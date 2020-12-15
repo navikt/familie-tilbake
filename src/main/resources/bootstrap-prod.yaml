@@ -1,0 +1,26 @@
+spring:
+  cloud:
+    vault:
+      enabled: true
+      uri: https://vault.adeo.no
+      connection-timeout: 5000
+      read-timeout: 15000
+      config:
+        order: -10
+        lifecycle:
+          enabled: true
+          expiry-threshold: 2m
+      database:
+        enabled: true
+        role: familie-tilbake-admin
+        backend: postgresql/prod-fss
+      authentication: KUBERNETES
+      kubernetes:
+        role: familie-tilbake
+        kubernetes-path: kubernetes/prod/fss
+        service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kv:
+        enabled: true
+        backend: kv/prod/fss
+        application-name: familie-tilbake/default
+        default-context: familie-tilbake/default

@@ -1,0 +1,21 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: http://mock-oauth2-server:1111/v2.0/.well-known/openid-configuration
+    accepted_audience: api://${TILBAKE_CLIENT_ID}/.default
+    cookie_name: azure_token
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-oppdrag:5432/familie-tilbake
+    username: familie
+    password: familie-pwd
+  cloud:
+    vault:
+      database:
+        role: familie
+
+ACCEPTED_CLIENTS: ${TILBAKE_BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
+SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
+OPPDRAG_SERVICE_URL: #Mockes ut lokalt
