@@ -1,0 +1,41 @@
+application:
+  name: familie-tilbake
+
+server:
+  port: 8030
+  servlet:
+    context-path: /
+
+spring:
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  main.banner-mode: "off"
+  data:
+    jdbc:
+      repositories:
+        enabled: true
+  main:
+    allow-bean-definition-overriding: true
+  flyway:
+    enabled: false #TODO Det må enables når database bestillingen er ferdig og før noen tabeller opprettes
+  datasource:
+    hikari:
+      maximum-pool-size: 2
+      connection-test-query: "select 1"
+      max-lifetime: 30000
+      minimum-idle: 1
+      data-source-properties.stringtype: unspecified # Nødvendig for å kunde sende en String til et json-felt i PostgresSql
+
+management:
+  endpoint.health.show-details: always
+  endpoints.web:
+    exposure.include: info, health, metrics, prometheus
+    base-path: "/internal"
+    path-mapping:
+      info: "status/isAlive"
+  metrics.export.prometheus.enabled: true
+  health:
+    db:
+      enabled: true
+
+BA_SAK_CLIENT_ID: ""
+EF_SAK_CLIENT_ID: ""
