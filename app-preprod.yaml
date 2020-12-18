@@ -8,7 +8,7 @@ metadata:
 
 spec:
   image: {{ image }}
-  port: 8087
+  port: 8030
   liveness:
     path: /internal/status/isAlive
     initialDelay: 30

@@ -2,7 +2,7 @@ name: Build-Deploy-Prod
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-tilbake:${{ github.sha }}
   IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/familie-tilbake:latest
