@@ -41,6 +41,7 @@
         <spring.vault>2.2.2.RELEASE</spring.vault>
         <testcontainers.version>1.12.1</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2020.01.30-14.36-cdf257baea96</tjenestespesifikasjoner.version>
+        <swagger.version>3.0.0</swagger.version>
 
     </properties>
 
@@ -293,6 +294,11 @@
         <dependency>
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>${swagger.version}</version>
         </dependency>
     </dependencies>
 
