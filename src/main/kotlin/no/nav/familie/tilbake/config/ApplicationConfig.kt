@@ -13,7 +13,7 @@ import org.springframework.context.annotation.ComponentScan
 @SpringBootConfiguration
 @EntityScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet")
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet")
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
 class ApplicationConfig {
 
 
