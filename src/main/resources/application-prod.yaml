@@ -9,6 +9,6 @@ ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
 
 spring:
   datasource:
-    url: jdbc:postgresql://A01DBVL011.adeo.no:5432/familie-tilbake
+    url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
 
 SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
