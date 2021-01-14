@@ -34,6 +34,6 @@ class ApplicationConfig {
 
     companion object {
         const val pakkenavn = "no.nav.familie.tilbake"
-        val LOKALE_PROFILER = setOf("dev", "e2e", "dev_postgres")
+        val LOKALE_PROFILER = setOf("dev", "e2e", "dev_postgres", "fagsak_e2e")
     }
 }
