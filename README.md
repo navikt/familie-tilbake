@@ -10,7 +10,8 @@ For å kjøre opp appen lokalt kan en kjøre `DevLauncher` med Spring-profilen `
 Appen tilgjengeliggjøres da på `localhost:8030`.
 
 ### Database
-Dersom man vil kjøre med postgres, kan man bytte til Spring-profilen `postgres`. Da må man sette opp postgres-databasen, dette gjøres slik:
+Dersom man vil kjøre med postgres, kan man bytte til Spring-profilen `postgres`.
+Da må man sette opp postgres-databasen, dette gjøres slik:
 ```
 docker run --name familie-tilbake-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
 docker ps (finn container id)
@@ -34,4 +35,5 @@ Variablene legges inn under DevLauncher -> Edit Configurations -> Environment Va
 Master-branchen blir automatisk bygget ved merge og deployet til prod.
 
 ## Kontaktinformasjon
-For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie-tilbakekreving på slack. Ellers kan man opprette et issue her på github.
+For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie-tilbakekreving på slack.
+Ellers kan man opprette et issue her på github.

@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.vault.config.databases.VaultDatabaseProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.vault.core.lease.SecretLeaseContainer
-import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent
 import org.springframework.vault.core.lease.domain.RequestedSecret.rotating
+import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent
 
 @Configuration
 @ConditionalOnProperty(name = ["spring.cloud.vault.enabled"])

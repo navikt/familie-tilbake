@@ -6,9 +6,12 @@ no.nav.security.jwt:
 
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
 
-spring.datasource.url: jdbc:postgresql://0.0.0.0:5432/familie-tilbake
-spring.datasource.username: postgres
-spring.datasource.password: test
+spring:
+  datasource:
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    url: ${DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
 
 OPPDRAG_SERVICE_URL: #Mockes ut lokalt
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
