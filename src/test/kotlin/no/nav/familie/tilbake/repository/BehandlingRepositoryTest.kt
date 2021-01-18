@@ -16,14 +16,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    @Autowired
-    private lateinit var brukerRepository: BrukerRepository
-
     private val behandling = Testdata.behandling
 
     @BeforeEach
     fun init() {
-        brukerRepository.insert(Testdata.bruker)
         fagsakRepository.insert(Testdata.fagsak)
     }
 

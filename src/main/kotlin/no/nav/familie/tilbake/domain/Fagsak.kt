@@ -6,11 +6,12 @@ import java.util.*
 
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
-                  val brukerId: UUID,
+                  @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                  val bruker: Bruker,
                   val eksternFagsakId: String?,
-                  val fagsakstatus: String,
+                  val ytelsestype: Ytelsestype,
+                  val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   val versjon: Int = 0,
-                  val ytelsestype: Ytelsestype = Ytelsestype.BA,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 
@@ -20,4 +21,10 @@ enum class Ytelsestype {
     BT,
     UT,
     KS
+}
+
+enum class Fagsaksstatus(val kode: String) {
+    OPPRETTET("OPPR"),
+    UNDER_BEHANDLING("UBEH"),
+    AVSLUTTET("AVSLU");
 }

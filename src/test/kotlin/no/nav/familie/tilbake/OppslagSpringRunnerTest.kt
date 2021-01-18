@@ -4,7 +4,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.tilbake.database.DbContainerInitializer
-import no.nav.familie.tilbake.domain.*
+import no.nav.familie.tilbake.domain.Behandling
+import no.nav.familie.tilbake.domain.Fagsak
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,8 +58,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(Bruker::class,
-               Fagsak::class,
+        listOf(Fagsak::class,
                Behandling::class).reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

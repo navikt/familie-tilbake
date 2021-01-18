@@ -12,15 +12,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    @Autowired
-    private lateinit var brukerRepository: BrukerRepository
-
     private val fagsak = Testdata.fagsak
-
-    @BeforeEach
-    fun init() {
-        brukerRepository.insert(Testdata.bruker)
-    }
 
     @Test
     fun insertPersistererEnForekomstAvFagsakTilBasen() {
