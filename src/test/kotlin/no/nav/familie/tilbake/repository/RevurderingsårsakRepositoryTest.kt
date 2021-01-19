@@ -1,0 +1,65 @@
+package no.nav.familie.tilbake.repository
+
+import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.data.Testdata
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+
+internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
+
+    @Autowired
+    private lateinit var revurderingsårsakRepository: RevurderingsårsakRepository
+
+    @Autowired
+    private lateinit var aksjonspunktRepository: AksjonspunktRepository
+
+    @Autowired
+    private lateinit var aksjonspunktsdefinisjonRepository: AksjonspunktsdefinisjonRepository
+
+    @Autowired
+    private lateinit var vurderingspunktsdefinisjonRepository: VurderingspunktsdefinisjonRepository
+
+    @Autowired
+    private lateinit var behandlingsstegstypeRepository: BehandlingsstegstypeRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    private val revurderingsårsak = Testdata.revurderingsårsak
+
+    @BeforeEach
+    fun init() {
+        fagsakRepository.insert(Testdata.fagsak)
+        behandlingRepository.insert(Testdata.behandling)
+        behandlingsstegstypeRepository.insert(Testdata.behandlingsstegstype)
+        vurderingspunktsdefinisjonRepository.insert(Testdata.vurderingspunktsdefinisjon)
+        aksjonspunktsdefinisjonRepository.insert(Testdata.aksjonspunktsdefinisjon)
+        aksjonspunktRepository.insert(Testdata.aksjonspunkt)
+    }
+
+    @Test
+    fun insertPersistererEnForekomstAvRevurderingsårsakTilBasen() {
+        revurderingsårsakRepository.insert(revurderingsårsak)
+
+        val lagretRevurderingsårsak = revurderingsårsakRepository.findByIdOrThrow(revurderingsårsak.id)
+
+        Assertions.assertThat(lagretRevurderingsårsak).isEqualToIgnoringGivenFields(revurderingsårsak, "sporbar")
+    }
+
+    @Test
+    fun updateOppdatererEnForekomstAvRevurderingsårsakIBasen() {
+        revurderingsårsakRepository.insert(revurderingsårsak)
+        val oppdatertRevurderingsårsak = revurderingsårsak.copy(årsakstype = "bob")
+
+        revurderingsårsakRepository.update(oppdatertRevurderingsårsak)
+
+        val lagretRevurderingsårsak = revurderingsårsakRepository.findByIdOrThrow(revurderingsårsak.id)
+        Assertions.assertThat(lagretRevurderingsårsak).isEqualToIgnoringGivenFields(oppdatertRevurderingsårsak, "sporbar")
+    }
+
+}

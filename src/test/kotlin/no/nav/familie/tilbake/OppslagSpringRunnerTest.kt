@@ -4,8 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.tilbake.database.DbContainerInitializer
-import no.nav.familie.tilbake.domain.Behandling
-import no.nav.familie.tilbake.domain.Fagsak
+import no.nav.familie.tilbake.domain.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,7 +58,49 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(Fagsak::class,
-               Behandling::class).reversed()
+               Behandling::class,
+               Behandlingsstegstype::class,
+               Behandlingsårsak::class,
+               Vurderingspunktsdefinisjon::class,
+               Aksjonspunktsdefinisjon::class,
+               Aksjonspunkt::class,
+               Revurderingsårsak::class,
+               Behandlingsstegstilstand::class,
+               Behandlingsstegssekvens::class,
+               Behandlingsresultat::class,
+               Behandlingsvedtak::class,
+               Totrinnsvurdering::class,
+               ÅrsakTotrinnsvurdering::class,
+               MottakersVarselrespons::class,
+               VurdertForeldelse::class,
+               GrupperingVurdertForeldelse::class,
+               Foreldelsesperiode::class,
+               Kravgrunnlag431::class,
+               Kravgrunnlagsperiode432::class,
+               Kravgrunnlagsbeløp433::class,
+               Kravvedtaksstatus437::class,
+               GrupperingKravGrunnlag::class,
+               Vilkår::class,
+               Vilkårsperiode::class,
+               VilkårAktsomhet::class,
+               VilkårSærligGrunn::class,
+               VilkårGodTro::class,
+               EksternBehandling::class,
+               FaktaFeilutbetaling::class,
+               FaktaFeilutbetalingsperiode::class,
+               GrupperingFaktaFeilutbetaling::class,
+               ØkonomiXmlMottatt::class,
+               Totrinnsresultatsgrunnlag::class,
+               Vedtaksbrevsoppsummering::class,
+               Vedtaksbrevsperiode::class,
+               ØkonomiXmlSendt::class,
+               GrupperingKravvedtaksstatus::class,
+               Varsel::class,
+               Brevsporing::class,
+               ØkonomiXmlMottattArkiv::class,
+               Verge::class,
+               GrupperingVerge::class)
+                .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
