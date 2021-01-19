@@ -1,23 +1,20 @@
 package no.nav.familie.tilbake.config
 
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 
-@Configuration
-@Profile("!dev & !dev_postgres")
-@ConditionalOnProperty("spring.flyway.enabled")
-class FlywayConfig {
-
-    private val logger = LoggerFactory.getLogger(FlywayConfig::class.java)
+@ConfigurationProperties("spring.cloud.vault.database")
+@ConditionalOnProperty(name = ["spring.cloud.vault.enabled"])
+@ConstructorBinding
+data class FlywayConfig(private val role: String) {
 
     @Bean
-    fun setRole(@Value("\${spring.cloud.vault.database.role}") role: String): FlywayConfigurationCustomizer {
-        logger.info("Setter rolle " + role)
-        return FlywayConfigurationCustomizer { c -> c.initSql(String.format("SET ROLE \"%s\"", role)) }
+    fun flywayConfig(): FlywayConfigurationCustomizer {
+        return FlywayConfigurationCustomizer {
+            it.initSql(String.format("SET ROLE \"%s\"", role))
+        }
     }
 }

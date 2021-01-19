@@ -16,7 +16,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   flyway:
-    enabled: false #TODO Det må enables når database bestillingen er ferdig og før noen tabeller opprettes
+    enabled: true
   datasource:
     hikari:
       maximum-pool-size: 2

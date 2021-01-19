@@ -1,0 +1,15 @@
+server:
+  port: 9093
+
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+    proxy_url: #Default satt, skal være null i integrasjonstest
+
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087
+
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
