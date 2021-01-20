@@ -6,30 +6,30 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class VilkårRepositoryTest : OppslagSpringRunnerTest() {
+internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
-    private lateinit var vilkårRepository: VilkårRepository
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     private val vilkår = Testdata.vilkår
 
     @Test
-    fun insertPersistererEnForekomstAvVilkårTilBasen() {
-        vilkårRepository.insert(vilkår)
+    fun insertPersistererEnForekomstAvVilkårsvurderingTilBasen() {
+        vilkårsvurderingRepository.insert(vilkår)
 
-        val lagretVilkår = vilkårRepository.findByIdOrThrow(vilkår.id)
+        val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
 
         Assertions.assertThat(lagretVilkår).isEqualToIgnoringGivenFields(vilkår, "sporbar")
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvVilkårIBasen() {
-        vilkårRepository.insert(vilkår)
+    fun updateOppdatererEnForekomstAvVilkårsvurderingIBasen() {
+        vilkårsvurderingRepository.insert(vilkår)
         val oppdatertVilkår = vilkår.copy(aktiv = false)
 
-        vilkårRepository.update(oppdatertVilkår)
+        vilkårsvurderingRepository.update(oppdatertVilkår)
 
-        val lagretVilkår = vilkårRepository.findByIdOrThrow(vilkår.id)
+        val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
         Assertions.assertThat(lagretVilkår).isEqualToIgnoringGivenFields(oppdatertVilkår, "sporbar")
     }
 

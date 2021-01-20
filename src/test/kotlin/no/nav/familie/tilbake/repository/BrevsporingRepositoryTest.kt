@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Brevtype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,7 +39,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun updateOppdatererEnForekomstAvBrevsporingIBasen() {
         brevsporingRepository.insert(brevsporing)
-        val oppdatertBrevsporing = brevsporing.copy(brevtype = "bob")
+        val oppdatertBrevsporing = brevsporing.copy(brevtype = Brevtype.HENLEGGELSE_BREV)
 
         brevsporingRepository.update(oppdatertBrevsporing)
 

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Hendelsestype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,7 +37,7 @@ internal class FaktaFeilutbetalingsperiodeRepositoryTest : OppslagSpringRunnerTe
     @Test
     fun updateOppdatererEnForekomstAvFaktaFeilutbetalingsperiodeIBasen() {
         faktaFeilutbetalingsperiodeRepository.insert(faktaFeilutbetalingsperiode)
-        val oppdatertFaktaFeilutbetalingsperiode = faktaFeilutbetalingsperiode.copy(hendelsestype = "bob")
+        val oppdatertFaktaFeilutbetalingsperiode = faktaFeilutbetalingsperiode.copy(hendelsestype = Hendelsestype.PSB_ANNET_TYPE)
 
         faktaFeilutbetalingsperiodeRepository.update(oppdatertFaktaFeilutbetalingsperiode)
 

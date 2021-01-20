@@ -1,14 +1,14 @@
 CREATE TABLE behandlingsstegstype (
-    id                        UUID PRIMARY KEY,
-    version                   BIGINT                              NOT NULL,
-    kode                      VARCHAR UNIQUE                      NOT NULL,
-    navn                      VARCHAR                             NOT NULL,
-    behandlingsstatus_default VARCHAR                             NOT NULL,
-    beskrivelse               VARCHAR,
-    opprettet_av              VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid             TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av                 VARCHAR,
-    endret_tid                TIMESTAMP(3)
+    id                         UUID PRIMARY KEY,
+    version                    BIGINT                              NOT NULL,
+    kode                       VARCHAR UNIQUE                      NOT NULL,
+    navn                       VARCHAR                             NOT NULL,
+    definert_behandlingsstatus VARCHAR                             NOT NULL,
+    beskrivelse                VARCHAR,
+    opprettet_av               VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid              TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av                  VARCHAR,
+    endret_tid                 TIMESTAMP(3)
 );
 
 COMMENT ON TABLE behandlingsstegstype
@@ -20,7 +20,7 @@ COMMENT ON COLUMN behandlingsstegstype.kode
 COMMENT ON COLUMN behandlingsstegstype.navn
     IS 'Et lesbart navn for behandlingssteget, ment for visning el.';
 
-COMMENT ON COLUMN behandlingsstegstype.behandlingsstatus_default
+COMMENT ON COLUMN behandlingsstegstype.definert_behandlingsstatus
     IS 'Definert status behandling settes i når steget kjøres';
 
 COMMENT ON COLUMN behandlingsstegstype.beskrivelse
@@ -102,7 +102,6 @@ CREATE TABLE aksjonspunktsdefinisjon (
     navn                           VARCHAR                             NOT NULL,
     vurderingspunktsdefinisjon_id  UUID                                NOT NULL REFERENCES vurderingspunktsdefinisjon,
     beskrivelse                    VARCHAR,
-    vilkarstype                    VARCHAR,
     totrinnsbehandling_default     BOOLEAN                             NOT NULL,
     aksjonspunktstype              VARCHAR      DEFAULT 'MANU'         NOT NULL,
     fristperiode                   VARCHAR,
@@ -130,9 +129,6 @@ COMMENT ON COLUMN aksjonspunktsdefinisjon.vurderingspunktsdefinisjon_id
 COMMENT ON COLUMN aksjonspunktsdefinisjon.beskrivelse
     IS 'Utdypende beskrivelse av koden';
 
-COMMENT ON COLUMN aksjonspunktsdefinisjon.vilkarstype
-    IS 'Fk: vilkårstype fremmednøkkel til tabellen som forklarer i hvilket vilkår aksjonspunktet skal løses';
-
 COMMENT ON COLUMN aksjonspunktsdefinisjon.totrinnsbehandling_default
     IS 'Indikerer om dette aksjonspunktet alltid skal kreve totrinnsbehandling';
 
@@ -154,8 +150,6 @@ COMMENT ON COLUMN aksjonspunktsdefinisjon.skjermlenketype
 CREATE INDEX ON aksjonspunktsdefinisjon (vurderingspunktsdefinisjon_id);
 
 CREATE INDEX ON aksjonspunktsdefinisjon (aksjonspunktstype);
-
-CREATE INDEX ON aksjonspunktsdefinisjon (vilkarstype);
 
 CREATE TABLE aksjonspunkt (
     id                         UUID PRIMARY KEY,
@@ -840,7 +834,7 @@ CREATE INDEX ON gruppering_krav_grunnlag (kravgrunnlag431_id);
 
 CREATE INDEX ON gruppering_krav_grunnlag (behandling_id);
 
-CREATE TABLE vilkar (
+CREATE TABLE vilkarsvurdering (
     id            UUID PRIMARY KEY,
     version       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL,
@@ -851,63 +845,63 @@ CREATE TABLE vilkar (
     endret_tid    TIMESTAMP(3)
 );
 
-COMMENT ON TABLE vilkar
+COMMENT ON TABLE vilkarsvurdering
     IS 'Kobler flere perioder av vilkårsvurdering for tilbakekreving';
 
-COMMENT ON COLUMN vilkar.behandling_id
+COMMENT ON COLUMN vilkarsvurdering.behandling_id
     IS 'Referanse til behandling';
 
-COMMENT ON COLUMN vilkar.aktiv
+COMMENT ON COLUMN vilkarsvurdering.aktiv
     IS 'Angir status av manuell vilkårsvurdering';
 
-CREATE INDEX ON vilkar (behandling_id);
+CREATE INDEX ON vilkarsvurdering (behandling_id);
 
-CREATE TABLE vilkarsperiode (
-    id              UUID PRIMARY KEY,
-    version         BIGINT                              NOT NULL,
-    vilkar_id       UUID                                NOT NULL REFERENCES vilkar,
-    fom             DATE                                NOT NULL,
-    tom             DATE                                NOT NULL,
-    fulgt_opp_nav   VARCHAR                             NOT NULL,
-    vilkarsresultat VARCHAR                             NOT NULL,
-    begrunnelse     VARCHAR                             NOT NULL,
-    opprettet_av    VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid   TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av       VARCHAR,
-    endret_tid      TIMESTAMP(3)
+CREATE TABLE vilkarsvurderingsperiode (
+    id                        UUID PRIMARY KEY,
+    version                   BIGINT                              NOT NULL,
+    vilkarsvurdering_id       UUID                                NOT NULL REFERENCES vilkarsvurdering,
+    fom                       DATE                                NOT NULL,
+    tom                       DATE                                NOT NULL,
+    navoppfulgt               VARCHAR                             NOT NULL,
+    vilkarsvurderingsresultat VARCHAR                             NOT NULL,
+    begrunnelse               VARCHAR                             NOT NULL,
+    opprettet_av              VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid             TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av                 VARCHAR,
+    endret_tid                TIMESTAMP(3)
 );
 
-COMMENT ON TABLE vilkarsperiode
+COMMENT ON TABLE vilkarsvurderingsperiode
     IS 'Periode med vilkårsvurdering for tilbakekreving';
 
-COMMENT ON COLUMN vilkarsperiode.vilkar_id
+COMMENT ON COLUMN vilkarsvurderingsperiode.vilkarsvurdering_id
     IS 'Fk:vilkår';
 
-COMMENT ON COLUMN vilkarsperiode.fom
+COMMENT ON COLUMN vilkarsvurderingsperiode.fom
     IS 'Fra-og-med-dato';
 
-COMMENT ON COLUMN vilkarsperiode.tom
+COMMENT ON COLUMN vilkarsvurderingsperiode.tom
     IS 'Til-og-med-dato';
 
-COMMENT ON COLUMN vilkarsperiode.fulgt_opp_nav
+COMMENT ON COLUMN vilkarsvurderingsperiode.navoppfulgt
     IS 'Vurdering av hvordan nav har fulgt opp';
 
-COMMENT ON COLUMN vilkarsperiode.vilkarsresultat
+COMMENT ON COLUMN vilkarsvurderingsperiode.vilkarsvurderingsresultat
     IS 'Hovedresultat av vilkårsvurdering (kodeverk)';
 
-COMMENT ON COLUMN vilkarsperiode.begrunnelse
+COMMENT ON COLUMN vilkarsvurderingsperiode.begrunnelse
     IS 'Saksbehandlers begrunnelse';
 
-CREATE INDEX ON vilkarsperiode (vilkar_id);
+CREATE INDEX ON vilkarsvurderingsperiode (vilkarsvurdering_id);
 
-CREATE INDEX ON vilkarsperiode (fulgt_opp_nav);
+CREATE INDEX ON vilkarsvurderingsperiode (navoppfulgt);
 
-CREATE INDEX ON vilkarsperiode (vilkarsresultat);
+CREATE INDEX ON vilkarsvurderingsperiode (vilkarsvurderingsresultat);
 
-CREATE TABLE vilkar_aktsomhet (
+CREATE TABLE vilkarsvurdering_aktsomhet (
     id                            UUID PRIMARY KEY,
     version                       BIGINT                              NOT NULL,
-    vilkarsperiode_id             UUID                                NOT NULL REFERENCES vilkarsperiode,
+    vilkarsvurderingsperiode_id   UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
     aktsomhet                     VARCHAR                             NOT NULL,
     ilegg_renter                  BOOLEAN,
     andel_tilbakekreves           NUMERIC(5, 2),
@@ -923,97 +917,97 @@ CREATE TABLE vilkar_aktsomhet (
     CHECK ("andel_tilbakekreves" IS NULL OR manuelt_satt_belop IS NULL)
 );
 
-COMMENT ON TABLE vilkar_aktsomhet
+COMMENT ON TABLE vilkarsvurdering_aktsomhet
     IS 'Videre vurderinger når det er vurdert at bruker ikke mottok beløp i god tro';
 
-COMMENT ON COLUMN vilkar_aktsomhet.vilkarsperiode_id
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.vilkarsvurderingsperiode_id
     IS 'Fk:vilkårsperiode';
 
-COMMENT ON COLUMN vilkar_aktsomhet.aktsomhet
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.aktsomhet
     IS 'Resultat av aktsomhetsvurdering (kodeverk)';
 
-COMMENT ON COLUMN vilkar_aktsomhet.ilegg_renter
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.ilegg_renter
     IS 'Hvorvidt renter skal ilegges';
 
-COMMENT ON COLUMN vilkar_aktsomhet.andel_tilbakekreves
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.andel_tilbakekreves
     IS 'Hvor stor del av feilutbetalt beløp som skal tilbakekreves';
 
-COMMENT ON COLUMN vilkar_aktsomhet.manuelt_satt_belop
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.manuelt_satt_belop
     IS 'Feilutbetalt beløp som skal tilbakekreves som bestemt ved saksbehandler';
 
-COMMENT ON COLUMN vilkar_aktsomhet.begrunnelse
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.begrunnelse
     IS 'Beskrivelse av aktsomhet';
 
-COMMENT ON COLUMN vilkar_aktsomhet.serlige_grunner_til_reduksjon
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.serlige_grunner_til_reduksjon
     IS 'Angir om særlig grunner gi reduksjon av beløpet';
 
-COMMENT ON COLUMN vilkar_aktsomhet.tilbakekrev_smabelop
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.tilbakekrev_smabelop
     IS 'Angir om skal tilbakekreves når totalbeløpet er under 4 rettsgebyr';
 
-COMMENT ON COLUMN vilkar_aktsomhet.serlige_grunner_begrunnelse
+COMMENT ON COLUMN vilkarsvurdering_aktsomhet.serlige_grunner_begrunnelse
     IS 'Beskrivelse av særlig grunner';
 
-CREATE INDEX ON vilkar_aktsomhet (vilkarsperiode_id);
+CREATE INDEX ON vilkarsvurdering_aktsomhet (vilkarsvurderingsperiode_id);
 
-CREATE INDEX ON vilkar_aktsomhet (aktsomhet);
+CREATE INDEX ON vilkarsvurdering_aktsomhet (aktsomhet);
 
-CREATE TABLE vilkar_serlig_grunn (
-    id                  UUID PRIMARY KEY,
-    version             BIGINT                              NOT NULL,
-    vilkar_aktsomhet_id UUID                                NOT NULL REFERENCES vilkar_aktsomhet,
-    serlig_grunn        VARCHAR                             NOT NULL,
-    opprettet_av        VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid       TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av           VARCHAR,
-    endret_tid          TIMESTAMP(3),
-    begrunnelse         VARCHAR
+CREATE TABLE vilkarsvurdering_serlig_grunn (
+    id                            UUID PRIMARY KEY,
+    version                       BIGINT                              NOT NULL,
+    vilkarsvurdering_aktsomhet_id UUID                                NOT NULL REFERENCES vilkarsvurdering_aktsomhet,
+    serlig_grunn                  VARCHAR                             NOT NULL,
+    opprettet_av                  VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid                 TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av                     VARCHAR,
+    endret_tid                    TIMESTAMP(3),
+    begrunnelse                   VARCHAR
 );
 
-COMMENT ON TABLE vilkar_serlig_grunn
+COMMENT ON TABLE vilkarsvurdering_serlig_grunn
     IS 'Særlige grunner ved vurdering';
 
-COMMENT ON COLUMN vilkar_serlig_grunn.vilkar_aktsomhet_id
-    IS 'Fk:vilkar_aktsomhet';
+COMMENT ON COLUMN vilkarsvurdering_serlig_grunn.vilkarsvurdering_aktsomhet_id
+    IS 'Fk:vilkarsvurdering_aktsomhet';
 
-COMMENT ON COLUMN vilkar_serlig_grunn.serlig_grunn
+COMMENT ON COLUMN vilkarsvurdering_serlig_grunn.serlig_grunn
     IS 'Særlig grunn (kodeverk)';
 
-COMMENT ON COLUMN vilkar_serlig_grunn.begrunnelse
+COMMENT ON COLUMN vilkarsvurdering_serlig_grunn.begrunnelse
     IS 'Beskrivelse av særlig grunn hvis grunn er annet';
 
-CREATE INDEX ON vilkar_serlig_grunn (vilkar_aktsomhet_id);
+CREATE INDEX ON vilkarsvurdering_serlig_grunn (vilkarsvurdering_aktsomhet_id);
 
-CREATE INDEX ON vilkar_serlig_grunn (serlig_grunn);
+CREATE INDEX ON vilkarsvurdering_serlig_grunn (serlig_grunn);
 
-CREATE TABLE vilkar_god_tro (
-    id                  UUID PRIMARY KEY,
-    version             BIGINT                              NOT NULL,
-    vilkarsperiode_id   UUID                                NOT NULL REFERENCES vilkarsperiode,
-    belop_er_i_behold   BOOLEAN                             NOT NULL,
-    belop_tilbakekreves BIGINT,
-    begrunnelse         VARCHAR                             NOT NULL,
-    opprettet_av        VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid       TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av           VARCHAR,
-    endret_tid          TIMESTAMP(3)
+CREATE TABLE vilkarsvurdering_god_tro (
+    id                          UUID PRIMARY KEY,
+    version                     BIGINT                              NOT NULL,
+    vilkarsvurderingsperiode_id UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
+    belop_er_i_behold           BOOLEAN                             NOT NULL,
+    belop_tilbakekreves         BIGINT,
+    begrunnelse                 VARCHAR                             NOT NULL,
+    opprettet_av                VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid               TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av                   VARCHAR,
+    endret_tid                  TIMESTAMP(3)
 );
 
-COMMENT ON TABLE vilkar_god_tro
+COMMENT ON TABLE vilkarsvurdering_god_tro
     IS 'Videre vurderinger når det er vurdert at bruker mottok feilutbetaling i god tro';
 
-COMMENT ON COLUMN vilkar_god_tro.vilkarsperiode_id
-    IS 'Fk:vilkarsperiode';
+COMMENT ON COLUMN vilkarsvurdering_god_tro.vilkarsvurderingsperiode_id
+    IS 'Fk:vilkarsvurderingsperiode';
 
-COMMENT ON COLUMN vilkar_god_tro.belop_er_i_behold
+COMMENT ON COLUMN vilkarsvurdering_god_tro.belop_er_i_behold
     IS 'Indikerer at beløp er i behold';
 
-COMMENT ON COLUMN vilkar_god_tro.belop_tilbakekreves
+COMMENT ON COLUMN vilkarsvurdering_god_tro.belop_tilbakekreves
     IS 'Hvor mye av feilutbetalt beløp som skal tilbakekreves';
 
-COMMENT ON COLUMN vilkar_god_tro.begrunnelse
+COMMENT ON COLUMN vilkarsvurdering_god_tro.begrunnelse
     IS 'Beskrivelse av god tro vilkår';
 
-CREATE INDEX ON vilkar_god_tro (vilkarsperiode_id);
+CREATE INDEX ON vilkarsvurdering_god_tro (vilkarsvurderingsperiode_id);
 
 CREATE TABLE ekstern_behandling (
     id            UUID PRIMARY KEY,
@@ -1024,7 +1018,6 @@ CREATE TABLE ekstern_behandling (
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av     VARCHAR,
     endret_tid    TIMESTAMP(3),
-    ekstern_id    UUID,
     henvisning    VARCHAR                             NOT NULL,
     UNIQUE (behandling_id, henvisning)
 );
@@ -1041,15 +1034,10 @@ COMMENT ON COLUMN ekstern_behandling.behandling_id
 COMMENT ON COLUMN ekstern_behandling.aktiv
     IS 'Angir om ekstern behandling data er gjeldende';
 
-COMMENT ON COLUMN ekstern_behandling.ekstern_id
-    IS 'Unik uuid for ekstern-behandling';
-
 COMMENT ON COLUMN ekstern_behandling.henvisning
     IS 'Henvisning;referanse. Peker på referanse-feltet i kravgrunnlaget, og kommer opprinnelig fra fagsystemet. For fptilbake er den lik fpsak.behandlingid. For k9-tilbake er den lik base64(bytes(behandlinguuid))';
 
 CREATE INDEX ON ekstern_behandling (behandling_id);
-
-CREATE INDEX ON ekstern_behandling (ekstern_id);
 
 CREATE INDEX ON ekstern_behandling (henvisning);
 
@@ -1187,7 +1175,7 @@ CREATE TABLE totrinnsresultatsgrunnlag (
     behandling_id                      UUID                                NOT NULL REFERENCES behandling,
     gruppering_fakta_feilutbetaling_id UUID                                NOT NULL REFERENCES gruppering_fakta_feilutbetaling,
     gruppering_vurdert_foreldelse_id   UUID REFERENCES gruppering_vurdert_foreldelse,
-    vilkar_id                          UUID REFERENCES vilkar,
+    vilkarsvurdering_id                UUID REFERENCES vilkarsvurdering,
     aktiv                              BOOLEAN                             NOT NULL,
     versjon                            INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av                       VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -1211,7 +1199,7 @@ COMMENT ON COLUMN totrinnsresultatsgrunnlag.gruppering_fakta_feilutbetaling_id
 COMMENT ON COLUMN totrinnsresultatsgrunnlag.gruppering_vurdert_foreldelse_id
     IS 'Fk til aktivt vurdertforeldelseaggregate ved totrinnsbehandlingen';
 
-COMMENT ON COLUMN totrinnsresultatsgrunnlag.vilkar_id
+COMMENT ON COLUMN totrinnsresultatsgrunnlag.vilkarsvurdering_id
     IS 'Fk til aktivt vilkårvurderingaggregate ved totrinnsbehandlingen';
 
 CREATE INDEX ON totrinnsresultatsgrunnlag (behandling_id);
@@ -1220,7 +1208,7 @@ CREATE INDEX ON totrinnsresultatsgrunnlag (gruppering_fakta_feilutbetaling_id);
 
 CREATE INDEX ON totrinnsresultatsgrunnlag (gruppering_vurdert_foreldelse_id);
 
-CREATE INDEX ON totrinnsresultatsgrunnlag (vilkar_id);
+CREATE INDEX ON totrinnsresultatsgrunnlag (vilkarsvurdering_id);
 
 CREATE TABLE vedtaksbrevsoppsummering (
     id                    UUID PRIMARY KEY,

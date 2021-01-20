@@ -31,7 +31,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
     private lateinit var vurdertForeldelseRepository: VurdertForeldelseRepository
 
     @Autowired
-    private lateinit var vilkårRepository: VilkårRepository
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     private val totrinnsresultatsgrunnlag = Testdata.totrinnsresultatsgrunnlag
 
@@ -43,7 +43,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
         grupperingFaktaFeilutbetalingRepository.insert(Testdata.grupperingFaktaFeilutbetaling)
         vurdertForeldelseRepository.insert(Testdata.vurdertForeldelse)
         grupperingVurdertForeldelseRepository.insert(Testdata.grupperingVurdertForeldelse)
-        vilkårRepository.insert(Testdata.vilkår)
+        vilkårsvurderingRepository.insert(Testdata.vilkår)
     }
 
     @Test

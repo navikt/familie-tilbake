@@ -10,8 +10,8 @@ data class Totrinnsresultatsgrunnlag(@Id
                                      val behandlingId: UUID,
                                      val grupperingFaktaFeilutbetalingId: UUID?,
                                      val grupperingVurdertForeldelseId: UUID,
-                                     @Column("vilkar_id")
-                                     val vilkårId: UUID,
+                                     @Column("vilkarsvurdering_id")
+                                     val vilkårsvurderingId: UUID,
                                      val aktiv: Boolean = true,
                                      val versjon: Int = 0,
                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

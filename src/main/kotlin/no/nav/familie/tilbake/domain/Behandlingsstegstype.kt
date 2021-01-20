@@ -8,7 +8,7 @@ data class Behandlingsstegstype(@Id
                                 val id: UUID = UUID.randomUUID(),
                                 val kode: String,
                                 val navn: String,
-                                val behandlingsstatusDefault: String,
+                                val definertBehandlingsstatus: Behandlingsstatus,
                                 val beskrivelse: String?,
                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                 val sporbar: Sporbar = Sporbar())

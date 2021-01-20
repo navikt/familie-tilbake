@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Behandlingstype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,8 @@ internal class BehandlingsstegssekvensRepositoryTest : OppslagSpringRunnerTest()
     @Test
     fun updateOppdatererEnForekomstAvBehandlingsstegssekvensIBasen() {
         behandlingsstegssekvensRepository.insert(behandlingsstegssekvens)
-        val oppdatertBehandlingsstegssekvens = behandlingsstegssekvens.copy(behandlingstype = "bob")
+        val oppdatertBehandlingsstegssekvens =
+                behandlingsstegssekvens.copy(behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING)
 
         behandlingsstegssekvensRepository.update(oppdatertBehandlingsstegssekvens)
 

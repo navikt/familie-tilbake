@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Fagsystem
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +26,7 @@ internal class Kravgrunnlag431RepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun updateOppdatererEnForekomstAvKravgrunnlag431IBasen() {
         kravgrunnlag431Repository.insert(kravgrunnlag431)
-        val oppdatertKravgrunnlag431 = kravgrunnlag431.copy(fagsystem = "bob")
+        val oppdatertKravgrunnlag431 = kravgrunnlag431.copy(fagsystem = Fagsystem.GOSYS)
 
         kravgrunnlag431Repository.update(oppdatertKravgrunnlag431)
 

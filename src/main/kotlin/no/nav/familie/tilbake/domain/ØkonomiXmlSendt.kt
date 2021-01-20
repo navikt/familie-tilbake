@@ -11,6 +11,11 @@ data class ØkonomiXmlSendt(@Id
                            val behandlingId: UUID,
                            val melding: String,
                            val kvittering: String?,
-                           val meldingstype: String,
+                           val meldingstype: Meldingstype,
                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                            val sporbar: Sporbar = Sporbar())
+
+enum class Meldingstype {
+    VEDTAK,
+    ANNULERE_GRUNNLAG
+}

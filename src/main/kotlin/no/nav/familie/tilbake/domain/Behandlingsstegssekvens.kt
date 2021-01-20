@@ -7,7 +7,7 @@ import java.util.*
 data class Behandlingsstegssekvens(@Id
                                    val id: UUID = UUID.randomUUID(),
                                    val behandlingsstegstypeId: UUID,
-                                   val behandlingstype: String,
+                                   val behandlingstype: Behandlingstype,
                                    val sekvensnummer: Int,
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                    val sporbar: Sporbar = Sporbar())

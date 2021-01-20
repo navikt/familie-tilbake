@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Behandlingstegsstatus
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +43,8 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     @Test
     fun updateOppdatererEnForekomstAvBehandlingsstegstilstandIBasen() {
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
-        val oppdatertBehandlingsstegstilstand = behandlingsstegstilstand.copy(behandlingsstegsstatus = "bob")
+        val oppdatertBehandlingsstegstilstand =
+                behandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingstegsstatus.STARTET)
 
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 

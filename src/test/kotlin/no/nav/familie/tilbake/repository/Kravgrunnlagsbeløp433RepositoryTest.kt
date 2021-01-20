@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Klassekode
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,7 +39,7 @@ internal class Kravgrunnlagsbeløp433RepositoryTest : OppslagSpringRunnerTest() 
     @Test
     fun updateOppdatererEnForekomstAvKravgrunnlagsbeløp433IBasen() {
         kravgrunnlagsbeløp433Repository.insert(kravgrunnlagsbeløp433)
-        val oppdatertKravgrunnlagsbeløp433 = kravgrunnlagsbeløp433.copy(klassekode = "bob")
+        val oppdatertKravgrunnlagsbeløp433 = kravgrunnlagsbeløp433.copy(klassekode = Klassekode.FPADSNDFI)
 
         kravgrunnlagsbeløp433Repository.update(oppdatertKravgrunnlagsbeløp433)
 

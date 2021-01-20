@@ -9,6 +9,15 @@ data class Brevsporing(@Id
                        val behandlingId: UUID,
                        val journalpostId: String,
                        val dokumentId: String,
-                       val brevtype: String,
+                       val brevtype: Brevtype,
                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                        val sporbar: Sporbar = Sporbar())
+
+enum class Brevtype {
+    VARSEL_BREV,
+    VEDTAK_BREV,
+    HENLEGGELSE_BREV,
+    INNHENT_DOKUMENTASJONBREV,
+    FRITEKST,
+    UDEFINERT
+}

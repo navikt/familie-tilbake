@@ -12,11 +12,11 @@ data class Kravgrunnlag431(@Id
                            val omgjortVedtakId: String?,
                            val kravstatuskode: String,
                            @Column("fagomradekode")
-                           val fagområdekode: String,
-                           val fagsystem: String,
+                           val fagområdekode: Fagområdekode,
+                           val fagsystem: Fagsystem,
                            val fagsystemVedtaksdato: LocalDate?,
                            val gjelderVedtakId: String,
-                           val gjelderType: String,
+                           val gjelderType: GjelderType,
                            val utbetalesTilId: String,
                            val hjemmelkode: String?,
                            val beregnesRenter: Boolean?,
@@ -29,3 +29,19 @@ data class Kravgrunnlag431(@Id
                            val eksternKravgrunnlagId: String?,
                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                            val sporbar: Sporbar = Sporbar())
+
+enum class Fagsystem(val offisiellKode: String) {
+    SAK("FS36"),
+    KSSASkK9SAK("K9"),
+    TPS("FS03"),
+    JOARK("AS36"),
+    INFOTRYGD("IT01"),
+    ARENA("AO01"),
+    INNTEKT("FS28"),
+    MEDL("FS18"),
+    GOSYS("FS22"),
+    ENHETSREGISTERET("ER01"),
+    AAREGISTERET("AR01"),
+    FPTILBAKE(""),
+    K9TILBAKE("")
+}

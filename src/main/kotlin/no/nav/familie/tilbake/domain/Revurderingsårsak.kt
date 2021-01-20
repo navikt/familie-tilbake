@@ -11,6 +11,6 @@ data class Revurderingsårsak(@Id
                              val id: UUID = UUID.randomUUID(),
                              val aksjonspunktId: UUID,
                              @Column("arsakstype")
-                             val årsakstype: String,
+                             val årsakstype: Årsakstype,
                              @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                              val sporbar: Sporbar = Sporbar())

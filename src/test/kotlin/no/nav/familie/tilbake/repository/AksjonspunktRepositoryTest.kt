@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Venteårsak
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun updateOppdatererEnForekomstAvAksjonspunktIBasen() {
         aksjonspunktRepository.insert(aksjonspunkt)
-        val oppdatertAksjonspunkt = aksjonspunkt.copy(ventearsak = "bob")
+        val oppdatertAksjonspunkt = aksjonspunkt.copy(ventearsak = Venteårsak.ENDRE_TILKJENT_YTELSE)
 
         aksjonspunktRepository.update(oppdatertAksjonspunkt)
 

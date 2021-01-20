@@ -1,8 +1,9 @@
 package no.nav.familie.tilbake.repository
 
-import no.nav.familie.tilbake.domain.VilkårSærligGrunn
+import no.nav.familie.tilbake.domain.VilkårsvurderingSærligGrunn
 import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface VilkårSærligGrunnRepository : RepositoryInterface<VilkårSærligGrunn, UUID>, InsertUpdateRepository<VilkårSærligGrunn>
+interface VilkårsvurderingSærligGrunnRepository : RepositoryInterface<VilkårsvurderingSærligGrunn, UUID>,
+                                                  InsertUpdateRepository<VilkårsvurderingSærligGrunn>

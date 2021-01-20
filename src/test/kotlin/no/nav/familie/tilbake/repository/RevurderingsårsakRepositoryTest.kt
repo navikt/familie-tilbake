@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.repository
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.Årsakstype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -54,7 +55,7 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun updateOppdatererEnForekomstAvRevurderingsårsakIBasen() {
         revurderingsårsakRepository.insert(revurderingsårsak)
-        val oppdatertRevurderingsårsak = revurderingsårsak.copy(årsakstype = "bob")
+        val oppdatertRevurderingsårsak = revurderingsårsak.copy(årsakstype = Årsakstype.FEIL_FAKTA)
 
         revurderingsårsakRepository.update(oppdatertRevurderingsårsak)
 

@@ -11,6 +11,14 @@ data class Vedtaksbrevsperiode(@Id
                                val fom: LocalDate,
                                val tom: LocalDate,
                                val fritekst: String,
-                               val fritekststype: String,
+                               val fritekststype: Friteksttype,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar())
+
+enum class Friteksttype {
+    FAKTA_AVSNITT,
+    FORELDELSE_AVSNITT,
+    VILKÅR_AVSNITT,
+    SÆRLIGE_GRUNNER_AVSNITT,
+    SÆRLIGE_GRUNNER_ANNET_AVSNITT
+}
