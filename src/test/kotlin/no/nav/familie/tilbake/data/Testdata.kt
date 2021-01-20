@@ -12,6 +12,8 @@ object Testdata {
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
+    val eksternBehandling = EksternBehandling(henvisning = "testverdi")
+
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
                                 opprettetDato = LocalDate.now(),
@@ -21,6 +23,7 @@ object Testdata {
                                 behandlendeEnhet = "testverdi",
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = true,
+                                eksternBehandling = setOf(eksternBehandling),
                                 eksternId = UUID.randomUUID())
 
 
