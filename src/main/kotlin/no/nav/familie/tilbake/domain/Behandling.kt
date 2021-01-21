@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.util.*
 
@@ -19,6 +20,12 @@ data class Behandling(@Id
                       val behandlendeEnhetsNavn: String?,
                       val manueltOpprettet: Boolean,
                       val eksternId: UUID?,
+                      @MappedCollection(idColumn = "behandling_id")
+                      val eksternBehandling: Set<EksternBehandling> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val varsler: Set<Varsel> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val verger: Set<Verge> = setOf(),
                       val versjon: Int = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
