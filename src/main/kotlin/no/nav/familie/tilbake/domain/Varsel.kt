@@ -7,7 +7,6 @@ import java.util.*
 
 data class Varsel(@Id
                   val id: UUID = UUID.randomUUID(),
-                  val behandlingId: UUID,
                   val varseltekst: String,
                   @Column("varselbelop")
                   val varselbeløp: Long?,

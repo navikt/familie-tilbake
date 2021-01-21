@@ -11,6 +11,7 @@ data class Verge(@Id
                  val orgNr: String?,
                  val gyldigFom: LocalDate,
                  val gyldigTom: LocalDate,
+                 val aktiv: Boolean = true,
                  val type: Vergetype,
                  val navn: String,
                  val kilde: String,
