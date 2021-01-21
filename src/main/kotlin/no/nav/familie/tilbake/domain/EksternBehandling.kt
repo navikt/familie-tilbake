@@ -7,6 +7,7 @@ import java.util.*
 data class EksternBehandling(@Id
                              val id: UUID = UUID.randomUUID(),
                              val henvisning: String,
+                             val eksternId: UUID?,
                              val aktiv: Boolean = true,
                              @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                              val sporbar: Sporbar = Sporbar())

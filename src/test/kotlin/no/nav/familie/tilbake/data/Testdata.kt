@@ -12,7 +12,8 @@ object Testdata {
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
-    val eksternBehandling = EksternBehandling(henvisning = "testverdi")
+    val eksternBehandling = EksternBehandling(henvisning = "testverdi",
+                                              eksternId = UUID.randomUUID())
 
     val varsel = Varsel(varseltekst = "testverdi",
                         varselbeløp = 123)
