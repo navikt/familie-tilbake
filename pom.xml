@@ -38,23 +38,12 @@
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud>2.2.6.RELEASE</spring.cloud>
+        <spring.vault>2.2.3.RELEASE</spring.vault>
         <testcontainers.version>1.12.1</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2020.01.30-14.36-cdf257baea96</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
 
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-vault-dependencies</artifactId>
-                <version>${spring.cloud}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot -->
@@ -153,6 +142,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.vault</groupId>
+            <artifactId>spring-vault-core</artifactId>
+            <version>${spring.vault}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
