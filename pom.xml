@@ -37,8 +37,8 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring-cloud.version>2.2.6.RELEASE</spring-cloud.version>
-        <spring.vault>2.2.2.RELEASE</spring.vault>
+        <spring.cloud>2.2.6.RELEASE</spring.cloud>
+        <spring.vault>2.2.3.RELEASE</spring.vault>
         <testcontainers.version>1.12.1</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2020.01.30-14.36-cdf257baea96</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
@@ -72,6 +72,10 @@
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -159,7 +163,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-vault-config-databases</artifactId>
-            <version>${spring-cloud.version}</version>
+            <version>${spring.cloud}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
