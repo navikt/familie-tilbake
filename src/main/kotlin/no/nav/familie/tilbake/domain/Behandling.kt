@@ -22,6 +22,10 @@ data class Behandling(@Id
                       val eksternId: UUID?,
                       @MappedCollection(idColumn = "behandling_id")
                       val eksternBehandling: Set<EksternBehandling> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val varsler: Set<Varsel> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val verger: Set<Verge> = setOf(),
                       val versjon: Int = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
