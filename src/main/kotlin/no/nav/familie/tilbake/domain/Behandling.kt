@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.domain
 
+import no.nav.familie.tilbake.domain.behandling.Behandlingsresultat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -26,6 +27,8 @@ data class Behandling(@Id
                       val varsler: Set<Varsel> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val verger: Set<Verge> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val resultater: Set<Behandlingsresultat> = setOf(),
                       val versjon: Int = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
