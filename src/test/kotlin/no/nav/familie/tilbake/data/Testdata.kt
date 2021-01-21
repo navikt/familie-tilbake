@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.data
 
 import no.nav.familie.tilbake.domain.*
+import no.nav.familie.tilbake.domain.behandling.Behandlingsresultat
 import java.time.LocalDate
 import java.util.*
 
@@ -27,6 +28,8 @@ object Testdata {
                       kilde = "testverdi",
                       begrunnelse = "testverdi")
 
+    val behandlingsresultat = Behandlingsresultat()
+
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
                                 opprettetDato = LocalDate.now(),
@@ -39,5 +42,6 @@ object Testdata {
                                 eksternBehandling = setOf(eksternBehandling),
                                 verger = setOf(verge),
                                 varsler = setOf(varsel),
+                                resultater = setOf(behandlingsresultat),
                                 eksternId = UUID.randomUUID())
 }
