@@ -14,6 +14,18 @@ object Testdata {
 
     val eksternBehandling = EksternBehandling(henvisning = "testverdi")
 
+    val varsel = Varsel(varseltekst = "testverdi",
+                        varselbeløp = 123)
+
+    val verge = Verge(ident = "testverdi",
+                      gyldigFom = LocalDate.now(),
+                      gyldigTom = LocalDate.now(),
+                      type = Vergetype.BARN,
+                      orgNr = "testverdi",
+                      navn = "testverdi",
+                      kilde = "testverdi",
+                      begrunnelse = "testverdi")
+
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
                                 opprettetDato = LocalDate.now(),
@@ -24,7 +36,7 @@ object Testdata {
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = true,
                                 eksternBehandling = setOf(eksternBehandling),
+                                verger = setOf(verge),
+                                varsler = setOf(varsel),
                                 eksternId = UUID.randomUUID())
-
-
 }
