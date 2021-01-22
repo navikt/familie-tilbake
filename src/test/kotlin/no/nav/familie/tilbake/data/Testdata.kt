@@ -87,8 +87,6 @@ object Testdata {
                                                           behandlingsstegstypeId = behandlingsstegstype.id,
                                                           sekvensnummer = 1)
 
-    val behandlingsresultat = Behandlingsresultat(behandlingId = behandling.id)
-
     val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
                                               ansvarligSaksbehandler = "testverdi",
                                               behandlingsresultatId = behandlingsresultat.id)
