@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.data
 
 import no.nav.familie.tilbake.domain.*
-import no.nav.familie.tilbake.domain.Aksjonspunktsdefinisjon
-import no.nav.familie.tilbake.domain.Behandlingsstegstype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -25,13 +23,16 @@ object Testdata {
     private val verge = Verge(ident = "testverdi",
                               gyldigFom = LocalDate.now(),
                               gyldigTom = LocalDate.now(),
-                              type = Vergetype.BARN,
+                              type = Vergetype.VERGE_BARN,
                               orgNr = "testverdi",
                               navn = "testverdi",
                               kilde = "testverdi",
                               begrunnelse = "testverdi")
 
-    private val behandlingsresultat = Behandlingsresultat()
+    private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
+                                                      ansvarligSaksbehandler = "testverdi")
+
+    private val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = setOf(behandlingsvedtak))
 
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
@@ -66,9 +67,6 @@ object Testdata {
                                                             behandlingsstegstype = Behandlingsstegstype.FATTE_VEDTAK,
                                                             behandlingsstegsstatus = Behandlingstegsstatus.INNGANG)
 
-    val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
-                                              ansvarligSaksbehandler = "testverdi",
-                                              behandlingsresultatId = behandlingsresultat.id)
 
     val totrinnsvurdering = Totrinnsvurdering(behandlingId = behandling.id,
                                               aksjonspunktsdefinisjon = Aksjonspunktsdefinisjon.FATTE_VEDTAK,
@@ -151,23 +149,25 @@ object Testdata {
                                                                 beløpTilbakekreves = 32165,
                                                                 begrunnelse = "testverdi")
 
-    private val vilkårsvurderingAktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                                                                      ileggRenter = true,
-                                                                      andelTilbakekreves = 123.11,
-                                                                      manueltSattBeløp = null,
-                                                                      begrunnelse = "testverdi",
-                                                                      særligeGrunnerTilReduksjon = true,
-                                                                      tilbakekrevSmabeløp = true,
-                                                                      særligeGrunnerBegrunnelse = "testverdi",
-                                                                      vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
+    private val vilkårsvurderingAktsomhet =
+            VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                      ileggRenter = true,
+                                      andelTilbakekreves = 123.11,
+                                      manueltSattBeløp = null,
+                                      begrunnelse = "testverdi",
+                                      særligeGrunnerTilReduksjon = true,
+                                      tilbakekrevSmabeløp = true,
+                                      særligeGrunnerBegrunnelse = "testverdi",
+                                      vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
-    private val vilkårsperiode = Vilkårsvurderingsperiode(fom = LocalDate.now(),
-                                                          tom = LocalDate.now(),
-                                                          navoppfulgt = Navoppfulgt.HAR_IKKE_FULGT_OPP,
-                                                          vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                                                          begrunnelse = "testverdi",
-                                                          vilkårsvurderingAktsomheter = setOf(vilkårsvurderingAktsomhet),
-                                                          vilkårsvurderingGodTro = setOf(vilkårsvurderingGodTro))
+    private val vilkårsperiode =
+            Vilkårsvurderingsperiode(fom = LocalDate.now(),
+                                     tom = LocalDate.now(),
+                                     navoppfulgt = Navoppfulgt.HAR_IKKE_FULGT_OPP,
+                                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                                     begrunnelse = "testverdi",
+                                     vilkårsvurderingAktsomheter = setOf(vilkårsvurderingAktsomhet),
+                                     vilkårsvurderingGodTro = setOf(vilkårsvurderingGodTro))
 
     val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
                                   perioder = setOf(vilkårsperiode))
@@ -177,7 +177,7 @@ object Testdata {
     val faktaFeilutbetalingsperiode = FaktaFeilutbetalingsperiode(faktaFeilutbetalingId = faktaFeilutbetaling.id,
                                                                   fom = LocalDate.now(),
                                                                   tom = LocalDate.now(),
-                                                                  hendelsestype = Hendelsestype.PPN_ANNET_TYPE,
+                                                                  hendelsestype = Hendelsestype.BA_ANNET,
                                                                   hendelsesundertype = Hendelsesundertype.ENDRET_DEKNINGSGRAD)
 
     val grupperingFaktaFeilutbetaling = GrupperingFaktaFeilutbetaling(behandlingId = behandling.id,

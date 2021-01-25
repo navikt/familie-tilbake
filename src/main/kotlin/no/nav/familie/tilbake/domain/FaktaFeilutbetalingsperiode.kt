@@ -16,11 +16,9 @@ data class FaktaFeilutbetalingsperiode(@Id
                                        val sporbar: Sporbar = Sporbar())
 
 enum class Hendelsestype(val navn: String, val sortering: Int) {
-    MEDLEMSKAP_TYPE("§14-2 Medlemskap", 10),
-    ØKONOMI_FEIL("Feil i økonomi", 500),
-    PSB_ANNET_TYPE("Annet", 999),
-    PPN_ANNET_TYPE("Annet", 999),
-    OLP_ANNET_TYPE("Annet", 999)
+    BA_ANNET("Annet", 999),
+    EF_ANNET("Annet", 999),
+    KS_ANNET("Annet", 999)
 }
 
 enum class Hendelsesundertype(val navn: String?, val sortering: Int) {

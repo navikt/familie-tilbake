@@ -37,7 +37,7 @@ internal class FaktaFeilutbetalingsperiodeRepositoryTest : OppslagSpringRunnerTe
     @Test
     fun updateOppdatererEnForekomstAvFaktaFeilutbetalingsperiodeIBasen() {
         faktaFeilutbetalingsperiodeRepository.insert(faktaFeilutbetalingsperiode)
-        val oppdatertFaktaFeilutbetalingsperiode = faktaFeilutbetalingsperiode.copy(hendelsestype = Hendelsestype.PSB_ANNET_TYPE)
+        val oppdatertFaktaFeilutbetalingsperiode = faktaFeilutbetalingsperiode.copy(hendelsestype = Hendelsestype.EF_ANNET)
 
         faktaFeilutbetalingsperiodeRepository.update(oppdatertFaktaFeilutbetalingsperiode)
 

@@ -7,7 +7,6 @@ import java.util.*
 
 data class Behandlingsvedtak(@Id
                              val id: UUID = UUID.randomUUID(),
-                             val behandlingsresultatId: UUID,
                              val vedtaksdato: LocalDate,
                              val ansvarligSaksbehandler: String,
                              val versjon: Int = 0,

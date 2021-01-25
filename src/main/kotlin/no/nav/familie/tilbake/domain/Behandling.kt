@@ -65,12 +65,12 @@ data class Verge(@Id
                  val sporbar: Sporbar = Sporbar())
 
 enum class Vergetype(val navn: String) {
-    BARN("Verge for barn under 18 år"),
-    FBARN("Verge for foreldreløst barn under 18 år"),
-    VOKSEN("Verge for voksen"),
+    VERGE_BARN("Verge for barn under 18 år"),
+    VERGE_FORELDRELØST_BARN("Verge for foreldreløst barn under 18 år"),
+    VERGE_VOKSEN("Verge for voksen"),
     ADVOKAT("Advokat/advokatfullmektig"),
-    ANNEN_F("Annen fullmektig"),
-    UDEFINERT("UDefinert");
+    ANNEN_FULLMEKTIG("Annen fullmektig"),
+    UDEFINERT("Udefinert");
 }
 
 enum class Behandlingsstatus(val kode: String) {
@@ -82,26 +82,26 @@ enum class Behandlingsstatus(val kode: String) {
     UTREDES("UTRED")
 }
 
-enum class Behandlingstype(val kode: String, val behandlingssteg: List<Behandlingsstegstype>) {
+enum class Behandlingstype(val behandlingssteg: List<Behandlingsstegstype>) {
 
-    TILBAKEKREVING("BT-007", listOf(Behandlingsstegstype.INNHENT_OPPLYSNINGER,
-                                    Behandlingsstegstype.VARSEL_OM_TILBAKEKREVING,
-                                    Behandlingsstegstype.MOTTA_KRAVGRUNNLAG_FRA_ØKONOMI,
-                                    Behandlingsstegstype.FAKTA_OM_VERGE,
-                                    Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
-                                    Behandlingsstegstype.VURDER_FORELDELSE,
-                                    Behandlingsstegstype.VURDER_TILBAKEKREVING,
-                                    Behandlingsstegstype.FORESLÅ_VEDTAK,
-                                    Behandlingsstegstype.FATTE_VEDTAK,
-                                    Behandlingsstegstype.IVERKSETT_VEDTAK)),
-    REVURDERING_TILBAKEKREVING("BT-009", listOf(Behandlingsstegstype.HENT_GRUNNLAG_FRA_ØKONOMI,
-                                                Behandlingsstegstype.FAKTA_OM_VERGE,
-                                                Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
-                                                Behandlingsstegstype.VURDER_FORELDELSE,
-                                                Behandlingsstegstype.VURDER_TILBAKEKREVING,
-                                                Behandlingsstegstype.FORESLÅ_VEDTAK,
-                                                Behandlingsstegstype.FATTE_VEDTAK,
-                                                Behandlingsstegstype.IVERKSETT_VEDTAK))
+    TILBAKEKREVING(listOf(Behandlingsstegstype.INNHENT_OPPLYSNINGER,
+                          Behandlingsstegstype.VARSEL_OM_TILBAKEKREVING,
+                          Behandlingsstegstype.MOTTA_KRAVGRUNNLAG_FRA_ØKONOMI,
+                          Behandlingsstegstype.FAKTA_OM_VERGE,
+                          Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
+                          Behandlingsstegstype.VURDER_FORELDELSE,
+                          Behandlingsstegstype.VURDER_TILBAKEKREVING,
+                          Behandlingsstegstype.FORESLÅ_VEDTAK,
+                          Behandlingsstegstype.FATTE_VEDTAK,
+                          Behandlingsstegstype.IVERKSETT_VEDTAK)),
+    REVURDERING_TILBAKEKREVING(listOf(Behandlingsstegstype.HENT_GRUNNLAG_FRA_ØKONOMI,
+                                      Behandlingsstegstype.FAKTA_OM_VERGE,
+                                      Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
+                                      Behandlingsstegstype.VURDER_FORELDELSE,
+                                      Behandlingsstegstype.VURDER_TILBAKEKREVING,
+                                      Behandlingsstegstype.FORESLÅ_VEDTAK,
+                                      Behandlingsstegstype.FATTE_VEDTAK,
+                                      Behandlingsstegstype.IVERKSETT_VEDTAK))
 }
 
 enum class Saksbehandlingstype {
