@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.domain
 
-import no.nav.familie.tilbake.domain.behandling.Behandlingsresultat
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
@@ -33,6 +33,46 @@ data class Behandling(@Id
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
 
+data class EksternBehandling(@Id
+                             val id: UUID = UUID.randomUUID(),
+                             val henvisning: String,
+                             val eksternId: UUID?,
+                             val aktiv: Boolean = true,
+                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                             val sporbar: Sporbar = Sporbar())
+
+data class Varsel(@Id
+                  val id: UUID = UUID.randomUUID(),
+                  val varseltekst: String,
+                  @Column("varselbelop")
+                  val varselbeløp: Long?,
+                  val aktiv: Boolean = true,
+                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                  val sporbar: Sporbar = Sporbar())
+
+data class Verge(@Id
+                 val id: UUID = UUID.randomUUID(),
+                 val ident: String?,
+                 val orgNr: String?,
+                 val gyldigFom: LocalDate,
+                 val gyldigTom: LocalDate,
+                 val aktiv: Boolean = true,
+                 val type: Vergetype,
+                 val navn: String,
+                 val kilde: String,
+                 val begrunnelse: String?,
+                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                 val sporbar: Sporbar = Sporbar())
+
+enum class Vergetype(val navn: String) {
+    BARN("Verge for barn under 18 år"),
+    FBARN("Verge for foreldreløst barn under 18 år"),
+    VOKSEN("Verge for voksen"),
+    ADVOKAT("Advokat/advokatfullmektig"),
+    ANNEN_F("Annen fullmektig"),
+    UDEFINERT("UDefinert");
+}
+
 enum class Behandlingsstatus(val kode: String) {
 
     AVSLUTTET("AVSLU"),
@@ -42,11 +82,26 @@ enum class Behandlingsstatus(val kode: String) {
     UTREDES("UTRED")
 }
 
-enum class Behandlingstype(val kode: String) {
+enum class Behandlingstype(val kode: String, val behandlingssteg: List<Behandlingsstegstype>) {
 
-    TILBAKEKREVING("BT-007"),
-    REVURDERING_TILBAKEKREVING("BT-009"),
-    UDEFINERT("-")
+    TILBAKEKREVING("BT-007", listOf(Behandlingsstegstype.INNHENT_OPPLYSNINGER,
+                                    Behandlingsstegstype.VARSEL_OM_TILBAKEKREVING,
+                                    Behandlingsstegstype.MOTTA_KRAVGRUNNLAG_FRA_ØKONOMI,
+                                    Behandlingsstegstype.FAKTA_OM_VERGE,
+                                    Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
+                                    Behandlingsstegstype.VURDER_FORELDELSE,
+                                    Behandlingsstegstype.VURDER_TILBAKEKREVING,
+                                    Behandlingsstegstype.FORESLÅ_VEDTAK,
+                                    Behandlingsstegstype.FATTE_VEDTAK,
+                                    Behandlingsstegstype.IVERKSETT_VEDTAK)),
+    REVURDERING_TILBAKEKREVING("BT-009", listOf(Behandlingsstegstype.HENT_GRUNNLAG_FRA_ØKONOMI,
+                                                Behandlingsstegstype.FAKTA_OM_VERGE,
+                                                Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
+                                                Behandlingsstegstype.VURDER_FORELDELSE,
+                                                Behandlingsstegstype.VURDER_TILBAKEKREVING,
+                                                Behandlingsstegstype.FORESLÅ_VEDTAK,
+                                                Behandlingsstegstype.FATTE_VEDTAK,
+                                                Behandlingsstegstype.IVERKSETT_VEDTAK))
 }
 
 enum class Saksbehandlingstype {

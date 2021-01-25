@@ -17,15 +17,6 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var aksjonspunktRepository: AksjonspunktRepository
 
     @Autowired
-    private lateinit var aksjonspunktsdefinisjonRepository: AksjonspunktsdefinisjonRepository
-
-    @Autowired
-    private lateinit var vurderingspunktsdefinisjonRepository: VurderingspunktsdefinisjonRepository
-
-    @Autowired
-    private lateinit var behandlingsstegstypeRepository: BehandlingsstegstypeRepository
-
-    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
@@ -37,9 +28,6 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        behandlingsstegstypeRepository.insert(Testdata.behandlingsstegstype)
-        vurderingspunktsdefinisjonRepository.insert(Testdata.vurderingspunktsdefinisjon)
-        aksjonspunktsdefinisjonRepository.insert(Testdata.aksjonspunktsdefinisjon)
         aksjonspunktRepository.insert(Testdata.aksjonspunkt)
     }
 

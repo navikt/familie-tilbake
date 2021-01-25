@@ -14,9 +14,6 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var behandlingsstegstypeRepository: BehandlingsstegstypeRepository
-
-    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
@@ -28,7 +25,6 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        behandlingsstegstypeRepository.insert(Testdata.behandlingsstegstype)
     }
 
     @Test

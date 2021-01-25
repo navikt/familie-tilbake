@@ -7,7 +7,7 @@ import java.util.*
 data class Totrinnsvurdering(@Id
                              val id: UUID = UUID.randomUUID(),
                              val behandlingId: UUID,
-                             val aksjonspunktsdefinisjonId: UUID,
+                             val aksjonspunktsdefinisjon: Aksjonspunktsdefinisjon,
                              val godkjent: Boolean,
                              val begrunnelse: String?,
                              val aktiv: Boolean = true,

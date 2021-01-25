@@ -1,14 +1,16 @@
-package no.nav.familie.tilbake.domain.behandling
+package no.nav.familie.tilbake.domain
 
-import no.nav.familie.tilbake.domain.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import java.util.*
 
 data class Behandlingsresultat(@Id
                                val id: UUID = UUID.randomUUID(),
                                val versjon: Int = 0,
                                val type: Behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT,
+                               @MappedCollection(idColumn = "behandlingsresultat_id")
+                               val behandlingsvedtak: Set<Behandlingsvedtak> = setOf(),
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar())
 

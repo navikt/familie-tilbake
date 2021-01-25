@@ -13,15 +13,6 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var totrinnsvurderingRepository: TotrinnsvurderingRepository
 
     @Autowired
-    private lateinit var aksjonspunktsdefinisjonRepository: AksjonspunktsdefinisjonRepository
-
-    @Autowired
-    private lateinit var vurderingspunktsdefinisjonRepository: VurderingspunktsdefinisjonRepository
-
-    @Autowired
-    private lateinit var behandlingsstegstypeRepository: BehandlingsstegstypeRepository
-
-    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
@@ -33,9 +24,6 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        behandlingsstegstypeRepository.insert(Testdata.behandlingsstegstype)
-        vurderingspunktsdefinisjonRepository.insert(Testdata.vurderingspunktsdefinisjon)
-        aksjonspunktsdefinisjonRepository.insert(Testdata.aksjonspunktsdefinisjon)
     }
 
     @Test

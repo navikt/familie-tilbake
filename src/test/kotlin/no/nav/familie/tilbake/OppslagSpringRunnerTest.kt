@@ -59,16 +59,10 @@ abstract class OppslagSpringRunnerTest {
     private fun resetDatabase() {
         listOf(Fagsak::class,
                Behandling::class,
-               Behandlingsstegstype::class,
                Behandlingsårsak::class,
-               Vurderingspunktsdefinisjon::class,
-               Aksjonspunktsdefinisjon::class,
                Aksjonspunkt::class,
                Revurderingsårsak::class,
                Behandlingsstegstilstand::class,
-               Behandlingsstegssekvens::class,
-               Behandlingsresultat::class,
-               Behandlingsvedtak::class,
                Totrinnsvurdering::class,
                ÅrsakTotrinnsvurdering::class,
                MottakersVarselrespons::class,
@@ -98,8 +92,7 @@ abstract class OppslagSpringRunnerTest {
                Varsel::class,
                Brevsporing::class,
                ØkonomiXmlMottattArkiv::class,
-               Verge::class,
-               GrupperingVerge::class)
+               Verge::class)
                 .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

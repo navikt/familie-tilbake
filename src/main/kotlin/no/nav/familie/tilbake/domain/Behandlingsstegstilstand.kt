@@ -7,7 +7,7 @@ import java.util.*
 data class Behandlingsstegstilstand(@Id
                                     val id: UUID = UUID.randomUUID(),
                                     val behandlingId: UUID,
-                                    val behandlingsstegstypeId: UUID,
+                                    val behandlingsstegstype: Behandlingsstegstype,
                                     val behandlingsstegsstatus: Behandlingstegsstatus,
                                     val versjon: Int = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

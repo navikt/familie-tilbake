@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
-@Table("Revurderingsarsak")
+@Table("revurderingsarsak")
 data class Revurderingsårsak(@Id
                              val id: UUID = UUID.randomUUID(),
                              val aksjonspunktId: UUID,

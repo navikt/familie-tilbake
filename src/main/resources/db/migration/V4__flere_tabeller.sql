@@ -1,31 +1,3 @@
-CREATE TABLE behandlingsstegstype (
-    id                         UUID PRIMARY KEY,
-    version                    BIGINT                              NOT NULL,
-    kode                       VARCHAR UNIQUE                      NOT NULL,
-    navn                       VARCHAR                             NOT NULL,
-    definert_behandlingsstatus VARCHAR                             NOT NULL,
-    beskrivelse                VARCHAR,
-    opprettet_av               VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid              TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av                  VARCHAR,
-    endret_tid                 TIMESTAMP(3)
-);
-
-COMMENT ON TABLE behandlingsstegstype
-    IS 'Angir definerte behandlingssteg med hvilket status behandling skal stå i når steget kjøres';
-
-COMMENT ON COLUMN behandlingsstegstype.kode
-    IS 'Pk - angir unik kode som identifiserer behandlingssteget';
-
-COMMENT ON COLUMN behandlingsstegstype.navn
-    IS 'Et lesbart navn for behandlingssteget, ment for visning el.';
-
-COMMENT ON COLUMN behandlingsstegstype.definert_behandlingsstatus
-    IS 'Definert status behandling settes i når steget kjøres';
-
-COMMENT ON COLUMN behandlingsstegstype.beskrivelse
-    IS 'Beskrivelse;forklaring av hva steget gjør';
-
 CREATE TABLE behandlingsarsak (
     id                     UUID PRIMARY KEY,
     version                BIGINT                              NOT NULL,
@@ -58,117 +30,24 @@ CREATE INDEX ON behandlingsarsak (behandling_id);
 
 CREATE INDEX ON behandlingsarsak (original_behandling_id);
 
-CREATE TABLE vurderingspunktsdefinisjon (
+CREATE TABLE aksjonspunkt (
     id                      UUID PRIMARY KEY,
     version                 BIGINT                              NOT NULL,
-    kode                    VARCHAR                             NOT NULL,
-    behandlingsstegstype_id UUID                                NOT NULL REFERENCES behandlingsstegstype,
-    vurderingspunktstype    VARCHAR      DEFAULT 'UT'           NOT NULL
-        CHECK (vurderingspunktstype IN ('UT', 'INN')),
-    navn                    VARCHAR                             NOT NULL,
-    beskrivelse             VARCHAR,
+    totrinnsbehandling      BOOLEAN                             NOT NULL,
+    behandlingsstegstype    VARCHAR,
+    aksjonspunktsdefinisjon VARCHAR                             NOT NULL,
+    status                  VARCHAR                             NOT NULL,
+    tidsfrist               TIMESTAMP(3),
+    ventearsak              VARCHAR      DEFAULT '-'            NOT NULL,
+    behandling_id           UUID                                NOT NULL REFERENCES behandling,
+    reaktiveringsstatus     VARCHAR      DEFAULT 'AKTIV'        NOT NULL,
+    manuelt_opprettet       BOOLEAN      DEFAULT FALSE          NOT NULL,
+    revurdering             BOOLEAN      DEFAULT FALSE          NOT NULL,
+    versjon                 INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av               VARCHAR,
     endret_tid              TIMESTAMP(3)
-);
-
-COMMENT ON TABLE vurderingspunktsdefinisjon
-    IS 'Internt kodeverk for definisjoner av vurderingspunkt.';
-
-COMMENT ON COLUMN vurderingspunktsdefinisjon.kode
-    IS 'Kodeverk primary key';
-
-COMMENT ON COLUMN vurderingspunktsdefinisjon.behandlingsstegstype_id
-    IS 'Fk:Behandlingsstegstype_id fremmednøkkel til tabellen som viser krav til status for at steget skal kunne kjøres';
-
-COMMENT ON COLUMN vurderingspunktsdefinisjon.vurderingspunktstype
-    IS 'Angir om det er et inngående eller utgående vurderingspunkt. Verdier: inn eller ut.';
-
-COMMENT ON COLUMN vurderingspunktsdefinisjon.navn
-    IS 'Lesbart navn på definisjon av vurderingspunkt';
-
-COMMENT ON COLUMN vurderingspunktsdefinisjon.beskrivelse
-    IS 'Utdypende beskrivelse av koden';
-
-CREATE INDEX ON vurderingspunktsdefinisjon (behandlingsstegstype_id);
-
-CREATE UNIQUE INDEX ON vurderingspunktsdefinisjon (behandlingsstegstype_id, vurderingspunktstype);
-
-CREATE TABLE aksjonspunktsdefinisjon (
-    id                             UUID PRIMARY KEY,
-    version                        BIGINT                              NOT NULL,
-    kode                           VARCHAR                             NOT NULL,
-    navn                           VARCHAR                             NOT NULL,
-    vurderingspunktsdefinisjon_id  UUID                                NOT NULL REFERENCES vurderingspunktsdefinisjon,
-    beskrivelse                    VARCHAR,
-    totrinnsbehandling_default     BOOLEAN                             NOT NULL,
-    aksjonspunktstype              VARCHAR      DEFAULT 'MANU'         NOT NULL,
-    fristperiode                   VARCHAR,
-    tilbakehopp_ved_gjenopptakelse BOOLEAN      DEFAULT FALSE          NOT NULL,
-    lag_uten_historikk             BOOLEAN      DEFAULT FALSE          NOT NULL,
-    skjermlenketype                VARCHAR                             NOT NULL,
-    opprettet_av                   VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid                  TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av                      VARCHAR,
-    endret_tid                     TIMESTAMP(3)
-);
-
-COMMENT ON TABLE aksjonspunktsdefinisjon
-    IS 'Kodetabell som definerer de forskjellige typene aksjonspunkter.';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.kode
-    IS 'Kodeverk primary key';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.navn
-    IS 'Lesbart navn på aksjonspunktsdefinisjon';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.vurderingspunktsdefinisjon_id
-    IS 'Fk: vurderingspunkt_def fremmednøkkel til tabellen som inneholder beskrivelsen av de ulike vurderingspunktene';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.beskrivelse
-    IS 'Utdypende beskrivelse av koden';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.totrinnsbehandling_default
-    IS 'Indikerer om dette aksjonspunktet alltid skal kreve totrinnsbehandling';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.aksjonspunktstype
-    IS 'Fk: aksjonspunktstype fremmednøkkel som forteller om aksjonspunktet kan løses automatisk eller må tas manuelt';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.fristperiode
-    IS 'Lengde på fristperioden for behandling av aksjonspunkt med denne definisjonen';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.tilbakehopp_ved_gjenopptakelse
-    IS 'Skal det hoppes tilbake slik at steget aksjonspunktet er koblet til kjøres på nytt';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.lag_uten_historikk
-    IS 'Skal det ikke lages historikkinnslag ved opprettelse av aksjonspunkt';
-
-COMMENT ON COLUMN aksjonspunktsdefinisjon.skjermlenketype
-    IS 'Fk: skjermlenketype fremmednøkkel til tabellen for skjermlenker';
-
-CREATE INDEX ON aksjonspunktsdefinisjon (vurderingspunktsdefinisjon_id);
-
-CREATE INDEX ON aksjonspunktsdefinisjon (aksjonspunktstype);
-
-CREATE TABLE aksjonspunkt (
-    id                         UUID PRIMARY KEY,
-    version                    BIGINT                              NOT NULL,
-    totrinnsbehandling         BOOLEAN                             NOT NULL,
-    behandlingsstegstype_id    UUID REFERENCES behandlingsstegstype,
-    aksjonspunktsdefinisjon_id UUID                                NOT NULL REFERENCES aksjonspunktsdefinisjon,
-    status                     VARCHAR                             NOT NULL,
-    tidsfrist                  TIMESTAMP(3),
-    ventearsak                 VARCHAR      DEFAULT '-'            NOT NULL,
-    behandling_id              UUID                                NOT NULL REFERENCES behandling,
-    reaktiveringsstatus        VARCHAR      DEFAULT 'AKTIV'        NOT NULL,
-    manuelt_opprettet          BOOLEAN      DEFAULT FALSE          NOT NULL,
-    revurdering                BOOLEAN      DEFAULT FALSE          NOT NULL,
-    versjon                    INTEGER      DEFAULT 0              NOT NULL,
-    opprettet_av               VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid              TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av                  VARCHAR,
-    endret_tid                 TIMESTAMP(3)
 );
 
 COMMENT ON TABLE aksjonspunkt
@@ -180,14 +59,14 @@ COMMENT ON COLUMN aksjonspunkt.id
 COMMENT ON COLUMN aksjonspunkt.totrinnsbehandling
     IS 'Indikerer at aksjonspunkter krever en totrinnsbehandling';
 
-COMMENT ON COLUMN aksjonspunkt.behandlingsstegstype_id
+COMMENT ON COLUMN aksjonspunkt.behandlingsstegstype
     IS 'Hvilket steg ble dette aksjonspunktet funnet i?';
 
 COMMENT ON COLUMN aksjonspunkt.status
     IS 'Fk:Status på aksjonspunktet';
 
-COMMENT ON COLUMN aksjonspunkt.aksjonspunktsdefinisjon_id
-    IS 'Fk:Aksjonspunkt_def fremmednøkkel til tabellen som inneholder definisjonene av aksjonspunktene';
+COMMENT ON COLUMN aksjonspunkt.aksjonspunktsdefinisjon
+    IS 'aksjonspunktsdefinisjon enum';
 
 COMMENT ON COLUMN aksjonspunkt.tidsfrist
     IS 'Behandling blir automatisk gjenopptatt etter dette tidspunktet';
@@ -207,11 +86,11 @@ COMMENT ON COLUMN aksjonspunkt.manuelt_opprettet
 COMMENT ON COLUMN aksjonspunkt.revurdering
     IS 'Flagget settes på aksjonspunkter som kopieres i det en revurdering opprettes. Trengs for å kunne vurdere om aksjonspunktet er kandidat for totrinnskontroll dersom det har blitt en endring i aksjonspunktet under revurderingen.';
 
-CREATE UNIQUE INDEX ON aksjonspunkt (behandling_id, aksjonspunktsdefinisjon_id);
+CREATE UNIQUE INDEX ON aksjonspunkt (behandling_id, aksjonspunktsdefinisjon);
 
-CREATE INDEX ON aksjonspunkt (behandlingsstegstype_id);
+CREATE INDEX ON aksjonspunkt (behandlingsstegstype);
 
-CREATE INDEX ON aksjonspunkt (aksjonspunktsdefinisjon_id);
+CREATE INDEX ON aksjonspunkt (aksjonspunktsdefinisjon);
 
 CREATE INDEX ON aksjonspunkt (ventearsak);
 
@@ -221,7 +100,7 @@ CREATE INDEX ON aksjonspunkt (reaktiveringsstatus);
 
 ALTER TABLE aksjonspunkt
     ADD CONSTRAINT chk_unique_beh_ad
-        UNIQUE (behandling_id, aksjonspunktsdefinisjon_id);
+        UNIQUE (behandling_id, aksjonspunktsdefinisjon);
 
 CREATE TABLE revurderingsarsak (
     id              UUID PRIMARY KEY,
@@ -251,16 +130,16 @@ CREATE INDEX ON revurderingsarsak (aksjonspunkt_id);
 CREATE INDEX ON revurderingsarsak (arsakstype);
 
 CREATE TABLE behandlingsstegstilstand (
-    id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
-    behandling_id           UUID                                NOT NULL REFERENCES behandling,
-    behandlingsstegstype_id UUID                                NOT NULL REFERENCES behandlingsstegstype,
-    behandlingsstegsstatus  VARCHAR                             NOT NULL,
-    versjon                 INTEGER      DEFAULT 0              NOT NULL,
-    opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av               VARCHAR,
-    endret_tid              TIMESTAMP(3)
+    id                     UUID PRIMARY KEY,
+    version                BIGINT                              NOT NULL,
+    behandling_id          UUID                                NOT NULL REFERENCES behandling,
+    behandlingsstegstype   VARCHAR                             NOT NULL,
+    behandlingsstegsstatus VARCHAR                             NOT NULL,
+    versjon                INTEGER      DEFAULT 0              NOT NULL,
+    opprettet_av           VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid          TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av              VARCHAR,
+    endret_tid             TIMESTAMP(3)
 );
 
 COMMENT ON TABLE behandlingsstegstilstand
@@ -272,7 +151,7 @@ COMMENT ON COLUMN behandlingsstegstilstand.id
 COMMENT ON COLUMN behandlingsstegstilstand.behandling_id
     IS 'Fk: behandling fremmednøkkel for kobling til behandlingen dette steget er tilknyttet';
 
-COMMENT ON COLUMN behandlingsstegstilstand.behandlingsstegstype_id
+COMMENT ON COLUMN behandlingsstegstilstand.behandlingsstegstype
     IS 'Hvilket behandlingsteg som kjøres';
 
 COMMENT ON COLUMN behandlingsstegstilstand.behandlingsstegsstatus
@@ -282,67 +161,7 @@ CREATE INDEX ON behandlingsstegstilstand (behandling_id);
 
 CREATE INDEX ON behandlingsstegstilstand (behandlingsstegsstatus);
 
-CREATE INDEX ON behandlingsstegstilstand (behandlingsstegstype_id);
-
-CREATE TABLE behandlingsstegssekvens (
-    id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
-    behandlingstype         VARCHAR                             NOT NULL,
-    behandlingsstegstype_id UUID                                NOT NULL REFERENCES behandlingsstegstype,
-    sekvensnummer           INTEGER                             NOT NULL
-        CHECK (sekvensnummer > 0),
-    opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av               VARCHAR,
-    endret_tid              TIMESTAMP(3)
-);
-
-COMMENT ON TABLE behandlingsstegssekvens
-    IS 'Rekkefølgen av steg for de forskjellige typene behandling';
-
-COMMENT ON COLUMN behandlingsstegssekvens.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN behandlingsstegssekvens.behandlingstype
-    IS 'Fk: behandlingstype fremmednøkkel til kodeverket for behandlingstyper';
-
-COMMENT ON COLUMN behandlingsstegssekvens.behandlingsstegstype_id
-    IS 'Fk: behandlingsstegstype fremmednøkkel til tabellen som viser krav til status for at steget skal kunne kjøres';
-
-COMMENT ON COLUMN behandlingsstegssekvens.sekvensnummer
-    IS 'Forteller når i sekvensen av steg i en behandling dette steget skal kjøres';
-
-CREATE INDEX ON behandlingsstegssekvens (behandlingstype, behandlingsstegstype_id);
-
-CREATE TABLE behandlingsresultat (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                               NOT NULL,
-    behandling_id UUID                                 NOT NULL REFERENCES behandling,
-    type          VARCHAR      DEFAULT 'IKKE_FASTSATT' NOT NULL,
-    versjon       INTEGER      DEFAULT 0               NOT NULL,
-    opprettet_av  VARCHAR      DEFAULT 'VL'            NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp  NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3)
-);
-
-CREATE INDEX ON behandlingsstegssekvens (behandlingsstegstype_id);
-
-COMMENT ON TABLE behandlingsresultat
-    IS 'Beregningsresultat. Knytter sammen beregning og behandling.';
-
-COMMENT ON COLUMN behandlingsresultat.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN behandlingsresultat.behandling_id
-    IS 'Fk: behandling fremmednøkkel for kobling til behandling';
-
-COMMENT ON COLUMN behandlingsresultat.type
-    IS 'Resultat av behandlingen';
-
-CREATE INDEX ON behandlingsresultat (behandling_id);
-
-CREATE INDEX ON behandlingsresultat (type);
+CREATE INDEX ON behandlingsstegstilstand (behandlingsstegstype);
 
 CREATE TABLE behandlingsvedtak (
     id                      UUID PRIMARY KEY,
@@ -385,18 +204,18 @@ CREATE INDEX ON behandlingsvedtak (vedtaksdato);
 CREATE INDEX ON behandlingsvedtak (iverksettingsstatus);
 
 CREATE TABLE totrinnsvurdering (
-    id                         UUID PRIMARY KEY,
-    version                    BIGINT                              NOT NULL,
-    behandling_id              UUID                                NOT NULL REFERENCES behandling,
-    aksjonspunktsdefinisjon_id UUID                                NOT NULL REFERENCES aksjonspunktsdefinisjon,
-    aktiv                      BOOLEAN      DEFAULT TRUE           NOT NULL,
-    godkjent                   BOOLEAN                             NOT NULL,
-    begrunnelse                VARCHAR,
-    versjon                    INTEGER      DEFAULT 0              NOT NULL,
-    opprettet_av               VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid              TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av                  VARCHAR,
-    endret_tid                 TIMESTAMP(3)
+    id                      UUID PRIMARY KEY,
+    version                 BIGINT                              NOT NULL,
+    behandling_id           UUID                                NOT NULL REFERENCES behandling,
+    aksjonspunktsdefinisjon VARCHAR                             NOT NULL,
+    aktiv                   BOOLEAN      DEFAULT TRUE           NOT NULL,
+    godkjent                BOOLEAN                             NOT NULL,
+    begrunnelse             VARCHAR,
+    versjon                 INTEGER      DEFAULT 0              NOT NULL,
+    opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av               VARCHAR,
+    endret_tid              TIMESTAMP(3)
 );
 
 COMMENT ON TABLE totrinnsvurdering
@@ -408,7 +227,7 @@ COMMENT ON COLUMN totrinnsvurdering.godkjent
 COMMENT ON COLUMN totrinnsvurdering.begrunnelse
     IS 'Beslutters begrunnelse';
 
-CREATE INDEX ON totrinnsvurdering (aksjonspunktsdefinisjon_id);
+CREATE INDEX ON totrinnsvurdering (aksjonspunktsdefinisjon);
 
 CREATE INDEX ON totrinnsvurdering (behandling_id);
 
@@ -1009,38 +828,6 @@ COMMENT ON COLUMN vilkarsvurdering_god_tro.begrunnelse
 
 CREATE INDEX ON vilkarsvurdering_god_tro (vilkarsvurderingsperiode_id);
 
-CREATE TABLE ekstern_behandling (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
-    behandling_id UUID                                NOT NULL REFERENCES behandling,
-    aktiv         BOOLEAN      DEFAULT TRUE           NOT NULL,
-    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3),
-    henvisning    VARCHAR                             NOT NULL,
-    UNIQUE (behandling_id, henvisning)
-);
-
-COMMENT ON TABLE ekstern_behandling
-    IS 'Referanse til ekstern behandling';
-
-COMMENT ON COLUMN ekstern_behandling.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN ekstern_behandling.behandling_id
-    IS 'Fk: behandling fremmednøkkel for kobling til intern behandling';
-
-COMMENT ON COLUMN ekstern_behandling.aktiv
-    IS 'Angir om ekstern behandling data er gjeldende';
-
-COMMENT ON COLUMN ekstern_behandling.henvisning
-    IS 'Henvisning;referanse. Peker på referanse-feltet i kravgrunnlaget, og kommer opprinnelig fra fagsystemet. For fptilbake er den lik fpsak.behandlingid. For k9-tilbake er den lik base64(bytes(behandlinguuid))';
-
-CREATE INDEX ON ekstern_behandling (behandling_id);
-
-CREATE INDEX ON ekstern_behandling (henvisning);
-
 CREATE TABLE fakta_feilutbetaling (
     id            UUID PRIMARY KEY,
     version       BIGINT                              NOT NULL,
@@ -1345,39 +1132,6 @@ CREATE INDEX ON gruppering_kravvedtaksstatus (kravvedtaksstatus437_id);
 
 CREATE INDEX ON gruppering_kravvedtaksstatus (behandling_id);
 
-CREATE TABLE varsel (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
-    behandling_id UUID                                NOT NULL REFERENCES behandling,
-    aktiv         BOOLEAN                             NOT NULL,
-    varseltekst   VARCHAR                             NOT NULL,
-    varselbelop   BIGINT,
-    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3)
-);
-
-COMMENT ON TABLE varsel
-    IS 'Tabell for å lagre varsel info';
-
-COMMENT ON COLUMN varsel.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN varsel.behandling_id
-    IS 'Fk: behandling fremmednøkkel for tilknyttet behandling';
-
-COMMENT ON COLUMN varsel.aktiv
-    IS 'Angir status av varsel';
-
-COMMENT ON COLUMN varsel.varseltekst
-    IS 'Fritekst som brukes i varselbrev';
-
-COMMENT ON COLUMN varsel.varselbelop
-    IS 'Beløp som brukes i varselbrev';
-
-CREATE INDEX ON varsel (behandling_id);
-
 CREATE TABLE brevsporing (
     id             UUID PRIMARY KEY,
     version        BIGINT                              NOT NULL,
@@ -1431,81 +1185,3 @@ COMMENT ON COLUMN okonomi_xml_mottatt_arkiv.id
 
 COMMENT ON COLUMN okonomi_xml_mottatt_arkiv.melding
     IS 'Gammel kravgrunnlag xml';
-
-CREATE TABLE verge (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
-    ident         VARCHAR,
-    gyldig_fom    DATE                                NOT NULL,
-    gyldig_tom    DATE                                NOT NULL,
-    type          VARCHAR                             NOT NULL,
-    org_nr        VARCHAR,
-    navn          VARCHAR                             NOT NULL,
-    kilde         VARCHAR                             NOT NULL,
-    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3),
-    begrunnelse   VARCHAR
-);
-
-COMMENT ON TABLE verge
-    IS 'Informasjon om verge';
-
-COMMENT ON COLUMN verge.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN verge.ident
-    IS 'Aktørid av verge person';
-
-COMMENT ON COLUMN verge.gyldig_fom
-    IS 'Hvis fullmakt er begrenset i periode, dato for når fullmakten er gyldig fra';
-
-COMMENT ON COLUMN verge.gyldig_tom
-    IS 'Hvis fullmakt er begrenset i periode, dato for når fullmakten er gyldig til';
-
-COMMENT ON COLUMN verge.type
-    IS 'Type verge';
-
-COMMENT ON COLUMN verge.org_nr
-    IS 'Vergens organisasjonsnummer';
-
-COMMENT ON COLUMN verge.navn
-    IS 'Navn på vergen, som tastet inn av saksbehandler';
-
-COMMENT ON COLUMN verge.kilde
-    IS 'Opprinnelsen av verge.enten fpsak hvis det kopierte fra fpsak eller fptilbake';
-
-COMMENT ON COLUMN verge.begrunnelse
-    IS 'Begrunnelse for verge';
-
-CREATE TABLE gruppering_verge (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
-    behandling_id UUID                                NOT NULL REFERENCES behandling,
-    verge_id      UUID                                NOT NULL REFERENCES verge,
-    aktiv         BOOLEAN                             NOT NULL,
-    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3)
-);
-
-COMMENT ON TABLE gruppering_verge
-    IS 'Aggregate tabell for å lagre verge';
-
-COMMENT ON COLUMN gruppering_verge.id
-    IS 'Primary key';
-
-COMMENT ON COLUMN gruppering_verge.behandling_id
-    IS 'Fk: referanse til behandling';
-
-COMMENT ON COLUMN gruppering_verge.verge_id
-    IS 'Fk:Verge';
-
-COMMENT ON COLUMN gruppering_verge.aktiv
-    IS 'Angir status av verge';
-
-CREATE INDEX ON gruppering_verge (behandling_id);
-
-CREATE INDEX ON gruppering_verge (verge_id);

@@ -8,8 +8,8 @@ import java.util.*
 data class Aksjonspunkt(@Id
                         val id: UUID = UUID.randomUUID(),
                         val behandlingId: UUID,
-                        val behandlingsstegstypeId: UUID,
-                        val aksjonspunktsdefinisjonId: UUID,
+                        val behandlingsstegstype: Behandlingsstegstype,
+                        val aksjonspunktsdefinisjon: Aksjonspunktsdefinisjon,
                         val totrinnsbehandling: Boolean,
                         val status: Aksjonspunktsstatus,
                         val tidsfrist: LocalDateTime?,
