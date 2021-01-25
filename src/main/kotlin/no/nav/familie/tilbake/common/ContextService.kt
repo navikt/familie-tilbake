@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.service
+package no.nav.familie.tilbake.common
 
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 

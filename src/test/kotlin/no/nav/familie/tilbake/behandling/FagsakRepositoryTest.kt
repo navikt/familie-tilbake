@@ -1,9 +1,10 @@
-package no.nav.familie.tilbake.repository
+package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -15,7 +16,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
 
     @Test
-    fun insertPersistererEnForekomstAvFagsakTilBasen() {
+    fun `skal_persistere_en_fagsak`() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
@@ -23,9 +24,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvFagsakIBasen() {
+    fun `skal_oppdatere_fagsak_status`() {
         fagsakRepository.insert(fagsak)
-        val oppdatertFagsak = fagsak.copy(eksternFagsakId = "bob")
+        val oppdatertFagsak = fagsak.copy(status = Fagsaksstatus.UNDER_BEHANDLING)
 
         fagsakRepository.update(oppdatertFagsak)
 
