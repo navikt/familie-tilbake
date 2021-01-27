@@ -12,19 +12,31 @@ data class Fagsak(@Id
                   val bruker: Bruker,
                   val eksternFagsakId: String?,
                   val fagsystem: Fagsystem,
-                  val ytelsestype: Ytelsestype,
+                  val ytelsestype: String,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   @Version
                   val versjon: Int = 0,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 
-enum class Ytelsestype(val beskrivelse: String) {
-    BA("Barnetrygd"),
-    OG("Overgangsstønad"),
-    BT("Barnetilsyn"),
-    SP("Skolepenger"),
-    KS("Konstantsstøtte")
+enum class Ytelsestype(val kode: String) {
+    BARNETRYGD("BA"),
+    OVERGANGSSTØNAD("OG"),
+    BARNETILSYN("BT"),
+    SKOLEPENGER("SP"),
+    KONTANTSTØTTE("KS");
+
+    companion object {
+
+        fun fraKode(kode: String): Ytelsestype {
+            for (ytelsestype in values()) {
+                if (ytelsestype.kode == kode) {
+                    return ytelsestype
+                }
+            }
+            throw IllegalArgumentException("Ytelsestype finnes ikke for kode $kode")
+        }
+    }
 }
 
 enum class Fagsystem {
@@ -36,11 +48,11 @@ enum class Fagsystem {
 
         fun fraYtelsestype(type: Ytelsestype): Fagsystem {
             return when (type) {
-                Ytelsestype.BA -> BA
-                Ytelsestype.KS -> KS
-                Ytelsestype.OG -> EF
-                Ytelsestype.BT -> EF
-                Ytelsestype.SP -> EF
+                Ytelsestype.BARNETRYGD -> BA
+                Ytelsestype.KONTANTSTØTTE -> KS
+                Ytelsestype.OVERGANGSSTØNAD -> EF
+                Ytelsestype.BARNETILSYN -> EF
+                Ytelsestype.SKOLEPENGER -> EF
             }
         }
     }

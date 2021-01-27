@@ -53,7 +53,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
                                        eksternFagsakId: String,
                                        eksternId: String) {
-        val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype.name, eksternFagsakId)
+        val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype.kode, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
                               "og eksternFagsakId=$eksternFagsakId, kan ikke opprettes en ny.";
@@ -82,7 +82,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             Bruker.velgSpråkkode(opprettTilbakekrevingRequest.språkkode))
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                      ytelsestype = ytelsestype,
+                      ytelsestype = ytelsestype.kode,
                       fagsystem = fagsystem)
     }
 

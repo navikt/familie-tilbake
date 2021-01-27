@@ -13,13 +13,13 @@ import no.nav.familie.tilbake.varsel.Varselsperiode
 import no.nav.familie.tilbake.verge.Verge
 import no.nav.familie.tilbake.verge.Vergetype
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 object Testdata {
 
     private val bruker = Bruker(ident = "321321321")
 
-    val fagsak = Fagsak(ytelsestype = Ytelsestype.BA,
+    val fagsak = Fagsak(ytelsestype = Ytelsestype.BARNETRYGD.kode,
                         fagsystem = Fagsystem.BA,
                         eksternFagsakId = "testverdi",
                         bruker = bruker)

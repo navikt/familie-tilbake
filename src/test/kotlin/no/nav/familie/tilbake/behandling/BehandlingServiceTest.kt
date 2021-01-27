@@ -7,13 +7,14 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.VergeType
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -107,8 +108,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                              opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         assertEquals(opprettTilbakekrevingRequest.eksternFagsakId, fagsak.eksternFagsakId)
-        assertEquals(opprettTilbakekrevingRequest.ytelsestype.name, fagsak.ytelsestype.name)
-        assertEquals(Fagsystem.fraYtelsestype(fagsak.ytelsestype).name, fagsak.fagsystem.name)
+        assertEquals(opprettTilbakekrevingRequest.ytelsestype.name, Ytelsestype.fraKode(fagsak.ytelsestype).name)
+        assertEquals(Fagsystem.fraYtelsestype(Ytelsestype.fraKode(fagsak.ytelsestype)).name, fagsak.fagsystem.name)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsak.status)
     }
 
@@ -172,7 +173,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                            navn = "Andy",
                                            personIdent = PersonIdent(ident = "321321321")) else null
 
-        return OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BA,
+        return OpprettTilbakekrevingRequest(ytelsestype = BARNETRYGD,
                                             eksternFagsakId = "1234567",
                                             personIdent = PersonIdent(ident = "321321322"),
                                             eksternId = UUID.randomUUID().toString(),
