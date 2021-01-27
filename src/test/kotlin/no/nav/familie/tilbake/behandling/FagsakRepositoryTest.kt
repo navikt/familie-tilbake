@@ -16,7 +16,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
 
     @Test
-    fun `skal_persistere_en_fagsak`() {
+    fun `skal persistere en fagsak`() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
@@ -24,7 +24,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal_oppdatere_fagsak_status`() {
+    fun `skal oppdatere fagsak status`() {
         fagsakRepository.insert(fagsak)
         val oppdatertFagsak = fagsak.copy(status = Fagsaksstatus.UNDER_BEHANDLING)
 

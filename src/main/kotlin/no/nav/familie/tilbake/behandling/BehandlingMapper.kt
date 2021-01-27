@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.varsel.Varsel
 import no.nav.familie.tilbake.varsel.Varselsperiode
@@ -19,10 +20,10 @@ object BehandlingMapper {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-                            fagsystem: String,
+                            fagsystem: Fagsystem,
                             fagsak: Fagsak): Behandling {
         val eksternBehandling = EksternBehandling(eksternId = opprettTilbakekrevingRequest.eksternId)
-        val varsel = tilDomeneVarsel(opprettTilbakekrevingRequest)
+        val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
 
         return Behandling(fagsakId = fagsak.id, type = Behandlingstype.TILBAKEKREVING,
@@ -31,23 +32,25 @@ object BehandlingMapper {
                           behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
                           eksternBehandling = setOf(eksternBehandling),
-                          varsler = setOf(varsel),
+                          varsler = varsler,
                           verger = verger)
     }
 
-    private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Varsel {
-        val varselsperioder = HashSet<Varselsperiode>()
-        for (periode in opprettTilbakekrevingRequest.feilutbetaltePerioder.perioder) {
-            varselsperioder.add(Varselsperiode(fom = periode.fom, tom = periode.tom))
+    private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {
+        opprettTilbakekrevingRequest.varsel?.let {
+            val varselsperioder =
+                    it.perioder.map {
+                        Varselsperiode(fom = it.fom, tom = it.tom)
+                    }.toSet()
+            return setOf(Varsel(varseltekst = it.varselTekst,
+                                varselbeløp = it.sumFeilutbetaling.longValueExact(),
+                                revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingVedtakDato,
+                                perioder = varselsperioder))
         }
-        return Varsel(varseltekst = opprettTilbakekrevingRequest.varselTekst,
-                      varselbeløp = opprettTilbakekrevingRequest.feilutbetaltePerioder.sumFeilutbetaling.longValueExact(),
-                      revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingVedtakDato,
-                      perioder = varselsperioder)
-
+        return emptySet()
     }
 
-    private fun tilDomeneVerge(fagsystem: String, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
+    private fun tilDomeneVerge(fagsystem: Fagsystem, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
         opprettTilbakekrevingRequest.verge?.let {
             val fagsystemVerge = it
             if (fagsystemVerge.gyldigTom.isBefore(LocalDate.now())) {
@@ -55,7 +58,7 @@ object BehandlingMapper {
             } else {
                 return setOf(Verge(
                         type = tilDomeneVergetype(fagsystemVerge.vergeType),
-                        kilde = fagsystem,
+                        kilde = fagsystem.name,
                         gyldigFom = fagsystemVerge.gyldigFom,
                         gyldigTom = fagsystemVerge.gyldigTom,
                         navn = fagsystemVerge.navn,

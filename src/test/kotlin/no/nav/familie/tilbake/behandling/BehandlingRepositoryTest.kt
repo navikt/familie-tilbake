@@ -25,7 +25,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal_persistere_en_behandling`() {
+    fun `skal persistere en behandling`() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -33,7 +33,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal_oppdatere_behandling_status`() {
+    fun `skal oppdatere behandling status`() {
         behandlingRepository.insert(behandling)
         val oppdatertBehandling = behandling.copy(status = Behandlingsstatus.UTREDES)
 

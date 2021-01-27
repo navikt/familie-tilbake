@@ -1,12 +1,14 @@
-CREATE TABLE varselsperiode (
-                                id                 UUID PRIMARY KEY,
-                                varsel_id          UUID                                NOT NULL REFERENCES varsel,
-                                fom                DATE                                NOT NULL,
-                                tom                DATE                                NOT NULL,
-                                opprettet_av       VARCHAR      DEFAULT 'VL'           NOT NULL,
-                                opprettet_tid      TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-                                endret_av          VARCHAR,
-                                endret_tid         TIMESTAMP(3)
+CREATE TABLE varselsperiode
+(
+    id            UUID PRIMARY KEY,
+    varsel_id     UUID                                NOT NULL REFERENCES varsel,
+    fom           DATE                                NOT NULL,
+    tom           DATE                                NOT NULL,
+    versjon       INTEGER      DEFAULT 0              NOT NULL,
+    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av     VARCHAR,
+    endret_tid    TIMESTAMP(3)
 );
 
 COMMENT ON TABLE varselsperiode

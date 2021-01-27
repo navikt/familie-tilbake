@@ -4,7 +4,8 @@ import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
+import javax.persistence.Version
 
 data class Verge(@Id
                  val id: UUID = UUID.randomUUID(),
@@ -17,6 +18,8 @@ data class Verge(@Id
                  val navn: String,
                  val kilde: String,
                  val begrunnelse: String? = "",
+                 @Version
+                 val versjon: Int = 0,
                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                  val sporbar: Sporbar = Sporbar())
 

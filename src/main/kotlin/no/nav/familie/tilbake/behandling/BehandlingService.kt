@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -19,26 +20,28 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    @Transactional
     fun opprettBehandlingAutomatisk(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         return opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
     }
 
-    fun opprettBehandlingManuell(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
+    fun opprettBehandlingManuell(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) : Behandling{
         TODO("Ikke implementert ennå")
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        val fagsystem = opprettTilbakekrevingRequest.fagsystem
+        val ytelsestype = Ytelsestype.valueOf(opprettTilbakekrevingRequest.ytelsestype.name)
+        val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
-        logger.info("Oppretter Tilbakekrevingsbehandling for fagsystem=$fagsystem,eksternFagsakId=$eksternFagsakId " +
+        logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                     "og eksternId=$eksternId")
-        secureLogger.info("Oppretter Tilbakekrevingsbehandling for fagsystem=$fagsystem,eksternFagsakId=$eksternFagsakId " +
+        secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                           " og personIdent=${opprettTilbakekrevingRequest.personIdent.ident}")
-        kanBehandlingOpprettes(fagsystem, eksternFagsakId, eksternId)
 
+        kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
         // oppretter fagsak
-        val fagsak = opprettFagsak(opprettTilbakekrevingRequest)
+        val fagsak = opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
         fagsakRepository.insert(fagsak)
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
@@ -47,36 +50,40 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
-    private fun kanBehandlingOpprettes(fagsystem: String,
+    private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
                                        eksternFagsakId: String,
                                        eksternId: String) {
-        val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(fagsystem, eksternFagsakId)
+        val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype.name, eksternFagsakId)
         if (behandling != null) {
-            throw Feil("Det finnes allerede en åpen behandling for fagsystem=$fagsystem " +
-                       "og eksternFagsakId=$eksternFagsakId, kan ikke opprettes en ny.")
+            val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
+                              "og eksternFagsakId=$eksternFagsakId, kan ikke opprettes en ny.";
+            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
         }
 
         //hvis behandlingen er henlagt,kan opprettes ny behandling
         val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
         if (avsluttetBehandlinger.isNotEmpty()) {
-            val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.get(0)
-            val erSisteBehandlingHenlagt: Boolean = sisteAvsluttetBehandling.resultater.stream()
-                    .anyMatch { Behandlingsresultat().erBehandlingHenlagt() }
+            val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
+            val erSisteBehandlingHenlagt: Boolean =
+                    sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
             if (!erSisteBehandlingHenlagt) {
-                throw Feil("Det finnes allerede en avsluttet behandling for fagsystem=$fagsystem " +
-                           "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprettes en ny.")
+                val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
+                                  "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprettes en ny."
+                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
             }
         }
 
     }
 
-    private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Fagsak {
-        val bruker = Bruker(opprettTilbakekrevingRequest.personIdent.ident, opprettTilbakekrevingRequest.språkkode!!)
-        val ytelsestype = Ytelsestype.valueOf(opprettTilbakekrevingRequest.fagsystem)
+    private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+                              ytelsestype: Ytelsestype,
+                              fagsystem: Fagsystem): Fagsak {
+        val bruker = Bruker(opprettTilbakekrevingRequest.personIdent.ident,
+                            Bruker.velgSpråkkode(opprettTilbakekrevingRequest.språkkode))
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
                       ytelsestype = ytelsestype,
-                      fagsystem = Fagsystem.fraYtelsestype(ytelsestype))
+                      fagsystem = fagsystem)
     }
 
 

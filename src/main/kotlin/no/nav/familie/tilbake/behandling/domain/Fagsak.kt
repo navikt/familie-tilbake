@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.behandling.domain
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
-import java.util.UUID
+import java.util.*
 import javax.persistence.Version
 
 data class Fagsak(@Id
@@ -19,12 +19,12 @@ data class Fagsak(@Id
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 
-enum class Ytelsestype {
-    BA,
-    OG,
-    BT,
-    UT,
-    KS
+enum class Ytelsestype(val beskrivelse: String) {
+    BA("Barnetrygd"),
+    OG("Overgangsstønad"),
+    BT("Barnetilsyn"),
+    SP("Skolepenger"),
+    KS("Konstantsstøtte")
 }
 
 enum class Fagsystem {
@@ -40,7 +40,7 @@ enum class Fagsystem {
                 Ytelsestype.KS -> KS
                 Ytelsestype.OG -> EF
                 Ytelsestype.BT -> EF
-                Ytelsestype.UT -> EF
+                Ytelsestype.SP -> EF
             }
         }
     }
