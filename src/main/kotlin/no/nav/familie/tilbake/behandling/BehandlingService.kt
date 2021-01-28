@@ -56,11 +56,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype.kode, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
-                              "og eksternFagsakId=$eksternFagsakId, kan ikke opprettes en ny.";
+                              "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
             throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
         }
 
-        //hvis behandlingen er henlagt,kan opprettes ny behandling
+        //hvis behandlingen er henlagt, kan det opprettes ny behandling
         val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
         if (avsluttetBehandlinger.isNotEmpty()) {
             val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
@@ -68,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                     sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
             if (!erSisteBehandlingHenlagt) {
                 val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
-                                  "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprettes en ny."
+                                  "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
                 throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
             }
         }
@@ -82,7 +82,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             Bruker.velgSpråkkode(opprettTilbakekrevingRequest.språkkode))
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                      ytelsestype = ytelsestype.kode,
+                      ytelsestype = ytelsestype,
                       fagsystem = fagsystem)
     }
 

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.domain.tbd.Behandlingsvedtak
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -17,11 +17,12 @@ data class Behandlingsresultat(@Id
 
     companion object {
 
-        val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> = setOf(Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                                                                          Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                                                                          Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                                                          Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
-                                                                          Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
+        val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> =
+                setOf(Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                      Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
     }
 
 

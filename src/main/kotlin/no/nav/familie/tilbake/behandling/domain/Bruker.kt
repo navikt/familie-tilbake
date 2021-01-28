@@ -9,9 +9,9 @@ data class Bruker(val ident: String?,
     companion object {
 
         fun velgSpråkkode(kode: String?): String {
-            return when {
-                kode?.equals("NB") == true -> kode
-                kode?.equals("NN") == true -> kode
+            return when (kode) {
+                "NB" -> kode
+                "NN" -> kode
                 else -> "NB"
             }
         }

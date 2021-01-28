@@ -23,7 +23,7 @@
         <kotlin.version>1.4.10</kotlin.version>
         <felles.version>1.20200514152201_7054ead</felles.version>
         <common-java-modules.version>1.2020.09.07_16.00-4f2f19a76bb2</common-java-modules.version>
-        <kontrakter.version>2.0_20210127140822_0a8c367</kontrakter.version>
+        <kontrakter.version>2.0_20210128142028_26014fb</kontrakter.version>
         <token-validation-spring.version>1.3.1</token-validation-spring.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>2.3.0.1</jaxb-core.version>

@@ -11,7 +11,7 @@ data class Fagsak(@Id
                   val bruker: Bruker,
                   val eksternFagsakId: String?,
                   val fagsystem: Fagsystem,
-                  val ytelsestype: String,
+                  val ytelsestype: Ytelsestype,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
@@ -37,26 +37,26 @@ enum class Ytelsestype(val kode: String) {
 }
 
 enum class Fagsystem {
-    BA,
-    EF,
-    KS;
+    BARNETRYGD,
+    ENSLIG_FORELDER,
+    KONTANTSTØTTE;
 
     companion object {
 
         fun fraYtelsestype(type: Ytelsestype): Fagsystem {
             return when (type) {
-                Ytelsestype.BARNETRYGD -> BA
-                Ytelsestype.KONTANTSTØTTE -> KS
-                Ytelsestype.OVERGANGSSTØNAD -> EF
-                Ytelsestype.BARNETILSYN -> EF
-                Ytelsestype.SKOLEPENGER -> EF
+                Ytelsestype.BARNETRYGD -> BARNETRYGD
+                Ytelsestype.KONTANTSTØTTE -> KONTANTSTØTTE
+                Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORELDER
+                Ytelsestype.BARNETILSYN -> ENSLIG_FORELDER
+                Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER
             }
         }
     }
 }
 
-enum class Fagsaksstatus(val kode: String) {
-    OPPRETTET("OPPR"),
-    UNDER_BEHANDLING("UBEH"),
-    AVSLUTTET("AVSLU");
+enum class Fagsaksstatus {
+    OPPRETTET,
+    UNDER_BEHANDLING,
+    AVSLUTTET;
 }

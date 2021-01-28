@@ -1,8 +1,7 @@
 package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.varsel.Varsel
-import no.nav.familie.tilbake.verge.Verge
+import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -37,8 +36,7 @@ data class Behandling(@Id
 
 data class EksternBehandling(@Id
                              val id: UUID = UUID.randomUUID(),
-                             val henvisning: String,
-                             val eksternId: UUID?,
+                             val eksternId: String,
                              val aktiv: Boolean = true,
                              @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                              val sporbar: Sporbar = Sporbar())
@@ -47,29 +45,39 @@ data class Varsel(@Id
                   val id: UUID = UUID.randomUUID(),
                   val varseltekst: String,
                   @Column("varselbelop")
-                  val varselbeløp: Long?,
+                  val varselbeløp: Long,
+                  val revurderingsvedtaksdato: LocalDate,
+                  @MappedCollection(idColumn = "varsel_id")
+                  val perioder: Set<Varselsperiode> = setOf(),
                   val aktiv: Boolean = true,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 
+data class Varselsperiode(@Id
+                          val id: UUID = UUID.randomUUID(),
+                          val fom: LocalDate,
+                          val tom: LocalDate,
+                          @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                          val sporbar: Sporbar = Sporbar())
+
 data class Verge(@Id
                  val id: UUID = UUID.randomUUID(),
-                 val ident: String?,
-                 val orgNr: String?,
+                 val ident: String? = null,
+                 val orgNr: String? = null,
                  val gyldigFom: LocalDate,
                  val gyldigTom: LocalDate,
                  val aktiv: Boolean = true,
                  val type: Vergetype,
                  val navn: String,
                  val kilde: String,
-                 val begrunnelse: String?,
+                 val begrunnelse: String? = "",
                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                  val sporbar: Sporbar = Sporbar())
 
 enum class Vergetype(val navn: String) {
-    VERGE_BARN("Verge for barn under 18 år"),
-    VERGE_FORELDRELØST_BARN("Verge for foreldreløst barn under 18 år"),
-    VERGE_VOKSEN("Verge for voksen"),
+    VERGE_FOR_BARN("Verge for barn under 18 år"),
+    VERGE_FOR_FORELDRELØST_BARN("Verge for foreldreløst barn under 18 år"),
+    VERGE_FOR_VOKSEN("Verge for voksen"),
     ADVOKAT("Advokat/advokatfullmektig"),
     ANNEN_FULLMEKTIG("Annen fullmektig"),
     UDEFINERT("Udefinert");

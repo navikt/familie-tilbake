@@ -1,9 +1,5 @@
 package no.nav.familie.tilbake.data
 
-import no.nav.familie.tilbake.domain.Bruker
-import no.nav.familie.tilbake.domain.Fagsystem
-import java.time.LocalDate
-import java.util.*
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -11,33 +7,90 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.behandling.domain.Varselsperiode
+import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandling.domain.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Ytelsestype
-import no.nav.familie.tilbake.varsel.Varsel
-import no.nav.familie.tilbake.varsel.Varselsperiode
-import no.nav.familie.tilbake.verge.Verge
-import no.nav.familie.tilbake.verge.Vergetype
+import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
+import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
+import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
+import no.nav.familie.tilbake.domain.tbd.Aktsomhet
+import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
+import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
+import no.nav.familie.tilbake.domain.tbd.Behandlingstegsstatus
+import no.nav.familie.tilbake.domain.tbd.Behandlingsvedtak
+import no.nav.familie.tilbake.domain.tbd.Behandlingsårsak
+import no.nav.familie.tilbake.domain.tbd.Behandlingsårsakstype
+import no.nav.familie.tilbake.domain.tbd.Brevsporing
+import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.domain.tbd.Fagområdekode
+import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetaling
+import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
+import no.nav.familie.tilbake.domain.tbd.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.domain.tbd.Friteksttype
+import no.nav.familie.tilbake.domain.tbd.GjelderType
+import no.nav.familie.tilbake.domain.tbd.GrupperingFaktaFeilutbetaling
+import no.nav.familie.tilbake.domain.tbd.GrupperingKravGrunnlag
+import no.nav.familie.tilbake.domain.tbd.GrupperingKravvedtaksstatus
+import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
+import no.nav.familie.tilbake.domain.tbd.Hendelsestype
+import no.nav.familie.tilbake.domain.tbd.Hendelsesundertype
+import no.nav.familie.tilbake.domain.tbd.Klassekode
+import no.nav.familie.tilbake.domain.tbd.Klassetype
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlag431
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlagsbeløp433
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.domain.tbd.Kravstatuskode
+import no.nav.familie.tilbake.domain.tbd.Kravvedtaksstatus437
+import no.nav.familie.tilbake.domain.tbd.Meldingstype
+import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
+import no.nav.familie.tilbake.domain.tbd.Navoppfulgt
+import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
+import no.nav.familie.tilbake.domain.tbd.SærligGrunn
+import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
+import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
+import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
+import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
+import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
+import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
+import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
+import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
+import no.nav.familie.tilbake.domain.tbd.Årsakstype
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 object Testdata {
 
     private val bruker = Bruker(ident = "321321321")
 
     val fagsak = Fagsak(ytelsestype = Ytelsestype.BARNETRYGD,
-                        fagsystem = Fagsystem.BA,
+                        fagsystem = Fagsystem.BARNETRYGD,
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
     private val eksternBehandling = EksternBehandling(eksternId = UUID.randomUUID().toString())
-    val date = LocalDate.now()
+    private val date = LocalDate.now()
 
-    val varsel = Varsel(varseltekst = "testverdi",
-                        varselbeløp = 123,
-                        revurderingsvedtaksdato = date.minusDays(1),
-                        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
+    private val varsel = Varsel(varseltekst = "testverdi",
+                                varselbeløp = 123,
+                                revurderingsvedtaksdato = date.minusDays(1),
+                                perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
     private val verge = Verge(ident = "testverdi",
                               gyldigFom = LocalDate.now(),
                               gyldigTom = LocalDate.now(),
-                              type = Vergetype.VERGE_BARN,
+                              type = Vergetype.VERGE_FOR_BARN,
                               orgNr = "testverdi",
                               navn = "testverdi",
                               kilde = "testverdi",
@@ -126,7 +179,7 @@ object Testdata {
     val kravgrunnlag431 = Kravgrunnlag431(vedtakId = "testverdi",
                                           kravstatuskode = "testverdi",
                                           fagområdekode = Fagområdekode.UKJENT,
-                                          fagsystem = Fagsystem.ARENA,
+                                          fagsystem = no.nav.familie.tilbake.domain.tbd.Fagsystem.ARENA,
                                           fagsystemVedtaksdato = LocalDate.now(),
                                           omgjortVedtakId = "testverdi",
                                           gjelderVedtakId = "testverdi",
