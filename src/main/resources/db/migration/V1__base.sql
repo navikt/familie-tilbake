@@ -1,11 +1,12 @@
-CREATE TABLE fagsak (
+CREATE TABLE fagsak
+(
     id                UUID PRIMARY KEY,
-    version           BIGINT                              NOT NULL,
+    fagsystem         VARCHAR                             NOT NULL,
     ekstern_fagsak_id VARCHAR,
     status            VARCHAR                             NOT NULL,
     bruker_ident      VARCHAR,
     bruker_sprakkode  VARCHAR      DEFAULT 'NB'           NOT NULL,
-    versjon           INTEGER      DEFAULT 0              NOT NULL,
+    versjon           BIGINT                              NOT NULL,
     ytelsestype       VARCHAR      DEFAULT 'BA'           NOT NULL,
     opprettet_av      VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid     TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
@@ -19,6 +20,9 @@ COMMENT ON TABLE fagsak
 COMMENT ON COLUMN fagsak.id
     IS 'Primary key';
 
+COMMENT ON COLUMN fagsak.fagsystem
+    IS 'Fagsystemet som er eier av tilbakekrevingsbehandling';
+
 COMMENT ON COLUMN fagsak.ekstern_fagsak_id
     IS 'Saksnummer (som gsak har mottatt)';
 
@@ -27,6 +31,9 @@ COMMENT ON COLUMN fagsak.status
 
 COMMENT ON COLUMN fagsak.bruker_ident
     IS 'Fk:Ident på bruker';
+
+COMMENT ON COLUMN fagsak.versjon
+    IS 'Bruker for optimistisk låsing';
 
 COMMENT ON COLUMN fagsak.ytelsestype
     IS 'Fremmednøkkel til kodeverkstabellen som inneholder oversikt over ytelser';
@@ -39,9 +46,9 @@ CREATE INDEX ON fagsak (bruker_ident);
 
 CREATE INDEX ON fagsak (ytelsestype);
 
-CREATE TABLE behandling (
+CREATE TABLE behandling
+(
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
     fagsak_id               UUID                                NOT NULL REFERENCES fagsak,
     status                  VARCHAR                             NOT NULL,
     type                    VARCHAR                             NOT NULL,
@@ -51,13 +58,13 @@ CREATE TABLE behandling (
     ansvarlig_beslutter     VARCHAR,
     behandlende_enhet       VARCHAR,
     behandlende_enhets_navn VARCHAR,
-    versjon                 INTEGER      DEFAULT 0              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av               VARCHAR,
     endret_tid              TIMESTAMP(3),
     manuelt_opprettet       BOOLEAN                             NOT NULL,
-    ekstern_id              UUID,
+    ekstern_bruk_id         UUID                                NOT NULL,
     saksbehandlingstype     VARCHAR                             NOT NULL
         CONSTRAINT chk_saksbehandlingstype
             CHECK (saksbehandlingstype IN ('ORDINÆR', 'AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP'))
@@ -96,10 +103,13 @@ COMMENT ON COLUMN behandling.behandlende_enhet
 COMMENT ON COLUMN behandling.behandlende_enhets_navn
     IS 'Navn på behandlende enhet';
 
+COMMENT ON COLUMN behandling.versjon
+    IS 'Bruker for optimistisk låsing';
+
 COMMENT ON COLUMN behandling.manuelt_opprettet
     IS 'Angir om behandlingen ble opprettet manuelt. ';
 
-COMMENT ON COLUMN behandling.ekstern_id
+COMMENT ON COLUMN behandling.ekstern_bruk_id
     IS 'Unik uuid for behandling til utvortes bruk';
 
 COMMENT ON COLUMN behandling.saksbehandlingstype
@@ -111,5 +121,5 @@ CREATE INDEX ON behandling (status);
 
 CREATE INDEX ON behandling (type);
 
-CREATE UNIQUE INDEX ON behandling (ekstern_id);
+CREATE UNIQUE INDEX ON behandling (ekstern_bruk_id);
 

@@ -1,15 +1,15 @@
-CREATE TABLE ekstern_behandling (
+CREATE TABLE ekstern_behandling
+(
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
     aktiv         BOOLEAN      DEFAULT TRUE           NOT NULL,
-    ekstern_id    UUID,
+    ekstern_id    varchar                             NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av     VARCHAR,
     endret_tid    TIMESTAMP(3),
-    henvisning    VARCHAR                             NOT NULL,
-    UNIQUE (behandling_id, henvisning)
+    UNIQUE (behandling_id, ekstern_id)
 );
 
 COMMENT ON TABLE ekstern_behandling
@@ -18,30 +18,35 @@ COMMENT ON TABLE ekstern_behandling
 COMMENT ON COLUMN ekstern_behandling.id
     IS 'Primary key';
 
+COMMENT ON COLUMN ekstern_behandling.versjon
+    IS 'Bruker for optimistisk låsing';
+
 COMMENT ON COLUMN ekstern_behandling.behandling_id
     IS 'Fk: behandling fremmednøkkel for kobling til intern behandling';
 
 COMMENT ON COLUMN ekstern_behandling.aktiv
     IS 'Angir om ekstern behandling data er gjeldende';
 
-COMMENT ON COLUMN ekstern_behandling.henvisning
-    IS 'Henvisning;referanse. Peker på referanse-feltet i kravgrunnlaget, og kommer opprinnelig fra fagsystemet.';
+COMMENT ON COLUMN ekstern_behandling.ekstern_id
+    IS 'ekstern_id;referanse. Peker på referanse-feltet i kravgrunnlaget, og kommer opprinnelig fra fagsystemet.';
 
 CREATE INDEX ON ekstern_behandling (behandling_id);
 
-CREATE INDEX ON ekstern_behandling (henvisning);
+CREATE INDEX ON ekstern_behandling (ekstern_id);
 
-CREATE TABLE varsel (
-    id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
-    behandling_id UUID                                NOT NULL REFERENCES behandling,
-    aktiv         BOOLEAN                             NOT NULL,
-    varseltekst   VARCHAR                             NOT NULL,
-    varselbelop   BIGINT,
-    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av     VARCHAR,
-    endret_tid    TIMESTAMP(3)
+CREATE TABLE varsel
+(
+    id                      UUID PRIMARY KEY,
+    versjon                 BIGINT                              NOT NULL,
+    behandling_id           UUID                                NOT NULL REFERENCES behandling,
+    aktiv                   BOOLEAN                             NOT NULL,
+    varseltekst             VARCHAR                             NOT NULL,
+    varselbelop             BIGINT,
+    revurderingsvedtaksdato DATE                                NOT NULL,
+    opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av               VARCHAR,
+    endret_tid              TIMESTAMP(3)
 );
 
 COMMENT ON TABLE varsel
@@ -49,6 +54,9 @@ COMMENT ON TABLE varsel
 
 COMMENT ON COLUMN varsel.id
     IS 'Primary key';
+
+COMMENT ON COLUMN varsel.versjon
+    IS 'Bruker for optimistisk låsing';
 
 COMMENT ON COLUMN varsel.behandling_id
     IS 'Fk: behandling fremmednøkkel for tilknyttet behandling';
@@ -62,13 +70,50 @@ COMMENT ON COLUMN varsel.varseltekst
 COMMENT ON COLUMN varsel.varselbelop
     IS 'Beløp som brukes i varselbrev';
 
+COMMENT ON COLUMN varsel.revurderingsvedtaksdato
+    IS 'vedtaksdato av fagsystemsrevurdering. Brukes av varselbrev';
+
 CREATE INDEX ON varsel (behandling_id);
 
+CREATE TABLE varselsperiode
+(
+    id            UUID PRIMARY KEY,
+    varsel_id     UUID                                NOT NULL REFERENCES varsel,
+    fom           DATE                                NOT NULL,
+    tom           DATE                                NOT NULL,
+    versjon       BIGINT                              NOT NULL,
+    opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
+    opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    endret_av     VARCHAR,
+    endret_tid    TIMESTAMP(3)
+);
 
-CREATE TABLE verge (
+COMMENT ON TABLE varselsperiode
+    IS 'Feilutbetalingsperiode som brukes i varselbrev';
+
+COMMENT ON COLUMN varselsperiode.id
+    IS 'Primary key';
+
+COMMENT ON COLUMN varselsperiode.varsel_id
+    IS 'FK: varsel fremmednøkel for kobling til varsel';
+
+COMMENT ON COLUMN varselsperiode.fom
+    IS 'Første dag av feilutbetalingsperiode';
+
+COMMENT ON COLUMN varselsperiode.fom
+    IS 'Siste dag av feilutbetalingsperiode';
+
+COMMENT ON COLUMN varselsperiode.versjon
+    IS 'Bruker for optimistisk låsing';
+
+CREATE INDEX ON varselsperiode (varsel_id);
+
+
+CREATE TABLE verge
+(
     id            UUID PRIMARY KEY,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     ident         VARCHAR,
     gyldig_fom    DATE                                NOT NULL,
     gyldig_tom    DATE                                NOT NULL,
@@ -89,6 +134,9 @@ COMMENT ON TABLE verge
 
 COMMENT ON COLUMN verge.id
     IS 'Primary key';
+
+COMMENT ON COLUMN verge.versjon
+    IS 'Bruker for optimistisk låsing';
 
 COMMENT ON COLUMN verge.ident
     IS 'Aktørid av verge person';

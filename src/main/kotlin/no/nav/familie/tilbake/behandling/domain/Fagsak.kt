@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.*
-import javax.persistence.Version
 
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
@@ -14,8 +13,6 @@ data class Fagsak(@Id
                   val fagsystem: Fagsystem,
                   val ytelsestype: String,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
-                  @Version
-                  val versjon: Int = 0,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 

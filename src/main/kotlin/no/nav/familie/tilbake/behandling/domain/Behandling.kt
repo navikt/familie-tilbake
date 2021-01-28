@@ -7,8 +7,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
-import java.util.UUID
-import javax.persistence.Version
+import java.util.*
 
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
@@ -32,8 +31,6 @@ data class Behandling(@Id
                       val verger: Set<Verge> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val resultater: Set<Behandlingsresultat> = setOf(),
-                      @Version
-                      val versjon: Int = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
 

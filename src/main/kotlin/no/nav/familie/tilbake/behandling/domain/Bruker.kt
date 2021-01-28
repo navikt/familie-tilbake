@@ -9,12 +9,11 @@ data class Bruker(val ident: String?,
     companion object {
 
         fun velgSpråkkode(kode: String?): String {
-            val språkkode = when {
+            return when {
                 kode?.equals("NB") == true -> kode
                 kode?.equals("NN") == true -> kode
                 else -> "NB"
             }
-            return språkkode
         }
     }
 }
