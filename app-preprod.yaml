@@ -34,7 +34,7 @@ spec:
       memory: 512Mi
       cpu: 500m
   ingresses:
-    - https://familie-tilbake.nais.preprod.local
+    - https://familie-tilbake.dev.adeo.no
     - https://familie-tilbake.dev-fss.nais.io
   secureLogs:
     enabled: true

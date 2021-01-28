@@ -3,8 +3,9 @@ package no.nav.familie.tilbake
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.database.DbContainerInitializer
-import no.nav.familie.tilbake.domain.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("integrasjonstest", "mock-oauth")
 abstract class OppslagSpringRunnerTest {
 
-    protected val listAppender = initLoggingEventListAppender()
+    private final val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()

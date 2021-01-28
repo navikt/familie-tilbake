@@ -1,6 +1,6 @@
-package no.nav.familie.tilbake.domain
+package no.nav.familie.tilbake.common.repository
 
-import no.nav.familie.tilbake.service.ContextService
+import no.nav.familie.tilbake.common.ContextService
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
@@ -13,7 +13,8 @@ data class Sporbar(val opprettetAv: String = ContextService.hentSaksbehandler(),
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val endret: Endret = Endret(),
                    @Version
-                   val version: Long = 0)
+                   val versjon: Long = 0 // brukes for optimistic låsing
+                   )
 
 data class Endret(val endretAv: String = ContextService.hentSaksbehandler(),
                   val endretTid: LocalDateTime = SporbarUtils.now())

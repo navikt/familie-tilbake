@@ -1,24 +1,38 @@
 package no.nav.familie.tilbake.data
 
-import no.nav.familie.tilbake.domain.*
+import no.nav.familie.tilbake.domain.Bruker
+import no.nav.familie.tilbake.domain.Fagsystem
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Bruker
+import no.nav.familie.tilbake.behandling.domain.EksternBehandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.behandling.domain.Ytelsestype
+import no.nav.familie.tilbake.varsel.Varsel
+import no.nav.familie.tilbake.varsel.Varselsperiode
+import no.nav.familie.tilbake.verge.Verge
+import no.nav.familie.tilbake.verge.Vergetype
 
 object Testdata {
 
     private val bruker = Bruker(ident = "321321321")
 
-    val fagsak = Fagsak(ytelsestype = Ytelsestype.BA,
+    val fagsak = Fagsak(ytelsestype = Ytelsestype.BARNETRYGD,
+                        fagsystem = Fagsystem.BA,
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
-    private val eksternBehandling = EksternBehandling(henvisning = "testverdi",
-                                                      eksternId = UUID.randomUUID())
+    private val eksternBehandling = EksternBehandling(eksternId = UUID.randomUUID().toString())
+    val date = LocalDate.now()
 
-    private val varsel = Varsel(varseltekst = "testverdi",
-                                varselbeløp = 123)
+    val varsel = Varsel(varseltekst = "testverdi",
+                        varselbeløp = 123,
+                        revurderingsvedtaksdato = date.minusDays(1),
+                        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
     private val verge = Verge(ident = "testverdi",
                               gyldigFom = LocalDate.now(),
@@ -44,10 +58,10 @@ object Testdata {
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = true,
                                 eksternBehandling = setOf(eksternBehandling),
-                                verger = setOf(verge),
-                                varsler = setOf(varsel),
                                 resultater = setOf(behandlingsresultat),
-                                eksternId = UUID.randomUUID())
+                                varsler = setOf(varsel),
+                                verger = setOf(verge),
+                                eksternBrukId = UUID.randomUUID())
 
     val behandlingsårsak = Behandlingsårsak(behandlingId = behandling.id,
                                             type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,

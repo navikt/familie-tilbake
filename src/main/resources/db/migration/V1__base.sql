@@ -1,6 +1,7 @@
 CREATE TABLE fagsak (
     id                UUID PRIMARY KEY,
     versjon           BIGINT                              NOT NULL,
+    fagsystem         VARCHAR                             NOT NULL,
     ekstern_fagsak_id VARCHAR,
     status            VARCHAR                             NOT NULL,
     bruker_ident      VARCHAR,
@@ -17,6 +18,9 @@ COMMENT ON TABLE fagsak
 
 COMMENT ON COLUMN fagsak.id
     IS 'Primary key';
+
+COMMENT ON COLUMN fagsak.fagsystem
+    IS 'Fagsystemet som er eier av tilbakekrevingsbehandling';
 
 COMMENT ON COLUMN fagsak.ekstern_fagsak_id
     IS 'Saksnummer (som gsak har mottatt)';
@@ -55,7 +59,7 @@ CREATE TABLE behandling (
     endret_av               VARCHAR,
     endret_tid              TIMESTAMP(3),
     manuelt_opprettet       BOOLEAN                             NOT NULL,
-    ekstern_id              UUID,
+    ekstern_bruk_id         UUID                                NOT NULL,
     saksbehandlingstype     VARCHAR                             NOT NULL
         CONSTRAINT chk_saksbehandlingstype
             CHECK (saksbehandlingstype IN ('ORDINÆR', 'AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP'))
@@ -97,7 +101,7 @@ COMMENT ON COLUMN behandling.behandlende_enhets_navn
 COMMENT ON COLUMN behandling.manuelt_opprettet
     IS 'Angir om behandlingen ble opprettet manuelt. ';
 
-COMMENT ON COLUMN behandling.ekstern_id
+COMMENT ON COLUMN behandling.ekstern_bruk_id
     IS 'Unik uuid for behandling til utvortes bruk';
 
 COMMENT ON COLUMN behandling.saksbehandlingstype
@@ -109,5 +113,5 @@ CREATE INDEX ON behandling (status);
 
 CREATE INDEX ON behandling (type);
 
-CREATE UNIQUE INDEX ON behandling (ekstern_id);
+CREATE UNIQUE INDEX ON behandling (ekstern_bruk_id);
 

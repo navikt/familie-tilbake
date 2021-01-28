@@ -1,12 +1,13 @@
-package no.nav.familie.tilbake.repository
+package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -34,7 +35,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Behandling i basen`() {
         behandlingRepository.insert(behandling)
-        val oppdatertBehandling = behandling.copy(opprettetDato = LocalDate.now().minusDays(15))
+        val oppdatertBehandling = behandling.copy(status = Behandlingsstatus.UTREDES)
 
         behandlingRepository.update(oppdatertBehandling)
 

@@ -1,6 +1,8 @@
-package no.nav.familie.tilbake.repository
+package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -24,7 +26,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Fagsak i basen`() {
         fagsakRepository.insert(fagsak)
-        val oppdatertFagsak = fagsak.copy(eksternFagsakId = "bob")
+        val oppdatertFagsak = fagsak.copy(status = Fagsaksstatus.UNDER_BEHANDLING)
 
         fagsakRepository.update(oppdatertFagsak)
 

@@ -15,6 +15,9 @@ COMMENT ON TABLE behandlingsresultat
 COMMENT ON COLUMN behandlingsresultat.id
     IS 'Primary key';
 
+COMMENT ON COLUMN behandlingsresultat.versjon
+    IS 'Bruker for optimistisk låsing';
+
 COMMENT ON COLUMN behandlingsresultat.behandling_id
     IS 'Fk: behandling fremmednøkkel for kobling til behandling';
 

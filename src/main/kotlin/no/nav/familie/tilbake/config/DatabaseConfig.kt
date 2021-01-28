@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.config
 
-import no.nav.familie.tilbake.domain.Endret
+import no.nav.familie.tilbake.common.repository.Endret
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.AuditorAware
@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.PlatformTransactionManager
-import java.util.*
+import java.util.Optional
 import javax.sql.DataSource
 
 
