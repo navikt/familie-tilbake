@@ -27,7 +27,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvVurdertForeldelseTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av VurdertForeldelse til basen`() {
         vurdertForeldelseRepository.insert(vurdertForeldelse)
 
         val lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
@@ -36,7 +36,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvVurdertForeldelseIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av VurdertForeldelse i basen`() {
         vurdertForeldelseRepository.insert(vurdertForeldelse)
         val oppdatertVurdertForeldelse = vurdertForeldelse.copy(aktiv = false)
 

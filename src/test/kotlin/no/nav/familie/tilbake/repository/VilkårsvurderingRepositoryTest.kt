@@ -14,7 +14,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     private val vilkår = Testdata.vilkår
 
     @Test
-    fun insertPersistererEnForekomstAvVilkårsvurderingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Vilkårsvurdering til basen`() {
         vilkårsvurderingRepository.insert(vilkår)
 
         val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
@@ -23,7 +23,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvVilkårsvurderingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Vilkårsvurdering i basen`() {
         vilkårsvurderingRepository.insert(vilkår)
         val oppdatertVilkår = vilkår.copy(aktiv = false)
 

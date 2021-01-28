@@ -31,7 +31,7 @@ internal class GrupperingKravGrunnlagRepositoryTest : OppslagSpringRunnerTest() 
     }
 
     @Test
-    fun insertPersistererEnForekomstAvGrupperingKravGrunnlagTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av GrupperingKravGrunnlag til basen`() {
         grupperingKravGrunnlagRepository.insert(grupperingKravGrunnlag)
 
         val lagretGrupperingKravGrunnlag = grupperingKravGrunnlagRepository.findByIdOrThrow(grupperingKravGrunnlag.id)
@@ -40,7 +40,7 @@ internal class GrupperingKravGrunnlagRepositoryTest : OppslagSpringRunnerTest() 
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvGrupperingKravGrunnlagIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingKravGrunnlag i basen`() {
         grupperingKravGrunnlagRepository.insert(grupperingKravGrunnlag)
         val oppdatertGrupperingKravGrunnlag = grupperingKravGrunnlag.copy(sperret = true)
 

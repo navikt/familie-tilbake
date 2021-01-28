@@ -31,7 +31,7 @@ internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvForeldelsesperiodeTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Foreldelsesperiode til basen`() {
         foreldelsesperiodeRepository.insert(foreldelsesperiode)
 
         val lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
@@ -40,7 +40,7 @@ internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvForeldelsesperiodeIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Foreldelsesperiode i basen`() {
         foreldelsesperiodeRepository.insert(foreldelsesperiode)
         val oppdatertForeldelsesperiode = foreldelsesperiode.copy(begrunnelse = "bob")
 

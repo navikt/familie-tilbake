@@ -32,7 +32,7 @@ internal class ÅrsakTotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    fun insertPersistererEnForekomstAvÅrsakTotrinnsvurderingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av ÅrsakTotrinnsvurdering til basen`() {
         årsakTotrinnsvurderingRepository.insert(årsakTotrinnsvurdering)
 
         val lagretÅrsakTotrinnsvurdering = årsakTotrinnsvurderingRepository.findByIdOrThrow(årsakTotrinnsvurdering.id)
@@ -41,7 +41,7 @@ internal class ÅrsakTotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvÅrsakTotrinnsvurderingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av ÅrsakTotrinnsvurdering i basen`() {
         årsakTotrinnsvurderingRepository.insert(årsakTotrinnsvurdering)
         val oppdatertÅrsakTotrinnsvurdering = årsakTotrinnsvurdering.copy(årsakstype = Årsakstype.FEIL_REGEL)
 

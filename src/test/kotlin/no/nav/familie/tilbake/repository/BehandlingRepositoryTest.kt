@@ -24,7 +24,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvBehandlingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Behandling til basen`() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -32,7 +32,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvBehandlingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Behandling i basen`() {
         behandlingRepository.insert(behandling)
         val oppdatertBehandling = behandling.copy(opprettetDato = LocalDate.now().minusDays(15))
 

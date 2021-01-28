@@ -14,7 +14,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
 
     @Test
-    fun insertPersistererEnForekomstAvFagsakTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Fagsak til basen`() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
@@ -22,7 +22,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvFagsakIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Fagsak i basen`() {
         fagsakRepository.insert(fagsak)
         val oppdatertFagsak = fagsak.copy(eksternFagsakId = "bob")
 

@@ -27,7 +27,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvØkonomiXmlSendtTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av ØkonomiXmlSendt til basen`() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
 
         val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
@@ -36,7 +36,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvØkonomiXmlSendtIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlSendt i basen`() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
         val oppdatertØkonomiXmlSendt = økonomiXmlSendt.copy(melding = "bob")
 

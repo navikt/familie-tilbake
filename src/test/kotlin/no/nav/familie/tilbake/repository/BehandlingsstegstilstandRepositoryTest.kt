@@ -28,7 +28,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     }
 
     @Test
-    fun insertPersistererEnForekomstAvBehandlingsstegstilstandTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Behandlingsstegstilstand til basen`() {
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
@@ -37,7 +37,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvBehandlingsstegstilstandIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Behandlingsstegstilstand i basen`() {
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
         val oppdatertBehandlingsstegstilstand =
                 behandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingstegsstatus.STARTET)

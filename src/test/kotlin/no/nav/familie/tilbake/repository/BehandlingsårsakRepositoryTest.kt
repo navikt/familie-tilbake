@@ -28,7 +28,7 @@ internal class BehandlingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvBehandlingsårsakTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Behandlingsårsak til basen`() {
         behandlingsårsakRepository.insert(behandlingsårsak)
 
         val lagretBehandlingsårsak = behandlingsårsakRepository.findByIdOrThrow(behandlingsårsak.id)
@@ -37,7 +37,7 @@ internal class BehandlingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvBehandlingsårsakIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Behandlingsårsak i basen`() {
         behandlingsårsakRepository.insert(behandlingsårsak)
         val oppdatertBehandlingsårsak = behandlingsårsak.copy(type = Behandlingsårsakstype.REVURDERING_KLAGE_NFP)
 

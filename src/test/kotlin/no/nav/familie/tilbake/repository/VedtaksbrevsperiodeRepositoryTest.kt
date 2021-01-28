@@ -27,7 +27,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvVedtaksbrevsperiodeTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Vedtaksbrevsperiode til basen`() {
         vedtaksbrevsperiodeRepository.insert(vedtaksbrevsperiode)
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
@@ -36,7 +36,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvVedtaksbrevsperiodeIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Vedtaksbrevsperiode i basen`() {
         vedtaksbrevsperiodeRepository.insert(vedtaksbrevsperiode)
         val oppdatertVedtaksbrevsperiode = vedtaksbrevsperiode.copy(fritekst = "bob")
 

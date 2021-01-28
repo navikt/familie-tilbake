@@ -28,7 +28,7 @@ internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() 
     }
 
     @Test
-    fun insertPersistererEnForekomstAvMottakersVarselresponsTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av MottakersVarselrespons til basen`() {
         mottakersVarselresponsRepository.insert(mottakersVarselrespons)
 
         val lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
@@ -37,7 +37,7 @@ internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() 
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvMottakersVarselresponsIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av MottakersVarselrespons i basen`() {
         mottakersVarselresponsRepository.insert(mottakersVarselrespons)
         val oppdatertMottakersVarselrespons = mottakersVarselrespons.copy(kilde = "bob")
 

@@ -47,7 +47,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
     }
 
     @Test
-    fun insertPersistererEnForekomstAvTotrinnsresultatsgrunnlagTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Totrinnsresultatsgrunnlag til basen`() {
         totrinnsresultatsgrunnlagRepository.insert(totrinnsresultatsgrunnlag)
 
         val lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
@@ -56,7 +56,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvTotrinnsresultatsgrunnlagIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Totrinnsresultatsgrunnlag i basen`() {
         totrinnsresultatsgrunnlagRepository.insert(totrinnsresultatsgrunnlag)
         val oppdatertTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlag.copy(aktiv = false)
 

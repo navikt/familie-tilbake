@@ -15,7 +15,7 @@ internal class Kravgrunnlag431RepositoryTest : OppslagSpringRunnerTest() {
     private val kravgrunnlag431 = Testdata.kravgrunnlag431
 
     @Test
-    fun insertPersistererEnForekomstAvKravgrunnlag431TilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Kravgrunnlag431 til basen`() {
         kravgrunnlag431Repository.insert(kravgrunnlag431)
 
         val lagretKravgrunnlag431 = kravgrunnlag431Repository.findByIdOrThrow(kravgrunnlag431.id)
@@ -24,7 +24,7 @@ internal class Kravgrunnlag431RepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvKravgrunnlag431IBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Kravgrunnlag431 i basen`() {
         kravgrunnlag431Repository.insert(kravgrunnlag431)
         val oppdatertKravgrunnlag431 = kravgrunnlag431.copy(fagsystem = Fagsystem.GOSYS)
 

@@ -32,7 +32,7 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvRevurderingsårsakTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Revurderingsårsak til basen`() {
         revurderingsårsakRepository.insert(revurderingsårsak)
 
         val lagretRevurderingsårsak = revurderingsårsakRepository.findByIdOrThrow(revurderingsårsak.id)
@@ -41,7 +41,7 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvRevurderingsårsakIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Revurderingsårsak i basen`() {
         revurderingsårsakRepository.insert(revurderingsårsak)
         val oppdatertRevurderingsårsak = revurderingsårsak.copy(årsakstype = Årsakstype.FEIL_FAKTA)
 

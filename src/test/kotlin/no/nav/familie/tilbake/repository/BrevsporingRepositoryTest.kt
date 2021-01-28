@@ -28,7 +28,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvBrevsporingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Brevsporing til basen`() {
         brevsporingRepository.insert(brevsporing)
 
         val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
@@ -37,7 +37,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvBrevsporingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Brevsporing i basen`() {
         brevsporingRepository.insert(brevsporing)
         val oppdatertBrevsporing = brevsporing.copy(brevtype = Brevtype.HENLEGGELSE_BREV)
 

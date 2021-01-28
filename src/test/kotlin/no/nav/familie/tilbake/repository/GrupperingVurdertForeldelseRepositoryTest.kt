@@ -31,7 +31,7 @@ internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun insertPersistererEnForekomstAvGrupperingVurdertForeldelseTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av GrupperingVurdertForeldelse til basen`() {
         grupperingVurdertForeldelseRepository.insert(grupperingVurdertForeldelse)
 
         val lagretGrupperingVurdertForeldelse =
@@ -42,7 +42,7 @@ internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvGrupperingVurdertForeldelseIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingVurdertForeldelse i basen`() {
         grupperingVurdertForeldelseRepository.insert(grupperingVurdertForeldelse)
         val oppdatertGrupperingVurdertForeldelse = grupperingVurdertForeldelse.copy(aktiv = false)
 

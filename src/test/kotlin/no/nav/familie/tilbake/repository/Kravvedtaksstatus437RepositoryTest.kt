@@ -14,7 +14,7 @@ internal class Kravvedtaksstatus437RepositoryTest : OppslagSpringRunnerTest() {
     private val kravvedtaksstatus437 = Testdata.kravvedtaksstatus437
 
     @Test
-    fun insertPersistererEnForekomstAvKravvedtaksstatus437TilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Kravvedtaksstatus437 til basen`() {
         kravvedtaksstatus437Repository.insert(kravvedtaksstatus437)
 
         val lagretKravvedtaksstatus437 = kravvedtaksstatus437Repository.findByIdOrThrow(kravvedtaksstatus437.id)
@@ -23,7 +23,7 @@ internal class Kravvedtaksstatus437RepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvKravvedtaksstatus437IBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Kravvedtaksstatus437 i basen`() {
         kravvedtaksstatus437Repository.insert(kravvedtaksstatus437)
         val oppdatertKravvedtaksstatus437 = kravvedtaksstatus437.copy(fagsystemId = "bob")
 

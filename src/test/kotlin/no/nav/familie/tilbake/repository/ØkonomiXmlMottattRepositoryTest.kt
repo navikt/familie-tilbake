@@ -14,7 +14,7 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
     private val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
 
     @Test
-    fun insertPersistererEnForekomstAvØkonomiXmlMottattTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av ØkonomiXmlMottatt til basen`() {
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt)
 
         val lagretØkonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(økonomiXmlMottatt.id)
@@ -23,7 +23,7 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvØkonomiXmlMottattIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlMottatt i basen`() {
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt)
         val oppdatertØkonomiXmlMottatt = økonomiXmlMottatt.copy(eksternFagsakId = "bob")
 

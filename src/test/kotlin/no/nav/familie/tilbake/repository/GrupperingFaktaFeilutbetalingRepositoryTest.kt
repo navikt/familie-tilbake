@@ -31,7 +31,7 @@ internal class GrupperingFaktaFeilutbetalingRepositoryTest : OppslagSpringRunner
     }
 
     @Test
-    fun insertPersistererEnForekomstAvGrupperingFaktaFeilutbetalingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av GrupperingFaktaFeilutbetaling til basen`() {
         grupperingFaktaFeilutbetalingRepository.insert(grupperingFaktaFeilutbetaling)
 
         val lagretGrupperingFaktaFeilutbetaling =
@@ -42,7 +42,7 @@ internal class GrupperingFaktaFeilutbetalingRepositoryTest : OppslagSpringRunner
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvGrupperingFaktaFeilutbetalingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingFaktaFeilutbetaling i basen`() {
         grupperingFaktaFeilutbetalingRepository.insert(grupperingFaktaFeilutbetaling)
         val oppdatertGrupperingFaktaFeilutbetaling = grupperingFaktaFeilutbetaling.copy(aktiv = false)
 

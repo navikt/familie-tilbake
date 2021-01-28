@@ -27,7 +27,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvTotrinnsvurderingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Totrinnsvurdering til basen`() {
         totrinnsvurderingRepository.insert(totrinnsvurdering)
 
         val lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
@@ -36,7 +36,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvTotrinnsvurderingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Totrinnsvurdering i basen`() {
         totrinnsvurderingRepository.insert(totrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurdering.copy(begrunnelse = "bob")
 

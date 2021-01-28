@@ -28,7 +28,7 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun insertPersistererEnForekomstAvAksjonspunktTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av Aksjonspunkt til basen`() {
         aksjonspunktRepository.insert(aksjonspunkt)
 
         val lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
@@ -37,7 +37,7 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvAksjonspunktIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av Aksjonspunkt i basen`() {
         aksjonspunktRepository.insert(aksjonspunkt)
         val oppdatertAksjonspunkt = aksjonspunkt.copy(ventearsak = Venteårsak.ENDRE_TILKJENT_YTELSE)
 

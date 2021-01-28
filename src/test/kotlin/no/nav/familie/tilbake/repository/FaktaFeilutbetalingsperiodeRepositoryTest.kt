@@ -24,7 +24,7 @@ internal class FaktaFeilutbetalingsperiodeRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun insertPersistererEnForekomstAvFaktaFeilutbetalingsperiodeTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av FaktaFeilutbetalingsperiode til basen`() {
         faktaFeilutbetalingsperiodeRepository.insert(faktaFeilutbetalingsperiode)
 
         val lagretFaktaFeilutbetalingsperiode =
@@ -35,7 +35,7 @@ internal class FaktaFeilutbetalingsperiodeRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvFaktaFeilutbetalingsperiodeIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av FaktaFeilutbetalingsperiode i basen`() {
         faktaFeilutbetalingsperiodeRepository.insert(faktaFeilutbetalingsperiode)
         val oppdatertFaktaFeilutbetalingsperiode = faktaFeilutbetalingsperiode.copy(hendelsestype = Hendelsestype.EF_ANNET)
 

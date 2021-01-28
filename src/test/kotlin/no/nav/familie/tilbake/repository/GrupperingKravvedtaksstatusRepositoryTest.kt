@@ -31,7 +31,7 @@ internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun insertPersistererEnForekomstAvGrupperingKravvedtaksstatusTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av GrupperingKravvedtaksstatus til basen`() {
         grupperingKravvedtaksstatusRepository.insert(grupperingKravvedtaksstatus)
 
         val lagretGrupperingKravvedtaksstatus =
@@ -42,7 +42,7 @@ internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTe
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvGrupperingKravvedtaksstatusIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingKravvedtaksstatus i basen`() {
         grupperingKravvedtaksstatusRepository.insert(grupperingKravvedtaksstatus)
         val oppdatertGrupperingKravvedtaksstatus = grupperingKravvedtaksstatus.copy(aktiv = false)
 

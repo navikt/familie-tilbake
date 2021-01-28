@@ -14,7 +14,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     private val faktaFeilutbetaling = Testdata.faktaFeilutbetaling
 
     @Test
-    fun insertPersistererEnForekomstAvFaktaFeilutbetalingTilBasen() {
+    fun `insert med gyldige verdier skal persistere en forekomst av FaktaFeilutbetaling til basen`() {
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
@@ -23,7 +23,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun updateOppdatererEnForekomstAvFaktaFeilutbetalingIBasen() {
+    fun `update med gyldige verdier skal oppdatere en forekomst av FaktaFeilutbetaling i basen`() {
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
         val oppdatertFaktaFeilutbetaling = faktaFeilutbetaling.copy(begrunnelse = "bob")
 
