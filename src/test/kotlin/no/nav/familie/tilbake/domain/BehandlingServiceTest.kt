@@ -1,20 +1,22 @@
-package no.nav.familie.tilbake.behandling
+package no.nav.familie.tilbake.domain
 
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.tilbakekreving.BehandlingType
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
-import no.nav.familie.kontrakter.felles.tilbakekreving.VergeType
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -41,7 +43,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
 
     @Test
-    fun `skal opprette automatisk behandling uten verge`() {
+    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = true, manueltOpprettet = false)
 
@@ -55,7 +57,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal opprette automatisk behandling med verge`() {
+    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling med verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
 
@@ -69,7 +71,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal opprette automatisk behandling uten varsel`() {
+    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten varsel`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = false, manueltOpprettet = false)
 
@@ -83,24 +85,28 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal ikke opprette automatisk behandling når det allerede finnes en åpen tilbakekreving for samme eksternFagsakId`() {
+    fun `opprettBehandlingAutomatisk oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en åpen behandling for fagsystem=" + opprettTilbakekrevingRequest.ytelsestype +
-                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, kan ikke opprettes en ny.",
+        assertFailsWith<RuntimeException>(message = "Det finnes allerede en åpen behandling for fagsystem=" 
+                                                    + opprettTilbakekrevingRequest.ytelsestype +
+                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, " +
+                                                    "kan ikke opprettes en ny.",
                                           block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
     }
 
     @Test
-    fun `skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
+    fun `opprettBehandlingAutomatisk skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem=" + opprettTilbakekrevingRequest.ytelsestype +
-                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} som ikke er henlagt, kan ikke opprettes en ny.",
+        assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem=" 
+                                                    + opprettTilbakekrevingRequest.ytelsestype +
+                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
+                                                    "som ikke er henlagt, kan ikke opprettes en ny.",
                                           block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
     }
 
@@ -108,15 +114,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                              opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         assertEquals(opprettTilbakekrevingRequest.eksternFagsakId, fagsak.eksternFagsakId)
-        assertEquals(opprettTilbakekrevingRequest.ytelsestype.name, Ytelsestype.fraKode(fagsak.ytelsestype).name)
-        assertEquals(Fagsystem.fraYtelsestype(Ytelsestype.fraKode(fagsak.ytelsestype)).name, fagsak.fagsystem.name)
+        assertEquals(opprettTilbakekrevingRequest.ytelsestype.name, fagsak.ytelsestype.name)
+        assertEquals(Fagsystem.fraYtelsestype(fagsak.ytelsestype).name, fagsak.fagsystem.name)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsak.status)
     }
 
     private fun assertBehandling(behandling: Behandling,
                                  opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
-        assertEquals(BehandlingType.TILBAKEKREVING.name, behandling.type.kode)
-        assertEquals(Behandlingsstatus.OPPRETTET, behandling.status)
+        assertEquals(Behandlingstype.TILBAKEKREVING.name, behandling.type.name)
+        assertEquals(Behandlingsstatus.OPPRETTET.name, behandling.status.name)
         assertEquals(false, behandling.manueltOpprettet)
         assertEquals(opprettTilbakekrevingRequest.enhetId, behandling.behandlendeEnhet)
         assertEquals(opprettTilbakekrevingRequest.enhetsnavn, behandling.behandlendeEnhetsNavn)
@@ -128,7 +134,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
         val eksternBehandlinger = behandling.eksternBehandling
         assertEquals(1, eksternBehandlinger.size)
-        val eksternBehandling = eksternBehandlinger.toList().get(0)
+        val eksternBehandling = eksternBehandlinger.toList().first()
         assertEquals(true, eksternBehandling.aktiv)
         assertEquals(opprettTilbakekrevingRequest.eksternId, eksternBehandling.eksternId)
     }
@@ -137,14 +143,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                  opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
         val varsler = behandling.varsler
         assertEquals(1, varsler.size)
-        val varsel = varsler.toList().get(0)
-        assertEquals(opprettTilbakekrevingRequest.revurderingVedtakDato, varsel.revurderingsvedtaksdato)
+        val varsel = varsler.toList().first()
+        assertEquals(opprettTilbakekrevingRequest.revurderingsvedtaksdato, varsel.revurderingsvedtaksdato)
         opprettTilbakekrevingRequest.varsel?.let {
-            assertEquals(it.varselTekst, varsel.varseltekst)
+            assertEquals(it.varseltekst, varsel.varseltekst)
             assertEquals(it.sumFeilutbetaling, varsel.varselbeløp.toBigDecimal())
             assertEquals(it.perioder.size, varsel.perioder.size)
-            assertEquals(it.perioder.get(0).fom, varsel.perioder.toList().get(0).fom)
-            assertEquals(it.perioder.get(0).tom, varsel.perioder.toList().get(0).tom)
+            assertEquals(it.perioder.first().fom, varsel.perioder.toList().first().fom)
+            assertEquals(it.perioder.first().tom, varsel.perioder.toList().first().tom)
         }
     }
 
@@ -152,8 +158,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                             opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
         assertTrue { behandling.verger.isNotEmpty() }
         assertEquals(1, behandling.verger.size)
-        val verge = behandling.verger.toList().get(0)
-        assertEquals(opprettTilbakekrevingRequest.verge?.vergeType?.navn, verge.type.navn)
+        val verge = behandling.verger.toList().first()
+        assertEquals(opprettTilbakekrevingRequest.verge?.vergetype?.navn, verge.type.navn)
         assertEquals(opprettTilbakekrevingRequest.verge?.gyldigFom, verge.gyldigFom)
         assertEquals(opprettTilbakekrevingRequest.verge?.gyldigTom, verge.gyldigTom)
         assertEquals(opprettTilbakekrevingRequest.verge?.navn, verge.navn)
@@ -164,10 +170,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private fun lagOpprettTilbakekrevingRequest(finnesVerge: Boolean,
                                                 finnesVarsel: Boolean,
                                                 manueltOpprettet: Boolean): OpprettTilbakekrevingRequest {
-        val varsel = if (finnesVarsel) Varsel(varselTekst = "testverdi",
+        val varsel = if (finnesVarsel) Varsel(varseltekst = "testverdi",
                                               sumFeilutbetaling = BigDecimal.valueOf(1500L),
                                               perioder = listOf(Periode(fom, tom))) else null
-        val verge = if (finnesVerge) Verge(vergeType = VergeType.BARN,
+        val verge = if (finnesVerge) Verge(vergetype = Vergetype.VERGE_FOR_BARN,
                                            gyldigFom = fom,
                                            gyldigTom = tom.plusDays(100),
                                            navn = "Andy",
@@ -181,7 +187,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             enhetId = "8020",
                                             enhetsnavn = "Oslo",
                                             varsel = varsel,
-                                            revurderingVedtakDato = fom,
+                                            revurderingsvedtaksdato = fom,
                                             verge = verge
         )
     }

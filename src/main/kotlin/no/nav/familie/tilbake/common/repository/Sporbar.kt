@@ -13,8 +13,7 @@ data class Sporbar(val opprettetAv: String = ContextService.hentSaksbehandler(),
                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                    val endret: Endret = Endret(),
                    @Version
-                   val versjon: Long = 0 // brukes for optimistic låsing
-                   )
+                   val versjon: Long = 0)
 
 data class Endret(val endretAv: String = ContextService.hentSaksbehandler(),
                   val endretTid: LocalDateTime = SporbarUtils.now())

@@ -4,8 +4,42 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.database.DbContainerInitializer
+import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
+import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
+import no.nav.familie.tilbake.domain.tbd.Behandlingsårsak
+import no.nav.familie.tilbake.domain.tbd.Brevsporing
+import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetaling
+import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
+import no.nav.familie.tilbake.domain.tbd.GrupperingFaktaFeilutbetaling
+import no.nav.familie.tilbake.domain.tbd.GrupperingKravGrunnlag
+import no.nav.familie.tilbake.domain.tbd.GrupperingKravvedtaksstatus
+import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlag431
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlagsbeløp433
+import no.nav.familie.tilbake.domain.tbd.Kravgrunnlagsperiode432
+import no.nav.familie.tilbake.domain.tbd.Kravvedtaksstatus437
+import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
+import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
+import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
+import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
+import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
+import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
+import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
+import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
+import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,7 +93,42 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(Fagsak::class,
-               Behandling::class).reversed()
+               Behandling::class,
+               Behandlingsårsak::class,
+               Aksjonspunkt::class,
+               Revurderingsårsak::class,
+               Behandlingsstegstilstand::class,
+               Totrinnsvurdering::class,
+               ÅrsakTotrinnsvurdering::class,
+               MottakersVarselrespons::class,
+               VurdertForeldelse::class,
+               GrupperingVurdertForeldelse::class,
+               Foreldelsesperiode::class,
+               Kravgrunnlag431::class,
+               Kravgrunnlagsperiode432::class,
+               Kravgrunnlagsbeløp433::class,
+               Kravvedtaksstatus437::class,
+               GrupperingKravGrunnlag::class,
+               Vilkårsvurdering::class,
+               Vilkårsvurderingsperiode::class,
+               VilkårsvurderingAktsomhet::class,
+               VilkårsvurderingSærligGrunn::class,
+               VilkårsvurderingGodTro::class,
+               EksternBehandling::class,
+               FaktaFeilutbetaling::class,
+               FaktaFeilutbetalingsperiode::class,
+               GrupperingFaktaFeilutbetaling::class,
+               ØkonomiXmlMottatt::class,
+               Totrinnsresultatsgrunnlag::class,
+               Vedtaksbrevsoppsummering::class,
+               Vedtaksbrevsperiode::class,
+               ØkonomiXmlSendt::class,
+               GrupperingKravvedtaksstatus::class,
+               Varsel::class,
+               Brevsporing::class,
+               ØkonomiXmlMottattArkiv::class,
+               Verge::class)
+                .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
