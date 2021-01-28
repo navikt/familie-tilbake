@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.domain
+package no.nav.familie.tilbake.repository.tbd
 
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -90,7 +90,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en åpen behandling for fagsystem=" 
+        assertFailsWith<RuntimeException>(message = "Det finnes allerede en åpen behandling for fagsystem="
                                                     + opprettTilbakekrevingRequest.ytelsestype +
                                                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, " +
                                                     "kan ikke opprettes en ny.",
@@ -103,7 +103,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem=" 
+        assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem="
                                                     + opprettTilbakekrevingRequest.ytelsestype +
                                                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
                                                     "som ikke er henlagt, kan ikke opprettes en ny.",

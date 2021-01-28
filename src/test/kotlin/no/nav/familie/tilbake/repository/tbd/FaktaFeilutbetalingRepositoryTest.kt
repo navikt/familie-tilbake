@@ -1,12 +1,11 @@
-package no.nav.familie.tilbake.domain
+package no.nav.familie.tilbake.repository.tbd
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.repository.tbd.FaktaFeilutbetalingRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 
 internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
