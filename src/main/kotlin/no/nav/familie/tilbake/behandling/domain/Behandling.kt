@@ -1,6 +1,8 @@
-package no.nav.familie.tilbake.domain
+package no.nav.familie.tilbake.behandling.domain
 
-import no.nav.familie.tilbake.domain.behandling.Behandlingsresultat
+import no.nav.familie.tilbake.common.repository.Sporbar
+import no.nav.familie.tilbake.varsel.Varsel
+import no.nav.familie.tilbake.verge.Verge
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -14,13 +16,13 @@ data class Behandling(@Id
                       val type: Behandlingstype,
                       val saksbehandlingstype: Saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
                       val opprettetDato: LocalDate = LocalDate.now(),
-                      val avsluttetDato: LocalDate?,
+                      val avsluttetDato: LocalDate? = null,
                       val ansvarligSaksbehandler: String?,
-                      val ansvarligBeslutter: String?,
+                      val ansvarligBeslutter: String? = null,
                       val behandlendeEnhet: String?,
                       val behandlendeEnhetsNavn: String?,
                       val manueltOpprettet: Boolean,
-                      val eksternId: UUID?,
+                      val eksternBrukId: UUID = UUID.randomUUID(),
                       @MappedCollection(idColumn = "behandling_id")
                       val eksternBehandling: Set<EksternBehandling> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
@@ -29,7 +31,6 @@ data class Behandling(@Id
                       val verger: Set<Verge> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val resultater: Set<Behandlingsresultat> = setOf(),
-                      val versjon: Int = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar())
 
@@ -44,9 +45,8 @@ enum class Behandlingsstatus(val kode: String) {
 
 enum class Behandlingstype(val kode: String) {
 
-    TILBAKEKREVING("BT-007"),
-    REVURDERING_TILBAKEKREVING("BT-009"),
-    UDEFINERT("-")
+    TILBAKEKREVING("TILBAKEKREVING"),
+    REVURDERING_TILBAKEKREVING("Tilbakekreving revurdering")
 }
 
 enum class Saksbehandlingstype {

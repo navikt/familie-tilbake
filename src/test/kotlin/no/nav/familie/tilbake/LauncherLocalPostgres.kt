@@ -16,11 +16,7 @@ fun main(args: Array<String>) {
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationLocalPostgres::class.java)
-            .profiles("local",
-                      "mock-integrasjoner",
-                      "mock-pdl",
-                      "mock-oppdrag",
-                      "mock-kodeverk")
+            .profiles("local")
             .properties(properties)
             .run(*args)
 }

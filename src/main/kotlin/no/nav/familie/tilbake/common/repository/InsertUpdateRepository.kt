@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.repository
+package no.nav.familie.tilbake.common.repository
 
 interface InsertUpdateRepository<T> {
 

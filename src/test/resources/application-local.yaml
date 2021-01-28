@@ -8,10 +8,11 @@ ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
 
 spring:
   datasource:
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
-    url: ${DATASOURCE_URL}
+    username: postgres
+    password: test
+    url: jdbc:postgresql://localhost:5432/familie-tilbake
     driver-class-name: org.postgresql.Driver
+
 
 OPPDRAG_SERVICE_URL: #Mockes ut lokalt
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/

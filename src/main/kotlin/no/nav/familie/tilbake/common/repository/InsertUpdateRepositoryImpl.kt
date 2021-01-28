@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.repository
+package no.nav.familie.tilbake.common.repository
 
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.stereotype.Component
