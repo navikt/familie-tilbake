@@ -1,11 +1,10 @@
 CREATE TABLE fagsak (
     id                UUID PRIMARY KEY,
-    version           BIGINT                              NOT NULL,
+    versjon           BIGINT                              NOT NULL,
     ekstern_fagsak_id VARCHAR,
     status            VARCHAR                             NOT NULL,
     bruker_ident      VARCHAR,
     bruker_sprakkode  VARCHAR      DEFAULT 'NB'           NOT NULL,
-    versjon           INTEGER      DEFAULT 0              NOT NULL,
     ytelsestype       VARCHAR      DEFAULT 'BA'           NOT NULL,
     opprettet_av      VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid     TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
@@ -41,7 +40,7 @@ CREATE INDEX ON fagsak (ytelsestype);
 
 CREATE TABLE behandling (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     fagsak_id               UUID                                NOT NULL REFERENCES fagsak,
     status                  VARCHAR                             NOT NULL,
     type                    VARCHAR                             NOT NULL,
@@ -51,7 +50,6 @@ CREATE TABLE behandling (
     ansvarlig_beslutter     VARCHAR,
     behandlende_enhet       VARCHAR,
     behandlende_enhets_navn VARCHAR,
-    versjon                 INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av               VARCHAR,

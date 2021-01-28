@@ -1,9 +1,8 @@
 CREATE TABLE behandlingsarsak (
     id                     UUID PRIMARY KEY,
-    version                BIGINT                              NOT NULL,
+    versjon                BIGINT                              NOT NULL,
     behandling_id          UUID                                NOT NULL REFERENCES behandling,
     type                   VARCHAR                             NOT NULL,
-    versjon                INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av           VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid          TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av              VARCHAR,
@@ -32,7 +31,7 @@ CREATE INDEX ON behandlingsarsak (original_behandling_id);
 
 CREATE TABLE aksjonspunkt (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     totrinnsbehandling      BOOLEAN                             NOT NULL,
     behandlingsstegstype    VARCHAR,
     aksjonspunktsdefinisjon VARCHAR                             NOT NULL,
@@ -43,7 +42,6 @@ CREATE TABLE aksjonspunkt (
     reaktiveringsstatus     VARCHAR      DEFAULT 'AKTIV'        NOT NULL,
     manuelt_opprettet       BOOLEAN      DEFAULT FALSE          NOT NULL,
     revurdering             BOOLEAN      DEFAULT FALSE          NOT NULL,
-    versjon                 INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av               VARCHAR,
@@ -104,7 +102,7 @@ ALTER TABLE aksjonspunkt
 
 CREATE TABLE revurderingsarsak (
     id              UUID PRIMARY KEY,
-    version         BIGINT                              NOT NULL,
+    versjon         BIGINT                              NOT NULL,
     aksjonspunkt_id UUID                                NOT NULL REFERENCES aksjonspunkt,
     arsakstype      VARCHAR                             NOT NULL,
     opprettet_av    VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -131,11 +129,10 @@ CREATE INDEX ON revurderingsarsak (arsakstype);
 
 CREATE TABLE behandlingsstegstilstand (
     id                     UUID PRIMARY KEY,
-    version                BIGINT                              NOT NULL,
+    versjon                BIGINT                              NOT NULL,
     behandling_id          UUID                                NOT NULL REFERENCES behandling,
     behandlingsstegstype   VARCHAR                             NOT NULL,
     behandlingsstegsstatus VARCHAR                             NOT NULL,
-    versjon                INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av           VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid          TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av              VARCHAR,
@@ -165,12 +162,11 @@ CREATE INDEX ON behandlingsstegstilstand (behandlingsstegstype);
 
 CREATE TABLE behandlingsvedtak (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                                NOT NULL,
+    versjon                 BIGINT                                NOT NULL,
     vedtaksdato             DATE                                  NOT NULL,
     ansvarlig_saksbehandler VARCHAR                               NOT NULL,
     behandlingsresultat_id  UUID                                  NOT NULL REFERENCES behandlingsresultat,
     iverksettingsstatus     VARCHAR      DEFAULT 'IKKE_IVERKSATT' NOT NULL,
-    versjon                 INTEGER      DEFAULT 0                NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'             NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp   NOT NULL,
     endret_av               VARCHAR,
@@ -205,13 +201,12 @@ CREATE INDEX ON behandlingsvedtak (iverksettingsstatus);
 
 CREATE TABLE totrinnsvurdering (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     behandling_id           UUID                                NOT NULL REFERENCES behandling,
     aksjonspunktsdefinisjon VARCHAR                             NOT NULL,
     aktiv                   BOOLEAN      DEFAULT TRUE           NOT NULL,
     godkjent                BOOLEAN                             NOT NULL,
     begrunnelse             VARCHAR,
-    versjon                 INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av            VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid           TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av               VARCHAR,
@@ -233,7 +228,7 @@ CREATE INDEX ON totrinnsvurdering (behandling_id);
 
 CREATE TABLE arsak_totrinnsvurdering (
     id                   UUID PRIMARY KEY,
-    version              BIGINT                              NOT NULL,
+    versjon              BIGINT                              NOT NULL,
     arsakstype           VARCHAR                             NOT NULL,
     totrinnsvurdering_id UUID                                NOT NULL REFERENCES totrinnsvurdering,
     opprettet_av         VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -254,7 +249,7 @@ CREATE INDEX ON arsak_totrinnsvurdering (arsakstype);
 
 CREATE TABLE mottakers_varselrespons (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                    NOT NULL,
+    versjon                 BIGINT                    NOT NULL,
     behandling_id           UUID                      NOT NULL REFERENCES behandling,
     akseptert_faktagrunnlag BOOLEAN,
     opprettet_av            VARCHAR      DEFAULT 'VL' NOT NULL,
@@ -283,7 +278,7 @@ CREATE UNIQUE INDEX ON mottakers_varselrespons (behandling_id);
 
 CREATE TABLE vurdert_foreldelse (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL,
     aktiv         BOOLEAN      DEFAULT TRUE           NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -306,7 +301,7 @@ COMMENT ON COLUMN vurdert_foreldelse.aktiv
 
 CREATE TABLE gruppering_vurdert_foreldelse (
     id                    UUID                                NOT NULL PRIMARY KEY,
-    version               BIGINT                              NOT NULL,
+    versjon               BIGINT                              NOT NULL,
     vurdert_foreldelse_id UUID                                NOT NULL
         REFERENCES vurdert_foreldelse,
     behandling_id         UUID                                NOT NULL
@@ -322,26 +317,26 @@ CREATE TABLE gruppering_vurdert_foreldelse (
 COMMENT ON TABLE gruppering_vurdert_foreldelse IS 'Aggregate tabell for å lagre vurdert foreldelse'
 ;
 
-COMMENT ON COLUMN gruppering_vurdert_foreldelse.ID IS 'Primary Key'
+COMMENT ON COLUMN gruppering_vurdert_foreldelse.id IS 'Primary Key'
 ;
 
-COMMENT ON COLUMN gruppering_vurdert_foreldelse.VURDERT_FORELDELSE_ID IS 'FK:VURDERT_FORELDELSE'
+COMMENT ON COLUMN gruppering_vurdert_foreldelse.vurdert_foreldelse_id IS 'FK:VURDERT_FORELDELSE'
 ;
 
-COMMENT ON COLUMN gruppering_vurdert_foreldelse.BEHANDLING_ID IS 'FK: BEHANDLING fremmednøkkel for tilknyttet behandling'
+COMMENT ON COLUMN gruppering_vurdert_foreldelse.behandling_id IS 'FK: BEHANDLING fremmednøkkel for tilknyttet behandling'
 ;
 
-COMMENT ON COLUMN gruppering_vurdert_foreldelse.AKTIV IS 'Angir status av vurdert foreldelse'
+COMMENT ON COLUMN gruppering_vurdert_foreldelse.aktiv IS 'Angir status av vurdert foreldelse'
 ;
 
-CREATE INDEX IDX_GR_VURDERT_FORELDELSE_1
-    ON gruppering_vurdert_foreldelse (VURDERT_FORELDELSE_ID)
+CREATE INDEX idx_gr_vurdert_foreldelse_1
+    ON gruppering_vurdert_foreldelse (vurdert_foreldelse_id)
 ;
 
 
 CREATE TABLE foreldelsesperiode (
     id                        UUID PRIMARY KEY,
-    version                   BIGINT                              NOT NULL,
+    versjon                   BIGINT                              NOT NULL,
     vurdert_foreldelse_id     UUID                                NOT NULL REFERENCES vurdert_foreldelse,
     fom                       DATE                                NOT NULL,
     tom                       DATE                                NOT NULL,
@@ -388,7 +383,7 @@ CREATE INDEX ON foreldelsesperiode (foreldelsesvurderingstype);
 
 CREATE TABLE kravgrunnlag431 (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     vedtak_id               VARCHAR                             NOT NULL,
     kravstatuskode          VARCHAR                             NOT NULL,
     fagomradekode           VARCHAR                             NOT NULL,
@@ -482,7 +477,7 @@ CREATE INDEX ON kravgrunnlag431 (vedtak_id);
 
 CREATE TABLE kravgrunnlagsperiode432 (
     id                   UUID PRIMARY KEY,
-    version              BIGINT                              NOT NULL,
+    versjon              BIGINT                              NOT NULL,
     kravgrunnlag431_id   UUID                                NOT NULL REFERENCES kravgrunnlag431,
     fom                  DATE                                NOT NULL,
     tom                  DATE                                NOT NULL,
@@ -512,7 +507,7 @@ CREATE INDEX ON kravgrunnlagsperiode432 (kravgrunnlag431_id);
 
 CREATE TABLE kravgrunnlagsbelop433 (
     id                           UUID PRIMARY KEY,
-    version                      BIGINT                              NOT NULL,
+    versjon                      BIGINT                              NOT NULL,
     klassekode                   VARCHAR                             NOT NULL,
     klassetype                   VARCHAR                             NOT NULL,
     opprinnelig_utbetalingsbelop NUMERIC(12, 2),
@@ -574,7 +569,7 @@ CREATE INDEX ON kravgrunnlagsbelop433 (kravgrunnlagsperiode432_id);
 
 CREATE TABLE kravvedtaksstatus437 (
     id                UUID PRIMARY KEY,
-    version           BIGINT                              NOT NULL,
+    versjon           BIGINT                              NOT NULL,
     vedtak_id         VARCHAR                             NOT NULL,
     kravstatuskode    VARCHAR                             NOT NULL,
     fagomradekode     VARCHAR                             NOT NULL,
@@ -620,7 +615,7 @@ CREATE INDEX ON kravvedtaksstatus437 (gjelder_type);
 
 CREATE TABLE gruppering_krav_grunnlag (
     id                 UUID PRIMARY KEY,
-    version            BIGINT                              NOT NULL,
+    versjon            BIGINT                              NOT NULL,
     kravgrunnlag431_id UUID                                NOT NULL REFERENCES kravgrunnlag431,
     behandling_id      UUID                                NOT NULL REFERENCES behandling,
     aktiv              BOOLEAN      DEFAULT TRUE           NOT NULL,
@@ -655,7 +650,7 @@ CREATE INDEX ON gruppering_krav_grunnlag (behandling_id);
 
 CREATE TABLE vilkarsvurdering (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL,
     aktiv         BOOLEAN                             NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -677,7 +672,7 @@ CREATE INDEX ON vilkarsvurdering (behandling_id);
 
 CREATE TABLE vilkarsvurderingsperiode (
     id                        UUID PRIMARY KEY,
-    version                   BIGINT                              NOT NULL,
+    versjon                   BIGINT                              NOT NULL,
     vilkarsvurdering_id       UUID                                NOT NULL REFERENCES vilkarsvurdering,
     fom                       DATE                                NOT NULL,
     tom                       DATE                                NOT NULL,
@@ -719,7 +714,7 @@ CREATE INDEX ON vilkarsvurderingsperiode (vilkarsvurderingsresultat);
 
 CREATE TABLE vilkarsvurdering_aktsomhet (
     id                            UUID PRIMARY KEY,
-    version                       BIGINT                              NOT NULL,
+    versjon                       BIGINT                              NOT NULL,
     vilkarsvurderingsperiode_id   UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
     aktsomhet                     VARCHAR                             NOT NULL,
     ilegg_renter                  BOOLEAN,
@@ -772,7 +767,7 @@ CREATE INDEX ON vilkarsvurdering_aktsomhet (aktsomhet);
 
 CREATE TABLE vilkarsvurdering_serlig_grunn (
     id                            UUID PRIMARY KEY,
-    version                       BIGINT                              NOT NULL,
+    versjon                       BIGINT                              NOT NULL,
     vilkarsvurdering_aktsomhet_id UUID                                NOT NULL REFERENCES vilkarsvurdering_aktsomhet,
     serlig_grunn                  VARCHAR                             NOT NULL,
     opprettet_av                  VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -800,7 +795,7 @@ CREATE INDEX ON vilkarsvurdering_serlig_grunn (serlig_grunn);
 
 CREATE TABLE vilkarsvurdering_god_tro (
     id                          UUID PRIMARY KEY,
-    version                     BIGINT                              NOT NULL,
+    versjon                     BIGINT                              NOT NULL,
     vilkarsvurderingsperiode_id UUID                                NOT NULL REFERENCES vilkarsvurderingsperiode,
     belop_er_i_behold           BOOLEAN                             NOT NULL,
     belop_tilbakekreves         BIGINT,
@@ -830,7 +825,7 @@ CREATE INDEX ON vilkarsvurdering_god_tro (vilkarsvurderingsperiode_id);
 
 CREATE TABLE fakta_feilutbetaling (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av     VARCHAR,
@@ -846,7 +841,7 @@ COMMENT ON COLUMN fakta_feilutbetaling.begrunnelse
 
 CREATE TABLE fakta_feilutbetalingsperiode (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     fom                     DATE                                NOT NULL,
     tom                     DATE                                NOT NULL,
     hendelsestype           VARCHAR                             NOT NULL,
@@ -887,7 +882,7 @@ CREATE INDEX ON fakta_feilutbetalingsperiode (hendelsesundertype);
 
 CREATE TABLE gruppering_fakta_feilutbetaling (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     behandling_id           UUID                                NOT NULL REFERENCES behandling,
     fakta_feilutbetaling_id UUID                                NOT NULL REFERENCES fakta_feilutbetaling,
     aktiv                   BOOLEAN                             NOT NULL,
@@ -915,7 +910,7 @@ CREATE INDEX ON gruppering_fakta_feilutbetaling (fakta_feilutbetaling_id);
 
 CREATE TABLE okonomi_xml_mottatt (
     id                UUID PRIMARY KEY,
-    version           BIGINT                              NOT NULL,
+    versjon           BIGINT                              NOT NULL,
     melding           TEXT                                NOT NULL,
     sekvens           INTEGER,
     opprettet_av      VARCHAR      DEFAULT 'VL'           NOT NULL,
@@ -958,13 +953,12 @@ CREATE INDEX ON okonomi_xml_mottatt (tilkoblet);
 
 CREATE TABLE totrinnsresultatsgrunnlag (
     id                                 UUID PRIMARY KEY,
-    version                            BIGINT                              NOT NULL,
+    versjon                            BIGINT                              NOT NULL,
     behandling_id                      UUID                                NOT NULL REFERENCES behandling,
     gruppering_fakta_feilutbetaling_id UUID                                NOT NULL REFERENCES gruppering_fakta_feilutbetaling,
     gruppering_vurdert_foreldelse_id   UUID REFERENCES gruppering_vurdert_foreldelse,
     vilkarsvurdering_id                UUID REFERENCES vilkarsvurdering,
     aktiv                              BOOLEAN                             NOT NULL,
-    versjon                            INTEGER      DEFAULT 0              NOT NULL,
     opprettet_av                       VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid                      TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av                          VARCHAR,
@@ -999,7 +993,7 @@ CREATE INDEX ON totrinnsresultatsgrunnlag (vilkarsvurdering_id);
 
 CREATE TABLE vedtaksbrevsoppsummering (
     id                    UUID PRIMARY KEY,
-    version               BIGINT                              NOT NULL,
+    versjon               BIGINT                              NOT NULL,
     behandling_id         UUID                                NOT NULL REFERENCES behandling,
     oppsummering_fritekst VARCHAR,
     opprettet_tid         TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
@@ -1028,7 +1022,7 @@ CREATE INDEX ON vedtaksbrevsoppsummering (behandling_id);
 
 CREATE TABLE vedtaksbrevsperiode (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
     fom           DATE                                NOT NULL,
     tom           DATE                                NOT NULL,
@@ -1065,7 +1059,7 @@ CREATE INDEX ON vedtaksbrevsperiode (behandling_id);
 
 CREATE TABLE okonomi_xml_sendt (
     id            UUID PRIMARY KEY NOT NULL,
-    version       BIGINT           NOT NULL,
+    versjon       BIGINT           NOT NULL,
     behandling_id UUID             NOT NULL REFERENCES behandling,
     melding       TEXT             NOT NULL,
     kvittering    TEXT,
@@ -1103,7 +1097,7 @@ CREATE INDEX ON okonomi_xml_sendt (meldingstype);
 
 CREATE TABLE gruppering_kravvedtaksstatus (
     id                      UUID PRIMARY KEY,
-    version                 BIGINT                              NOT NULL,
+    versjon                 BIGINT                              NOT NULL,
     kravvedtaksstatus437_id UUID                                NOT NULL REFERENCES kravvedtaksstatus437,
     behandling_id           UUID                                NOT NULL REFERENCES behandling,
     aktiv                   BOOLEAN                             NOT NULL,
@@ -1134,7 +1128,7 @@ CREATE INDEX ON gruppering_kravvedtaksstatus (behandling_id);
 
 CREATE TABLE brevsporing (
     id             UUID PRIMARY KEY,
-    version        BIGINT                              NOT NULL,
+    versjon        BIGINT                              NOT NULL,
     behandling_id  UUID                                NOT NULL REFERENCES behandling,
     journalpost_id VARCHAR                             NOT NULL,
     dokument_id    VARCHAR                             NOT NULL,
@@ -1169,7 +1163,7 @@ CREATE INDEX ON brevsporing (brevtype);
 
 CREATE TABLE okonomi_xml_mottatt_arkiv (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     melding       TEXT                                NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,

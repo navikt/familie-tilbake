@@ -1,6 +1,6 @@
 CREATE TABLE ekstern_behandling (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
     aktiv         BOOLEAN      DEFAULT TRUE           NOT NULL,
     ekstern_id    UUID,
@@ -33,7 +33,7 @@ CREATE INDEX ON ekstern_behandling (henvisning);
 
 CREATE TABLE varsel (
     id            UUID PRIMARY KEY,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
     aktiv         BOOLEAN                             NOT NULL,
     varseltekst   VARCHAR                             NOT NULL,
@@ -68,7 +68,7 @@ CREATE INDEX ON varsel (behandling_id);
 CREATE TABLE verge (
     id            UUID PRIMARY KEY,
     behandling_id UUID                                NOT NULL REFERENCES behandling,
-    version       BIGINT                              NOT NULL,
+    versjon       BIGINT                              NOT NULL,
     ident         VARCHAR,
     gyldig_fom    DATE                                NOT NULL,
     gyldig_tom    DATE                                NOT NULL,

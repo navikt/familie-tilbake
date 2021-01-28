@@ -1,9 +1,8 @@
 CREATE TABLE behandlingsresultat (
     id            UUID PRIMARY KEY,
-    version       BIGINT                               NOT NULL,
+    versjon       BIGINT                               NOT NULL,
     behandling_id UUID                                 NOT NULL REFERENCES behandling,
     type          VARCHAR      DEFAULT 'IKKE_FASTSATT' NOT NULL,
-    versjon       INTEGER      DEFAULT 0               NOT NULL,
     opprettet_av  VARCHAR      DEFAULT 'VL'            NOT NULL,
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp  NOT NULL,
     endret_av     VARCHAR,
