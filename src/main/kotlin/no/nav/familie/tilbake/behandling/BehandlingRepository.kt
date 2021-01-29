@@ -1,11 +1,12 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
@@ -17,7 +18,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             and beh.status <>'AVSLUTTET' and beh.type='TILBAKEKREVING'
     """)
     fun finnÅpenTilbakekrevingsbehandling(
-            ytelsestype: String,
+            ytelsestype: Ytelsestype,
             eksternFagsakId: String
     ): Behandling?
 

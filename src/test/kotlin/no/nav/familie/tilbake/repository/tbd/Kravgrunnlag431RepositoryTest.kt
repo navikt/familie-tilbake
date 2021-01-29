@@ -1,13 +1,12 @@
-package no.nav.familie.tilbake.domain
+package no.nav.familie.tilbake.repository.tbd
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.repository.tbd.Kravgrunnlag431Repository
+import no.nav.familie.tilbake.domain.tbd.Fagsystem
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.domain.tbd.Fagsystem
 
 internal class Kravgrunnlag431RepositoryTest : OppslagSpringRunnerTest() {
 
