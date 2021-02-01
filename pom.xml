@@ -18,6 +18,7 @@
         <revision>1.0</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
+        <java.version>11</java.version>
         <jvmTarget>11</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.4.21-2</kotlin.version>

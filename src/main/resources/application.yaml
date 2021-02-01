@@ -39,3 +39,5 @@ management:
 
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
+STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+PDL_URL: http://pdl-api
