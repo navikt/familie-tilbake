@@ -10,32 +10,4 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     kjoenn {
         kjoenn
     }
-    adressebeskyttelse {
-        gradering
-    }
-    bostedsadresse(historikk: false) {
-        vegadresse {
-            matrikkelId
-            husnummer
-            husbokstav
-            bruksenhetsnummer
-            adressenavn
-            kommunenummer
-            tilleggsnavn
-            postnummer
-        }
-        matrikkeladresse {
-            matrikkelId
-            bruksenhetsnummer
-            tilleggsnavn
-            postnummer
-            kommunenummer
-        }
-        ukjentBosted {
-            bostedskommune
-        }
-    }
-    sivilstand(historikk: false) {
-        type
-    }
 }}

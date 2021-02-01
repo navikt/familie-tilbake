@@ -33,13 +33,9 @@ class PdlClient(val pdlConfig: PdlConfig,
         if (!response.harFeil()) {
             return Result.runCatching {
                 response.data.person!!.let {
-                    PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
+                    PersonInfo(fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                                navn = it.navn.first().fulltNavn(),
-                               kjønn = it.kjoenn.first().kjoenn,
-                               familierelasjoner = emptySet(),
-                               adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
-                               bostedsadresse = it.bostedsadresse.firstOrNull(),
-                               sivilstand = it.sivilstand.firstOrNull()?.type)
+                               kjønn = it.kjønn.first().kjønn)
                 }
             }.fold(
                     onSuccess = { it },
