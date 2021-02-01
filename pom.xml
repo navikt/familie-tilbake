@@ -20,7 +20,7 @@
         <changelist>-SNAPSHOT</changelist>
         <jvmTarget>11</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.21-2</kotlin.version>
         <felles.version>1.20210121113106_ca34836</felles.version>
         <common-java-modules.version>1.2020.09.07_16.00-4f2f19a76bb2</common-java-modules.version>
         <kontrakter.version>2.0_20210128142028_26014fb</kontrakter.version>
@@ -28,7 +28,7 @@
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>2.3.0.1</jaxb-core.version>
         <jaxb-impl.version>2.3.3</jaxb-impl.version>
-        <cxf.version>3.3.4</cxf.version>
+        <cxf.version>3.4.2</cxf.version>
         <mockk.version>1.9.3</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.16</version>
+            <version>42.2.18</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
