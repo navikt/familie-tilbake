@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.config
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.http.config.RestTemplateSts
+import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.SpringBootConfiguration
@@ -10,10 +12,12 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Import
 
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
+@Import(RestTemplateSts::class, StsRestClient::class)
 @ConfigurationPropertiesScan
 class ApplicationConfig {
 

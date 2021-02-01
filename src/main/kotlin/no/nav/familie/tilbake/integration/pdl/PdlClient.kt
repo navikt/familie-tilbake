@@ -1,0 +1,63 @@
+package no.nav.familie.tilbake.integration.pdl
+
+
+import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.config.PdlConfig
+import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
+import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.web.client.RestOperations
+import java.time.LocalDate
+
+@Service
+class PdlClient(val pdlConfig: PdlConfig,
+                @Qualifier("sts") val restTemplate: RestOperations,
+                private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
+
+    fun hentPersoninfo(personIdent: String): PersonInfo {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                                                query = PdlConfig.hentEnkelPersonQuery)
+        val response : PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri, pdlPersonRequest, httpHeaders())
+        if (!response.harFeil()) {
+            return Result.runCatching {
+                response.data.person!!.let {
+                    PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
+                               navn = it.navn.first().fulltNavn(),
+                               kjønn = it.kjoenn.first().kjoenn,
+                               familierelasjoner = emptySet(),
+                               adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
+                               bostedsadresse = it.bostedsadresse.firstOrNull(),
+                               sivilstand = it.sivilstand.firstOrNull()?.type)
+                }
+            }.fold(
+                    onSuccess = { it },
+                    onFailure = {
+                        throw Feil(message = "Fant ikke forespurte data på person.",
+                                   frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
+                                   httpStatus = HttpStatus.NOT_FOUND,
+                                   throwable = it)
+                    }
+            )
+        } else {
+            throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
+                            frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
+                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    private fun httpHeaders(): HttpHeaders {
+
+        return HttpHeaders().apply {
+            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
+            add("Tema", "ENF")
+        }
+    }
+}
