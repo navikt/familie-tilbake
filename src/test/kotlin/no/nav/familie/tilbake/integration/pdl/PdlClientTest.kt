@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.AfterAll
@@ -54,11 +55,11 @@ class PdlClientTest {
     }
 
     @Test
-    fun `hentPersoninfo skal hente person info med ok respons fra PDL`() {
+    fun `hentPersoninfo skal hente person info for barnetrygd med ok respons fra PDL`() {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))))
 
-        val respons = pdlClient.hentPersoninfo("11111122222")
+        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD)
 
         assertNotNull(respons)
         assertEquals("ENGASJERT FYR", respons.navn)
@@ -73,7 +74,7 @@ class PdlClientTest {
 
 
         assertFailsWith<RuntimeException>(message = "Fant ikke person, Ikke tilgang",
-                                          block = { pdlClient.hentPersoninfo("11111122222") })
+                                          block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD) })
     }
 
 

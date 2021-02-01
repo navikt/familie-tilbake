@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.integration.pdl
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.kontrakter.felles.journalpost.Tema
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
@@ -22,10 +24,12 @@ class PdlClient(val pdlConfig: PdlConfig,
                 @Qualifier("sts") val restTemplate: RestOperations,
                 private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
-    fun hentPersoninfo(personIdent: String): PersonInfo {
+    fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): PersonInfo {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = PdlConfig.hentEnkelPersonQuery)
-        val response : PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri, pdlPersonRequest, httpHeaders())
+        val response: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
+                                                                       pdlPersonRequest,
+                                                                       httpHeaders(fagsystem))
         if (!response.harFeil()) {
             return Result.runCatching {
                 response.data.person!!.let {
@@ -48,16 +52,20 @@ class PdlClient(val pdlConfig: PdlConfig,
             )
         } else {
             throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
-                            frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
-                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+                       frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
-    private fun httpHeaders(): HttpHeaders {
+    private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
             add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
-            add("Tema", "ENF")
+            add("Tema", hentTema(fagsystem).name)
         }
+    }
+
+    private fun hentTema(fagsystem: Fagsystem): Tema {
+        return Tema.valueOf(fagsystem.tema)
     }
 }
