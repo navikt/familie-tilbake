@@ -4,7 +4,7 @@ no.nav.security.jwt:
     accepted_audience: ${CLIENT_ID}
     cookie_name: azure_token
 
-ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
+ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 
 spring:
   datasource:

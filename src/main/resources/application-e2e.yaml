@@ -14,7 +14,7 @@ spring:
       database:
         role: familie
 
-ACCEPTED_CLIENTS: ${TILBAKE_BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}
+ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw

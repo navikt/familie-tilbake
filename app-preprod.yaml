@@ -36,6 +36,8 @@ spec:
   ingresses:
     - https://familie-tilbake.dev.adeo.no
     - https://familie-tilbake.dev-fss.nais.io
+    - https://familie-tilbake.dev.intern.nav.no
+    - https://familie-tilbake.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
   env:
