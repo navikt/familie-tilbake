@@ -22,6 +22,21 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+  azure:
+    application:
+      enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak
+          namespace: default
+        - application: familie-ef-sak
+          namespace: default
+        - application: familie-ks-sak
+          namespace: default
+        - application: familie-tilbake-frontend
+          namespace: teamfamilie
+          cluster: prod-gcp
   replicas:
     min: 2
     max: 4
@@ -37,6 +52,8 @@ spec:
     enabled: true
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-tilbake.nais.adeo.no
+    - https://familie-tilbake.intern.nav.no
+    - https://familie-tilbake.prod-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod

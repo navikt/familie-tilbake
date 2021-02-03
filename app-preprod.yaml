@@ -22,6 +22,22 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak
+          namespace: default
+        - application: familie-ef-sak
+          namespace: default
+        - application: familie-ks-sak
+          namespace: default
+        - application: familie-tilbake-frontend
+          namespace: teamfamilie
+          cluster: dev-gcp
   replicas:
     min: 2
     max: 4
@@ -36,6 +52,8 @@ spec:
   ingresses:
     - https://familie-tilbake.dev.adeo.no
     - https://familie-tilbake.dev-fss.nais.io
+    - https://familie-tilbake.dev.intern.nav.no
+    - https://familie-tilbake.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
   env:

@@ -1,0 +1,16 @@
+---
+apiVersion: nais.io/v1
+kind: AzureAdApplication
+metadata:
+  name: familie-tilbake-lokal
+  namespace: teamfamilie
+  labels:
+    team: teamfamilie
+spec:
+  preAuthorizedApplications:
+    - application: familie-tilbake-frontend-lokal
+      cluster: dev-gcp
+      namespace: teamfamilie
+  logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
+  tenant: trygdeetaten.no
+  secretName: azuread-familie-tilbake-lokal
