@@ -22,6 +22,19 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak
+          namespace: default
+        - application: familie-ef-sak
+          namespace: default
+        - application: familie-ks-sak
+          namespace: default
   replicas:
     min: 2
     max: 4

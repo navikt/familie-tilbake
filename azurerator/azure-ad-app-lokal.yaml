@@ -1,0 +1,15 @@
+---
+apiVersion: nais.io/v1
+kind: AzureAdApplication
+metadata:
+  name: familie-tilbake-lokal
+  namespace: teamfamilie
+  labels:
+    team: teamfamilie
+spec:
+  logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
+  tenant: trygdeetaten.no
+  replyUrls:
+    - url: "http://familie-tilbake.dev.intern.nav.no/auth/openid/callback"
+    - url: "http://localhost:8000/auth/openid/callback"
+  secretName: azuread-familie-tilbake-lokal
