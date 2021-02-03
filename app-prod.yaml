@@ -25,10 +25,6 @@ spec:
   azure:
     application:
       enabled: true
-      preAuthorizedApplications:
-        - application: familie-tilbake-frontend
-          cluster: prod-gcp
-          namespace: teamfamilie
   accessPolicy:
     inbound:
       rules:
@@ -38,6 +34,9 @@ spec:
           namespace: default
         - application: familie-ks-sak
           namespace: default
+        - application: familie-tilbake-frontend
+          namespace: teamfamilie
+          cluster: prod-gcp
   replicas:
     min: 2
     max: 4
