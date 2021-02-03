@@ -25,6 +25,10 @@ spec:
   azure:
     application:
       enabled: true
+      preAuthorizedApplications:
+        - application: familie-tilbake-frontend
+          cluster: prod-gcp
+          namespace: teamfamilie
   accessPolicy:
     inbound:
       rules:

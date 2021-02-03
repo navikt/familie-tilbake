@@ -26,6 +26,10 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      preAuthorizedApplications:
+        - application: familie-tilbake-frontend
+          cluster: dev-gcp
+          namespace: teamfamilie
   accessPolicy:
     inbound:
       rules:
