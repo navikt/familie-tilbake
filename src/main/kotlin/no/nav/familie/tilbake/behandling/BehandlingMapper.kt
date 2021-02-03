@@ -1,7 +1,12 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BrukerDto
+import no.nav.familie.tilbake.api.dto.FagsakDto
+import no.nav.familie.tilbake.api.dto.HentBehandlingResponsDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -11,6 +16,7 @@ import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandling.domain.Vergetype
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -34,6 +40,47 @@ object BehandlingMapper {
                           eksternBehandling = setOf(eksternBehandling),
                           varsler = varsler,
                           verger = verger)
+    }
+
+    fun tilRespons(behandling: Behandling,
+               fagsak: Fagsak,
+               personInfo: PersonInfo,
+               kanHenleggeBehandling: Boolean): HentBehandlingResponsDto {
+        val fagsakDto = FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
+                                  ytelsestype = fagsak.ytelsestype,
+                                  status = fagsak.status,
+                                  søkerFødselsnummer = fagsak.bruker.ident)
+        val brukerDto = BrukerDto(navn = personInfo.navn!!,
+                                  fødselsdato = personInfo.fødselsdato,
+                                  kjønn = personInfo.kjønn!!)
+
+        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull { behandlingsresultat ->
+            behandlingsresultat.sporbar.endret.endretTid
+        }
+
+        val behandlingDto = BehandlingDto(
+                eksternBrukId = behandling.eksternBrukId,
+                type = behandling.type,
+                status = behandling.status,
+                erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
+                resultatstype = resultat?.resultatstypeTilFrontend(),
+                enhetskode = behandling.behandlendeEnhet!!,
+                enhetsnavn = behandling.behandlendeEnhetsNavn!!,
+                ansvarligSaksbehandler = behandling.ansvarligSaksbehandler!!,
+                ansvarligBeslutter = behandling.ansvarligBeslutter,
+                språkkode = fagsak.bruker.språkkode!!,
+                opprettetDato = behandling.opprettetDato,
+                avsluttetDato = behandling.avsluttetDato,
+                endretTidspunkt = behandling.endretTidspunkt,
+                harVerge = behandling.verger.isNotEmpty(),
+                kanHenleggeBehandling = kanHenleggeBehandling,
+                erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
+
+        return HentBehandlingResponsDto(
+                behandling = behandlingDto,
+                fagsak = fagsakDto,
+                bruker = brukerDto
+        )
     }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {

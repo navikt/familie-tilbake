@@ -7,7 +7,8 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
-import java.util.*
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class Behandling(@Id
                       val id: UUID = UUID.randomUUID(),
@@ -32,7 +33,18 @@ data class Behandling(@Id
                       @MappedCollection(idColumn = "behandling_id")
                       val resultater: Set<Behandlingsresultat> = setOf(),
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar())
+                      val sporbar: Sporbar = Sporbar()) {
+
+    fun erAvsluttet(): Boolean {
+        return Behandlingsstatus.AVSLUTTET.equals(status)
+    }
+
+    val opprettetTidspunkt: LocalDateTime
+        get() = sporbar.opprettetTid
+
+    val endretTidspunkt: LocalDateTime
+        get() = sporbar.endret.endretTid
+}
 
 data class EksternBehandling(@Id
                              val id: UUID = UUID.randomUUID(),

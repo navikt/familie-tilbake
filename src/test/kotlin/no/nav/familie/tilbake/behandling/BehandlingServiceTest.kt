@@ -9,12 +9,17 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BrukerDto
+import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +27,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
@@ -98,14 +105,92 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     fun `opprettBehandlingAutomatisk skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
+
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
         assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem="
                                                     + opprettTilbakekrevingRequest.ytelsestype +
                                                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
                                                     "som ikke er henlagt, kan ikke opprettes en ny.",
                                           block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
     }
+
+    @Test
+    fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val data = behandlingService.hentBehandling(behandling.eksternBrukId)
+
+        val behandlingDto = data.behandling
+        assertFellesBehandlingRespons(behandlingDto, behandling)
+        assertFalse { behandlingDto.kanHenleggeBehandling }
+        assertTrue { behandlingDto.harVerge }
+
+        val fagsakDto = data.fagsak
+        assertFellesFagsakRespons(opprettTilbakekrevingRequest, fagsakDto)
+
+        val brukerDto = data.bruker
+        assertFellesBrukerRespons(brukerDto)
+    }
+
+    @Test
+    fun `hentBehandling skal hente behandling som kan henlegges uten verge`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = true, manueltOpprettet = false)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
+        val oppdatertBehandling = behandling.copy(sporbar = sporbar)
+        behandlingRepository.update(oppdatertBehandling)
+
+        val data = behandlingService.hentBehandling(behandling.eksternBrukId)
+
+        val behandlingDto = data.behandling
+        assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)
+        assertTrue { behandlingDto.kanHenleggeBehandling }
+        assertFalse { behandlingDto.harVerge }
+
+        val fagsakDto = data.fagsak
+        assertFellesFagsakRespons(opprettTilbakekrevingRequest, fagsakDto)
+
+        val brukerDto = data.bruker
+        assertFellesBrukerRespons(brukerDto)
+    }
+
+    private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
+                                              behandling: Behandling) {
+        assertEquals(behandling.eksternBrukId, behandlingDto.eksternBrukId)
+        assertFalse { behandlingDto.erBehandlingHenlagt }
+        assertEquals(Behandlingstype.TILBAKEKREVING.name, behandlingDto.type.name)
+        assertEquals(Behandlingsstatus.OPPRETTET, behandlingDto.status)
+        assertEquals("NB", behandlingDto.språkkode)
+        assertEquals(behandling.opprettetDato, behandlingDto.opprettetDato)
+        assertNull(behandlingDto.avsluttetDato)
+        assertNull(behandlingDto.vedtaksdato)
+        assertEquals("8020", behandlingDto.enhetskode)
+        assertEquals("Oslo", behandlingDto.enhetsnavn)
+        assertNull(behandlingDto.resultatstype)
+        assertEquals("VL", behandlingDto.ansvarligSaksbehandler)
+        assertNull(behandlingDto.ansvarligBeslutter)
+        assertFalse { behandlingDto.erBehandlingPåVent }
+    }
+
+    private fun assertFellesFagsakRespons(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+                                          fagsakDto: FagsakDto) {
+        assertEquals(opprettTilbakekrevingRequest.eksternFagsakId, fagsakDto.eksternFagsakId)
+        assertEquals(Fagsaksstatus.OPPRETTET.name, fagsakDto.status.name)
+        assertEquals(Ytelsestype.BARNETRYGD.name, fagsakDto.ytelsestype.name)
+        assertEquals(opprettTilbakekrevingRequest.personIdent.ident, fagsakDto.søkerFødselsnummer)
+    }
+
+    private fun assertFellesBrukerRespons(brukerDto: BrukerDto) {
+        assertEquals("testverdi", brukerDto.navn)
+        assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
+        assertEquals(Kjønn.MANN.name, brukerDto.kjønn.name)
+    }
+
 
     private fun assertFagsak(behandling: Behandling,
                              opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {

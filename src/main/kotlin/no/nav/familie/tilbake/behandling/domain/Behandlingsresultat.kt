@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.domain.tbd.Behandlingsvedtak
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
-import java.util.*
+import java.util.UUID
 
 data class Behandlingsresultat(@Id
                                val id: UUID = UUID.randomUUID(),
@@ -29,11 +29,17 @@ data class Behandlingsresultat(@Id
     fun erBehandlingHenlagt(): Boolean {
         return ALLE_HENLEGGELSESKODER.contains(type)
     }
+
+    fun resultatstypeTilFrontend(): Behandlingsresultatstype {
+        if (erBehandlingHenlagt()) {
+            return Behandlingsresultatstype.HENLAGT
+        }
+        return type
+    }
 }
 
 enum class Behandlingsresultatstype(val navn: String) {
     IKKE_FASTSATT("Ikke fastsatt"),
-    FASTSATT("Resultatet er fastsatt"),  //Ikke bruk denne BehandlingResultatType.Blir fjernes senere
     HENLAGT_FEILOPPRETTET("Henlagt, søknaden er feilopprettet"),
     HENLAGT_FEILOPPRETTET_MED_BREV("Feilaktig opprettet - med henleggelsesbrev"),
     HENLAGT_FEILOPPRETTET_UTEN_BREV("Feilaktig opprettet - uten henleggelsesbrev"),
