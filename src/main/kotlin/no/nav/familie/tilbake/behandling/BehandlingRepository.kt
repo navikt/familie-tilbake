@@ -13,9 +13,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-            select beh.* from behandling beh join fagsak f on beh.fagsak_id = f.id 
-             where f.ytelsestype=:ytelsestype and f.ekstern_fagsak_id=:eksternFagsakId
-            and beh.status <>'AVSLUTTET' and beh.type='TILBAKEKREVING'
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
+            AND beh.status <>'AVSLUTTET' AND beh.type='TILBAKEKREVING'
     """)
     fun finnÅpenTilbakekrevingsbehandling(
             ytelsestype: Ytelsestype,
@@ -24,9 +24,19 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-            select beh.* from behandling beh join ekstern_behandling eks on eks.behandling_id= beh.id 
-            where eks.ekstern_id=:eksternId and eks.aktiv=true 
-            and beh.type='TILBAKEKREVING' and beh.status='AVSLUTTET' ORDER BY beh.opprettet_tid DESC
+            SELECT beh.* FROM behandling beh JOIN ekstern_behandling eks ON eks.behandling_id= beh.id 
+            WHERE eks.ekstern_id=:eksternId AND eks.aktiv=TRUE 
+            AND beh.type='TILBAKEKREVING' AND beh.status='AVSLUTTET' ORDER BY beh.opprettet_tid DESC
     """)
     fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>
+
+    // language=PostgreSQL
+    @Query("""
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
+            AND beh.ekstern_bruk_id=:eksternBrukId
+    """)
+    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype: Ytelsestype,
+                                                            eksternFagsakId: String,
+                                                            eksternBrukId: UUID): Behandling?
 }

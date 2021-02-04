@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -34,6 +36,32 @@ object BehandlingMapper {
                           eksternBehandling = setOf(eksternBehandling),
                           varsler = varsler,
                           verger = verger)
+    }
+
+    fun tilRespons(behandling: Behandling,
+               kanHenleggeBehandling: Boolean): BehandlingDto {
+
+        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull { behandlingsresultat ->
+            behandlingsresultat.sporbar.endret.endretTid
+        }
+
+        return BehandlingDto(
+                eksternBrukId = behandling.eksternBrukId,
+                type = behandling.type,
+                status = behandling.status,
+                erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
+                resultatstype = resultat?.resultatstypeTilFrontend(),
+                enhetskode = behandling.behandlendeEnhet,
+                enhetsnavn = behandling.behandlendeEnhetsNavn,
+                ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                ansvarligBeslutter = behandling.ansvarligBeslutter,
+                opprettetDato = behandling.opprettetDato,
+                avsluttetDato = behandling.avsluttetDato,
+                endretTidspunkt = behandling.endretTidspunkt,
+                harVerge = behandling.verger.isNotEmpty(),
+                kanHenleggeBehandling = kanHenleggeBehandling,
+                erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
+
     }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {

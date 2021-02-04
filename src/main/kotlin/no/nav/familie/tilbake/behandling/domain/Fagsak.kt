@@ -9,7 +9,7 @@ data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
                   @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val bruker: Bruker,
-                  val eksternFagsakId: String?,
+                  val eksternFagsakId: String,
                   val fagsystem: Fagsystem,
                   val ytelsestype: Ytelsestype,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,

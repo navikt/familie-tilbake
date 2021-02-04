@@ -3,7 +3,7 @@ package no.nav.familie.tilbake
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
-import java.util.*
+import java.util.Properties
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
 class LauncherLocalPostgres
@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(LauncherLocalPostgres::class.java)
-            .profiles("local")
+            .profiles("local", "mock-pdl")
             .properties(properties)
             .run(*args)
 }

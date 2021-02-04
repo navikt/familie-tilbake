@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
@@ -22,6 +23,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
@@ -98,13 +101,67 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     fun `opprettBehandlingAutomatisk skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
+
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
         assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem="
                                                     + opprettTilbakekrevingRequest.ytelsestype +
                                                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
                                                     "som ikke er henlagt, kan ikke opprettes en ny.",
                                           block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
+    }
+
+    @Test
+    fun `hentBehandlingskontekst skal hente behandling som ikke kan henlegges med verge`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFellesBehandlingRespons(behandlingDto, behandling)
+        assertFalse { behandlingDto.kanHenleggeBehandling }
+        assertTrue { behandlingDto.harVerge }
+    }
+
+    @Test
+    fun `hentBehandling skal hente behandling som kan henlegges uten verge`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = true, manueltOpprettet = false)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
+        val oppdatertBehandling = behandling.copy(sporbar = sporbar)
+        behandlingRepository.update(oppdatertBehandling)
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)
+        assertTrue { behandlingDto.kanHenleggeBehandling }
+        assertFalse { behandlingDto.harVerge }
+    }
+
+    @Test
+    fun `hentBehandling skal ikke hente behandling når behandling ikke finnes`() {
+        val behandlingId = UUID.randomUUID()
+        assertFailsWith<RuntimeException>(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                                          block = { behandlingService.hentBehandling(behandlingId) })
+    }
+
+    private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
+                                              behandling: Behandling) {
+        assertEquals(behandling.eksternBrukId, behandlingDto.eksternBrukId)
+        assertFalse { behandlingDto.erBehandlingHenlagt }
+        assertEquals(Behandlingstype.TILBAKEKREVING.name, behandlingDto.type.name)
+        assertEquals(Behandlingsstatus.OPPRETTET, behandlingDto.status)
+        assertEquals(behandling.opprettetDato, behandlingDto.opprettetDato)
+        assertNull(behandlingDto.avsluttetDato)
+        assertNull(behandlingDto.vedtaksdato)
+        assertEquals("8020", behandlingDto.enhetskode)
+        assertEquals("Oslo", behandlingDto.enhetsnavn)
+        assertNull(behandlingDto.resultatstype)
+        assertEquals("VL", behandlingDto.ansvarligSaksbehandler)
+        assertNull(behandlingDto.ansvarligBeslutter)
+        assertFalse { behandlingDto.erBehandlingPåVent }
     }
 
     private fun assertFagsak(behandling: Behandling,
