@@ -2,9 +2,9 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BehandlingsresponsDto
 import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
-import no.nav.familie.tilbake.api.dto.HentBehandlingResponsDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -45,7 +45,7 @@ object BehandlingMapper {
     fun tilRespons(behandling: Behandling,
                fagsak: Fagsak,
                personInfo: PersonInfo,
-               kanHenleggeBehandling: Boolean): HentBehandlingResponsDto {
+               kanHenleggeBehandling: Boolean): BehandlingsresponsDto {
         val fagsakDto = FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
                                   ytelsestype = fagsak.ytelsestype,
                                   status = fagsak.status,
@@ -76,7 +76,7 @@ object BehandlingMapper {
                 kanHenleggeBehandling = kanHenleggeBehandling,
                 erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
 
-        return HentBehandlingResponsDto(
+        return BehandlingsresponsDto(
                 behandling = behandlingDto,
                 fagsak = fagsakDto,
                 bruker = brukerDto

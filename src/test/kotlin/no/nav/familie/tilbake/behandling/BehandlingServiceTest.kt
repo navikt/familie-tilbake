@@ -117,12 +117,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
+    fun `hentBehandlingskontekst skal hente behandling som ikke kan henlegges med verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
-
-        val data = behandlingService.hentBehandling(behandling.eksternBrukId)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val data = behandlingService.hentBehandlingskontekst(fagsak.ytelsestype, fagsak.eksternFagsakId, behandling.eksternBrukId)
 
         val behandlingDto = data.behandling
         assertFellesBehandlingRespons(behandlingDto, behandling)
@@ -144,8 +144,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
         val oppdatertBehandling = behandling.copy(sporbar = sporbar)
         behandlingRepository.update(oppdatertBehandling)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val data = behandlingService.hentBehandling(behandling.eksternBrukId)
+        val data = behandlingService.hentBehandlingskontekst(fagsak.ytelsestype, fagsak.eksternFagsakId, behandling.eksternBrukId)
 
         val behandlingDto = data.behandling
         assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)

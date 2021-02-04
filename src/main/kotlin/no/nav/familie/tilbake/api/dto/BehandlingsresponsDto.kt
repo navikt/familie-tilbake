@@ -10,9 +10,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class HentBehandlingResponsDto(val behandling: BehandlingDto,
-                                    val fagsak: FagsakDto,
-                                    val bruker: BrukerDto)
+data class BehandlingsresponsDto(val behandling: BehandlingDto,
+                                 val fagsak: FagsakDto,
+                                 val bruker: BrukerDto)
 
 data class BehandlingDto(val eksternBrukId: UUID,
                          val erBehandlingHenlagt: Boolean,

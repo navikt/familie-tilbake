@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.api.dto.HentBehandlingResponsDto
+import no.nav.familie.tilbake.api.dto.BehandlingsresponsDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
@@ -37,8 +37,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional(readOnly = true)
-    fun hentBehandling(eksternBrukId: UUID): HentBehandlingResponsDto {
-        val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
+    fun hentBehandlingskontekst(ytelsestype: Ytelsestype,
+                                eksternFagsakId: String,
+                                eksternBrukId: UUID): BehandlingsresponsDto {
+        val behandling = behandlingRepository
+                .findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype = ytelsestype,
+                                                                     eksternFagsakId = eksternFagsakId,
+                                                                     eksternBrukId = eksternBrukId)
         if (behandling != null) {
             val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
             val personInfo = personService.hentPersoninfo(fagsak.bruker.ident, fagsak.fagsystem)
@@ -47,8 +52,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                personInfo,
                                                kanHenleggeBehandling(behandling))
         }
-        throw Feil(message = "Behandling finnes ikke for eksternBrukId=$eksternBrukId",
-                   frontendFeilmelding = "Behandling finnes ikke for eksternBrukId=$eksternBrukId")
+        throw Feil(message = "Behandling finnes ikke for ytelsestype=$ytelsestype, " +
+                             "eksternFagsakId=$eksternFagsakId, eksternBrukId=$eksternBrukId",
+                   frontendFeilmelding = "Behandling finnes ikke for ytelsestype=$ytelsestype, " +
+                                         "eksternFagsakId=$eksternFagsakId, eksternBrukId=$eksternBrukId")
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {

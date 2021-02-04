@@ -30,5 +30,13 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """)
     fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>
 
-    fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
+    // language=PostgreSQL
+    @Query("""
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
+            AND beh.ekstern_bruk_id=:eksternBrukId
+    """)
+    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype: Ytelsestype,
+                                                            eksternFagsakId: String,
+                                                            eksternBrukId: UUID): Behandling?
 }
