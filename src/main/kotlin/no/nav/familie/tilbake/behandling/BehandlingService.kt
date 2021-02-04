@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.person.PersonService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -20,8 +19,7 @@ import java.util.UUID
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakRepository: FagsakRepository,
-                        private val personService: PersonService) {
+                        private val fagsakRepository: FagsakRepository) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")

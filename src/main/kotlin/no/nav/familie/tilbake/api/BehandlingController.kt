@@ -4,6 +4,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.sikkerhet.BehandlerRolle
+import no.nav.familie.tilbake.sikkerhet.RolleTilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -27,6 +29,7 @@ class BehandlingController(val behandlingService: BehandlingService) {
     @PostMapping(path = ["/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RolleTilgangssjekk(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving")
     fun opprettBehandling(@Valid @RequestBody
                           opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Ressurs<String> {
         val behandling = when {
@@ -42,7 +45,10 @@ class BehandlingController(val behandlingService: BehandlingService) {
 
     @GetMapping(path = ["/v1/{behandlingId}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentBehandling(@NotNull @PathVariable("behandlingId") behandlingId : UUID): Ressurs<BehandlingDto> {
+    @RolleTilgangssjekk(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+                        handling = "Henter tilbakekrevingsbehandling",
+                        henteParam = "behandlingId")
+    fun hentBehandling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<BehandlingDto> {
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
     }
 }

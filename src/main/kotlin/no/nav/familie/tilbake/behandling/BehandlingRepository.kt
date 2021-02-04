@@ -39,4 +39,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype: Ytelsestype,
                                                             eksternFagsakId: String,
                                                             eksternBrukId: UUID): Behandling?
+
+    fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 }

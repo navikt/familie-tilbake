@@ -90,11 +90,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en åpen behandling for fagsystem="
-                                                    + opprettTilbakekrevingRequest.ytelsestype +
-                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, " +
-                                                    "kan ikke opprettes en ny.",
-                                          block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        })
+        assertEquals("Det finnes allerede en åpen behandling for ytelsestype="
+                     + opprettTilbakekrevingRequest.ytelsestype +
+                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId}, " +
+                     "kan ikke opprette en ny.", exception.message)
     }
 
     @Test
@@ -105,11 +107,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        assertFailsWith<RuntimeException>(message = "Det finnes allerede en avsluttet behandling for fagsystem="
-                                                    + opprettTilbakekrevingRequest.ytelsestype +
-                                                    " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
-                                                    "som ikke er henlagt, kan ikke opprettes en ny.",
-                                          block = { behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest) })
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        })
+        assertEquals("Det finnes allerede en avsluttet behandling for ytelsestype="
+                     + opprettTilbakekrevingRequest.ytelsestype +
+                     " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
+                     "som ikke er henlagt, kan ikke opprette en ny.", exception.message)
     }
 
     @Test
