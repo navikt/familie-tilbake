@@ -140,6 +140,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFalse { behandlingDto.harVerge }
     }
 
+    @Test
+    fun `hentBehandling skal ikke hente behandling når behandling ikke finnes`() {
+        val behandlingId = UUID.randomUUID()
+        assertFailsWith<RuntimeException>(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                                          block = { behandlingService.hentBehandling(behandlingId) })
+    }
+
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
                                               behandling: Behandling) {
         assertEquals(behandling.eksternBrukId, behandlingDto.eksternBrukId)
