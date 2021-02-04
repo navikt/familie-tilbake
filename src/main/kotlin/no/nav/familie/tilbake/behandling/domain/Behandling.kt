@@ -18,10 +18,10 @@ data class Behandling(@Id
                       val saksbehandlingstype: Saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
                       val opprettetDato: LocalDate = LocalDate.now(),
                       val avsluttetDato: LocalDate? = null,
-                      val ansvarligSaksbehandler: String?,
+                      val ansvarligSaksbehandler: String,
                       val ansvarligBeslutter: String? = null,
-                      val behandlendeEnhet: String?,
-                      val behandlendeEnhetsNavn: String?,
+                      val behandlendeEnhet: String,
+                      val behandlendeEnhetsNavn: String,
                       val manueltOpprettet: Boolean,
                       val eksternBrukId: UUID = UUID.randomUUID(),
                       @MappedCollection(idColumn = "behandling_id")

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.tilbake.api.dto.BehandlingsresponsDto
+import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.person.PersonService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,25 +36,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional(readOnly = true)
-    fun hentBehandlingskontekst(ytelsestype: Ytelsestype,
-                                eksternFagsakId: String,
-                                eksternBrukId: UUID): BehandlingsresponsDto {
-        val behandling = behandlingRepository
-                .findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype = ytelsestype,
-                                                                     eksternFagsakId = eksternFagsakId,
-                                                                     eksternBrukId = eksternBrukId)
-        if (behandling != null) {
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-            val personInfo = personService.hentPersoninfo(fagsak.bruker.ident, fagsak.fagsystem)
-            return BehandlingMapper.tilRespons(behandling,
-                                               fagsak,
-                                               personInfo,
-                                               kanHenleggeBehandling(behandling))
+    fun hentBehandling(behandlingId: UUID): BehandlingDto {
+        val data = behandlingRepository.findById(behandlingId)
+        if (data.isPresent) {
+            val behandling = data.get()
+            return BehandlingMapper.tilRespons(behandling, kanHenleggeBehandling(behandling))
         }
-        throw Feil(message = "Behandling finnes ikke for ytelsestype=$ytelsestype, " +
-                             "eksternFagsakId=$eksternFagsakId, eksternBrukId=$eksternBrukId",
-                   frontendFeilmelding = "Behandling finnes ikke for ytelsestype=$ytelsestype, " +
-                                         "eksternFagsakId=$eksternFagsakId, eksternBrukId=$eksternBrukId")
+        throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                   frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId")
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {

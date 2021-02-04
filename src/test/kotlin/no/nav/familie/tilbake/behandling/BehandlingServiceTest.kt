@@ -10,16 +10,12 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
-import no.nav.familie.tilbake.api.dto.BrukerDto
-import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -121,19 +117,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val data = behandlingService.hentBehandlingskontekst(fagsak.ytelsestype, fagsak.eksternFagsakId, behandling.eksternBrukId)
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
-        val behandlingDto = data.behandling
         assertFellesBehandlingRespons(behandlingDto, behandling)
         assertFalse { behandlingDto.kanHenleggeBehandling }
         assertTrue { behandlingDto.harVerge }
-
-        val fagsakDto = data.fagsak
-        assertFellesFagsakRespons(opprettTilbakekrevingRequest, fagsakDto)
-
-        val brukerDto = data.bruker
-        assertFellesBrukerRespons(brukerDto)
     }
 
     @Test
@@ -144,20 +132,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
         val oppdatertBehandling = behandling.copy(sporbar = sporbar)
         behandlingRepository.update(oppdatertBehandling)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val data = behandlingService.hentBehandlingskontekst(fagsak.ytelsestype, fagsak.eksternFagsakId, behandling.eksternBrukId)
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
-        val behandlingDto = data.behandling
         assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)
         assertTrue { behandlingDto.kanHenleggeBehandling }
         assertFalse { behandlingDto.harVerge }
-
-        val fagsakDto = data.fagsak
-        assertFellesFagsakRespons(opprettTilbakekrevingRequest, fagsakDto)
-
-        val brukerDto = data.bruker
-        assertFellesBrukerRespons(brukerDto)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
@@ -166,7 +146,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFalse { behandlingDto.erBehandlingHenlagt }
         assertEquals(Behandlingstype.TILBAKEKREVING.name, behandlingDto.type.name)
         assertEquals(Behandlingsstatus.OPPRETTET, behandlingDto.status)
-        assertEquals("NB", behandlingDto.språkkode)
         assertEquals(behandling.opprettetDato, behandlingDto.opprettetDato)
         assertNull(behandlingDto.avsluttetDato)
         assertNull(behandlingDto.vedtaksdato)
@@ -177,21 +156,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertNull(behandlingDto.ansvarligBeslutter)
         assertFalse { behandlingDto.erBehandlingPåVent }
     }
-
-    private fun assertFellesFagsakRespons(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-                                          fagsakDto: FagsakDto) {
-        assertEquals(opprettTilbakekrevingRequest.eksternFagsakId, fagsakDto.eksternFagsakId)
-        assertEquals(Fagsaksstatus.OPPRETTET.name, fagsakDto.status.name)
-        assertEquals(Ytelsestype.BARNETRYGD.name, fagsakDto.ytelsestype.name)
-        assertEquals(opprettTilbakekrevingRequest.personIdent.ident, fagsakDto.søkerFødselsnummer)
-    }
-
-    private fun assertFellesBrukerRespons(brukerDto: BrukerDto) {
-        assertEquals("testverdi", brukerDto.navn)
-        assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
-        assertEquals(Kjønn.MANN.name, brukerDto.kjønn.name)
-    }
-
 
     private fun assertFagsak(behandling: Behandling,
                              opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
