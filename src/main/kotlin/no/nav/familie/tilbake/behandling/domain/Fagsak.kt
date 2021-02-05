@@ -38,7 +38,7 @@ enum class Ytelsestype(val kode: String) {
 
 enum class Fagsystem(var tema:String) {
     BARNETRYGD("BAR"),
-    ENSLIG_FORELDER("ENF"),
+    ENSLIG_FORSØRGER("ENF"),
     KONTANTSTØTTE("KON");
 
     companion object {
@@ -47,9 +47,9 @@ enum class Fagsystem(var tema:String) {
             return when (type) {
                 Ytelsestype.BARNETRYGD -> BARNETRYGD
                 Ytelsestype.KONTANTSTØTTE -> KONTANTSTØTTE
-                Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORELDER
-                Ytelsestype.BARNETILSYN -> ENSLIG_FORELDER
-                Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER
+                Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORSØRGER
+                Ytelsestype.BARNETILSYN -> ENSLIG_FORSØRGER
+                Ytelsestype.SKOLEPENGER -> ENSLIG_FORSØRGER
             }
         }
     }
