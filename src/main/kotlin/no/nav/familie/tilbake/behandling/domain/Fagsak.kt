@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.behandling.domain
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
-import java.util.UUID
+import java.util.*
 
 data class Fagsak(@Id
                   val id: UUID = UUID.randomUUID(),
@@ -36,10 +36,10 @@ enum class Ytelsestype(val kode: String) {
     }
 }
 
-enum class Fagsystem(var tema:String) {
-    BARNETRYGD("BAR"),
-    ENSLIG_FORELDER("ENF"),
-    KONTANTSTØTTE("KON");
+enum class Fagsystem(val kode: String, val tema: String) {
+    BARNETRYGD("BA", "BAR"),
+    ENSLIG_FORELDER("EF", "ENF"),
+    KONTANTSTØTTE("KS", "KON");
 
     companion object {
 
