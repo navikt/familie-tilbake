@@ -41,7 +41,7 @@
         <spring.cloud>2.2.6.RELEASE</spring.cloud>
         <spring.vault>2.3.0</spring.vault>
         <testcontainers.version>1.15.1</testcontainers.version>
-        <tjenestespesifikasjoner.version>1.2020.01.30-14.36-cdf257baea96</tjenestespesifikasjoner.version>
+        <tjenestespesifikasjoner.version>1.2021.01.21-11.34-02f5eb27bb76</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
 
     </properties>
