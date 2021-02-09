@@ -1,0 +1,18 @@
+package no.nav.familie.tilbake.config
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
+import java.net.URI
+
+@Configuration
+class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjonUri: URI,
+                          @Value("\${application.name}") val applicationName: String) {
+
+    companion object {
+
+        const val PATH_PING = "internal/status/isAlive"
+        const val PATH_ORGANISASJON = "api/organisasjon"
+        const val PATH_ARKIVER = "api/arkiv/v3"
+        const val PATH_DISTRIBUER = "api/dist/v1"
+    }
+}
