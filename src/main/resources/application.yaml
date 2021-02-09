@@ -28,7 +28,7 @@ spring:
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZUREAD_DISCOVERY_URL}
-    accepted_audience: ${AZURE_CLIENT_ID}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
@@ -39,8 +39,8 @@ no.nav.security.jwt:
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
@@ -48,8 +48,8 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
-          client-id: ${AZURE_CLIENT_ID}
-          client-secret: ${AZURE_CLIENT_SECRET}
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
 
 management:
