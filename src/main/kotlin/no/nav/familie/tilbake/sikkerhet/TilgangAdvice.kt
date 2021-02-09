@@ -154,7 +154,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     private fun validateFagsystem(fagsystem: Fagsystem,
                                   brukerRolleOgFagsystemstilgang: InnloggetBrukerTilgang,
                                   handling: String) {
-        if (rolleConfig.ENVIRONMENT_NAME == "local" || BehandlerRolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerRolle) {
+        if (rolleConfig.environmentName == "local" || BehandlerRolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerRolle) {
             return
         }
         if (fagsystem != brukerRolleOgFagsystemstilgang.fagsystem) {

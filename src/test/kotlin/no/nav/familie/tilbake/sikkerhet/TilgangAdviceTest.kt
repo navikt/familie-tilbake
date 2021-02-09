@@ -60,18 +60,18 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         val rolleConfig = tilgangAdvice.rolleConfig
-        ReflectionTestUtils.setField(rolleConfig, "ENVIRONMENT_NAME", "test")
-        ReflectionTestUtils.setField(rolleConfig, "BESLUTTER_ROLLE_BARNETRYGD", BARNETRYGD_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "SAKSBEHANDLER_ROLLE_BARNETRYGD", BARNETRYGD_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "VEILEDER_ROLLE_BARNETRYGD", BARNETRYGD_VEILEDER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "environmentName", "test")
+        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleBarnetrygd", BARNETRYGD_BESLUTTER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleBarnetrygd", BARNETRYGD_SAKSBEHANDLER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "veilederRolleBarnetrygd", BARNETRYGD_VEILEDER_ROLLE)
 
-        ReflectionTestUtils.setField(rolleConfig, "BESLUTTER_ROLLE_ENSLIG", ENSLIG_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "SAKSBEHANDLER_ROLLE_ENSLIG", ENSLIG_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "VEILEDER_ROLLE_ENSLIG", ENSLIG_VEILEDER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleEnslig", ENSLIG_BESLUTTER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleEnslig", ENSLIG_SAKSBEHANDLER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "veilederRolleEnslig", ENSLIG_VEILEDER_ROLLE)
 
-        ReflectionTestUtils.setField(rolleConfig, "BESLUTTER_ROLLE_KONTANTSTØTTE", KONTANTSTØTTE_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "SAKSBEHANDLER_ROLLE_KONTANTSTØTTE", KONTANTSTØTTE_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "VEILEDER_ROLLE_KONTANTSTØTTE", KONTANTSTØTTE_VEILEDER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleKontantStøtte", KONTANTSTØTTE_BESLUTTER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleKontantStøtte", KONTANTSTØTTE_SAKSBEHANDLER_ROLLE)
+        ReflectionTestUtils.setField(rolleConfig, "veilederRolleKontantStøtte", KONTANTSTØTTE_VEILEDER_ROLLE)
     }
 
     @Test

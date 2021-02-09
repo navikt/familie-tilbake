@@ -6,32 +6,32 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class RolleConfig(
         @Value("\${rolle.barnetrygd.beslutter}")
-        val BESLUTTER_ROLLE_BARNETRYGD: String,
+        val beslutterRolleBarnetrygd: String,
 
         @Value("\${rolle.barnetrygd.saksbehandler}")
-        val SAKSBEHANDLER_ROLLE_BARNETRYGD: String,
+        val saksbehandlerRolleBarnetrygd: String,
 
         @Value("\${rolle.barnetrygd.veileder}")
-        val VEILEDER_ROLLE_BARNETRYGD: String,
+        val veilederRolleBarnetrygd: String,
 
         @Value("\${rolle.enslig.beslutter}")
-        val BESLUTTER_ROLLE_ENSLIG: String,
+        val beslutterRolleEnslig: String,
 
         @Value("\${rolle.enslig.saksbehandler}")
-        val SAKSBEHANDLER_ROLLE_ENSLIG: String,
+        val saksbehandlerRolleEnslig: String,
 
         @Value("\${rolle.enslig.veileder}")
-        val VEILEDER_ROLLE_ENSLIG: String,
+        val veilederRolleEnslig: String,
 
         @Value("\${rolle.kontantstøtte.beslutter}")
-        val BESLUTTER_ROLLE_KONTANTSTØTTE: String,
+        val beslutterRolleKontantStøtte: String,
 
         @Value("\${rolle.kontantstøtte.saksbehandler}")
-        val SAKSBEHANDLER_ROLLE_KONTANTSTØTTE: String,
+        val saksbehandlerRolleKontantStøtte: String,
 
         @Value("\${rolle.kontantstøtte.veileder}")
-        val VEILEDER_ROLLE_KONTANTSTØTTE: String,
+        val veilederRolleKontantStøtte: String,
 
         @Value("\${ENVIRONMENT_NAME}")
-        val ENVIRONMENT_NAME: String
+        val environmentName: String
 )
