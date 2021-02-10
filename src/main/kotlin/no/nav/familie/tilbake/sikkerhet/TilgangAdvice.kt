@@ -14,6 +14,7 @@ import org.aspectj.lang.annotation.Before
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -27,7 +28,8 @@ import java.util.UUID
 @Configuration
 class TilgangAdvice(val rolleConfig: RolleConfig,
                     val behandlingRepository: BehandlingRepository,
-                    val fagsakRepository: FagsakRepository) {
+                    val fagsakRepository: FagsakRepository,
+                    val environment: Environment) {
 
     private final val behandlingIdParam = "behandlingId"
     private final val ytelsestypeParam = "ytelsestype"
@@ -40,7 +42,8 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         val minimumBehandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
         val handling = rolletilgangssjekk.handling
 
-        val brukerRolleOgFagsystemstilgang = ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig)
+        val brukerRolleOgFagsystemstilgang =
+                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, environment)
 
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         if (HttpMethod.POST.matches(httpRequest.method)) {
@@ -158,7 +161,8 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     private fun validateFagsystem(fagsystem: Fagsystem,
                                   brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                   handling: String) {
-        if (rolleConfig.environmentName == "local" || Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerrolle) {
+        if (environment.activeProfiles.any { "local" == it } ||
+                Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerrolle) {
             return
         }
         if (fagsystem != brukerRolleOgFagsystemstilgang.fagsystem) {

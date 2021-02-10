@@ -16,7 +16,6 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.aspectj.lang.JoinPoint
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.Mockito.`when`
@@ -24,7 +23,7 @@ import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.test.util.ReflectionTestUtils
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.math.BigDecimal
@@ -33,6 +32,15 @@ import java.util.Calendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+@TestPropertySource(properties = arrayOf("rolle.barnetrygd.beslutter=bb123",
+                                         "rolle.barnetrygd.saksbehandler=bs123",
+                                         "rolle.barnetrygd.veileder=bv123",
+                                         "rolle.enslig.beslutter=eb123",
+                                         "rolle.enslig.saksbehandler=es123",
+                                         "rolle.enslig.veileder=ev123",
+                                         "rolle.kontantstøtte.beslutter = kb123",
+                                         "rolle.kontantstøtte.saksbehandler = ks123",
+                                         "rolle.kontantstøtte.veileder = kv123"))
 internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     companion object {
@@ -56,23 +64,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     private val mockJoinpoint: JoinPoint = mock(JoinPoint::class.java)
     private val mockRolleTilgangssjekk = mock(Rolletilgangssjekk::class.java)
-
-    @BeforeEach
-    fun init() {
-        val rolleConfig = tilgangAdvice.rolleConfig
-        ReflectionTestUtils.setField(rolleConfig, "environmentName", "test")
-        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleBarnetrygd", BARNETRYGD_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleBarnetrygd", BARNETRYGD_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "veilederRolleBarnetrygd", BARNETRYGD_VEILEDER_ROLLE)
-
-        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleEnslig", ENSLIG_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleEnslig", ENSLIG_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "veilederRolleEnslig", ENSLIG_VEILEDER_ROLLE)
-
-        ReflectionTestUtils.setField(rolleConfig, "beslutterRolleKontantStøtte", KONTANTSTØTTE_BESLUTTER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "saksbehandlerRolleKontantStøtte", KONTANTSTØTTE_SAKSBEHANDLER_ROLLE)
-        ReflectionTestUtils.setField(rolleConfig, "veilederRolleKontantStøtte", KONTANTSTØTTE_VEILEDER_ROLLE)
-    }
 
     @Test
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {

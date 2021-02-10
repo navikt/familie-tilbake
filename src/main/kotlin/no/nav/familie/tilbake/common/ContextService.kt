@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import org.springframework.core.env.Environment
 
 object ContextService {
 
@@ -29,10 +30,13 @@ object ContextService {
                 )
     }
 
-    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig): InnloggetBrukertilgang {
+    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig,
+                                                               environment: Environment): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
         if (saksbehandler == SYSTEM_FORKORTELSE) return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
-        if (rolleConfig.environmentName == "local") return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
+        if (environment.activeProfiles.any { "local" == it }) {
+            return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
+        }
 
         val grupper = hentGrupper()
 

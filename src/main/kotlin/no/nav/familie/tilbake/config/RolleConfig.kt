@@ -31,7 +31,4 @@ class RolleConfig(
 
         @Value("\${rolle.kontantstøtte.veileder}")
         val veilederRolleKontantStøtte: String,
-
-        @Value("\${ENVIRONMENT_NAME}")
-        val environmentName: String
 )
