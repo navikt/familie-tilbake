@@ -24,6 +24,9 @@ spring:
       max-lifetime: 30000
       minimum-idle: 1
       data-source-properties.stringtype: unspecified # Nødvendig for å kunde sende en String til et json-felt i PostgresSql
+  aop:
+    auto: true
+    proxy-target-class: true
 
 no.nav.security.jwt:
   issuer.azuread:
@@ -72,3 +75,17 @@ EF_SAK_CLIENT_ID: ""
 FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
+
+rolle:
+  barnetrygd:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""
+  enslig:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""
+  kontantstøtte:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""
