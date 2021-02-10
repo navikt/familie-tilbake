@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 
-enum class BehandlerRolle(val nivå: Int) {
+enum class Behandlerrolle(val nivå: Int) {
     SYSTEM(4),
     BESLUTTER(3),
     SAKSBEHANDLER(2),
@@ -10,5 +10,5 @@ enum class BehandlerRolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukerTilgang(val behandlerRolle: BehandlerRolle,
+class InnloggetBrukertilgang(val behandlerrolle: Behandlerrolle,
                              val fagsystem: Fagsystem? = null)

@@ -2,8 +2,8 @@ package no.nav.familie.tilbake.common
 
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.config.RolleConfig
-import no.nav.familie.tilbake.sikkerhet.BehandlerRolle
-import no.nav.familie.tilbake.sikkerhet.InnloggetBrukerTilgang
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object ContextService {
@@ -29,36 +29,36 @@ object ContextService {
                 )
     }
 
-    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig): InnloggetBrukerTilgang {
+    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
-        if (saksbehandler == SYSTEM_FORKORTELSE) return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.SYSTEM)
-        if (rolleConfig.environmentName == "local") return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.SYSTEM)
+        if (saksbehandler == SYSTEM_FORKORTELSE) return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
+        if (rolleConfig.environmentName == "local") return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
 
         val grupper = hentGrupper()
 
-        when {
+        return when {
             grupper.contains(rolleConfig.beslutterRolleBarnetrygd) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.BESLUTTER, fagsystem = Fagsystem.BARNETRYGD)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.BARNETRYGD)
             grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.SAKSBEHANDLER, fagsystem = Fagsystem.BARNETRYGD)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER, fagsystem = Fagsystem.BARNETRYGD)
             grupper.contains(rolleConfig.veilederRolleBarnetrygd) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.VEILEDER, fagsystem = Fagsystem.BARNETRYGD)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.BARNETRYGD)
 
             grupper.contains(rolleConfig.beslutterRolleEnslig) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.BESLUTTER, fagsystem = Fagsystem.ENSLIG_FORELDER)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.ENSLIG_FORELDER)
             grupper.contains(rolleConfig.saksbehandlerRolleEnslig) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                              fagsystem = Fagsystem.ENSLIG_FORELDER)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                       fagsystem = Fagsystem.ENSLIG_FORELDER)
             grupper.contains(rolleConfig.veilederRolleEnslig) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.VEILEDER, fagsystem = Fagsystem.ENSLIG_FORELDER)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.ENSLIG_FORELDER)
 
             grupper.contains(rolleConfig.beslutterRolleKontantStøtte) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.BESLUTTER, fagsystem = Fagsystem.KONTANTSTØTTE)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.KONTANTSTØTTE)
             grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.SAKSBEHANDLER, fagsystem = Fagsystem.KONTANTSTØTTE)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER, fagsystem = Fagsystem.KONTANTSTØTTE)
             grupper.contains(rolleConfig.veilederRolleKontantStøtte) ->
-                return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.VEILEDER, fagsystem = Fagsystem.KONTANTSTØTTE)
-            else -> return InnloggetBrukerTilgang(behandlerRolle = BehandlerRolle.UKJENT)
+                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.KONTANTSTØTTE)
+            else -> InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.UKJENT)
         }
     }
 

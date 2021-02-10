@@ -55,7 +55,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     private lateinit var tilgangAdvice: TilgangAdvice
 
     private val mockJoinpoint: JoinPoint = mock(JoinPoint::class.java)
-    private val mockRolleTilgangssjekk = mock(RolleTilgangssjekk::class.java)
+    private val mockRolleTilgangssjekk = mock(Rolletilgangssjekk::class.java)
 
     @BeforeEach
     fun init() {
@@ -82,7 +82,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerRolle).thenReturn(BehandlerRolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
         `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
         `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
 
@@ -97,7 +97,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerRolle).thenReturn(BehandlerRolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd hent behandling")
         `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
 
@@ -130,7 +130,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerRolle).thenReturn(BehandlerRolle.SAKSBEHANDLER)
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
 
         val exception = assertFailsWith<RuntimeException>(block = {
@@ -138,7 +138,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                        mockRolleTilgangssjekk)
         })
         assertEquals("abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
-                     "Krever ${mockRolleTilgangssjekk.minimumBehandlerRolle}.",
+                     "Krever ${mockRolleTilgangssjekk.minimumBehandlerrolle}.",
                      exception.message)
     }
 

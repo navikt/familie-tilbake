@@ -14,7 +14,9 @@ import org.aspectj.lang.annotation.Before
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.lang.reflect.Field
@@ -33,10 +35,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @Before("execution(* no.nav.familie.tilbake.api.*.*(..)) && @annotation(rolleTilgangssjekk) ")
-    fun sjekkTilgang(joinpoint: JoinPoint, rolleTilgangssjekk: RolleTilgangssjekk) {
-        val minimumBehandlerRolle = rolleTilgangssjekk.minimumBehandlerRolle
-        val handling = rolleTilgangssjekk.handling
+    @Before("execution(* no.nav.familie.tilbake.api.*.*(..)) && @annotation(rolletilgangssjekk) ")
+    fun sjekkTilgang(joinpoint: JoinPoint, rolletilgangssjekk: Rolletilgangssjekk) {
+        val minimumBehandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
+        val handling = rolletilgangssjekk.handling
 
         val brukerRolleOgFagsystemstilgang = ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig)
 
@@ -44,29 +46,30 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         if (HttpMethod.POST.matches(httpRequest.method)) {
             validateFagsystemTilgangIPostRequest(joinpoint.args[0], brukerRolleOgFagsystemstilgang, handling)
         } else if (HttpMethod.GET.matches(httpRequest.method)) {
-            validateFagsystemTilgangIGetRequest(rolleTilgangssjekk.henteParam,
+            validateFagsystemTilgangIGetRequest(rolletilgangssjekk.henteParam,
                                                 joinpoint.args[0],
                                                 brukerRolleOgFagsystemstilgang,
                                                 handling)
         }
 
-        val høyesteRolletilgang = brukerRolleOgFagsystemstilgang.behandlerRolle
+        val høyesteRolletilgang = brukerRolleOgFagsystemstilgang.behandlerrolle
 
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw Feil(
                     message = "${ContextService.hentSaksbehandler()} med rolle $høyesteRolletilgang " +
                               "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                    frontendFeilmelding = "Du har ikke tilgang til å $handling."
+                    frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                    httpStatus = HttpStatus.FORBIDDEN
             )
         }
     }
 
     private fun validateFagsystemTilgangIGetRequest(param: String,
                                                     requestBody: Any,
-                                                    brukerRolleOgFagsystemstilgang: InnloggetBrukerTilgang,
+                                                    brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                                     handling: String) {
-        when {
-            behandlingIdParam == param -> {
+        when (param) {
+            behandlingIdParam -> {
                 val behandlingId = requestBody as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
 
@@ -74,14 +77,14 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
 
             }
-            ytelsestypeParam == param -> {
+            ytelsestypeParam -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.toString())
                 val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
 
                 // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
                 validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
             }
-            eksternBrukIdParam == param -> {
+            eksternBrukIdParam -> {
                 val eksternBrukId = requestBody as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
 
@@ -96,7 +99,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     }
 
     private fun validateFagsystemTilgangIPostRequest(requestBody: Any,
-                                                     brukerRolleOgFagsystemstilgang: InnloggetBrukerTilgang,
+                                                     brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                                      handling: String) {
         val ytelsestypeFinnesIRequest = requestBody.javaClass.declaredFields.any { "ytelsestype" == it.name }
         val behandlingIdFinnesIRequest = requestBody.javaClass.declaredFields.any { "behandlingId" == it.name }
@@ -142,7 +145,8 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     }
 
     private fun hentFagsystemAvBehandlingId(behandlingId: UUID): Fagsystem {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
+                         ?: throw Feil(message = "Behandling finnes ikke for $behandlingId", httpStatus = HttpStatus.BAD_REQUEST)
         return fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
     }
 
@@ -152,9 +156,9 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     }
 
     private fun validateFagsystem(fagsystem: Fagsystem,
-                                  brukerRolleOgFagsystemstilgang: InnloggetBrukerTilgang,
+                                  brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                   handling: String) {
-        if (rolleConfig.environmentName == "local" || BehandlerRolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerRolle) {
+        if (rolleConfig.environmentName == "local" || Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerrolle) {
             return
         }
         if (fagsystem != brukerRolleOgFagsystemstilgang.fagsystem) {
@@ -162,7 +166,8 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                  " har ikke tilgang til $handling",
                        frontendFeilmelding = "${ContextService.hentSaksbehandler()} med " +
                                              "${brukerRolleOgFagsystemstilgang.fagsystem}" +
-                                             " tilgang har ikke tilgang til $handling")
+                                             " tilgang har ikke tilgang til $handling",
+                       httpStatus = HttpStatus.FORBIDDEN)
         }
     }
 
