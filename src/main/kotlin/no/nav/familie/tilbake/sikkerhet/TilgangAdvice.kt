@@ -55,7 +55,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                                 handling)
         }
 
-        val høyesteRolletilgang = brukerRolleOgFagsystemstilgang.getRolle
+        val høyesteRolletilgang = brukerRolleOgFagsystemstilgang.rolle
 
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw Feil(
@@ -162,10 +162,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                   brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                   handling: String) {
         if (environment.activeProfiles.any { "local" == it } ||
-            Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.getRolle) {
+            Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.rolle) {
             return
         }
-        if (brukerRolleOgFagsystemstilgang.getTilganger.none { fagsystem == it }) {
+        if (brukerRolleOgFagsystemstilgang.tilganger.none { fagsystem == it }) {
             throw Feil(message = "${ContextService.hentSaksbehandler()} har ikke tilgang til $handling",
                        frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til $handling",
                        httpStatus = HttpStatus.FORBIDDEN)
