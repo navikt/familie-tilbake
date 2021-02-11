@@ -16,6 +16,7 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.aspectj.lang.JoinPoint
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.Mockito.`when`
@@ -56,6 +57,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         const val KONTANTSTØTTE_BESLUTTER_ROLLE = "kb123"
         const val KONTANTSTØTTE_SAKSBEHANDLER_ROLLE = "ks123"
         const val KONTANTSTØTTE_VEILEDER_ROLLE = "kv123"
+    }
+
+    @AfterEach
+    fun tearDown() {
+        RequestContextHolder.currentRequestAttributes().removeAttribute(SpringTokenValidationContextHolder::class.java.name, 0)
     }
 
 
