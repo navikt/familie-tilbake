@@ -153,6 +153,41 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
+    @Test
+    fun `sjekkTilgang skal ha tilgang i hent behandling request når bruker er fagsystem`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("VL", listOf())
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal ikke ha tilgang i hent behandling request når bruker er ukjent`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf())
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        val exception = assertFailsWith<RuntimeException>(block = {
+            tilgangAdvice.sjekkTilgang(mockJoinpoint,
+                                       mockRolleTilgangssjekk)
+        })
+        assertEquals("Bruker har ukjente grupper=[], har ikke tilgang til hent behandling",
+                     exception.message)
+    }
+
 
     private fun opprettBehandling(ytelsestype: Ytelsestype): Behandling {
         val fagsak = Fagsak(bruker = Bruker("1232"),

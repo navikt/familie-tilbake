@@ -10,14 +10,13 @@ enum class Behandlerrolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukertilgang(behandlerrolle: Behandlerrolle,
-                             fagsystem: Fagsystem? = null) {
+class InnloggetBrukertilgang {
 
-    var rolle = Behandlerrolle.UKJENT
-    val tilganger = mutableSetOf<Fagsystem>()
+    val tilganger = mutableMapOf<Fagsystem, Behandlerrolle>()
 
-    init {
-        fagsystem?.let { tilganger.add(it) }
-        rolle = behandlerrolle
+    fun leggTilTilgangerMedRolle(fagsystem: Fagsystem,
+                                 behandlerrolle: Behandlerrolle) {
+        tilganger[fagsystem] = behandlerrolle
     }
+
 }
