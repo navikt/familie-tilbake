@@ -75,7 +75,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
-        val token = opprettToken("abc", BARNETRYGD_BESLUTTER_ROLLE)
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
@@ -90,7 +90,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     fun `sjekkTilgang skal ikke ha tilgang for enslig beslutter i barnetrygd hent behandling request`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
-        val token = opprettToken("abc", ENSLIG_BESLUTTER_ROLLE)
+        val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
@@ -98,15 +98,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd hent behandling")
         `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
 
-        assertFailsWith<RuntimeException>(message = "abc med ENSLIG_FORELDER tilgang har ikke tilgang " +
-                                                    "til barnetrygd hent behandling",
+        assertFailsWith<RuntimeException>(message = "abc har ikke tilgang til barnetrygd hent behandling",
                                           block = { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) })
 
         val exception = assertFailsWith<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("abc med ENSLIG_FORELDER tilgang har ikke tilgang til ${mockRolleTilgangssjekk.handling}",
+        assertEquals("abc har ikke tilgang til ${mockRolleTilgangssjekk.handling}",
                      exception.message)
     }
 
@@ -123,7 +122,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                              enhetsnavn = "Oslo",
                                              revurderingsvedtaksdato = LocalDate.now(),
                                              varsel = varsel)
-        val token = opprettToken("abc", BARNETRYGD_VEILEDER_ROLLE)
+        val token = opprettToken("abc", listOf(BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
@@ -137,6 +136,21 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         assertEquals("abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
                      "Krever ${mockRolleTilgangssjekk.minimumBehandlerrolle}.",
                      exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i hent behandling request når saksbehandler har tilgang til enslig og barnetrygd`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
 
@@ -157,8 +171,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         return behandling
     }
 
-    private fun opprettToken(behandlerNavn: String, gruppeNavn: String): String {
-        val additionalParameters = mapOf("preferred_username" to behandlerNavn, "groups" to listOf(gruppeNavn))
+    private fun opprettToken(behandlerNavn: String, gruppeNavn: List<String>): String {
+        val additionalParameters = mapOf("preferred_username" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
         return Jwts.builder().setExpiration(calendar.time)

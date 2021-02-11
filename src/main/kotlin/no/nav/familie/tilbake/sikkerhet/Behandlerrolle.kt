@@ -10,5 +10,17 @@ enum class Behandlerrolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukertilgang(val behandlerrolle: Behandlerrolle,
-                             val fagsystem: Fagsystem? = null)
+class InnloggetBrukertilgang(behandlerrolle: Behandlerrolle,
+                             fagsystem: Fagsystem? = null) {
+
+    private var rolle = Behandlerrolle.UKJENT
+    private val tilganger = mutableSetOf<Fagsystem>()
+
+    init {
+        fagsystem?.let { tilganger.add(it) }
+        rolle = behandlerrolle
+    }
+
+    val getRolle: Behandlerrolle get() = rolle
+    val getTilganger: Set<Fagsystem> get() = tilganger
+}
