@@ -27,6 +27,13 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvfamilie-tilbake
   azure:
     application:
+      claims:
+        groups:
+          - id: 847e3d72-9dc1-41c3-80ff-f5d4acdd5d46 # 0000-GA-Barnetrygd
+          - id: 7a271f87-39fb-468b-a9ee-6cf3c070f548 # 0000-GA-Barnetrygd-Beslutter
+          - id: 199c2b39-e535-4ae8-ac59-8ccbee7991ae # 0000-GA-Barnetrygd-Veileder
+          - id: e40090eb-c2fb-400e-b412-e9084019a73b # 0000-GA-Kontantstøtte
+          - id: 54cd86b8-2e23-48b2-8852-b05b5827bb0f # 0000-GA-Kontantstøtte-Veileder
       enabled: true
   accessPolicy:
     inbound:
