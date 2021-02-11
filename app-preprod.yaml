@@ -24,6 +24,14 @@ spec:
     enabled: true
   azure:
     application:
+      claims:
+        groups:
+          - id: d21e00a4-969d-4b28-8782-dc818abfae65 # 0000-GA-Barnetrygd
+          - id: 9449c153-5a1e-44a7-84c6-7cc7a8867233 # 0000-GA-Barnetrygd-Beslutter
+          - id: 93a26831-9866-4410-927b-74ff51a9107c # 0000-GA-Barnetrygd-Veileder
+          - id: ee5e0b5e-454c-4612-b931-1fe363df7c2c # 0000-GA-Enslig-Forsorger-Saksbehandler
+          - id: 01166863-22f1-4e16-9785-d7a05a22df74 # 0000-GA-Enslig-Forsorger-Beslutter
+          - id: 19dcbfde-4cdb-4c64-a1ea-ac9802b03339 # 0000-GA-Enslig-Forsorger-Veileder
       enabled: true
       tenant: trygdeetaten.no
   accessPolicy:
