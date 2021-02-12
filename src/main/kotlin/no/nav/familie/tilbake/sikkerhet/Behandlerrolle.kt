@@ -16,7 +16,17 @@ class InnloggetBrukertilgang {
 
     fun leggTilTilgangerMedRolle(fagsystem: Fagsystem,
                                  behandlerrolle: Behandlerrolle) {
-        tilganger[fagsystem] = behandlerrolle
+        if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle)) {
+            tilganger[fagsystem] = behandlerrolle
+        }
+    }
+
+    private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem: Fagsystem,
+                                                        behandlerrolle: Behandlerrolle): Boolean {
+        if (tilganger.containsKey(fagsystem)) {
+            return tilganger[fagsystem]!!.nivå > behandlerrolle.nivå
+        }
+        return false
     }
 
 }
