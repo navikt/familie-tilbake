@@ -10,13 +10,4 @@ enum class Behandlerrolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukertilgang {
-
-    val tilganger = mutableMapOf<Fagsystem, Behandlerrolle>()
-
-    fun leggTilTilgangerMedRolle(fagsystem: Fagsystem,
-                                 behandlerrolle: Behandlerrolle) {
-        tilganger[fagsystem] = behandlerrolle
-    }
-
-}
+class InnloggetBrukertilgang(val tilganger: Map<Fagsystem, Behandlerrolle>)

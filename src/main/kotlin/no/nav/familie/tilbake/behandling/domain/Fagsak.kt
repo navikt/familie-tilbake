@@ -39,14 +39,14 @@ enum class Ytelsestype(val kode: String) {
 enum class Fagsystem(val kode: String, val tema: String) {
     BARNETRYGD("BA", "BAR"),
     ENSLIG_FORELDER("EF", "ENF"),
-    KONTANTSTØTTE("KS", "KON"),
+    KONTANTSTOTTE("KS", "KON"),
     SYSTEM_TILGANG("", ""); //brukes internt bare for tilgangsskontroll
     companion object {
 
         fun fraYtelsestype(type: Ytelsestype): Fagsystem {
             return when (type) {
                 Ytelsestype.BARNETRYGD -> BARNETRYGD
-                Ytelsestype.KONTANTSTØTTE -> KONTANTSTØTTE
+                Ytelsestype.KONTANTSTØTTE -> KONTANTSTOTTE
                 Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORELDER
                 Ytelsestype.BARNETILSYN -> ENSLIG_FORELDER
                 Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER

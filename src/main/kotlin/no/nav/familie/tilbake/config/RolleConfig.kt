@@ -1,34 +1,18 @@
 package no.nav.familie.tilbake.config
 
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Configuration
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 
-@Configuration
-class RolleConfig(
-        @Value("\${rolle.barnetrygd.beslutter}")
-        val beslutterRolleBarnetrygd: String,
+@ConfigurationProperties("familie.tilbake")
+@ConstructorBinding
+class RolleConfig(rolle: Map<Fagsystem, Map<Behandlerrolle, String>>) {
 
-        @Value("\${rolle.barnetrygd.saksbehandler}")
-        val saksbehandlerRolleBarnetrygd: String,
-
-        @Value("\${rolle.barnetrygd.veileder}")
-        val veilederRolleBarnetrygd: String,
-
-        @Value("\${rolle.enslig.beslutter}")
-        val beslutterRolleEnslig: String,
-
-        @Value("\${rolle.enslig.saksbehandler}")
-        val saksbehandlerRolleEnslig: String,
-
-        @Value("\${rolle.enslig.veileder}")
-        val veilederRolleEnslig: String,
-
-        @Value("\${rolle.kontantstøtte.beslutter}")
-        val beslutterRolleKontantStøtte: String,
-
-        @Value("\${rolle.kontantstøtte.saksbehandler}")
-        val saksbehandlerRolleKontantStøtte: String,
-
-        @Value("\${rolle.kontantstøtte.veileder}")
-        val veilederRolleKontantStøtte: String,
-)
+    val rolleMap =
+            rolle.map {
+                it.value.entries.map { rolleMap ->
+                    rolleMap.value to (it.key to rolleMap.key)
+                }
+            }.flatten().toMap()
+}

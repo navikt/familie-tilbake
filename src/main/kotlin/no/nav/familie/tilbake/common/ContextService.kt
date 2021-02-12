@@ -36,55 +36,23 @@ object ContextService {
                                                                handling: String,
                                                                environment: Environment): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
-        val innloggetBrukertilgang = InnloggetBrukertilgang()
-        if (saksbehandler == SYSTEM_FORKORTELSE || environment.activeProfiles.any { "local" == it }) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.SYSTEM_TILGANG,
-                                                            behandlerrolle = Behandlerrolle.SYSTEM)
-        }
-        val grupper = hentGrupper()
 
-        if (grupper.contains(rolleConfig.beslutterRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
+        val rollerMedTilgang =
+                hentGrupper().map {
+                    rolleConfig.rolleMap[it]
+                }.filterNotNull()
+                        .toMap()
+
+        if (saksbehandler == SYSTEM_FORKORTELSE || environment.activeProfiles.any { "local" == it }) {
+            return InnloggetBrukertilgang(rollerMedTilgang.plus(Fagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM))
         }
-        if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
-        }
-        if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
-        }
-        if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
-        }
-        if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
-        }
-        if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
-        }
-        if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
-        }
-        if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
-        }
-        if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
-        }
-        if (innloggetBrukertilgang.tilganger.isEmpty()) {
-            throw Feil(message = "Bruker har ukjente grupper=$grupper, har ikke tilgang til $handling",
-                       frontendFeilmelding = "Bruker har ukjente grupper=$grupper, har ikke tilgang til $handling",
+
+        if (rollerMedTilgang.isEmpty()) {
+            throw Feil(message = "Bruker har mangler tilgang til $handling",
+                       frontendFeilmelding = "Bruker har mangler tilgang til $handling",
                        httpStatus = HttpStatus.FORBIDDEN)
         }
-        return innloggetBrukertilgang
-    }
 
+        return InnloggetBrukertilgang(rollerMedTilgang)
+    }
 }

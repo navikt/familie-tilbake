@@ -22,3 +22,19 @@ SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvid
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 PDL_URL: #Mockes ut lokalt
+
+familie:
+  tilbake:
+    rolle:
+      BARNETRYGD:
+        VEILEDER: "a"
+        SAKSBEHANDLER: "b"
+        BESLUTTER: "c"
+      ENSLIG_FORELDER:
+        VEILEDER: "d"
+        SAKSBEHANDLER: "e"
+        BESLUTTER: "f"
+      KONTANTSTOTTE:
+        VEILEDER: "g"
+        SAKSBEHANDLER: "h"
+        BESLUTTER: "i"

@@ -76,16 +76,18 @@ FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
 
-rolle:
-  barnetrygd:
-    veileder: ""
-    saksbehandler: ""
-    beslutter: ""
-  enslig:
-    veileder: ""
-    saksbehandler: ""
-    beslutter: ""
-  kontantstøtte:
-    veileder: ""
-    saksbehandler: ""
-    beslutter: ""
+familie:
+  tilbake:
+    rolle:
+      BARNETRYGD:
+        VEILEDER: ""
+        SAKSBEHANDLER: ""
+        BESLUTTER: ""
+      ENSLIG_FORELDER:
+        VEILEDER: ""
+        SAKSBEHANDLER: ""
+        BESLUTTER: ""
+      KONTANTSTOTTE:
+        VEILEDER: ""
+        SAKSBEHANDLER: ""
+        BESLUTTER: ""

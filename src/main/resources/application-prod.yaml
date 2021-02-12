@@ -14,15 +14,15 @@ spring:
 SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
 
 rolle:
-  barnetrygd:
-    veileder: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"
-    saksbehandler: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"
-    beslutter: "7a271f87-39fb-468b-a9ee-6cf3c070f548"
-  enslig:
-    veileder: ""
-    saksbehandler: ""
-    beslutter: ""
-  kontantstøtte:
-    veileder: "54cd86b8-2e23-48b2-8852-b05b5827bb0f"
-    saksbehandler: "e40090eb-c2fb-400e-b412-e9084019a73b"
-    beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
+  BARNETRYGD:
+    VEILEDER: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"
+    SAKSBEHANDLER: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"
+    BESLUTTER: "7a271f87-39fb-468b-a9ee-6cf3c070f548"
+  ENSLIG_FORELDER:
+    VEILEDER: ""
+    SAKSBEHANDLER: ""
+    BESLUTTER: ""
+  KONTANTSTOTTE:
+    VEILEDER: "54cd86b8-2e23-48b2-8852-b05b5827bb0f"
+    SAKSBEHANDLER: "e40090eb-c2fb-400e-b412-e9084019a73b"
+    BESLUTTER: "e40090eb-c2fb-400e-b412-e9084019a73b"

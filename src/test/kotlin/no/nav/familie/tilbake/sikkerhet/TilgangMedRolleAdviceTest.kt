@@ -33,16 +33,16 @@ import java.util.Calendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-@TestPropertySource(properties = ["rolle.barnetrygd.beslutter=bb123",
-    "rolle.barnetrygd.saksbehandler=bs123",
-    "rolle.barnetrygd.veileder=bv123",
-    "rolle.enslig.beslutter=eb123",
-    "rolle.enslig.saksbehandler=es123",
-    "rolle.enslig.veileder=ev123",
-    "rolle.kontantstøtte.beslutter = kb123",
-    "rolle.kontantstøtte.saksbehandler = ks123",
-    "rolle.kontantstøtte.veileder = kv123"])
-internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
+@TestPropertySource(properties = ["familie.tilbake.rolle.BARNETRYGD.BESLUTTER=bb123",
+    "familie.tilbake.rolle.BARNETRYGD.SAKSBEHANDLER=bs123",
+    "familie.tilbake.rolle.BARNETRYGD.VEILEDER=bv123",
+    "familie.tilbake.rolle.ENSLIG_FORELDER.BESLUTTER=eb123",
+    "familie.tilbake.rolle.ENSLIG_FORELDER.SAKSBEHANDLER=es123",
+    "familie.tilbake.rolle.ENSLIG_FORELDER.VEILEDER=ev123",
+    "familie.tilbake.rolle.KONTANTSTOTTE.BESLUTTER = kb123",
+    "familie.tilbake.rolle.KONTANTSTOTTE.SAKSBEHANDLER = ks123",
+    "familie.tilbake.rolle.KONTANTSTOTTE.VEILEDER = kv123"])
+internal class TilgangMedRolleAdviceTest : OppslagSpringRunnerTest() {
 
     companion object {
 
@@ -184,7 +184,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("Bruker har ukjente grupper=[], har ikke tilgang til hent behandling",
+        assertEquals("Bruker har mangler tilgang til hent behandling",
                      exception.message)
     }
 
