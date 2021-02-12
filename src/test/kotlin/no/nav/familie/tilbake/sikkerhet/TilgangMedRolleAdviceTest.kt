@@ -139,6 +139,29 @@ internal class TilgangMedRolleAdviceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `sjekkTilgang skal ha tilgang i barnetrygd opprett behandling request når bruker både er beslutter og veileder`() {
+        val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
+        val opprettBehandlingRequest =
+                OpprettTilbakekrevingRequest(ytelsestype = no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD,
+                                             eksternFagsakId = "123",
+                                             personIdent = PersonIdent("123434"),
+                                             eksternId = "123",
+                                             manueltOpprettet = false,
+                                             enhetId = "8020",
+                                             enhetsnavn = "Oslo",
+                                             revurderingsvedtaksdato = LocalDate.now(),
+                                             varsel = varsel)
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
+        opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
     fun `sjekkTilgang skal ha tilgang i hent behandling request når saksbehandler har tilgang til enslig og barnetrygd`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
