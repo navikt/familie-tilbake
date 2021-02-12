@@ -73,8 +73,8 @@ class PdlClientTest {
                                            .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
 
 
-        assertFailsWith<RuntimeException>(message = "Fant ikke person, Ikke tilgang",
-                                          block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD) })
+        val exception = assertFailsWith<RuntimeException>(block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD) })
+        assertEquals("Feil ved oppslag på person: Fant ikke person, Ikke tilgang", exception.message)
     }
 
 

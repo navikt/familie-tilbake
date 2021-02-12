@@ -117,7 +117,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentBehandlingskontekst skal hente behandling som ikke kan henlegges med verge`() {
+    fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
@@ -147,8 +147,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling skal ikke hente behandling når behandling ikke finnes`() {
         val behandlingId = UUID.randomUUID()
-        assertFailsWith<RuntimeException>(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                                          block = { behandlingService.hentBehandling(behandlingId) })
+        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.hentBehandling(behandlingId) })
+        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
