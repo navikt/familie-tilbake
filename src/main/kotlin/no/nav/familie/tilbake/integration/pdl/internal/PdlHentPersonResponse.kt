@@ -42,8 +42,14 @@ data class PdlErrorLocation(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlErrorExtension(
         val code: String?,
+        val details: PdlErrorDetails,
         val classification: String
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlErrorDetails(val type: String,
+                           val cause: String,
+                           val policy: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlNavn(val fornavn: String,
