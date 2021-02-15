@@ -12,7 +12,7 @@ import java.util.UUID
 data class FagsakDto(val eksternFagsakId: String,
                      val status: Fagsaksstatus,
                      val ytelsestype: Ytelsestype,
-                     val fagsystemskode: String,
+                     val fagsystem: String,
                      val språkkode: String,
                      val bruker: BrukerDto,
                      val behandlinger: Set<BehandlingsoppsummeringDto>)
