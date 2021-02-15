@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.tilbake.api.dto.FagsakResponsDto
+import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -27,7 +27,7 @@ class FagsakController(val fagsakService: FagsakService) {
                         handling = "Henter fagsak informasjon med bruker og behandlinger",
                         henteParam = "ytelsestype")
     fun hentFagsak(@NotNull @RequestParam("ytelse") ytelsestype: Ytelsestype,
-                   @NotNull @RequestParam("fagsak") eksternFagsakId: String): Ressurs<FagsakResponsDto> {
+                   @NotNull @RequestParam("fagsak") eksternFagsakId: String): Ressurs<FagsakDto> {
         return Ressurs.success(fagsakService.hentFagsak(ytelsestype, eksternFagsakId))
     }
 }

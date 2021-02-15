@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -32,21 +33,20 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
-        val fagsakResponsDto = fagsakService.hentFagsak(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        val fagsakDto = fagsakService.hentFagsak(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
-        val fagsakDto = fagsakResponsDto.fagsak
         assertEquals(eksternFagsakId, fagsakDto.eksternFagsakId)
         assertEquals("NB", fagsakDto.språkkode)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsakDto.status)
         assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
 
         val brukerDto = fagsakDto.bruker
-        assertEquals("123", brukerDto.søkerFødselsnummer)
+        assertEquals(PersonIdent("123"), brukerDto.søkerFødselsnummer)
         assertEquals("testverdi", brukerDto.navn)
         assertEquals(Kjønn.MANN, brukerDto.kjønn)
         assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
 
-        val behandlinger = fagsakResponsDto.behandlinger
+        val behandlinger = fagsakDto.behandlinger
         assertEquals(1, behandlinger.size)
         val behandlingsoppsummeringtDto = behandlinger.toList().get(0)
         assertEquals(behandling.id, behandlingsoppsummeringtDto.behandlingId)

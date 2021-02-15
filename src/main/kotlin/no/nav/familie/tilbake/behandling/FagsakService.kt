@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.tilbake.api.dto.FagsakResponsDto
+import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.person.PersonService
@@ -14,7 +14,7 @@ class FagsakService(val fagsakRepository: FagsakRepository,
                     val personService: PersonService) {
 
     @Transactional(readOnly = true)
-    fun hentFagsak(ytelsestype: Ytelsestype, eksternFagsakId: String): FagsakResponsDto {
+    fun hentFagsak(ytelsestype: Ytelsestype, eksternFagsakId: String): FagsakDto {
         val fagsak = fagsakRepository.findByYtelsestypeAndEksternFagsakId(ytelsestype = ytelsestype,
                                                                           eksternFagsakId = eksternFagsakId)
                      ?: throw Feil(
