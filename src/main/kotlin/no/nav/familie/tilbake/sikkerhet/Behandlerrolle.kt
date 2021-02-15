@@ -10,5 +10,4 @@ enum class Behandlerrolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukertilgang(val behandlerrolle: Behandlerrolle,
-                             val fagsystem: Fagsystem? = null)
+class InnloggetBrukertilgang(val tilganger: Map<Fagsystem, Behandlerrolle>)

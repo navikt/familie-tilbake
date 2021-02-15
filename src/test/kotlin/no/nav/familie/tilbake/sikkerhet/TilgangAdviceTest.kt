@@ -33,15 +33,15 @@ import java.util.Calendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-@TestPropertySource(properties = arrayOf("rolle.barnetrygd.beslutter=bb123",
-                                         "rolle.barnetrygd.saksbehandler=bs123",
-                                         "rolle.barnetrygd.veileder=bv123",
-                                         "rolle.enslig.beslutter=eb123",
-                                         "rolle.enslig.saksbehandler=es123",
-                                         "rolle.enslig.veileder=ev123",
-                                         "rolle.kontantstøtte.beslutter = kb123",
-                                         "rolle.kontantstøtte.saksbehandler = ks123",
-                                         "rolle.kontantstøtte.veileder = kv123"))
+@TestPropertySource(properties = ["rolle.barnetrygd.beslutter=bb123",
+    "rolle.barnetrygd.saksbehandler=bs123",
+    "rolle.barnetrygd.veileder=bv123",
+    "rolle.enslig.beslutter=eb123",
+    "rolle.enslig.saksbehandler=es123",
+    "rolle.enslig.veileder=ev123",
+    "rolle.kontantstøtte.beslutter = kb123",
+    "rolle.kontantstøtte.saksbehandler = ks123",
+    "rolle.kontantstøtte.veileder = kv123"])
 internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     companion object {
@@ -75,7 +75,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
-        val token = opprettToken("abc", BARNETRYGD_BESLUTTER_ROLLE)
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
@@ -90,7 +90,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     fun `sjekkTilgang skal ikke ha tilgang for enslig beslutter i barnetrygd hent behandling request`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
-        val token = opprettToken("abc", ENSLIG_BESLUTTER_ROLLE)
+        val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
@@ -98,15 +98,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd hent behandling")
         `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
 
-        assertFailsWith<RuntimeException>(message = "abc med ENSLIG_FORELDER tilgang har ikke tilgang " +
-                                                    "til barnetrygd hent behandling",
+        assertFailsWith<RuntimeException>(message = "abc har ikke tilgang til barnetrygd hent behandling",
                                           block = { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) })
 
         val exception = assertFailsWith<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("abc med ENSLIG_FORELDER tilgang har ikke tilgang til ${mockRolleTilgangssjekk.handling}",
+        assertEquals("abc har ikke tilgang til ${mockRolleTilgangssjekk.handling}",
                      exception.message)
     }
 
@@ -123,7 +122,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                              enhetsnavn = "Oslo",
                                              revurderingsvedtaksdato = LocalDate.now(),
                                              varsel = varsel)
-        val token = opprettToken("abc", BARNETRYGD_VEILEDER_ROLLE)
+        val token = opprettToken("abc", listOf(BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
         `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
@@ -136,6 +135,79 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         })
         assertEquals("abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
                      "Krever ${mockRolleTilgangssjekk.minimumBehandlerrolle}.",
+                     exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i barnetrygd opprett behandling request når bruker både er beslutter og veileder`() {
+        val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
+        val opprettBehandlingRequest =
+                OpprettTilbakekrevingRequest(ytelsestype = no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD,
+                                             eksternFagsakId = "123",
+                                             personIdent = PersonIdent("123434"),
+                                             eksternId = "123",
+                                             manueltOpprettet = false,
+                                             enhetId = "8020",
+                                             enhetsnavn = "Oslo",
+                                             revurderingsvedtaksdato = LocalDate.now(),
+                                             varsel = varsel)
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
+        opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i hent behandling request når saksbehandler har tilgang til enslig og barnetrygd`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i hent behandling request når bruker er fagsystem`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("VL", listOf())
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal ikke ha tilgang i hent behandling request når bruker er ukjent`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf())
+        opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
+
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
+        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
+        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
+        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+
+        val exception = assertFailsWith<RuntimeException>(block = {
+            tilgangAdvice.sjekkTilgang(mockJoinpoint,
+                                       mockRolleTilgangssjekk)
+        })
+        assertEquals("Bruker har mangler tilgang til hent behandling",
                      exception.message)
     }
 
@@ -157,8 +229,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         return behandling
     }
 
-    private fun opprettToken(behandlerNavn: String, gruppeNavn: String): String {
-        val additionalParameters = mapOf("preferred_username" to behandlerNavn, "groups" to listOf(gruppeNavn))
+    private fun opprettToken(behandlerNavn: String, gruppeNavn: List<String>): String {
+        val additionalParameters = mapOf("preferred_username" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
         return Jwts.builder().setExpiration(calendar.time)

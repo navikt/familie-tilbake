@@ -33,6 +33,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
     private final val behandlingIdParam = "behandlingId"
     private final val ytelsestypeParam = "ytelsestype"
+    private final val fagsystemParam = "fagsystem"
     private final val eksternBrukIdParam = "eksternBrukId"
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -43,56 +44,55 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         val handling = rolletilgangssjekk.handling
 
         val brukerRolleOgFagsystemstilgang =
-                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, environment)
+                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, environment)
 
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         if (HttpMethod.POST.matches(httpRequest.method)) {
-            validateFagsystemTilgangIPostRequest(joinpoint.args[0], brukerRolleOgFagsystemstilgang, handling)
+            validateFagsystemTilgangIPostRequest(joinpoint.args[0], brukerRolleOgFagsystemstilgang,
+                                                 minimumBehandlerRolle, handling)
         } else if (HttpMethod.GET.matches(httpRequest.method)) {
             validateFagsystemTilgangIGetRequest(rolletilgangssjekk.henteParam,
                                                 joinpoint.args[0],
                                                 brukerRolleOgFagsystemstilgang,
+                                                minimumBehandlerRolle,
                                                 handling)
         }
 
-        val høyesteRolletilgang = brukerRolleOgFagsystemstilgang.behandlerrolle
-
-        if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
-            throw Feil(
-                    message = "${ContextService.hentSaksbehandler()} med rolle $høyesteRolletilgang " +
-                              "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                    frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                    httpStatus = HttpStatus.FORBIDDEN
-            )
-        }
     }
 
     private fun validateFagsystemTilgangIGetRequest(param: String,
                                                     requestBody: Any,
                                                     brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
+                                                    minimumBehandlerRolle: Behandlerrolle,
                                                     handling: String) {
         when (param) {
             behandlingIdParam -> {
                 val behandlingId = requestBody as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
 
             }
             ytelsestypeParam -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.toString())
                 val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+            }
+            fagsystemParam -> {
+                val fagsystem = Fagsystem.fraKode(requestBody.toString())
+
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             eksternBrukIdParam -> {
                 val eksternBrukId = requestBody as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             else -> {
                 logger.info("$handling kan ikke valideres for tilgangssjekk. " +
@@ -103,6 +103,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
     private fun validateFagsystemTilgangIPostRequest(requestBody: Any,
                                                      brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
+                                                     minimumBehandlerRolle: Behandlerrolle,
                                                      handling: String) {
         val ytelsestypeFinnesIRequest = requestBody.javaClass.declaredFields.any { "ytelsestype" == it.name }
         val behandlingIdFinnesIRequest = requestBody.javaClass.declaredFields.any { "behandlingId" == it.name }
@@ -114,24 +115,24 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val ytelsestype = Ytelsestype.valueOf(felt.get(requestBody).toString())
                 val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             behandlingIdFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = behandlingIdParam, requestBody = requestBody)
                 val behandlingId: UUID = felt.get(requestBody) as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             eksternBrukIdFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = eksternBrukIdParam, requestBody = requestBody)
                 val eksternBrukId: UUID = felt.get(requestBody) as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
 
-                // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-                validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             else -> {
                 logger.info("$handling kan ikke valideres for tilgangssjekk. " +
@@ -158,20 +159,45 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         return fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
     }
 
+    private fun validate(fagsystem: Fagsystem,
+                         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
+                         minimumBehandlerRolle: Behandlerrolle,
+                         handling: String) {
+        if (environment.activeProfiles.any { "local" == it } ||
+            brukerRolleOgFagsystemstilgang.tilganger.containsValue(Behandlerrolle.SYSTEM)) {
+            return
+        }
+
+        // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
+        validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+
+        // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
+        validateRolle(brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(fagsystem),
+                      minimumBehandlerRolle = minimumBehandlerRolle,
+                      handling = handling)
+    }
+
     private fun validateFagsystem(fagsystem: Fagsystem,
                                   brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                   handling: String) {
-        if (environment.activeProfiles.any { "local" == it } ||
-                Behandlerrolle.SYSTEM == brukerRolleOgFagsystemstilgang.behandlerrolle) {
-            return
-        }
-        if (fagsystem != brukerRolleOgFagsystemstilgang.fagsystem) {
-            throw Feil(message = "${ContextService.hentSaksbehandler()} med ${brukerRolleOgFagsystemstilgang.fagsystem} tilgang" +
-                                 " har ikke tilgang til $handling",
-                       frontendFeilmelding = "${ContextService.hentSaksbehandler()} med " +
-                                             "${brukerRolleOgFagsystemstilgang.fagsystem}" +
-                                             " tilgang har ikke tilgang til $handling",
+        if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
+            throw Feil(message = "${ContextService.hentSaksbehandler()} har ikke tilgang til $handling",
+                       frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til $handling",
                        httpStatus = HttpStatus.FORBIDDEN)
+        }
+    }
+
+    private fun validateRolle(brukersrolleTilFagsystemet: Behandlerrolle,
+                              minimumBehandlerRolle: Behandlerrolle,
+                              handling: String) {
+
+        if (minimumBehandlerRolle.nivå > brukersrolleTilFagsystemet.nivå) {
+            throw Feil(
+                    message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                              "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                    frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                    httpStatus = HttpStatus.FORBIDDEN
+            )
         }
     }
 

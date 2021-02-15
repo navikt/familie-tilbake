@@ -1,11 +1,13 @@
 package no.nav.familie.tilbake.common
 
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
 
 object ContextService {
 
@@ -31,39 +33,84 @@ object ContextService {
     }
 
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig,
+                                                               handling: String,
                                                                environment: Environment): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
-        if (saksbehandler == SYSTEM_FORKORTELSE) return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
-        if (environment.activeProfiles.any { "local" == it }) {
-            return InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SYSTEM)
+        val brukerTilganger = mutableMapOf<Fagsystem, Behandlerrolle>()
+        if (saksbehandler == SYSTEM_FORKORTELSE || environment.activeProfiles.any { "local" == it }) {
+            brukerTilganger[Fagsystem.SYSTEM_TILGANG] = Behandlerrolle.SYSTEM
         }
-
         val grupper = hentGrupper()
 
-        return when {
-            grupper.contains(rolleConfig.beslutterRolleBarnetrygd) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.BARNETRYGD)
-            grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER, fagsystem = Fagsystem.BARNETRYGD)
-            grupper.contains(rolleConfig.veilederRolleBarnetrygd) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.BARNETRYGD)
-
-            grupper.contains(rolleConfig.beslutterRolleEnslig) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.ENSLIG_FORELDER)
-            grupper.contains(rolleConfig.saksbehandlerRolleEnslig) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                                       fagsystem = Fagsystem.ENSLIG_FORELDER)
-            grupper.contains(rolleConfig.veilederRolleEnslig) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.ENSLIG_FORELDER)
-
-            grupper.contains(rolleConfig.beslutterRolleKontantStøtte) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.BESLUTTER, fagsystem = Fagsystem.KONTANTSTØTTE)
-            grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.SAKSBEHANDLER, fagsystem = Fagsystem.KONTANTSTØTTE)
-            grupper.contains(rolleConfig.veilederRolleKontantStøtte) ->
-                InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.VEILEDER, fagsystem = Fagsystem.KONTANTSTØTTE)
-            else -> InnloggetBrukertilgang(behandlerrolle = Behandlerrolle.UKJENT)
+        if (grupper.contains(rolleConfig.beslutterRolleBarnetrygd)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
         }
+        if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (grupper.contains(rolleConfig.veilederRolleKontantStøtte)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
+        }
+        if (brukerTilganger.isEmpty()) {
+            throw Feil(message = "Bruker har mangler tilgang til $handling",
+                       frontendFeilmelding = "Bruker har mangler tilgang til $handling",
+                       httpStatus = HttpStatus.FORBIDDEN)
+        }
+
+        return InnloggetBrukertilgang(brukerTilganger.toMap())
     }
 
+    private fun hentTilgangMedRolle(fagsystem: Fagsystem,
+                                    behandlerrolle: Behandlerrolle,
+                                    brukerTilganger: Map<Fagsystem, Behandlerrolle>): Map<Fagsystem, Behandlerrolle> {
+        if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle, brukerTilganger)) {
+            return mapOf(fagsystem to behandlerrolle)
+        }
+        return emptyMap()
+    }
+
+    private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem: Fagsystem,
+                                                                behandlerrolle: Behandlerrolle,
+                                                                brukerTilganger: Map<Fagsystem, Behandlerrolle>): Boolean {
+        if (brukerTilganger.containsKey(fagsystem)) {
+            return brukerTilganger[fagsystem]!!.nivå > behandlerrolle.nivå
+        }
+        return false
+    }
 }
