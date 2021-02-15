@@ -13,7 +13,7 @@ object FagsakMapper {
     fun tilRespons(fagsak: Fagsak,
                    personInfo: PersonInfo,
                    behandlinger: List<Behandling>): FagsakDto {
-        val bruker = BrukerDto(søkerFødselsnummer = PersonIdent(fagsak.bruker.ident),
+        val bruker = BrukerDto(personIdent = PersonIdent(fagsak.bruker.ident),
                                navn = personInfo.navn,
                                fødselsdato = personInfo.fødselsdato,
                                kjønn = personInfo.kjønn)

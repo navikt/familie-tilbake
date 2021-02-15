@@ -16,7 +16,7 @@ data class FagsakDto(val eksternFagsakId: String,
                      val bruker: BrukerDto,
                      val behandlinger: Set<BehandlingsoppsummeringDto>)
 
-data class BrukerDto(val søkerFødselsnummer: PersonIdent,
+data class BrukerDto(val personIdent: PersonIdent,
                      val navn: String,
                      val fødselsdato: LocalDate,
                      val kjønn: Kjønn)

@@ -41,7 +41,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
 
         val brukerDto = fagsakDto.bruker
-        assertEquals(PersonIdent("123"), brukerDto.søkerFødselsnummer)
+        assertEquals(PersonIdent("123"), brukerDto.personIdent)
         assertEquals("testverdi", brukerDto.navn)
         assertEquals(Kjønn.MANN, brukerDto.kjønn)
         assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
