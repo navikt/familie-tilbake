@@ -26,7 +26,24 @@ data class PdlPersonData(@JsonProperty("foedsel") val fødsel: List<PdlFødselsD
 data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlError(val message: String)
+data class PdlError(
+        val message: String,
+        val locations: List<PdlErrorLocation>,
+        val path: List<String>?,
+        val extensions: PdlErrorExtension
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlErrorLocation(
+        val line: Int?,
+        val column: Int?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlErrorExtension(
+        val code: String?,
+        val classification: String
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlNavn(val fornavn: String,

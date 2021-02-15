@@ -34,7 +34,6 @@ class PdlClient(val pdlConfig: PdlConfig,
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
                                                                       pdlPersonRequest,
                                                                       httpHeaders(fagsystem))
-        logger.info("respons fra PDL= $respons")
         if (!respons.harFeil()) {
             return Result.runCatching {
                 respons.data.person!!.let {
@@ -52,6 +51,7 @@ class PdlClient(val pdlConfig: PdlConfig,
                     }
             )
         } else {
+            logger.warn("Respons fra PDL:$respons")
             throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                        frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${respons.errorMessages()}",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
