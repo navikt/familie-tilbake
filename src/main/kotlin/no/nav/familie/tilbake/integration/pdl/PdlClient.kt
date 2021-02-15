@@ -12,6 +12,8 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -24,15 +26,18 @@ class PdlClient(val pdlConfig: PdlConfig,
                 @Qualifier("sts") val restTemplate: RestOperations,
                 private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): PersonInfo {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = PdlConfig.hentEnkelPersonQuery)
-        val response: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
-                                                                       pdlPersonRequest,
-                                                                       httpHeaders(fagsystem))
-        if (!response.harFeil()) {
+        val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
+                                                                      pdlPersonRequest,
+                                                                      httpHeaders(fagsystem))
+        logger.info("respons fra PDL= $respons")
+        if (!respons.harFeil()) {
             return Result.runCatching {
-                response.data.person!!.let {
+                respons.data.person!!.let {
                     PersonInfo(fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                                navn = it.navn.first().fulltNavn(),
                                kjønn = it.kjønn.first().kjønn)
@@ -47,8 +52,8 @@ class PdlClient(val pdlConfig: PdlConfig,
                     }
             )
         } else {
-            throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
-                       frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
+            throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
+                       frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${respons.errorMessages()}",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
