@@ -39,6 +39,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         assertEquals("NB", fagsakDto.språkkode)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsakDto.status)
         assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
+        assertEquals(Fagsystem.BARNETRYGD.kode, fagsakDto.fagsystemskode)
 
         val brukerDto = fagsakDto.bruker
         assertEquals(PersonIdent("123"), brukerDto.personIdent)
