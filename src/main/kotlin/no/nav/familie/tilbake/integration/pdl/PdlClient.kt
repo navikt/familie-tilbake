@@ -4,6 +4,7 @@ package no.nav.familie.tilbake.integration.pdl
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.journalpost.Tema
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
@@ -51,7 +52,8 @@ class PdlClient(val pdlConfig: PdlConfig,
                     }
             )
         } else {
-            logger.warn("Respons fra PDL:$respons")
+
+            logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
             throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                        frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${respons.errorMessages()}",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
