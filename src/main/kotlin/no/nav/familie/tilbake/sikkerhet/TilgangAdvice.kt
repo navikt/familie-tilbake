@@ -33,6 +33,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
     private final val behandlingIdParam = "behandlingId"
     private final val ytelsestypeParam = "ytelsestype"
+    private final val fagsystemParam = "fagsystem"
     private final val eksternBrukIdParam = "eksternBrukId"
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -76,6 +77,12 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
             ytelsestypeParam -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.toString())
                 val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
+
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+            }
+            fagsystemParam -> {
+                val fagsystem = Fagsystem.fraKode(requestBody.toString())
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)

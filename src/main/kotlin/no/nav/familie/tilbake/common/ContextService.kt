@@ -36,55 +36,81 @@ object ContextService {
                                                                handling: String,
                                                                environment: Environment): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
-        val innloggetBrukertilgang = InnloggetBrukertilgang()
+        val brukerTilganger = mutableMapOf<Fagsystem, Behandlerrolle>()
         if (saksbehandler == SYSTEM_FORKORTELSE || environment.activeProfiles.any { "local" == it }) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.SYSTEM_TILGANG,
-                                                            behandlerrolle = Behandlerrolle.SYSTEM)
+            brukerTilganger[Fagsystem.SYSTEM_TILGANG] = Behandlerrolle.SYSTEM
         }
         val grupper = hentGrupper()
 
         if (grupper.contains(rolleConfig.beslutterRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.BARNETRYGD,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.BESLUTTER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
+                                                       brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.SAKSBEHANDLER)
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                                                       brukerTilganger = brukerTilganger))
         }
-        if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            innloggetBrukertilgang.leggTilTilgangerMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
-                                                            behandlerrolle = Behandlerrolle.VEILEDER)
+        if (grupper.contains(rolleConfig.veilederRolleKontantStøtte)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+                                                       behandlerrolle = Behandlerrolle.VEILEDER,
+                                                       brukerTilganger = brukerTilganger))
         }
-        if (innloggetBrukertilgang.tilganger.isEmpty()) {
-            throw Feil(message = "Bruker har ukjente grupper=$grupper, har ikke tilgang til $handling",
-                       frontendFeilmelding = "Bruker har ukjente grupper=$grupper, har ikke tilgang til $handling",
+        if (brukerTilganger.isEmpty()) {
+            throw Feil(message = "Bruker har mangler tilgang til $handling",
+                       frontendFeilmelding = "Bruker har mangler tilgang til $handling",
                        httpStatus = HttpStatus.FORBIDDEN)
         }
-        return innloggetBrukertilgang
+
+        return InnloggetBrukertilgang(brukerTilganger.toMap())
     }
 
+    private fun hentTilgangMedRolle(fagsystem: Fagsystem,
+                                    behandlerrolle: Behandlerrolle,
+                                    brukerTilganger: Map<Fagsystem, Behandlerrolle>): Map<Fagsystem, Behandlerrolle> {
+        if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle, brukerTilganger)) {
+            return mapOf(fagsystem to behandlerrolle)
+        }
+        return emptyMap()
+    }
+
+    private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem: Fagsystem,
+                                                                behandlerrolle: Behandlerrolle,
+                                                                brukerTilganger: Map<Fagsystem, Behandlerrolle>): Boolean {
+        if (brukerTilganger.containsKey(fagsystem)) {
+            return brukerTilganger[fagsystem]!!.nivå > behandlerrolle.nivå
+        }
+        return false
+    }
 }

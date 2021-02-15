@@ -207,7 +207,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("Bruker har ukjente grupper=[], har ikke tilgang til hent behandling",
+        assertEquals("Bruker har mangler tilgang til hent behandling",
                      exception.message)
     }
 

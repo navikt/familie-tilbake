@@ -52,6 +52,15 @@ enum class Fagsystem(val kode: String, val tema: String) {
                 Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER
             }
         }
+
+       fun fraKode(kode: String): Fagsystem  {
+           for (fagsystem in values()) {
+               if (fagsystem.kode == kode) {
+                   return fagsystem
+               }
+           }
+           throw IllegalArgumentException("Fagsystem finnes ikke for kode $kode")
+       }
     }
 }
 
