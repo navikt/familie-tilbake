@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.api
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.FagsakService
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,9 +25,9 @@ class FagsakController(val fagsakService: FagsakService) {
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter fagsak informasjon med bruker og behandlinger",
-                        henteParam = "ytelsestype")
-    fun hentFagsak(@NotNull @RequestParam("ytelse") ytelsestype: Ytelsestype,
+                        henteParam = "fagsystem")
+    fun hentFagsak(@NotNull @RequestParam("fagsystem") fagsystemKode: String,
                    @NotNull @RequestParam("fagsak") eksternFagsakId: String): Ressurs<FagsakDto> {
-        return Ressurs.success(fagsakService.hentFagsak(ytelsestype, eksternFagsakId))
+        return Ressurs.success(fagsakService.hentFagsak(Fagsystem.fraKode(fagsystemKode), eksternFagsakId))
     }
 }

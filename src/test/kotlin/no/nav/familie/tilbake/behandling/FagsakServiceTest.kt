@@ -33,7 +33,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
-        val fagsakDto = fagsakService.hentFagsak(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BARNETRYGD, eksternFagsakId)
 
         assertEquals(eksternFagsakId, fagsakDto.eksternFagsakId)
         assertEquals("NB", fagsakDto.språkkode)
@@ -59,7 +59,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     fun `hentFagsak skal ikke hente fagsak for barnetrygd når det ikke finnes`() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val exception = assertFailsWith<RuntimeException>(block =
-                                                          { fagsakService.hentFagsak(Ytelsestype.BARNETRYGD, eksternFagsakId) })
+                                                          { fagsakService.hentFagsak(Fagsystem.BARNETRYGD, eksternFagsakId) })
         assertEquals("Fagsak finnes ikke for BARNETRYGD og $eksternFagsakId", exception.message)
     }
 
