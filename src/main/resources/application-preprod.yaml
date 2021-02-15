@@ -15,6 +15,7 @@ SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvi
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+PDL_URL: https://pdl-api.nais.preprod.local
 
 rolle:
   barnetrygd:
