@@ -36,23 +36,12 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                       pdlPersonRequest,
                                                                       httpHeaders(fagsystem))
         if (!respons.harFeil()) {
-            return Result.runCatching {
-                respons.data.person!!.let {
-                    PersonInfo(fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
-                               navn = it.navn.first().fulltNavn(),
-                               kjønn = it.kjønn.first().kjønn)
-                }
-            }.fold(
-                    onSuccess = { it },
-                    onFailure = {
-                        throw Feil(message = "Fant ikke forespurte data på person.",
-                                   frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
-                                   httpStatus = HttpStatus.NOT_FOUND,
-                                   throwable = it)
-                    }
-            )
+            return respons.data.person!!.let {
+                PersonInfo(fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
+                           navn = it.navn.first().fulltNavn(),
+                           kjønn = it.kjønn.first().kjønn)
+            }
         } else {
-
             logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
             throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                        frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${respons.errorMessages()}",

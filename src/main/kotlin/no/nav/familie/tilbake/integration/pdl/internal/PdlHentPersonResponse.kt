@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.integration.pdl.internal
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class PdlHentPersonResponse<T>(val data: T,
@@ -17,15 +16,15 @@ data class PdlHentPersonResponse<T>(val data: T,
 
 data class PdlPerson(val person: PdlPersonData?)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlPersonData(@JsonProperty("foedsel") val fødsel: List<PdlFødselsDato>,
                          val navn: List<PdlNavn>,
                          @JsonProperty("kjoenn") val kjønn: List<PdlKjønn>)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlError(
         val message: String,
         val locations: List<PdlErrorLocation>,
@@ -33,25 +32,25 @@ data class PdlError(
         val extensions: PdlErrorExtension
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlErrorLocation(
         val line: Int?,
         val column: Int?
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlErrorExtension(
         val code: String?,
         val details: PdlErrorDetails,
         val classification: String
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlErrorDetails(val type: String,
                            val cause: String,
                            val policy: String)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlNavn(val fornavn: String,
                    val mellomnavn: String? = null,
                    val etternavn: String) {
@@ -64,7 +63,7 @@ data class PdlNavn(val fornavn: String,
     }
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 data class PdlKjønn(@JsonProperty("kjoenn") val kjønn: Kjønn)
 
 enum class Kjønn {

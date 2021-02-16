@@ -18,11 +18,11 @@ object FagsakMapper {
                                fødselsdato = personInfo.fødselsdato,
                                kjønn = personInfo.kjønn)
 
-        val behandlingListe = behandlinger.map { behandling ->
-            BehandlingsoppsummeringDto(behandlingId = behandling.id,
-                                       eksternBrukId = behandling.eksternBrukId,
-                                       type = behandling.type,
-                                       status = behandling.status)
+        val behandlingListe = behandlinger.map {
+            BehandlingsoppsummeringDto(behandlingId = it.id,
+                                       eksternBrukId = it.eksternBrukId,
+                                       type = it.type,
+                                       status = it.status)
         }.toSet()
         return FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
                          status = fagsak.status,
