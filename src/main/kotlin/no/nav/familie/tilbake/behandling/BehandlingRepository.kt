@@ -41,4 +41,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                                                             eksternBrukId: UUID): Behandling?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
+
+    fun findByFagsakId(fagsakId: UUID): List<Behandling>
 }

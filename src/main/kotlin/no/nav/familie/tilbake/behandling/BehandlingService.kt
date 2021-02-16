@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -41,7 +42,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return BehandlingMapper.tilRespons(behandling, kanHenleggeBehandling(behandling))
         }
         throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                   frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId")
+                   frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
+                   httpStatus = HttpStatus.BAD_REQUEST)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {

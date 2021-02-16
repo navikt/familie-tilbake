@@ -12,6 +12,7 @@ spring:
     url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
 
 SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
+PDL_URL: https://pdl-api.nais.adeo.no
 
 rolle:
   barnetrygd:

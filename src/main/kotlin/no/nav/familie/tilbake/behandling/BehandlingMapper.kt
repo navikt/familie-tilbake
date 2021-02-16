@@ -47,6 +47,7 @@ object BehandlingMapper {
 
         return BehandlingDto(
                 eksternBrukId = behandling.eksternBrukId,
+                behandlingId = behandling.id,
                 type = behandling.type,
                 status = behandling.status,
                 erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,

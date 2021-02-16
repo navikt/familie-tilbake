@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BehandlingDto(val eksternBrukId: UUID,
+                         val behandlingId: UUID,
                          val erBehandlingHenlagt: Boolean,
                          val type: Behandlingstype,
                          val status: Behandlingsstatus,
