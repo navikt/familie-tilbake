@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -19,7 +18,7 @@ data class FagsakDto(val eksternFagsakId: String,
                      val bruker: BrukerDto,
                      val behandlinger: Set<BehandlingsoppsummeringDto>)
 
-data class BrukerDto(val personIdent: PersonIdent,
+data class BrukerDto(val personIdent: String,
                      val navn: String,
                      val fødselsdato: LocalDate,
                      val kjønn: Kjønn)

@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -179,7 +178,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(opprettTilbakekrevingRequest.fagsystem, fagsak.fagsystem)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsak.status)
         assertEquals(opprettTilbakekrevingRequest.språkkode, fagsak.bruker.språkkode)
-        assertEquals(opprettTilbakekrevingRequest.personIdent.ident, fagsak.bruker.ident)
+        assertEquals(opprettTilbakekrevingRequest.personIdent, fagsak.bruker.ident)
     }
 
     private fun assertBehandling(behandling: Behandling,
@@ -232,7 +231,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(opprettTilbakekrevingRequest.verge?.gyldigTom, verge.gyldigTom)
         assertEquals(opprettTilbakekrevingRequest.verge?.navn, verge.navn)
         assertEquals(opprettTilbakekrevingRequest.verge?.organisasjonsnummer, verge.orgNr)
-        assertEquals(opprettTilbakekrevingRequest.verge?.personIdent?.ident, verge.ident)
+        assertEquals(opprettTilbakekrevingRequest.verge?.personIdent, verge.ident)
     }
 
     private fun lagOpprettTilbakekrevingRequest(finnesVerge: Boolean,
@@ -245,7 +244,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                            gyldigFom = fom,
                                            gyldigTom = tom.plusDays(100),
                                            navn = "Andy",
-                                           personIdent = PersonIdent(ident = "321321321")) else null
+                                           personIdent = "321321321") else null
 
         val faktainfo = Faktainfo(revurderingsårsaker = setOf("testverdi"),
                                   revurderingsresultat = "testresultat",
@@ -254,7 +253,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         return OpprettTilbakekrevingRequest(ytelsestype = BARNETRYGD,
                                             fagsystem = Fagsystem.BA,
                                             eksternFagsakId = "1234567",
-                                            personIdent = PersonIdent(ident = "321321322"),
+                                            personIdent = "321321322",
                                             eksternId = UUID.randomUUID().toString(),
                                             manueltOpprettet = manueltOpprettet,
                                             språkkode= Språkkode.NN,

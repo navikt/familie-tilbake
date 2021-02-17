@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import io.jsonwebtoken.Jwts
-import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -235,20 +235,18 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val faktainfo = Faktainfo(revurderingsårsaker = emptySet(),
                                   revurderingsresultat = "testresultat",
                                   tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val opprettBehandlingRequest =
-                OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,
-                                             fagsystem = no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem.BA,
-                                             eksternFagsakId = "123",
-                                             personIdent = PersonIdent("123434"),
-                                             eksternId = "123",
-                                             manueltOpprettet = false,
-                                             enhetId = "8020",
-                                             enhetsnavn = "Oslo",
-                                             revurderingsvedtaksdato = LocalDate.now(),
-                                             varsel = varsel,
-                                             faktainfo = faktainfo
-                )
-        return opprettBehandlingRequest
+        return OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,
+                                            fagsystem = Fagsystem.BA,
+                                            eksternFagsakId = "123",
+                                            personIdent = "123434",
+                                            eksternId = "123",
+                                            manueltOpprettet = false,
+                                            enhetId = "8020",
+                                            enhetsnavn = "Oslo",
+                                            revurderingsvedtaksdato = LocalDate.now(),
+                                            varsel = varsel,
+                                            faktainfo = faktainfo
+        )
     }
 
 

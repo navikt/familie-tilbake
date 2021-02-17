@@ -54,7 +54,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                     "og eksternId=$eksternId")
         secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                          " og personIdent=${opprettTilbakekrevingRequest.personIdent.ident}")
+                          " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
 
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
         // oppretter fagsak
@@ -93,7 +93,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                               ytelsestype: Ytelsestype,
                               fagsystem: Fagsystem): Fagsak {
-        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent.ident,
+        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
                             språkkode = opprettTilbakekrevingRequest.språkkode)
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,

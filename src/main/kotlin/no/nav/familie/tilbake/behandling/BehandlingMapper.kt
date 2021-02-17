@@ -31,7 +31,8 @@ object BehandlingMapper {
         val fagsystemskonsekvenser = opprettTilbakekrevingRequest.faktainfo.konsekvensForYtelser
                 .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling = Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
-                                                        tilbakekrevingsvalg = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg,
+                                                        tilbakekrevingsvalg = opprettTilbakekrevingRequest.faktainfo
+                                                                .tilbakekrevingsvalg,
                                                         resultat = opprettTilbakekrevingRequest.faktainfo.revurderingsresultat,
                                                         årsaker = fagsystemsbehandlingsårsaker,
                                                         konsekvenser = fagsystemskonsekvenser)
@@ -100,7 +101,7 @@ object BehandlingMapper {
                         gyldigTom = it.gyldigTom,
                         navn = it.navn,
                         orgNr = it.organisasjonsnummer,
-                        ident = it.personIdent?.ident
+                        ident = it.personIdent
                 ))
             }
         }

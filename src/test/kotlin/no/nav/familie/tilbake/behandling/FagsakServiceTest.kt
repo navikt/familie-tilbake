@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -43,7 +42,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Fagsystem.BA, fagsakDto.fagsystem)
 
         val brukerDto = fagsakDto.bruker
-        assertEquals(PersonIdent("123"), brukerDto.personIdent)
+        assertEquals("123", brukerDto.personIdent)
         assertEquals("testverdi", brukerDto.navn)
         assertEquals(Kjønn.MANN, brukerDto.kjønn)
         assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
@@ -62,7 +61,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val exception = assertFailsWith<RuntimeException>(block =
                                                           { fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId) })
-        assertEquals("Fagsak finnes ikke for BARNETRYGD og $eksternFagsakId", exception.message)
+        assertEquals("Fagsak finnes ikke for Barnetrygd og $eksternFagsakId", exception.message)
     }
 
     private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {
