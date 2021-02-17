@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.person
 
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
 import org.springframework.stereotype.Service

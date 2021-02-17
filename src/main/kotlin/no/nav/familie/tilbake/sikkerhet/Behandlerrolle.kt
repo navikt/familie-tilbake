@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.sikkerhet
 
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
 
 enum class Behandlerrolle(val nivå: Int) {
     SYSTEM(4),
@@ -10,4 +9,4 @@ enum class Behandlerrolle(val nivå: Int) {
     UKJENT(0)
 }
 
-class InnloggetBrukertilgang(val tilganger: Map<Fagsystem, Behandlerrolle>)
+class InnloggetBrukertilgang(val tilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)

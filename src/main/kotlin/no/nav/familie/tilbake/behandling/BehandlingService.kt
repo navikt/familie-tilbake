@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,8 +47,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        val ytelsestype = Ytelsestype.valueOf(opprettTilbakekrevingRequest.ytelsestype.name)
-        val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
+        val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
+        val fagsystem = opprettTilbakekrevingRequest.fagsystem
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
@@ -93,8 +93,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                               ytelsestype: Ytelsestype,
                               fagsystem: Fagsystem): Fagsak {
-        val bruker = Bruker(opprettTilbakekrevingRequest.personIdent.ident,
-                            Bruker.velgSpråkkode(opprettTilbakekrevingRequest.språkkode))
+        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent.ident,
+                            språkkode = opprettTilbakekrevingRequest.språkkode)
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
                       ytelsestype = ytelsestype,

@@ -1,14 +1,15 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,13 +34,13 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
-        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BARNETRYGD, eksternFagsakId)
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
 
         assertEquals(eksternFagsakId, fagsakDto.eksternFagsakId)
-        assertEquals("NB", fagsakDto.språkkode)
+        assertEquals(Språkkode.NB, fagsakDto.språkkode)
         assertEquals(Fagsaksstatus.OPPRETTET, fagsakDto.status)
         assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
-        assertEquals(Fagsystem.BARNETRYGD.kode, fagsakDto.fagsystem)
+        assertEquals(Fagsystem.BA, fagsakDto.fagsystem)
 
         val brukerDto = fagsakDto.bruker
         assertEquals(PersonIdent("123"), brukerDto.personIdent)
@@ -60,15 +61,15 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     fun `hentFagsak skal ikke hente fagsak for barnetrygd når det ikke finnes`() {
         val eksternFagsakId = UUID.randomUUID().toString()
         val exception = assertFailsWith<RuntimeException>(block =
-                                                          { fagsakService.hentFagsak(Fagsystem.BARNETRYGD, eksternFagsakId) })
+                                                          { fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId) })
         assertEquals("Fagsak finnes ikke for BARNETRYGD og $eksternFagsakId", exception.message)
     }
 
     private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {
         val fagsak = Fagsak(eksternFagsakId = eksternFagsakId,
-                            bruker = Bruker("123", "NB"),
+                            bruker = Bruker("123", Språkkode.NB),
                             ytelsestype = ytelsestype,
-                            fagsystem = Fagsystem.fraYtelsestype(ytelsestype))
+                            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
         fagsakRepository.insert(fagsak)
 
         val behandling = Behandling(fagsakId = fagsak.id,

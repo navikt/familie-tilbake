@@ -1,11 +1,13 @@
 package no.nav.familie.tilbake.behandling.domain
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,7 +27,7 @@ data class Behandling(@Id
                       val manueltOpprettet: Boolean,
                       val eksternBrukId: UUID = UUID.randomUUID(),
                       @MappedCollection(idColumn = "behandling_id")
-                      val eksternBehandling: Set<EksternBehandling> = setOf(),
+                      val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val varsler: Set<Varsel> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
@@ -36,7 +38,7 @@ data class Behandling(@Id
                       val sporbar: Sporbar = Sporbar()) {
 
     fun erAvsluttet(): Boolean {
-        return Behandlingsstatus.AVSLUTTET.equals(status)
+        return Behandlingsstatus.AVSLUTTET == status
     }
 
     val opprettetTidspunkt: LocalDateTime
@@ -46,12 +48,33 @@ data class Behandling(@Id
         get() = sporbar.endret.endretTid
 }
 
-data class EksternBehandling(@Id
-                             val id: UUID = UUID.randomUUID(),
-                             val eksternId: String,
-                             val aktiv: Boolean = true,
-                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                             val sporbar: Sporbar = Sporbar())
+data class Fagsystemsbehandling(@Id
+                                val id: UUID = UUID.randomUUID(),
+                                val eksternId: String,
+                                val aktiv: Boolean = true,
+                                val tilbakekrevingsvalg: Tilbakekrevingsvalg,
+                                val resultat: String,
+                                @MappedCollection(idColumn = "fagsystemsbehandling_id")
+                                val årsaker: Set<Fagsystemsbehandlingsårsak> = setOf(),
+                                @MappedCollection(idColumn = "fagsystemsbehandling_id")
+                                val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
+                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                val sporbar: Sporbar = Sporbar())
+
+@Table("fagsystemsbehandlingsarsak")
+data class Fagsystemsbehandlingsårsak(@Id
+                                      val id: UUID = UUID.randomUUID(),
+                                      @Column("arsak")
+                                      val årsak: String,
+                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                      val sporbar: Sporbar = Sporbar())
+
+@Table("fagsystemskonsekvens")
+data class Fagsystemskonsekvens(@Id
+                                val id: UUID = UUID.randomUUID(),
+                                val konsekvens: String,
+                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                val sporbar: Sporbar = Sporbar())
 
 data class Varsel(@Id
                   val id: UUID = UUID.randomUUID(),

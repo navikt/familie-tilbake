@@ -1,17 +1,19 @@
 package no.nav.familie.tilbake.data
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandling.domain.Vergetype
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
@@ -68,18 +70,23 @@ import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 object Testdata {
 
     private val bruker = Bruker(ident = "321321321")
 
     val fagsak = Fagsak(ytelsestype = Ytelsestype.BARNETRYGD,
-                        fagsystem = Fagsystem.BARNETRYGD,
+                        fagsystem = Fagsystem.BA,
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
-    private val eksternBehandling = EksternBehandling(eksternId = UUID.randomUUID().toString())
+    private val fagsystemsbehandling = Fagsystemsbehandling(
+            eksternId = UUID.randomUUID().toString(),
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            resultat = "OPPHØR",
+            årsaker = setOf(Fagsystemsbehandlingsårsak(årsak = "testverdi"))
+    )
     private val date = LocalDate.now()
 
     private val varsel = Varsel(varseltekst = "testverdi",
@@ -110,7 +117,7 @@ object Testdata {
                                 behandlendeEnhet = "testverdi",
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = true,
-                                eksternBehandling = setOf(eksternBehandling),
+                                fagsystemsbehandling = setOf(fagsystemsbehandling),
                                 resultater = setOf(behandlingsresultat),
                                 varsler = setOf(varsel),
                                 verger = setOf(verge),

@@ -7,9 +7,8 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
@@ -52,7 +51,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun distribuerJournalpost(journalpostId: String, fagsystem: Fagsystem): String {
         val request = DistribuerJournalpostRequest(journalpostId,
-                                                   fagsystem.kode,
+                                                   fagsystem.name,
                                                    integrasjonerConfig.applicationName)
 
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()

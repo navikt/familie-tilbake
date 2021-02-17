@@ -2,16 +2,18 @@ package no.nav.familie.tilbake.sikkerhet
 
 import io.jsonwebtoken.Jwts
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
@@ -111,21 +113,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sjekkTilgang skal ikke ha tilgang for barnetrygd veileder i barnetrygd opprett behandling request`() {
-        val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
-        val opprettBehandlingRequest =
-                OpprettTilbakekrevingRequest(ytelsestype = no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD,
-                                             eksternFagsakId = "123",
-                                             personIdent = PersonIdent("123434"),
-                                             eksternId = "123",
-                                             manueltOpprettet = false,
-                                             enhetId = "8020",
-                                             enhetsnavn = "Oslo",
-                                             revurderingsvedtaksdato = LocalDate.now(),
-                                             varsel = varsel)
         val token = opprettToken("abc", listOf(BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(lagOpprettTilbakekrevingRequest()))
         `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
 
@@ -140,21 +131,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sjekkTilgang skal ha tilgang i barnetrygd opprett behandling request når bruker både er beslutter og veileder`() {
-        val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
-        val opprettBehandlingRequest =
-                OpprettTilbakekrevingRequest(ytelsestype = no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD,
-                                             eksternFagsakId = "123",
-                                             personIdent = PersonIdent("123434"),
-                                             eksternId = "123",
-                                             manueltOpprettet = false,
-                                             enhetId = "8020",
-                                             enhetsnavn = "Oslo",
-                                             revurderingsvedtaksdato = LocalDate.now(),
-                                             varsel = varsel)
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(opprettBehandlingRequest))
+        `when`(mockJoinpoint.args).thenReturn(arrayOf(lagOpprettTilbakekrevingRequest()))
         `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
         `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
 
@@ -215,7 +195,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     private fun opprettBehandling(ytelsestype: Ytelsestype): Behandling {
         val fagsak = Fagsak(bruker = Bruker("1232"),
                             eksternFagsakId = "123",
-                            fagsystem = Fagsystem.fraYtelsestype(ytelsestype),
+                            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                             ytelsestype = ytelsestype,
                             status = Fagsaksstatus.OPPRETTET)
         tilgangAdvice.fagsakRepository.insert(fagsak)
@@ -248,6 +228,27 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                                             ("azuread" to JwtToken(token)))
         RequestContextHolder.currentRequestAttributes()
                 .setAttribute(SpringTokenValidationContextHolder::class.java.name, tokenValidationContext, 0)
+    }
+
+    private fun lagOpprettTilbakekrevingRequest(): OpprettTilbakekrevingRequest {
+        val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
+        val faktainfo = Faktainfo(revurderingsårsaker = emptySet(),
+                                  revurderingsresultat = "testresultat",
+                                  tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val opprettBehandlingRequest =
+                OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,
+                                             fagsystem = no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem.BA,
+                                             eksternFagsakId = "123",
+                                             personIdent = PersonIdent("123434"),
+                                             eksternId = "123",
+                                             manueltOpprettet = false,
+                                             enhetId = "8020",
+                                             enhetsnavn = "Oslo",
+                                             revurderingsvedtaksdato = LocalDate.now(),
+                                             varsel = varsel,
+                                             faktainfo = faktainfo
+                )
+        return opprettBehandlingRequest
     }
 
 
