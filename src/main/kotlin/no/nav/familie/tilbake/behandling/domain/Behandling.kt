@@ -34,12 +34,22 @@ data class Behandling(@Id
                       val verger: Set<Verge> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val resultater: Set<Behandlingsresultat> = setOf(),
+                      @MappedCollection(idColumn = "behandling_id")
+                      val årsaker: Set<Behandlingsårsak> = setOf(),
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar()) {
 
     fun erAvsluttet(): Boolean {
         return Behandlingsstatus.AVSLUTTET == status
     }
+
+    val aktivVerge get() = verger.firstOrNull { it.aktiv }
+
+    val aktivtVarsel get() = varsler.first { it.aktiv }
+
+    val harVerge get() = verger.any { it.aktiv }
+
+    val sisteResultat get() = resultater.maxByOrNull { it.sporbar.endret.endretTid }
 
     val opprettetTidspunkt: LocalDateTime
         get() = sporbar.opprettetTid
@@ -100,6 +110,24 @@ data class Verge(@Id
                  val begrunnelse: String? = "",
                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                  val sporbar: Sporbar = Sporbar())
+
+@Table("behandlingsarsak")
+data class Behandlingsårsak(@Id
+                            val id: UUID = UUID.randomUUID(),
+                            val originalBehandlingId: UUID?,
+                            val type: Behandlingsårsakstype,
+                            val versjon: Int = 0,
+                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                            val sporbar: Sporbar = Sporbar())
+
+enum class Behandlingsårsakstype(val navn: String) {
+    REVURDERING_KLAGE_NFP("Revurdering NFP omgjør vedtak basert på klage"),
+    REVURDERING_KLAGE_KA("Revurdering etter KA-behandlet klage"),
+    REVURDERING_OPPLYSNINGER_OM_VILKÅR("Nye opplysninger om vilkårsvurdering"),
+    REVURDERING_OPPLYSNINGER_OM_FORELDELSE("Nye opplysninger om foreldelse"),
+    REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt"),
+    UDEFINERT("Ikke Definert")
+}
 
 enum class Vergetype(val navn: String) {
     VERGE_FOR_BARN("Verge for barn under 18 år"),

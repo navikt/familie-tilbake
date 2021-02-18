@@ -1,13 +1,15 @@
 package no.nav.familie.tilbake.data
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
@@ -20,8 +22,6 @@ import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import no.nav.familie.tilbake.domain.tbd.Behandlingstegsstatus
-import no.nav.familie.tilbake.domain.tbd.Behandlingsvedtak
-import no.nav.familie.tilbake.domain.tbd.Behandlingsårsak
 import no.nav.familie.tilbake.domain.tbd.Behandlingsårsakstype
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.Brevtype
@@ -69,7 +69,12 @@ import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
+import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandlingsårsak
 
 object Testdata {
 
@@ -93,19 +98,19 @@ object Testdata {
                                 revurderingsvedtaksdato = date.minusDays(1),
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
-    private val verge = Verge(ident = "testverdi",
-                              gyldigFom = LocalDate.now(),
-                              gyldigTom = LocalDate.now(),
-                              type = Vergetype.VERGE_FOR_BARN,
-                              orgNr = "testverdi",
-                              navn = "testverdi",
-                              kilde = "testverdi",
-                              begrunnelse = "testverdi")
+    val verge = Verge(ident = "testverdi",
+                      gyldigFom = LocalDate.now(),
+                      gyldigTom = LocalDate.now(),
+                      type = Vergetype.VERGE_FOR_BARN,
+                      orgNr = "testverdi",
+                      navn = "testverdi",
+                      kilde = "testverdi",
+                      begrunnelse = "testverdi")
 
     private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
                                                       ansvarligSaksbehandler = "testverdi")
 
-    private val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = setOf(behandlingsvedtak))
+    private val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
@@ -159,8 +164,7 @@ object Testdata {
                                                                   behandlingId = behandling.id)
 
     val foreldelsesperiode = Foreldelsesperiode(vurdertForeldelseId = vurdertForeldelse.id,
-                                                fom = LocalDate.now(),
-                                                tom = LocalDate.now(),
+                                                periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                 foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                                                 begrunnelse = "testverdi",
                                                 foreldelsesfrist = LocalDate.now(),
@@ -168,22 +172,21 @@ object Testdata {
 
     private val kravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.FPADATORD,
                                                               klassetype = Klassetype.JUST,
-                                                              opprinneligUtbetalingsbeløp = 123.11,
-                                                              nyttBeløp = 123.11,
-                                                              tilbakekrevesBeløp = 123.11,
-                                                              uinnkrevdBeløp = 123.11,
+                                                              opprinneligUtbetalingsbeløp = BigDecimal("123.11"),
+                                                              nyttBeløp = BigDecimal("123.11"),
+                                                              tilbakekrevesBeløp = BigDecimal("123.11"),
+                                                              uinnkrevdBeløp = BigDecimal("123.11"),
                                                               resultatkode = "testverdi",
                                                               årsakskode = "testverdi",
                                                               skyldkode = "testverdi",
-                                                              skatteprosent = 35.11)
+                                                              skatteprosent = BigDecimal("35.1100"))
 
-    private val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(fom = LocalDate.now(),
-                                                                  tom = LocalDate.now(),
+    private val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                                   beløp = setOf(kravgrunnlagsbeløp433),
-                                                                  månedligSkattebeløp = 123.11)
+                                                                  månedligSkattebeløp = BigDecimal("123.11"))
 
     val kravgrunnlag431 = Kravgrunnlag431(vedtakId = "testverdi",
-                                          kravstatuskode = "testverdi",
+                                          kravstatuskode = Kravstatuskode.NYTT,
                                           fagområdekode = Fagområdekode.UKJENT,
                                           fagsystem = no.nav.familie.tilbake.domain.tbd.Fagsystem.ARENA,
                                           fagsystemVedtaksdato = LocalDate.now(),
@@ -219,28 +222,27 @@ object Testdata {
                                                                           begrunnelse = "testverdi")
 
     private val vilkårsvurderingGodTro = VilkårsvurderingGodTro(beløpErIBehold = true,
-                                                                beløpTilbakekreves = 32165,
+                                                                beløpTilbakekreves = BigDecimal("32165"),
                                                                 begrunnelse = "testverdi")
 
     private val vilkårsvurderingAktsomhet =
             VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                                       ileggRenter = true,
-                                      andelTilbakekreves = 123.11,
+                                      andelTilbakekreves = BigDecimal("123.11"),
                                       manueltSattBeløp = null,
                                       begrunnelse = "testverdi",
                                       særligeGrunnerTilReduksjon = true,
-                                      tilbakekrevSmabeløp = true,
+                                      tilbakekrevSmåbeløp = false,
                                       særligeGrunnerBegrunnelse = "testverdi",
                                       vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
     private val vilkårsperiode =
-            Vilkårsvurderingsperiode(fom = LocalDate.now(),
-                                     tom = LocalDate.now(),
+            Vilkårsvurderingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                      navoppfulgt = Navoppfulgt.HAR_IKKE_FULGT_OPP,
                                      vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                                      begrunnelse = "testverdi",
-                                     vilkårsvurderingAktsomheter = setOf(vilkårsvurderingAktsomhet),
-                                     vilkårsvurderingGodTro = setOf(vilkårsvurderingGodTro))
+                                     aktsomhet = vilkårsvurderingAktsomhet,
+                                     godTro = vilkårsvurderingGodTro)
 
     val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
                                   perioder = setOf(vilkårsperiode))
@@ -248,8 +250,7 @@ object Testdata {
     val faktaFeilutbetaling = FaktaFeilutbetaling(begrunnelse = "testverdi")
 
     val faktaFeilutbetalingsperiode = FaktaFeilutbetalingsperiode(faktaFeilutbetalingId = faktaFeilutbetaling.id,
-                                                                  fom = LocalDate.now(),
-                                                                  tom = LocalDate.now(),
+                                                                  periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                                   hendelsestype = Hendelsestype.BA_ANNET,
                                                                   hendelsesundertype = Hendelsesundertype.ENDRET_DEKNINGSGRAD)
 
@@ -288,7 +289,7 @@ object Testdata {
     val brevsporing = Brevsporing(behandlingId = behandling.id,
                                   journalpostId = "testverdi",
                                   dokumentId = "testverdi",
-                                  brevtype = Brevtype.INNHENT_DOKUMENTASJONBREV)
+                                  brevtype = Brevtype.INNHENT_DOKUMENTASJON)
 
     val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(melding = "testverdi")
 

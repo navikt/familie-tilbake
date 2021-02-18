@@ -42,7 +42,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Brevsporing i basen`() {
         brevsporingRepository.insert(brevsporing)
-        val oppdatertBrevsporing = brevsporing.copy(brevtype = Brevtype.HENLEGGELSE_BREV)
+        val oppdatertBrevsporing = brevsporing.copy(brevtype = Brevtype.HENLEGGELSE)
 
         brevsporingRepository.update(oppdatertBrevsporing)
 

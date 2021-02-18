@@ -16,8 +16,11 @@ data class Fagsak(@Id
                   val ytelsestype: Ytelsestype,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar())
+                  val sporbar: Sporbar = Sporbar()) {
 
+    val ytelsesnavn get() =  ytelsestype.kode[bruker.språkkode]
+                             ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
+}
 
 enum class Fagsaksstatus {
     OPPRETTET,

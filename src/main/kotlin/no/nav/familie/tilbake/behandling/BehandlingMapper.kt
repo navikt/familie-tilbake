@@ -68,7 +68,7 @@ object BehandlingMapper {
                 opprettetDato = behandling.opprettetDato,
                 avsluttetDato = behandling.avsluttetDato,
                 endretTidspunkt = behandling.endretTidspunkt,
-                harVerge = behandling.verger.isNotEmpty(),
+                harVerge = behandling.harVerge,
                 kanHenleggeBehandling = kanHenleggeBehandling,
                 erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
 

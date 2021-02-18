@@ -6,8 +6,8 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDate
-import java.util.*
+import java.math.BigDecimal
+import java.util.UUID
 
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(@Id
@@ -22,16 +22,16 @@ data class Vilkårsvurdering(@Id
 @Table("vilkarsvurderingsperiode")
 data class Vilkårsvurderingsperiode(@Id
                                     val id: UUID = UUID.randomUUID(),
-                                    val fom: LocalDate,
-                                    val tom: LocalDate,
-                                    val navoppfulgt: Navoppfulgt,
+                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                    val periode: Periode,
+                                    val navoppfulgt: Navoppfulgt? = null,
                                     @Column("vilkarsvurderingsresultat")
                                     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
                                     val begrunnelse: String,
                                     @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
-                                    val vilkårsvurderingAktsomheter: Set<VilkårsvurderingAktsomhet> = setOf(),
+                                    val aktsomhet: VilkårsvurderingAktsomhet? = null,
                                     @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
-                                    val vilkårsvurderingGodTro: Set<VilkårsvurderingGodTro> = setOf(),
+                                    val godTro: VilkårsvurderingGodTro? = null,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
@@ -41,7 +41,7 @@ data class VilkårsvurderingGodTro(@Id
                                   @Column("belop_er_i_behold")
                                   val beløpErIBehold: Boolean,
                                   @Column("belop_tilbakekreves")
-                                  val beløpTilbakekreves: Long?,
+                                  val beløpTilbakekreves: BigDecimal,
                                   val begrunnelse: String,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                   val sporbar: Sporbar = Sporbar())
@@ -51,21 +51,37 @@ data class VilkårsvurderingGodTro(@Id
 data class VilkårsvurderingAktsomhet(@Id
                                      val id: UUID = UUID.randomUUID(),
                                      val aktsomhet: Aktsomhet,
-                                     val ileggRenter: Boolean?,
-                                     val andelTilbakekreves: Double?,
+                                     val ileggRenter: Boolean? = null,
+                                     val andelTilbakekreves: BigDecimal? = null,
                                      @Column("manuelt_satt_belop")
-                                     val manueltSattBeløp: Long?,
+                                     val manueltSattBeløp: BigDecimal? = null,
                                      val begrunnelse: String,
                                      @Column("serlige_grunner_til_reduksjon")
-                                     val særligeGrunnerTilReduksjon: Boolean?,
+                                     val særligeGrunnerTilReduksjon: Boolean = false,
                                      @Column("tilbakekrev_smabelop")
-                                     val tilbakekrevSmabeløp: Boolean?,
+                                     val tilbakekrevSmåbeløp: Boolean = false,
                                      @MappedCollection(idColumn = "vilkarsvurdering_aktsomhet_id")
                                      val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
                                      @Column("serlige_grunner_begrunnelse")
-                                     val særligeGrunnerBegrunnelse: String?,
+                                     val særligeGrunnerBegrunnelse: String? = null,
                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                     val sporbar: Sporbar = Sporbar())
+                                     val sporbar: Sporbar = Sporbar()) {
+
+    init {
+        require(!(andelTilbakekreves != null && manueltSattBeløp != null))
+        { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
+        if (aktsomhet == Aktsomhet.FORSETT) {
+            check(!særligeGrunnerTilReduksjon) { "Ved FORSETT skal ikke særligeGrunnerTilReduksjon settes her" }
+            check(manueltSattBeløp == null) { "Ved FORSETT er beløp automatisk, og skal ikke settes her" }
+            check(andelTilbakekreves == null) { "Ved FORSETT er andel automatisk, og skal ikke settes her" }
+            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+        }
+        if (aktsomhet == Aktsomhet.GROV_UAKTSOMHET) {
+            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+        }
+    }
+
+}
 
 @Table("vilkarsvurdering_serlig_grunn")
 data class VilkårsvurderingSærligGrunn(@Id
@@ -84,10 +100,21 @@ enum class SærligGrunn(val navn: String) {
     ANNET("Annet");
 }
 
-enum class Aktsomhet(val navn: String) {
+interface Vurdering {
+
+    val navn: String
+}
+
+enum class Aktsomhet(override val navn: String) : Vurdering {
     FORSETT("Forsett"),
     GROV_UAKTSOMHET("Grov uaktsomhet"),
     SIMPEL_UAKTSOMHET("Simpel uaktsomhet");
+}
+
+enum class AnnenVurdering(override val navn: String) : Vurdering {
+
+    GOD_TRO("Handlet i god tro"),
+    FORELDET("Foreldet");
 }
 
 enum class Navoppfulgt {
