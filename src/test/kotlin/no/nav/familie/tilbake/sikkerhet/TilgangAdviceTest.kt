@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import io.jsonwebtoken.Jwts
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
@@ -21,8 +23,6 @@ import org.aspectj.lang.JoinPoint
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.mock.web.MockHttpServletRequest
@@ -70,8 +70,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var tilgangAdvice: TilgangAdvice
 
-    private val mockJoinpoint: JoinPoint = mock(JoinPoint::class.java)
-    private val mockRolleTilgangssjekk = mock(Rolletilgangssjekk::class.java)
+    private val mockJoinpoint: JoinPoint = mockk()
+    private val mockRolleTilgangssjekk: Rolletilgangssjekk = mockk()
 
     @Test
     fun `sjekkTilgang skal ha tilgang for barnetrygd beslutter i barnetrygd hent behandling request`() {
@@ -80,10 +80,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
-        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.VEILEDER
+        every { mockRolleTilgangssjekk.handling } returns "hent behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
@@ -95,10 +95,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_BESLUTTER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd hent behandling")
-        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.VEILEDER
+        every { mockRolleTilgangssjekk.handling } returns "barnetrygd hent behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertFailsWith<RuntimeException>(message = "abc har ikke tilgang til barnetrygd hent behandling",
                                           block = { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) })
@@ -116,9 +116,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(lagOpprettTilbakekrevingRequest()))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
+        every { mockJoinpoint.args } returns arrayOf(lagOpprettTilbakekrevingRequest())
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
 
         val exception = assertFailsWith<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
@@ -134,9 +134,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE, BARNETRYGD_VEILEDER_ROLLE))
         opprettRequest("/api/behandling/v1", HttpMethod.POST, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(lagOpprettTilbakekrevingRequest()))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.SAKSBEHANDLER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("barnetrygd opprett behandling")
+        every { mockJoinpoint.args } returns arrayOf(lagOpprettTilbakekrevingRequest())
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
@@ -148,10 +148,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(ENSLIG_SAKSBEHANDLER_ROLLE, BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
-        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.VEILEDER
+        every { mockRolleTilgangssjekk.handling } returns "hent behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
@@ -163,10 +163,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("VL", listOf())
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
-        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.VEILEDER
+        every { mockRolleTilgangssjekk.handling } returns "hent behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
@@ -178,10 +178,10 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf())
         opprettRequest("/api/behandling/v1/$behandlingId", HttpMethod.GET, token)
 
-        `when`(mockJoinpoint.args).thenReturn(arrayOf(behandlingId))
-        `when`(mockRolleTilgangssjekk.minimumBehandlerrolle).thenReturn(Behandlerrolle.VEILEDER)
-        `when`(mockRolleTilgangssjekk.handling).thenReturn("hent behandling")
-        `when`(mockRolleTilgangssjekk.henteParam).thenReturn("behandlingId")
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.VEILEDER
+        every { mockRolleTilgangssjekk.handling } returns "hent behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         val exception = assertFailsWith<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
