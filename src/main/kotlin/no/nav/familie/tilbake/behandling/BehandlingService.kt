@@ -49,6 +49,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
+        validateFagsystem(ytelsestype, fagsystem)
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
@@ -66,6 +67,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
+    private fun validateFagsystem(ytelsestype: Ytelsestype,
+                                  fagsystem: Fagsystem) {
+        if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) != fagsystem) {
+            throw Feil(message = "Behandling kan ikke opprettes med $ytelsestype og $fagsystem",
+                       frontendFeilmelding = "Behandling kan ikke opprettes med $ytelsestype og $fagsystem",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+    }
+
     private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
                                        eksternFagsakId: String,
                                        eksternId: String) {
@@ -73,7 +83,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
                               "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
-            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
+                       httpStatus = HttpStatus.BAD_REQUEST)
         }
 
         //hvis behandlingen er henlagt, kan det opprettes ny behandling
@@ -85,7 +96,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             if (!erSisteBehandlingHenlagt) {
                 val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
                                   "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
-                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
+                           httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
     }
