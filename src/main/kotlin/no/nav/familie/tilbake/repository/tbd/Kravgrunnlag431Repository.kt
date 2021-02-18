@@ -5,9 +5,11 @@ import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import no.nav.familie.tilbake.domain.tbd.Kravgrunnlag431
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Repository
+@Transactional
 interface Kravgrunnlag431Repository : RepositoryInterface<Kravgrunnlag431, UUID>,
                                       InsertUpdateRepository<Kravgrunnlag431> {
 
