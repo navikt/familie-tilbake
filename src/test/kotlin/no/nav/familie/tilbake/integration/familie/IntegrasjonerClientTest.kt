@@ -71,7 +71,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${IntegrasjonerConfig.PATH_DISTRIBUER}"))
                                        .willReturn(okJson(success("id").toJson())))
         // Vil gi resultat
-        assertNotNull(integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.ENSLIG_FORELDER))
+        assertNotNull(integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF))
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class IntegrasjonerClientTest {
                                        .willReturn(okJson(failure<Any>("error").toJson())))
 
         assertFailsWith(IllegalStateException::class) {
-            integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.ENSLIG_FORELDER)
+            integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF)
         }
     }
 

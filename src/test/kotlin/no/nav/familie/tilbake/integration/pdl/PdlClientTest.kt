@@ -59,7 +59,7 @@ class PdlClientTest {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))))
 
-        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD)
+        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
 
         assertNotNull(respons)
         assertEquals("ENGASJERT FYR", respons.navn)
@@ -73,7 +73,7 @@ class PdlClientTest {
                                            .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
 
 
-        val exception = assertFailsWith<RuntimeException>(block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BARNETRYGD) })
+        val exception = assertFailsWith<RuntimeException>(block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
         assertEquals("Feil ved oppslag på person: Ikke tilgang til å se person", exception.message)
     }
 

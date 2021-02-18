@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.domain.tbd.Behandlingsvedtak
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
+import java.time.LocalDate
 import java.util.UUID
 
 data class Behandlingsresultat(@Id
                                val id: UUID = UUID.randomUUID(),
                                val type: Behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT,
                                @MappedCollection(idColumn = "behandlingsresultat_id")
-                               val behandlingsvedtak: Set<Behandlingsvedtak> = setOf(),
+                               val behandlingsvedtak: Behandlingsvedtak? = null,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar()) {
 
@@ -37,6 +37,24 @@ data class Behandlingsresultat(@Id
         return type
     }
 }
+
+data class Behandlingsvedtak(@Id
+                             val id: UUID = UUID.randomUUID(),
+                             val vedtaksdato: LocalDate,
+                             val ansvarligSaksbehandler: String,
+                             val versjon: Int = 0,
+                             val iverksettingsstatus: Iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
+                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                             val sporbar: Sporbar = Sporbar())
+
+enum class Iverksettingsstatus {
+    IKKE_IVERKSATT,
+    UNDER_IVERKSETTING,
+    IVERKSATT,
+    UDEFINERT
+}
+
+
 
 enum class Behandlingsresultatstype(val navn: String) {
     IKKE_FASTSATT("Ikke fastsatt"),

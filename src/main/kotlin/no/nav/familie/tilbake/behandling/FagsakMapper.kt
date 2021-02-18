@@ -28,7 +28,7 @@ object FagsakMapper {
                          status = fagsak.status,
                          ytelsestype = fagsak.ytelsestype,
                          fagsystem = fagsak.fagsystem.kode,
-                         språkkode = fagsak.bruker.språkkode!!,
+                         språkkode = fagsak.bruker.språkkode.toString(),
                          bruker = bruker,
                          behandlinger = behandlingListe)
     }
