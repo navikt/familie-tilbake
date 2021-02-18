@@ -115,4 +115,3 @@ object ContextService {
         }
         return false
     }
-}

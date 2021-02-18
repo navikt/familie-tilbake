@@ -28,7 +28,7 @@ object FagsakMapper {
                          ytelsestype = fagsak.ytelsestype,
                          fagsystem = fagsak.fagsystem,
                          språkkode = fagsak.bruker.språkkode,
-                         bruker = bruker,
+            bruker = bruker,
                          behandlinger = behandlingListe)
     }
 }
