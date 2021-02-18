@@ -54,20 +54,12 @@ data class Fagsystemsbehandling(@Id
                                 val aktiv: Boolean = true,
                                 val tilbakekrevingsvalg: Tilbakekrevingsvalg,
                                 val resultat: String,
-                                @MappedCollection(idColumn = "fagsystemsbehandling_id")
-                                val årsaker: Set<Fagsystemsbehandlingsårsak> = setOf(),
+                                @Column("arsak")
+                                val årsak: String,
                                 @MappedCollection(idColumn = "fagsystemsbehandling_id")
                                 val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                 val sporbar: Sporbar = Sporbar())
-
-@Table("fagsystemsbehandlingsarsak")
-data class Fagsystemsbehandlingsårsak(@Id
-                                      val id: UUID = UUID.randomUUID(),
-                                      @Column("arsak")
-                                      val årsak: String,
-                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                      val sporbar: Sporbar = Sporbar())
 
 @Table("fagsystemskonsekvens")
 data class Fagsystemskonsekvens(@Id

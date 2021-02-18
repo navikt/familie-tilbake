@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
@@ -85,7 +84,7 @@ object Testdata {
             eksternId = UUID.randomUUID().toString(),
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             resultat = "OPPHØR",
-            årsaker = setOf(Fagsystemsbehandlingsårsak(årsak = "testverdi"))
+            årsak = "testverdi"
     )
     private val date = LocalDate.now()
 

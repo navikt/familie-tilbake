@@ -201,8 +201,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(opprettTilbakekrevingRequest.eksternId, fagsystemsbehandling.eksternId)
         assertEquals(opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg, fagsystemsbehandling.tilbakekrevingsvalg)
         assertEquals("testresultat", fagsystemsbehandling.resultat)
-        assertEquals(1, fagsystemsbehandling.årsaker.size)
-        assertEquals("testverdi", fagsystemsbehandling.årsaker.toList()[0].årsak)
+        assertEquals("testverdi", fagsystemsbehandling.årsak)
         assertTrue { fagsystemsbehandling.konsekvenser.isEmpty() }
     }
 
@@ -246,7 +245,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                            navn = "Andy",
                                            personIdent = "321321321") else null
 
-        val faktainfo = Faktainfo(revurderingsårsaker = setOf("testverdi"),
+        val faktainfo = Faktainfo(revurderingsårsak = "testverdi",
                                   revurderingsresultat = "testresultat",
                                   tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 

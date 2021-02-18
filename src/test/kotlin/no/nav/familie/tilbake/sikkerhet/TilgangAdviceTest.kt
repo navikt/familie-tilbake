@@ -232,7 +232,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     private fun lagOpprettTilbakekrevingRequest(): OpprettTilbakekrevingRequest {
         val varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList())
-        val faktainfo = Faktainfo(revurderingsårsaker = emptySet(),
+        val faktainfo = Faktainfo(revurderingsårsak = "testårsak",
                                   revurderingsresultat = "testresultat",
                                   tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         return OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,

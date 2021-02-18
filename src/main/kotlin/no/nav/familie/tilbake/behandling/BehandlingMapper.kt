@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
@@ -26,15 +25,14 @@ object BehandlingMapper {
     fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                             fagsystem: Fagsystem,
                             fagsak: Fagsak): Behandling {
-        val fagsystemsbehandlingsårsaker = opprettTilbakekrevingRequest.faktainfo.revurderingsårsaker
-                .map { Fagsystemsbehandlingsårsak(årsak = it) }.toSet()
-        val fagsystemskonsekvenser = opprettTilbakekrevingRequest.faktainfo.konsekvensForYtelser
+        val faktainfo = opprettTilbakekrevingRequest.faktainfo
+        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser
                 .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling = Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
-                                                        tilbakekrevingsvalg = opprettTilbakekrevingRequest.faktainfo
+                                                        tilbakekrevingsvalg = faktainfo
                                                                 .tilbakekrevingsvalg,
-                                                        resultat = opprettTilbakekrevingRequest.faktainfo.revurderingsresultat,
-                                                        årsaker = fagsystemsbehandlingsårsaker,
+                                                        resultat = faktainfo.revurderingsresultat,
+                                                        årsak = faktainfo.revurderingsårsak,
                                                         konsekvenser = fagsystemskonsekvenser)
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
