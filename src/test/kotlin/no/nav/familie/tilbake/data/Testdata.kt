@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.data
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -7,9 +8,9 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
@@ -22,7 +23,6 @@ import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import no.nav.familie.tilbake.domain.tbd.Behandlingstegsstatus
-import no.nav.familie.tilbake.domain.tbd.Behandlingsårsakstype
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.domain.tbd.Fagområdekode
@@ -48,6 +48,7 @@ import no.nav.familie.tilbake.domain.tbd.Kravvedtaksstatus437
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Navoppfulgt
+import no.nav.familie.tilbake.domain.tbd.Periode
 import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
 import no.nav.familie.tilbake.domain.tbd.SærligGrunn
 import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
@@ -66,15 +67,11 @@ import no.nav.familie.tilbake.domain.tbd.Årsakstype
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
-import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandlingsårsak
+import java.util.UUID
 
 object Testdata {
 
@@ -127,8 +124,7 @@ object Testdata {
                                 verger = setOf(verge),
                                 eksternBrukId = UUID.randomUUID())
 
-    val behandlingsårsak = Behandlingsårsak(behandlingId = behandling.id,
-                                            type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+    val behandlingsårsak = Behandlingsårsak(type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                                             originalBehandlingId = null)
 
     val aksjonspunkt = Aksjonspunkt(totrinnsbehandling = true,
