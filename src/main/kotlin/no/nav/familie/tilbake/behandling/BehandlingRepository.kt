@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
@@ -26,8 +26,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-            SELECT beh.* FROM behandling beh JOIN ekstern_behandling eks ON eks.behandling_id= beh.id 
-            WHERE eks.ekstern_id=:eksternId AND eks.aktiv=TRUE 
+            SELECT beh.* FROM behandling beh JOIN fagsystemsbehandling fag ON fag.behandling_id= beh.id 
+            WHERE fag.ekstern_id=:eksternId AND fag.aktiv=TRUE 
             AND beh.type='TILBAKEKREVING' AND beh.status='AVSLUTTET' ORDER BY beh.opprettet_tid DESC
     """)
     fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>

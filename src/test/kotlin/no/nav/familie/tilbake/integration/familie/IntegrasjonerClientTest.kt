@@ -1,7 +1,10 @@
 package no.nav.familie.tilbake.integration.familie
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
@@ -11,7 +14,7 @@ import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

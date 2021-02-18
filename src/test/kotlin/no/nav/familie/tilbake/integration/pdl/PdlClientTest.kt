@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.http.sts.StsRestClient
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.AfterAll
@@ -73,7 +73,8 @@ class PdlClientTest {
                                            .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
 
 
-        val exception = assertFailsWith<RuntimeException>(block = { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
+        val exception = assertFailsWith<RuntimeException>(block =
+                                                          { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
         assertEquals("Feil ved oppslag på person: Ikke tilgang til å se person", exception.message)
     }
 

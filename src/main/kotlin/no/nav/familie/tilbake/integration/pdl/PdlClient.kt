@@ -5,7 +5,7 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.journalpost.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
@@ -26,7 +27,7 @@ data class Behandling(@Id
                       val manueltOpprettet: Boolean,
                       val eksternBrukId: UUID = UUID.randomUUID(),
                       @MappedCollection(idColumn = "behandling_id")
-                      val eksternBehandling: Set<EksternBehandling> = setOf(),
+                      val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val varsler: Set<Varsel> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
@@ -57,12 +58,25 @@ data class Behandling(@Id
         get() = sporbar.endret.endretTid
 }
 
-data class EksternBehandling(@Id
-                             val id: UUID = UUID.randomUUID(),
-                             val eksternId: String,
-                             val aktiv: Boolean = true,
-                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                             val sporbar: Sporbar = Sporbar())
+data class Fagsystemsbehandling(@Id
+                                val id: UUID = UUID.randomUUID(),
+                                val eksternId: String,
+                                val aktiv: Boolean = true,
+                                val tilbakekrevingsvalg: Tilbakekrevingsvalg,
+                                val resultat: String,
+                                @Column("arsak")
+                                val årsak: String,
+                                @MappedCollection(idColumn = "fagsystemsbehandling_id")
+                                val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
+                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                val sporbar: Sporbar = Sporbar())
+
+@Table("fagsystemskonsekvens")
+data class Fagsystemskonsekvens(@Id
+                                val id: UUID = UUID.randomUUID(),
+                                val konsekvens: String,
+                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                val sporbar: Sporbar = Sporbar())
 
 data class Varsel(@Id
                   val id: UUID = UUID.randomUUID(),

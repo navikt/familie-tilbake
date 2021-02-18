@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.data
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -7,14 +10,12 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandling.domain.Vergetype
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
@@ -67,7 +68,6 @@ import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import java.math.BigDecimal
-import java.math.MathContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -82,7 +82,12 @@ object Testdata {
                         eksternFagsakId = "testverdi",
                         bruker = bruker)
 
-    private val eksternBehandling = EksternBehandling(eksternId = UUID.randomUUID().toString())
+    private val fagsystemsbehandling = Fagsystemsbehandling(
+            eksternId = UUID.randomUUID().toString(),
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            resultat = "OPPHØR",
+            årsak = "testverdi"
+    )
     private val date = LocalDate.now()
 
     private val varsel = Varsel(varseltekst = "testverdi",
@@ -91,13 +96,13 @@ object Testdata {
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
     val verge = Verge(ident = "testverdi",
-                              gyldigFom = LocalDate.now(),
-                              gyldigTom = LocalDate.now(),
-                              type = Vergetype.VERGE_FOR_BARN,
-                              orgNr = "testverdi",
-                              navn = "testverdi",
-                              kilde = "testverdi",
-                              begrunnelse = "testverdi")
+                      gyldigFom = LocalDate.now(),
+                      gyldigTom = LocalDate.now(),
+                      type = Vergetype.VERGE_FOR_BARN,
+                      orgNr = "testverdi",
+                      navn = "testverdi",
+                      kilde = "testverdi",
+                      begrunnelse = "testverdi")
 
     private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
                                                       ansvarligSaksbehandler = "testverdi")
@@ -113,7 +118,7 @@ object Testdata {
                                 behandlendeEnhet = "testverdi",
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = true,
-                                eksternBehandling = setOf(eksternBehandling),
+                                fagsystemsbehandling = setOf(fagsystemsbehandling),
                                 resultater = setOf(behandlingsresultat),
                                 varsler = setOf(varsel),
                                 verger = setOf(verge),
