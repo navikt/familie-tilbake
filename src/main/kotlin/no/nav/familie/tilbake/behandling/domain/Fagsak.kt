@@ -17,7 +17,7 @@ data class Fagsak(@Id
                   val sporbar: Sporbar = Sporbar()) {
 
     val ytelsesnavn get() =  ytelsestype.navn[bruker.språkkode]
-                             ?: throw IllegalStateException("Programmeringsfeil: Sprækkode lagt til uten støtte")
+                             ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
 }
 
 enum class Ytelsestype(val kode: String, val navn: Map<Språkkode, String>) {
