@@ -9,20 +9,21 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-    maxAntallFeil = 3,
-    beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
-    triggerTidVedFeilISekunder = 60 * 5)
+                     maxAntallFeil = 3,
+                     beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
+                     triggerTidVedFeilISekunder = 60 * 5)
 class BehandleKravgrunnlagTask(private val kravgrunnlag431Repository: Kravgrunnlag431Repository) : AsyncTaskStep {
 
-    private val LOG = LoggerFactory.getLogger(BehandleKravgrunnlagTask::class.java)
-    private val SECURE_LOGG = LoggerFactory.getLogger("secureLogger")
+    private val log = LoggerFactory.getLogger(this::class.java)
+    private val secure_log = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         //TODO map fra kravgrunnlag xml i payload til domene + validering +++
-        LOG.info("Behandler kravgrunnlag.")
+        log.info("Behandler kravgrunnlag.")
     }
 
     companion object {
+
         const val BEHANDLE_KRAVGRUNNLAG = "behandleKravgrunnlag"
     }
 }

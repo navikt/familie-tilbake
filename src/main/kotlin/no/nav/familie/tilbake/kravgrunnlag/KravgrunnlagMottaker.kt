@@ -17,24 +17,24 @@ import java.util.*
 @Profile("!e2e")
 class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
-    private val LOG = LoggerFactory.getLogger(KravgrunnlagMottaker::class.java)
-    private val SECURE_LOGG = LoggerFactory.getLogger("secureLogger")
+    private val log = LoggerFactory.getLogger(this::class.java)
+    private val secure_log = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     @JmsListener(destination = "\${oppdrag.mq.kravgrunnlag}", containerFactory = "jmsListenerContainerFactory")
     fun mottaKravgrunnlagFraOppdrag(melding: TextMessage) {
         val kravgrunnlagFraOppdrag = melding.text as String
 
-        LOG.info("Mottatt kravgrunnlag fra oppdrag")
-        SECURE_LOGG.info(kravgrunnlagFraOppdrag)
+        log.info("Mottatt kravgrunnlag fra oppdrag")
+        secure_log.info(kravgrunnlagFraOppdrag)
 
         taskRepository.save(
-            Task(
-                type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-                payload = kravgrunnlagFraOppdrag,
-                properties = Properties().apply {
-                    this["callId"] = UUID.randomUUID()
-                })
+                Task(
+                        type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+                        payload = kravgrunnlagFraOppdrag,
+                        properties = Properties().apply {
+                            this["callId"] = UUID.randomUUID()
+                        })
         )
 
     }
