@@ -18,7 +18,7 @@ data class Fagsak(@Id
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar()) {
 
-    val ytelsesnavn get() =  ytelsestype.kode[bruker.språkkode]
+    val ytelsesnavn get() =  ytelsestype.navn[bruker.språkkode]
                              ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
 }
 
