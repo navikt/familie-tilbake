@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -17,7 +16,6 @@ import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -248,8 +246,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                            personIdent = "321321321") else null
 
         val faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                       revurderingsresultat = "testresultat",
-                                       tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+                                  revurderingsresultat = "testresultat",
+                                  tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
         return OpprettTilbakekrevingRequest(ytelsestype = BARNETRYGD,
                                             fagsystem = Fagsystem.BA,
@@ -257,7 +255,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             personIdent = "321321322",
                                             eksternId = UUID.randomUUID().toString(),
                                             manueltOpprettet = manueltOpprettet,
-                                            språkkode= Språkkode.NN,
+                                            språkkode = Språkkode.NN,
                                             enhetId = "8020",
                                             enhetsnavn = "Oslo",
                                             varsel = varsel,
