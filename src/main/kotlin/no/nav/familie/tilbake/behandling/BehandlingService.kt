@@ -70,8 +70,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun validateFagsystem(ytelsestype: Ytelsestype,
                                   fagsystem: Fagsystem) {
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) != fagsystem) {
-            throw Feil(message = "Behandling kan ikke opprettes med $ytelsestype og $fagsystem",
-                       frontendFeilmelding = "Behandling kan ikke opprettes med $ytelsestype og $fagsystem",
+            throw Feil(message = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                       frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
