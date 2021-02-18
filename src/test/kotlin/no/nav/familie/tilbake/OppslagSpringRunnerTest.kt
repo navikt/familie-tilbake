@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
@@ -11,7 +12,6 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
-import no.nav.familie.tilbake.domain.tbd.Behandlingsårsak
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetaling
 import no.nav.familie.tilbake.domain.tbd.FaktaFeilutbetalingsperiode

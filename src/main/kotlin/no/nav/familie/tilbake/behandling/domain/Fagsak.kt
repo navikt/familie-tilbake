@@ -14,14 +14,18 @@ data class Fagsak(@Id
                   val ytelsestype: Ytelsestype,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar())
+                  val sporbar: Sporbar = Sporbar()) {
 
-enum class Ytelsestype(val kode: String) {
-    BARNETRYGD("BA"),
-    OVERGANGSSTØNAD("OG"),
-    BARNETILSYN("BT"),
-    SKOLEPENGER("SP"),
-    KONTANTSTØTTE("KS");
+    val ytelsesnavn get() =  ytelsestype.navn[bruker.språkkode]
+                             ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
+}
+
+enum class Ytelsestype(val kode: String, val navn: Map<Språkkode, String>) {
+    BARNETRYGD("BA", mapOf(Språkkode.NB to "Barnetrygd", Språkkode.NN to "Barnetrygd")),
+    OVERGANGSSTØNAD("OG", mapOf(Språkkode.NB to "Overgangsstønad", Språkkode.NN to "Overgangsstønad")),
+    BARNETILSYN("BT", mapOf(Språkkode.NB to "Stønad til barnetilsyn", Språkkode.NN to "Stønad til barnetilsyn")),
+    SKOLEPENGER("SP", mapOf(Språkkode.NB to "Stønad til skolepenger", Språkkode.NN to "Stønad til skulepengar")),
+    KONTANTSTØTTE("KS", mapOf(Språkkode.NB to "Kontantstøtte", Språkkode.NN to "Kontantstøtte"));
 
     companion object {
 
@@ -37,19 +41,19 @@ enum class Ytelsestype(val kode: String) {
 }
 
 enum class Fagsystem(val kode: String, val tema: String) {
-    BARNETRYGD("BA", "BAR"),
-    ENSLIG_FORELDER("EF", "ENF"),
-    KONTANTSTØTTE("KS", "KON"),
+    BA("BA", "BAR"),
+    EF("EF", "ENF"),
+    KS("KS", "KON"),
     SYSTEM_TILGANG("", ""); //brukes internt bare for tilgangsskontroll
     companion object {
 
         fun fraYtelsestype(type: Ytelsestype): Fagsystem {
             return when (type) {
-                Ytelsestype.BARNETRYGD -> BARNETRYGD
-                Ytelsestype.KONTANTSTØTTE -> KONTANTSTØTTE
-                Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORELDER
-                Ytelsestype.BARNETILSYN -> ENSLIG_FORELDER
-                Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER
+                Ytelsestype.BARNETRYGD -> BA
+                Ytelsestype.KONTANTSTØTTE -> KS
+                Ytelsestype.OVERGANGSSTØNAD -> EF
+                Ytelsestype.BARNETILSYN -> EF
+                Ytelsestype.SKOLEPENGER -> EF
             }
         }
 

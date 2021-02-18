@@ -6,6 +6,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -13,7 +14,7 @@ data class Kravgrunnlag431(@Id
                            val id: UUID = UUID.randomUUID(),
                            val vedtakId: String,
                            val omgjortVedtakId: String?,
-                           val kravstatuskode: String,
+                           val kravstatuskode: Kravstatuskode,
                            @Column("fagomradekode")
                            val fagområdekode: Fagområdekode,
                            val fagsystem: Fagsystem,
@@ -37,14 +38,16 @@ data class Kravgrunnlag431(@Id
 
 data class Kravgrunnlagsperiode432(@Id
                                    val id: UUID = UUID.randomUUID(),
-                                   val fom: LocalDate,
-                                   val tom: LocalDate,
+                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+                                   val periode: Periode,
                                    @Column("manedlig_skattebelop")
-                                   val månedligSkattebeløp: Double,
+                                   val månedligSkattebeløp: BigDecimal,
                                    @MappedCollection(idColumn = "kravgrunnlagsperiode432_id")
                                    val beløp: Set<Kravgrunnlagsbeløp433> = setOf(),
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                    val sporbar: Sporbar = Sporbar())
+
+
 
 @Table("kravgrunnlagsbelop433")
 data class Kravgrunnlagsbeløp433(@Id
@@ -52,18 +55,18 @@ data class Kravgrunnlagsbeløp433(@Id
                                  val klassekode: Klassekode,
                                  val klassetype: Klassetype,
                                  @Column("opprinnelig_utbetalingsbelop")
-                                 val opprinneligUtbetalingsbeløp: Double?,
+                                 val opprinneligUtbetalingsbeløp: BigDecimal,
                                  @Column("nytt_belop")
-                                 val nyttBeløp: Double,
+                                 val nyttBeløp: BigDecimal,
                                  @Column("tilbakekreves_belop")
-                                 val tilbakekrevesBeløp: Double?,
+                                 val tilbakekrevesBeløp: BigDecimal,
                                  @Column("uinnkrevd_belop")
-                                 val uinnkrevdBeløp: Double?,
+                                 val uinnkrevdBeløp: BigDecimal?,
                                  val resultatkode: String?,
                                  @Column("arsakskode")
                                  val årsakskode: String?,
                                  val skyldkode: String?,
-                                 val skatteprosent: Double,
+                                 val skatteprosent: BigDecimal,
                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                  val sporbar: Sporbar = Sporbar())
 

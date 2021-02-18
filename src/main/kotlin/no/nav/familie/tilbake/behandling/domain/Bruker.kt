@@ -4,16 +4,21 @@ import org.springframework.data.relational.core.mapping.Column
 
 data class Bruker(val ident: String,
                   @Column("sprakkode")
-                  val språkkode: String? = "NB") {
+                  val språkkode: Språkkode = Språkkode.NB) {
 
     companion object {
 
-        fun velgSpråkkode(kode: String?): String {
+        fun velgSpråkkode(kode: String?): Språkkode {
             return when (kode) {
-                "NB" -> kode
-                "NN" -> kode
-                else -> "NB"
+                "NB" -> Språkkode.NB
+                "NN" -> Språkkode.NN
+                else -> Språkkode.NB
             }
         }
     }
+}
+
+enum class Språkkode {
+    NB,
+    NN;
 }

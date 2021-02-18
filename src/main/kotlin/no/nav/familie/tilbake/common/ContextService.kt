@@ -43,47 +43,47 @@ object ContextService {
         val grupper = hentGrupper()
 
         if (grupper.contains(rolleConfig.beslutterRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BA,
                                                        behandlerrolle = Behandlerrolle.BESLUTTER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BA,
                                                        behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BARNETRYGD,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.BA,
                                                        behandlerrolle = Behandlerrolle.VEILEDER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.EF,
                                                        behandlerrolle = Behandlerrolle.BESLUTTER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.EF,
                                                        behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.ENSLIG_FORELDER,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.EF,
                                                        behandlerrolle = Behandlerrolle.VEILEDER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KS,
                                                        behandlerrolle = Behandlerrolle.BESLUTTER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KS,
                                                        behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                                                        brukerTilganger = brukerTilganger))
         }
         if (grupper.contains(rolleConfig.veilederRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KONTANTSTØTTE,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Fagsystem.KS,
                                                        behandlerrolle = Behandlerrolle.VEILEDER,
                                                        brukerTilganger = brukerTilganger))
         }
