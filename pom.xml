@@ -175,6 +175,16 @@
 
         <!-- NAV interne avhengigheter-->
         <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>tilbakekreving-v1-tjenestespesifikasjon</artifactId>
+            <version>1.2020.07.17-17.06-31e5aa824db7</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie</groupId>
+            <artifactId>prosessering-jdbc</artifactId>
+            <version>1.20210218080201_c4e5465</version>
+        </dependency>
+        <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring</artifactId>
             <version>${nav.security.version}</version>
