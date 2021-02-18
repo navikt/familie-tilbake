@@ -30,7 +30,7 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
         taskRepository.save(
             Task(
-                type = MottattKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+                type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
                 payload = kravgrunnlagFraOppdrag,
                 properties = Properties().apply {
                     this["callId"] = UUID.randomUUID()

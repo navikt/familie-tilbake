@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = MottattKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-    maxAntallFeil = 20,
+@TaskStepBeskrivelse(taskStepType = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+    maxAntallFeil = 3,
     beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
-    triggerTidVedFeilISekunder = 60 * 60 * 12)
-class MottattKravgrunnlagTask(private val kravgrunnlag431Repository: Kravgrunnlag431Repository) : AsyncTaskStep {
+    triggerTidVedFeilISekunder = 60 * 5)
+class BehandleKravgrunnlagTask(private val kravgrunnlag431Repository: Kravgrunnlag431Repository) : AsyncTaskStep {
 
-    private val LOG = LoggerFactory.getLogger(MottattKravgrunnlagTask::class.java)
+    private val LOG = LoggerFactory.getLogger(BehandleKravgrunnlagTask::class.java)
     private val SECURE_LOGG = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
