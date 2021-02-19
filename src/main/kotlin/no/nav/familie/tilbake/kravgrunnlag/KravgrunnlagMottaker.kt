@@ -1,16 +1,15 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
-
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Properties
+import java.util.UUID
 import javax.jms.TextMessage
-
-import no.nav.familie.prosessering.domene.TaskRepository
-import java.util.*
 
 
 @Service
