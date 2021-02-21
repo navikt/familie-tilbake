@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.tilbake.api.dto.BehandlingsoppsummeringDto
 import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
@@ -13,7 +12,7 @@ object FagsakMapper {
     fun tilRespons(fagsak: Fagsak,
                    personInfo: PersonInfo,
                    behandlinger: List<Behandling>): FagsakDto {
-        val bruker = BrukerDto(personIdent = PersonIdent(fagsak.bruker.ident),
+        val bruker = BrukerDto(personIdent = fagsak.bruker.ident,
                                navn = personInfo.navn,
                                fødselsdato = personInfo.fødselsdato,
                                kjønn = personInfo.kjønn)
@@ -27,9 +26,9 @@ object FagsakMapper {
         return FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
                          status = fagsak.status,
                          ytelsestype = fagsak.ytelsestype,
-                         fagsystem = fagsak.fagsystem.kode,
-                         språkkode = fagsak.bruker.språkkode!!,
-                         bruker = bruker,
+                         fagsystem = fagsak.fagsystem,
+                         språkkode = fagsak.bruker.språkkode,
+            bruker = bruker,
                          behandlinger = behandlingListe)
     }
 }

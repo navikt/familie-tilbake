@@ -1,9 +1,8 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -76,13 +75,13 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
             }
             ytelsestypeParam -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.toString())
-                val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
+                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             fagsystemParam -> {
-                val fagsystem = Fagsystem.fraKode(requestBody.toString())
+                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.toString())
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
@@ -113,7 +112,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
             ytelsestypeFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = ytelsestypeParam, requestBody = requestBody)
                 val ytelsestype = Ytelsestype.valueOf(felt.get(requestBody).toString())
-                val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
+                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
@@ -148,18 +147,18 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         return felt
     }
 
-    private fun hentFagsystemAvBehandlingId(behandlingId: UUID): Fagsystem {
+    private fun hentFagsystemAvBehandlingId(behandlingId: UUID): Tilgangskontrollsfagsystem {
         val behandling = behandlingRepository.findByIdOrNull(behandlingId)
                          ?: throw Feil(message = "Behandling finnes ikke for $behandlingId", httpStatus = HttpStatus.BAD_REQUEST)
-        return fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
     }
 
-    private fun hentFagsystemAvEksternBrukId(eksternBrukId: UUID): Fagsystem {
+    private fun hentFagsystemAvEksternBrukId(eksternBrukId: UUID): Tilgangskontrollsfagsystem {
         val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
-        return fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
     }
 
-    private fun validate(fagsystem: Fagsystem,
+    private fun validate(fagsystem: Tilgangskontrollsfagsystem,
                          brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                          minimumBehandlerRolle: Behandlerrolle,
                          handling: String) {
@@ -177,7 +176,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                       handling = handling)
     }
 
-    private fun validateFagsystem(fagsystem: Fagsystem,
+    private fun validateFagsystem(fagsystem: Tilgangskontrollsfagsystem,
                                   brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                   handling: String) {
         if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {

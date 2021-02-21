@@ -1,13 +1,14 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.EksternBehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
@@ -24,7 +25,15 @@ object BehandlingMapper {
     fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                             fagsystem: Fagsystem,
                             fagsak: Fagsak): Behandling {
-        val eksternBehandling = EksternBehandling(eksternId = opprettTilbakekrevingRequest.eksternId)
+        val faktainfo = opprettTilbakekrevingRequest.faktainfo
+        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser
+                .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
+        val fagsystemsbehandling = Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
+                                                        tilbakekrevingsvalg = faktainfo
+                                                                .tilbakekrevingsvalg,
+                                                        resultat = faktainfo.revurderingsresultat,
+                                                        årsak = faktainfo.revurderingsårsak,
+                                                        konsekvenser = fagsystemskonsekvenser)
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
 
@@ -33,13 +42,13 @@ object BehandlingMapper {
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
                           behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
-                          eksternBehandling = setOf(eksternBehandling),
+                          fagsystemsbehandling = setOf(fagsystemsbehandling),
                           varsler = varsler,
                           verger = verger)
     }
 
     fun tilRespons(behandling: Behandling,
-               kanHenleggeBehandling: Boolean): BehandlingDto {
+                   kanHenleggeBehandling: Boolean): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull { behandlingsresultat ->
             behandlingsresultat.sporbar.endret.endretTid
@@ -59,7 +68,7 @@ object BehandlingMapper {
                 opprettetDato = behandling.opprettetDato,
                 avsluttetDato = behandling.avsluttetDato,
                 endretTidspunkt = behandling.endretTidspunkt,
-                harVerge = behandling.verger.isNotEmpty(),
+                harVerge = behandling.harVerge,
                 kanHenleggeBehandling = kanHenleggeBehandling,
                 erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
 
@@ -90,7 +99,7 @@ object BehandlingMapper {
                         gyldigTom = it.gyldigTom,
                         navn = it.navn,
                         orgNr = it.organisasjonsnummer,
-                        ident = it.personIdent?.ident
+                        ident = it.personIdent
                 ))
             }
         }

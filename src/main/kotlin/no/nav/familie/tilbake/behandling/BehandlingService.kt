@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystem
-import no.nav.familie.tilbake.behandling.domain.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,14 +47,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        val ytelsestype = Ytelsestype.valueOf(opprettTilbakekrevingRequest.ytelsestype.name)
-        val fagsystem = Fagsystem.fraYtelsestype(ytelsestype)
+        val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
+        val fagsystem = opprettTilbakekrevingRequest.fagsystem
+        validateFagsystem(ytelsestype, fagsystem)
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                     "og eksternId=$eksternId")
         secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                          " og personIdent=${opprettTilbakekrevingRequest.personIdent.ident}")
+                          " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
 
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
         // oppretter fagsak
@@ -66,6 +67,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
+    private fun validateFagsystem(ytelsestype: Ytelsestype,
+                                  fagsystem: Fagsystem) {
+        if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) != fagsystem) {
+            throw Feil(message = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                       frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+    }
+
     private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
                                        eksternFagsakId: String,
                                        eksternId: String) {
@@ -73,7 +83,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
                               "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
-            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
+                       httpStatus = HttpStatus.BAD_REQUEST)
         }
 
         //hvis behandlingen er henlagt, kan det opprettes ny behandling
@@ -85,7 +96,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             if (!erSisteBehandlingHenlagt) {
                 val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
                                   "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
-                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
+                           httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
     }
@@ -93,8 +105,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                               ytelsestype: Ytelsestype,
                               fagsystem: Fagsystem): Fagsak {
-        val bruker = Bruker(opprettTilbakekrevingRequest.personIdent.ident,
-                            Bruker.velgSpråkkode(opprettTilbakekrevingRequest.språkkode))
+        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
+                            språkkode = opprettTilbakekrevingRequest.språkkode)
         return Fagsak(bruker = bruker,
                       eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
                       ytelsestype = ytelsestype,

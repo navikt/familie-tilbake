@@ -15,10 +15,15 @@ data class Brevsporing(@Id
                        val sporbar: Sporbar = Sporbar())
 
 enum class Brevtype {
-    VARSEL_BREV,
-    VEDTAK_BREV,
-    HENLEGGELSE_BREV,
-    INNHENT_DOKUMENTASJONBREV,
+    VARSEL,
+    KORRIGERT_VARSEL,
+    VEDTAK,
+    HENLEGGELSE,
+    INNHENT_DOKUMENTASJON,
     FRITEKST,
-    UDEFINERT
+    UDEFINERT;
+
+    fun gjelderVarsel(): Boolean {
+        return this in setOf(VARSEL)
+    }
 }
