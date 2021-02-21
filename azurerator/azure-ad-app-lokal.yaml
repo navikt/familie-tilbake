@@ -11,6 +11,9 @@ spec:
     - application: familie-tilbake-frontend-lokal
       cluster: dev-gcp
       namespace: teamfamilie
+    - application: ida
+      cluster: prod-fss
+      namespace: default
   logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal

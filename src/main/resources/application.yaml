@@ -76,6 +76,16 @@ FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
 
+oppdrag.mq:
+  queuemanager: QM1
+  kravgrunnlag: DEV.QUEUE.1
+  channel: DEV.ADMIN.SVRCONN
+  hostname: localhost
+  port: 1414
+  user: admin
+  password: passw0rd
+  enabled: true
+
 rolle:
   barnetrygd:
     veileder: ""

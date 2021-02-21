@@ -17,7 +17,7 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableJdbcAuditing
-@EnableJdbcRepositories("no.nav.familie.tilbake")
+@EnableJdbcRepositories("no.nav.familie.tilbake","no.nav.familie.prosessering")
 class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @Bean
