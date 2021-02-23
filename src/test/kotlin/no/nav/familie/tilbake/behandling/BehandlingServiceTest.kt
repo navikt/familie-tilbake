@@ -200,6 +200,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(true, fagsystemsbehandling.aktiv)
         assertEquals(opprettTilbakekrevingRequest.eksternId, fagsystemsbehandling.eksternId)
         assertEquals(opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg, fagsystemsbehandling.tilbakekrevingsvalg)
+        assertEquals(opprettTilbakekrevingRequest.revurderingsvedtaksdato, fagsystemsbehandling.revurderingsvedtaksdato)
         assertEquals("testresultat", fagsystemsbehandling.resultat)
         assertEquals("testverdi", fagsystemsbehandling.årsak)
         assertTrue { fagsystemsbehandling.konsekvenser.isEmpty() }
@@ -210,7 +211,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val varsler = behandling.varsler
         assertEquals(1, varsler.size)
         val varsel = varsler.toList().first()
-        assertEquals(opprettTilbakekrevingRequest.revurderingsvedtaksdato, varsel.revurderingsvedtaksdato)
         opprettTilbakekrevingRequest.varsel?.let {
             assertEquals(it.varseltekst, varsel.varseltekst)
             assertEquals(it.sumFeilutbetaling, varsel.varselbeløp.toBigDecimal())

@@ -45,7 +45,9 @@ data class Behandling(@Id
 
     val aktivVerge get() = verger.firstOrNull { it.aktiv }
 
-    val aktivtVarsel get() = varsler.first { it.aktiv }
+    val aktivtVarsel get() = varsler.firstOrNull { it.aktiv }
+
+    val aktivtFagsystem get() = fagsystemsbehandling.first { it.aktiv }
 
     val harVerge get() = verger.any { it.aktiv }
 
@@ -66,6 +68,7 @@ data class Fagsystemsbehandling(@Id
                                 val resultat: String,
                                 @Column("arsak")
                                 val årsak: String,
+                                val revurderingsvedtaksdato: LocalDate,
                                 @MappedCollection(idColumn = "fagsystemsbehandling_id")
                                 val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
@@ -83,7 +86,6 @@ data class Varsel(@Id
                   val varseltekst: String,
                   @Column("varselbelop")
                   val varselbeløp: Long,
-                  val revurderingsvedtaksdato: LocalDate,
                   @MappedCollection(idColumn = "varsel_id")
                   val perioder: Set<Varselsperiode> = setOf(),
                   val aktiv: Boolean = true,

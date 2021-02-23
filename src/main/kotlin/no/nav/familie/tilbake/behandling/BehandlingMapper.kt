@@ -29,8 +29,9 @@ object BehandlingMapper {
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser
                 .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling = Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
-                                                        tilbakekrevingsvalg = faktainfo
-                                                                .tilbakekrevingsvalg,
+                                                        tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
+                                                        revurderingsvedtaksdato =
+                                                        opprettTilbakekrevingRequest.revurderingsvedtaksdato,
                                                         resultat = faktainfo.revurderingsresultat,
                                                         årsak = faktainfo.revurderingsårsak,
                                                         konsekvenser = fagsystemskonsekvenser)
@@ -82,7 +83,6 @@ object BehandlingMapper {
                     }.toSet()
             return setOf(Varsel(varseltekst = it.varseltekst,
                                 varselbeløp = it.sumFeilutbetaling.longValueExact(),
-                                revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
                                 perioder = varselsperioder))
         } ?: emptySet()
     }

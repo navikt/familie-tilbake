@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,9 +26,6 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
-    private lateinit var grupperingFaktaFeilutbetalingRepository: GrupperingFaktaFeilutbetalingRepository
-
-    @Autowired
     private lateinit var grupperingVurdertForeldelseRepository: GrupperingVurdertForeldelseRepository
 
     @Autowired
@@ -43,7 +41,6 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
         faktaFeilutbetalingRepository.insert(Testdata.faktaFeilutbetaling)
-        grupperingFaktaFeilutbetalingRepository.insert(Testdata.grupperingFaktaFeilutbetaling)
         vurdertForeldelseRepository.insert(Testdata.vurdertForeldelse)
         grupperingVurdertForeldelseRepository.insert(Testdata.grupperingVurdertForeldelse)
         vilkårsvurderingRepository.insert(Testdata.vilkår)

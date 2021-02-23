@@ -1,13 +1,12 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.faktaomfeilutbetaling
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Assert
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -22,13 +21,15 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
-    @Autowired
-    private lateinit var grupperingFaktaFeilutbetalingRepository: GrupperingFaktaFeilutbetalingRepository
-
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
-    private val grupperingFaktaFeilutbetaling = Testdata.grupperingFaktaFeilutbetaling
     private val faktaFeilutbetaling = Testdata.faktaFeilutbetaling
+
+    @BeforeEach
+    fun init(){
+        fagsakRepository.insert(fagsak)
+        behandlingRepository.insert(behandling)
+    }
 
     @Test
     fun `insert med gyldige verdier skal persistere en forekomst av FaktaFeilutbetaling til basen`() {
@@ -53,11 +54,8 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `findByBehandlingId returnerer resultat når det finnes en forekomst`() {
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
-        fagsakRepository.insert(fagsak)
-        behandlingRepository.insert(behandling)
-        grupperingFaktaFeilutbetalingRepository.insert(grupperingFaktaFeilutbetaling)
 
-        val findByBehandlingId = faktaFeilutbetalingRepository.findByBehandlingId(behandling.id)
+        val findByBehandlingId = faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandling.id)
 
         assertThat(findByBehandlingId).isEqualToIgnoringGivenFields(faktaFeilutbetaling, "sporbar")
     }
