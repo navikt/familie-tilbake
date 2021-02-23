@@ -34,7 +34,7 @@ object FaktaFeilutbetalingMapper {
                 begrunnelse = faktaFeilutbetaling?.begrunnelse ?: "",
                 faktainfo = faktainfo,
                 feilutbetaltePerioder = feilutbetaltePerioder,
-                totalFeilutbetaltBeløp = utledTotalFeilutbetaltBeløp(logiskePerioder),
+                totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
                 totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder))
     }
 
@@ -59,11 +59,6 @@ object FaktaFeilutbetalingMapper {
 
     private fun hentFeilutbetaltBeløp(logiskePerioder: List<LogiskPeriode>, faktaPeriode: Periode): BigDecimal {
         return logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
-    }
-
-    private fun utledTotalFeilutbetaltBeløp(perioder: List<LogiskPeriode>): BigDecimal {
-        return perioder.map(LogiskPeriode::feilutbetaltBeløp)
-                .reduce(BigDecimal::add)
     }
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Periode {

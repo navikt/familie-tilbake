@@ -13,11 +13,9 @@ object KravgrunnlagUtil {
     fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Periode, BigDecimal> {
         val feilutbetalingPrPeriode = mutableMapOf<Periode, BigDecimal>()
         for (kravgrunnlagPeriode432 in kravgrunnlag.perioder) {
-            val feilutbetaltBeløp = kravgrunnlagPeriode432.beløp.stream()
+            val feilutbetaltBeløp = kravgrunnlagPeriode432.beløp
                     .filter { Klassetype.FEIL === it.klassetype }
-                    .map(Kravgrunnlagsbeløp433::nyttBeløp)
-                    .reduce(BigDecimal::add)
-                    .orElse(BigDecimal.ZERO)
+                    .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
             if (feilutbetaltBeløp.compareTo(BigDecimal.ZERO) != 0) {
                 feilutbetalingPrPeriode[kravgrunnlagPeriode432.periode] = feilutbetaltBeløp
             }
