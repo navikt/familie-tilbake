@@ -66,7 +66,7 @@ object FaktaFeilutbetalingMapper {
         var totalPeriodeTom: LocalDate? = null
         for (periode in perioder) {
             totalPeriodeFom =
-                    if (totalPeriodeFom == null || totalPeriodeFom.isAfter(periode.fom)) periode.tom else totalPeriodeFom
+                    if (totalPeriodeFom == null || totalPeriodeFom.isAfter(periode.fom)) periode.fom else totalPeriodeFom
             totalPeriodeTom =
                     if (totalPeriodeTom == null || totalPeriodeTom.isBefore(periode.tom)) periode.tom else totalPeriodeTom
         }

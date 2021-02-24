@@ -125,6 +125,9 @@ class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private fun assertFeilutbetaltePerioder(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
                                             hendelsestype: Hendelsestype?,
                                             hendelsesundertype: Hendelsesundertype?) {
+        assertEquals(periode, faktaFeilutbetalingDto.totalFeilutbetaltPeriode)
+        assertEquals(BigDecimal.valueOf(123.11), faktaFeilutbetalingDto.totaltFeilutbetaltBeløp)
+
         assertEquals(1, faktaFeilutbetalingDto.feilutbetaltePerioder.size)
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()
         assertEquals(hendelsestype, feilutbetaltePeriode.hendelsestype)
