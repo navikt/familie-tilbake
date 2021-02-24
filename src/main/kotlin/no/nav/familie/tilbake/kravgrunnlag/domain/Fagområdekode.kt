@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.domain.tbd
+    package no.nav.familie.tilbake.kravgrunnlag.domain
 
 
 enum class Fagområdekode(val navn: String) {

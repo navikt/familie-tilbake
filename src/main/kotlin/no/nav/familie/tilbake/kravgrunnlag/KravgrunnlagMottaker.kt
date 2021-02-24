@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener

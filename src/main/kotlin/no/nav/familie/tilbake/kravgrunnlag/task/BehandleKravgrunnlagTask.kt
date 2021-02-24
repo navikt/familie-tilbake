@@ -1,9 +1,9 @@
-package no.nav.familie.tilbake.kravgrunnlag
+package no.nav.familie.tilbake.kravgrunnlag.task
 
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.repository.tbd.Kravgrunnlag431Repository
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
                      maxAntallFeil = 3,
                      beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
                      triggerTidVedFeilISekunder = 60 * 5)
-class BehandleKravgrunnlagTask(private val kravgrunnlag431Repository: Kravgrunnlag431Repository) : AsyncTaskStep {
+class BehandleKravgrunnlagTask(private val kravgrunnlagRepository: KravgrunnlagRepository) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secure_log = LoggerFactory.getLogger("secureLogger")

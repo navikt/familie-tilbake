@@ -1,5 +1,6 @@
-package no.nav.familie.tilbake.domain.tbd
+package no.nav.familie.tilbake.kravgrunnlag.domain
 
+import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -8,20 +9,24 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class Kravgrunnlag431(@Id
                            val id: UUID = UUID.randomUUID(),
+                           val behandlingId: UUID,
+                           val aktiv: Boolean = true,
+                           val sperret: Boolean = false,
                            val vedtakId: String,
                            val omgjortVedtakId: String?,
                            val kravstatuskode: Kravstatuskode,
                            @Column("fagomradekode")
                            val fagområdekode: Fagområdekode,
-                           val fagsystem: Fagsystem,
+                           val fagsystemId: String,
                            val fagsystemVedtaksdato: LocalDate?,
                            val gjelderVedtakId: String,
                            val gjelderType: GjelderType,
                            val utbetalesTilId: String,
+                           val utbetIdType:GjelderType,
                            val hjemmelkode: String?,
                            val beregnesRenter: Boolean?,
                            val ansvarligEnhet: String,
@@ -46,7 +51,6 @@ data class Kravgrunnlagsperiode432(@Id
                                    val beløp: Set<Kravgrunnlagsbeløp433> = setOf(),
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                    val sporbar: Sporbar = Sporbar())
-
 
 
 @Table("kravgrunnlagsbelop433")
@@ -161,20 +165,4 @@ enum class Klassetype(val navn: String) {
     SKAT("Skatt"),
     TREK("Trekk"),
     YTEL("Ytelseskonto")
-}
-
-enum class Fagsystem(val offisiellKode: String) {
-    SAK("FS36"),
-    KSSASkK9SAK("K9"),
-    TPS("FS03"),
-    JOARK("AS36"),
-    INFOTRYGD("IT01"),
-    ARENA("AO01"),
-    INNTEKT("FS28"),
-    MEDL("FS18"),
-    GOSYS("FS22"),
-    ENHETSREGISTERET("ER01"),
-    AAREGISTERET("AR01"),
-    FPTILBAKE(""),
-    K9TILBAKE("")
 }

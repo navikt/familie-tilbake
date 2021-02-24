@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.domain.tbd
 
+import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
