@@ -29,22 +29,23 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): PersonInfo {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+    fun hentPersoninfo(ident: String, fagsystem: Fagsystem): PersonInfo {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = PdlConfig.hentEnkelPersonQuery)
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
                                                                       pdlPersonRequest,
                                                                       httpHeaders(fagsystem))
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
-                PersonInfo(fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
+                PersonInfo(ident = ident,
+                           fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                            navn = it.navn.first().fulltNavn(),
                            kjønn = it.kjønn.first().kjønn)
             }
         } else {
             logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
             throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
-                       frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${respons.errorMessages()}",
+                       frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }

@@ -21,7 +21,8 @@ class PdlClientConfig {
         val pdlClient: PdlClient = mockk()
 
         every { pdlClient.hentPersoninfo(any(), any()) } answers {
-            PersonInfo(fødselsdato = LocalDate.now().minusYears(20),
+            PersonInfo(ident = "32132132111",
+                       fødselsdato = LocalDate.now().minusYears(20),
                        navn = "testverdi",
                        kjønn = Kjønn.MANN)
         }

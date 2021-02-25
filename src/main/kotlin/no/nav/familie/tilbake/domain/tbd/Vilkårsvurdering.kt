@@ -42,7 +42,7 @@ data class VilkårsvurderingGodTro(@Id
                                   @Column("belop_er_i_behold")
                                   val beløpErIBehold: Boolean,
                                   @Column("belop_tilbakekreves")
-                                  val beløpTilbakekreves: BigDecimal,
+                                  val beløpTilbakekreves: BigDecimal? = null,
                                   val begrunnelse: String,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                   val sporbar: Sporbar = Sporbar())
@@ -60,7 +60,7 @@ data class VilkårsvurderingAktsomhet(@Id
                                      @Column("serlige_grunner_til_reduksjon")
                                      val særligeGrunnerTilReduksjon: Boolean = false,
                                      @Column("tilbakekrev_smabelop")
-                                     val tilbakekrevSmåbeløp: Boolean = false,
+                                     val tilbakekrevSmåbeløp: Boolean = true,
                                      @MappedCollection(idColumn = "vilkarsvurdering_aktsomhet_id")
                                      val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
                                      @Column("serlige_grunner_begrunnelse")
@@ -75,10 +75,10 @@ data class VilkårsvurderingAktsomhet(@Id
             check(!særligeGrunnerTilReduksjon) { "Ved FORSETT skal ikke særligeGrunnerTilReduksjon settes her" }
             check(manueltSattBeløp == null) { "Ved FORSETT er beløp automatisk, og skal ikke settes her" }
             check(andelTilbakekreves == null) { "Ved FORSETT er andel automatisk, og skal ikke settes her" }
-            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+            check(tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
         }
         if (aktsomhet == Aktsomhet.GROV_UAKTSOMHET) {
-            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+            check(tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
         }
     }
 

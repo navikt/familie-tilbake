@@ -239,7 +239,6 @@ object Testdata {
                                       manueltSattBeløp = null,
                                       begrunnelse = "testverdi",
                                       særligeGrunnerTilReduksjon = true,
-                                      tilbakekrevSmåbeløp = false,
                                       særligeGrunnerBegrunnelse = "testverdi",
                                       vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
@@ -254,9 +253,10 @@ object Testdata {
     val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
                                   perioder = setOf(vilkårsperiode))
 
-    val faktaFeilutbetalingsperiode = FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-                                                                  hendelsestype = Hendelsestype.BA_ANNET,
-                                                                  hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+    private val faktaFeilutbetalingsperiode =
+            FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+                                        hendelsestype = Hendelsestype.BA_ANNET,
+                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(begrunnelse = "testverdi",
                                                   aktiv = true,
