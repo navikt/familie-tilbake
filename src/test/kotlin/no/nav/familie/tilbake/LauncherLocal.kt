@@ -13,6 +13,6 @@ fun main(args: Array<String>) {
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .initializers(DbContainerInitializer())
-            .profiles("local", "mock-pdl")
+            .profiles("local", "mock-pdl", "mock-oauth")
             .run(*args)
 }

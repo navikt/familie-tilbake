@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kravgrunnlag.KravvedtaksstatusRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTe
     private lateinit var grupperingKravvedtaksstatusRepository: GrupperingKravvedtaksstatusRepository
 
     @Autowired
-    private lateinit var kravvedtaksstatus437Repository: Kravvedtaksstatus437Repository
+    private lateinit var kravvedtaksstatusRepository: KravvedtaksstatusRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -30,7 +31,7 @@ internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTe
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        kravvedtaksstatus437Repository.insert(Testdata.kravvedtaksstatus437)
+        kravvedtaksstatusRepository.insert(Testdata.kravvedtaksstatus437)
     }
 
     @Test

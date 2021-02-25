@@ -3,6 +3,7 @@ no.nav.security.jwt:
     discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
     accepted_audience: ${CLIENT_ID}
     cookie_name: azure_token
+    proxy_url: #Default satt, skal være null lokalt
 
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 
@@ -14,6 +15,8 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 OPPDRAG_SERVICE_URL: #Mockes ut lokalt
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 CREDENTIAL_USERNAME: not-a-real-srvuser

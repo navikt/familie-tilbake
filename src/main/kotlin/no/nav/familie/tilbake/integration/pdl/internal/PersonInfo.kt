@@ -4,6 +4,6 @@ import java.time.LocalDate
 
 data class PersonInfo(
         val fødselsdato: LocalDate,
-        val navn: String? = null,
-        val kjønn: Kjønn? = null
+        val navn: String,
+        val kjønn: Kjønn
 )

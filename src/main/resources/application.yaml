@@ -24,6 +24,36 @@ spring:
       max-lifetime: 30000
       minimum-idle: 1
       data-source-properties.stringtype: unspecified # Nødvendig for å kunde sende en String til et json-felt i PostgresSql
+  aop:
+    auto: true
+    proxy-target-class: true
+
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: ${AZUREAD_DISCOVERY_URL}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}
+    proxyurl: http://webproxy-nais.nav.no:8088
+    cookie_name: azure_token
+  client:
+    registration:
+      familie-integrasjoner:
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-integrasjoner-clientcredentials:
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 management:
   endpoint.health.show-details: always
@@ -37,8 +67,35 @@ management:
     db:
       enabled: true
 
+AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
 FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
+
+oppdrag.mq:
+  queuemanager: QM1
+  kravgrunnlag: DEV.QUEUE.1
+  channel: DEV.ADMIN.SVRCONN
+  hostname: localhost
+  port: 1414
+  user: admin
+  password: passw0rd
+  enabled: true
+
+rolle:
+  barnetrygd:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""
+  enslig:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""
+  kontantstøtte:
+    veileder: ""
+    saksbehandler: ""
+    beslutter: ""

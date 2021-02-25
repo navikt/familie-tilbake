@@ -1,9 +1,11 @@
 package no.nav.familie.tilbake.config
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.config.RestTemplateSts
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -15,9 +17,10 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 
 @SpringBootConfiguration
-@ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet")
+@ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateSts::class, StsRestClient::class)
+@Import(RestTemplateSts::class, RestTemplateAzure::class, StsRestClient::class)
+@EnableOAuth2Client(cacheEnabled = true)
 @ConfigurationPropertiesScan
 class ApplicationConfig {
 
