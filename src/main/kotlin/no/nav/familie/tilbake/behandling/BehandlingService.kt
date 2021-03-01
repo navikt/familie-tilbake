@@ -9,6 +9,9 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,7 +23,9 @@ import java.util.UUID
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakRepository: FagsakRepository) {
+                        private val fagsakRepository: FagsakRepository,
+                        private val behandlingskontrollService: BehandlingskontrollService,
+                        private val stegService: StegService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -63,6 +68,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         fagsakRepository.insert(fagsak)
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
+
+        behandlingskontrollService.bestemBehandlingsstegogstatus(behandling.id)
+        håndterNesteSteg(behandling.id)
 
         return behandling
     }
@@ -123,6 +131,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                                                    .minusDays(OPPRETTELSE_DAGER_BEGRENSNING)))
         }
         return kanHenlegges
+    }
+
+    private fun håndterNesteSteg(behandlingId: UUID) {
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
+        when {
+            Behandlingssteg.VARSEL == aktivtBehandlingssteg -> {
+                stegService.håndterVarsel(behandlingId, aktivtBehandlingssteg)
+            }
+            Behandlingssteg.GRUNNLAG == aktivtBehandlingssteg -> {
+                stegService.håndterGrunnlag(behandlingId,aktivtBehandlingssteg)
+            }
+            Behandlingssteg.FAKTA == aktivtBehandlingssteg -> {
+                stegService.håndterFakta(behandlingId, aktivtBehandlingssteg)
+            }
+        }
     }
 
     companion object {

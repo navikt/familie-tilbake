@@ -1,12 +1,12 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.behandlingskontroll
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.domain.tbd.Behandlingstegsstatus
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,19 +36,19 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        Assertions.assertThat(lagretBehandlingsstegstilstand).isEqualToIgnoringGivenFields(behandlingsstegstilstand, "sporbar")
+        assertThat(lagretBehandlingsstegstilstand).isEqualToIgnoringGivenFields(behandlingsstegstilstand, "sporbar")
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Behandlingsstegstilstand i basen`() {
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
         val oppdatertBehandlingsstegstilstand =
-                behandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingstegsstatus.STARTET)
+                behandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
-        Assertions.assertThat(lagretBehandlingsstegstilstand)
+        assertThat(lagretBehandlingsstegstilstand)
                 .isEqualToIgnoringGivenFields(oppdatertBehandlingsstegstilstand, "sporbar")
     }
 
