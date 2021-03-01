@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo

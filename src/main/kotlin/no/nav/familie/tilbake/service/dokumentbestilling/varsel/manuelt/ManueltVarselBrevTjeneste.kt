@@ -6,6 +6,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottaker
@@ -17,8 +19,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbr
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevSamletInfo
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevUtil
-import no.nav.familie.tilbake.domain.tbd.Brevtype
-import no.nav.familie.tilbake.service.FaktaFeilutbetalingTjeneste
 import org.springframework.stereotype.Service
 import java.time.Period
 import java.util.UUID
@@ -28,7 +28,7 @@ class ManueltVarselBrevTjeneste(private val behandlingRepository: BehandlingRepo
                                 private val fagsakRepository: FagsakRepository,
                                 private val eksternDataForBrevTjeneste: EksternDataForBrevTjeneste,
                                 private val pdfBrevTjeneste: PdfBrevTjeneste,
-                                private val faktaFeilutbetalingTjeneste: FaktaFeilutbetalingTjeneste) {
+                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
     val brukersSvarfrist: Period = Period.ofDays(14)
 
@@ -123,7 +123,7 @@ class ManueltVarselBrevTjeneste(private val behandlingRepository: BehandlingRepo
         //Henter feilutbetaling fakta
 
         //Henter feilutbetaling fakta
-        val feilutbetalingFakta = faktaFeilutbetalingTjeneste.hentBehandlingFeilutbetalingFakta(behandling)
+        val feilutbetalingFakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
 
         return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(behandling,
                                                                                        personinfo,

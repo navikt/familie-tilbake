@@ -6,6 +6,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottaker
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottakerUtil
@@ -13,8 +15,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksternDataForBr
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.BrevData
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevTjeneste
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.FritekstbrevData
-import no.nav.familie.tilbake.domain.tbd.Brevtype
-import no.nav.familie.tilbake.integration.pdl.PdlClient
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

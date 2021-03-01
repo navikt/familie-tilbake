@@ -4,22 +4,24 @@ import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
+import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
-import no.nav.familie.tilbake.service.FaktaFeilutbetalingTjeneste
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottaker
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksternDataForBrevTjeneste
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevTjeneste
-import no.nav.familie.tilbake.service.modell.BehandlingFeilutbetalingFakta
-import no.nav.familie.tilbake.service.modell.LogiskPeriodeMedFaktaDto
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +41,7 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     private val mockEksternDataForBrevTjeneste: EksternDataForBrevTjeneste = mockk()
-    private val mockFeilutbetalingTjeneste: FaktaFeilutbetalingTjeneste = mockk()
+    private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
     private val mockPdfBrevTjeneste: PdfBrevTjeneste = mockk(relaxed = true)
     private lateinit var manueltVarselBrevTjeneste: ManueltVarselBrevTjeneste
     private var behandling = Testdata.behandling
@@ -51,9 +53,9 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
                                                               fagsakRepository,
                                                               mockEksternDataForBrevTjeneste,
                                                               mockPdfBrevTjeneste,
-                                                              mockFeilutbetalingTjeneste)
+                                                              mockFeilutbetalingService)
 
-        every { mockFeilutbetalingTjeneste.hentBehandlingFeilutbetalingFakta(any()) }
+        every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
                 .returns(lagFeilutbetalingFakta())
         val personinfo = PersonInfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident: String = Testdata.fagsak.bruker.ident
@@ -152,15 +154,22 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(data).isNotEmpty
     }
 
-    private fun lagFeilutbetalingFakta(): BehandlingFeilutbetalingFakta {
+    private fun lagFeilutbetalingFakta(): FaktaFeilutbetalingDto {
         val periode = Periode(LocalDate.of(2019, 10, 1),
                               LocalDate.of(2019, 10, 30))
 
-        return BehandlingFeilutbetalingFakta(aktuellFeilUtbetaltBeløp = BigDecimal.valueOf(9000),
-                                             perioder = listOf(LogiskPeriodeMedFaktaDto(periode,
-                                                                                        BigDecimal.valueOf(9000))),
-                                             datoForRevurderingsvedtak = (LocalDate.now()),
-                                             totalPeriode = periode)
+        return FaktaFeilutbetalingDto(totaltFeilutbetaltBeløp = BigDecimal(9000),
+                                      totalFeilutbetaltPeriode = periode,
+                                      feilutbetaltePerioder = setOf(
+                                              FeilutbetalingsperiodeDto(periode = periode,
+                                                                        feilutbetaltBeløp = BigDecimal(9000))),
+                                      revurderingsvedtaksdato = LocalDate.now().minusDays(1),
+                                      begrunnelse = "",
+                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                            revurderingsresultat = "testverdi",
+                                                            tilbakekrevingsvalg =
+                                                            Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL))
+
     }
 
 

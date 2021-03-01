@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.BaseDokument

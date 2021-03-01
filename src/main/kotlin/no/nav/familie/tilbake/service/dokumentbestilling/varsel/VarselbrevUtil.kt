@@ -1,13 +1,13 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
+import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.periode.HbPeriode
-import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
-import no.nav.familie.tilbake.service.modell.BehandlingFeilutbetalingFakta
 import java.time.LocalDate
 import java.time.Period
 
@@ -41,7 +41,8 @@ object VarselbrevUtil {
                                     sumFeilutbetaling = varsel?.varselbeløp ?: 0L,
                                     feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel),
                                     fristdato = LocalDate.now().plus(ventetid),
-                                    revurderingVedtakDato = LocalDate.now()) // TODO revurderingVedtakDato = grunninformasjon.getVedtakDato()
+                                    revurderingVedtakDato = LocalDate.now())
+        // TODO revurderingVedtakDato = grunninformasjon.getVedtakDato()
     }
 
     fun sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(behandling: Behandling,
@@ -50,7 +51,7 @@ object VarselbrevUtil {
                                                                  fagsak: Fagsak,
                                                                  ventetid: Period?,
                                                                  friTekst: String?,
-                                                                 feilutbetalingFakta: BehandlingFeilutbetalingFakta,
+                                                                 feilutbetalingFakta: FaktaFeilutbetalingDto,
                                                                  finnesVerge: Boolean,
                                                                  vergeNavn: String?,
                                                                  erKorrigert: Boolean): VarselbrevSamletInfo {
@@ -68,10 +69,10 @@ object VarselbrevUtil {
                                     tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert))
         return VarselbrevSamletInfo(brevMetadata = metadata,
                                     fritekstFraSaksbehandler = friTekst,
-                                    sumFeilutbetaling = feilutbetalingFakta.aktuellFeilUtbetaltBeløp.toLong(),
+                                    sumFeilutbetaling = feilutbetalingFakta.totaltFeilutbetaltBeløp.toLong(),
                                     feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingFakta),
                                     fristdato = LocalDate.now().plus(ventetid),
-                                    revurderingVedtakDato = feilutbetalingFakta.datoForRevurderingsvedtak)
+                                    revurderingVedtakDato = feilutbetalingFakta.revurderingsvedtaksdato)
     }
 
     private fun getTittelForVarselbrev(ytelseNavn: String, erKorrigert: Boolean): String {
@@ -83,8 +84,8 @@ object VarselbrevUtil {
         return varsel?.perioder?.map { HbPeriode(it.fom, it.tom) } ?: emptyList()
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingFakta: BehandlingFeilutbetalingFakta): List<HbPeriode> {
-        return feilutbetalingFakta.perioder.map { HbPeriode(it.periode.fom, it.periode.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetalingFakta: FaktaFeilutbetalingDto): List<HbPeriode> {
+        return feilutbetalingFakta.feilutbetaltePerioder.map { HbPeriode(it.periode.fom, it.periode.tom) }
     }
 
 

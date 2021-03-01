@@ -12,8 +12,6 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 object FellesTekstformaterer {
 
