@@ -26,7 +26,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun bestemBehandlingsstegogstatus(behandlingId: UUID) {
+    fun fortsettBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet()) {
             return

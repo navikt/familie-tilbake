@@ -62,7 +62,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                                                             tom = LocalDate.now())))
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = setOf(varsel)))
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)
@@ -75,7 +75,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     fun `fortsettBehandling skal ikke fortsette til grunnlag steg når behandling venter på varsel steg`() {
         lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, VENTER)))
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)
@@ -89,7 +89,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = emptySet()))
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)
@@ -104,7 +104,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = emptySet()))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)
@@ -116,7 +116,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til foreldelse steg etter fakta steg er utført`() {
         lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(FAKTA, UTFØRT)))
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(2, behandlingsstegstilstand.size)
@@ -131,7 +131,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(FAKTA, UTFØRT),
                                           BehandlingsstegMetaData(FORELDELSE, UTFØRT)))
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(3, behandlingsstegstilstand.size)
@@ -147,7 +147,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                                           BehandlingsstegMetaData(GRUNNLAG, UTFØRT),
                                           BehandlingsstegMetaData(FAKTA, KLAR)))
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(3, behandlingsstegstilstand.size)
@@ -167,7 +167,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
-        behandlingskontrollService.bestemBehandlingsstegogstatus(behandlingId = behandling.id)
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(5, behandlingsstegstilstand.size)

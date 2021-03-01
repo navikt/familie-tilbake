@@ -14,7 +14,7 @@ class Varselssteg : IBehandlingssteg {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
     }
 
-    override fun behandlingssteg(): Behandlingssteg {
+    override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.VARSEL
     }
 }

@@ -7,5 +7,5 @@ interface IBehandlingssteg {
 
     fun utførSteg(behandlingId: UUID)
 
-    fun behandlingssteg(): Behandlingssteg
+    fun getBehandlingssteg(): Behandlingssteg
 }
