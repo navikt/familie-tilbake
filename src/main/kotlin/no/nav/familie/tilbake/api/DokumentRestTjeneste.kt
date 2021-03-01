@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.api
 
-import no.nav.familie.tilbake.brev.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.brev.dokumentbestilling.varsel.VarselbrevTjeneste
-import no.nav.familie.tilbake.brev.dokumentbestilling.varsel.manuelt.ManueltVarselBrevTjeneste
+import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevTjeneste
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselBrevTjeneste
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
