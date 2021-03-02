@@ -10,7 +10,6 @@ data class Behandlingsstegstilstand(@Id
                                     val behandlingId: UUID,
                                     val behandlingssteg: Behandlingssteg,
                                     val behandlingsstegsstatus: Behandlingsstegstatus,
-                                    val versjon: Int = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
