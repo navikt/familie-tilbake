@@ -16,14 +16,15 @@ import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandling.domain.Vergetype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
-import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
-import no.nav.familie.tilbake.domain.tbd.Behandlingstegsstatus
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
@@ -116,7 +117,7 @@ object Testdata {
                                 ansvarligBeslutter = "testverdi",
                                 behandlendeEnhet = "testverdi",
                                 behandlendeEnhetsNavn = "testverdi",
-                                manueltOpprettet = true,
+                                manueltOpprettet = false,
                                 fagsystemsbehandling = setOf(fagsystemsbehandling),
                                 resultater = setOf(behandlingsresultat),
                                 varsler = setOf(varsel),
@@ -137,8 +138,8 @@ object Testdata {
                                               årsakstype = Årsakstype.FEIL_LOV)
 
     val behandlingsstegstilstand = Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                            behandlingsstegstype = Behandlingsstegstype.FATTE_VEDTAK,
-                                                            behandlingsstegsstatus = Behandlingstegsstatus.INNGANG)
+                                                            behandlingssteg = Behandlingssteg.FAKTA,
+                                                            behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
 
     val totrinnsvurdering = Totrinnsvurdering(behandlingId = behandling.id,

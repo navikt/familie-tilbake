@@ -10,9 +10,9 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
-import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstilstand
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
 import no.nav.familie.tilbake.domain.tbd.GrupperingKravvedtaksstatus

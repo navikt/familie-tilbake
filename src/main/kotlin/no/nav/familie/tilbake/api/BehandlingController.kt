@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,7 +24,8 @@ import javax.validation.constraints.NotNull
 @RequestMapping("/api/behandling")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BehandlingController(val behandlingService: BehandlingService) {
+class BehandlingController(val behandlingService: BehandlingService,
+                           val stegService: StegService) {
 
 
     @PostMapping(path = ["/v1"],
@@ -50,5 +52,13 @@ class BehandlingController(val behandlingService: BehandlingService) {
                         henteParam = "behandlingId")
     fun hentBehandling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<BehandlingDto> {
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
+    }
+
+    @PostMapping(path = ["{behandlingId}/steg/v1"],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Håndterer behandlings aktiv steg og fortsetter den til neste steg")
+    fun behandleSteg(@PathVariable("behandlingId") behandlingId: UUID) {
+        stegService.håndterSteg(behandlingId)
     }
 }

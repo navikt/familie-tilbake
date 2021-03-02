@@ -64,7 +64,7 @@ data class Fagsystemsbehandling(@Id
                                 val id: UUID = UUID.randomUUID(),
                                 val eksternId: String,
                                 val aktiv: Boolean = true,
-                                val tilbakekrevingsvalg: Tilbakekrevingsvalg,
+                                val tilbakekrevingsvalg: Tilbakekrevingsvalg?= null,
                                 val resultat: String,
                                 @Column("arsak")
                                 val årsak: String,
