@@ -13,4 +13,7 @@ interface KravgrunnlagRepository : RepositoryInterface<Kravgrunnlag431, UUID>,
                                    InsertUpdateRepository<Kravgrunnlag431> {
 
       fun findByBehandlingIdAndAktivIsTrue(behandlingId:UUID): Kravgrunnlag431
+
+      fun existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId: UUID): Boolean
+
 }

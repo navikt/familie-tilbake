@@ -9,6 +9,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,7 +22,9 @@ import java.util.UUID
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakRepository: FagsakRepository) {
+                        private val fagsakRepository: FagsakRepository,
+                        private val behandlingskontrollService: BehandlingskontrollService,
+                        private val stegService: StegService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -63,6 +67,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         fagsakRepository.insert(fagsak)
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
+
+        behandlingskontrollService.fortsettBehandling(behandling.id)
+        stegService.håndterSteg(behandling.id)
 
         return behandling
     }

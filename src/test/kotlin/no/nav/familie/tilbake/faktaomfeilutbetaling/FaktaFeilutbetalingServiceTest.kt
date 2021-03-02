@@ -23,7 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
+internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository

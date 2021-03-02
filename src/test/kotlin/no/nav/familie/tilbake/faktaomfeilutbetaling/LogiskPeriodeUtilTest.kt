@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-class LogiskPeriodeUtilTest {
+internal class LogiskPeriodeUtilTest {
 
     private val uke1Fredag = LocalDate.of(2021, 1, 1)
     private val uke1Søndag = uke1Fredag.plusDays(2)
