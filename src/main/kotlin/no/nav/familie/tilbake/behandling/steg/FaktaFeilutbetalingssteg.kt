@@ -1,28 +1,28 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMetaData
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMedStatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FAKTA
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class Faktafeilutbetalingssteg(val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
+class FaktaFeilutbetalingssteg(val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
 
     override fun utførSteg(behandlingId: UUID) {
-        logger.info("Behandling $behandlingId er på $FAKTA steg")
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 BehandlingsstegMetaData(FAKTA, UTFØRT))
+                                                                 BehandlingsstegMedStatus(Behandlingssteg.FAKTA,
+                                                                                          Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
-        return FAKTA
+        return Behandlingssteg.FAKTA
     }
 }

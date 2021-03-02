@@ -29,11 +29,12 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean, priv
     companion object {
 
         fun finnNesteBehandlingssteg(behandlingssteg: Behandlingssteg): Behandlingssteg {
-            val behandlingsnesteSteg = fraSekvens(behandlingssteg.sekvens + 1)
-            if (behandlingsnesteSteg == VERGE) {
-                return fraSekvens(behandlingsnesteSteg.sekvens + 1) // VERGE kan ikke opprettes automatisk, hopper til neste steg.
+            val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1)
+            if (nesteBehandlingssteg == VERGE) {
+                // VERGE kan ikke opprettes automatisk, hopper til neste steg.
+                return fraSekvens(nesteBehandlingssteg.sekvens + 1)
             }
-            return behandlingsnesteSteg
+            return nesteBehandlingssteg
         }
 
         private fun fraSekvens(sekvens: Int): Behandlingssteg {

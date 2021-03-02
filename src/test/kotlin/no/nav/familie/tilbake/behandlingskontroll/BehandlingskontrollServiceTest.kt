@@ -73,7 +73,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal ikke fortsette til grunnlag steg når behandling venter på varsel steg`() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, VENTER)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(VARSEL, VENTER)))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -115,7 +115,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal oppdatere til foreldelse steg etter fakta steg er utført`() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(FAKTA, UTFØRT)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(FAKTA, UTFØRT)))
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -128,8 +128,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal oppdatere til vilkårsvurdering steg etter foreldelse steg er utført`() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(FAKTA, UTFØRT),
-                                          BehandlingsstegMetaData(FORELDELSE, UTFØRT)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(FAKTA, UTFØRT),
+                                          BehandlingsstegMedStatus(FORELDELSE, UTFØRT)))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -143,9 +143,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal ikke oppdatere til foreldelse steg når fakta steg ikke er utført`() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, UTFØRT),
-                                          BehandlingsstegMetaData(GRUNNLAG, UTFØRT),
-                                          BehandlingsstegMetaData(FAKTA, KLAR)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(VARSEL, UTFØRT),
+                                          BehandlingsstegMedStatus(GRUNNLAG, UTFØRT),
+                                          BehandlingsstegMedStatus(FAKTA, KLAR)))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -159,11 +159,11 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal oppdatere til fakta steg etter mottok endr melding`() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, UTFØRT),
-                                          BehandlingsstegMetaData(GRUNNLAG, UTFØRT),
-                                          BehandlingsstegMetaData(FAKTA, AVBRUTT),
-                                          BehandlingsstegMetaData(FORELDELSE, AVBRUTT),
-                                          BehandlingsstegMetaData(VILKÅRSVURDERING, AVBRUTT)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(VARSEL, UTFØRT),
+                                          BehandlingsstegMedStatus(GRUNNLAG, UTFØRT),
+                                          BehandlingsstegMedStatus(FAKTA, AVBRUTT),
+                                          BehandlingsstegMedStatus(FORELDELSE, AVBRUTT),
+                                          BehandlingsstegMedStatus(VILKÅRSVURDERING, AVBRUTT)))
 
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
@@ -179,14 +179,14 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varsel steg når manuelt varsel sendt og behandling er i vilkår steg `() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, UTFØRT),
-                                          BehandlingsstegMetaData(GRUNNLAG, UTFØRT),
-                                          BehandlingsstegMetaData(FAKTA, UTFØRT),
-                                          BehandlingsstegMetaData(FORELDELSE, AUTOUTFØRT),
-                                          BehandlingsstegMetaData(VILKÅRSVURDERING, KLAR)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(VARSEL, UTFØRT),
+                                          BehandlingsstegMedStatus(GRUNNLAG, UTFØRT),
+                                          BehandlingsstegMedStatus(FAKTA, UTFØRT),
+                                          BehandlingsstegMedStatus(FORELDELSE, AUTOUTFØRT),
+                                          BehandlingsstegMedStatus(VILKÅRSVURDERING, KLAR)))
 
         behandlingskontrollService.tilbakehoppBehandlingssteg(behandlingId = behandling.id,
-                                                              behandlingsstegMetaData = BehandlingsstegMetaData(VARSEL, VENTER))
+                                                              behandlingsstegMedStatus = BehandlingsstegMedStatus(VARSEL, VENTER))
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(5, behandlingsstegstilstand.size)
 
@@ -203,14 +203,14 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varsel steg når mottok sper melding og behandling er i vilkår steg `() {
-        lagBehandlingsstegstilstand(setOf(BehandlingsstegMetaData(VARSEL, UTFØRT),
-                                          BehandlingsstegMetaData(GRUNNLAG, UTFØRT),
-                                          BehandlingsstegMetaData(FAKTA, UTFØRT),
-                                          BehandlingsstegMetaData(FORELDELSE, AUTOUTFØRT),
-                                          BehandlingsstegMetaData(VILKÅRSVURDERING, KLAR)))
+        lagBehandlingsstegstilstand(setOf(BehandlingsstegMedStatus(VARSEL, UTFØRT),
+                                          BehandlingsstegMedStatus(GRUNNLAG, UTFØRT),
+                                          BehandlingsstegMedStatus(FAKTA, UTFØRT),
+                                          BehandlingsstegMedStatus(FORELDELSE, AUTOUTFØRT),
+                                          BehandlingsstegMedStatus(VILKÅRSVURDERING, KLAR)))
 
         behandlingskontrollService.tilbakehoppBehandlingssteg(behandlingId = behandling.id,
-                                                              behandlingsstegMetaData = BehandlingsstegMetaData(GRUNNLAG, VENTER))
+                                                              behandlingsstegMedStatus = BehandlingsstegMedStatus(GRUNNLAG, VENTER))
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(5, behandlingsstegstilstand.size)
@@ -226,7 +226,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertEquals(AVBRUTT, behandlingsstegstilstand.first { VILKÅRSVURDERING == it.behandlingssteg }.behandlingsstegsstatus)
     }
 
-    private fun lagBehandlingsstegstilstand(stegMetadata: Set<BehandlingsstegMetaData>) {
+    private fun lagBehandlingsstegstilstand(stegMetadata: Set<BehandlingsstegMedStatus>) {
         stegMetadata.map {
             behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
                                                                                behandlingssteg = it.behandlingssteg,

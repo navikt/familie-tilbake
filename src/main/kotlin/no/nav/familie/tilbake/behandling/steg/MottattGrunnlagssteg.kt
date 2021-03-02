@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMetaData
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMedStatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -20,8 +20,8 @@ class MottattGrunnlagssteg(val kravgrunnlagRepository: KravgrunnlagRepository,
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId)) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     BehandlingsstegMetaData(Behandlingssteg.GRUNNLAG,
-                                                                                             Behandlingsstegstatus.UTFØRT))
+                                                                     BehandlingsstegMedStatus(Behandlingssteg.GRUNNLAG,
+                                                                                              Behandlingsstegstatus.UTFØRT))
         }
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }

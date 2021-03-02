@@ -47,7 +47,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = true,
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
@@ -63,7 +64,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling med verge`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true,
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
@@ -79,7 +81,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten varsel`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = false, manueltOpprettet = false,
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
@@ -94,7 +98,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingAutomatisk oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false,
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
@@ -110,7 +116,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandlingAutomatisk skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false,
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
@@ -128,7 +136,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = true, finnesVarsel = true, manueltOpprettet = false,
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
@@ -141,7 +151,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling skal hente behandling som kan henlegges uten verge`() {
         val opprettTilbakekrevingRequest =
-                lagOpprettTilbakekrevingRequest(finnesVerge = false, finnesVarsel = true, manueltOpprettet = false,
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())

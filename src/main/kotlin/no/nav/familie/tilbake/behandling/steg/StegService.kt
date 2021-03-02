@@ -21,12 +21,12 @@ class StegService(val steg: List<IBehandlingssteg>,
     }
 
     fun håndterFakta(behandlingId: UUID, behandlingssteg: Behandlingssteg) {
-        val stegClass = hentStegInstans(behandlingssteg) as Faktafeilutbetalingssteg
+        val stegClass = hentStegInstans(behandlingssteg) as FaktaFeilutbetalingssteg
         stegClass.utførSteg(behandlingId)
     }
 
     fun håndterForeldelse(behandlingId: UUID, behandlingssteg: Behandlingssteg) {
-        val stegClass = hentStegInstans(behandlingssteg) as Foreldelsesteg
+        val stegClass = hentStegInstans(behandlingssteg) as Foreldelsessteg
         stegClass.utførSteg(behandlingId)
     }
 
@@ -52,7 +52,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     private fun <T : IBehandlingssteg> hentStegInstans(behandlingssteg: Behandlingssteg): T {
         val firstOrNull = steg.singleOrNull { it.getBehandlingssteg() == behandlingssteg }
-                          ?: error("Finner ikke behandling steg $behandlingssteg")
+                          ?: error("Finner ikke behandlingssteg $behandlingssteg")
         @Suppress("UNCHECKED_CAST")
         return firstOrNull as T
     }

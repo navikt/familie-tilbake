@@ -32,13 +32,14 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
             return
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        val aktivStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
+        val aktivtStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
 
-        if (aktivStegstilstand == null) {
+        if (aktivtStegstilstand == null) {
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
+            val gammelBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
+                    behandlingId, nesteStegMetaData.behandlingssteg)
             when {
-                behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
-                        behandlingId, nesteStegMetaData.behandlingssteg) == null -> {
+                gammelBehandlingsstegstilstand == null -> {
                     settBehandlingsstegOgStatus(behandlingId, nesteStegMetaData)
                 }
                 else -> {
@@ -46,37 +47,37 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 }
             }
         } else {
-            log.info("Behandling har allerede et aktiv steg=${aktivStegstilstand.behandlingssteg} " +
-                     "med status=${aktivStegstilstand.behandlingsstegsstatus}")
+            log.info("Behandling har allerede et aktivt steg=${aktivtStegstilstand.behandlingssteg} " +
+                     "med status=${aktivtStegstilstand.behandlingsstegsstatus}")
         }
     }
 
     @Transactional
-    fun tilbakehoppBehandlingssteg(behandlingId: UUID, behandlingsstegMetaData: BehandlingsstegMetaData) {
+    fun tilbakehoppBehandlingssteg(behandlingId: UUID, behandlingsstegMedStatus: BehandlingsstegMedStatus) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet()) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
-                       "så kan ikke forsette til ${behandlingsstegMetaData.behandlingssteg}")
+                       "så kan ikke forsette til ${behandlingsstegMedStatus.behandlingssteg}")
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         val behandletSteg = behandlingsstegstilstand.filter { it.behandlingssteg.kanSaksbehandles }
         behandletSteg.map { behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = AVBRUTT)) }
-        oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegMetaData)
+        oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegMedStatus)
     }
 
     @Transactional
-    fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegMetaData: BehandlingsstegMetaData) {
+    fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegMedStatus: BehandlingsstegMedStatus) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet()) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
-                       "så status=${behandlingsstegMetaData.behandlingsstegstatus} kan ikke oppdateres")
+                       "så status=${behandlingsstegMedStatus.behandlingsstegstatus} kan ikke oppdateres")
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
-                behandlingId, behandlingsstegMetaData.behandlingssteg)
+                behandlingId, behandlingsstegMedStatus.behandlingssteg)
                                        ?: throw Feil(message = "Behandling med id=$behandlingId og " +
-                                                               "steg=${behandlingsstegMetaData.behandlingssteg} finnes ikke")
+                                                               "steg=${behandlingsstegMedStatus.behandlingssteg} finnes ikke")
         behandlingsstegstilstandRepository.update(behandlingsstegstilstand.copy(
-                behandlingsstegsstatus = behandlingsstegMetaData.behandlingsstegstatus))
+                behandlingsstegsstatus = behandlingsstegMedStatus.behandlingsstegstatus))
     }
 
     fun finnAktivtSteg(behandlingId: UUID): Behandlingssteg? {
@@ -86,34 +87,34 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
     fun finnAktivStegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>): Behandlingsstegstilstand? {
         return behandlingsstegstilstand
-                .filter { Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus) }
-                .getOrNull(0) //forutsetter at behandling kan ha kun et aktiv steg om gangen
+                .firstOrNull { Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus) }
+        //forutsetter at behandling kan ha kun et aktiv steg om gangen
     }
 
     private fun finnNesteBehandlingsstegMedStatus(behandling: Behandling,
-                                                  stegstilstand: List<Behandlingsstegstilstand>): BehandlingsstegMetaData {
+                                                  stegstilstand: List<Behandlingsstegstilstand>): BehandlingsstegMedStatus {
         if (stegstilstand.isEmpty()) {
             return when {
-                kanSendeVarselsbrev(behandling) -> BehandlingsstegMetaData(Behandlingssteg.VARSEL, VENTER)
-                !harMottattGrunnlag(behandling) -> BehandlingsstegMetaData(Behandlingssteg.GRUNNLAG, VENTER)
-                else -> BehandlingsstegMetaData(Behandlingssteg.FAKTA, KLAR)
+                kanSendeVarselsbrev(behandling) -> BehandlingsstegMedStatus(Behandlingssteg.VARSEL, VENTER)
+                !harMottattGrunnlag(behandling) -> BehandlingsstegMedStatus(Behandlingssteg.GRUNNLAG, VENTER)
+                else -> BehandlingsstegMedStatus(Behandlingssteg.FAKTA, KLAR)
             }
         }
         val sisteUtførteSteg = stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
                 .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
-        return BehandlingsstegMetaData(Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
+        return BehandlingsstegMedStatus(Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
     }
 
     private fun settBehandlingsstegOgStatus(behandlingId: UUID,
-                                            nesteStegMetaData: BehandlingsstegMetaData) {
+                                            nesteStegMedStatus: BehandlingsstegMedStatus) {
         // startet nytt behandlingssteg
         val nybehandlingstegstilstand = behandlingsstegstilstandRepository.insert(
                 Behandlingsstegstilstand(behandlingId = behandlingId,
-                                         behandlingssteg = nesteStegMetaData.behandlingssteg,
+                                         behandlingssteg = nesteStegMedStatus.behandlingssteg,
                                          behandlingsstegsstatus = STARTET))
         // oppdaterte behandlingsteg med riktig status
         behandlingsstegstilstandRepository.update(nybehandlingstegstilstand.copy(
-                behandlingsstegsstatus = nesteStegMetaData.behandlingsstegstatus))
+                behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
     }
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {

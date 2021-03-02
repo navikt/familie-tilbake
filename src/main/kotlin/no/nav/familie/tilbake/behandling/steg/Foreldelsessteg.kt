@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMetaData
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMedStatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -11,8 +11,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class Foreldelsesteg(val behandlingskontrollService: BehandlingskontrollService,
-                     val kravgrunnlagRepository: KravgrunnlagRepository) : IBehandlingssteg {
+class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService,
+                      val kravgrunnlagRepository: KravgrunnlagRepository) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -20,8 +20,8 @@ class Foreldelsesteg(val behandlingskontrollService: BehandlingskontrollService,
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     BehandlingsstegMetaData(Behandlingssteg.FORELDELSE,
-                                                                                             Behandlingsstegstatus.AUTOUTFØRT))
+                                                                     BehandlingsstegMedStatus(Behandlingssteg.FORELDELSE,
+                                                                                              Behandlingsstegstatus.AUTOUTFØRT))
         }
 
         behandlingskontrollService.fortsettBehandling(behandlingId)
