@@ -9,7 +9,7 @@ object DokprodTilHtml {
         avsnittene.forEach { avsnitt ->
             var inBulletpoints = false
             var harAvsnitt = false
-            val linjer = avsnitt.split("\n\r?".toRegex()).toTypedArray()
+            val linjer = avsnitt.split("\n\r?".toRegex())
             for (linje in linjer) {
                 if (linje.isBlank()) {
                     builder.append("<br/>")
@@ -34,18 +34,13 @@ object DokprodTilHtml {
                 }
                 val overskrift = linje.startsWith("_")
                 if (overskrift) {
-                    val erUnderoverskrift = false //dropper underoverskrifter inntil videre
                     if (samepageStarted) {
                         builder.append("</div>")
                     } else {
                         samepageStarted = true
                     }
                     builder.append("<div class=\"samepage\">")
-                    if (erUnderoverskrift) {
-                        builder.append("<h3>").append(linje.substring(1)).append("</h3>")
-                    } else {
-                        builder.append("<h2>").append(linje.substring(1)).append("</h2>")
-                    }
+                    builder.append("<h2>").append(linje.substring(1)).append("</h2>")
                 } else {
                     if (!harAvsnitt) {
                         harAvsnitt = true
@@ -67,10 +62,10 @@ object DokprodTilHtml {
         return ekstraLinjeskiftFørHilsing(konverterNbsp(builder.toString()))
     }
 
-    private fun hentAvsnittene(dokprod: String): Array<String> {
+    private fun hentAvsnittene(dokprod: String): List<String> {
         //avsnitt ved dobbelt linjeskift
         //avsnitt ved overskrift (linje starter med _)
-        return dokprod.split("(\n\r?\n\r?)|(\n\r?(?=_))".toRegex()).toTypedArray()
+        return dokprod.split("(\n\r?\n\r?)|(\n\r?(?=_))".toRegex())
     }
 
     private fun konverterNbsp(s: String): String {

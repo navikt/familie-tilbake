@@ -10,7 +10,7 @@ class BehandlingFeilutbetalingFakta(val tidligereVarseltBeløp: Long? = null,
                                     val aktuellFeilUtbetaltBeløp: BigDecimal,
                                     val datoForRevurderingsvedtak: LocalDate? = null,
                                     val totalPeriode: Periode,
-                                    val perioder: List<LogiskPeriodeMedFaktaDto>,
+                                    val perioder: List<Periode>,
                                     val behandlingsresultat: Behandlingsresultatstype? = null,
                                     val behandlingÅrsaker: List<Behandlingsårsakstype>? = null,
                                     val tilbakekrevingValg: String? = null, // TODO legge inn riktig objekt med verdier
