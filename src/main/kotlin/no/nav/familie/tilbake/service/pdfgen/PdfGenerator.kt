@@ -18,10 +18,10 @@ class PdfGenerator {
     companion object {
         private val FONT_CACHE: MutableMap<String, ByteArray?> = HashMap()
 
-        private fun lagBodyStartTag(dokumentVariant: DokumentVariant): String {
-            return when (dokumentVariant) {
-                DokumentVariant.ENDELIG -> "<body>"
-                DokumentVariant.UTKAST -> "<body class=\"utkast\">"
+        private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String {
+            return when (dokumentvariant) {
+                Dokumentvariant.ENDELIG -> "<body>"
+                Dokumentvariant.UTKAST -> "<body class=\"utkast\">"
             }
         }
 
@@ -31,16 +31,16 @@ class PdfGenerator {
         }
     }
 
-    fun genererPDFMedLogo(html: String, dokumentVariant: DokumentVariant): ByteArray {
+    fun genererPDFMedLogo(html: String, dokumentvariant: Dokumentvariant): ByteArray {
         val logo = FileStructureUtil.readResourceAsString("pdf/nav_logo_svg.html")
-        return genererPDF(logo + html, dokumentVariant)
+        return genererPDF(logo + html, dokumentvariant)
     }
 
-    private fun genererPDF(html: String, dokumentVariant: DokumentVariant): ByteArray {
+    private fun genererPDF(html: String, dokumentvariant: Dokumentvariant): ByteArray {
         val baos = ByteArrayOutputStream()
-        genererPDF(html, baos, dokumentVariant)
+        genererPDF(html, baos, dokumentvariant)
         val bytes = baos.toByteArray()
-        if (dokumentVariant == DokumentVariant.ENDELIG) {
+        if (dokumentvariant == Dokumentvariant.ENDELIG) {
             //validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
             //validering er også bare nødvendig før journalføring, så det er OK
             PdfaValidator.validatePdf(bytes)
@@ -48,8 +48,8 @@ class PdfGenerator {
         return bytes
     }
 
-    private fun genererPDF(htmlContent: String, outputStream: ByteArrayOutputStream, dokumentVariant: DokumentVariant) {
-        val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentVariant)
+    private fun genererPDF(htmlContent: String, outputStream: ByteArrayOutputStream, dokumentvariant: Dokumentvariant) {
+        val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant)
         val builder = PdfRendererBuilder()
         try {
             builder.useFont(fontSupplier("SourceSansPro-Regular.ttf"),
@@ -80,7 +80,7 @@ class PdfGenerator {
         }
     }
 
-    private fun appendHtmlMetadata(html: String, format: DocFormat, dokumentVariant: DokumentVariant): String {
+    private fun appendHtmlMetadata(html: String, format: DocFormat, dokumentvariant: Dokumentvariant): String {
         //nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
                " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
@@ -91,7 +91,7 @@ class PdfGenerator {
                hentCss(format) +
                "</style>" +
                "</head>" +
-               lagBodyStartTag(dokumentVariant) +
+               lagBodyStartTag(dokumentvariant) +
                "<div id=\"content\">" +
                html +
                "</div>" +

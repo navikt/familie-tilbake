@@ -5,26 +5,26 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
-import no.nav.familie.tilbake.service.pdfgen.DokumentVariant
+import no.nav.familie.tilbake.service.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.service.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class PdfBrevTjeneste(private val journalføringTjeneste: JournalføringTjeneste) {
+class PdfBrevService(private val journalføringService: JournalføringService) {
 
-    private val logger = LoggerFactory.getLogger(PdfBrevTjeneste::class.java)
+    private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
     private val pdfGenerator: PdfGenerator = PdfGenerator()
 
-    fun genererForhåndsvisning(data: BrevData): ByteArray {
+    fun genererForhåndsvisning(data: Brevdata): ByteArray {
         val html = lagHtml(data)
-        return pdfGenerator.genererPDFMedLogo(html, DokumentVariant.UTKAST)
+        return pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.UTKAST)
     }
 
     fun sendBrev(behandling: Behandling,
                  fagsak: Fagsak,
                  brevtype: Brevtype,
-                 data: BrevData,
+                 data: Brevdata,
                  varsletBeløp: Long? = null,
                  fritekst: String? = null) {
         valider(brevtype, varsletBeløp)
@@ -37,13 +37,13 @@ class PdfBrevTjeneste(private val journalføringTjeneste: JournalføringTjeneste
     private fun lagOgJournalførBrev(behandling: Behandling,
                                     fagsak: Fagsak,
                                     brevtype: Brevtype,
-                                    data: BrevData): JournalpostIdOgDokumentId {
+                                    data: Brevdata): JournalpostIdOgDokumentId {
         return JournalpostIdOgDokumentId("dummy")
         //  TODO Kommenteres inn når familie integrasjoner er tilpasset
 //        val html = lagHtml(data)
 //        val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, DokumentVariant.ENDELIG)
 
-        //        return journalføringTjeneste.journalførUtgåendeBrev(behandling,
+        //        return journalføringService.journalførUtgåendeBrev(behandling,
 //                                                            fagsak,
 //                                                            mapBrevTypeTilDokumentKategori(brevtype),
 //                                                            data.metadata,
@@ -52,7 +52,7 @@ class PdfBrevTjeneste(private val journalføringTjeneste: JournalføringTjeneste
     }
 
 
-    private fun mapBrevTypeTilDokumentKategori(brevType: Brevtype): Dokumentkategori {
+    private fun mapBrevtypeTilDokumentkategori(brevType: Brevtype): Dokumentkategori {
         return if (Brevtype.VEDTAK === brevType) {
             Dokumentkategori.VEDTAKSBREV
         } else {
@@ -60,17 +60,17 @@ class PdfBrevTjeneste(private val journalføringTjeneste: JournalføringTjeneste
         }
     }
 
-    private fun lagHtml(data: BrevData): String {
+    private fun lagHtml(data: Brevdata): String {
         val header = lagHeader(data)
         val innholdHtml = lagInnhold(data)
         return header + innholdHtml + data.vedleggHtml
     }
 
-    private fun lagInnhold(data: BrevData): String {
+    private fun lagInnhold(data: Brevdata): String {
         return DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
     }
 
-    private fun lagHeader(data: BrevData): String? {
+    private fun lagHeader(data: Brevdata): String? {
         return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
     }
 
@@ -83,7 +83,7 @@ class PdfBrevTjeneste(private val journalføringTjeneste: JournalføringTjeneste
             }
         }
 
-        private fun valider(brevType: Brevtype, data: BrevData) {
+        private fun valider(brevType: Brevtype, data: Brevdata) {
             require(!(brevType == Brevtype.FRITEKST && data.tittel == null)) {
                 "Utvikler-feil: For brevType = $brevType må tittel være satt"
             }

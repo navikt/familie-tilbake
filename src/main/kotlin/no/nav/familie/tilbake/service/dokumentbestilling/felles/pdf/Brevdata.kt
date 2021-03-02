@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf
 
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMetadata
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottaker
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 
-data class BrevData(var metadata: BrevMetadata,
+data class Brevdata(var metadata: Brevmetadata,
                     val tittel: String? = null,
                     val overskrift: String,
-                    val mottaker: BrevMottaker,
+                    val mottager: Brevmottager,
                     val brevtekst: String,
                     val vedleggHtml: String? = null)
 

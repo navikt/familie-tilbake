@@ -3,16 +3,16 @@ package no.nav.familie.tilbake.service.dokumentbestilling.felles.header
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.Template
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.FellesTekstformaterer
 import java.io.IOException
 
 object TekstformatererHeader {
 
-    fun lagHeader(brevMetadata: BrevMetadata, overskrift: String): String? {
-        return lagHeader(HeaderData(brevMetadata.språkkode,
-                                    Person(brevMetadata.sakspartNavn,
-                                           brevMetadata.sakspartId),
+    fun lagHeader(brevmetadata: Brevmetadata, overskrift: String): String? {
+        return lagHeader(HeaderData(brevmetadata.språkkode,
+                                    Person(brevmetadata.sakspartsnavn,
+                                           brevmetadata.sakspartId),
                                     Brev(overskrift)))
     }
 

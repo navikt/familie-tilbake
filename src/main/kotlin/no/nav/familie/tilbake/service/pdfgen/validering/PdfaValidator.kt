@@ -33,7 +33,6 @@ object PdfaValidator {
         }
     }
 
-    @Throws(ModelParsingException::class, EncryptedPdfException::class, IOException::class, ValidationException::class)
     fun validatePdf(inputStream: InputStream?) {
         val flavour: PDFAFlavour = PDFAFlavour.fromString("2u")
         Foundries.defaultInstance().createValidator(flavour, false).use { validator ->

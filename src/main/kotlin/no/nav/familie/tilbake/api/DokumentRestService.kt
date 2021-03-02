@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevTjeneste
-import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselBrevTjeneste
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevService
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -15,13 +15,13 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/dokument")
 @ProtectedWithClaims(issuer = "azuread")
-class DokumentRestTjeneste(val varselbrevTjeneste: VarselbrevTjeneste,
-                           val manueltVarselBrevTjeneste: ManueltVarselBrevTjeneste) {
+class DokumentRestService(val varselbrevService: VarselbrevService,
+                          val manueltVarselbrevService: ManueltVarselbrevService) {
 
     @GetMapping("/forhandsvis-varselbrev",
                 produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
     fun hentForhåndsvisningVarselbrev(behandlingId: UUID, malType: Dokumentmalstype, fritekst: String): ByteArray {
-        return manueltVarselBrevTjeneste.hentForhåndsvisningManueltVarselbrev(behandlingId, malType, fritekst)
+        return manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, malType, fritekst)
     }
 }

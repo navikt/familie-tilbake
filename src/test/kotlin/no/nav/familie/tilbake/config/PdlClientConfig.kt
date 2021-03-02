@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
-import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -21,7 +21,7 @@ class PdlClientConfig {
         val pdlClient: PdlClient = mockk()
 
         every { pdlClient.hentPersoninfo(any(), any()) } answers {
-            PersonInfo(ident = "32132132111",
+            Personinfo(ident = "32132132111",
                        fødselsdato = LocalDate.now().minusYears(20),
                        navn = "testverdi",
                        kjønn = Kjønn.MANN)

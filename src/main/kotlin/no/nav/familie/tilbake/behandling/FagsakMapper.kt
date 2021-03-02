@@ -5,17 +5,17 @@ import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 
 object FagsakMapper {
 
     fun tilRespons(fagsak: Fagsak,
-                   personInfo: PersonInfo,
+                   personinfo: Personinfo,
                    behandlinger: List<Behandling>): FagsakDto {
         val bruker = BrukerDto(personIdent = fagsak.bruker.ident,
-                               navn = personInfo.navn,
-                               fødselsdato = personInfo.fødselsdato,
-                               kjønn = personInfo.kjønn)
+                               navn = personinfo.navn,
+                               fødselsdato = personinfo.fødselsdato,
+                               kjønn = personinfo.kjønn)
 
         val behandlingListe = behandlinger.map {
             BehandlingsoppsummeringDto(behandlingId = it.id,

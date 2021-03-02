@@ -15,14 +15,14 @@ import java.util.Locale
 
 class SwitchHelper : Helper<Any> {
 
-    override fun apply(variable: Any, options: Options): Any {
-        val variabelNavn: MutableList<String> = ArrayList()
-        val variabelVerdier: MutableList<Any> = ArrayList()
-        variabelNavn.add("__condition_fulfilled")
-        variabelVerdier.add(0)
-        variabelNavn.add("__condition_variable")
-        variabelVerdier.add(if (options.hash.isEmpty()) variable else options.hash)
-        val ctx: Context = Context.newBlockParamContext(options.context, variabelNavn, variabelVerdier)
+    override fun apply(variabel: Any, options: Options): Any {
+        val variabelnavn: MutableList<String> = ArrayList()
+        val variabelverdier: MutableList<Any> = ArrayList()
+        variabelnavn.add("__condition_fulfilled")
+        variabelverdier.add(0)
+        variabelnavn.add("__condition_variable")
+        variabelverdier.add(if (options.hash.isEmpty()) variabel else options.hash)
+        val ctx: Context = Context.newBlockParamContext(options.context, variabelnavn, variabelverdier)
         val resultat: String = options.fn.apply(ctx)
         val antall = ctx.get("__condition_fulfilled") as Int
         if (Integer.valueOf(1) == antall) {
@@ -51,13 +51,13 @@ class CaseHelper : Helper<Any?> {
 class VariableHelper : Helper<Any?> {
 
     override fun apply(context: Any?, options: Options): Any {
-        val variabelNavn: MutableList<String> = ArrayList()
-        val variabelVerdier: MutableList<Any> = ArrayList()
+        val variabelnavn: MutableList<String> = ArrayList()
+        val variabelverdier: MutableList<Any> = ArrayList()
         for ((key, value) in options.hash.entries) {
-            variabelNavn.add(key)
-            variabelVerdier.add(value)
+            variabelnavn.add(key)
+            variabelverdier.add(value)
         }
-        val ctx: Context = Context.newBlockParamContext(options.context, variabelNavn, variabelVerdier)
+        val ctx: Context = Context.newBlockParamContext(options.context, variabelnavn, variabelverdier)
         return options.fn.apply(ctx)
     }
 }

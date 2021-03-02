@@ -28,8 +28,6 @@ data class Periode(val fom: LocalDate,
         }
     }
 
-
-
     companion object {
         fun max(en: LocalDate, to: LocalDate): LocalDate {
             return if (en.isAfter(to)) en else to

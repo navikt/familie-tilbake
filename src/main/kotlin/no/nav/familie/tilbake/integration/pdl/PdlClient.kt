@@ -12,7 +12,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
-import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,7 +29,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun hentPersoninfo(ident: String, fagsystem: Fagsystem): PersonInfo {
+    fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = PdlConfig.hentEnkelPersonQuery)
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
@@ -37,7 +37,7 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                       httpHeaders(fagsystem))
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
-                PersonInfo(ident = ident,
+                Personinfo(ident = ident,
                            fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                            navn = it.navn.first().fulltNavn(),
                            kjønn = it.kjønn.first().kjønn)

@@ -16,12 +16,12 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.integration.pdl.internal.PersonInfo
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMottaker
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksternDataForBrevTjeneste
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevTjeneste
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,10 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
+class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
-    private val korrigertVarselTekst = "Sender korrigert varselbrev"
-    private val varselTekst = "Sender manuelt varselbrev"
+    private val korrigertVarseltekst = "Sender korrigert varselbrev"
+    private val varseltekst = "Sender manuelt varselbrev"
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -40,28 +40,28 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val mockEksternDataForBrevTjeneste: EksternDataForBrevTjeneste = mockk()
+    private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
-    private val mockPdfBrevTjeneste: PdfBrevTjeneste = mockk(relaxed = true)
-    private lateinit var manueltVarselBrevTjeneste: ManueltVarselBrevTjeneste
+    private val mockPdfBrevService: PdfBrevService = mockk(relaxed = true)
+    private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
     private var fagsak = Testdata.fagsak
 
     @BeforeEach
     fun setup() {
-        manueltVarselBrevTjeneste = ManueltVarselBrevTjeneste(behandlingRepository,
-                                                              fagsakRepository,
-                                                              mockEksternDataForBrevTjeneste,
-                                                              mockPdfBrevTjeneste,
-                                                              mockFeilutbetalingService)
+        manueltVarselbrevService = ManueltVarselbrevService(behandlingRepository,
+                                                            fagsakRepository,
+                                                            mockEksterneDataForBrevService,
+                                                            mockPdfBrevService,
+                                                            mockFeilutbetalingService)
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
-                .returns(lagFeilutbetalingFakta())
-        val personinfo = PersonInfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
+                .returns(lagFeilutbetaling())
+        val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident: String = Testdata.fagsak.bruker.ident
-        every { mockEksternDataForBrevTjeneste.hentPerson(ident, any()) }.returns(personinfo)
+        every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
         every {
-            mockEksternDataForBrevTjeneste.hentAdresse(any(), any(), any(), any())
+            mockEksterneDataForBrevService.hentAdresse(any(), any(), any(), any())
         }.returns(Adresseinfo("Test", "12345678901"))
 
         fagsak = fagsakRepository.insert(fagsak)
@@ -69,10 +69,10 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal sende manuelt varselbrev`() {
-        manueltVarselBrevTjeneste.sendManueltVarselBrev(behandling.id, varselTekst, BrevMottaker.BRUKER)
+    fun `sendManueltVarselBrev skal sende manuelt varselbrev`() {
+        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
         verify {
-            mockPdfBrevTjeneste.sendBrev(eq(behandling),
+            mockPdfBrevService.sendBrev(eq(behandling),
                                          eq(fagsak),
                                          eq(Brevtype.VARSEL),
                                          any(),
@@ -82,20 +82,20 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal sende korrigert varselbrev`() {
-        excludeRecords { mockPdfBrevTjeneste.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
+    fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
+        excludeRecords { mockPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
-        manueltVarselBrevTjeneste.sendManueltVarselBrev(behandling.id, varselTekst, BrevMottaker.BRUKER)
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varselTekst,
+        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
+        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)))
         val behandling = behandlingRepository.update(behandlingCopy)
 
         //act
-        manueltVarselBrevTjeneste.sendKorrigertVarselBrev(behandling.id, korrigertVarselTekst, BrevMottaker.BRUKER)
+        manueltVarselbrevService.sendKorrigertVarselBrev(behandling.id, korrigertVarseltekst, Brevmottager.BRUKER)
 
         //assert
         verify {
-            mockPdfBrevTjeneste.sendBrev(eq(behandling),
+            mockPdfBrevService.sendBrev(eq(behandling),
                                          eq(fagsak),
                                          eq(Brevtype.KORRIGERT_VARSEL),
                                          any(),
@@ -105,21 +105,21 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal sende korrigert varselbrev med verge`() {
-        excludeRecords { mockPdfBrevTjeneste.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
+    fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
+        excludeRecords { mockPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
-        manueltVarselBrevTjeneste.sendManueltVarselBrev(behandling.id, varselTekst, BrevMottaker.BRUKER)
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varselTekst,
+        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
+        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)),
                                              verger = setOf(Testdata.verge))
         val behandling = behandlingRepository.update(behandlingCopy)
 
         //act
-        manueltVarselBrevTjeneste.sendKorrigertVarselBrev(behandling.id, varselTekst, BrevMottaker.VERGE)
+        manueltVarselbrevService.sendKorrigertVarselBrev(behandling.id, varseltekst, Brevmottager.VERGE)
 
         //assert
         verify {
-            mockPdfBrevTjeneste.sendBrev(eq(behandling),
+            mockPdfBrevService.sendBrev(eq(behandling),
                                          eq(fagsak),
                                          eq(Brevtype.KORRIGERT_VARSEL),
                                          any(),
@@ -129,32 +129,32 @@ class ManueltVarselBrevTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal forhåndsvise manuelt varselbrev`() {
-        every { mockPdfBrevTjeneste.genererForhåndsvisning(any()) }
-                .returns(varselTekst.toByteArray())
+    fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise manuelt varselbrev`() {
+        every { mockPdfBrevService.genererForhåndsvisning(any()) }
+                .returns(varseltekst.toByteArray())
 
-        val data = manueltVarselBrevTjeneste.hentForhåndsvisningManueltVarselbrev(behandling.id,
-                                                                                  Dokumentmalstype.VARSEL,
-                                                                                  varselTekst)
+        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
+                                                                                 Dokumentmalstype.VARSEL,
+                                                                                 varseltekst)
         Assertions.assertThat(data).isNotEmpty
     }
 
     @Test
-    fun `skal forhåndsvise korrigert varselbrev`() {
-        every { mockPdfBrevTjeneste.genererForhåndsvisning(any()) }
+    fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
+        every { mockPdfBrevService.genererForhåndsvisning(any()) }
                 .returns(
-                        varselTekst.toByteArray())
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varselTekst,
+                        varseltekst.toByteArray())
+        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)))
         behandlingRepository.update(behandlingCopy)
 
-        val data = manueltVarselBrevTjeneste.hentForhåndsvisningManueltVarselbrev(behandling.id,
-                                                                                  Dokumentmalstype.KORRIGERT_VARSEL,
-                                                                                  varselTekst)
+        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
+                                                                                 Dokumentmalstype.KORRIGERT_VARSEL,
+                                                                                 varseltekst)
         Assertions.assertThat(data).isNotEmpty
     }
 
-    private fun lagFeilutbetalingFakta(): FaktaFeilutbetalingDto {
+    private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
         val periode = Periode(LocalDate.of(2019, 10, 1),
                               LocalDate.of(2019, 10, 30))
 

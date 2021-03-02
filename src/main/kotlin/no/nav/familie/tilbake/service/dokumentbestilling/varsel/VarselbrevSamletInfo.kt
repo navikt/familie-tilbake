@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevMetadata
-import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.periode.HbPeriode
+import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import java.time.LocalDate
 
 data class VarselbrevSamletInfo(val fritekstFraSaksbehandler: String? = null,
-                                val feilutbetaltePerioder: List<HbPeriode>,
+                                val feilutbetaltePerioder: List<Periode>,
                                 val sumFeilutbetaling: Long,
                                 val fristdato: LocalDate,
-                                val brevMetadata: BrevMetadata,
-                                val revurderingVedtakDato: LocalDate? = null)
+                                val brevmetadata: Brevmetadata,
+                                val revurderingsvedtaksdato: LocalDate? = null)

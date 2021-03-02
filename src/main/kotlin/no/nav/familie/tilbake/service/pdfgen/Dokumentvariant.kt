@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.service.pdfgen
 
-enum class DokumentVariant {
+enum class Dokumentvariant {
     ENDELIG,
     UTKAST
 }

@@ -27,7 +27,7 @@ class FagsakService(val fagsakRepository: FagsakRepository,
         val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
 
         return FagsakMapper.tilRespons(fagsak = fagsak,
-                                       personInfo = personInfo,
+                                       personinfo = personInfo,
                                        behandlinger = behandlinger)
     }
 }

@@ -14,7 +14,7 @@ internal class DokprodTilHtmlTest {
     }
 
     @Test
-    fun `dokprodInnholdTilHtml skal Konvertere Non Break Space`() {
+    fun `dokprodInnholdTilHtml skal Konvertere Non Breaking Space`() {
         // utf8nonBreakingSpace = "\u00A0";
         val resultat = DokprodTilHtml.dokprodInnholdTilHtml("10\u00A0000\u00A0kroner")
 
