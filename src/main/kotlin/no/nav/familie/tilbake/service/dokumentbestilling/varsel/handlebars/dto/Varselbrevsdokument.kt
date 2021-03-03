@@ -23,13 +23,17 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
                                                                                 brevmetadata.ansvarligSaksbehandler) {
 
 
-    @Suppress("Brukes av handlebars")
+    @Suppress("unused") // Handlebars
     val isYtelseMedSkatt
         get() = ytelsestype == Ytelsestype.OVERGANGSSTØNAD
 
-    @Suppress("Brukes av handlebars")
+    @Suppress("unused") // Handlebars
     val isRentepliktig
         get() = ytelsestype != Ytelsestype.BARNETRYGD
+
+    @Suppress("unused") // Handlebars
+    val isFinnesVerge
+        get() = finnesVerge
 
     init {
         if (feilutbetaltePerioder.size == 1) {

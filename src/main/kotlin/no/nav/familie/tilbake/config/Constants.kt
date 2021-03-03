@@ -4,6 +4,6 @@ import java.time.Period
 
 object Constants {
 
-    val brukersSvarfrist: Period = Period.ofWeeks(2)
+    val brukersSvarfrist: Period = Period.ofWeeks(3)
 
 }

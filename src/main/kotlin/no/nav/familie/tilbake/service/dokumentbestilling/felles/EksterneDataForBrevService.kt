@@ -2,17 +2,16 @@ package no.nav.familie.tilbake.service.dokumentbestilling.felles
 
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.behandling.domain.Vergetype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 
 @Service
-class EksterneDataForBrevService(private val pdlClient: PdlClient,
-                                 private val integrasjonerClient: IntegrasjonerClient) {
-
+class EksterneDataForBrevService(private val pdlClient: PdlClient) {
 
     fun hentPerson(ident: String, fagsystem: Fagsystem): Personinfo {
         return pdlClient.hentPersoninfo(ident, fagsystem)
@@ -31,6 +30,20 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient,
             return hentOrganisasjonsadresse(verge.orgNr!!, verge.navn, personinfo, brevmottager)
         } else if (Brevmottager.VERGE == brevmottager && verge != null) {
             val person = hentPerson(verge.ident!!, fagsystem)
+            return hentAdresse(person)
+        }
+        return hentAdresse(personinfo)
+    }
+
+    fun hentAdresse(personinfo: Personinfo,
+                    brevmottager: Brevmottager,
+                    verge: VergeDto?,
+                    fagsystem: Fagsystem): Adresseinfo {
+
+        if (Vergetype.ADVOKAT == verge?.vergetype) {
+            return hentOrganisasjonsadresse(verge.organisasjonsnummer!!, verge.navn, personinfo, brevmottager)
+        } else if (Brevmottager.VERGE == brevmottager && verge != null) {
+            val person = hentPerson(verge.personIdent!!, fagsystem)
             return hentAdresse(person)
         }
         return hentAdresse(personinfo)

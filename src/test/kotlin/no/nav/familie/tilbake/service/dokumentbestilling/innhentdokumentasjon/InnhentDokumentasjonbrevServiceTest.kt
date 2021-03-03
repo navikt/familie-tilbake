@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -33,7 +34,7 @@ class InnhentDokumentasjonbrevServiceTest {
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
-        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any(), any()) }
+        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
                 .returns(Adresseinfo("Bob", "DUMMY_FØDSELSNUMMER"))
     }
 

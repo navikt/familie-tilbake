@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
@@ -129,15 +130,6 @@ enum class Behandlingsårsakstype(val navn: String) {
     REVURDERING_OPPLYSNINGER_OM_FORELDELSE("Nye opplysninger om foreldelse"),
     REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt"),
     UDEFINERT("Ikke Definert")
-}
-
-enum class Vergetype(val navn: String) {
-    VERGE_FOR_BARN("Verge for barn under 18 år"),
-    VERGE_FOR_FORELDRELØST_BARN("Verge for foreldreløst barn under 18 år"),
-    VERGE_FOR_VOKSEN("Verge for voksen"),
-    ADVOKAT("Advokat/advokatfullmektig"),
-    ANNEN_FULLMEKTIG("Annen fullmektig"),
-    UDEFINERT("Udefinert");
 }
 
 enum class Behandlingsstatus(val kode: String) {

@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets
 object FellesTekstformaterer {
 
     private val OM = ObjectMapperForUtvekslingAvDataMedHandlebars.INSTANCE
-    fun opprettHandlebarsKonfigurasjon(): Handlebars {
+    private fun opprettHandlebarsKonfigurasjon(): Handlebars {
         val loader = ClassPathTemplateLoader().apply {
             charset = StandardCharsets.UTF_8
             prefix = "/templates/"
@@ -51,10 +51,11 @@ object FellesTekstformaterer {
         handlebars.registerHelper("lookup-map", MapLookupHelper())
         handlebars.registerHelper("kroner", KroneFormattererMedTusenskille())
         handlebars.registerHelper("dato", DatoHelper())
+        handlebars.registerHelper("kortdato", KortdatoHelper())
         return handlebars.compile(lagSpråkstøttetFilsti(filsti, språkkode))
     }
 
-    fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {
+    private fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {
         return String.format("%s/%s", språkkode.name.toLowerCase(), filsti)
     }
 }

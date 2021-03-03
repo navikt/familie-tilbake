@@ -12,16 +12,15 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.behandling.domain.Vergetype
 import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype as Kontraksvergetype
 
 object BehandlingMapper {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+
     fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                             fagsystem: Fagsystem,
                             fagsak: Fagsak): Behandling {
@@ -51,27 +50,26 @@ object BehandlingMapper {
     fun tilRespons(behandling: Behandling,
                    kanHenleggeBehandling: Boolean): BehandlingDto {
 
-        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull { behandlingsresultat ->
-            behandlingsresultat.sporbar.endret.endretTid
+        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
+            it.sporbar.endret.endretTid
         }
 
-        return BehandlingDto(
-                eksternBrukId = behandling.eksternBrukId,
-                behandlingId = behandling.id,
-                type = behandling.type,
-                status = behandling.status,
-                erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
-                resultatstype = resultat?.resultatstypeTilFrontend(),
-                enhetskode = behandling.behandlendeEnhet,
-                enhetsnavn = behandling.behandlendeEnhetsNavn,
-                ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                ansvarligBeslutter = behandling.ansvarligBeslutter,
-                opprettetDato = behandling.opprettetDato,
-                avsluttetDato = behandling.avsluttetDato,
-                endretTidspunkt = behandling.endretTidspunkt,
-                harVerge = behandling.harVerge,
-                kanHenleggeBehandling = kanHenleggeBehandling,
-                erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
+        return BehandlingDto(eksternBrukId = behandling.eksternBrukId,
+                             behandlingId = behandling.id,
+                             type = behandling.type,
+                             status = behandling.status,
+                             erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
+                             resultatstype = resultat?.resultatstypeTilFrontend(),
+                             enhetskode = behandling.behandlendeEnhet,
+                             enhetsnavn = behandling.behandlendeEnhetsNavn,
+                             ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                             ansvarligBeslutter = behandling.ansvarligBeslutter,
+                             opprettetDato = behandling.opprettetDato,
+                             avsluttetDato = behandling.avsluttetDato,
+                             endretTidspunkt = behandling.endretTidspunkt,
+                             harVerge = behandling.harVerge,
+                             kanHenleggeBehandling = kanHenleggeBehandling,
+                             erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
 
     }
 
@@ -92,23 +90,15 @@ object BehandlingMapper {
             if (it.gyldigTom.isBefore(LocalDate.now())) {
                 logger.info("Vergeinformasjon er utløpt.Så kopierer ikke fra fagsystem=$fagsystem")
             } else {
-                return setOf(Verge(
-                        type = tilDomeneVergetype(it.vergetype),
-                        kilde = fagsystem.name,
-                        gyldigFom = it.gyldigFom,
-                        gyldigTom = it.gyldigTom,
-                        navn = it.navn,
-                        orgNr = it.organisasjonsnummer,
-                        ident = it.personIdent
-                ))
+                return setOf(Verge(type = it.vergetype,
+                                   kilde = fagsystem.name,
+                                   gyldigFom = it.gyldigFom,
+                                   gyldigTom = it.gyldigTom,
+                                   navn = it.navn,
+                                   orgNr = it.organisasjonsnummer,
+                                   ident = it.personIdent))
             }
         }
         return emptySet()
-    }
-
-    private fun tilDomeneVergetype(vergetype: Kontraksvergetype): Vergetype {
-        return Vergetype.values().firstOrNull {
-            it.name == vergetype.name
-        } ?: throw IllegalArgumentException("Ukjent vergetype=$vergetype")
     }
 }
