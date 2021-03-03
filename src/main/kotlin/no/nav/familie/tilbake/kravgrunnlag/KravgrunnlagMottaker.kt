@@ -27,7 +27,6 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
         log.info("Mottatt kravgrunnlag fra oppdrag")
         secure_log.info(kravgrunnlagFraOppdrag)
-
         taskRepository.save(
                 Task(
                         type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
