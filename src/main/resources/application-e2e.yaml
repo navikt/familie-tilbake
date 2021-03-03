@@ -3,6 +3,29 @@ no.nav.security.jwt:
     discoveryurl: http://mock-oauth2-server:1111/v2.0/.well-known/openid-configuration
     accepted_audience: api://${TILBAKE_CLIENT_ID}/.default
     cookie_name: azure_token
+  client:
+    registration:
+      familie-integrasjoner-onbehalfof:
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${TILBAKE_CLIENT_ID}
+          client-secret: ${TILBAKE_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-integrasjoner-clientcredentials:
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${TILBAKE_CLIENT_ID}
+          client-secret: ${TILBAKE_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
+logging:
+  config: "classpath:logback-e2e.xml"
 
 spring:
   datasource:
@@ -16,6 +39,9 @@ spring:
 
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
-CREDENTIAL_USERNAME: not-a-real-srvuser
-CREDENTIAL_PASSWORD: not-a-real-pw
+
+FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
+
+CREDENTIAL_USERNAME: srvfamilie-tilbake
+#CREDENTIAL_PASSWORD: ${SRVUSER_TILBAKE_SECRET}
 OPPDRAG_SERVICE_URL: #Mockes ut lokalt
