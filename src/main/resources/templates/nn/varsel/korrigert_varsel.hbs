@@ -1,0 +1,22 @@
+{{~#* inline "førSkatt"}}{{#if ytelseMedSkatt}} før skatt{{/if}}{{~/inline~}}
+Vi varsla deg {{varsletDato}} om at du hadde fått utbetalt {{kroner varsletBeløp}} for mykje i {{ytelsesnavnUbestemt}}{{> førSkatt}}.
+
+Riktig beløp som er utbetalt for mykje er {{kroner beløp}}{{> førSkatt}}.
+
+{{#if ytelseMedSkatt}}
+{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodane{{/eq}} du har fått for mykje utbetalt for, er:
+*-{{#each feilutbetaltePerioder}}
+Frå og med {{fom}} til og med {{tom}}.{{/each}}-*
+{{/if}}
+Før vi avgjer om du skal betale tilbake, kan du uttale deg innan {{fristdatoForTilbakemelding}}.
+{{#if ytelseMedSkatt}}
+
+Dersom du må betale tilbake, reduserer vi beløpet med trekt skatt.
+{{/if}}
+_Dette har skjedd
+Saka di vart endra {{endringsdato}}, og endringa har ført til at du har fått utbetalt for mykje.
+{{#if varseltekstFraSaksbehandler}}
+
+{{{varseltekstFraSaksbehandler}}}
+{{/if}}
+{{> nn/varsel/varsel_slutt}}

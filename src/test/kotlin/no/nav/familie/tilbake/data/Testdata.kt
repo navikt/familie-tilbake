@@ -95,7 +95,7 @@ object Testdata {
                                 varselbeløp = 123,
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
-    private val verge = Verge(ident = "testverdi",
+    val verge = Verge(ident = "testverdi",
                       gyldigFom = LocalDate.now(),
                       gyldigTom = LocalDate.now(),
                       type = Vergetype.VERGE_FOR_BARN,
@@ -240,7 +240,6 @@ object Testdata {
                                       manueltSattBeløp = null,
                                       begrunnelse = "testverdi",
                                       særligeGrunnerTilReduksjon = true,
-                                      tilbakekrevSmåbeløp = false,
                                       særligeGrunnerBegrunnelse = "testverdi",
                                       vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
@@ -255,10 +254,10 @@ object Testdata {
     val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
                                   perioder = setOf(vilkårsperiode))
 
-    private val faktaFeilutbetalingsperiode = FaktaFeilutbetalingsperiode(
-            periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            hendelsestype = Hendelsestype.BA_ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+    private val faktaFeilutbetalingsperiode =
+            FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+                                        hendelsestype = Hendelsestype.BA_ANNET,
+                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(begrunnelse = "testverdi",
                                                   aktiv = true,

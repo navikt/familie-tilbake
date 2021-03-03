@@ -3,13 +3,13 @@ package no.nav.familie.tilbake.common
 import java.time.LocalDate
 
 data class Periode(val fom: LocalDate,
-                   val tom: LocalDate) {
+                   val tom: LocalDate): Comparable<Periode> {
 
     init {
         require(!tom.isBefore(fom)) { "Til-og-med-dato før fra-og-med-dato: $fom>$tom" }
     }
 
-    fun overlapper(dato: LocalDate): Boolean {
+    private fun overlapper(dato: LocalDate): Boolean {
         return !dato.isBefore(fom) && !dato.isAfter(tom)
     }
 
@@ -28,8 +28,6 @@ data class Periode(val fom: LocalDate,
         }
     }
 
-
-
     companion object {
         fun max(en: LocalDate, to: LocalDate): LocalDate {
             return if (en.isAfter(to)) en else to
@@ -40,6 +38,10 @@ data class Periode(val fom: LocalDate,
         }
 
         val COMPARATOR: Comparator<Periode> = Comparator.comparing(Periode::fom).thenComparing(Periode::tom)
+    }
+
+    override fun compareTo(other: Periode): Int {
+        return COMPARATOR.compare(this, other)
     }
 
 }
