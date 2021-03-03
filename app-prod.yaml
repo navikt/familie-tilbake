@@ -47,6 +47,9 @@ spec:
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: prod-gcp
+        - application: familie-prosessering
+          namespace: teamfamilie
+          cluster: gcp-prod
   replicas:
     min: 2
     max: 4
