@@ -46,15 +46,20 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, environment)
 
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
-        if (HttpMethod.POST.matches(httpRequest.method)) {
-            validateFagsystemTilgangIPostRequest(joinpoint.args[0], brukerRolleOgFagsystemstilgang,
-                                                 minimumBehandlerRolle, handling)
-        } else if (HttpMethod.GET.matches(httpRequest.method)) {
+
+        if (HttpMethod.GET.matches(httpRequest.method) || rolletilgangssjekk.henteParam != "") {
             validateFagsystemTilgangIGetRequest(rolletilgangssjekk.henteParam,
                                                 joinpoint.args[0],
                                                 brukerRolleOgFagsystemstilgang,
                                                 minimumBehandlerRolle,
                                                 handling)
+        } else if (HttpMethod.POST.matches(httpRequest.method) || HttpMethod.PUT.matches(httpRequest.method)) {
+            validateFagsystemTilgangIPostRequest(joinpoint.args[0],
+                                                 brukerRolleOgFagsystemstilgang,
+                                                 minimumBehandlerRolle,
+                                                 handling)
+        } else {
+            logger.warn("${httpRequest.requestURI} støtter ikke tilgangssjekk")
         }
 
     }
@@ -94,8 +99,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             else -> {
-                logger.info("$handling kan ikke valideres for tilgangssjekk. " +
-                            "Det finnes ikke en av de påkrevde parameterne i request")
+                kastTilgangssjekkException(handling)
             }
         }
     }
@@ -134,12 +138,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             else -> {
-                logger.info("$handling kan ikke valideres for tilgangssjekk. " +
-                            "Det finnes ikke en av de påkrevde parameterne i request")
+                kastTilgangssjekkException(handling)
             }
         }
     }
-
 
     private fun hentFelt(feltNavn: String, requestBody: Any): Field {
         val felt = requestBody.javaClass.declaredFields.filter { it.name == feltNavn }[0]
@@ -198,6 +200,14 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                     httpStatus = HttpStatus.FORBIDDEN
             )
         }
+    }
+
+    private fun kastTilgangssjekkException(handling: String) {
+        val feilmelding: String = "$handling kan ikke valideres for tilgangssjekk. " +
+                                  "Det finnes ikke en av de påkrevde parameterne i request"
+        throw Feil(message = feilmelding,
+                   frontendFeilmelding = feilmelding,
+                   httpStatus = HttpStatus.BAD_REQUEST)
     }
 
 }
