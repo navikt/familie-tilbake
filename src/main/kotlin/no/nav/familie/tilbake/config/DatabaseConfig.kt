@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
+import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import no.nav.familie.tilbake.common.repository.Endret
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import org.springframework.context.annotation.Bean
@@ -30,6 +32,7 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
         return NamedParameterJdbcTemplate(dataSource)
     }
 
+
     @Bean
     fun transactionManager(dataSource: DataSource): PlatformTransactionManager {
         return DataSourceTransactionManager(dataSource)
@@ -44,7 +47,10 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @Bean
     override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(listOf(KravstatuskodeLesConverter(), KravstatuskodeSkrivConverter()))
+        return JdbcCustomConversions(listOf(KravstatuskodeLesConverter(),
+                                            KravstatuskodeSkrivConverter(),
+                                            StringTilPropertiesWrapperConverter(),
+                                            PropertiesWrapperTilStringConverter()))
     }
 
     @ReadingConverter
