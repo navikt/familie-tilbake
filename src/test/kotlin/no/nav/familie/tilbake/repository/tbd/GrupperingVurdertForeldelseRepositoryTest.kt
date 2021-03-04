@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -40,22 +41,26 @@ internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTe
         val lagretGrupperingVurdertForeldelse =
                 grupperingVurdertForeldelseRepository.findByIdOrThrow(grupperingVurdertForeldelse.id)
 
-        Assertions.assertThat(lagretGrupperingVurdertForeldelse)
-                .isEqualToIgnoringGivenFields(grupperingVurdertForeldelse, "sporbar")
+        assertThat(lagretGrupperingVurdertForeldelse)
+                .isEqualToIgnoringGivenFields(grupperingVurdertForeldelse, "sporbar", "versjon")
+        assertEquals(1, lagretGrupperingVurdertForeldelse.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingVurdertForeldelse i basen`() {
         grupperingVurdertForeldelseRepository.insert(grupperingVurdertForeldelse)
-        val oppdatertGrupperingVurdertForeldelse = grupperingVurdertForeldelse.copy(aktiv = false)
+        var lagretGrupperingVurdertForeldelse =
+                grupperingVurdertForeldelseRepository.findByIdOrThrow(grupperingVurdertForeldelse.id)
+        val oppdatertGrupperingVurdertForeldelse = lagretGrupperingVurdertForeldelse.copy(aktiv = false)
 
         grupperingVurdertForeldelseRepository.update(oppdatertGrupperingVurdertForeldelse)
 
-        val lagretGrupperingVurdertForeldelse =
+        lagretGrupperingVurdertForeldelse =
                 grupperingVurdertForeldelseRepository.findByIdOrThrow(grupperingVurdertForeldelse.id)
-        Assertions.assertThat(lagretGrupperingVurdertForeldelse)
+        assertThat(lagretGrupperingVurdertForeldelse)
                 .isEqualToIgnoringGivenFields(oppdatertGrupperingVurdertForeldelse,
-                                              "sporbar")
+                                              "sporbar", "versjon")
+        assertEquals(2, lagretGrupperingVurdertForeldelse.versjon)
     }
 
 }

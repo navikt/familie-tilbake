@@ -4,10 +4,11 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -29,18 +30,21 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        Assertions.assertThat(lagretBehandling).isEqualToIgnoringGivenFields(behandling, "sporbar")
+        assertThat(lagretBehandling).isEqualToIgnoringGivenFields(behandling, "sporbar", "versjon")
+        assertEquals(1, lagretBehandling.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Behandling i basen`() {
         behandlingRepository.insert(behandling)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val oppdatertBehandling = behandling.copy(status = Behandlingsstatus.UTREDES)
 
         behandlingRepository.update(oppdatertBehandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        Assertions.assertThat(lagretBehandling).isEqualToIgnoringGivenFields(oppdatertBehandling, "sporbar")
+        assertThat(lagretBehandling).isEqualToIgnoringGivenFields(oppdatertBehandling, "sporbar", "versjon")
+        assertEquals(2, lagretBehandling.versjon)
     }
 
 }

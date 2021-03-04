@@ -9,6 +9,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -26,7 +27,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     private val faktaFeilutbetaling = Testdata.faktaFeilutbetaling
 
     @BeforeEach
-    fun init(){
+    fun init() {
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }
@@ -37,18 +38,23 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
 
-        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(faktaFeilutbetaling, "sporbar")
+        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(faktaFeilutbetaling,
+                "sporbar", "versjon")
+        assertEquals(1, lagretFaktaFeilutbetaling.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av FaktaFeilutbetaling i basen`() {
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
-        val oppdatertFaktaFeilutbetaling = faktaFeilutbetaling.copy(begrunnelse = "bob")
+        var lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
+        val oppdatertFaktaFeilutbetaling = lagretFaktaFeilutbetaling.copy(begrunnelse = "bob")
 
         faktaFeilutbetalingRepository.update(oppdatertFaktaFeilutbetaling)
 
-        val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
-        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(oppdatertFaktaFeilutbetaling, "sporbar")
+        lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
+        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(oppdatertFaktaFeilutbetaling,
+                "sporbar", "versjon")
+        assertEquals(2, lagretFaktaFeilutbetaling.versjon)
     }
 
     @Test
@@ -57,7 +63,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandling.id)
 
-        assertThat(findByBehandlingId).isEqualToIgnoringGivenFields(faktaFeilutbetaling, "sporbar")
+        assertThat(findByBehandlingId).isEqualToIgnoringGivenFields(faktaFeilutbetaling, "sporbar", "versjon")
     }
 
 }

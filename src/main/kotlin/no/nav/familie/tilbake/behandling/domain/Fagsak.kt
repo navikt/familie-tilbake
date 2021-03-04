@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
@@ -15,11 +16,14 @@ data class Fagsak(@Id
                   val fagsystem: Fagsystem,
                   val ytelsestype: Ytelsestype,
                   val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
+                  @Version
+                  val versjon: Long = 0,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar()) {
 
-    val ytelsesnavn get() =  ytelsestype.navn[bruker.språkkode]
-                             ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
+    val ytelsesnavn
+        get() = ytelsestype.navn[bruker.språkkode]
+                ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
 }
 
 enum class Fagsaksstatus {

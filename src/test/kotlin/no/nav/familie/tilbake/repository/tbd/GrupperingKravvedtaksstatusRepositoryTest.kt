@@ -6,10 +6,11 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravvedtaksstatusRepository
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -41,22 +42,26 @@ internal class GrupperingKravvedtaksstatusRepositoryTest : OppslagSpringRunnerTe
         val lagretGrupperingKravvedtaksstatus =
                 grupperingKravvedtaksstatusRepository.findByIdOrThrow(grupperingKravvedtaksstatus.id)
 
-        Assertions.assertThat(lagretGrupperingKravvedtaksstatus)
-                .isEqualToIgnoringGivenFields(grupperingKravvedtaksstatus, "sporbar")
+        assertThat(lagretGrupperingKravvedtaksstatus)
+                .isEqualToIgnoringGivenFields(grupperingKravvedtaksstatus, "sporbar", "versjon")
+        assertEquals(1, lagretGrupperingKravvedtaksstatus.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av GrupperingKravvedtaksstatus i basen`() {
         grupperingKravvedtaksstatusRepository.insert(grupperingKravvedtaksstatus)
-        val oppdatertGrupperingKravvedtaksstatus = grupperingKravvedtaksstatus.copy(aktiv = false)
+        var lagretGrupperingKravvedtaksstatus =
+                grupperingKravvedtaksstatusRepository.findByIdOrThrow(grupperingKravvedtaksstatus.id)
+        val oppdatertGrupperingKravvedtaksstatus = lagretGrupperingKravvedtaksstatus.copy(aktiv = false)
 
         grupperingKravvedtaksstatusRepository.update(oppdatertGrupperingKravvedtaksstatus)
 
-        val lagretGrupperingKravvedtaksstatus =
+        lagretGrupperingKravvedtaksstatus =
                 grupperingKravvedtaksstatusRepository.findByIdOrThrow(grupperingKravvedtaksstatus.id)
-        Assertions.assertThat(lagretGrupperingKravvedtaksstatus)
+        assertThat(lagretGrupperingKravvedtaksstatus)
                 .isEqualToIgnoringGivenFields(oppdatertGrupperingKravvedtaksstatus,
-                                              "sporbar")
+                                              "sporbar", "versjon")
+        assertEquals(2, lagretGrupperingKravvedtaksstatus.versjon)
     }
 
 }

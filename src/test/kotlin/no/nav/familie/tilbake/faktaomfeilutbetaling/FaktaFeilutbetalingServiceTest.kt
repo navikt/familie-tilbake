@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -75,11 +76,12 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentFaktaomfeilutbetaling skal hente fakta om feilutbetaling for behandling uten varsel`() {
-        val behandling = behandling.copy(varsler = emptySet())
-        behandlingRepository.update(behandling)
-        lagFaktaomfeilutbetaling(behandlingId = behandling.id)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        val oppdatertBehandling = lagretBehandling.copy(varsler = emptySet())
+        behandlingRepository.update(oppdatertBehandling)
+        lagFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id)
 
-        val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = behandling.id)
+        val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id)
 
         assertEquals("Fakta begrunnelse", faktaFeilutbetalingDto.begrunnelse)
         assertNull(faktaFeilutbetalingDto.varsletBeløp)

@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.domain.tbd
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -17,6 +18,8 @@ data class Vilkårsvurdering(@Id
                             val aktiv: Boolean = true,
                             @MappedCollection(idColumn = "vilkarsvurdering_id")
                             val perioder: Set<Vilkårsvurderingsperiode> = setOf(),
+                            @Version
+                            val versjon: Long = 0,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                             val sporbar: Sporbar = Sporbar())
 
@@ -33,6 +36,8 @@ data class Vilkårsvurderingsperiode(@Id
                                     val aktsomhet: VilkårsvurderingAktsomhet? = null,
                                     @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
                                     val godTro: VilkårsvurderingGodTro? = null,
+                                    @Version
+                                    val versjon: Long = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
@@ -44,6 +49,8 @@ data class VilkårsvurderingGodTro(@Id
                                   @Column("belop_tilbakekreves")
                                   val beløpTilbakekreves: BigDecimal? = null,
                                   val begrunnelse: String,
+                                  @Version
+                                  val versjon: Long = 0,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                   val sporbar: Sporbar = Sporbar())
 
@@ -65,6 +72,8 @@ data class VilkårsvurderingAktsomhet(@Id
                                      val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
                                      @Column("serlige_grunner_begrunnelse")
                                      val særligeGrunnerBegrunnelse: String? = null,
+                                     @Version
+                                     val versjon: Long = 0,
                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                      val sporbar: Sporbar = Sporbar()) {
 
@@ -90,6 +99,8 @@ data class VilkårsvurderingSærligGrunn(@Id
                                        @Column("serlig_grunn")
                                        val særligGrunn: SærligGrunn,
                                        val begrunnelse: String?,
+                                       @Version
+                                       val versjon: Long = 0,
                                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                        val sporbar: Sporbar = Sporbar())
 

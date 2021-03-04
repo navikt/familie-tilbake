@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -37,6 +38,8 @@ data class Behandling(@Id
                       val resultater: Set<Behandlingsresultat> = setOf(),
                       @MappedCollection(idColumn = "behandling_id")
                       val årsaker: Set<Behandlingsårsak> = setOf(),
+                      @Version
+                      val versjon: Long = 0,
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar()) {
 
@@ -65,13 +68,15 @@ data class Fagsystemsbehandling(@Id
                                 val id: UUID = UUID.randomUUID(),
                                 val eksternId: String,
                                 val aktiv: Boolean = true,
-                                val tilbakekrevingsvalg: Tilbakekrevingsvalg?= null,
+                                val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
                                 val resultat: String,
                                 @Column("arsak")
                                 val årsak: String,
                                 val revurderingsvedtaksdato: LocalDate,
                                 @MappedCollection(idColumn = "fagsystemsbehandling_id")
                                 val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
+                                @Version
+                                val versjon: Long = 0,
                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                 val sporbar: Sporbar = Sporbar())
 
@@ -79,6 +84,8 @@ data class Fagsystemsbehandling(@Id
 data class Fagsystemskonsekvens(@Id
                                 val id: UUID = UUID.randomUUID(),
                                 val konsekvens: String,
+                                @Version
+                                val versjon: Long = 0,
                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                 val sporbar: Sporbar = Sporbar())
 
@@ -90,6 +97,8 @@ data class Varsel(@Id
                   @MappedCollection(idColumn = "varsel_id")
                   val perioder: Set<Varselsperiode> = setOf(),
                   val aktiv: Boolean = true,
+                  @Version
+                  val versjon: Long = 0,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                   val sporbar: Sporbar = Sporbar())
 
@@ -97,6 +106,8 @@ data class Varselsperiode(@Id
                           val id: UUID = UUID.randomUUID(),
                           val fom: LocalDate,
                           val tom: LocalDate,
+                          @Version
+                          val versjon: Long = 0,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar())
 
@@ -111,6 +122,8 @@ data class Verge(@Id
                  val navn: String,
                  val kilde: String,
                  val begrunnelse: String? = "",
+                 @Version
+                 val versjon: Long = 0,
                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                  val sporbar: Sporbar = Sporbar())
 
@@ -119,7 +132,8 @@ data class Behandlingsårsak(@Id
                             val id: UUID = UUID.randomUUID(),
                             val originalBehandlingId: UUID?,
                             val type: Behandlingsårsakstype,
-                            val versjon: Int = 0,
+                            @Version
+                            val versjon: Long = 0,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                             val sporbar: Sporbar = Sporbar())
 

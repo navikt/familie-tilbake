@@ -8,10 +8,20 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.*
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.*
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.AVSLUTTET
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FAKTA
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FORELDELSE
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.GRUNNLAG
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VARSEL
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VILKÅRSVURDERING
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
@@ -56,7 +66,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                             varselbeløp = 1000L,
                             perioder = setOf(Varselsperiode(fom = LocalDate.now().minusMonths(2),
                                                             tom = LocalDate.now())))
-        behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = setOf(varsel)))
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
+                                                          varsler = setOf(varsel)))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -87,7 +99,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til grunnlag steg etter behandling er opprettet uten varsel`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = emptySet()))
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
+                                                          varsler = emptySet()))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -103,7 +117,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til fakta steg etter behandling er opprettet uten varsel og mottok kravgrunnlag`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling), varsler = emptySet()))
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
+                                                          varsler = emptySet()))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)

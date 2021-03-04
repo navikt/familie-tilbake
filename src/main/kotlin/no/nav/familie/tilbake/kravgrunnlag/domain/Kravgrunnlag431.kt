@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag.domain
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -26,7 +27,7 @@ data class Kravgrunnlag431(@Id
                            val gjelderVedtakId: String,
                            val gjelderType: GjelderType,
                            val utbetalesTilId: String,
-                           val utbetIdType:GjelderType,
+                           val utbetIdType: GjelderType,
                            val hjemmelkode: String?,
                            val beregnesRenter: Boolean?,
                            val ansvarligEnhet: String,
@@ -38,6 +39,8 @@ data class Kravgrunnlag431(@Id
                            val eksternKravgrunnlagId: String?,
                            @MappedCollection(idColumn = "kravgrunnlag431_id")
                            val perioder: Set<Kravgrunnlagsperiode432> = setOf(),
+                           @Version
+                           val versjon: Long = 0,
                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                            val sporbar: Sporbar = Sporbar())
 
@@ -49,6 +52,8 @@ data class Kravgrunnlagsperiode432(@Id
                                    val månedligSkattebeløp: BigDecimal,
                                    @MappedCollection(idColumn = "kravgrunnlagsperiode432_id")
                                    val beløp: Set<Kravgrunnlagsbeløp433> = setOf(),
+                                   @Version
+                                   val versjon: Long = 0,
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                    val sporbar: Sporbar = Sporbar())
 
@@ -71,6 +76,8 @@ data class Kravgrunnlagsbeløp433(@Id
                                  val årsakskode: String?,
                                  val skyldkode: String?,
                                  val skatteprosent: BigDecimal,
+                                 @Version
+                                 val versjon: Long = 0,
                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                  val sporbar: Sporbar = Sporbar())
 

@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,19 +36,22 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
 
-        Assertions.assertThat(lagretVedtaksbrevsoppsummering).isEqualToIgnoringGivenFields(vedtaksbrevsoppsummering, "sporbar")
+        assertThat(lagretVedtaksbrevsoppsummering).isEqualToIgnoringGivenFields(vedtaksbrevsoppsummering, "sporbar", "versjon")
+        assertEquals(1, lagretVedtaksbrevsoppsummering.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Vedtaksbrevsoppsummering i basen`() {
         vedtaksbrevsoppsummeringRepository.insert(vedtaksbrevsoppsummering)
-        val oppdatertVedtaksbrevsoppsummering = vedtaksbrevsoppsummering.copy(fritekst = "bob")
+        var lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
+        val oppdatertVedtaksbrevsoppsummering = lagretVedtaksbrevsoppsummering.copy(fritekst = "bob")
 
         vedtaksbrevsoppsummeringRepository.update(oppdatertVedtaksbrevsoppsummering)
 
-        val lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        Assertions.assertThat(lagretVedtaksbrevsoppsummering)
-                .isEqualToIgnoringGivenFields(oppdatertVedtaksbrevsoppsummering, "sporbar")
+        lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
+        assertThat(lagretVedtaksbrevsoppsummering)
+                .isEqualToIgnoringGivenFields(oppdatertVedtaksbrevsoppsummering, "sporbar", "versjon")
+        assertEquals(2, lagretVedtaksbrevsoppsummering.versjon)
     }
 
 }
