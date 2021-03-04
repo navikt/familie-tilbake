@@ -6,10 +6,11 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Venteårsak
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,19 +36,21 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
         aksjonspunktRepository.insert(aksjonspunkt)
 
         val lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
-
-        Assertions.assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(aksjonspunkt, "sporbar")
+        assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(aksjonspunkt, "sporbar", "versjon")
+        assertEquals(1, lagretAksjonspunkt.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Aksjonspunkt i basen`() {
         aksjonspunktRepository.insert(aksjonspunkt)
-        val oppdatertAksjonspunkt = aksjonspunkt.copy(ventearsak = Venteårsak.ENDRE_TILKJENT_YTELSE)
+        var lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
+        val oppdatertAksjonspunkt = lagretAksjonspunkt.copy(ventearsak = Venteårsak.ENDRE_TILKJENT_YTELSE)
 
         aksjonspunktRepository.update(oppdatertAksjonspunkt)
 
-        val lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
-        Assertions.assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(oppdatertAksjonspunkt, "sporbar")
+        lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
+        assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(oppdatertAksjonspunkt, "sporbar", "versjon")
+        assertEquals(2, lagretAksjonspunkt.versjon)
     }
 
 }

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
@@ -12,6 +13,8 @@ data class Behandlingsresultat(@Id
                                val type: Behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT,
                                @MappedCollection(idColumn = "behandlingsresultat_id")
                                val behandlingsvedtak: Behandlingsvedtak? = null,
+                               @Version
+                               val versjon: Long = 0,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar()) {
 
@@ -19,10 +22,10 @@ data class Behandlingsresultat(@Id
 
         val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> =
                 setOf(Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                      Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
+                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                        Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
+                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
     }
 
 
@@ -42,8 +45,9 @@ data class Behandlingsvedtak(@Id
                              val id: UUID = UUID.randomUUID(),
                              val vedtaksdato: LocalDate,
                              val ansvarligSaksbehandler: String,
-                             val versjon: Int = 0,
                              val iverksettingsstatus: Iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
+                             @Version
+                             val versjon: Long = 0,
                              @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                              val sporbar: Sporbar = Sporbar())
 
@@ -53,7 +57,6 @@ enum class Iverksettingsstatus {
     IVERKSATT,
     UDEFINERT
 }
-
 
 
 enum class Behandlingsresultatstype(val navn: String) {

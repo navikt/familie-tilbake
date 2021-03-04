@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,19 +36,22 @@ internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() 
 
         val lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
 
-        Assertions.assertThat(lagretMottakersVarselrespons).isEqualToIgnoringGivenFields(mottakersVarselrespons, "sporbar")
+        assertThat(lagretMottakersVarselrespons).isEqualToIgnoringGivenFields(mottakersVarselrespons, "sporbar", "versjon")
+        assertEquals(1, lagretMottakersVarselrespons.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av MottakersVarselrespons i basen`() {
         mottakersVarselresponsRepository.insert(mottakersVarselrespons)
-        val oppdatertMottakersVarselrespons = mottakersVarselrespons.copy(kilde = "bob")
+        var lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
+        val oppdatertMottakersVarselrespons = lagretMottakersVarselrespons.copy(kilde = "bob")
 
         mottakersVarselresponsRepository.update(oppdatertMottakersVarselrespons)
 
-        val lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
-        Assertions.assertThat(lagretMottakersVarselrespons)
-                .isEqualToIgnoringGivenFields(oppdatertMottakersVarselrespons, "sporbar")
+        lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
+        assertThat(lagretMottakersVarselrespons)
+                .isEqualToIgnoringGivenFields(oppdatertMottakersVarselrespons, "sporbar", "versjon")
+        assertEquals(2, lagretMottakersVarselrespons.versjon)
     }
 
 }

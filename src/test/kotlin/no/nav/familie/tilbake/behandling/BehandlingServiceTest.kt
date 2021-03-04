@@ -1,6 +1,15 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.*
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
+import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
@@ -17,7 +26,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -116,7 +125,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                         tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val exception = assertFailsWith<RuntimeException>(block = {
             behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
@@ -150,8 +160,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                         manueltOpprettet = false,
                         tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
-        val oppdatertBehandling = behandling.copy(sporbar = sporbar)
+        val oppdatertBehandling = lagretBehandling.copy(sporbar = sporbar)
         behandlingRepository.update(oppdatertBehandling)
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
