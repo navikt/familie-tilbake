@@ -192,7 +192,24 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                     tidsfrist = LocalDate.now().minusDays(4)))
         })
-        assertEquals("Fristdato kan ikke være mindre enn i dag for behandling ${behandling.id}", exception.message)
+        assertEquals("Fristdato må være større enn i dag for behandling ${behandling.id}", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er i dag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                        finnesVarsel = true,
+                        manueltOpprettet = false,
+                        tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
+                    venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                    tidsfrist = LocalDate.now()))
+        })
+        assertEquals("Fristdato må være større enn i dag for behandling ${behandling.id}", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
