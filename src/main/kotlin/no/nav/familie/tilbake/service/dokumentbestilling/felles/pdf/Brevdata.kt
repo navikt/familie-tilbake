@@ -8,5 +8,5 @@ data class Brevdata(var metadata: Brevmetadata,
                     val overskrift: String,
                     val mottager: Brevmottager,
                     val brevtekst: String,
-                    val vedleggHtml: String? = null)
+                    val vedleggHtml: String = "")
 
