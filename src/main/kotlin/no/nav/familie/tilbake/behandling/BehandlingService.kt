@@ -61,8 +61,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         httpStatus = HttpStatus.BAD_REQUEST)
 
         if (LocalDate.now().compareTo(behandlingPåVentDto.tidsfrist) <= 1) {
-            throw Feil(message = "Fristdato må være større enn i dag for behandling $behandlingId",
-                    frontendFeilmelding = "Fristdato må være større enn i dag for behandling $behandlingId",
+            throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                    frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
                     httpStatus = HttpStatus.BAD_REQUEST)
         }
         behandlingskontrollService.settBehandlingPåVent(behandlingId,

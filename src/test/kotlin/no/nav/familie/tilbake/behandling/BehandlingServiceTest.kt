@@ -192,7 +192,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                     tidsfrist = LocalDate.now().minusDays(4)))
         })
-        assertEquals("Fristdato må være større enn i dag for behandling ${behandling.id}", exception.message)
+        assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
     }
 
     @Test
@@ -209,7 +209,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                     tidsfrist = LocalDate.now()))
         })
-        assertEquals("Fristdato må være større enn i dag for behandling ${behandling.id}", exception.message)
+        assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
