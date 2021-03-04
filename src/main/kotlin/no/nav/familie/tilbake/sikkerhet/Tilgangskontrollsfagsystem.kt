@@ -1,9 +1,11 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 // Denne enum-en brukes kun for tilgangskontroll
 enum class Tilgangskontrollsfagsystem(val kode: String) {
+
     BARNETRYGD("BA"),
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KS"),
@@ -31,7 +33,7 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
             throw IllegalArgumentException("Fagsystem finnes ikke for kode $kode")
         }
 
-        fun fraFagsystem(kontraktFagsystem: no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem): Tilgangskontrollsfagsystem {
+        fun fraFagsystem(kontraktFagsystem: Fagsystem): Tilgangskontrollsfagsystem {
             for (fagsystem in values()) {
                 if (fagsystem.kode == kontraktFagsystem.name) {
                     return fagsystem

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 class BehandleKravgrunnlagTask(private val kravgrunnlagRepository: KravgrunnlagRepository) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val secure_log = LoggerFactory.getLogger("secureLogger")
+    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         //TODO map fra kravgrunnlag xml i payload til domene + validering +++

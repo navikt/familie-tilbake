@@ -41,7 +41,7 @@ class InnhentDokumentasjonbrevServiceTest {
     @Test
     fun `hentForhåndsvisningInnhentDokumentasjonBrev skal forhåndsvise innhent dokumentasjonbrev`() {
         val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(Testdata.behandling,
-                                                                                                flereOpplysninger)
+                                                                                               flereOpplysninger)
         Assertions.assertThat(data).isNotEmpty
     }
 

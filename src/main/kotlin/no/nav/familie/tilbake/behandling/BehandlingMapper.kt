@@ -87,7 +87,7 @@ object BehandlingMapper {
 
     private fun tilDomeneVerge(fagsystem: Fagsystem, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
         opprettTilbakekrevingRequest.verge?.let {
-            if (it.gyldigTom.isBefore(LocalDate.now())) {
+            if (it.gyldigTom < LocalDate.now()) {
                 logger.info("Vergeinformasjon er utløpt.Så kopierer ikke fra fagsystem=$fagsystem")
             } else {
                 return setOf(Verge(type = it.vergetype,

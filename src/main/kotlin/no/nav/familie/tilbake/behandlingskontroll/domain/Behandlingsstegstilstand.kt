@@ -69,8 +69,8 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 
     companion object {
 
-        val aktiveStegStatuser = listOf(VENTER, KLAR)
-        val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
+        private val aktiveStegStatuser = listOf(VENTER, KLAR)
+        private val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
 
         fun erStegAktiv(status: Behandlingsstegstatus): Boolean {
             return aktiveStegStatuser.contains(status)

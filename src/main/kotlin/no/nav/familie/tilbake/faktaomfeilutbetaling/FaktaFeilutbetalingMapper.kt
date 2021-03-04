@@ -19,8 +19,8 @@ object FaktaFeilutbetalingMapper {
                    revurderingsvedtaksdato: LocalDate,
                    varsletData: Varsel?,
                    fagsystemsbehandling: Fagsystemsbehandling): FaktaFeilutbetalingDto {
-        val logiskePerioder = LogiskPeriodeUtil.utledLogiskPeriode(
-                feilutbetalingPrPeriode = KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
+        val logiskePerioder =
+                LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
         val feilutbetaltePerioder = hentFeilutbetaltePerioder(faktaFeilutbetaling = faktaFeilutbetaling,
                                                               logiskePerioder = logiskePerioder)
         val faktainfo = Faktainfo(revurderingsårsak = fagsystemsbehandling.årsak,
@@ -28,32 +28,25 @@ object FaktaFeilutbetalingMapper {
                                   tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
                                   konsekvensForYtelser = fagsystemsbehandling.konsekvenser.map { it.konsekvens }.toSet())
 
-        return FaktaFeilutbetalingDto(
-                varsletBeløp = varsletData?.varselbeløp,
-                revurderingsvedtaksdato = revurderingsvedtaksdato,
-                begrunnelse = faktaFeilutbetaling?.begrunnelse ?: "",
-                faktainfo = faktainfo,
-                feilutbetaltePerioder = feilutbetaltePerioder,
-                totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
-                totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder))
+        return FaktaFeilutbetalingDto(varsletBeløp = varsletData?.varselbeløp,
+                                      revurderingsvedtaksdato = revurderingsvedtaksdato,
+                                      begrunnelse = faktaFeilutbetaling?.begrunnelse ?: "",
+                                      faktainfo = faktainfo,
+                                      feilutbetaltePerioder = feilutbetaltePerioder,
+                                      totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
+                                      totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder))
     }
 
     private fun hentFeilutbetaltePerioder(faktaFeilutbetaling: FaktaFeilutbetaling?,
-                                          logiskePerioder: List<LogiskPeriode>): Set<FeilutbetalingsperiodeDto> {
-        if (faktaFeilutbetaling != null) {
-            return faktaFeilutbetaling.perioder.map {
-                FeilutbetalingsperiodeDto(
-                        periode = it.periode,
-                        feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
-                        hendelsestype = it.hendelsestype,
-                        hendelsesundertype = it.hendelsesundertype,
-                )
-            }.toSet()
-        } else {
-            return logiskePerioder.map {
-                FeilutbetalingsperiodeDto(periode = it.periode,
-                                          feilutbetaltBeløp = it.feilutbetaltBeløp)
-            }.toSet()
+                                          logiskePerioder: List<LogiskPeriode>): List<FeilutbetalingsperiodeDto> {
+        return faktaFeilutbetaling?.perioder?.map {
+            FeilutbetalingsperiodeDto(periode = it.periode,
+                                      feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
+                                      hendelsestype = it.hendelsestype,
+                                      hendelsesundertype = it.hendelsesundertype)
+        } ?: logiskePerioder.map {
+            FeilutbetalingsperiodeDto(periode = it.periode,
+                                      feilutbetaltBeløp = it.feilutbetaltBeløp)
         }
     }
 
@@ -65,10 +58,8 @@ object FaktaFeilutbetalingMapper {
         var totalPeriodeFom: LocalDate? = null
         var totalPeriodeTom: LocalDate? = null
         for (periode in perioder) {
-            totalPeriodeFom =
-                    if (totalPeriodeFom == null || totalPeriodeFom.isAfter(periode.fom)) periode.fom else totalPeriodeFom
-            totalPeriodeTom =
-                    if (totalPeriodeTom == null || totalPeriodeTom.isBefore(periode.tom)) periode.tom else totalPeriodeTom
+            totalPeriodeFom = if (totalPeriodeFom == null || totalPeriodeFom > periode.fom) periode.fom else totalPeriodeFom
+            totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom
         }
         return Periode(totalPeriodeFom!!, totalPeriodeTom!!)
     }

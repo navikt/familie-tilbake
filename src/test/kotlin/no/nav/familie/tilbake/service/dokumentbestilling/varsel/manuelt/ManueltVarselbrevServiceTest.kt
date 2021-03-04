@@ -27,7 +27,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -75,11 +74,11 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
         verify {
             mockPdfBrevService.sendBrev(eq(behandling),
-                                         eq(fagsak),
-                                         eq(Brevtype.VARSEL),
-                                         any(),
-                                         eq(9000L),
-                                         any())
+                                        eq(fagsak),
+                                        eq(Brevtype.VARSEL),
+                                        any(),
+                                        eq(9000L),
+                                        any())
         }
     }
 
@@ -98,11 +97,11 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         //assert
         verify {
             mockPdfBrevService.sendBrev(eq(behandling),
-                                         eq(fagsak),
-                                         eq(Brevtype.KORRIGERT_VARSEL),
-                                         any(),
-                                         eq(9000L),
-                                         any())
+                                        eq(fagsak),
+                                        eq(Brevtype.KORRIGERT_VARSEL),
+                                        any(),
+                                        eq(9000L),
+                                        any())
         }
     }
 
@@ -122,11 +121,11 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         //assert
         verify {
             mockPdfBrevService.sendBrev(eq(behandling),
-                                         eq(fagsak),
-                                         eq(Brevtype.KORRIGERT_VARSEL),
-                                         any(),
-                                         eq(9000L),
-                                         any())
+                                        eq(fagsak),
+                                        eq(Brevtype.KORRIGERT_VARSEL),
+                                        any(),
+                                        eq(9000L),
+                                        any())
         }
     }
 
@@ -144,8 +143,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
         every { mockPdfBrevService.genererForhåndsvisning(any()) }
-                .returns(
-                        varseltekst.toByteArray())
+                .returns(varseltekst.toByteArray())
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)))
         behandlingRepository.update(behandlingCopy)
@@ -162,9 +160,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         return FaktaFeilutbetalingDto(totaltFeilutbetaltBeløp = BigDecimal(9000),
                                       totalFeilutbetaltPeriode = periode,
-                                      feilutbetaltePerioder = setOf(
-                                              FeilutbetalingsperiodeDto(periode = periode,
-                                                                        feilutbetaltBeløp = BigDecimal(9000))),
+                                      feilutbetaltePerioder = listOf(FeilutbetalingsperiodeDto(periode,
+                                                                                               BigDecimal(9000))),
                                       revurderingsvedtaksdato = LocalDate.now().minusDays(1),
                                       begrunnelse = "",
                                       faktainfo = Faktainfo(revurderingsårsak = "testverdi",

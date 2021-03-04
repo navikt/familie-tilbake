@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.integration.pdl.internal
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class PdlHentPersonResponse<T>(val data: T,
-                          val errors: List<PdlError>?) {
+                                    val errors: List<PdlError>?) {
 
     fun harFeil(): Boolean {
         return errors != null && errors.isNotEmpty()
@@ -25,24 +25,21 @@ data class PdlPersonData(@JsonProperty("foedsel") val fødsel: List<PdlFødselsD
 data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
 
 
-data class PdlError(
-        val message: String,
-        val locations: List<PdlErrorLocation>,
-        val path: List<String>?,
-        val extensions: PdlErrorExtension
+data class PdlError(val message: String,
+                    val locations: List<PdlErrorLocation>,
+                    val path: List<String>?,
+                    val extensions: PdlErrorExtension
 )
 
 
-data class PdlErrorLocation(
-        val line: Int?,
-        val column: Int?
+data class PdlErrorLocation(val line: Int?,
+                            val column: Int?
 )
 
 
-data class PdlErrorExtension(
-        val code: String?,
-        val details: PdlErrorDetails,
-        val classification: String
+data class PdlErrorExtension(val code: String?,
+                             val details: PdlErrorDetails,
+                             val classification: String
 )
 
 
@@ -67,5 +64,7 @@ data class PdlNavn(val fornavn: String,
 data class PdlKjønn(@JsonProperty("kjoenn") val kjønn: Kjønn)
 
 enum class Kjønn {
-    MANN, KVINNE, UKJENT
+    MANN,
+    KVINNE,
+    UKJENT
 }

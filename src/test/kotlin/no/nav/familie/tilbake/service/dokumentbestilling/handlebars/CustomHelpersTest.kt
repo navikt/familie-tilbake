@@ -7,8 +7,7 @@ import java.math.BigDecimal
 class KroneFormattererMedTusenskilleTest {
 
     @Test
-    fun `medTusenskille skal gi riktig tusenskille`()
-    {
+    fun `medTusenskille skal gi riktig tusenskille`() {
         assertThat(KroneFormattererMedTusenskille.medTusenskille(BigDecimal.valueOf(1), ' ')).isEqualTo("1")
         assertThat(KroneFormattererMedTusenskille.medTusenskille(BigDecimal.valueOf(12), ' ')).isEqualTo("12")
         assertThat(KroneFormattererMedTusenskille.medTusenskille(BigDecimal.valueOf(123), ' ')).isEqualTo("123")

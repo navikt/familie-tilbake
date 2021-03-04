@@ -193,12 +193,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                               handling: String) {
 
         if (minimumBehandlerRolle.nivå > brukersrolleTilFagsystemet.nivå) {
-            throw Feil(
-                    message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
-                              "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                    frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                    httpStatus = HttpStatus.FORBIDDEN
-            )
+            throw Feil(message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                                 "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                       frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                       httpStatus = HttpStatus.FORBIDDEN)
         }
     }
 
