@@ -1,7 +1,8 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles
 
-import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.behandling.domain.Vergetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
+import no.nav.familie.tilbake.behandling.domain.Verge as DomainVerge
 
 object BrevmottagerUtil {
 
@@ -17,11 +18,20 @@ object BrevmottagerUtil {
         }
     }
 
-    fun getVergenavn(verge: Verge?, adresseinfo: Adresseinfo): String {
+    fun getVergenavn(verge: DomainVerge?, adresseinfo: Adresseinfo): String {
         return if (Vergetype.ADVOKAT == verge?.type) {
             adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
         } else {
             verge?.navn ?: ""
         }
     }
+
+    fun getVergenavn(verge: VergeDto?, adresseinfo: Adresseinfo): String {
+        return if (Vergetype.ADVOKAT == verge?.vergetype) {
+            adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
+        } else {
+            verge?.navn ?: ""
+        }
+    }
+
 }

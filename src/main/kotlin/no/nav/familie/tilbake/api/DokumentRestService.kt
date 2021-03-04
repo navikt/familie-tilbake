@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
@@ -18,10 +19,18 @@ import java.util.UUID
 class DokumentRestService(val varselbrevService: VarselbrevService,
                           val manueltVarselbrevService: ManueltVarselbrevService) {
 
+    @GetMapping("/forhandsvis-manueltVarselbrev",
+                produces = [MediaType.APPLICATION_PDF_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
+    fun hentForhåndsvisningManueltVarselbrev(behandlingId: UUID, malType: Dokumentmalstype, fritekst: String): ByteArray {
+        return manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, malType, fritekst)
+    }
+
     @GetMapping("/forhandsvis-varselbrev",
                 produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
-    fun hentForhåndsvisningVarselbrev(behandlingId: UUID, malType: Dokumentmalstype, fritekst: String): ByteArray {
-        return manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, malType, fritekst)
+    fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
+        return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
+
 }

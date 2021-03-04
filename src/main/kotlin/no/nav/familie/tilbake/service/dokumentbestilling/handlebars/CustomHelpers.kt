@@ -82,11 +82,12 @@ class DatoHelper : Helper<Any> {
     }
 }
 
-class KortdatoHelper : Helper<LocalDate> {
+class KortdatoHelper : Helper<Any> {
 
     private val format = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    override fun apply(date: LocalDate, options: Options?): Any {
+    override fun apply(context: Any, options: Options?): Any {
+        val date = objectMapper.convertValue(context, LocalDate::class.java)
         return format.format(date)
     }
 }

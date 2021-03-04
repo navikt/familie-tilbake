@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
@@ -26,6 +27,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -61,7 +63,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         val ident: String = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
         every {
-            mockEksterneDataForBrevService.hentAdresse(any(), any(), any(), any())
+            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("Test", "12345678901"))
 
         fagsak = fagsakRepository.insert(fagsak)

@@ -30,9 +30,6 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                private val pdfBrevService: PdfBrevService,
                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
-    val brukersSvarfrist: Period = Period.ofDays(14)
-
-
     fun sendManueltVarselBrev(behandlingId: UUID, fritekst: String, brevmottager: Brevmottager) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -129,7 +126,6 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                                                                        personinfo,
                                                                                        adresseinfo,
                                                                                        fagsak,
-                                                                                       brukersSvarfrist,
                                                                                        fritekst,
                                                                                        feilutbetalingFakta,
                                                                                        behandling.harVerge,

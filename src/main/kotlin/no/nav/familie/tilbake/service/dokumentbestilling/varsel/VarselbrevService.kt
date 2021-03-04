@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
+import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
@@ -23,7 +23,6 @@ import java.util.UUID
 @Transactional
 class VarselbrevService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakRepository: FagsakRepository,
-                        private val pdlClient: PdlClient,
                         private val eksterneDataForBrevService: EksterneDataForBrevService,
                         private val pdfBrevService: PdfBrevService) {
 
@@ -57,7 +56,7 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
         val verge = behandling.aktivVerge
 
         //Henter data fra pdl
-        val personinfo = pdlClient.hentPersoninfo(fagsak.bruker.ident, fagsak.fagsystem)
+        val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
 
@@ -65,10 +64,39 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
                                                                       behandling,
                                                                       adresseinfo,
                                                                       personinfo,
-                                                                      Constants.brukersSvarfrist,
                                                                       behandling.aktivtVarsel,
                                                                       behandling.harVerge,
                                                                       vergeNavn)
+    }
+
+    fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
+        val varselbrevSamletInfo: VarselbrevSamletInfo =
+                lagVarselbrevForForhåndsvisning(forhåndsvisVarselbrevRequest)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevSamletInfo.brevmetadata)
+        val brevtekst = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+        val brevMottaker = if (varselbrevSamletInfo.brevmetadata.finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val data = Fritekstbrevsdata(overskrift = overskrift,
+                                     brevtekst = brevtekst,
+                                     brevmetadata = varselbrevSamletInfo.brevmetadata)
+        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevMottaker,
+                                                              metadata = data.brevmetadata,
+                                                              overskrift = data.overskrift,
+                                                              brevtekst = data.brevtekst)
+        )
+    }
+
+    private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): VarselbrevSamletInfo {
+
+        val brevmottager = if (request.verge != null) Brevmottager.VERGE else Brevmottager.BRUKER
+        val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem)
+        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo,
+                                                                              brevmottager,
+                                                                              request.verge,
+                                                                              request.fagsystem)
+
+        return VarselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(adresseinfo,
+                                                                         request,
+                                                                         personinfo)
     }
 
 }

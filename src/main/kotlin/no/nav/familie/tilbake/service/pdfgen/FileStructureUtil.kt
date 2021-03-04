@@ -11,10 +11,10 @@ object FileStructureUtil {
             readResource("colorprofile/sRGBz.icc")
 
     fun readResource(location: String): ByteArray {
-        val `is` = FileStructureUtil::class.java.classLoader.getResourceAsStream(location)
-        requireNotNull(`is`) {"Fant ikke resource $location"}
+        val inputStream = FileStructureUtil::class.java.classLoader.getResourceAsStream(location)
+        requireNotNull(inputStream) {"Fant ikke resource $location"}
         return try {
-            `is`.readAllBytes()
+            inputStream.readAllBytes()
         } catch (e: IOException) {
             throw IllegalArgumentException("Klarte ikke å lese resource $location")
         }

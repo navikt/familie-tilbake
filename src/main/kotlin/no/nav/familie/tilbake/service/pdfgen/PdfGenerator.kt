@@ -32,7 +32,7 @@ class PdfGenerator {
     }
 
     fun genererPDFMedLogo(html: String, dokumentvariant: Dokumentvariant): ByteArray {
-        val logo = FileStructureUtil.readResourceAsString("pdf/nav_logo_svg.html")
+        val logo = FileStructureUtil.readResourceAsString("formats/pdf/nav_logo_svg.html")
         return genererPDF(logo + html, dokumentvariant)
     }
 
