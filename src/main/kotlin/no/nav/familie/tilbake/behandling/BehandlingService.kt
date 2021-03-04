@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
@@ -14,11 +15,12 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -46,8 +48,26 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return BehandlingMapper.tilRespons(behandling, kanHenleggeBehandling(behandling))
         }
         throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                   frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
-                   httpStatus = HttpStatus.BAD_REQUEST)
+                frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
+                httpStatus = HttpStatus.BAD_REQUEST)
+    }
+
+    @Transactional
+    fun settBehandlingPåVent(behandlingPåVentDto: BehandlingPåVentDto) {
+        val behandlingId = behandlingPåVentDto.behandlingId
+        behandlingRepository.findByIdOrNull(behandlingId)
+                ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                        frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
+                        httpStatus = HttpStatus.BAD_REQUEST)
+
+        if (LocalDate.now().compareTo(behandlingPåVentDto.tidsfrist) >= 0) {
+            throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                    frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                    httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        behandlingskontrollService.settBehandlingPåVent(behandlingId,
+                behandlingPåVentDto.venteårsak,
+                behandlingPåVentDto.tidsfrist)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -57,9 +77,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                    "og eksternId=$eksternId")
+                "og eksternId=$eksternId")
         secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                          " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
+                " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
 
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
         // oppretter fagsak
@@ -78,8 +98,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                   fagsystem: Fagsystem) {
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) != fagsystem) {
             throw Feil(message = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
-                       frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+                    frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                    httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -89,9 +109,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
-                              "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
+                    "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
             throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
-                       httpStatus = HttpStatus.BAD_REQUEST)
+                    httpStatus = HttpStatus.BAD_REQUEST)
         }
 
         //hvis behandlingen er henlagt, kan det opprettes ny behandling
@@ -102,9 +122,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                     sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
             if (!erSisteBehandlingHenlagt) {
                 val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
-                                  "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
+                        "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
                 throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
-                           httpStatus = HttpStatus.BAD_REQUEST)
+                        httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
     }
@@ -113,21 +133,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                               ytelsestype: Ytelsestype,
                               fagsystem: Fagsystem): Fagsak {
         val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
-                            språkkode = opprettTilbakekrevingRequest.språkkode)
+                språkkode = opprettTilbakekrevingRequest.språkkode)
         return Fagsak(bruker = bruker,
-                      eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                      ytelsestype = ytelsestype,
-                      fagsystem = fagsystem)
+                eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+                ytelsestype = ytelsestype,
+                fagsystem = fagsystem)
     }
 
     private fun kanHenleggeBehandling(behandling: Behandling): Boolean {
         var kanHenlegges = true
         if (TILBAKEKREVING == behandling.type) {
             kanHenlegges = !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
-                                                         behandling.opprettetTidspunkt
-                                                                 .isBefore(LocalDate.now()
-                                                                                   .atStartOfDay()
-                                                                                   .minusDays(OPPRETTELSE_DAGER_BEGRENSNING)))
+                    behandling.opprettetTidspunkt
+                            .isBefore(LocalDate.now()
+                                    .atStartOfDay()
+                                    .minusDays(OPPRETTELSE_DAGER_BEGRENSNING)))
         }
         return kanHenlegges
     }

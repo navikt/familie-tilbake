@@ -2,7 +2,9 @@ package no.nav.familie.tilbake.behandlingskontroll.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import java.time.LocalDate
 import java.util.UUID
 
 data class Behandlingsstegstilstand(@Id
@@ -10,6 +12,9 @@ data class Behandlingsstegstilstand(@Id
                                     val behandlingId: UUID,
                                     val behandlingssteg: Behandlingssteg,
                                     val behandlingsstegsstatus: Behandlingsstegstatus,
+                                    @Column("ventearsak")
+                                    val venteårsak: Venteårsak? = null,
+                                    val tidsfrist: LocalDate? = null,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
@@ -72,4 +77,14 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
             return utførteStegStatuser.contains(status)
         }
     }
+}
+
+enum class Venteårsak(val defaultVenteTidIUker: Long) {
+
+    VENT_PÅ_BRUKERTILBAKEMELDING(4),
+    VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4),
+    AVVENTER_DOKUMENTASJON(0),
+    UTVIDET_TILSVAR_FRIST(0),
+    ENDRE_TILKJENT_YTELSE(0),
+    VENT_PÅ_MULIG_MOTREGNING(0)
 }
