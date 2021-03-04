@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -39,18 +40,23 @@ internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
 
-        Assertions.assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(foreldelsesperiode, "sporbar")
+        assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(foreldelsesperiode,
+                                                                          "sporbar", "versjon")
+        assertEquals(1, lagretForeldelsesperiode.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Foreldelsesperiode i basen`() {
         foreldelsesperiodeRepository.insert(foreldelsesperiode)
-        val oppdatertForeldelsesperiode = foreldelsesperiode.copy(begrunnelse = "bob")
+        var lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
+        val oppdatertForeldelsesperiode = lagretForeldelsesperiode.copy(begrunnelse = "bob")
 
         foreldelsesperiodeRepository.update(oppdatertForeldelsesperiode)
 
-        val lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
-        Assertions.assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(oppdatertForeldelsesperiode, "sporbar")
+        lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
+        assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(oppdatertForeldelsesperiode,
+                                                                          "sporbar", "versjon")
+        assertEquals(2, lagretForeldelsesperiode.versjon)
     }
 
 }

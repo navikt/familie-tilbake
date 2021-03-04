@@ -83,13 +83,12 @@ object Testdata {
 
     private val date = LocalDate.now()
 
-    private val fagsystemsbehandling = Fagsystemsbehandling(
-            eksternId = UUID.randomUUID().toString(),
-            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            revurderingsvedtaksdato = date.minusDays(1),
-            resultat = "OPPHØR",
-            årsak = "testverdi"
-    )
+    private val fagsystemsbehandling =
+            Fagsystemsbehandling(eksternId = UUID.randomUUID().toString(),
+                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                                 revurderingsvedtaksdato = date.minusDays(1),
+                                 resultat = "OPPHØR",
+                                 årsak = "testverdi")
 
     private val varsel = Varsel(varseltekst = "testverdi",
                                 varselbeløp = 123,

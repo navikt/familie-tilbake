@@ -13,8 +13,8 @@ internal object TekstformatererInnhentDokumentasjonsbrev {
             val template =
                     FellesTekstformaterer.opprettHandlebarsTemplate("innhentdokumentasjon/innhent_dokumentasjon",
                                                                     innhentDokumentasjonBrevSamletInfo.brevmetadata.språkkode)
-            val innhentDokumentasjonBrevDokument: InnhentDokumentasjonsbrevsdokument = mapTilInnhentDokumentasjonsbrevsdokument(
-                    innhentDokumentasjonBrevSamletInfo)
+            val innhentDokumentasjonBrevDokument: InnhentDokumentasjonsbrevsdokument =
+                    mapTilInnhentDokumentasjonsbrevsdokument(innhentDokumentasjonBrevSamletInfo)
             FellesTekstformaterer.applyTemplate(template, innhentDokumentasjonBrevDokument)
         } catch (e: IOException) {
             throw IllegalStateException("Feil ved tekstgenerering", e)

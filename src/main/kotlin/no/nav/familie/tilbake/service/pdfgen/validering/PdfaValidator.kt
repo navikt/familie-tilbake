@@ -33,7 +33,7 @@ object PdfaValidator {
         }
     }
 
-    fun validatePdf(inputStream: InputStream?) {
+    private fun validatePdf(inputStream: InputStream?) {
         val flavour: PDFAFlavour = PDFAFlavour.fromString("2u")
         Foundries.defaultInstance().createValidator(flavour, false).use { validator ->
             Foundries.defaultInstance().createParser(inputStream, flavour).use { parser ->

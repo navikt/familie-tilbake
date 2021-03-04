@@ -18,7 +18,7 @@ class VersionController {
         val namespace = System.getenv("NAIS_NAMESPACE") ?: "udefinert"
         val clusterName = System.getenv("NAIS_CLUSTER_NAME") ?: "udefinert"
 
-        return Ressurs.success(Info(appImage = appImage, appName = appName, namespace = namespace, clusterName = clusterName));
+        return Ressurs.success(Info(appImage = appImage, appName = appName, namespace = namespace, clusterName = clusterName))
     }
 }
 

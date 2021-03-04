@@ -22,13 +22,13 @@ object FagsakMapper {
                                        eksternBrukId = it.eksternBrukId,
                                        type = it.type,
                                        status = it.status)
-        }.toSet()
+        }
         return FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
                          status = fagsak.status,
                          ytelsestype = fagsak.ytelsestype,
                          fagsystem = fagsak.fagsystem,
                          språkkode = fagsak.bruker.språkkode,
-            bruker = bruker,
+                         bruker = bruker,
                          behandlinger = behandlingListe)
     }
 }

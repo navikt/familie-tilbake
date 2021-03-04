@@ -31,7 +31,7 @@ class PdfBrevService(private val journalføringService: JournalføringService) {
         valider(brevtype, data)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
 //        TODO opprettes task
-    //        lagTaskerForUtsendingOgSporing(behandlingId, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
+        //        lagTaskerForUtsendingOgSporing(behandlingId, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
     }
 
     private fun lagOgJournalførBrev(behandling: Behandling,

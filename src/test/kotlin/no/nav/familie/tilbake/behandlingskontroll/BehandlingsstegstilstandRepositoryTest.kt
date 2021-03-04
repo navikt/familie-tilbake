@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -36,20 +37,24 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        assertThat(lagretBehandlingsstegstilstand).isEqualToIgnoringGivenFields(behandlingsstegstilstand, "sporbar")
+        assertThat(lagretBehandlingsstegstilstand).isEqualToIgnoringGivenFields(behandlingsstegstilstand,
+                "sporbar", "versjon")
+        assertEquals(1, lagretBehandlingsstegstilstand.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Behandlingsstegstilstand i basen`() {
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
+        var lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
         val oppdatertBehandlingsstegstilstand =
-                behandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
+                lagretBehandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 
-        val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
+        lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
         assertThat(lagretBehandlingsstegstilstand)
-                .isEqualToIgnoringGivenFields(oppdatertBehandlingsstegstilstand, "sporbar")
+                .isEqualToIgnoringGivenFields(oppdatertBehandlingsstegstilstand, "sporbar", "versjon")
+        assertEquals(2, lagretBehandlingsstegstilstand.versjon)
     }
 
 }

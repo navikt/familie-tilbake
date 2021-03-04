@@ -18,7 +18,7 @@ import javax.jms.TextMessage
 class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val secure_log = LoggerFactory.getLogger("secureLogger")
+    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     @JmsListener(destination = "\${oppdrag.mq.kravgrunnlag}", containerFactory = "jmsListenerContainerFactory")
@@ -26,15 +26,12 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
         val kravgrunnlagFraOppdrag = melding.text as String
 
         log.info("Mottatt kravgrunnlag fra oppdrag")
-        secure_log.info(kravgrunnlagFraOppdrag)
-        taskRepository.save(
-                Task(
-                        type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-                        payload = kravgrunnlagFraOppdrag,
-                        properties = Properties().apply {
-                            this["callId"] = UUID.randomUUID()
-                        })
-        )
+        secureLog.info(kravgrunnlagFraOppdrag)
+        taskRepository.save(Task(type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+                                 payload = kravgrunnlagFraOppdrag,
+                                 properties = Properties().apply {
+                                     this["callId"] = UUID.randomUUID()
+                                 }))
 
     }
 

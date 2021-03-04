@@ -16,6 +16,7 @@ import java.util.HashMap
 class PdfGenerator {
 
     companion object {
+
         private val FONT_CACHE: MutableMap<String, ByteArray?> = HashMap()
 
         private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String {

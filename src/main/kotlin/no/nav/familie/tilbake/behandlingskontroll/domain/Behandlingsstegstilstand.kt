@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandlingskontroll.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
@@ -15,6 +16,8 @@ data class Behandlingsstegstilstand(@Id
                                     @Column("ventearsak")
                                     val venteårsak: Venteårsak? = null,
                                     val tidsfrist: LocalDate? = null,
+                                    @Version
+                                    val versjon: Long = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
@@ -66,8 +69,8 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 
     companion object {
 
-        val aktiveStegStatuser = listOf(VENTER, KLAR)
-        val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
+        private val aktiveStegStatuser = listOf(VENTER, KLAR)
+        private val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
 
         fun erStegAktiv(status: Behandlingsstegstatus): Boolean {
             return aktiveStegStatuser.contains(status)

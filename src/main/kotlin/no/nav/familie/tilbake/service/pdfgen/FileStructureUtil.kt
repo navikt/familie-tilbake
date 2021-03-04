@@ -12,7 +12,7 @@ object FileStructureUtil {
 
     fun readResource(location: String): ByteArray {
         val inputStream = FileStructureUtil::class.java.classLoader.getResourceAsStream(location)
-        requireNotNull(inputStream) {"Fant ikke resource $location"}
+        requireNotNull(inputStream) { "Fant ikke resource $location" }
         return try {
             inputStream.readAllBytes()
         } catch (e: IOException) {

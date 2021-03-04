@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -38,18 +39,23 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
 
-        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(kravgrunnlag431, "sporbar", "perioder")
+        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(kravgrunnlag431,
+                                                                       "sporbar", "perioder", "versjon")
+        assertEquals(1, lagretKravgrunnlag431.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Kravgrunnlag431 i basen`() {
         kravgrunnlagRepository.insert(kravgrunnlag431)
-        val oppdatertKravgrunnlag431 = kravgrunnlag431.copy(sperret = true)
+        var lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
+        val oppdatertKravgrunnlag431 = lagretKravgrunnlag431.copy(sperret = true)
 
         kravgrunnlagRepository.update(oppdatertKravgrunnlag431)
 
-        val lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
-        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(oppdatertKravgrunnlag431, "sporbar", "perioder")
+        lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
+        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(oppdatertKravgrunnlag431,
+                                                                       "sporbar", "perioder", "versjon")
+        assertEquals(2, lagretKravgrunnlag431.versjon)
     }
 
     @Test
@@ -58,7 +64,8 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        assertThat(kravgrunnlag431).isEqualToIgnoringGivenFields(findByBehandlingId, "sporbar", "perioder")
+        assertThat(kravgrunnlag431).isEqualToIgnoringGivenFields(findByBehandlingId,
+                                                                 "sporbar", "perioder","versjon")
     }
 
 }

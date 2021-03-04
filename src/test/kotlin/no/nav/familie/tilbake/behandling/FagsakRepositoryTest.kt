@@ -4,9 +4,10 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -20,18 +21,21 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        Assertions.assertThat(lagretFagsak).isEqualToIgnoringGivenFields(fagsak, "sporbar")
+        assertThat(lagretFagsak).isEqualToIgnoringGivenFields(fagsak, "sporbar", "versjon")
+        assertEquals(1, lagretFagsak.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Fagsak i basen`() {
         fagsakRepository.insert(fagsak)
-        val oppdatertFagsak = fagsak.copy(status = Fagsaksstatus.UNDER_BEHANDLING)
+        var lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
+        val oppdatertFagsak = lagretFagsak.copy(status = Fagsaksstatus.UNDER_BEHANDLING)
 
         fagsakRepository.update(oppdatertFagsak)
 
-        val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        Assertions.assertThat(lagretFagsak).isEqualToIgnoringGivenFields(oppdatertFagsak, "sporbar")
+        lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
+        assertThat(lagretFagsak).isEqualToIgnoringGivenFields(oppdatertFagsak, "sporbar", "versjon")
+        assertEquals(2, lagretFagsak.versjon)
     }
 
 }

@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.domain.tbd.Brevtype
-import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
@@ -81,8 +80,7 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
         return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevMottaker,
                                                               metadata = data.brevmetadata,
                                                               overskrift = data.overskrift,
-                                                              brevtekst = data.brevtekst)
-        )
+                                                              brevtekst = data.brevtekst))
     }
 
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): VarselbrevSamletInfo {

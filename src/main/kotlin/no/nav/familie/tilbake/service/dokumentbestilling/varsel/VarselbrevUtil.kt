@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
+import no.nav.familie.tilbake.api.dto.FeilutbetaltePerioderDto
+import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.api.dto.FeilutbetaltePerioderDto
-import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
