@@ -60,7 +60,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
                         httpStatus = HttpStatus.BAD_REQUEST)
 
-        if (LocalDate.now().compareTo(behandlingPåVentDto.tidsfrist) <= 1) {
+        if (LocalDate.now().compareTo(behandlingPåVentDto.tidsfrist) >= 0) {
             throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
                     frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
                     httpStatus = HttpStatus.BAD_REQUEST)

@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -210,6 +211,20 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     tidsfrist = LocalDate.now()))
         })
         assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er større enn i dag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                        finnesVarsel = true,
+                        manueltOpprettet = false,
+                        tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        assertDoesNotThrow { behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
+                venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                tidsfrist = LocalDate.now().plusDays(1))) }
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
