@@ -26,7 +26,7 @@ data class Kravgrunnlag431(@Id
                            val gjelderVedtakId: String,
                            val gjelderType: GjelderType,
                            val utbetalesTilId: String,
-                           val utbetIdType:GjelderType,
+                           val utbetIdType: GjelderType,
                            val hjemmelkode: String?,
                            val beregnesRenter: Boolean?,
                            val ansvarligEnhet: String,

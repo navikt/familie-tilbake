@@ -1,4 +1,3 @@
-
 package no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
@@ -7,7 +6,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 open class BaseDokument(open val ytelsestype: Ytelsestype,
                         open val språkkode: Språkkode,
                         open val behandlendeEnhetsNavn: String,
-                        open val ansvarligSaksbehandler: String ) {
+                        open val ansvarligSaksbehandler: String) {
 
     private val infoMap =
             mapOf(Ytelsestype.BARNETRYGD to Ytelsesinfo("nav.no/barnetrygd",
@@ -32,11 +31,13 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
                                                            mapOf(Språkkode.NB to Ytelsesnavn("kontantstøtte", "kontantstøtten"),
                                                                  Språkkode.NN to Ytelsesnavn("kontantstøtte", "kontantstøtta"))))
 
-    private val ytelsesinfo get() = infoMap[ytelsestype]
-            ?: error("Dokument forsøkt generert for ugyldig ytelsestype: $ytelsestype ")
+    private val ytelsesinfo
+        get() = infoMap[ytelsestype]
+                ?: error("Dokument forsøkt generert for ugyldig ytelsestype: $ytelsestype ")
 
-    private val ytelsesnavn get() = ytelsesinfo.navn[språkkode]
-            ?: error("Dokument forsøkt generert for ugyldig språkkode: $språkkode ytelse: $ytelsestype")
+    private val ytelsesnavn
+        get() = ytelsesinfo.navn[språkkode]
+                ?: error("Dokument forsøkt generert for ugyldig språkkode: $språkkode ytelse: $ytelsestype")
 
     @Suppress("unused") // Handlebars
     val ytelsesnavnUbestemt = ytelsesnavn.ubestemt

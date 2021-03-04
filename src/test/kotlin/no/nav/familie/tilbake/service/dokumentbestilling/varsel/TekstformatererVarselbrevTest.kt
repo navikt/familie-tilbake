@@ -126,16 +126,16 @@ class TekstformatererVarselbrevTest {
 
     private fun lagFeilutbetalingerMedFlerePerioder(): List<Periode> {
         val periode1 = Periode(LocalDate.of(2019, 3, 3),
-                                 LocalDate.of(2020, 3, 3))
+                               LocalDate.of(2020, 3, 3))
         val periode2 = Periode(LocalDate.of(2022, 3, 3),
-                                 LocalDate.of(2024, 3, 3))
+                               LocalDate.of(2024, 3, 3))
         return listOf(periode1, periode2)
     }
 
 
     private fun lagFeilutbetalingerMedKunEnPeriode(): List<Periode> {
         return listOf(Periode(LocalDate.of(2019, 3, 3),
-                                LocalDate.of(2020, 3, 3)))
+                              LocalDate.of(2020, 3, 3)))
     }
 
 

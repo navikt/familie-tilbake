@@ -55,7 +55,6 @@ enum class Iverksettingsstatus {
 }
 
 
-
 enum class Behandlingsresultatstype(val navn: String) {
     IKKE_FASTSATT("Ikke fastsatt"),
     HENLAGT_FEILOPPRETTET("Henlagt, søknaden er feilopprettet"),

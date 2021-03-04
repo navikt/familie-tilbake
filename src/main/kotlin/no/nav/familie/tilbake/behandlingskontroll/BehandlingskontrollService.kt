@@ -5,7 +5,10 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.*
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.STARTET
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -15,7 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class BehandlingskontrollService(private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
@@ -35,10 +38,11 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
         if (aktivtStegstilstand == null) {
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
-            val gammelBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
-                    behandlingId, nesteStegMetaData.behandlingssteg)
-            when {
-                gammelBehandlingsstegstilstand == null -> {
+            val gammelBehandlingsstegstilstand =
+                    behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
+                                                                                            nesteStegMetaData.behandlingssteg)
+            when (gammelBehandlingsstegstilstand) {
+                null -> {
                     settBehandlingsstegOgStatus(behandlingId, nesteStegMetaData)
                 }
                 else -> {
@@ -71,15 +75,15 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres")
         }
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
-                behandlingId, behandlingsstegsinfo.behandlingssteg)
-                                       ?: throw Feil(message = "Behandling med id=$behandlingId og " +
-                                                               "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke")
-        behandlingsstegstilstandRepository.update(behandlingsstegstilstand.copy(
-                behandlingsstegsstatus = behandlingsstegsinfo.behandlingsstegstatus,
-                venteårsak = behandlingsstegsinfo.venteårsak,
-                tidsfrist = behandlingsstegsinfo.tidsfrist,
-        ))
+        val behandlingsstegstilstand =
+                behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
+                                                                                        behandlingsstegsinfo.behandlingssteg)
+                ?: throw Feil(message = "Behandling med id=$behandlingId og " +
+                                        "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke")
+        behandlingsstegstilstandRepository
+                .update(behandlingsstegstilstand.copy(behandlingsstegsstatus = behandlingsstegsinfo.behandlingsstegstatus,
+                                                      venteårsak = behandlingsstegsinfo.venteårsak,
+                                                      tidsfrist = behandlingsstegsinfo.tidsfrist))
     }
 
     @Transactional
@@ -91,11 +95,9 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                      "har ikke aktivt steg",
                                                            frontendFeilmelding = "Behandling $behandlingId " +
                                                                                  "har ikke aktivt steg")
-        behandlingsstegstilstandRepository.update(aktivtBehandlingsstegstilstand.copy(
-                behandlingsstegsstatus = VENTER,
-                venteårsak = venteårsak,
-                tidsfrist = tidsfrist
-        ))
+        behandlingsstegstilstandRepository.update(aktivtBehandlingsstegstilstand.copy(behandlingsstegsstatus = VENTER,
+                                                                                      venteårsak = venteårsak,
+                                                                                      tidsfrist = tidsfrist))
     }
 
     fun finnAktivtSteg(behandlingId: UUID): Behandlingssteg? {
@@ -132,15 +134,16 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     private fun settBehandlingsstegOgStatus(behandlingId: UUID,
                                             nesteStegMedStatus: Behandlingsstegsinfo) {
         // startet nytt behandlingssteg
-        val nybehandlingstegstilstand = behandlingsstegstilstandRepository.insert(
-                Behandlingsstegstilstand(behandlingId = behandlingId,
-                                         behandlingssteg = nesteStegMedStatus.behandlingssteg,
-                                         venteårsak = nesteStegMedStatus.venteårsak,
-                                         tidsfrist = nesteStegMedStatus.tidsfrist,
-                                         behandlingsstegsstatus = STARTET))
+        val nybehandlingstegstilstand =
+                behandlingsstegstilstandRepository
+                        .insert(Behandlingsstegstilstand(behandlingId = behandlingId,
+                                                         behandlingssteg = nesteStegMedStatus.behandlingssteg,
+                                                         venteårsak = nesteStegMedStatus.venteårsak,
+                                                         tidsfrist = nesteStegMedStatus.tidsfrist,
+                                                         behandlingsstegsstatus = STARTET))
         // oppdaterte behandlingsteg med riktig status
-        behandlingsstegstilstandRepository.update(nybehandlingstegstilstand.copy(
-                behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
+        behandlingsstegstilstandRepository
+                .update(nybehandlingstegstilstand.copy(behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
     }
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {

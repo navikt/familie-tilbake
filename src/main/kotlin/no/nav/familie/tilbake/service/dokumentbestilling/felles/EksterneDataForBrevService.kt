@@ -3,12 +3,11 @@ package no.nav.familie.tilbake.service.dokumentbestilling.felles
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
+import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 
 @Service
 class EksterneDataForBrevService(private val pdlClient: PdlClient) {

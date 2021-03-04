@@ -29,7 +29,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return kravgrunnlag.perioder.any { it.periode.fom.isBefore(LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED)) }
+        return kravgrunnlag.perioder.any { it.periode.fom < LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED) }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -38,6 +38,6 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     companion object {
 
-        val FORELDELSE_ANTALL_MÅNED = 30L
+        const val FORELDELSE_ANTALL_MÅNED = 30L
     }
 }

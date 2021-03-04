@@ -16,14 +16,10 @@ internal class KravgrunnlagMottakerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `verifiser at det er mulig å lagre en task`() {
-        taskRepository.save(
-                Task(
-                        type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-                        payload = "kravgrunnlagFraOppdrag")
-        )
+        taskRepository.save(Task(type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+                                 payload = "kravgrunnlagFraOppdrag"))
         Assertions.assertThat(taskRepository.count()).isGreaterThan(0)
     }
-
 
 
 }

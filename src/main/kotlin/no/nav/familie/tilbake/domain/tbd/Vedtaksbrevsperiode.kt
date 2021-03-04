@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class Vedtaksbrevsperiode(@Id
                                val id: UUID = UUID.randomUUID(),

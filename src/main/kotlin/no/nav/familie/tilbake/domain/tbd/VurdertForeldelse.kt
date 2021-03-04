@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
-import java.util.*
+import java.util.UUID
 
 data class VurdertForeldelse(@Id
                              val id: UUID = UUID.randomUUID(),

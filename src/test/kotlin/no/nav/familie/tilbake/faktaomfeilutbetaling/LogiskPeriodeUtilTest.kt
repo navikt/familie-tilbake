@@ -22,9 +22,8 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(uke1Fredag, uke2Mandag)
         val periode2 = Periode(uke2Tirsdag, uke3Mandag)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-                mapOf(periode1 to BigDecimal.valueOf(100), periode2 to BigDecimal.valueOf(200)).toSortedMap(
-                        comparator))
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
+                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap(comparator))
 
         assertEquals(1, resultat.size)
         assertEquals(uke1Fredag, resultat[0].fom)
@@ -37,9 +36,8 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(uke1Fredag, uke2Mandag)
         val periode2 = Periode(uke2Onsdag, uke3Mandag)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-                mapOf(periode1 to BigDecimal.valueOf(100), periode2 to BigDecimal.valueOf(200)).toSortedMap(
-                        comparator))
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
+                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap(comparator))
 
         assertEquals(2, resultat.size)
         assertEquals(uke1Fredag, resultat[0].fom)
@@ -56,9 +54,8 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(uke1Fredag, uke1Fredag)
         val periode2 = Periode(uke2Mandag, uke3Mandag)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-                mapOf(periode1 to BigDecimal.valueOf(100), periode2 to BigDecimal.valueOf(200)).toSortedMap(
-                        comparator))
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
+                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap(comparator))
 
         assertEquals(1, resultat.size)
         assertEquals(uke1Fredag, resultat[0].fom)
@@ -71,9 +68,8 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(uke1Fredag, uke1Fredag)
         val periode2 = Periode(uke1Søndag, uke3Mandag)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-                mapOf(periode1 to BigDecimal.valueOf(100), periode2 to BigDecimal.valueOf(200)).toSortedMap(
-                        comparator))
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
+                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap(comparator))
 
         assertEquals(1, resultat.size)
         assertEquals(uke1Fredag, resultat[0].fom)

@@ -29,7 +29,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
-    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository;
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
@@ -48,12 +48,11 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
-        val kravgrunnlag = Testdata.kravgrunnlag431.copy(
-                perioder = setOf(Kravgrunnlagsperiode432(periode = periode,
-                                                         beløp = setOf(Testdata.feilKravgrunnlagsbeløp433,
-                                                                       Testdata.ytelKravgrunnlagsbeløp433),
-                                                         månedligSkattebeløp = BigDecimal(
-                                                                 "123.11"))))
+        val kravgrunnlag = Testdata.kravgrunnlag431
+                .copy(perioder = setOf(Kravgrunnlagsperiode432(periode = periode,
+                                                               beløp = setOf(Testdata.feilKravgrunnlagsbeløp433,
+                                                                             Testdata.ytelKravgrunnlagsbeløp433),
+                                                               månedligSkattebeløp = BigDecimal("123.11"))))
         kravgrunnlagRepository.insert(kravgrunnlag)
     }
 

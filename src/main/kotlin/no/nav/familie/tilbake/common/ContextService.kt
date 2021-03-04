@@ -23,13 +23,11 @@ object ContextService {
 
     private fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(
-                        onSuccess = {
-                            @Suppress("UNCHECKED_CAST")
-                            it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
-                        },
-                        onFailure = { emptyList() }
-                )
+                .fold(onSuccess = {
+                    @Suppress("UNCHECKED_CAST")
+                    it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
+                },
+                      onFailure = { emptyList() })
     }
 
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig,

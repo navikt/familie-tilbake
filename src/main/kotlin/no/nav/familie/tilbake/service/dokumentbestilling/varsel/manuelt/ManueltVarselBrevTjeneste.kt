@@ -20,7 +20,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.varsel.TekstformatererV
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevSamletInfo
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevUtil
 import org.springframework.stereotype.Service
-import java.time.Period
 import java.util.UUID
 
 @Service

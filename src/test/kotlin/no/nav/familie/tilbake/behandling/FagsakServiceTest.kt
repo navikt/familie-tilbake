@@ -49,7 +49,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val behandlinger = fagsakDto.behandlinger
         assertEquals(1, behandlinger.size)
-        val behandlingsoppsummeringtDto = behandlinger.toList().get(0)
+        val behandlingsoppsummeringtDto = behandlinger.toList()[0]
         assertEquals(behandling.id, behandlingsoppsummeringtDto.behandlingId)
         assertEquals(behandling.eksternBrukId, behandlingsoppsummeringtDto.eksternBrukId)
         assertEquals(behandling.status, behandlingsoppsummeringtDto.status)

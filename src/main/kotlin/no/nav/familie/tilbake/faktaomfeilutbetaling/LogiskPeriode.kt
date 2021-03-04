@@ -43,7 +43,7 @@ object LogiskPeriodeUtil {
     }
 
     private fun harUkedagerMellom(dag1: LocalDate, dag2: LocalDate): Boolean {
-        require(dag2.isAfter(dag1)) { "dag2 må være etter dag1" }
+        require(dag2 > dag1) { "dag2 må være etter dag1" }
         if (dag1.plusDays(1) == dag2) {
             return false
         }

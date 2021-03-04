@@ -16,7 +16,7 @@ data class FagsakDto(val eksternFagsakId: String,
                      val fagsystem: Fagsystem,
                      val språkkode: Språkkode,
                      val bruker: BrukerDto,
-                     val behandlinger: Set<BehandlingsoppsummeringDto>)
+                     val behandlinger: List<BehandlingsoppsummeringDto>)
 
 data class BrukerDto(val personIdent: String,
                      val navn: String,

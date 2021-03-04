@@ -26,7 +26,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     private val faktaFeilutbetaling = Testdata.faktaFeilutbetaling
 
     @BeforeEach
-    fun init(){
+    fun init() {
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }
