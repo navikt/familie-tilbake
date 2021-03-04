@@ -5,21 +5,17 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.STARTET
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.*
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class BehandlingskontrollService(private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
@@ -95,12 +91,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                      "har ikke aktivt steg",
                                                            frontendFeilmelding = "Behandling $behandlingId " +
                                                                                  "har ikke aktivt steg")
-        if (VENTER == aktivtBehandlingsstegstilstand.behandlingsstegsstatus &&
-            aktivtBehandlingsstegstilstand.tidsfrist?.isAfter(tidsfrist) == true) {
-            throw Feil(message = "Fristen kan ikke senkes for behandling $behandlingId",
-                       frontendFeilmelding = "Fristen kan ikke senkes for behandling $behandlingId",
-                       httpStatus = HttpStatus.BAD_REQUEST)
-        }
         behandlingsstegstilstandRepository.update(aktivtBehandlingsstegstilstand.copy(
                 behandlingsstegsstatus = VENTER,
                 venteårsak = venteårsak,

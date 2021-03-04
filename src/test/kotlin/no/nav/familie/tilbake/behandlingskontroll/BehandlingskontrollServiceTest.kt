@@ -8,17 +8,8 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.AVSLUTTET
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FAKTA
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FORELDELSE
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.GRUNNLAG
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VARSEL
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VILKÅRSVURDERING
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.*
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.*
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.data.Testdata
@@ -289,23 +280,6 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                                                             tidsfrist = tidsfrist.minusDays(5))
         })
         assertEquals("Behandling ${behandling.id} har ikke aktivt steg", exception.message)
-    }
-
-
-    @Test
-    fun `settBehandlingPåVent skal ikke utvide fristen med mulig motregning når input er lavere enn tidsfrist`() {
-        val tidsfrist: LocalDate =
-                behandling.opprettetDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, VENTER,
-                                                               venteårsak = Venteårsak.VENT_PÅ_MULIG_MOTREGNING,
-                                                               tidsfrist = tidsfrist)))
-
-        val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingskontrollService.settBehandlingPåVent(behandlingId = behandling.id,
-                                                            venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                            tidsfrist = tidsfrist.minusDays(5))
-        })
-        assertEquals("Fristen kan ikke senkes for behandling ${behandling.id}", exception.message)
     }
 
     @Test
