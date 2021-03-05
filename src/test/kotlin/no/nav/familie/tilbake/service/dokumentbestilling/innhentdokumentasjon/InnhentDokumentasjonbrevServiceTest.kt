@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -14,23 +15,26 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevServi
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
 import java.time.LocalDate
 
-class InnhentDokumentasjonbrevServiceTest {
+class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     private val flereOpplysninger = "Vi trenger flere opplysninger"
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
-    private val mockPdfBrevService: PdfBrevService = mockk()
+
+    @Autowired
+    lateinit var pdfBrevService: PdfBrevService
     private val fagsakRepository: FagsakRepository = mockk()
-    private var innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(fagsakRepository,
-                                                                                  mockEksterneDataForBrevService,
-                                                                                  mockPdfBrevService)
+    private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
 
     @BeforeEach
     fun setup() {
+        innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(fagsakRepository,
+                                                                          mockEksterneDataForBrevService,
+                                                                          pdfBrevService)
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
-        every { mockPdfBrevService.genererForhåndsvisning(any()) }
-                .returns(flereOpplysninger.toByteArray())
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
