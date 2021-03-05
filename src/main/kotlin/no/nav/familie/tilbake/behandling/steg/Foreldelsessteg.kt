@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegMedStatus
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -20,8 +20,8 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     BehandlingsstegMedStatus(Behandlingssteg.FORELDELSE,
-                                                                                              Behandlingsstegstatus.AUTOUTFØRT))
+                                                                     Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
+                                                                                          Behandlingsstegstatus.AUTOUTFØRT))
         }
 
         behandlingskontrollService.fortsettBehandling(behandlingId)
@@ -29,7 +29,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return kravgrunnlag.perioder.any { it.periode.fom.isBefore(LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED)) }
+        return kravgrunnlag.perioder.any { it.periode.fom < LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED) }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -38,6 +38,6 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     companion object {
 
-        val FORELDELSE_ANTALL_MÅNED = 30L
+        const val FORELDELSE_ANTALL_MÅNED = 30L
     }
 }

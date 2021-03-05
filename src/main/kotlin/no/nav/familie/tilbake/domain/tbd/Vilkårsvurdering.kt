@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.domain.tbd
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -17,6 +18,8 @@ data class Vilkårsvurdering(@Id
                             val aktiv: Boolean = true,
                             @MappedCollection(idColumn = "vilkarsvurdering_id")
                             val perioder: Set<Vilkårsvurderingsperiode> = setOf(),
+                            @Version
+                            val versjon: Long = 0,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                             val sporbar: Sporbar = Sporbar())
 
@@ -33,6 +36,8 @@ data class Vilkårsvurderingsperiode(@Id
                                     val aktsomhet: VilkårsvurderingAktsomhet? = null,
                                     @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
                                     val godTro: VilkårsvurderingGodTro? = null,
+                                    @Version
+                                    val versjon: Long = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
@@ -42,8 +47,10 @@ data class VilkårsvurderingGodTro(@Id
                                   @Column("belop_er_i_behold")
                                   val beløpErIBehold: Boolean,
                                   @Column("belop_tilbakekreves")
-                                  val beløpTilbakekreves: BigDecimal,
+                                  val beløpTilbakekreves: BigDecimal? = null,
                                   val begrunnelse: String,
+                                  @Version
+                                  val versjon: Long = 0,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                   val sporbar: Sporbar = Sporbar())
 
@@ -60,11 +67,13 @@ data class VilkårsvurderingAktsomhet(@Id
                                      @Column("serlige_grunner_til_reduksjon")
                                      val særligeGrunnerTilReduksjon: Boolean = false,
                                      @Column("tilbakekrev_smabelop")
-                                     val tilbakekrevSmåbeløp: Boolean = false,
+                                     val tilbakekrevSmåbeløp: Boolean = true,
                                      @MappedCollection(idColumn = "vilkarsvurdering_aktsomhet_id")
                                      val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
                                      @Column("serlige_grunner_begrunnelse")
                                      val særligeGrunnerBegrunnelse: String? = null,
+                                     @Version
+                                     val versjon: Long = 0,
                                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                      val sporbar: Sporbar = Sporbar()) {
 
@@ -75,10 +84,10 @@ data class VilkårsvurderingAktsomhet(@Id
             check(!særligeGrunnerTilReduksjon) { "Ved FORSETT skal ikke særligeGrunnerTilReduksjon settes her" }
             check(manueltSattBeløp == null) { "Ved FORSETT er beløp automatisk, og skal ikke settes her" }
             check(andelTilbakekreves == null) { "Ved FORSETT er andel automatisk, og skal ikke settes her" }
-            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+            check(tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
         }
         if (aktsomhet == Aktsomhet.GROV_UAKTSOMHET) {
-            check(!tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
+            check(tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
         }
     }
 
@@ -90,6 +99,8 @@ data class VilkårsvurderingSærligGrunn(@Id
                                        @Column("serlig_grunn")
                                        val særligGrunn: SærligGrunn,
                                        val begrunnelse: String?,
+                                       @Version
+                                       val versjon: Long = 0,
                                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                        val sporbar: Sporbar = Sporbar())
 

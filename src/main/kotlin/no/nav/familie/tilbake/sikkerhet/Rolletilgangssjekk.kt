@@ -6,4 +6,4 @@ package no.nav.familie.tilbake.sikkerhet
 @MustBeDocumented
 annotation class Rolletilgangssjekk(val minimumBehandlerrolle: Behandlerrolle,
                                     val handling: String,
-                                    val henteParam: String = "") //brukes kun i GET request for å hente fagsystem
+                                    val henteParam: String = "") //brukes kun i GET request/request uten body

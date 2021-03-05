@@ -6,10 +6,11 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Årsakstype
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class ÅrsakTotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -40,19 +41,23 @@ internal class ÅrsakTotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest()
 
         val lagretÅrsakTotrinnsvurdering = årsakTotrinnsvurderingRepository.findByIdOrThrow(årsakTotrinnsvurdering.id)
 
-        Assertions.assertThat(lagretÅrsakTotrinnsvurdering).isEqualToIgnoringGivenFields(årsakTotrinnsvurdering, "sporbar")
+        assertThat(lagretÅrsakTotrinnsvurdering).isEqualToIgnoringGivenFields(årsakTotrinnsvurdering,
+                                                                              "sporbar", "versjon")
+        assertEquals(1, lagretÅrsakTotrinnsvurdering.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av ÅrsakTotrinnsvurdering i basen`() {
         årsakTotrinnsvurderingRepository.insert(årsakTotrinnsvurdering)
-        val oppdatertÅrsakTotrinnsvurdering = årsakTotrinnsvurdering.copy(årsakstype = Årsakstype.FEIL_REGEL)
+        var lagretÅrsakTotrinnsvurdering = årsakTotrinnsvurderingRepository.findByIdOrThrow(årsakTotrinnsvurdering.id)
+        val oppdatertÅrsakTotrinnsvurdering = lagretÅrsakTotrinnsvurdering.copy(årsakstype = Årsakstype.FEIL_REGEL)
 
         årsakTotrinnsvurderingRepository.update(oppdatertÅrsakTotrinnsvurdering)
 
-        val lagretÅrsakTotrinnsvurdering = årsakTotrinnsvurderingRepository.findByIdOrThrow(årsakTotrinnsvurdering.id)
-        Assertions.assertThat(lagretÅrsakTotrinnsvurdering)
-                .isEqualToIgnoringGivenFields(oppdatertÅrsakTotrinnsvurdering, "sporbar")
+        lagretÅrsakTotrinnsvurdering = årsakTotrinnsvurderingRepository.findByIdOrThrow(årsakTotrinnsvurdering.id)
+        assertThat(lagretÅrsakTotrinnsvurdering)
+                .isEqualToIgnoringGivenFields(oppdatertÅrsakTotrinnsvurdering, "sporbar", "versjon")
+        assertEquals(2, lagretÅrsakTotrinnsvurdering.versjon)
     }
 
 }

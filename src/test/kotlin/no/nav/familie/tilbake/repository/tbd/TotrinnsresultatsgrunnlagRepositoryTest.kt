@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -52,19 +53,23 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
 
         val lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
 
-        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag).isEqualToIgnoringGivenFields(totrinnsresultatsgrunnlag, "sporbar")
+        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag).isEqualToIgnoringGivenFields(totrinnsresultatsgrunnlag,
+                                                                                            "sporbar", "versjon")
+        assertEquals(1, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Totrinnsresultatsgrunnlag i basen`() {
         totrinnsresultatsgrunnlagRepository.insert(totrinnsresultatsgrunnlag)
-        val oppdatertTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlag.copy(aktiv = false)
+        var lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
+        val oppdatertTotrinnsresultatsgrunnlag = lagretTotrinnsresultatsgrunnlag.copy(aktiv = false)
 
         totrinnsresultatsgrunnlagRepository.update(oppdatertTotrinnsresultatsgrunnlag)
 
-        val lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
+        lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
         Assertions.assertThat(lagretTotrinnsresultatsgrunnlag)
-                .isEqualToIgnoringGivenFields(oppdatertTotrinnsresultatsgrunnlag, "sporbar")
+                .isEqualToIgnoringGivenFields(oppdatertTotrinnsresultatsgrunnlag, "sporbar", "versjon")
+        assertEquals(2, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 
 }

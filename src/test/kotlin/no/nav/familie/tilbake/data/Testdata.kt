@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.data
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -15,7 +16,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.behandling.domain.Vergetype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
@@ -83,19 +83,18 @@ object Testdata {
 
     private val date = LocalDate.now()
 
-    private val fagsystemsbehandling = Fagsystemsbehandling(
-            eksternId = UUID.randomUUID().toString(),
-            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            revurderingsvedtaksdato = date.minusDays(1),
-            resultat = "OPPHØR",
-            årsak = "testverdi"
-    )
+    private val fagsystemsbehandling =
+            Fagsystemsbehandling(eksternId = UUID.randomUUID().toString(),
+                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                                 revurderingsvedtaksdato = date.minusDays(1),
+                                 resultat = "OPPHØR",
+                                 årsak = "testverdi")
 
     private val varsel = Varsel(varseltekst = "testverdi",
                                 varselbeløp = 123,
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
-    private val verge = Verge(ident = "testverdi",
+    val verge = Verge(ident = "testverdi",
                       gyldigFom = LocalDate.now(),
                       gyldigTom = LocalDate.now(),
                       type = Vergetype.VERGE_FOR_BARN,
@@ -240,7 +239,6 @@ object Testdata {
                                       manueltSattBeløp = null,
                                       begrunnelse = "testverdi",
                                       særligeGrunnerTilReduksjon = true,
-                                      tilbakekrevSmåbeløp = false,
                                       særligeGrunnerBegrunnelse = "testverdi",
                                       vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
@@ -255,10 +253,10 @@ object Testdata {
     val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
                                   perioder = setOf(vilkårsperiode))
 
-    private val faktaFeilutbetalingsperiode = FaktaFeilutbetalingsperiode(
-            periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            hendelsestype = Hendelsestype.BA_ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+    private val faktaFeilutbetalingsperiode =
+            FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+                                        hendelsestype = Hendelsestype.BA_ANNET,
+                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(begrunnelse = "testverdi",
                                                   aktiv = true,

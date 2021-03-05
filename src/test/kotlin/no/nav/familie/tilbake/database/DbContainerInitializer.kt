@@ -9,11 +9,9 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
 
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
         postgres.start()
-        TestPropertyValues.of(
-                "spring.datasource.url=${postgres.jdbcUrl}",
-                "spring.datasource.username=${postgres.username}",
-                "spring.datasource.password=${postgres.password}"
-        ).applyTo(applicationContext.environment)
+        TestPropertyValues.of("spring.datasource.url=${postgres.jdbcUrl}",
+                              "spring.datasource.username=${postgres.username}",
+                              "spring.datasource.password=${postgres.password}").applyTo(applicationContext.environment)
     }
 
     companion object {

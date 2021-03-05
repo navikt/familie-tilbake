@@ -17,10 +17,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
              WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
             AND beh.status <>'AVSLUTTET' AND beh.type='TILBAKEKREVING'
     """)
-    fun finnÅpenTilbakekrevingsbehandling(
-            ytelsestype: Ytelsestype,
-            eksternFagsakId: String
-    ): Behandling?
+    fun finnÅpenTilbakekrevingsbehandling(ytelsestype: Ytelsestype,
+                                          eksternFagsakId: String): Behandling?
 
     // language=PostgreSQL
     @Query("""

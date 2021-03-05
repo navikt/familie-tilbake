@@ -13,13 +13,16 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -122,7 +125,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val exception = assertFailsWith<RuntimeException>(block = {
             behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
@@ -156,8 +160,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
-        val oppdatertBehandling = behandling.copy(sporbar = sporbar)
+        val oppdatertBehandling = lagretBehandling.copy(sporbar = sporbar)
         behandlingRepository.update(oppdatertBehandling)
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
@@ -172,6 +177,67 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandlingId = UUID.randomUUID()
         val exception = assertFailsWith<RuntimeException>(block = { behandlingService.hentBehandling(behandlingId) })
         assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis behandling ikke finnes`() {
+        val behandlingId = UUID.randomUUID()
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandlingId,
+                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                                                                       tidsfrist = LocalDate.now().plusWeeks(4)))
+        })
+        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er mindre enn i dag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
+                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                                                                       tidsfrist = LocalDate.now().minusDays(4)))
+        })
+        assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er i dag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val exception = assertFailsWith<RuntimeException>(block = {
+            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
+                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                                                                       tidsfrist = LocalDate.now()))
+        })
+        assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er større enn i dag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        assertDoesNotThrow {
+            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
+                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+                                                                       tidsfrist = LocalDate.now().plusDays(1)))
+        }
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
@@ -283,7 +349,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             varsel = varsel,
                                             revurderingsvedtaksdato = fom,
                                             verge = verge,
-                                            faktainfo = faktainfo
-        )
+                                            faktainfo = faktainfo)
     }
 }

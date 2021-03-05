@@ -6,10 +6,11 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -36,18 +37,21 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
 
-        Assertions.assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(brevsporing, "sporbar")
+        assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(brevsporing, "sporbar", "versjon")
+        assertEquals(1, lagretBrevsporing.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Brevsporing i basen`() {
         brevsporingRepository.insert(brevsporing)
-        val oppdatertBrevsporing = brevsporing.copy(brevtype = Brevtype.HENLEGGELSE)
+        var lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
+        val oppdatertBrevsporing = lagretBrevsporing.copy(brevtype = Brevtype.HENLEGGELSE)
 
         brevsporingRepository.update(oppdatertBrevsporing)
 
-        val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
-        Assertions.assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(oppdatertBrevsporing, "sporbar")
+        lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
+        assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(oppdatertBrevsporing, "sporbar", "versjon")
+        assertEquals(2, lagretBrevsporing.versjon)
     }
 
 }

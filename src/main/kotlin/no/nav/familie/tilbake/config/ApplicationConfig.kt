@@ -15,12 +15,14 @@ import org.springframework.boot.web.servlet.server.ServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
 @Import(RestTemplateSts::class, RestTemplateAzure::class, StsRestClient::class)
 @EnableOAuth2Client(cacheEnabled = true)
+@EnableScheduling //brukes av prosessering(Tasks)
 @ConfigurationPropertiesScan
 class ApplicationConfig {
 

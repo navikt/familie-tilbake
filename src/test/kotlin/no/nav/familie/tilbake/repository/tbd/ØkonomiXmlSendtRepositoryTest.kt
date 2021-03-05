@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,18 +36,21 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
 
-        Assertions.assertThat(lagretØkonomiXmlSendt).isEqualToIgnoringGivenFields(økonomiXmlSendt, "sporbar")
+        assertThat(lagretØkonomiXmlSendt).isEqualToIgnoringGivenFields(økonomiXmlSendt, "sporbar", "versjon")
+        assertEquals(1, lagretØkonomiXmlSendt.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlSendt i basen`() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
-        val oppdatertØkonomiXmlSendt = økonomiXmlSendt.copy(melding = "bob")
+        var lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
+        val oppdatertØkonomiXmlSendt = lagretØkonomiXmlSendt.copy(melding = "bob")
 
         økonomiXmlSendtRepository.update(oppdatertØkonomiXmlSendt)
 
-        val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        Assertions.assertThat(lagretØkonomiXmlSendt).isEqualToIgnoringGivenFields(oppdatertØkonomiXmlSendt, "sporbar")
+        lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
+        assertThat(lagretØkonomiXmlSendt).isEqualToIgnoringGivenFields(oppdatertØkonomiXmlSendt, "sporbar", "versjon")
+        assertEquals(2, lagretØkonomiXmlSendt.versjon)
     }
 
 }

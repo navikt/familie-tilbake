@@ -3,18 +3,18 @@ package no.nav.familie.tilbake.common
 import java.time.LocalDate
 
 data class Periode(val fom: LocalDate,
-                   val tom: LocalDate) {
+                   val tom: LocalDate) : Comparable<Periode> {
 
     init {
-        require(!tom.isBefore(fom)) { "Til-og-med-dato før fra-og-med-dato: $fom>$tom" }
+        require(tom >= fom) { "Til-og-med-dato før fra-og-med-dato: $fom>$tom" }
     }
 
-    fun overlapper(dato: LocalDate): Boolean {
-        return !dato.isBefore(fom) && !dato.isAfter(tom)
+    private fun overlapper(dato: LocalDate): Boolean {
+        return dato in fom..tom
     }
 
-    fun overlapper(other: Periode): Boolean {
-       return  overlapper(other.fom) || overlapper(other.tom)
+    private fun overlapper(other: Periode): Boolean {
+        return overlapper(other.fom) || overlapper(other.tom)
     }
 
     fun union(annen: Periode): Periode? {
@@ -23,23 +23,18 @@ data class Periode(val fom: LocalDate,
         } else if (this == annen) {
             this
         } else {
-            Periode(max(fom, annen.fom),
-                    min(tom, annen.tom))
+            Periode(maxOf(fom, annen.fom),
+                    minOf(tom, annen.tom))
         }
     }
 
-
-
     companion object {
-        fun max(en: LocalDate, to: LocalDate): LocalDate {
-            return if (en.isAfter(to)) en else to
-        }
-
-        fun min(en: LocalDate, to: LocalDate): LocalDate {
-            return if (en.isBefore(to)) en else to
-        }
 
         val COMPARATOR: Comparator<Periode> = Comparator.comparing(Periode::fom).thenComparing(Periode::tom)
+    }
+
+    override fun compareTo(other: Periode): Int {
+        return COMPARATOR.compare(this, other)
     }
 
 }

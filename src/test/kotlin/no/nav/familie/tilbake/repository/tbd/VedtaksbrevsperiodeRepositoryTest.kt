@@ -5,10 +5,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,18 +36,23 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
 
-        Assertions.assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(vedtaksbrevsperiode, "sporbar")
+        assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(vedtaksbrevsperiode,
+                                                                           "sporbar", "versjon")
+        assertEquals(1, lagretVedtaksbrevsperiode.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Vedtaksbrevsperiode i basen`() {
         vedtaksbrevsperiodeRepository.insert(vedtaksbrevsperiode)
-        val oppdatertVedtaksbrevsperiode = vedtaksbrevsperiode.copy(fritekst = "bob")
+        var lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
+        val oppdatertVedtaksbrevsperiode = lagretVedtaksbrevsperiode.copy(fritekst = "bob")
 
         vedtaksbrevsperiodeRepository.update(oppdatertVedtaksbrevsperiode)
 
-        val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
-        Assertions.assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(oppdatertVedtaksbrevsperiode, "sporbar")
+        lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
+        assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(oppdatertVedtaksbrevsperiode,
+                                                                           "sporbar", "versjon")
+        assertEquals(2, lagretVedtaksbrevsperiode.versjon)
     }
 
 }

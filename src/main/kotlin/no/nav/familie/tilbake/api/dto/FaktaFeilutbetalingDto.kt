@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 data class FaktaFeilutbetalingDto(val varsletBeløp: Long? = null,
                                   val totalFeilutbetaltPeriode: Periode,
-                                  val feilutbetaltePerioder: Set<FeilutbetalingsperiodeDto>,
+                                  val feilutbetaltePerioder: List<FeilutbetalingsperiodeDto>,
                                   val totaltFeilutbetaltBeløp: BigDecimal,
                                   val revurderingsvedtaksdato: LocalDate,
                                   val begrunnelse: String,

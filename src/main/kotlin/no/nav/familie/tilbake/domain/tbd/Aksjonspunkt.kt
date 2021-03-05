@@ -2,9 +2,10 @@ package no.nav.familie.tilbake.domain.tbd
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Aksjonspunkt(@Id
                         val id: UUID = UUID.randomUUID(),
@@ -18,7 +19,8 @@ data class Aksjonspunkt(@Id
                         val reaktiveringsstatus: Reaktiveringsstatus = Reaktiveringsstatus.AKTIV,
                         val manueltOpprettet: Boolean = false,
                         val revurdering: Boolean = false,
-                        val versjon: Int = 0,
+                        @Version
+                        val versjon: Long = 0,
                         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                         val sporbar: Sporbar = Sporbar())
 

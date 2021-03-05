@@ -10,12 +10,14 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
@@ -119,6 +121,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockJoinpoint.args } returns arrayOf(lagOpprettTilbakekrevingRequest())
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
         every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns ""
 
         val exception = assertFailsWith<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
@@ -137,6 +140,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockJoinpoint.args } returns arrayOf(lagOpprettTilbakekrevingRequest())
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
         every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns ""
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
@@ -189,6 +193,40 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         })
         assertEquals("Bruker har mangler tilgang til hent behandling",
                      exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i behandleSteg POST request uten body`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        // POST request uten body
+        opprettRequest("/api/behandling/$behandlingId/steg/v1/", HttpMethod.POST, token)
+
+        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal ha tilgang i sett behandling på vent PUT request`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        // POST request uten body
+        opprettRequest("/api/behandling/vent/v1/", HttpMethod.POST, token)
+
+        every { mockJoinpoint.args } returns arrayOf(BehandlingPåVentDto(behandlingId = behandlingId,
+                                                                         venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                                         tidsfrist = LocalDate.now().plusWeeks(2)))
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
+        every { mockRolleTilgangssjekk.henteParam } returns ""
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
 
@@ -245,8 +283,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                             enhetsnavn = "Oslo",
                                             revurderingsvedtaksdato = LocalDate.now(),
                                             varsel = varsel,
-                                            faktainfo = faktainfo
-        )
+                                            faktainfo = faktainfo)
     }
 
 

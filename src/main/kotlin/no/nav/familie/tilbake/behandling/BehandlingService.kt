@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
@@ -14,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -48,6 +50,24 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
                    frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
                    httpStatus = HttpStatus.BAD_REQUEST)
+    }
+
+    @Transactional
+    fun settBehandlingPåVent(behandlingPåVentDto: BehandlingPåVentDto) {
+        val behandlingId = behandlingPåVentDto.behandlingId
+        behandlingRepository.findByIdOrNull(behandlingId)
+        ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                      frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
+                      httpStatus = HttpStatus.BAD_REQUEST)
+
+        if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
+            throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                       frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        behandlingskontrollService.settBehandlingPåVent(behandlingId,
+                                                        behandlingPåVentDto.venteårsak,
+                                                        behandlingPåVentDto.tidsfrist)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -124,10 +144,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         var kanHenlegges = true
         if (TILBAKEKREVING == behandling.type) {
             kanHenlegges = !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
-                                                         behandling.opprettetTidspunkt
-                                                                 .isBefore(LocalDate.now()
-                                                                                   .atStartOfDay()
-                                                                                   .minusDays(OPPRETTELSE_DAGER_BEGRENSNING)))
+                                                         behandling.opprettetTidspunkt < LocalDate.now()
+                                                                 .atStartOfDay()
+                                                                 .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
         }
         return kanHenlegges
     }

@@ -3,9 +3,10 @@ package no.nav.familie.tilbake.repository.tbd
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
 
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -19,19 +20,21 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insert(vilkår)
 
         val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-
-        Assertions.assertThat(lagretVilkår).isEqualToIgnoringGivenFields(vilkår, "sporbar")
+        assertThat(lagretVilkår).isEqualToIgnoringGivenFields(vilkår, "sporbar", "versjon")
+        assertEquals(1, lagretVilkår.versjon)
     }
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av Vilkårsvurdering i basen`() {
         vilkårsvurderingRepository.insert(vilkår)
-        val oppdatertVilkår = vilkår.copy(aktiv = false)
+        var lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
+        val oppdatertVilkår = lagretVilkår.copy(aktiv = false)
 
         vilkårsvurderingRepository.update(oppdatertVilkår)
 
-        val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        Assertions.assertThat(lagretVilkår).isEqualToIgnoringGivenFields(oppdatertVilkår, "sporbar")
+        lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
+        assertThat(lagretVilkår).isEqualToIgnoringGivenFields(oppdatertVilkår, "sporbar", "versjon")
+        assertEquals(2, lagretVilkår.versjon)
     }
 
 }
