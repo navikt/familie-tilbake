@@ -24,7 +24,7 @@
         <kotlin.version>1.4.31</kotlin.version>
         <felles.version>1.20210208115050_88991d1</felles.version>
         <common-java-modules.version>2.2021.02.03_08.08-9d0c8281f06b</common-java-modules.version>
-        <kontrakter.version>2.0_20210301132655_04e6a55</kontrakter.version>
+        <kontrakter.version>2.0_20210304090118_e60086b</kontrakter.version>
         <nav.security.version>1.3.2</nav.security.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>2.3.0.1</jaxb-core.version>
