@@ -26,7 +26,9 @@ class DokumentController(private val varselbrevService: VarselbrevService,
 
     @GetMapping("/forhandsvis-manueltVarselbrev/{behandlingId}",
                 produces = [MediaType.APPLICATION_PDF_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Forhåndsviser brev",
+                        henteParam = "behandlingId")
     fun hentForhåndsvisningManueltVarselbrev(@PathVariable behandlingId: UUID,
                                              malType: Dokumentmalstype,
                                              fritekst: String): ByteArray {
@@ -42,7 +44,9 @@ class DokumentController(private val varselbrevService: VarselbrevService,
 
     @GetMapping("/forhandsvis-innhentbrev/{behandlingId}",
                  produces = [MediaType.APPLICATION_PDF_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Forhåndsviser brev",
+                        henteParam = "behandlingId")
     fun hentForhåndsvisningInnhentDokumentasjonsbrev(@PathVariable behandlingId: UUID,
                                                      fritekst: String): ByteArray {
         return innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
