@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -16,7 +17,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.io.File
 import java.time.LocalDate
 
 class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
@@ -27,14 +27,17 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var pdfBrevService: PdfBrevService
     private val fagsakRepository: FagsakRepository = mockk()
+    private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
 
     @BeforeEach
     fun setup() {
         innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(fagsakRepository,
+                                                                          behandlingRepository,
                                                                           mockEksterneDataForBrevService,
                                                                           pdfBrevService)
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
+        every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
@@ -44,7 +47,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningInnhentDokumentasjonBrev skal forhåndsvise innhent dokumentasjonbrev`() {
-        val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(Testdata.behandling,
+        val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(Testdata.behandling.id,
                                                                                                flereOpplysninger)
         Assertions.assertThat(data).isNotEmpty
     }
