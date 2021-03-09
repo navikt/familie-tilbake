@@ -14,3 +14,5 @@ class Feil(message: String,
 }
 
 class ManglerTilgang(val melding: String) : RuntimeException(melding)
+
+class UgyldigKravgrunnlagFeil(val melding: String) : RuntimeException(melding)
