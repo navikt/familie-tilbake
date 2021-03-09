@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -17,14 +18,17 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevServi
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakRepository,
+                                      private val behandlingRepository: BehandlingRepository,
                                       private val eksterneDataForBrevService: EksterneDataForBrevService,
                                       private val pdfBrevService: PdfBrevService) {
 
-    fun hentForhåndsvisningInnhentDokumentasjonBrev(behandling: Behandling,
+    fun hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId: UUID,
                                                     fritekst: String): ByteArray {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val brevmottager: Brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val dokumentasjonsbrevSamletInfo =

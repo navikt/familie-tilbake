@@ -4,13 +4,15 @@ _Du må sende oss
 _Saken blir behandlet etter frist har gått ut
 Hvis vi ikke får opplysningene innen {{dato fristdato}}, behandler vi saken med de opplysningene vi har.
 
-Dette går fram av folketrygdloven § 21-3.
+Dette går fram av {{#if rentepliktig}}folketrygdloven § 21-3{{else}}barnetrygdloven §§ 17 og 18{{/if}}.
 _Slik uttaler du deg
 Du kan sende uttalelsen din ved å logge deg inn på nav.no/beskjedtilnav og velge «Send beskjed til NAV». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på nav.no/ettersendelser.
 _Har du spørsmål?
-Du finner nyttig informasjon på nav.no{{#if (eq ytelsetype "FRISINN")}}. Du kan også kontakte oss på telefon 55553333.{{else}}/familie.{{/if}}
+Du finner nyttig informasjon på {{ytelseUrl}}
+Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
 
 Med vennlig hilsen
-NAV Familie- og pensjonsytelser{{#if finnesVerge}}
+NAV Familie- og pensjonsytelser {{behandlendeEnhetsNavn}}
+{{ansvarligSaksbehandler}}{{#if finnesVerge}}
 
 Brev med likt innhold er sendt til {{annenMottagersNavn}}{{/if}}
