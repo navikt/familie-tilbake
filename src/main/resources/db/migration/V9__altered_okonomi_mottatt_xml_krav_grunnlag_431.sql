@@ -26,13 +26,13 @@ ALTER TABLE okonomi_xml_mottatt
     ALTER COLUMN referanse SET NOT NULL;
 
 ALTER TABLE okonomi_xml_mottatt
-    ADD COLUMN kontrollfelt VARCHAR NOT NULL;
+    ADD COLUMN kontrollfelt VARCHAR;
 
 COMMENT ON COLUMN okonomi_xml_mottatt.kontrollfelt
     IS 'Brukes ved innsending av tilbakekrevingsvedtak for å kontrollere at kravgrunnlaget ikke er blitt endret i mellomtiden';
 
 ALTER TABLE okonomi_xml_mottatt
-    ADD COLUMN ekstern_kravgrunnlag_id BIGINT NOT NULL;
+    ADD COLUMN ekstern_kravgrunnlag_id BIGINT;
 
 COMMENT ON COLUMN okonomi_xml_mottatt.ekstern_kravgrunnlag_id
     IS 'Referanse til kravgrunnlag fra ostbk. Brukes ved omgjøring for å hente nytt grunnlag';

@@ -19,6 +19,7 @@ class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagServ
 
     override fun doTask(task: Task) {
         log.info("BehandleKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        secureLog.info("BehandleKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         kravgrunnlagService.håndterMottattKravgrunnlag(task.payload)
     }
 

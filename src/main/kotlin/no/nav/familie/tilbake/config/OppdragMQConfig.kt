@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory
 import org.springframework.jms.config.JmsListenerContainerFactory
 import org.springframework.jms.connection.JmsTransactionManager
@@ -24,7 +25,8 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
                       @Value("\${oppdrag.mq.channel}") val channel: String,
                       @Value("\${oppdrag.mq.port}") val port: Int,
                       @Value("\${oppdrag.mq.user}") val user: String,
-                      @Value("\${oppdrag.mq.password}") val password: String) {
+                      @Value("\${oppdrag.mq.password}") val password: String,
+                      val environment: Environment) {
 
     @Bean
     @Throws(JMSException::class)
@@ -58,6 +60,9 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         transactionManager.connectionFactory = connectionFactory
         factory.setTransactionManager(transactionManager)
         factory.setSessionTransacted(true)
+        if (environment.activeProfiles.any { it.contains("local") }) {
+            factory.setAutoStartup(false)
+        }
         return factory
     }
 }

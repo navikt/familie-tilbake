@@ -42,27 +42,27 @@ object KravgrunnlagMapper {
     }
 
     private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> {
-        return perioder.map { grunnlagsperiode ->
-            Kravgrunnlagsperiode432(periode = KravgrunnlagUtil.tilPeriode(grunnlagsperiode.periode.fom,
-                                                                          grunnlagsperiode.periode.tom),
-                                    månedligSkattebeløp = grunnlagsperiode.belopSkattMnd,
-                                    beløp = tilKravgrunnlagsbeløp(grunnlagsperiode.tilbakekrevingsBelop))
+        return perioder.map {
+            Kravgrunnlagsperiode432(periode = KravgrunnlagUtil.tilPeriode(it.periode.fom,
+                                                                          it.periode.tom),
+                                    månedligSkattebeløp = it.belopSkattMnd,
+                                    beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop))
         }.toSet()
     }
 
     private fun tilKravgrunnlagsbeløp(beløpPosteringer: List<DetaljertKravgrunnlagBelopDto>): Set<Kravgrunnlagsbeløp433> {
-        return beløpPosteringer.map { beløp ->
+        return beløpPosteringer.map {
             Kravgrunnlagsbeløp433(
-                    klassekode = Klassekode.fraKode(beløp.kodeKlasse),
-                    klassetype = Klassetype.fraKode(beløp.typeKlasse.value()),
-                    opprinneligUtbetalingsbeløp = beløp.belopOpprUtbet,
-                    nyttBeløp = beløp.belopNy,
-                    tilbakekrevesBeløp = beløp.belopTilbakekreves,
-                    uinnkrevdBeløp = beløp.belopUinnkrevd,
-                    skatteprosent = beløp.skattProsent,
-                    resultatkode = beløp.kodeResultat,
-                    årsakskode = beløp.kodeAArsak,
-                    skyldkode = beløp.kodeSkyld,
+                    klassekode = Klassekode.fraKode(it.kodeKlasse),
+                    klassetype = Klassetype.fraKode(it.typeKlasse.value()),
+                    opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
+                    nyttBeløp = it.belopNy,
+                    tilbakekrevesBeløp = it.belopTilbakekreves,
+                    uinnkrevdBeløp = it.belopUinnkrevd,
+                    skatteprosent = it.skattProsent,
+                    resultatkode = it.kodeResultat,
+                    årsakskode = it.kodeAArsak,
+                    skyldkode = it.kodeSkyld,
             )
         }.toSet()
 

@@ -17,9 +17,9 @@ data class ØkonomiXmlMottatt(@Id
                              val eksternFagsakId: String,
                              val ytelsestype: Ytelsestype,
                              val referanse: String,
-                             val eksternKravgrunnlagId: BigInteger,
+                             val eksternKravgrunnlagId: BigInteger?,
                              val vedtakId: BigInteger,
-                             val kontrollfelt: String,
+                             val kontrollfelt: String?,
                              @Version
                              val versjon: Long = 0,
                              @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
