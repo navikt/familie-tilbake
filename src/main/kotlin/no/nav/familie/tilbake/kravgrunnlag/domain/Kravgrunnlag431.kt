@@ -95,12 +95,8 @@ enum class Klassekode {
     companion object {
 
         fun fraKode(kode: String): Klassekode {
-            for (klassekode in values()) {
-                if (klassekode.name == kode) {
-                    return klassekode
-                }
-            }
-            throw IllegalArgumentException("Ukjent KlasseKode $kode")
+            return values().firstOrNull { it.name == kode }
+                   ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
         }
     }
 }
@@ -115,12 +111,8 @@ enum class Klassetype(val navn: String) {
     companion object {
 
         fun fraKode(kode: String): Klassetype {
-            for (klassetype in values()) {
-                if (klassetype.name == kode) {
-                    return klassetype
-                }
-            }
-            throw IllegalArgumentException("Ukjent KlasseType $kode")
+            return values().firstOrNull { it.name == kode }
+                   ?: throw IllegalArgumentException("Ukjent KlasseType $kode")
         }
     }
 }

@@ -34,8 +34,8 @@ object KravgrunnlagValidator {
     }
 
     private fun validerPeriodeInnenforMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
-            val periode = kravgrunnlagsperiode.periode
+        kravgrunnlag.tilbakekrevingsPeriode.forEach {
+            val periode = it.periode
             val fomMåned = YearMonth.of(periode.fom.year, periode.fom.month)
             val tomMåned = YearMonth.of(periode.tom.year, periode.tom.month)
             if (fomMåned != tomMåned) {
@@ -47,22 +47,22 @@ object KravgrunnlagValidator {
     }
 
     private fun validerPerioderHarFeilutbetalingspostering(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
-            if (kravgrunnlagsperiode.tilbakekrevingsBelop.none { beløp -> finnesFeilutbetalingspostering(beløp.typeKlasse) }) {
+        kravgrunnlag.tilbakekrevingsPeriode.forEach {
+            if (it.tilbakekrevingsBelop.none { beløp -> finnesFeilutbetalingspostering(beløp.typeKlasse) }) {
                 throw UgyldigKravgrunnlagFeil(
                         melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                  "Perioden ${kravgrunnlagsperiode.periode.fom}-${kravgrunnlagsperiode.periode.tom} " +
+                                  "Perioden ${it.periode.fom}-${it.periode.tom} " +
                                   "mangler postering med klasseType=FEIL.")
             }
         }
     }
 
     private fun validerPerioderHarYtelsespostering(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
-            if (kravgrunnlagsperiode.tilbakekrevingsBelop.none { beløp -> finnesYtelsespostering(beløp.typeKlasse) }) {
+        kravgrunnlag.tilbakekrevingsPeriode.forEach {
+            if (it.tilbakekrevingsBelop.none { beløp -> finnesYtelsespostering(beløp.typeKlasse) }) {
                 throw UgyldigKravgrunnlagFeil(
                         melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                  "Perioden ${kravgrunnlagsperiode.periode.fom}-${kravgrunnlagsperiode.periode.tom} " +
+                                  "Perioden ${it.periode.fom}-${it.periode.tom} " +
                                   "mangler postering med klasseType=YTEL.")
             }
         }
@@ -70,8 +70,8 @@ object KravgrunnlagValidator {
 
     private fun validerOverlappendePerioder(kravgrunnlag: DetaljertKravgrunnlagDto) {
         val sortertePerioder: List<Periode> = kravgrunnlag.tilbakekrevingsPeriode
-                .map { p -> KravgrunnlagUtil.tilPeriode(p.periode.fom, p.periode.tom) }
-                .sortedBy { it.fom }.toList()
+                .map { p -> Periode(p.periode.fom, p.periode.tom) }
+                .sorted().toList()
         for (i in 1 until sortertePerioder.size) {
             val forrigePeriode = sortertePerioder[i - 1]
             val nåværendePeriode = sortertePerioder[i]
@@ -143,12 +143,10 @@ object KravgrunnlagValidator {
         for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
             val sumTilbakekrevesFraYtelsePosteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
                                                                .filter { finnesYtelsespostering(it.typeKlasse) }
-                                                               .map(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
-                                                               .reduceOrNull(BigDecimal::add) ?: BigDecimal.ZERO
+                                                               .sumOf(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
             val sumNyttBelopFraFeilposteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
                                                          .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
-                                                         .map(DetaljertKravgrunnlagBelopDto::getBelopNy)
-                                                         .reduceOrNull(BigDecimal::add) ?: BigDecimal.ZERO
+                                                         .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
             if (sumNyttBelopFraFeilposteringer.compareTo(sumTilbakekrevesFraYtelsePosteringer) != 0) {
                 throw UgyldigKravgrunnlagFeil(
                         melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +

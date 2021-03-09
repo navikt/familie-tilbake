@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
@@ -23,7 +24,7 @@ object KravgrunnlagMapper {
                 kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
                 fagområdekode = Fagområdekode.fraKode(kravgrunnlag.kodeFagomraade),
                 fagsystemId = kravgrunnlag.fagsystemId,
-                fagsystemVedtaksdato = KravgrunnlagUtil.tilLocalDate(kravgrunnlag.datoVedtakFagsystem),
+                fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
                 gjelderVedtakId = kravgrunnlag.vedtakGjelderId,
                 gjelderType = GjelderType.fraKode(kravgrunnlag.typeGjelderId.value()),
                 utbetalesTilId = kravgrunnlag.utbetalesTilId,
@@ -43,8 +44,7 @@ object KravgrunnlagMapper {
 
     private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> {
         return perioder.map {
-            Kravgrunnlagsperiode432(periode = KravgrunnlagUtil.tilPeriode(it.periode.fom,
-                                                                          it.periode.tom),
+            Kravgrunnlagsperiode432(periode = Periode(it.periode.fom, it.periode.tom),
                                     månedligSkattebeløp = it.belopSkattMnd,
                                     beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop))
         }.toSet()

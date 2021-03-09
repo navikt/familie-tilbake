@@ -60,13 +60,6 @@ object KravgrunnlagUtil {
         )
     }
 
-    fun tilLocalDate(dato: XMLGregorianCalendar?): LocalDate? {
-        if (dato == null) {
-            return null
-        }
-        return LocalDate.of(dato.year, dato.month, dato.day)
-    }
-
     fun tilYtelsestype(fagområdekode: String): Ytelsestype {
         return when (fagområdekode) {
             "BA" -> Ytelsestype.BARNETRYGD
