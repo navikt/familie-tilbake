@@ -237,7 +237,7 @@
         <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-jdbc</artifactId>
-            <version>1.20210218080201_c4e5465</version>
+            <version>1.20210302133042_76527ed</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
