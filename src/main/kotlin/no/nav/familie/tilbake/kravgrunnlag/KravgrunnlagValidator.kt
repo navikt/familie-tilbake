@@ -71,7 +71,7 @@ object KravgrunnlagValidator {
     private fun validerOverlappendePerioder(kravgrunnlag: DetaljertKravgrunnlagDto) {
         val sortertePerioder: List<Periode> = kravgrunnlag.tilbakekrevingsPeriode
                 .map { p -> Periode(p.periode.fom, p.periode.tom) }
-                .sorted().toList()
+                .sorted()
         for (i in 1 until sortertePerioder.size) {
             val forrigePeriode = sortertePerioder[i - 1]
             val nåværendePeriode = sortertePerioder[i]
