@@ -10,6 +10,9 @@ import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.helper.ConditionalHelpers
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.BaseDokument
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Brevoverskriftsdata
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
@@ -53,6 +56,25 @@ object FellesTekstformaterer {
         handlebars.registerHelper("dato", DatoHelper())
         handlebars.registerHelper("kortdato", KortdatoHelper())
         return handlebars.compile(lagSpråkstøttetFilsti(filsti, språkkode))
+    }
+
+    fun lagFritekst(dokument: BaseDokument, filsti: String): String {
+        return try {
+            val template = opprettHandlebarsTemplate(filsti, dokument.språkkode)
+            applyTemplate(template, dokument)
+        } catch (e: IOException) {
+            throw IllegalStateException("Feil ved tekstgenerering", e)
+        }
+    }
+
+    fun lagOverskrift(brevmetadata: Brevmetadata, filsti: String): String {
+        return try {
+            val brevoverskriftsdata = Brevoverskriftsdata(brevmetadata)
+            val template = opprettHandlebarsTemplate(filsti, brevmetadata.språkkode)
+            template.apply(brevoverskriftsdata)
+        } catch (e: IOException) {
+            throw IllegalStateException("Feil ved tekstgenerering", e)
+        }
     }
 
     private fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {

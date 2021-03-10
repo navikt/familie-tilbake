@@ -22,29 +22,29 @@ class TekstformatererVarselbrevTest {
                                         behandlendeEnhetsNavn = "Skien",
                                         ansvarligSaksbehandler = "Bob")
 
-    private val varselbrevSamletInfo =
-            VarselbrevSamletInfo(fritekstFraSaksbehandler = "Dette er fritekst skrevet av saksbehandler.",
-                                 sumFeilutbetaling = 595959L,
-                                 feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
-                                 fristdato = LocalDate.of(2020, 4, 4),
-                                 revurderingsvedtaksdato = LocalDate.of(2019, 12, 18),
-                                 brevmetadata = metadata)
+    private val varselbrevsdokument =
+            Varselbrevsdokument(varseltekstFraSaksbehandler = "Dette er fritekst skrevet av saksbehandler.",
+                                beløp = 595959L,
+                                feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
+                                fristdatoForTilbakemelding = LocalDate.of(2020, 4, 4),
+                                endringsdato = LocalDate.of(2019, 12, 18),
+                                brevmetadata = metadata)
 
 
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for flere perioder overgangsstønad`() {
         val metadata = metadata.copy(språkkode = Språkkode.NN)
-        val varselbrevSamletInfo = varselbrevSamletInfo.copy(brevmetadata = metadata,
-                                                             feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
-        val generertBrev = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+        val varselbrevsdokument = varselbrevsdokument.copy(brevmetadata = metadata,
+                                                           feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/OS_flere_perioder.txt")
         assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
     }
 
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode overgangsstønad`() {
-        val varselbrevSamletInfo = varselbrevSamletInfo.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
-        val generertBrev = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+        val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/OS_en_periode.txt")
         assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
     }
@@ -52,34 +52,11 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode barnetrygd`() {
         val metadata = metadata.copy(ytelsestype = Ytelsestype.BARNETRYGD)
-        val varselbrevSamletInfo = varselbrevSamletInfo.copy(brevmetadata = metadata,
-                                                             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
-        val generertBrev = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+        val varselbrevsdokument = varselbrevsdokument.copy(brevmetadata = metadata,
+                                                           feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/BA_en_periode.txt")
         assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
-    }
-
-    @Test
-    fun `mapTilVarselbrevsdokument skal mappe verdier fra dtoer til komplett tilbakekrevingsvarsel`() {
-        val varselbrevSamletInfo =
-                varselbrevSamletInfo.copy(fristdato = LocalDate.of(2018, 5, 27),
-                                          revurderingsvedtaksdato = LocalDate.of(2018, 5, 6))
-        val varselbrev: Varselbrevsdokument = TekstformatererVarselbrev.mapTilVarselbrevsdokument(varselbrevSamletInfo)
-        assertThat(varselbrev.endringsdato).isEqualTo(LocalDate.of(2018, 5, 6))
-        assertThat(varselbrev.fristdatoForTilbakemelding).isEqualTo(LocalDate.of(2018, 5, 27))
-        assertThat(varselbrev.varseltekstFraSaksbehandler).isEqualTo("Dette er fritekst skrevet av saksbehandler.")
-        assertThat(varselbrev.datoerHvisSammenhengendePeriode?.fom).isEqualTo(LocalDate.of(2019, 3, 3))
-        assertThat(varselbrev.datoerHvisSammenhengendePeriode?.tom).isEqualTo(LocalDate.of(2020, 3, 3))
-        assertThat(varselbrev.ytelsesnavnUbestemt).isEqualTo("overgangsstønad")
-        assertThat(varselbrev.beløp).isEqualTo(595959L)
-        assertThat(varselbrev.feilutbetaltePerioder).isNotNull()
-    }
-
-    @Test
-    fun `mapTilVarselbrevsdokument skal ikke sette tidligste og seneste dato når det foreligger flere perioder`() {
-        val varselbrevSamletInfo = varselbrevSamletInfo.copy(feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
-        val varselbrev: Varselbrevsdokument = TekstformatererVarselbrev.mapTilVarselbrevsdokument(varselbrevSamletInfo)
-        assertThat(varselbrev.datoerHvisSammenhengendePeriode).isNull()
     }
 
     @Test
@@ -117,8 +94,8 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(vergenavn = "John Doe",
                                      finnesVerge = true,
                                      språkkode = Språkkode.NB)
-        val varselbrevSamletInfo = varselbrevSamletInfo.copy(brevmetadata = metadata)
-        val generertBrev = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+        val varselbrevSamletInfo = varselbrevsdokument.copy(brevmetadata = metadata)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevSamletInfo)
         val fasit = les("/varselbrev/OS_en_periode.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
         assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")

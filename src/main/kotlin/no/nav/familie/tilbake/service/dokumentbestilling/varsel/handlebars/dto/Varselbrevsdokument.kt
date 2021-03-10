@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.BaseDokument
 import java.time.LocalDate
 
@@ -12,16 +13,20 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
                                val feilutbetaltePerioder: List<Periode>,
                                val varseltekstFraSaksbehandler: String? = null,
                                val fristdatoForTilbakemelding: LocalDate,
-                               val datoerHvisSammenhengendePeriode: Periode? = null,
                                val varsletDato: LocalDate? = null,
                                val varsletBeløp: Long? = null,
-                               val finnesVerge: Boolean = false,
-                               val annenMottagersNavn: String? = null,
                                val erKorrigert: Boolean = false) : BaseDokument(brevmetadata.ytelsestype,
                                                                                 brevmetadata.språkkode,
                                                                                 brevmetadata.behandlendeEnhetsNavn,
                                                                                 brevmetadata.ansvarligSaksbehandler) {
 
+    val finnesVerge: Boolean = brevmetadata.finnesVerge
+
+    val datoerHvisSammenhengendePeriode: Periode? = if (feilutbetaltePerioder.size == 1) {
+        Periode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
+    } else null
+
+    val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
     val isYtelseMedSkatt

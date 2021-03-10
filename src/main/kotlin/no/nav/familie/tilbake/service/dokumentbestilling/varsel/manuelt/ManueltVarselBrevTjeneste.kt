@@ -17,8 +17,8 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.TekstformatererVarselbrev
-import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevSamletInfo
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevUtil
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -32,9 +32,14 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
     fun sendManueltVarselBrev(behandlingId: UUID, fritekst: String, brevmottager: Brevmottager) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val varselbrevSamletInfo = lagVarselBeløpForSending(fritekst, behandling, fagsak, brevmottager, false)
-        val data = lagManueltVarselBrev(varselbrevSamletInfo)
-        val varsletFeilutbetaling = varselbrevSamletInfo.sumFeilutbetaling
+        val varselbrevsdokument = lagVarselbrevForSending(fritekst,
+                                                          behandling,
+                                                          fagsak,
+                                                          brevmottager,
+                                                          false,
+                                                          behandling.aktivtVarsel)
+        val data = lagManueltVarselBrev(varselbrevsdokument)
+        val varsletFeilutbetaling = varselbrevsdokument.beløp
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
                                 Brevtype.VARSEL,
@@ -49,22 +54,26 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
     fun hentForhåndsvisningManueltVarselbrev(behandlingId: UUID, malType: Dokumentmalstype, fritekst: String): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevMottaker = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val data = when (malType) {
             Dokumentmalstype.VARSEL -> {
-                val varselbrevSamletInfo = lagVarselBeløpForSending(fritekst, behandling, fagsak, brevMottaker, false)
-                lagManueltVarselBrev(varselbrevSamletInfo)
+                val varselbrevsdokument = lagVarselbrevForSending(fritekst,
+                                                                  behandling,
+                                                                  fagsak,
+                                                                  brevmottager,
+                                                                  false)
+                lagManueltVarselBrev(varselbrevsdokument)
             }
             Dokumentmalstype.KORRIGERT_VARSEL -> {
-                val varselbrevSamletInfo = lagVarselBeløpForSending(fritekst, behandling, fagsak, brevMottaker, true)
-                val varsel: Varsel = behandling.aktivtVarsel!!
-                lagKorrigertVarselBrev(varselbrevSamletInfo, varsel)
+                val varselbrevsdokument =
+                        lagVarselbrevForSending(fritekst, behandling, fagsak, brevmottager, true, behandling.aktivtVarsel)
+                lagKorrigertVarselbrev(varselbrevsdokument)
             }
             else -> {
                 throw IllegalArgumentException("Ikke-støttet DokumentMalType: $malType")
             }
         }
-        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevMottaker,
+        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
                                                               overskrift = data.overskrift,
                                                               brevtekst = data.brevtekst,
                                                               metadata = data.brevmetadata))
@@ -73,10 +82,14 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
     fun sendKorrigertVarselBrev(behandlingId: UUID, fritekst: String, brevmottager: Brevmottager) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val varselbrevSamletInfo = lagVarselBeløpForSending(fritekst, behandling, fagsak, brevmottager, true)
-        val varsel: Varsel? = behandling.aktivtVarsel
-        val data = lagKorrigertVarselBrev(varselbrevSamletInfo, varsel!!)
-        val varsletFeilutbetaling = varselbrevSamletInfo.sumFeilutbetaling
+        val varselbrevsdokument = lagVarselbrevForSending(fritekst,
+                                                          behandling,
+                                                          fagsak,
+                                                          brevmottager,
+                                                          true,
+                                                          behandling.aktivtVarsel)
+        val data = lagKorrigertVarselbrev(varselbrevsdokument)
+        val varsletFeilutbetaling = varselbrevsdokument.beløp
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
                                 Brevtype.KORRIGERT_VARSEL,
@@ -88,48 +101,49 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                 fritekst)
     }
 
-    private fun lagManueltVarselBrev(varselbrevSamletInfo: VarselbrevSamletInfo?): Fritekstbrevsdata {
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevSamletInfo!!.brevmetadata)
-        val brevtekst = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo)
+    private fun lagManueltVarselBrev(varselbrevsdokument: Varselbrevsdokument): Fritekstbrevsdata {
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)
+        val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         return Fritekstbrevsdata(overskrift = overskrift,
                                  brevtekst = brevtekst,
-                                 brevmetadata = varselbrevSamletInfo.brevmetadata)
+                                 brevmetadata = varselbrevsdokument.brevmetadata)
     }
 
-    private fun lagKorrigertVarselBrev(varselbrevSamletInfo: VarselbrevSamletInfo?, varselInfo: Varsel): Fritekstbrevsdata {
-        val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(varselbrevSamletInfo!!.brevmetadata)
-        val brevtekst = TekstformatererVarselbrev.lagVarselbrevsfritekst(varselbrevSamletInfo, varselInfo)
+    private fun lagKorrigertVarselbrev(varselbrevsdokument: Varselbrevsdokument): Fritekstbrevsdata {
+        val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)
+        val brevtekst = TekstformatererVarselbrev.lagKorrigertFritekst(varselbrevsdokument)
         return Fritekstbrevsdata(overskrift = overskrift,
                                  brevtekst = brevtekst,
-                                 brevmetadata = varselbrevSamletInfo.brevmetadata)
+                                 brevmetadata = varselbrevsdokument.brevmetadata)
     }
 
-    private fun lagVarselBeløpForSending(fritekst: String,
-                                         behandling: Behandling,
-                                         fagsak: Fagsak,
-                                         brevmottager: Brevmottager,
-                                         erKorrigert: Boolean): VarselbrevSamletInfo {
+    private fun lagVarselbrevForSending(fritekst: String,
+                                        behandling: Behandling,
+                                        fagsak: Fagsak,
+                                        brevmottager: Brevmottager,
+                                        erKorrigert: Boolean,
+                                        aktivtVarsel: Varsel? = null): Varselbrevsdokument {
         //Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
-        val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+        val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
 
 
         //Henter feilutbetaling fakta
+        val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
 
-        //Henter feilutbetaling fakta
-        val feilutbetalingFakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
+        val metadata = VarselbrevUtil.sammenstillInfoForBrevmetadata(behandling,
+                                                                     personinfo,
+                                                                     adresseinfo,
+                                                                     fagsak,
+                                                                     vergenavn,
+                                                                     erKorrigert)
 
-        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(behandling,
-                                                                                       personinfo,
-                                                                                       adresseinfo,
-                                                                                       fagsak,
+        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata,
                                                                                        fritekst,
-                                                                                       feilutbetalingFakta,
-                                                                                       behandling.harVerge,
-                                                                                       vergeNavn,
-                                                                                       erKorrigert)
+                                                                                       feilutbetalingsfakta,
+                                                                                       aktivtVarsel)
     }
 
 }

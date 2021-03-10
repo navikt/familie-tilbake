@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
@@ -19,21 +20,19 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
                                         ytelsestype = Ytelsestype.BARNETILSYN,
                                         behandlendeEnhetsNavn = "Skien",
                                         ansvarligSaksbehandler = "Bob")
-    private val innhentDokumentasjonsbrevSamletInfo =
-            InnhentDokumentasjonsbrevSamletInfo(brevmetadata = metadata,
-                                                fritekstFraSaksbehandler = "Dette er ein fritekst.",
-                                                fristdato = LocalDate.of(2020, 3, 2))
+    private val innhentDokumentasjonsbrevsdokument =
+            InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,
+                                               fritekstFraSaksbehandler = "Dette er ein fritekst.",
+                                               fristdato = LocalDate.of(2020, 3, 2))
 
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev`() {
-        val dokumentasjonBrevSamletInfo =
-                InnhentDokumentasjonsbrevSamletInfo(brevmetadata = metadata,
-                                                    fritekstFraSaksbehandler = "Dette er ein fritekst.",
-                                                    fristdato = LocalDate.of(2020, 3, 2))
+        val dokument = InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,
+                                                          fritekstFraSaksbehandler = "Dette er ein fritekst.",
+                                                          fristdato = LocalDate.of(2020, 3, 2))
 
-        val generertBrev =
-                TekstformatererInnhentDokumentasjonsbrev.lagInnhentDokumentasjonsbrevsfritekst(dokumentasjonBrevSamletInfo)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
         Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
@@ -42,10 +41,9 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev for verge`() {
         val brevMetadata = metadata.copy(vergenavn = "John Doe", finnesVerge = true)
-        val innhentDokumentasjonBrevSamletInfo = innhentDokumentasjonsbrevSamletInfo.copy(brevmetadata = brevMetadata)
+        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
-        val generertBrev =
-                TekstformatererInnhentDokumentasjonsbrev.lagInnhentDokumentasjonsbrevsfritekst(innhentDokumentasjonBrevSamletInfo)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
@@ -59,10 +57,9 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
                                          sakspartsnavn = "Test",
                                          vergenavn = "John Doe",
                                          finnesVerge = true)
-        val innhentDokumentasjonBrevSamletInfo = innhentDokumentasjonsbrevSamletInfo.copy(brevmetadata = brevMetadata)
+        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
-        val generertBrev =
-                TekstformatererInnhentDokumentasjonsbrev.lagInnhentDokumentasjonsbrevsfritekst(innhentDokumentasjonBrevSamletInfo)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
         val vergeTekst = "Brev med likt innhold er sendt til Test"
@@ -72,10 +69,9 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
-        val innhentDokumentasjonBrevSamletInfo = innhentDokumentasjonsbrevSamletInfo.copy(brevmetadata = brevMetadata)
+        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
-        val generertBrev =
-                TekstformatererInnhentDokumentasjonsbrev.lagInnhentDokumentasjonsbrevsfritekst(innhentDokumentasjonBrevSamletInfo)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn.txt")
         Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
@@ -83,8 +79,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevOverskrift skal generere innhentdokumentasjonbrev overskrift`() {
-        val overskrift = TekstformatererInnhentDokumentasjonsbrev
-                .lagInnhentDokumentasjonsbrevsoverskrift(innhentDokumentasjonsbrevSamletInfo)
+        val overskrift = TekstformatererInnhentDokumentasjonsbrev.lagOverskrift(innhentDokumentasjonsbrevsdokument.brevmetadata)
 
         val fasit = "Vi trenger flere opplysninger"
         Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
@@ -93,10 +88,9 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     @Test
     fun `lagInnhentDokumentasjonBrevOverskrift skal generere innhentdokumentasjonbrev overskrift nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
-        val innhentDokumentasjonBrevSamletInfo = innhentDokumentasjonsbrevSamletInfo.copy(brevmetadata = brevMetadata)
 
         val overskrift = TekstformatererInnhentDokumentasjonsbrev
-                .lagInnhentDokumentasjonsbrevsoverskrift(innhentDokumentasjonBrevSamletInfo)
+                .lagOverskrift(brevMetadata)
 
         val fasit = "Vi trenger fleire opplysningar"
         Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
