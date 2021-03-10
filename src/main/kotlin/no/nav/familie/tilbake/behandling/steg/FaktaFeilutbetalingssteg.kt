@@ -18,7 +18,7 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
 
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg")
-        faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandlingId) ?: run {
+        if(faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandlingId) != null) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FAKTA,
                                                                                           Behandlingsstegstatus.UTFØRT))
