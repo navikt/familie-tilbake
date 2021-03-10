@@ -67,7 +67,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
             Dokumentmalstype.KORRIGERT_VARSEL -> {
                 val varselbrevsdokument =
                         lagVarselbrevForSending(fritekst, behandling, fagsak, brevmottager, true, behandling.aktivtVarsel)
-                lagKorrigertVarselBrev(varselbrevsdokument)
+                lagKorrigertVarselbrev(varselbrevsdokument)
             }
             else -> {
                 throw IllegalArgumentException("Ikke-støttet DokumentMalType: $malType")
@@ -88,7 +88,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                                           brevmottager,
                                                           true,
                                                           behandling.aktivtVarsel)
-        val data = lagKorrigertVarselBrev(varselbrevsdokument)
+        val data = lagKorrigertVarselbrev(varselbrevsdokument)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
@@ -109,7 +109,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                  brevmetadata = varselbrevsdokument.brevmetadata)
     }
 
-    private fun lagKorrigertVarselBrev(varselbrevsdokument: Varselbrevsdokument): Fritekstbrevsdata {
+    private fun lagKorrigertVarselbrev(varselbrevsdokument: Varselbrevsdokument): Fritekstbrevsdata {
         val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)
         val brevtekst = TekstformatererVarselbrev.lagKorrigertFritekst(varselbrevsdokument)
         return Fritekstbrevsdata(overskrift = overskrift,
@@ -127,21 +127,22 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
-        val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+        val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
 
 
         //Henter feilutbetaling fakta
-        val feilutbetalingFakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
+        val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
 
-        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(behandling,
-                                                                                       personinfo,
-                                                                                       adresseinfo,
-                                                                                       fagsak,
+        val metadata = VarselbrevUtil.sammenstillInfoForBrevmetadata(behandling,
+                                                                     personinfo,
+                                                                     adresseinfo,
+                                                                     fagsak,
+                                                                     vergenavn,
+                                                                     erKorrigert)
+
+        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata,
                                                                                        fritekst,
-                                                                                       feilutbetalingFakta,
-                                                                                       behandling.harVerge,
-                                                                                       vergeNavn,
-                                                                                       erKorrigert,
+                                                                                       feilutbetalingsfakta,
                                                                                        aktivtVarsel)
     }
 

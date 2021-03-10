@@ -26,20 +26,13 @@ object VarselbrevUtil {
                                                 adresseinfo: Adresseinfo,
                                                 personinfo: Personinfo,
                                                 varsel: Varsel?,
-                                                finnesVerge: Boolean,
-                                                vergeNavn: String?): Varselbrevsdokument {
-        val metadata = Brevmetadata(sakspartId = personinfo.ident,
-                                    sakspartsnavn = personinfo.navn,
-                                    finnesVerge = finnesVerge,
-                                    vergenavn = vergeNavn,
-                                    mottageradresse = adresseinfo,
-                                    behandlendeEnhetId = behandling.behandlendeEnhet,
-                                    behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                                    ansvarligSaksbehandler = "VL",
-                                    saksnummer = fagsak.eksternFagsakId,
-                                    språkkode = fagsak.bruker.språkkode,
-                                    ytelsestype = fagsak.ytelsestype,
-                                    tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, false))
+                                                vergenavn: String?): Varselbrevsdokument {
+        val metadata = sammenstillInfoForBrevmetadata(behandling,
+                                                      personinfo,
+                                                      adresseinfo,
+                                                      fagsak,
+                                                      vergenavn,
+                                                      false)
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = varsel?.varselbeløp ?: 0L,
                                    endringsdato = LocalDate.now(),
@@ -78,42 +71,48 @@ object VarselbrevUtil {
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto))
     }
 
-    fun sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(behandling: Behandling,
-                                                                 personinfo: Personinfo,
-                                                                 adresseinfo: Adresseinfo,
-                                                                 fagsak: Fagsak,
-                                                                 friTekst: String?,
-                                                                 feilutbetalingFakta: FaktaFeilutbetalingDto,
-                                                                 finnesVerge: Boolean,
-                                                                 vergeNavn: String?,
-                                                                 erKorrigert: Boolean,
+    fun sammenstillInfoForBrevmetadata(behandling: Behandling,
+                                       personinfo: Personinfo,
+                                       adresseinfo: Adresseinfo,
+                                       fagsak: Fagsak,
+                                       vergenavn: String?,
+                                       erKorrigert: Boolean): Brevmetadata {
+
+        return Brevmetadata(sakspartId = personinfo.ident,
+                            sakspartsnavn = personinfo.navn,
+                            finnesVerge = behandling.harVerge,
+                            vergenavn = vergenavn,
+                            mottageradresse = adresseinfo,
+                            behandlendeEnhetId = behandling.behandlendeEnhet,
+                            behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
+                            ansvarligSaksbehandler = "VL",
+                            saksnummer = fagsak.eksternFagsakId,
+                            språkkode = fagsak.bruker.språkkode,
+                            ytelsestype = fagsak.ytelsestype,
+                            tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert))
+
+    }
+
+
+    fun sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata: Brevmetadata,
+                                                                 fritekst: String?,
+                                                                 feilutbetalingsfakta: FaktaFeilutbetalingDto,
                                                                  varsel: Varsel?): Varselbrevsdokument {
-        val metadata = Brevmetadata(sakspartId = personinfo.ident,
-                                    sakspartsnavn = personinfo.navn,
-                                    finnesVerge = finnesVerge,
-                                    vergenavn = vergeNavn,
-                                    mottageradresse = adresseinfo,
-                                    behandlendeEnhetId = behandling.behandlendeEnhet,
-                                    behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                                    ansvarligSaksbehandler = "VL",
-                                    saksnummer = fagsak.eksternFagsakId,
-                                    språkkode = fagsak.bruker.språkkode,
-                                    ytelsestype = fagsak.ytelsestype,
-                                    tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert))
+
         return Varselbrevsdokument(brevmetadata = metadata,
-                                   beløp = feilutbetalingFakta.totaltFeilutbetaltBeløp.toLong(),
-                                   endringsdato = feilutbetalingFakta.revurderingsvedtaksdato,
+                                   beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
+                                   endringsdato = feilutbetalingsfakta.revurderingsvedtaksdato,
                                    fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
-                                   varseltekstFraSaksbehandler = friTekst,
-                                   feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingFakta),
+                                   varseltekstFraSaksbehandler = fritekst,
+                                   feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingsfakta),
                                    erKorrigert = varsel != null,
                                    varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
                                    varsletBeløp = varsel?.varselbeløp)
     }
 
-    private fun getTittelForVarselbrev(ytelseNavn: String, erKorrigert: Boolean): String {
-        return if (erKorrigert) TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelseNavn
-        else TITTEL_VARSEL_TILBAKEBETALING + ytelseNavn
+    private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {
+        return if (erKorrigert) TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
+        else TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
     }
 
     private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Periode> {
@@ -124,7 +123,7 @@ object VarselbrevUtil {
         return varsel?.perioder?.map { Periode(it.fom, it.tom) } ?: emptyList()
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingFakta: FaktaFeilutbetalingDto): List<Periode> {
-        return feilutbetalingFakta.feilutbetaltePerioder.map { Periode(it.periode.fom, it.periode.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Periode> {
+        return feilutbetalingsfakta.feilutbetaltePerioder.map { Periode(it.periode.fom, it.periode.tom) }
     }
 }

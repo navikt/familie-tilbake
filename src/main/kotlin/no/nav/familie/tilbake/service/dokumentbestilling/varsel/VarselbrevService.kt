@@ -5,11 +5,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.domain.tbd.Brevtype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
@@ -57,15 +54,14 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
         //Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
-        val vergeNavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
+        val vergenavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
 
         return VarselbrevUtil.sammenstillInfoFraFagsystemerForSending(fagsak,
                                                                       behandling,
                                                                       adresseinfo,
                                                                       personinfo,
                                                                       behandling.aktivtVarsel,
-                                                                      behandling.harVerge,
-                                                                      vergeNavn)
+                                                                      vergenavn)
     }
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
@@ -75,8 +71,8 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
         val data = Fritekstbrevsdata(overskrift = overskrift,
                                      brevtekst = brevtekst,
                                      brevmetadata = varselbrevsdokument.brevmetadata)
-        val brevMottaker = if (varselbrevsdokument.brevmetadata.finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
-        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevMottaker,
+        val brevmottager = if (varselbrevsdokument.brevmetadata.finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
                                                               metadata = data.brevmetadata,
                                                               overskrift = data.overskrift,
                                                               brevtekst = data.brevtekst))
