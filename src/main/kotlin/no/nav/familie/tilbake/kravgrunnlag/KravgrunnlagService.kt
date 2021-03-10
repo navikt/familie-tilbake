@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -16,7 +17,8 @@ import java.util.UUID
 class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRepository,
                           private val behandlingRepository: BehandlingRepository,
                           private val mottattXmlRepository: ØkonomiXmlMottattRepository,
-                          private val mottattXmlArkivRepository: ØkonomiXmlMottattArkivRepository) {
+                          private val mottattXmlArkivRepository: ØkonomiXmlMottattArkivRepository,
+                          private val stegService: StegService) {
 
     @Transactional
     fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
@@ -37,6 +39,8 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         lagreKravgrunnlag(kravgrunnlag431)
         arkiverKravgrunnlagXml(kravgrunnlagXml)
+
+        stegService.håndterSteg(behandling.id)
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
@@ -75,6 +79,12 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
     }
 
     private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431) {
+        val finnesKravgrunnlag =
+                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(kravgrunnlag431.behandlingId)
+        if (finnesKravgrunnlag) {
+            val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(kravgrunnlag431.behandlingId)
+            kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = false))
+        }
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }
 
