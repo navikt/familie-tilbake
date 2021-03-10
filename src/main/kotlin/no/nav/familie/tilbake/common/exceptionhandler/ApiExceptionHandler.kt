@@ -76,4 +76,12 @@ class ApiExceptionHandler {
                 .body(Ressurs.failure(errorMessage = feilMelding.toString(), frontendFeilmelding = feilMelding.toString()))
     }
 
+    @ExceptionHandler(UgyldigKravgrunnlagFeil::class)
+    fun handleThrowable(feil: UgyldigKravgrunnlagFeil): ResponseEntity<Ressurs<Nothing>> {
+        secureLogger.error("En håndtert feil har oppstått - ${feil.melding}", feil)
+        logger.info("En håndtert feil har oppstått - ${feil.melding}")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Ressurs.failure(frontendFeilmelding = feil.message))
+    }
+
 }

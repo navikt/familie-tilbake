@@ -30,8 +30,6 @@ import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -39,6 +37,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravvedtaksstatus437
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

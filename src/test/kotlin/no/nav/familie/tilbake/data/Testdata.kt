@@ -50,8 +50,6 @@ import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Årsakstype
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottatt
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -66,7 +64,10 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravvedtaksstatus437
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -165,7 +166,7 @@ object Testdata {
                                                 foreldelsesfrist = LocalDate.now(),
                                                 oppdagelsesdato = LocalDate.now())
 
-    val feilKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.FPADATORD,
+    val feilKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.KL_KODE_FEIL_BA,
                                                           klassetype = Klassetype.FEIL,
                                                           opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
                                                           nyttBeløp = BigDecimal("123.11"),
@@ -176,7 +177,7 @@ object Testdata {
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
 
-    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.FPADATORD,
+    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.BATR,
                                                           klassetype = Klassetype.YTEL,
                                                           opprinneligUtbetalingsbeløp = BigDecimal("123.11"),
                                                           nyttBeløp = BigDecimal.ZERO,
@@ -193,12 +194,12 @@ object Testdata {
                                                                   månedligSkattebeløp = BigDecimal("123.11"))
 
     val kravgrunnlag431 = Kravgrunnlag431(behandlingId = behandling.id,
-                                          vedtakId = "testverdi",
+                                          vedtakId = BigInteger.ZERO,
                                           kravstatuskode = Kravstatuskode.NYTT,
-                                          fagområdekode = Fagområdekode.UKJENT,
+                                          fagområdekode = Fagområdekode.BA,
                                           fagsystemId = "testverdi",
                                           fagsystemVedtaksdato = LocalDate.now(),
-                                          omgjortVedtakId = "testverdi",
+                                          omgjortVedtakId = BigInteger.ZERO,
                                           gjelderVedtakId = "testverdi",
                                           gjelderType = GjelderType.PERSON,
                                           utbetalesTilId = "testverdi",
@@ -211,14 +212,14 @@ object Testdata {
                                           kontrollfelt = "testverdi",
                                           saksbehandlerId = "testverdi",
                                           referanse = "testverdi",
-                                          eksternKravgrunnlagId = "testverdi",
+                                          eksternKravgrunnlagId = BigInteger.ZERO,
                                           perioder = setOf(kravgrunnlagsperiode432),
                                           aktiv = true,
                                           sperret = false)
 
     val kravvedtaksstatus437 = Kravvedtaksstatus437(vedtakId = "testverdi",
                                                     kravstatuskode = Kravstatuskode.ANNULERT,
-                                                    fagområdekode = Fagområdekode.UKJENT,
+                                                    fagområdekode = Fagområdekode.BA,
                                                     fagsystemId = "testverdi",
                                                     gjelderVedtakId = "testverdi",
                                                     gjelderType = GjelderType.ORGANISASJON,
@@ -264,10 +265,13 @@ object Testdata {
                                                   perioder = setOf(faktaFeilutbetalingsperiode))
 
     val økonomiXmlMottatt = ØkonomiXmlMottatt(melding = "testverdi",
-                                              sekvens = 1,
-                                              tilkoblet = true,
+                                              kravstatuskode = Kravstatuskode.NYTT,
                                               eksternFagsakId = "testverdi",
-                                              henvisning = "testverdi")
+                                              ytelsestype = Ytelsestype.BARNETRYGD,
+                                              referanse = "testverdi",
+                                              eksternKravgrunnlagId = BigInteger.ZERO,
+                                              vedtakId = BigInteger.ZERO,
+                                              kontrollfelt = "testverdi")
 
     val totrinnsresultatsgrunnlag = Totrinnsresultatsgrunnlag(behandlingId = behandling.id,
                                                               faktaFeilutbetalingId = faktaFeilutbetaling.id,

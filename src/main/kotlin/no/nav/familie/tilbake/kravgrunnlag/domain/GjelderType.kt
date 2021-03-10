@@ -7,4 +7,15 @@ enum class GjelderType(val navn: String) {
     SAMHANDLER("Samhandler"),
     APPLIKASJONSBRUKER("Applikasjonsbruker");
 
+    companion object {
+
+        fun fraKode(kode: String): GjelderType {
+            for (gjelderType in values()) {
+                if (gjelderType.name == kode) {
+                    return gjelderType
+                }
+            }
+            throw IllegalArgumentException("Ukjent GjelderType $kode")
+        }
+    }
 }
