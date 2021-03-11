@@ -37,7 +37,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         val aktivtStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
 
         if (aktivtStegstilstand == null) {
-            val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
+                val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
             val gammelBehandlingsstegstilstand =
                     behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
                                                                                             nesteStegMetaData.behandlingssteg)
@@ -62,9 +62,12 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så kan ikke forsette til ${behandlingsstegsinfo.behandlingssteg}")
         }
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        val behandletSteg = behandlingsstegstilstand.filter { it.behandlingssteg.kanSaksbehandles }
-        behandletSteg.map { behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = AVBRUTT)) }
+        val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
+                behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        val aktivtBehandlingssteg = finnAktivStegstilstand(behandlingsstegstilstand)
+                                    ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
+        behandlingsstegstilstandRepository.update(aktivtBehandlingssteg.copy(behandlingsstegsstatus = AVBRUTT))
+
         oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
     }
 
@@ -126,6 +129,14 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 else -> Behandlingsstegsinfo(Behandlingssteg.FAKTA, KLAR)
             }
         }
+
+        val finnesAvbruttSteg = stegstilstand.any { AVBRUTT == it.behandlingsstegsstatus }
+        if (finnesAvbruttSteg) {
+            //forutsetter behandling har et AVBRUTT steg om gangen
+            val avbruttSteg = stegstilstand.first { AVBRUTT == it.behandlingsstegsstatus }
+            return Behandlingsstegsinfo(avbruttSteg.behandlingssteg, KLAR)
+        }
+
         val sisteUtførteSteg = stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
                 .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
         return Behandlingsstegsinfo(Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)

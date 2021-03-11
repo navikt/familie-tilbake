@@ -228,8 +228,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
 
         assertEquals(UTFØRT, behandlingsstegstilstand.first { GRUNNLAG == it.behandlingssteg }.behandlingsstegsstatus)
-        assertEquals(AVBRUTT, behandlingsstegstilstand.first { FAKTA == it.behandlingssteg }.behandlingsstegsstatus)
-        assertEquals(AVBRUTT, behandlingsstegstilstand.first { FORELDELSE == it.behandlingssteg }.behandlingsstegsstatus)
+        assertEquals(UTFØRT, behandlingsstegstilstand.first { FAKTA == it.behandlingssteg }.behandlingsstegsstatus)
+        assertEquals(AUTOUTFØRT, behandlingsstegstilstand.first { FORELDELSE == it.behandlingssteg }.behandlingsstegsstatus)
         assertEquals(AVBRUTT, behandlingsstegstilstand.first { VILKÅRSVURDERING == it.behandlingssteg }.behandlingsstegsstatus)
     }
 
@@ -257,8 +257,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
 
         assertEquals(UTFØRT, behandlingsstegstilstand.first { VARSEL == it.behandlingssteg }.behandlingsstegsstatus)
-        assertEquals(AVBRUTT, behandlingsstegstilstand.first { FAKTA == it.behandlingssteg }.behandlingsstegsstatus)
-        assertEquals(AVBRUTT, behandlingsstegstilstand.first { FORELDELSE == it.behandlingssteg }.behandlingsstegsstatus)
+        assertEquals(UTFØRT, behandlingsstegstilstand.first { FAKTA == it.behandlingssteg }.behandlingsstegsstatus)
+        assertEquals(AUTOUTFØRT, behandlingsstegstilstand.first { FORELDELSE == it.behandlingssteg }.behandlingsstegsstatus)
         assertEquals(AVBRUTT, behandlingsstegstilstand.first { VILKÅRSVURDERING == it.behandlingssteg }.behandlingsstegsstatus)
     }
 

@@ -1,11 +1,10 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,7 +64,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
         val findByBehandlingId = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
         assertThat(kravgrunnlag431).isEqualToIgnoringGivenFields(findByBehandlingId,
-                                                                 "sporbar", "perioder","versjon")
+                                                                 "sporbar", "perioder", "versjon")
     }
 
 }

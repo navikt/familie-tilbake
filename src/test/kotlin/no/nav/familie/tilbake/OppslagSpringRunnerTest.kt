@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Brevsporing
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
-import no.nav.familie.tilbake.domain.tbd.GrupperingKravvedtaksstatus
 import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
@@ -36,7 +35,6 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsp
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravvedtaksstatus437
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import org.junit.jupiter.api.AfterEach
@@ -108,7 +106,6 @@ abstract class OppslagSpringRunnerTest {
                Kravgrunnlag431::class,
                Kravgrunnlagsperiode432::class,
                Kravgrunnlagsbeløp433::class,
-               Kravvedtaksstatus437::class,
                Vilkårsvurdering::class,
                Vilkårsvurderingsperiode::class,
                VilkårsvurderingAktsomhet::class,
@@ -121,7 +118,6 @@ abstract class OppslagSpringRunnerTest {
                Vedtaksbrevsoppsummering::class,
                Vedtaksbrevsperiode::class,
                ØkonomiXmlSendt::class,
-               GrupperingKravvedtaksstatus::class,
                Varsel::class,
                Brevsporing::class,
                ØkonomiXmlMottattArkiv::class,
