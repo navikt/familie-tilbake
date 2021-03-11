@@ -42,7 +42,7 @@
         <spring.cloud-contract>3.0.1</spring.cloud-contract>
         <spring.vault>2.3.1</spring.vault>
         <testcontainers.version>1.15.2</testcontainers.version>
-        <tjenestespesifikasjoner.version>1.2020.01.30-14.36-cdf257baea96</tjenestespesifikasjoner.version>
+        <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
 
     </properties>
