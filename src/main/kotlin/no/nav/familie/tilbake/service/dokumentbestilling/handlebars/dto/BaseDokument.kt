@@ -12,21 +12,21 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
             mapOf(Ytelsestype.BARNETRYGD to Ytelsesinfo("nav.no/barnetrygd",
                                                         mapOf(Språkkode.NB to Ytelsesnavn("barnetrygd", "barnetrygden"),
                                                               Språkkode.NN to Ytelsesnavn("barnetrygd", "barnetrygda"))),
-                  Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo("nav.no/overgangsstonad",
+                  Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo("nav.no/familie/alene-med-barn",
                                                              mapOf(Språkkode.NB to Ytelsesnavn("overgangsstønad",
                                                                                                "overgansgstønaden"),
                                                                    Språkkode.NN to Ytelsesnavn("overgangsstønad",
                                                                                                "overgangsstønaden"))),
-                  Ytelsestype.BARNETILSYN to Ytelsesinfo("nav.no/familie/alene-med-barn/barnetilsyn",
+                  Ytelsestype.BARNETILSYN to Ytelsesinfo("nav.no/familie/alene-med-barn",
                                                          mapOf(Språkkode.NB to Ytelsesnavn("stønad til barnetilsyn",
-                                                                                           "stønaden til barnetilsyn"),
+                                                                                           "barnetilsynsstønaden"),
                                                                Språkkode.NN to Ytelsesnavn("stønad til barnetilsyn",
-                                                                                           "stønaden til barnetilsyn"))),
-                  Ytelsestype.SKOLEPENGER to Ytelsesinfo("nav.no/familie/alene-med-barn/skolepenger",
+                                                                                           "barnetilsynsstønaden"))),
+                  Ytelsestype.SKOLEPENGER to Ytelsesinfo("nav.no/familie/alene-med-barn",
                                                          mapOf(Språkkode.NB to Ytelsesnavn("stønad til skolepenger",
-                                                                                           "stønaden til skolepenger"),
+                                                                                           "skolepengestønaden"),
                                                                Språkkode.NN to Ytelsesnavn("stønad til skulepengar",
-                                                                                           "stønaden til skulepengar"))),
+                                                                                           "skulepengestønaden"))),
                   Ytelsestype.KONTANTSTØTTE to Ytelsesinfo("nav.no/kontantstotte",
                                                            mapOf(Språkkode.NB to Ytelsesnavn("kontantstøtte", "kontantstøtten"),
                                                                  Språkkode.NN to Ytelsesnavn("kontantstøtte", "kontantstøtta"))))
@@ -47,7 +47,6 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
 
     @Suppress("unused") // Handlebars
     val ytelseUrl = ytelsesinfo.url
-
 
     private class Ytelsesinfo(val url: String, val navn: Map<Språkkode, Ytelsesnavn>)
 

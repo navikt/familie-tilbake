@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.repository.tbd
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
@@ -10,6 +11,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.test.assertEquals
 
 internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
@@ -52,6 +55,21 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
         lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
         assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(oppdatertBrevsporing, "sporbar", "versjon")
         assertEquals(2, lagretBrevsporing.versjon)
+    }
+
+    @Test
+    fun `findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc rerturnerer siste brevsporing`() {
+        brevsporingRepository.insert(brevsporing)
+        val nyesteBrevsporing = brevsporingRepository
+                .insert(brevsporing.copy(id = UUID.randomUUID(),
+                                         sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1))))
+
+        val funnetBrevsporing =
+                brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(Testdata.behandling.id,
+                                                                                                       Brevtype.VARSEL)
+
+        assertThat(funnetBrevsporing).isEqualToIgnoringGivenFields(nyesteBrevsporing, "sporbar", "versjon")
+
     }
 
 }

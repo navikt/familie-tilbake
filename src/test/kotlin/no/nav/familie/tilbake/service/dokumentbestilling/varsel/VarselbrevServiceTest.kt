@@ -17,7 +17,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,6 +68,6 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
 
-        assertThat(bytes).isNotEmpty
+        PdfaValidator.validatePdf(bytes)
     }
 }

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api
 
 import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
+import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
@@ -22,7 +23,8 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class DokumentController(private val varselbrevService: VarselbrevService,
                          private val manueltVarselbrevService: ManueltVarselbrevService,
-                         private val innhentDokumentasjonbrevService: InnhentDokumentasjonbrevService) {
+                         private val innhentDokumentasjonbrevService: InnhentDokumentasjonbrevService,
+                         private val henleggelsesbrevService: HenleggelsesbrevService) {
 
     @GetMapping("/forhandsvis-manueltVarselbrev/{behandlingId}",
                 produces = [MediaType.APPLICATION_PDF_VALUE])
@@ -43,13 +45,23 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     }
 
     @GetMapping("/forhandsvis-innhentbrev/{behandlingId}",
-                 produces = [MediaType.APPLICATION_PDF_VALUE])
+                produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Forhåndsviser brev",
                         henteParam = "behandlingId")
     fun hentForhåndsvisningInnhentDokumentasjonsbrev(@PathVariable behandlingId: UUID,
                                                      fritekst: String): ByteArray {
         return innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
+    }
+
+    @GetMapping("/forhandsvis-henleggelse/{behandlingId}",
+                produces = [MediaType.APPLICATION_PDF_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Forhåndsviser brev",
+                        henteParam = "behandlingId")
+    fun hentForhåndsvisningHenleggelsesbrev(@PathVariable behandlingId: UUID,
+                                            fritekst: String): ByteArray {
+        return henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, fritekst)
     }
 
 }

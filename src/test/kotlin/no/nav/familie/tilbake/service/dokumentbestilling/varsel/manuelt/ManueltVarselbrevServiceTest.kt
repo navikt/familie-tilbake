@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -23,7 +24,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
-import org.assertj.core.api.Assertions
+import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,19 +42,23 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
+    @Autowired
+    private lateinit var pdfBrevService: PdfBrevService
+
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
-    private val mockPdfBrevService: PdfBrevService = mockk(relaxed = true)
+    private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
     private var fagsak = Testdata.fagsak
 
     @BeforeEach
     fun setup() {
+        spyPdfBrevService = spyk(pdfBrevService)
         manueltVarselbrevService = ManueltVarselbrevService(behandlingRepository,
                                                             fagsakRepository,
                                                             mockEksterneDataForBrevService,
-                                                            mockPdfBrevService,
+                                                            spyPdfBrevService,
                                                             mockFeilutbetalingService)
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
@@ -73,18 +78,18 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendManueltVarselBrev skal sende manuelt varselbrev`() {
         manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
         verify {
-            mockPdfBrevService.sendBrev(eq(behandling),
-                                        eq(fagsak),
-                                        eq(Brevtype.VARSEL),
-                                        any(),
-                                        eq(9000L),
-                                        any())
+            spyPdfBrevService.sendBrev(eq(behandling),
+                                       eq(fagsak),
+                                       eq(Brevtype.VARSEL),
+                                       any(),
+                                       eq(9000L),
+                                       any())
         }
     }
 
     @Test
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
-        excludeRecords { mockPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
+        excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
         manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
@@ -96,18 +101,18 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         //assert
         verify {
-            mockPdfBrevService.sendBrev(eq(behandling),
-                                        eq(fagsak),
-                                        eq(Brevtype.KORRIGERT_VARSEL),
-                                        any(),
-                                        eq(9000L),
-                                        any())
+            spyPdfBrevService.sendBrev(eq(behandling),
+                                       eq(fagsak),
+                                       eq(Brevtype.KORRIGERT_VARSEL),
+                                       any(),
+                                       eq(9000L),
+                                       any())
         }
     }
 
     @Test
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
-        excludeRecords { mockPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
+        excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
         manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
@@ -120,38 +125,36 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         //assert
         verify {
-            mockPdfBrevService.sendBrev(eq(behandling),
-                                        eq(fagsak),
-                                        eq(Brevtype.KORRIGERT_VARSEL),
-                                        any(),
-                                        eq(9000L),
-                                        any())
+            spyPdfBrevService.sendBrev(eq(behandling),
+                                       eq(fagsak),
+                                       eq(Brevtype.KORRIGERT_VARSEL),
+                                       any(),
+                                       eq(9000L),
+                                       any())
         }
     }
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise manuelt varselbrev`() {
-        every { mockPdfBrevService.genererForhåndsvisning(any()) }
-                .returns(varseltekst.toByteArray())
-
         val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
                                                                                  Dokumentmalstype.VARSEL,
                                                                                  varseltekst)
-        Assertions.assertThat(data).isNotEmpty
+
+        PdfaValidator.validatePdf(data)
     }
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
-        every { mockPdfBrevService.genererForhåndsvisning(any()) }
-                .returns(varseltekst.toByteArray())
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)))
+
         behandlingRepository.update(behandlingCopy)
 
         val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
                                                                                  Dokumentmalstype.KORRIGERT_VARSEL,
                                                                                  varseltekst)
-        Assertions.assertThat(data).isNotEmpty
+
+        PdfaValidator.validatePdf(data)
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
