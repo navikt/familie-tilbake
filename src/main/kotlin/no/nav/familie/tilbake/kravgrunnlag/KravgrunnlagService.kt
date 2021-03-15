@@ -59,7 +59,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
 
     private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431) {
         val finnesKravgrunnlag =
-                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(kravgrunnlag431.behandlingId)
+                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
             val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(kravgrunnlag431.behandlingId)
             kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = false))
