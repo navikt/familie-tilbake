@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
+private const val EF_URL = "nav.no/familie/alene-med-barn"
+
 open class BaseDokument(open val ytelsestype: Ytelsestype,
                         open val språkkode: Språkkode,
                         open val behandlendeEnhetsNavn: String,
@@ -10,26 +12,41 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
 
     private val infoMap =
             mapOf(Ytelsestype.BARNETRYGD to Ytelsesinfo("nav.no/barnetrygd",
-                                                        mapOf(Språkkode.NB to Ytelsesnavn("barnetrygd", "barnetrygden"),
-                                                              Språkkode.NN to Ytelsesnavn("barnetrygd", "barnetrygda"))),
-                  Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo("nav.no/overgangsstonad",
+                                                        mapOf(Språkkode.NB to Ytelsesnavn("barnetrygd",
+                                                                                          "barnetrygden",
+                                                                                          "barnetrygden din"),
+                                                              Språkkode.NN to Ytelsesnavn("barnetrygd",
+                                                                                          "barnetrygda",
+                                                                                          "barnetrygda di"))),
+                  Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo(EF_URL,
                                                              mapOf(Språkkode.NB to Ytelsesnavn("overgangsstønad",
-                                                                                               "overgansgstønaden"),
+                                                                                               "overgangsstønaden",
+                                                                                               "overgangsstønaden din"),
                                                                    Språkkode.NN to Ytelsesnavn("overgangsstønad",
-                                                                                               "overgangsstønaden"))),
-                  Ytelsestype.BARNETILSYN to Ytelsesinfo("nav.no/familie/alene-med-barn/barnetilsyn",
+                                                                                               "overgangsstønaden",
+                                                                                               "overgangsstønaden din"))),
+                  Ytelsestype.BARNETILSYN to Ytelsesinfo(EF_URL,
                                                          mapOf(Språkkode.NB to Ytelsesnavn("stønad til barnetilsyn",
-                                                                                           "stønaden til barnetilsyn"),
+                                                                                           "stønaden til barnetilsyn",
+                                                                                           "stønaden din til barnetilsyn"),
                                                                Språkkode.NN to Ytelsesnavn("stønad til barnetilsyn",
-                                                                                           "stønaden til barnetilsyn"))),
-                  Ytelsestype.SKOLEPENGER to Ytelsesinfo("nav.no/familie/alene-med-barn/skolepenger",
-                                                         mapOf(Språkkode.NB to Ytelsesnavn("stønad til skolepenger",
-                                                                                           "stønaden til skolepenger"),
+                                                                                           "stønaden til barnetilsyn",
+                                                                                           "stønaden din til barnetilsyn"))),
+                  Ytelsestype.SKOLEPENGER to Ytelsesinfo(EF_URL,
+                                                         mapOf(Språkkode.NB to Ytelsesnavn(
+                                                                 "stønad til skolepenger",
+                                                                 "stønaden til skolepenger",
+                                                                 "stønaden din til skolepenger"),
                                                                Språkkode.NN to Ytelsesnavn("stønad til skulepengar",
-                                                                                           "stønaden til skulepengar"))),
+                                                                                           "stønad til skulepengar",
+                                                                                           "stønaden din til skulepengar"))),
                   Ytelsestype.KONTANTSTØTTE to Ytelsesinfo("nav.no/kontantstotte",
-                                                           mapOf(Språkkode.NB to Ytelsesnavn("kontantstøtte", "kontantstøtten"),
-                                                                 Språkkode.NN to Ytelsesnavn("kontantstøtte", "kontantstøtta"))))
+                                                           mapOf(Språkkode.NB to Ytelsesnavn("kontantstøtte",
+                                                                                             "kontantstøtten",
+                                                                                             "kontantstøtten din"),
+                                                                 Språkkode.NN to Ytelsesnavn("kontantstøtte",
+                                                                                             "kontantstøtta",
+                                                                                             "kontantstøtta di"))))
 
     private val ytelsesinfo
         get() = infoMap[ytelsestype]
@@ -46,11 +63,13 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
     val ytelsesnavnBestemt = ytelsesnavn.bestemt
 
     @Suppress("unused") // Handlebars
-    val ytelseUrl = ytelsesinfo.url
+    val ytelsesnavnEiendomsform = ytelsesnavn.eiendomsform
 
+    @Suppress("unused") // Handlebars
+    val ytelseUrl = ytelsesinfo.url
 
     private class Ytelsesinfo(val url: String, val navn: Map<Språkkode, Ytelsesnavn>)
 
-    private class Ytelsesnavn(val ubestemt: String, val bestemt: String)
+    private class Ytelsesnavn(val ubestemt: String, val bestemt: String, val eiendomsform: String)
 
 }

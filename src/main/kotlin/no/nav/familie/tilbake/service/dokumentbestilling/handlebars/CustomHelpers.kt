@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.apache.commons.lang3.StringUtils
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -89,6 +90,13 @@ class KortdatoHelper : Helper<Any> {
     override fun apply(context: Any, options: Options?): Any {
         val date = objectMapper.convertValue(context, LocalDate::class.java)
         return format.format(date)
+    }
+}
+
+class StorBokstavHelper : Helper<String> {
+
+    override fun apply(context: String, options: Options?): Any {
+        return StringUtils.capitalize(context)
     }
 }
 

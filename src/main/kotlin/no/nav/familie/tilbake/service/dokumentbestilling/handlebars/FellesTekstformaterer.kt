@@ -51,10 +51,11 @@ object FellesTekstformaterer {
 
     fun opprettHandlebarsTemplate(filsti: String, språkkode: Språkkode): Template {
         val handlebars: Handlebars = opprettHandlebarsKonfigurasjon()
-        handlebars.registerHelper("lookup-map", MapLookupHelper())
+//        handlebars.registerHelper("lookup-map", MapLookupHelper())
         handlebars.registerHelper("kroner", KroneFormattererMedTusenskille())
         handlebars.registerHelper("dato", DatoHelper())
         handlebars.registerHelper("kortdato", KortdatoHelper())
+        handlebars.registerHelper("storForbokstav", StorBokstavHelper())
         return handlebars.compile(lagSpråkstøttetFilsti(filsti, språkkode))
     }
 

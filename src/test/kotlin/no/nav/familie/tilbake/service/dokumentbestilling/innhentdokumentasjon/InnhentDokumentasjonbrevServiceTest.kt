@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
-import org.assertj.core.api.Assertions
+import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,10 +46,11 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentForhåndsvisningInnhentDokumentasjonBrev skal forhåndsvise innhent dokumentasjonbrev`() {
+    fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
         val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(Testdata.behandling.id,
                                                                                                flereOpplysninger)
-        Assertions.assertThat(data).isNotEmpty
+
+        PdfaValidator.validatePdf(data)
     }
 
 }

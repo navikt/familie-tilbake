@@ -27,6 +27,6 @@ enum class Brevtype {
     UDEFINERT;
 
     fun gjelderVarsel(): Boolean {
-        return this in setOf(VARSEL)
+        return this in setOf(VARSEL, KORRIGERT_VARSEL)
     }
 }

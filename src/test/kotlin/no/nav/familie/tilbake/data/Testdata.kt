@@ -299,7 +299,7 @@ object Testdata {
     val brevsporing = Brevsporing(behandlingId = behandling.id,
                                   journalpostId = "testverdi",
                                   dokumentId = "testverdi",
-                                  brevtype = Brevtype.INNHENT_DOKUMENTASJON)
+                                  brevtype = Brevtype.VARSEL)
 
     val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(melding = "testverdi")
 
