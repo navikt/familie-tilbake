@@ -159,7 +159,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertEquals(3, behandlingsstegstilstand.size)
+        assertEquals(2, behandlingsstegstilstand.size)
         val aktivtstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         assertNotNull(aktivtstegstilstand)
         assertEquals(FAKTA, aktivtstegstilstand.behandlingssteg)

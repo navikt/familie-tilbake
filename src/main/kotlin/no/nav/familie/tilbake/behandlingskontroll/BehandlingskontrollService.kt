@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.STARTET
@@ -70,7 +69,14 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         // steg som kan behandles, kan avbrytes
         if (aktivtBehandlingssteg.behandlingssteg.kanSaksbehandles) {
             behandlingsstegstilstandRepository.update(aktivtBehandlingssteg.copy(behandlingsstegsstatus = AVBRUTT))
-            oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+            val finnesBehandlingssteg: Boolean = behandlingsstegstilstandRepository
+                    .findByBehandlingIdAndBehandlingssteg(behandlingId, behandlingsstegsinfo.behandlingssteg) != null
+            if (finnesBehandlingssteg) {
+                oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+            } else {
+                settBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
+            }
+
         }
     }
 
@@ -165,10 +171,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                              .toLocalDate())
             }
             harAktivtGrunnlag(behandling) -> {
-                // når behandling allerede har et aktivt grunnlag, utfører GRUNNLAG steg automatisk
-                settBehandlingsstegOgStatus(behandlingId = behandling.id,
-                                            nesteStegMedStatus = Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                                                      behandlingsstegstatus = AUTOUTFØRT))
                 Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.FAKTA,
                                      behandlingsstegstatus = KLAR)
             }
