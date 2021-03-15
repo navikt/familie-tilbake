@@ -37,7 +37,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         val aktivtStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
 
         if (aktivtStegstilstand == null) {
-                val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
+            val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
             val gammelBehandlingsstegstilstand =
                     behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
                                                                                             nesteStegMetaData.behandlingssteg)
@@ -66,9 +66,11 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         val aktivtBehandlingssteg = finnAktivStegstilstand(behandlingsstegstilstand)
                                     ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
-        behandlingsstegstilstandRepository.update(aktivtBehandlingssteg.copy(behandlingsstegsstatus = AVBRUTT))
-
-        oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+        // steg som kan behandles, kan avbrytes
+        if (aktivtBehandlingssteg.behandlingssteg.kanSaksbehandles) {
+            behandlingsstegstilstandRepository.update(aktivtBehandlingssteg.copy(behandlingsstegsstatus = AVBRUTT))
+            oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+        }
     }
 
     @Transactional
@@ -122,10 +124,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                            Behandlingssteg.VARSEL,
                                                                            VENTER,
                                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
-                !harMottattGrunnlag(behandling) -> lagBehandlingsstegsinfo(behandling,
-                                                                           Behandlingssteg.GRUNNLAG,
-                                                                           VENTER,
-                                                                           Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+                !harAktivtGrunnlag(behandling) -> lagBehandlingsstegsinfo(behandling,
+                                                                          Behandlingssteg.GRUNNLAG,
+                                                                          VENTER,
+                                                                          Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
                 else -> Behandlingsstegsinfo(Behandlingssteg.FAKTA, KLAR)
             }
         }
@@ -139,7 +141,27 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
         val sisteUtførteSteg = stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
                 .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
-        return Behandlingsstegsinfo(Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
+
+        if (Behandlingssteg.VARSEL == sisteUtførteSteg && !harAktivtGrunnlag(behandling)) {
+            return when {
+                erKravgrunnlagSperret(behandling) -> {
+                    val kravgrunnlag = kravgrunnlagRepository
+                            .findByBehandlingIdAndAktivIsTrueAndSperretTrue(behandling.id)
+                    val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+                    Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                         behandlingsstegstatus = VENTER,
+                                         venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                                         tidsfrist = kravgrunnlag.sporbar.endret.endretTid
+                                                 .plusWeeks(venteårsak.defaultVenteTidIUker)
+                                                 .toLocalDate())
+                }
+                else -> lagBehandlingsstegsinfo(behandling = behandling,
+                                                behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                behandlingsstegstatus = VENTER,
+                                                venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+            }
+        }
+        return Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
     }
 
     private fun settBehandlingsstegOgStatus(behandlingId: UUID,
@@ -162,8 +184,12 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                && !behandling.manueltOpprettet
     }
 
-    private fun harMottattGrunnlag(behandling: Behandling): Boolean {
+    private fun harAktivtGrunnlag(behandling: Behandling): Boolean {
         return kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandling.id)
+    }
+
+    private fun erKravgrunnlagSperret(behandling: Behandling): Boolean {
+        return kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
     }
 
     private fun lagBehandlingsstegsinfo(behandling: Behandling,

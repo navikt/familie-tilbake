@@ -96,6 +96,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
     }
 
+
     @Test
     fun `fortsettBehandling skal oppdatere til grunnlag steg etter behandling er opprettet uten varsel`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
@@ -112,6 +113,41 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, sisteStegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
+    }
+
+    @Test
+    fun `fortsettBehandling skal fortsette til grunnlag steg når varselsrespons ble mottatt uten kravgrunnlag`() {
+        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
+
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(2, behandlingsstegstilstand.size)
+        val aktivtstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
+        assertNotNull(aktivtstegstilstand)
+        assertEquals(GRUNNLAG, aktivtstegstilstand.behandlingssteg)
+        assertEquals(VENTER, aktivtstegstilstand.behandlingsstegsstatus)
+        assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtstegstilstand.venteårsak)
+        assertEquals(behandling.opprettetDato.plusWeeks(4), aktivtstegstilstand.tidsfrist)
+    }
+
+    @Test
+    fun `fortsettBehandling skal fortsette til grunnlag steg når varselsrespons ble mottatt med sperret kravgrunnlag`() {
+        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
+        val kravgrunnlag = Testdata.kravgrunnlag431
+        val oppdatertKravgrunnlag = kravgrunnlag.copy(sperret = true)
+        kravgrunnlagRepository.insert(oppdatertKravgrunnlag)
+
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(2, behandlingsstegstilstand.size)
+        val aktivtstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
+        assertNotNull(aktivtstegstilstand)
+        assertEquals(GRUNNLAG, aktivtstegstilstand.behandlingssteg)
+        assertEquals(VENTER, aktivtstegstilstand.behandlingsstegsstatus)
+        assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtstegstilstand.venteårsak)
+        assertEquals(oppdatertKravgrunnlag.sporbar.endret.endretTid.plusWeeks(4).toLocalDate(), aktivtstegstilstand.tidsfrist)
     }
 
     @Test

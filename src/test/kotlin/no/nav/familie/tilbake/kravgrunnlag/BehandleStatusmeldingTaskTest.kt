@@ -149,6 +149,25 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask skal prosessere SPER melding med behandling på VARSEL steg`() {
+        behandlingRepository.insert(behandling)
+        lagBehandlingsstegstilstand(VARSEL, Behandlingsstegstatus.VENTER)
+
+        opprettGrunnlag()
+
+        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.BEHANDLE_STATUSMELDING)
+
+        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
+        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        assertTrue { kravgrunnlag.sperret }
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.VENTER)
+    }
+
+    @Test
     fun `doTask skal prosessere SPER melding med behandling på FAKTA steg`() {
         behandlingRepository.insert(behandling)
         lagBehandlingsstegstilstand(VARSEL, Behandlingsstegstatus.UTFØRT)
