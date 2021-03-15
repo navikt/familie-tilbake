@@ -151,6 +151,24 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `fortsettBehandling skal fortsette til fakta steg når varselsrespons ble mottatt med aktivt kravgrunnlag`() {
+        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
+        val kravgrunnlag = Testdata.kravgrunnlag431
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(3, behandlingsstegstilstand.size)
+        val aktivtstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
+        assertNotNull(aktivtstegstilstand)
+        assertEquals(FAKTA, aktivtstegstilstand.behandlingssteg)
+        assertEquals(KLAR, aktivtstegstilstand.behandlingsstegsstatus)
+        assertNull(aktivtstegstilstand.venteårsak)
+        assertNull(aktivtstegstilstand.tidsfrist)
+    }
+
+    @Test
     fun `fortsettBehandling skal oppdatere til fakta steg etter behandling er opprettet uten varsel og mottok kravgrunnlag`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)

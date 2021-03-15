@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.STARTET
@@ -142,26 +143,40 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         val sisteUtførteSteg = stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
                 .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
 
-        if (Behandlingssteg.VARSEL == sisteUtførteSteg && !harAktivtGrunnlag(behandling)) {
-            return when {
-                erKravgrunnlagSperret(behandling) -> {
-                    val kravgrunnlag = kravgrunnlagRepository
-                            .findByBehandlingIdAndAktivIsTrueAndSperretTrue(behandling.id)
-                    val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-                    Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                         behandlingsstegstatus = VENTER,
-                                         venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                                         tidsfrist = kravgrunnlag.sporbar.endret.endretTid
-                                                 .plusWeeks(venteårsak.defaultVenteTidIUker)
-                                                 .toLocalDate())
-                }
-                else -> lagBehandlingsstegsinfo(behandling = behandling,
-                                                behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                behandlingsstegstatus = VENTER,
-                                                venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
-            }
+        if (Behandlingssteg.VARSEL == sisteUtførteSteg) {
+            return håndterOmSisteUtførteStegVarsel(behandling)
         }
         return Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
+    }
+
+    private fun håndterOmSisteUtførteStegVarsel(behandling: Behandling): Behandlingsstegsinfo {
+
+        return when {
+            erKravgrunnlagSperret(behandling) -> {
+                val kravgrunnlag = kravgrunnlagRepository
+                        .findByBehandlingIdAndAktivIsTrueAndSperretTrue(behandling.id)
+                val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+                // setter tidsfristen fra sperret dato
+                Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                     behandlingsstegstatus = VENTER,
+                                     venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                                     tidsfrist = kravgrunnlag.sporbar.endret.endretTid
+                                             .plusWeeks(venteårsak.defaultVenteTidIUker)
+                                             .toLocalDate())
+            }
+            harAktivtGrunnlag(behandling) -> {
+                // når behandling allerede har et aktivt grunnlag, utfører GRUNNLAG steg automatisk
+                settBehandlingsstegOgStatus(behandlingId = behandling.id,
+                                            nesteStegMedStatus = Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                                                      behandlingsstegstatus = AUTOUTFØRT))
+                Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.FAKTA,
+                                     behandlingsstegstatus = KLAR)
+            }
+            else -> lagBehandlingsstegsinfo(behandling = behandling,  // setter tidsfristen fra opprettelse dato
+                                            behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                            behandlingsstegstatus = VENTER,
+                                            venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        }
     }
 
     private fun settBehandlingsstegOgStatus(behandlingId: UUID,
@@ -189,7 +204,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     private fun erKravgrunnlagSperret(behandling: Behandling): Boolean {
-        return kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
+        return kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id)
     }
 
     private fun lagBehandlingsstegsinfo(behandling: Behandling,
