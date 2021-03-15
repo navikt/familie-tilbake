@@ -84,4 +84,12 @@ class ApiExceptionHandler {
                 .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
+    @ExceptionHandler(UgyldigStatusmeldingFeil::class)
+    fun handleThrowable(feil: UgyldigStatusmeldingFeil): ResponseEntity<Ressurs<Nothing>> {
+        secureLogger.error("En håndtert feil har oppstått - ${feil.melding}", feil)
+        logger.info("En håndtert feil har oppstått - ${feil.melding}")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Ressurs.failure(frontendFeilmelding = feil.message))
+    }
+
 }
