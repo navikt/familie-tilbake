@@ -188,7 +188,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `fortsettBehandling skal oppdatere til foreldelse steg etter fakta steg er utført`() {
+    fun `fortsettBehandling skal oppdatere til foreldelsessteg etter fakta steg er utført`() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT)))
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
