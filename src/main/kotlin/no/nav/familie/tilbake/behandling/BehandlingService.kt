@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,7 +46,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val data = behandlingRepository.findById(behandlingId)
         if (data.isPresent) {
             val behandling = data.get()
-            return BehandlingMapper.tilRespons(behandling, kanHenleggeBehandling(behandling))
+            val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling)
+            val behandlingsstegsinfoListe: List<Behandlingsstegsinfo> = behandlingskontrollService
+                    .hentBehandlingsstegstilstand(behandling)
+            val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
+
+            return BehandlingMapper.tilRespons(behandling = behandling,
+                                               erBehandlingPåVent = erBehandlingPåVent,
+                                               kanHenleggeBehandling = kanBehandlingHenlegges,
+                                               behandlingsstegsinfoListe = behandlingsstegsinfoListe)
         }
         throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
                    frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",

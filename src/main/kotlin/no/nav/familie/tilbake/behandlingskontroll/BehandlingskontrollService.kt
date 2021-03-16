@@ -77,6 +77,25 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       tidsfrist = tidsfrist))
     }
 
+    fun erBehandlingPåVent(behandling: Behandling): Boolean {
+        val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
+                behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        val aktivtBehandlingsstegstilstand: Behandlingsstegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
+                                                                       ?: return false
+        return VENTER == aktivtBehandlingsstegstilstand.behandlingsstegsstatus
+    }
+
+    fun hentBehandlingsstegstilstand(behandling: Behandling): List<Behandlingsstegsinfo> {
+        val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
+                behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        return behandlingsstegstilstand.map {
+            Behandlingsstegsinfo(behandlingssteg = it.behandlingssteg,
+                                 behandlingsstegstatus = it.behandlingsstegsstatus,
+                                 venteårsak = it.venteårsak,
+                                 tidsfrist = it.tidsfrist)
+        }.toList()
+    }
+
     fun finnAktivtSteg(behandlingId: UUID): Behandlingssteg? {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         return finnAktivStegstilstand(behandlingsstegstilstand)?.behandlingssteg
