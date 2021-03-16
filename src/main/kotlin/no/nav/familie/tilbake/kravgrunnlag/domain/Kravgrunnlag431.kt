@@ -18,6 +18,7 @@ data class Kravgrunnlag431(@Id
                            val behandlingId: UUID,
                            val aktiv: Boolean = true,
                            val sperret: Boolean = false,
+                           val avsluttet: Boolean = false,
                            val vedtakId: BigInteger,
                            val omgjortVedtakId: BigInteger?,
                            val kravstatuskode: Kravstatuskode,

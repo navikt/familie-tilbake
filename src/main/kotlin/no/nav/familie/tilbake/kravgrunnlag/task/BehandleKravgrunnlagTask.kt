@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+@TaskStepBeskrivelse(taskStepType = BehandleKravgrunnlagTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
                      triggerTidVedFeilISekunder = 60 * 5)
@@ -25,6 +25,6 @@ class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagServ
 
     companion object {
 
-        const val BEHANDLE_KRAVGRUNNLAG = "behandleKravgrunnlag"
+        const val TYPE = "behandleKravgrunnlag"
     }
 }

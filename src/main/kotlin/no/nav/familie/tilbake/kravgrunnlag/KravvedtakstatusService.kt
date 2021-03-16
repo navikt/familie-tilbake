@@ -1,0 +1,116 @@
+package no.nav.familie.tilbake.kravgrunnlag
+
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+
+@Service
+class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                              private val behandlingRepository: BehandlingRepository,
+                              private val mottattXmlService: ØkonomiXmlMottattService,
+                              private val stegService: StegService,
+                              private val behandlingskontrollService: BehandlingskontrollService) {
+
+    @Transactional
+    fun håndterMottattStatusmelding(statusmeldingXml: String) {
+        val kravOgVedtakstatus: KravOgVedtakstatus = KravgrunnlagUtil.unmarshalStatusmelding(statusmeldingXml)
+
+        validerStatusmelding(kravOgVedtakstatus)
+
+        val fagsystemId = kravOgVedtakstatus.fagsystemId
+        val vedtakId = kravOgVedtakstatus.vedtakId
+        val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravOgVedtakstatus.kodeFagomraade)
+
+        val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
+        if (behandling == null) {
+            val kravgrunnlagXmlListe = mottattXmlService
+                    .hentMottattKravgrunnlag(eksternFagsakId = fagsystemId,
+                                             ytelsestype = ytelsestype,
+                                             vedtakId = vedtakId)
+            håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
+            mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+            return
+        }
+        val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling)
+        mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+    }
+
+    private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {
+        kravOgVedtakstatus.referanse ?: throw UgyldigStatusmeldingFeil(
+                melding = "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
+                          "Mangler referanse.")
+    }
+
+    private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
+                                   fagsystemId: String): Behandling? {
+        return behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = ytelsestype,
+                                                                      eksternFagsakId = fagsystemId)
+    }
+
+    private fun håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe: List<ØkonomiXmlMottatt>,
+                                                     kravOgVedtakstatus: KravOgVedtakstatus) {
+        when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
+            Kravstatuskode.SPERRET, Kravstatuskode.MANUELL ->
+                kravgrunnlagXmlListe.forEach { mottattXmlService.oppdaterMottattXml(it.copy(sperret = true)) }
+            Kravstatuskode.ENDRET -> kravgrunnlagXmlListe.forEach {
+                mottattXmlService
+                        .oppdaterMottattXml(it.copy(sperret = false))
+            }
+            Kravstatuskode.AVSLUTTET -> kravgrunnlagXmlListe.forEach {
+                mottattXmlService.arkiverMottattXml(it.melding,
+                                                    it.eksternFagsakId,
+                                                    it.ytelsestype)
+                mottattXmlService.slettMottattXml(it.id)
+            }
+            else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
+        }
+
+    }
+
+    private fun håndterStatusmeldingerMedBehandling(kravgrunnlag431: Kravgrunnlag431,
+                                                    kravOgVedtakstatus: KravOgVedtakstatus,
+                                                    behandling: Behandling) {
+        when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
+            Kravstatuskode.SPERRET, Kravstatuskode.MANUELL -> {
+                oppdaterKravgrunnlag(kravgrunnlag431.copy(sperret = true))
+                val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+                behandlingskontrollService
+                        .tilbakehoppBehandlingssteg(behandling.id,
+                                                    Behandlingsstegsinfo(
+                                                            behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                            behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                                            venteårsak = venteårsak,
+                                                            tidsfrist = LocalDate.now()
+                                                                    .plusWeeks(venteårsak.defaultVenteTidIUker)
+                                                    ))
+            }
+            Kravstatuskode.ENDRET -> {
+                oppdaterKravgrunnlag(kravgrunnlag431.copy(sperret = false))
+                stegService.håndterSteg(behandling.id)
+            }
+            //TODO behandlingskontroll blir implementert med henleggelse
+            Kravstatuskode.AVSLUTTET -> oppdaterKravgrunnlag(kravgrunnlag431.copy(avsluttet = true))
+            else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
+        }
+    }
+
+    private fun oppdaterKravgrunnlag(kravgrunnlag431: Kravgrunnlag431) {
+        kravgrunnlagRepository.update(kravgrunnlag431)
+    }
+
+}

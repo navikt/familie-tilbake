@@ -8,21 +8,22 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
+import no.nav.tilbakekreving.status.v1.EndringKravOgVedtakstatus
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import java.io.StringReader
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.Comparator
 import java.util.SortedMap
 import javax.xml.XMLConstants
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
 import javax.xml.bind.Unmarshaller
-import javax.xml.datatype.XMLGregorianCalendar
 import javax.xml.validation.SchemaFactory
 
 object KravgrunnlagUtil {
 
     private val jaxbContext: JAXBContext = JAXBContext.newInstance(DetaljertKravgrunnlagMelding::class.java)
+    private val statusmeldingJaxbContext: JAXBContext = JAXBContext.newInstance(EndringKravOgVedtakstatus::class.java)
 
     fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Periode, BigDecimal> {
         val feilutbetalingPrPeriode = mutableMapOf<Periode, BigDecimal>()
@@ -37,7 +38,7 @@ object KravgrunnlagUtil {
         return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Periode::fom).thenComparing(Periode::tom))
     }
 
-    fun unmarshal(kravgrunnlagXML: String): DetaljertKravgrunnlagDto {
+    fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto {
         return try {
             val jaxbUnmarshaller: Unmarshaller = jaxbContext.createUnmarshaller()
 
@@ -53,11 +54,20 @@ object KravgrunnlagUtil {
         }
     }
 
-    fun tilPeriode(fraDato: XMLGregorianCalendar, tilDato: XMLGregorianCalendar): Periode {
-        return Periode(
-                fom = LocalDate.of(fraDato.year, fraDato.month, fraDato.day),
-                tom = LocalDate.of(tilDato.year, tilDato.month, tilDato.day),
-        )
+    fun unmarshalStatusmelding(statusmeldingXml: String): KravOgVedtakstatus {
+        return try {
+            val jaxbUnmarshaller: Unmarshaller = statusmeldingJaxbContext.createUnmarshaller()
+
+            //satt xsd for å validere mottatt xml
+            val schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+            val statusmeldingSchema = schemaFactory.newSchema(
+                    this.javaClass.classLoader.getResource("xsd/krav_og_vedtakstatus.xsd"))
+            jaxbUnmarshaller.schema = statusmeldingSchema
+
+            (jaxbUnmarshaller.unmarshal(StringReader(statusmeldingXml)) as EndringKravOgVedtakstatus).kravOgVedtakstatus
+        } catch (e: JAXBException) {
+            throw UgyldigKravgrunnlagFeil(melding = "Mottatt statusmeldingXML er ugyldig! Den feiler med $e")
+        }
     }
 
     fun tilYtelsestype(fagområdekode: String): Ytelsestype {

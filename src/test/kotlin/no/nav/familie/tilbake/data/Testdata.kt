@@ -30,7 +30,6 @@ import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.domain.tbd.Friteksttype
-import no.nav.familie.tilbake.domain.tbd.GrupperingKravvedtaksstatus
 import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
@@ -63,7 +62,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravvedtaksstatus437
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import java.math.BigDecimal
@@ -217,15 +215,6 @@ object Testdata {
                                           aktiv = true,
                                           sperret = false)
 
-    val kravvedtaksstatus437 = Kravvedtaksstatus437(vedtakId = "testverdi",
-                                                    kravstatuskode = Kravstatuskode.ANNULERT,
-                                                    fagområdekode = Fagområdekode.BA,
-                                                    fagsystemId = "testverdi",
-                                                    gjelderVedtakId = "testverdi",
-                                                    gjelderType = GjelderType.ORGANISASJON,
-                                                    referanse = "testverdi")
-
-
     private val vilkårsvurderingSærligGrunn = VilkårsvurderingSærligGrunn(særligGrunn = SærligGrunn.GRAD_AV_UAKTSOMHET,
                                                                           begrunnelse = "testverdi")
 
@@ -273,6 +262,10 @@ object Testdata {
                                               vedtakId = BigInteger.ZERO,
                                               kontrollfelt = "testverdi")
 
+    val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(melding = "testverdi",
+                                                        eksternFagsakId = "testverdi",
+                                                        ytelsestype = Ytelsestype.BARNETRYGD)
+
     val totrinnsresultatsgrunnlag = Totrinnsresultatsgrunnlag(behandlingId = behandling.id,
                                                               faktaFeilutbetalingId = faktaFeilutbetaling.id,
                                                               grupperingVurdertForeldelseId = grupperingVurdertForeldelse.id,
@@ -293,14 +286,9 @@ object Testdata {
                                           kvittering = "testverdi",
                                           meldingstype = Meldingstype.VEDTAK)
 
-    val grupperingKravvedtaksstatus = GrupperingKravvedtaksstatus(kravvedtaksstatus437Id = kravvedtaksstatus437.id,
-                                                                  behandlingId = behandling.id)
-
     val brevsporing = Brevsporing(behandlingId = behandling.id,
                                   journalpostId = "testverdi",
                                   dokumentId = "testverdi",
                                   brevtype = Brevtype.VARSEL)
-
-    val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(melding = "testverdi")
 
 }

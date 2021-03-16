@@ -2,7 +2,9 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
@@ -22,17 +24,25 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
     @Transactional
     @JmsListener(destination = "\${oppdrag.mq.kravgrunnlag}", containerFactory = "jmsListenerContainerFactory")
-    fun mottaKravgrunnlagFraOppdrag(melding: TextMessage) {
-        val kravgrunnlagFraOppdrag = melding.text as String
+    fun mottaMeldingFraOppdrag(melding: TextMessage) {
+        val meldingFraOppdrag = melding.text as String
 
-        log.info("Mottatt kravgrunnlag fra oppdrag")
-        secureLog.info(kravgrunnlagFraOppdrag)
-        taskRepository.save(Task(type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
-                                 payload = kravgrunnlagFraOppdrag,
-                                 properties = Properties().apply {
-                                     this["callId"] = UUID.randomUUID()
-                                 }))
+        log.info("Mottatt melding fra oppdrag")
+        secureLog.info(meldingFraOppdrag)
+        if (meldingFraOppdrag.contains(Constants.kravgrunnlagXmlRootElement)) {
+            taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
+                                     payload = meldingFraOppdrag,
+                                     properties = Properties().apply {
+                                         this["callId"] = UUID.randomUUID()
+                                     }))
 
+        } else {
+            taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
+                                     payload = meldingFraOppdrag,
+                                     properties = Properties().apply {
+                                         this["callId"] = UUID.randomUUID()
+                                     }))
+        }
     }
 
 }

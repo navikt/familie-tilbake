@@ -13,4 +13,6 @@ import java.util.UUID
 interface BrevsporingRepository : RepositoryInterface<Brevsporing, UUID>, InsertUpdateRepository<Brevsporing> {
 
     fun findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, brevtype: Brevtype): Brevsporing?
+
+    fun existsByBehandlingIdAndBrevtypeIn(behandlingId: UUID, brevtype: Set<Brevtype>): Boolean
 }

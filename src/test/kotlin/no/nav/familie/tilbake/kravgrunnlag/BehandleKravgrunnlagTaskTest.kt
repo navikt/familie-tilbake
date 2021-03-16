@@ -299,7 +299,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTask(kravgrunnlagXml: String): Task {
-        return taskRepository.save(Task(type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+        return taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                         payload = kravgrunnlagXml))
     }
 

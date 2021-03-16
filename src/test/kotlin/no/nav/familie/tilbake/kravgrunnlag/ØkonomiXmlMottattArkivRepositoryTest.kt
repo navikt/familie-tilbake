@@ -1,9 +1,8 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
