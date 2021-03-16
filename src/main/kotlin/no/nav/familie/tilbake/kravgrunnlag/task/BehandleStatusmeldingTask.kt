@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleStatusmeldingTask.BEHANDLE_STATUSMELDING,
+@TaskStepBeskrivelse(taskStepType = BehandleStatusmeldingTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Håndter mottatt statusmelding fra oppdrag",
                      triggerTidVedFeilISekunder = 60 * 5)
@@ -25,6 +25,6 @@ class BehandleStatusmeldingTask(private val kravvedtakstatusService: Kravvedtaks
 
     companion object {
 
-        const val BEHANDLE_STATUSMELDING = "behandleStatusmelding"
+        const val TYPE = "behandleStatusmelding"
     }
 }

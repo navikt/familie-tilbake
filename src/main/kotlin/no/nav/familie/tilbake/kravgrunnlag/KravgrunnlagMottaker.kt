@@ -30,14 +30,14 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
         log.info("Mottatt melding fra oppdrag")
         secureLog.info(meldingFraOppdrag)
         if (meldingFraOppdrag.contains(Constants.kravgrunnlagXmlRootElement)) {
-            taskRepository.save(Task(type = BehandleKravgrunnlagTask.BEHANDLE_KRAVGRUNNLAG,
+            taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                      payload = meldingFraOppdrag,
                                      properties = Properties().apply {
                                          this["callId"] = UUID.randomUUID()
                                      }))
 
         } else {
-            taskRepository.save(Task(type = BehandleStatusmeldingTask.BEHANDLE_STATUSMELDING,
+            taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
                                      payload = meldingFraOppdrag,
                                      properties = Properties().apply {
                                          this["callId"] = UUID.randomUUID()
