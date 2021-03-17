@@ -14,10 +14,13 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -138,6 +141,27 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentBehandling skal hente behandling som opprettet uten varsel`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFellesBehandlingRespons(behandlingDto, behandling)
+        assertFalse { behandlingDto.kanHenleggeBehandling }
+        assertTrue { behandlingDto.harVerge }
+        assertTrue { behandlingDto.erBehandlingPåVent }
+        assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
+                                   behandling = behandling,
+                                   behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                   behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                   venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+    }
+
+    @Test
     fun `hentBehandling skal hente behandling som ikke kan henlegges med verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
@@ -150,6 +174,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFellesBehandlingRespons(behandlingDto, behandling)
         assertFalse { behandlingDto.kanHenleggeBehandling }
         assertTrue { behandlingDto.harVerge }
+        assertTrue { behandlingDto.erBehandlingPåVent }
+        assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
+                                   behandling = behandling,
+                                   behandlingssteg = Behandlingssteg.VARSEL,
+                                   behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                   venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
     }
 
     @Test
@@ -170,6 +200,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)
         assertTrue { behandlingDto.kanHenleggeBehandling }
         assertFalse { behandlingDto.harVerge }
+        assertTrue { behandlingDto.erBehandlingPåVent }
+        assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
+                                   behandling = behandling,
+                                   behandlingssteg = Behandlingssteg.VARSEL,
+                                   behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                   venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
     }
 
     @Test
@@ -254,7 +290,20 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertNull(behandlingDto.resultatstype)
         assertEquals("VL", behandlingDto.ansvarligSaksbehandler)
         assertNull(behandlingDto.ansvarligBeslutter)
-        assertFalse { behandlingDto.erBehandlingPåVent }
+    }
+
+    private fun assertBehandlingsstegsinfo(behandlingDto: BehandlingDto,
+                                           behandling: Behandling,
+                                           behandlingssteg: Behandlingssteg,
+                                           behandlingsstegstatus: Behandlingsstegstatus,
+                                           venteårsak: Venteårsak) {
+        val behandlingsstegsinfo: List<BehandlingsstegsinfoDto> = behandlingDto.behandlingsstegsinfo
+        assertEquals(1, behandlingsstegsinfo.size)
+        assertEquals(behandlingssteg, behandlingsstegsinfo[0].behandlingssteg)
+        assertEquals(behandlingsstegstatus, behandlingsstegsinfo[0].behandlingsstegstatus)
+        assertEquals(venteårsak, behandlingsstegsinfo[0].venteårsak)
+        assertEquals(behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker),
+                     behandlingsstegsinfo[0].tidsfrist)
     }
 
     private fun assertFagsak(behandling: Behandling,

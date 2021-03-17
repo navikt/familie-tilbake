@@ -3,6 +3,9 @@ package no.nav.familie.tilbake.api.dto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -23,4 +26,10 @@ data class BehandlingDto(val eksternBrukId: UUID,
                          val ansvarligBeslutter: String? = null,
                          val erBehandlingPåVent: Boolean,
                          val kanHenleggeBehandling: Boolean,
-                         val harVerge: Boolean)
+                         val harVerge: Boolean,
+                         val behandlingsstegsinfo: List<BehandlingsstegsinfoDto>)
+
+data class BehandlingsstegsinfoDto(val behandlingssteg: Behandlingssteg,
+                                   val behandlingsstegstatus: Behandlingsstegstatus,
+                                   val venteårsak: Venteårsak? = null,
+                                   val tidsfrist: LocalDate? = null)

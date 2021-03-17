@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,7 +50,9 @@ object BehandlingMapper {
     }
 
     fun tilRespons(behandling: Behandling,
-                   kanHenleggeBehandling: Boolean): BehandlingDto {
+                   erBehandlingPåVent: Boolean,
+                   kanHenleggeBehandling: Boolean,
+                   behandlingsstegsinfoer: List<Behandlingsstegsinfo>): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
@@ -69,8 +73,18 @@ object BehandlingMapper {
                              endretTidspunkt = behandling.endretTidspunkt,
                              harVerge = behandling.harVerge,
                              kanHenleggeBehandling = kanHenleggeBehandling,
-                             erBehandlingPåVent = false) //hard-kodert til vente funksjonalitet er implementert
+                             erBehandlingPåVent = erBehandlingPåVent,
+                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
 
+    }
+
+    private fun tilBehandlingstegsinfoDto(behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): List<BehandlingsstegsinfoDto> {
+        return behandlingsstegsinfoListe.map {
+            BehandlingsstegsinfoDto(behandlingssteg = it.behandlingssteg,
+                                    behandlingsstegstatus = it.behandlingsstegstatus,
+                                    venteårsak = it.venteårsak,
+                                    tidsfrist = it.tidsfrist)
+        }
     }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {
