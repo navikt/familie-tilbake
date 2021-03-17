@@ -40,7 +40,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud>3.0.1</spring.cloud>
         <spring.cloud-contract>3.0.1</spring.cloud-contract>
-        <spring.vault>2.3.1</spring.vault>
+        <spring.vault>2.3.2</spring.vault>
         <testcontainers.version>1.15.2</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
