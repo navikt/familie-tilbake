@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.domain.tbd
+package no.nav.familie.tilbake.service.dokumentbestilling.felles.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id

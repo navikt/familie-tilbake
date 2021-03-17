@@ -25,8 +25,6 @@ import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
-import no.nav.familie.tilbake.domain.tbd.Brevsporing
-import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
 import no.nav.familie.tilbake.domain.tbd.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.domain.tbd.Friteksttype
@@ -64,6 +62,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -287,8 +287,8 @@ object Testdata {
                                           meldingstype = Meldingstype.VEDTAK)
 
     val brevsporing = Brevsporing(behandlingId = behandling.id,
-                                  journalpostId = "testverdi",
-                                  dokumentId = "testverdi",
-                                  brevtype = Brevtype.VARSEL)
+                                       journalpostId = "testverdi",
+                                       dokumentId = "testverdi",
+                                       brevtype = Brevtype.VARSEL)
 
 }

@@ -2,8 +2,8 @@ package no.nav.familie.tilbake.service.dokumentbestilling.felles
 
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.familie.tilbake.domain.tbd.Brevsporing
-import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID

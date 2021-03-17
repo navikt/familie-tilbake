@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf
 
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.domain.tbd.Brevtype
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.service.pdfgen.Dokumentvariant
