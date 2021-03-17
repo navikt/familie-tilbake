@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -60,8 +61,9 @@ class BehandlingController(val behandlingService: BehandlingService,
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
                         henteParam = "behandlingId")
-    fun behandleSteg(@PathVariable("behandlingId") behandlingId: UUID) {
-        stegService.håndterSteg(behandlingId)
+    fun behandleSteg(@PathVariable("behandlingId") behandlingId: UUID,
+                     @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto) {
+        stegService.håndterSteg(behandlingId,behandlingsstegDto)
     }
 
     @PutMapping(path = ["/vent/v1"],

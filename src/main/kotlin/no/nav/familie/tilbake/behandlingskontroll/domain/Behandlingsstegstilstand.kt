@@ -53,6 +53,11 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean, priv
             }
             throw IllegalArgumentException("Behandlingssteg finnes ikke med sekvens=$sekvens")
         }
+
+        fun fraKode(kode: String): Behandlingssteg {
+            return values().firstOrNull { it.name == kode }
+                   ?: throw IllegalArgumentException("Ukjent Behandlingssteg $kode")
+        }
     }
 
 

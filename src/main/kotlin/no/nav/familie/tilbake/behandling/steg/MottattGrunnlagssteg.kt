@@ -22,8 +22,8 @@ class MottattGrunnlagssteg(val kravgrunnlagRepository: KravgrunnlagRepository,
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.GRUNNLAG,
                                                                                           Behandlingsstegstatus.UTFØRT))
+            behandlingskontrollService.fortsettBehandling(behandlingId)
         }
-        behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
