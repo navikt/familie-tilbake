@@ -47,14 +47,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (data.isPresent) {
             val behandling = data.get()
             val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling)
-            val behandlingsstegsinfoListe: List<Behandlingsstegsinfo> = behandlingskontrollService
+            val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                     .hentBehandlingsstegstilstand(behandling)
             val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
 
             return BehandlingMapper.tilRespons(behandling = behandling,
                                                erBehandlingPåVent = erBehandlingPåVent,
                                                kanHenleggeBehandling = kanBehandlingHenlegges,
-                                               behandlingsstegsinfoListe = behandlingsstegsinfoListe)
+                                               behandlingsstegsinfoer = behandlingsstegsinfoer)
         }
         throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
                    frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",

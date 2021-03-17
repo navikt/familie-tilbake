@@ -93,7 +93,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                  behandlingsstegstatus = it.behandlingsstegsstatus,
                                  venteårsak = it.venteårsak,
                                  tidsfrist = it.tidsfrist)
-        }.toList()
+        }
     }
 
     fun finnAktivtSteg(behandlingId: UUID): Behandlingssteg? {

@@ -52,7 +52,7 @@ object BehandlingMapper {
     fun tilRespons(behandling: Behandling,
                    erBehandlingPåVent: Boolean,
                    kanHenleggeBehandling: Boolean,
-                   behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): BehandlingDto {
+                   behandlingsstegsinfoer: List<Behandlingsstegsinfo>): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
@@ -74,7 +74,7 @@ object BehandlingMapper {
                              harVerge = behandling.harVerge,
                              kanHenleggeBehandling = kanHenleggeBehandling,
                              erBehandlingPåVent = erBehandlingPåVent,
-                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoListe))
+                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
 
     }
 
@@ -84,7 +84,7 @@ object BehandlingMapper {
                                     behandlingsstegstatus = it.behandlingsstegstatus,
                                     venteårsak = it.venteårsak,
                                     tidsfrist = it.tidsfrist)
-        }.toList()
+        }
     }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {
