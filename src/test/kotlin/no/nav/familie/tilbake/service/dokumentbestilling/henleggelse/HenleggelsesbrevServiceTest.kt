@@ -14,9 +14,9 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Brevtype
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.repository.tbd.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator

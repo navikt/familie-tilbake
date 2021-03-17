@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.domain.tbd.Brevtype
-import no.nav.familie.tilbake.repository.tbd.BrevsporingRepository
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID

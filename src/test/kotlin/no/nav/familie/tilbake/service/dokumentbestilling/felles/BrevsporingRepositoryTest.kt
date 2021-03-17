@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.service.dokumentbestilling.felles
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
