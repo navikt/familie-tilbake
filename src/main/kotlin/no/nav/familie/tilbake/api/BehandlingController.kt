@@ -59,9 +59,9 @@ class BehandlingController(val behandlingService: BehandlingService,
     @PostMapping(path = ["{behandlingId}/steg/v1"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
+                        handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
                         henteParam = "behandlingId")
-    fun behandleSteg(@PathVariable("behandlingId") behandlingId: UUID,
+    fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                      @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto) {
         stegService.håndterSteg(behandlingId,behandlingsstegDto)
     }

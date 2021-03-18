@@ -14,7 +14,7 @@ class StegService(val steg: List<IBehandlingssteg>,
     fun håndterSteg(behandlingId: UUID,
                     behandlingsstegDto: BehandlingsstegDto? = null) {
         if (behandlingsstegDto != null) {
-            val behandledeSteg = Behandlingssteg.fraKode(behandlingsstegDto.getSteg())
+            val behandledeSteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
             hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
         }
 
