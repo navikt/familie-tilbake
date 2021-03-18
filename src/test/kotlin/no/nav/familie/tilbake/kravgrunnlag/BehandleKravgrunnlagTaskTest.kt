@@ -7,6 +7,8 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -56,6 +58,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
     private val fagsak = Testdata.fagsak
@@ -69,7 +74,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
-        lagBehandlingsstegstilstand()
+        lagGrunnlagssteg()
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml)
 
@@ -101,11 +106,17 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
-        lagBehandlingsstegstilstand()
+        lagGrunnlagssteg()
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
-        lagBehandlingsstegstilstand()
+        behandlingskontrollService
+                .tilbakehoppBehandlingssteg(behandlingId = behandling.id,
+                                            behandlingsstegsinfo =
+                                            Behandlingsstegsinfo(Behandlingssteg.GRUNNLAG,
+                                                                 Behandlingsstegstatus.VENTER,
+                                                                 Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                                                                 LocalDate.now().plusWeeks(4)))
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
 
         assertDoesNotThrow { behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml)) }
@@ -333,7 +344,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertTrue { kravgrunnlagsbeløp.any { Klassetype.FEIL == it.klassetype } }
     }
 
-    private fun lagBehandlingsstegstilstand() {
+    private fun lagGrunnlagssteg() {
         behandlingsstegstilstandRepository.insert(
                 Behandlingsstegstilstand(behandlingId = behandling.id,
                                          behandlingssteg = Behandlingssteg.GRUNNLAG,

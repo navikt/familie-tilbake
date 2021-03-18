@@ -22,9 +22,8 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
                                                                                           Behandlingsstegstatus.AUTOUTFØRT))
+            behandlingskontrollService.fortsettBehandling(behandlingId)
         }
-
-        behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {

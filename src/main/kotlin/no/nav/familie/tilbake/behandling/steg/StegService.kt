@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -10,7 +11,13 @@ import java.util.UUID
 class StegService(val steg: List<IBehandlingssteg>,
                   val behandlingskontrollService: BehandlingskontrollService) {
 
-    fun håndterSteg(behandlingId: UUID) {
+    fun håndterSteg(behandlingId: UUID,
+                    behandlingsstegDto: BehandlingsstegDto? = null) {
+        if (behandlingsstegDto != null) {
+            val behandledeSteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
+            hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
+        }
+
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
                                     ?: throw  Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
                                                    frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg")
@@ -22,8 +29,8 @@ class StegService(val steg: List<IBehandlingssteg>,
             throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")
         }
 
+        //utfører steg 2 ganger for å sjekke om det nye steget kan utføres automatisk
         hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
-
     }
 
     private fun hentStegInstans(behandlingssteg: Behandlingssteg): IBehandlingssteg {
