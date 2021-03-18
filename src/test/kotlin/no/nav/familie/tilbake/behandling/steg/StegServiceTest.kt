@@ -117,7 +117,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             }
         }
 
-        val faktaFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaomfeilutbetalingForBehandlingId(behandlingId)
+        val faktaFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
         assertNotNull(faktaFeilutbetaling)
         val faktaFeilutbetalingsperioder = faktaFeilutbetaling.perioder.toList()
         assertEquals(1, faktaFeilutbetalingsperioder.size)

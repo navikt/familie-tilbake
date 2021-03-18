@@ -19,7 +19,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val faktaFeilutbetaling = hentAktivFaktaomfeilutbetalingForBehandlingId(behandlingId)
+        val faktaFeilutbetaling = hentAktivFaktaOmFeilutbetaling(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         return FaktaFeilutbetalingMapper.tilRespons(faktaFeilutbetaling = faktaFeilutbetaling,
                                                     kravgrunnlag = kravgrunnlag,
@@ -30,7 +30,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
 
     @Transactional
     fun lagreFaktaomfeilutbetaling(behandlingId: UUID, behandlingsstegFaktaDto: BehandlingsstegFaktaDto) {
-        val eksisterendeFaktaData: FaktaFeilutbetaling? = hentAktivFaktaomfeilutbetalingForBehandlingId(behandlingId)
+        val eksisterendeFaktaData: FaktaFeilutbetaling? = hentAktivFaktaOmFeilutbetaling(behandlingId)
         if (eksisterendeFaktaData != null) {
             faktaFeilutbetalingRepository.update(eksisterendeFaktaData.copy(aktiv = false))
         }
@@ -46,7 +46,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
                                                                  begrunnelse = behandlingsstegFaktaDto.begrunnelse))
     }
 
-    fun hentAktivFaktaomfeilutbetalingForBehandlingId(behandlingId: UUID): FaktaFeilutbetaling? {
+    fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {
         return faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandlingId)
     }
 }

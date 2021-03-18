@@ -8,11 +8,11 @@ import java.util.UUID
 interface IBehandlingssteg {
 
     fun utførSteg(behandlingId: UUID) {
-        throw Feil(message = "Noe gikk galt,er i default method implementasjon for $behandlingId")
+        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
     }
 
     fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
-        throw Feil(message = "Noe gikk galt,er i default method implementasjon for $behandlingId")
+        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
     }
 
     fun getBehandlingssteg(): Behandlingssteg

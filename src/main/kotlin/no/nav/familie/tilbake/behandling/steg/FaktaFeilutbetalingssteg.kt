@@ -25,7 +25,7 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
 
-        if (faktaFeilutbetalingService.hentAktivFaktaomfeilutbetalingForBehandlingId(behandlingId) != null) {
+        if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FAKTA,
                                                                                           Behandlingsstegstatus.UTFØRT))
