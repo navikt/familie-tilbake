@@ -196,7 +196,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                     "Overlappende perioder Periode(fom=2020-08-01, tom=2020-08-31) og Periode(fom=2020-08-15, tom=2020-08-27).",
+                     "Overlappende perioder Periode(fom=2020-08, tom=2020-08) og Periode(fom=2020-08, tom=2020-08).",
                      exception.message)
     }
 
@@ -207,16 +207,6 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
                      "For måned 2020-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210",
-                     exception.message)
-    }
-
-    @Test
-    fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har ulike månedlig skatt beløp til samme måned`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_samme_måned_har_ulike_månedlig_skatt_beløp.xml")
-
-        val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
-        assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                     "For måned 2020-08 er opplyses ulike verdier maks skatt i ulike perioder",
                      exception.message)
     }
 

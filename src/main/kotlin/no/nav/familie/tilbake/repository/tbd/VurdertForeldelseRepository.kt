@@ -9,4 +9,7 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface VurdertForeldelseRepository : RepositoryInterface<VurdertForeldelse, UUID>, InsertUpdateRepository<VurdertForeldelse>
+interface VurdertForeldelseRepository : RepositoryInterface<VurdertForeldelse, UUID>, InsertUpdateRepository<VurdertForeldelse> {
+
+    fun findByBehandlingId(behandlingId: UUID): VurdertForeldelse?
+}

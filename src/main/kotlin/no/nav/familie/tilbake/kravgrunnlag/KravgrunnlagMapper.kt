@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.kravgrunnlag.domain.Resultatkode
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
@@ -60,7 +61,7 @@ object KravgrunnlagMapper {
                     tilbakekrevesBeløp = it.belopTilbakekreves,
                     uinnkrevdBeløp = it.belopUinnkrevd,
                     skatteprosent = it.skattProsent,
-                    resultatkode = it.kodeResultat,
+                    resultatkode = Resultatkode.fraNavn(it.kodeResultat),
                     årsakskode = it.kodeAArsak,
                     skyldkode = it.kodeSkyld,
             )

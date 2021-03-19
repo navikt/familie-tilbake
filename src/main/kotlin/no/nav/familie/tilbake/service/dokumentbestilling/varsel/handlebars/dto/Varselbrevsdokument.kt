@@ -1,16 +1,16 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.BaseDokument
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.HbPeriode
 import java.time.LocalDate
 
 data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
                                val beløp: Long,
                                val endringsdato: LocalDate,
-                               val feilutbetaltePerioder: List<Periode>,
+                               val feilutbetaltePerioder: List<HbPeriode>,
                                val varseltekstFraSaksbehandler: String? = null,
                                val fristdatoForTilbakemelding: LocalDate,
                                val varsletDato: LocalDate? = null,
@@ -22,8 +22,8 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
-    val datoerHvisSammenhengendePeriode: Periode? = if (feilutbetaltePerioder.size == 1) {
-        Periode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
+    val datoerHvisSammenhengendePeriode: HbPeriode? = if (feilutbetaltePerioder.size == 1) {
+        HbPeriode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
     } else null
 
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)

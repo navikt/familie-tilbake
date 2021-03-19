@@ -73,7 +73,7 @@ data class Kravgrunnlagsbeløp433(@Id
                                  val tilbakekrevesBeløp: BigDecimal,
                                  @Column("uinnkrevd_belop")
                                  val uinnkrevdBeløp: BigDecimal?,
-                                 val resultatkode: String?,
+                                 val resultatkode: Resultatkode?,
                                  @Column("arsakskode")
                                  val årsakskode: String?,
                                  val skyldkode: String?,
@@ -114,6 +114,21 @@ enum class Klassetype(val navn: String) {
         fun fraKode(kode: String): Klassetype {
             return values().firstOrNull { it.name == kode }
                    ?: throw IllegalArgumentException("Ukjent KlasseType $kode")
+        }
+    }
+}
+
+enum class Resultatkode {
+    FORELDET,
+    FEILREGISTRERT,
+    INGEN_TILBAKEKREVING,
+    DELVIS_TILBAKEKREVING,
+    FULL_TILBAKEKREVING;
+
+    companion object {
+
+        fun fraNavn(navn: String?): Resultatkode? {
+            return values().firstOrNull { it.name == navn }
         }
     }
 }

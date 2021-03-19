@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.service.modell
+package no.nav.familie.tilbake.beregning.modell
 
 
 enum class Vedtaksresultat(val navn: String) {

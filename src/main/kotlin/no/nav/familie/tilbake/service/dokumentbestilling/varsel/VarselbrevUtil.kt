@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.HbPeriode
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import java.time.LocalDate
 
@@ -115,15 +116,15 @@ object VarselbrevUtil {
         else TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Periode> {
-        return feilutbetaltePerioderDto.perioder.map { Periode(it.fom, it.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<HbPeriode> {
+        return feilutbetaltePerioderDto.perioder.map { HbPeriode(it.fom, it.tom) }
     }
 
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Periode> {
-        return varsel?.perioder?.map { Periode(it.fom, it.tom) } ?: emptyList()
+    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<HbPeriode> {
+        return varsel?.perioder?.map { HbPeriode(it.fom, it.tom) } ?: emptyList()
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Periode> {
-        return feilutbetalingsfakta.feilutbetaltePerioder.map { Periode(it.periode.fom, it.periode.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<HbPeriode> {
+        return feilutbetalingsfakta.feilutbetaltePerioder.map { HbPeriode(it.periode.fom, it.periode.tom) }
     }
 }

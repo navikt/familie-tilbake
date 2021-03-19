@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.config
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import no.nav.familie.tilbake.common.repository.Endret
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -18,6 +17,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.PlatformTransactionManager
+import java.sql.Date
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.Optional
 import javax.sql.DataSource
 
@@ -47,27 +49,32 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @Bean
     override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(listOf(KravstatuskodeLesConverter(),
-                                            KravstatuskodeSkrivConverter(),
+        return JdbcCustomConversions(listOf(YearMonthTilLocalDateConverter(),
+                                            LocalDateTilYearMonthConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PropertiesWrapperTilStringConverter()))
     }
 
-    @ReadingConverter
-    class KravstatuskodeLesConverter : Converter<String, Kravstatuskode> {
-
-        override fun convert(kode: String): Kravstatuskode {
-            return Kravstatuskode.fraKode(kode)
-        }
-
-    }
-
     @WritingConverter
-    class KravstatuskodeSkrivConverter : Converter<Kravstatuskode, String> {
+    class YearMonthTilLocalDateConverter : Converter<YearMonth?, LocalDate> {
 
-        override fun convert(kravstatuskode: Kravstatuskode): String {
-            return kravstatuskode.kode
+        override fun convert(yearMonth: YearMonth): LocalDate {
+            return yearMonth.let {
+                LocalDate.of(it.year, it.month, 1)
+            }
+        }
+    }
+
+    @ReadingConverter
+    class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
+
+        override fun convert(date: Date): YearMonth {
+            return date.let {
+                val localDate = date.toLocalDate()
+                YearMonth.of(localDate.year, localDate.month)
+            }
         }
 
     }
+
 }

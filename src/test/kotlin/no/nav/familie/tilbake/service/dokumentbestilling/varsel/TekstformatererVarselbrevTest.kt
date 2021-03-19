@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.HbPeriode
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -101,18 +102,18 @@ class TekstformatererVarselbrevTest {
         assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
     }
 
-    private fun lagFeilutbetalingerMedFlerePerioder(): List<Periode> {
-        val periode1 = Periode(LocalDate.of(2019, 3, 3),
+    private fun lagFeilutbetalingerMedFlerePerioder(): List<HbPeriode> {
+        val periode1 = HbPeriode(LocalDate.of(2019, 3, 3),
                                LocalDate.of(2020, 3, 3))
-        val periode2 = Periode(LocalDate.of(2022, 3, 3),
+        val periode2 = HbPeriode(LocalDate.of(2022, 3, 3),
                                LocalDate.of(2024, 3, 3))
         return listOf(periode1, periode2)
     }
 
 
-    private fun lagFeilutbetalingerMedKunEnPeriode(): List<Periode> {
-        return listOf(Periode(LocalDate.of(2019, 3, 3),
-                              LocalDate.of(2020, 3, 3)))
+    private fun lagFeilutbetalingerMedKunEnPeriode(): List<HbPeriode> {
+        return listOf(HbPeriode(LocalDate.of(2019, 3, 3),
+                                LocalDate.of(2020, 3, 3)))
     }
 
 

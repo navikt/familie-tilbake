@@ -10,13 +10,12 @@ import java.util.UUID
 
 data class Foreldelsesperiode(@Id
                               val id: UUID = UUID.randomUUID(),
-                              val vurdertForeldelseId: UUID,
                               @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                               val periode: Periode,
                               val foreldelsesvurderingstype: Foreldelsesvurderingstype,
                               val begrunnelse: String,
-                              val foreldelsesfrist: LocalDate?,
-                              val oppdagelsesdato: LocalDate?,
+                              val foreldelsesfrist: LocalDate? = null,
+                              val oppdagelsesdato: LocalDate? = null,
                               @Version
                               val versjon: Long = 0,
                               @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

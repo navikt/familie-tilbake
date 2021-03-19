@@ -18,10 +18,11 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val faktaFeilutbetaling = faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return FaktaFeilutbetalingMapper.tilRespons(faktaFeilutbetaling = faktaFeilutbetaling,
-                                                    kravgrunnlag = kravgrunnlag,
-                                                    revurderingsvedtaksdato = behandling.aktivtFagsystem.revurderingsvedtaksdato,
-                                                    varsletData = behandling.aktivtVarsel,
-                                                    fagsystemsbehandling = behandling.aktivtFagsystem)
+        return FaktaFeilutbetalingMapper
+                .tilRespons(faktaFeilutbetaling = faktaFeilutbetaling,
+                            kravgrunnlag = kravgrunnlag,
+                            revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
+                            varsletData = behandling.aktivtVarsel,
+                            fagsystemsbehandling = behandling.aktivFagsystemsbehandling)
     }
 }
