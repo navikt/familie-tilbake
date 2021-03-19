@@ -5,11 +5,15 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -62,65 +67,209 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `håndterSteg skal vente på faktafeilutbetalingssteg for behandling`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId)
-        brevsporingRepository.insert(Testdata.brevsporing)
-        stegService.håndterSteg(behandlingId)
+    fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er avsluttet`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
-        assertDoesNotThrow { stegService.håndterSteg(behandlingId) }
+        val exception = assertFailsWith<RuntimeException>(block =
+                                                          { stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto) })
+        assertEquals("Behandling med id=$behandlingId er allerede ferdig behandlet", exception.message)
+    }
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        assertEquals(3, behandlingsstegstilstander.size)
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        assertEquals(Behandlingssteg.FAKTA, aktivtBehandlingssteg?.behandlingssteg)
-        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+    @Test
+    fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er på vent`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.AVVENTER_DOKUMENTASJON)
 
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+
+        val exception = assertFailsWith<RuntimeException>(block =
+                                                          { stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto) })
+        assertEquals("Behandling med id=$behandlingId er på vent, kan ikke behandle steg FAKTA", exception.message)
     }
 
     @Test
     fun `håndterSteg skal utføre faktafeilutbetalingssteg for behandling`() {
-        behandlingskontrollService.fortsettBehandling(behandlingId)
-        brevsporingRepository.insert(Testdata.brevsporing)
-        stegService.håndterSteg(behandlingId)
-
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        stegService.håndterSteg(behandlingId)
 
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto) }
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertEquals(3, behandlingsstegstilstander.size)
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+        assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingssteg?.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+
+        assertFaktadata(behandlingsstegFaktaDto)
+    }
+
+    @Test
+    fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til vilkårsvurdering når behandling er på foreslåvedtak`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto) }
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertEquals(4, behandlingsstegstilstander.size)
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+        assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingssteg?.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+
+        assertFaktadata(behandlingsstegFaktaDto)
+    }
+
+    @Test
+    fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til foreldelse når foreldelse ikke er autoutført`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        var kravgrunnlag431 = Testdata.kravgrunnlag431
+        for (grunnlagsperiode in kravgrunnlag431.perioder) {
+            kravgrunnlag431 =
+                    kravgrunnlag431.copy(perioder = setOf(grunnlagsperiode.copy(
+                            periode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                              tom = LocalDate.of(2010, 1, 31)))))
+        }
+        kravgrunnlagRepository.insert(kravgrunnlag431)
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto) }
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertEquals(4, behandlingsstegstilstander.size)
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+        assertEquals(Behandlingssteg.FORELDELSE, aktivtBehandlingssteg?.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+
+        assertFaktadata(behandlingsstegFaktaDto)
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i varselssteg`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+
+        stegService.gjenopptaSteg(behandlingId)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        assertNotNull(aktivtBehandlingsstegstilstand)
+        assertEquals(Behandlingssteg.GRUNNLAG, aktivtBehandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.VENTER, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
+        assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtBehandlingsstegstilstand.venteårsak)
+        assertEquals(LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
+                     aktivtBehandlingsstegstilstand.tidsfrist)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+    }
+
+    @Test
+    fun `gjenopptaSteg skal ikke gjenoppta behandling når behandling er i grunnlagssteg uten grunnlag`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+
+        stegService.gjenopptaSteg(behandlingId)
+
+        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        assertNotNull(aktivtBehandlingsstegstilstand)
+        assertEquals(Behandlingssteg.GRUNNLAG, aktivtBehandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.VENTER, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
+        assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtBehandlingsstegstilstand.venteårsak)
+        assertEquals(LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
+                     aktivtBehandlingsstegstilstand.tidsfrist)
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i grunnlagssteg med grunnlag`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
+        stegService.gjenopptaSteg(behandlingId)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        assertNotNull(aktivtBehandlingsstegstilstand)
+        assertEquals(Behandlingssteg.FAKTA, aktivtBehandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i vilkårsvurderingssteg`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.AVVENTER_DOKUMENTASJON)
+
+        stegService.gjenopptaSteg(behandlingId)
+
+        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        assertNotNull(aktivtBehandlingsstegstilstand)
+        assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
+    }
+
+    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
+                                            behandlingsstegstatus: Behandlingsstegstatus,
+                                            venteårsak: Venteårsak? = null) {
+        val tidsfrist: LocalDate? = venteårsak?.let { LocalDate.now().plusWeeks(it.defaultVenteTidIUker) }
+        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingssteg = behandlingssteg,
+                                                                           behandlingsstegsstatus = behandlingsstegstatus,
+                                                                           venteårsak = venteårsak,
+                                                                           tidsfrist = tidsfrist,
+                                                                           behandlingId = behandlingId))
+    }
+
+    private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
         val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = Periode(LocalDate.now().minusMonths(1),
                                                                                              LocalDate.now()),
                                                                            hendelsestype = Hendelsestype.BA_ANNET,
                                                                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
-        assertDoesNotThrow {
-            stegService
-                    .håndterSteg(behandlingId,
-                                 BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
-                                                         begrunnelse = "testverdi"))
-        }
+        return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
+                                       begrunnelse = "testverdi")
+    }
 
-        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        assertEquals(5, behandlingsstegstilstander.size)
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
-        assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingssteg?.behandlingssteg)
-        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+    private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+                                      behandlingssteg: Behandlingssteg,
+                                      behandlingsstegstatus: Behandlingsstegstatus) {
+
         assertTrue {
-            behandlingsstegstilstander.any {
-                Behandlingssteg.FAKTA == it.behandlingssteg &&
-                Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
+            behandlingsstegstilstand.any {
+                behandlingssteg == it.behandlingssteg &&
+                behandlingsstegstatus == it.behandlingsstegsstatus
             }
         }
-        assertTrue {
-            behandlingsstegstilstander.any {
-                Behandlingssteg.FORELDELSE == it.behandlingssteg &&
-                Behandlingsstegstatus.AUTOUTFØRT == it.behandlingsstegsstatus
-            }
-        }
+    }
 
+    private fun assertFaktadata(behandlingsstegFaktaDto: BehandlingsstegFaktaDto) {
         val faktaFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
         assertNotNull(faktaFeilutbetaling)
         val faktaFeilutbetalingsperioder = faktaFeilutbetaling.perioder.toList()
         assertEquals(1, faktaFeilutbetalingsperioder.size)
+        val faktaFeilutbetaltePerioderDto = behandlingsstegFaktaDto.feilutbetaltePerioder[0]
         assertEquals(faktaFeilutbetaltePerioderDto.periode, faktaFeilutbetalingsperioder[0].periode)
         assertEquals(faktaFeilutbetaltePerioderDto.hendelsestype, faktaFeilutbetalingsperioder[0].hendelsestype)
         assertEquals(faktaFeilutbetaltePerioderDto.hendelsesundertype, faktaFeilutbetalingsperioder[0].hendelsesundertype)

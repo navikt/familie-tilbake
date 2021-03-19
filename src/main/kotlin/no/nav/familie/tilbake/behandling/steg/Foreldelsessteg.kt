@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
 
@@ -16,6 +17,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
@@ -24,6 +26,13 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
                                                                                           Behandlingsstegstatus.AUTOUTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
+    }
+
+    @Transactional
+    override fun gjenopptaSteg(behandlingId: UUID){
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
+                                                                                      Behandlingsstegstatus.KLAR))
     }
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {

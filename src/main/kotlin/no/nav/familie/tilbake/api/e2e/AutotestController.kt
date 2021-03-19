@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.e2e
+package no.nav.familie.tilbake.api.e2e
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task

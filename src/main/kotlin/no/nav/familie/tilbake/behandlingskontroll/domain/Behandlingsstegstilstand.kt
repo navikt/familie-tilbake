@@ -45,7 +45,7 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean, priv
             return nesteBehandlingssteg
         }
 
-        private fun fraSekvens(sekvens: Int): Behandlingssteg {
+        fun fraSekvens(sekvens: Int): Behandlingssteg {
             for (behandlingssteg in values()) {
                 if (sekvens == behandlingssteg.sekvens) {
                     return behandlingssteg
