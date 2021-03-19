@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,19 +21,21 @@ import java.util.UUID
 class AutotestController (private val taskRepository: TaskRepository) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
-    fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String) {
+    fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): HttpStatus {
         taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                  payload = kravgrunnlag,
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
+        return HttpStatus.ACCEPTED
     }
     @PostMapping(path = ["/opprett/statusmelding/"])
-    fun opprettStatusmelding(@RequestBody statusmelding: String) {
+    fun opprettStatusmelding(@RequestBody statusmelding: String): HttpStatus {
         taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
                                  payload = statusmelding,
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
+        return HttpStatus.ACCEPTED
     }
 }
