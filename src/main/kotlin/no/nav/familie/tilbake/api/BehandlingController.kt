@@ -74,7 +74,7 @@ class BehandlingController(val behandlingService: BehandlingService,
         behandlingService.settBehandlingPåVent(behandlingPåVentDto)
     }
 
-    @PutMapping(path = ["/gjenoppta/v1"],
+    @PutMapping(path = ["{behandlingId}/gjenoppta/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
