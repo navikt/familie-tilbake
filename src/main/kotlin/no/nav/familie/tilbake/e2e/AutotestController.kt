@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.e2e
 
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
@@ -20,19 +21,21 @@ import java.util.UUID
 class AutotestController (private val taskRepository: TaskRepository) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
-    fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String) {
+    fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
         taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                  payload = kravgrunnlag,
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
+        return Ressurs.success("")
     }
     @PostMapping(path = ["/opprett/statusmelding/"])
-    fun opprettStatusmelding(@RequestBody statusmelding: String) {
+    fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
         taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
                                  payload = statusmelding,
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
+        return Ressurs.success("")
     }
 }
