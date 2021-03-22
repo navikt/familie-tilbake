@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.beregning
 
-import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagBeløp
+import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.isNotZero
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
@@ -13,14 +13,14 @@ import java.math.RoundingMode
 import java.util.function.Function
 
 @Service
-object KravgrunnlagBeregningService {
+object KravgrunnlagsberegningService {
 
     fun fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag: Kravgrunnlag431,
-                                          vurderingsperioder: List<Periode>): Map<Periode, FordeltKravgrunnlagBeløp> {
+                                          vurderingsperioder: List<Periode>): Map<Periode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
-            FordeltKravgrunnlagBeløp(beregnFeilutbetaltBeløp(kravgrunnlag, it),
-                                     beregnUtbetaltYtelseBeløp(kravgrunnlag, it),
-                                     beregnRiktigYtelseBeløp(kravgrunnlag, it))
+            FordeltKravgrunnlagsbeløp(beregnFeilutbetaltBeløp(kravgrunnlag, it),
+                                      beregnUtbetaltYtelseBeløp(kravgrunnlag, it),
+                                      beregnRiktigYtelseBeløp(kravgrunnlag, it))
         }
     }
 
@@ -66,8 +66,8 @@ object KravgrunnlagBeregningService {
                 .sumOf {
                     val beløp = beløpsummerer.apply(it)
                     if (beløp.isNotZero()) {
-                        val beløpPerMåned: BigDecimal = BeregnBeløpUtil.beregnBeløpPerMåned(beløp, it.periode)
-                        BeregnBeløpUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
+                        val beløpPerMåned: BigDecimal = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode)
+                        BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
                     } else {
                         BigDecimal.ZERO
                     }

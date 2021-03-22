@@ -7,13 +7,12 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
-import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.HbPeriode
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import java.time.LocalDate
 
@@ -116,15 +115,15 @@ object VarselbrevUtil {
         else TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<HbPeriode> {
-        return feilutbetaltePerioderDto.perioder.map { HbPeriode(it.fom, it.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Handlebarsperiode> {
+        return feilutbetaltePerioderDto.perioder.map { Handlebarsperiode(it.fom, it.tom) }
     }
 
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<HbPeriode> {
-        return varsel?.perioder?.map { HbPeriode(it.fom, it.tom) } ?: emptyList()
+    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Handlebarsperiode> {
+        return varsel?.perioder?.map { Handlebarsperiode(it.fom, it.tom) } ?: emptyList()
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<HbPeriode> {
-        return feilutbetalingsfakta.feilutbetaltePerioder.map { HbPeriode(it.periode.fom, it.periode.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Handlebarsperiode> {
+        return feilutbetalingsfakta.feilutbetaltePerioder.map { Handlebarsperiode(it.periode.fom, it.periode.tom) }
     }
 }

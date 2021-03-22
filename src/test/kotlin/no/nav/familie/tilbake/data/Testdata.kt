@@ -60,7 +60,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.kravgrunnlag.domain.Resultatkode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
@@ -170,7 +169,7 @@ object Testdata {
                                                           nyttBeløp = BigDecimal("10000"),
                                                           tilbakekrevesBeløp = BigDecimal.ZERO,
                                                           uinnkrevdBeløp = BigDecimal.ZERO,
-                                                          resultatkode = Resultatkode.DELVIS_TILBAKEKREVING,
+                                                          resultatkode = "testverdi",
                                                           årsakskode = "testverdi",
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
@@ -182,7 +181,7 @@ object Testdata {
                                                           nyttBeløp = BigDecimal.ZERO,
                                                           tilbakekrevesBeløp = BigDecimal("10000"),
                                                           uinnkrevdBeløp = BigDecimal.ZERO,
-                                                          resultatkode = Resultatkode.FORELDET,
+                                                          resultatkode = "testverdi",
                                                           årsakskode = "testverdi",
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))

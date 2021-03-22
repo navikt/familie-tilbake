@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.beregning
 
 import com.google.common.collect.Lists
-import no.nav.familie.tilbake.beregning.modell.BeregningResultatPeriode
-import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagBeløp
-import no.nav.familie.tilbake.beregning.modell.GrunnlagPeriodeMedSkattProsent
+import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
+import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
+import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class TilbakekrevingBeregnerVilkårTest {
+class TilbakekrevingsberegningVilkårTest {
 
     private lateinit var vurdering: Vilkårsvurderingsperiode
-    private lateinit var grunnlagPeriodeMedSkattProsent: GrunnlagPeriodeMedSkattProsent
+    private lateinit var grunnlagsperiodeMedSkatteprosent: GrunnlagsperiodeMedSkatteprosent
     private lateinit var forstoBurdeForstattVurdering: Vilkårsvurderingsperiode
 
     @BeforeEach
@@ -36,8 +36,8 @@ class TilbakekrevingBeregnerVilkårTest {
                                                            LocalDate.of(2019, 5, 3)),
                                          begrunnelse = "foo")
 
-        grunnlagPeriodeMedSkattProsent =
-                GrunnlagPeriodeMedSkattProsent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
+        grunnlagsperiodeMedSkatteprosent =
+                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
     }
 
     @Test
@@ -47,14 +47,14 @@ class TilbakekrevingBeregnerVilkårTest {
 
 
         //act
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
 
         //assert
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(resultat.tilbakekrevingBeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.renteBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
         assertThat(resultat.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
         assertThat(resultat.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.FORSETT)
@@ -70,16 +70,16 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                                         ileggRenter = true))
 
         //act
-        val resultat: BeregningResultatPeriode = beregn(forstoBurdeForstattVurdering,
-                                                        BigDecimal.valueOf(10000),
-                                                        Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
-                                                        true)
+        val resultat: Beregningsresultatsperiode = beregn(forstoBurdeForstattVurdering,
+                                                          BigDecimal.valueOf(10000),
+                                                          Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                                                          true)
 
         //assert
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(resultat.tilbakekrevingBeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.renteBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
         assertThat(resultat.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
         assertThat(resultat.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.FORSETT)
@@ -95,16 +95,16 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                                         ileggRenter = false))
 
         //act
-        val resultat: BeregningResultatPeriode = beregn(forstoBurdeForstattVurdering,
-                                                        BigDecimal.valueOf(10000),
-                                                        Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
-                                                        true)
+        val resultat: Beregningsresultatsperiode = beregn(forstoBurdeForstattVurdering,
+                                                          BigDecimal.valueOf(10000),
+                                                          Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                                                          true)
 
         //assert
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.tilbakekrevingBeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.renteBeløp).isEqualByComparingTo(BigDecimal.valueOf(0))
-        assertThat(resultat.renterProsent).isNull()
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(0))
+        assertThat(resultat.renteprosent).isNull()
         assertThat(resultat.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
         assertThat(resultat.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.FORSETT)
@@ -120,10 +120,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          ileggRenter = true))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.GROV_UAKTSOMHET)
     }
 
@@ -135,9 +135,9 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          tilbakekrevSmåbeløp = false))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(522), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.ZERO)
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(522), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.ZERO)
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.SIMPEL_UAKTSOMHET)
     }
 
@@ -150,10 +150,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          andelTilbakekreves = BigDecimal.valueOf(70)))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(7700))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(7700))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
     }
 
     @Test
@@ -165,11 +165,11 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          andelTilbakekreves = BigDecimal.valueOf(70)))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(7000))
-        assertThat(resultat.renterProsent).isNull()
-        assertThat(resultat.renteBeløp).isZero()
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(7000))
+        assertThat(resultat.renteprosent).isNull()
+        assertThat(resultat.rentebeløp).isZero()
     }
 
     @Test
@@ -181,11 +181,11 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          andelTilbakekreves = BigDecimal("0.01")))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(70000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(7))
-        assertThat(resultat.renterProsent).isNull()
-        assertThat(resultat.renteBeløp).isZero()
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(70000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(7))
+        assertThat(resultat.renteprosent).isNull()
+        assertThat(resultat.rentebeløp).isZero()
     }
 
     @Test
@@ -197,10 +197,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          manueltSattBeløp = BigDecimal.valueOf(6556)))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(6556))
-        assertThat(resultat.renterProsent).isNull()
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(6556))
+        assertThat(resultat.renteprosent).isNull()
     }
 
     @Test
@@ -212,10 +212,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                          manueltSattBeløp = BigDecimal.valueOf(6000)))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(6600))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(6600))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
     }
 
     @Test
@@ -225,10 +225,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                    begrunnelse = "foo"))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
-        assertThat(resultat.renterProsent).isNull()
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
+        assertThat(resultat.renteprosent).isNull()
         assertThat(resultat.andelAvBeløp).isNull()
         assertThat(resultat.vurdering).isEqualTo(AnnenVurdering.GOD_TRO)
         assertThat(resultat.manueltSattTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
@@ -240,10 +240,10 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                    begrunnelse = "foo"))
 
         //assert
-        val resultat: BeregningResultatPeriode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(resultat.renterProsent).isNull()
+        val resultat: Beregningsresultatsperiode =
+                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.ZERO)
+        assertThat(resultat.renteprosent).isNull()
         assertThat(resultat.andelAvBeløp).isZero()
         assertThat(resultat.vurdering).isEqualTo(AnnenVurdering.GOD_TRO)
         assertThat(resultat.manueltSattTilbakekrevingsbeløp).isNull()
@@ -255,18 +255,18 @@ class TilbakekrevingBeregnerVilkårTest {
                                                                    beløpTilbakekreves = BigDecimal.valueOf(8991),
                                                                    begrunnelse = "foo"))
         val grunnlagPeriodeMedSkattProsent =
-                GrunnlagPeriodeMedSkattProsent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
         //assert
-        val resultat: BeregningResultatPeriode =
+        val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
-        assertThat(resultat.renterProsent).isNull()
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
+        assertThat(resultat.renteprosent).isNull()
         assertThat(resultat.andelAvBeløp).isNull()
         assertThat(resultat.vurdering).isEqualTo(AnnenVurdering.GOD_TRO)
         assertThat(resultat.manueltSattTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(8991))
-        assertThat(resultat.skattBeløp).isEqualByComparingTo(BigDecimal.valueOf(899))
-        assertThat(resultat.tilbakekrevingBeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(8092))
+        assertThat(resultat.skattebeløp).isEqualByComparingTo(BigDecimal.valueOf(899))
+        assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(8092))
     }
 
     @Test
@@ -274,24 +274,24 @@ class TilbakekrevingBeregnerVilkårTest {
         vurdering = vurdering.copy(aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.FORSETT,
                                                                          begrunnelse = "foo"))
         val grunnlagPeriodeMedSkattProsent =
-                GrunnlagPeriodeMedSkattProsent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
         //act
-        val resultat: BeregningResultatPeriode =
+        val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
 
         //assert
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(resultat.tilbakekrevingBeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.renteBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(resultat.renterProsent).isEqualByComparingTo(BigDecimal.valueOf(10))
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
+        assertThat(resultat.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
         assertThat(resultat.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
         assertThat(resultat.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.FORSETT)
         assertThat(resultat.periode).isEqualTo(Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3)))
         assertThat(resultat.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(resultat.skattBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(resultat.tilbakekrevingBeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.skattebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
+        assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(10000))
     }
 
     @Test
@@ -299,31 +299,31 @@ class TilbakekrevingBeregnerVilkårTest {
         vurdering = vurdering.copy(aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.FORSETT,
                                                                          begrunnelse = "foo"))
         val grunnlagPeriodeMedSkattProsent =
-                GrunnlagPeriodeMedSkattProsent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
         //act
-        val resultat: BeregningResultatPeriode =
+        val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), false)
 
         //assert
-        assertThat(resultat.tilbakekrevingBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.tilbakekrevingBeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(resultat.renteBeløp).isEqualByComparingTo(BigDecimal.valueOf(0))
-        assertThat(resultat.renterProsent).isNull()
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualByComparingTo(BigDecimal.valueOf(10000))
+        assertThat(resultat.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(0))
+        assertThat(resultat.renteprosent).isNull()
         assertThat(resultat.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
         assertThat(resultat.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
         assertThat(resultat.vurdering).isEqualTo(Aktsomhet.FORSETT)
         assertThat(resultat.periode).isEqualTo(Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3)))
         assertThat(resultat.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(resultat.skattBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(resultat.tilbakekrevingBeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(9000))
+        assertThat(resultat.skattebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
+        assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(9000))
     }
 
     fun beregn(vilkårVurdering: Vilkårsvurderingsperiode,
                feilutbetalt: BigDecimal,
-               perioderMedSkattProsent: List<GrunnlagPeriodeMedSkattProsent>,
-               beregnRenter: Boolean): BeregningResultatPeriode {
-        val delresultat = FordeltKravgrunnlagBeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
-        return TilbakekrevingBeregnerVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkattProsent, beregnRenter)
+               perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
+               beregnRenter: Boolean): Beregningsresultatsperiode {
+        val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
+        return TilbakekrevingsberegningVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter)
     }
 }

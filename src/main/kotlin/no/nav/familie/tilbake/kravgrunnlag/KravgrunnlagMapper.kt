@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.kravgrunnlag.domain.Resultatkode
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
@@ -53,18 +52,16 @@ object KravgrunnlagMapper {
 
     private fun tilKravgrunnlagsbeløp(beløpPosteringer: List<DetaljertKravgrunnlagBelopDto>): Set<Kravgrunnlagsbeløp433> {
         return beløpPosteringer.map {
-            Kravgrunnlagsbeløp433(
-                    klassekode = Klassekode.fraKode(it.kodeKlasse),
-                    klassetype = Klassetype.fraKode(it.typeKlasse.value()),
-                    opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
-                    nyttBeløp = it.belopNy,
-                    tilbakekrevesBeløp = it.belopTilbakekreves,
-                    uinnkrevdBeløp = it.belopUinnkrevd,
-                    skatteprosent = it.skattProsent,
-                    resultatkode = Resultatkode.fraNavn(it.kodeResultat),
-                    årsakskode = it.kodeAArsak,
-                    skyldkode = it.kodeSkyld,
-            )
+            Kravgrunnlagsbeløp433(klassekode = Klassekode.fraKode(it.kodeKlasse),
+                                  klassetype = Klassetype.fraKode(it.typeKlasse.value()),
+                                  opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
+                                  nyttBeløp = it.belopNy,
+                                  tilbakekrevesBeløp = it.belopTilbakekreves,
+                                  uinnkrevdBeløp = it.belopUinnkrevd,
+                                  skatteprosent = it.skattProsent,
+                                  resultatkode = it.kodeResultat,
+                                  årsakskode = it.kodeAArsak,
+                                  skyldkode = it.kodeSkyld)
         }.toSet()
 
     }

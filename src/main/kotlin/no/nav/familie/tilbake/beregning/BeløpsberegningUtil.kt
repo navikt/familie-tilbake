@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.common.Periode
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-object BeregnBeløpUtil {
+object BeløpsberegningUtil {
 
     fun beregnBeløpPerMåned(beløp: BigDecimal, kravgrunnlagsperiode: Periode): BigDecimal {
         return beløp.divide(BigDecimal.valueOf(kravgrunnlagsperiode.lengdeIMåneder()), 2, RoundingMode.HALF_UP)

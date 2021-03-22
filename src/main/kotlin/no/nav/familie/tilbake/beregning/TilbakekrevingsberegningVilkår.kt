@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.beregning
 
-import no.nav.familie.tilbake.beregning.modell.BeregningResultatPeriode
-import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagBeløp
-import no.nav.familie.tilbake.beregning.modell.GrunnlagPeriodeMedSkattProsent
+import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
+import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
+import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.isZero
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
@@ -14,16 +14,16 @@ import no.nav.familie.tilbake.domain.tbd.Vurdering
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-internal object TilbakekrevingBeregnerVilkår {
+internal object TilbakekrevingsberegningVilkår {
 
     private val HUNDRE_PROSENT: BigDecimal = BigDecimal.valueOf(100)
     private val RENTESATS: BigDecimal = BigDecimal.valueOf(10)
     private val RENTEFAKTOR: BigDecimal = RENTESATS.divide(HUNDRE_PROSENT, 2, RoundingMode.UNNECESSARY)
 
     fun beregn(vilkårVurdering: Vilkårsvurderingsperiode,
-               delresultat: FordeltKravgrunnlagBeløp,
-               perioderMedSkattProsent: List<GrunnlagPeriodeMedSkattProsent>,
-               beregnRenter: Boolean): BeregningResultatPeriode {
+               delresultat: FordeltKravgrunnlagsbeløp,
+               perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
+               beregnRenter: Boolean): Beregningsresultatsperiode {
         val periode: Periode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
         val renter = beregnRenter && finnRenter(vilkårVurdering)
@@ -39,21 +39,21 @@ internal object TilbakekrevingBeregnerVilkår {
         val skattBeløp: BigDecimal =
                 beregnSkattBeløp(periode,
                                  beløpUtenRenter,
-                                 perioderMedSkattProsent)
+                                 perioderMedSkatteprosent)
         val nettoBeløp: BigDecimal = tilbakekrevingBeløp.subtract(skattBeløp)
-        return BeregningResultatPeriode(periode = periode,
-                                        vurdering = vurdering,
-                                        renterProsent = if (renter) RENTESATS else null,
-                                        feilutbetaltBeløp = delresultat.feilutbetaltBeløp,
-                                        riktigYtelseBeløp = delresultat.riktigYtelseBeløp,
-                                        utbetaltYtelseBeløp = delresultat.utbetaltYtelseBeløp,
-                                        andelAvBeløp = andel,
-                                        manueltSattTilbakekrevingsbeløp = manueltBeløp,
-                                        tilbakekrevingBeløpUtenRenter = beløpUtenRenter,
-                                        renteBeløp = rentebeløp,
-                                        tilbakekrevingBeløpEtterSkatt = nettoBeløp,
-                                        skattBeløp = skattBeløp,
-                                        tilbakekrevingBeløp = tilbakekrevingBeløp)
+        return Beregningsresultatsperiode(periode = periode,
+                                          vurdering = vurdering,
+                                          renteprosent = if (renter) RENTESATS else null,
+                                          feilutbetaltBeløp = delresultat.feilutbetaltBeløp,
+                                          riktigYtelsesbeløp = delresultat.riktigYtelsesbeløp,
+                                          utbetaltYtelsesbeløp = delresultat.utbetaltYtelsesbeløp,
+                                          andelAvBeløp = andel,
+                                          manueltSattTilbakekrevingsbeløp = manueltBeløp,
+                                          tilbakekrevingsbeløpUtenRenter = beløpUtenRenter,
+                                          rentebeløp = rentebeløp,
+                                          tilbakekrevingsbeløpEtterSkatt = nettoBeløp,
+                                          skattebeløp = skattBeløp,
+                                          tilbakekrevingsbeløp = tilbakekrevingBeløp)
     }
 
     private fun beregnRentebeløp(beløp: BigDecimal, renter: Boolean): BigDecimal {
@@ -62,18 +62,18 @@ internal object TilbakekrevingBeregnerVilkår {
 
     private fun beregnSkattBeløp(periode: Periode,
                                  bruttoTilbakekrevesBeløp: BigDecimal,
-                                 perioderMedSkattProsent: List<GrunnlagPeriodeMedSkattProsent>): BigDecimal {
-        val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkattProsent.sumOf { it.tilbakekrevesBeløp }
+                                 perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>): BigDecimal {
+        val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
         val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {
             BigDecimal.ZERO
         } else {
             bruttoTilbakekrevesBeløp.divide(totalKgTilbakekrevesBeløp, 4, RoundingMode.HALF_UP)
         }
         var skattBeløp: BigDecimal = BigDecimal.ZERO
-        for (grunnlagPeriodeMedSkattProsent in perioderMedSkattProsent) {
+        for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
-                val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevesBeløp.multiply(andel)
-                skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skattProsent)
+                val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
+                skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
                                                     .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 val statement = ""
             }
