@@ -62,6 +62,10 @@ data class Behandling(@Id
 
     val endretTidspunkt: LocalDateTime
         get() = sporbar.endret.endretTid
+
+    fun lagreResultat(behandlingsresultat: Behandlingsresultat) {
+        (resultater as MutableSet).add(behandlingsresultat)
+    }
 }
 
 data class Fagsystemsbehandling(@Id

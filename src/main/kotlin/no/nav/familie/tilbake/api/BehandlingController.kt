@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -84,5 +85,17 @@ class BehandlingController(val behandlingService: BehandlingService,
     fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         behandlingService.taBehandlingAvvent(behandlingId)
         return Ressurs.success("OK")
+    }
+
+    @PutMapping(path = ["{behandlingId}/henlegg/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Saksbehandler henlegger behandling",
+                        henteParam = "behandlingId")
+    fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
+                          @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto) {
+        behandlingService.henleggBehandling(behandlingId = behandlingId,
+                                            behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype,
+                                            fritekst = henleggelsesbrevFritekstDto.fritekst)
     }
 }
