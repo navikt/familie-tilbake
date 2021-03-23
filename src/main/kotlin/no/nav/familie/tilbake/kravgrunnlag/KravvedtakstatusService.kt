@@ -2,7 +2,9 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -23,7 +25,8 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                               private val behandlingRepository: BehandlingRepository,
                               private val mottattXmlService: ØkonomiXmlMottattService,
                               private val stegService: StegService,
-                              private val behandlingskontrollService: BehandlingskontrollService) {
+                              private val behandlingskontrollService: BehandlingskontrollService,
+                              private val behandlingService: BehandlingService) {
 
     @Transactional
     fun håndterMottattStatusmelding(statusmeldingXml: String) {
@@ -103,8 +106,12 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                 oppdaterKravgrunnlag(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
             }
-            //TODO behandlingskontroll blir implementert med henleggelse
-            Kravstatuskode.AVSLUTTET -> oppdaterKravgrunnlag(kravgrunnlag431.copy(avsluttet = true))
+            Kravstatuskode.AVSLUTTET -> {
+                oppdaterKravgrunnlag(kravgrunnlag431.copy(avsluttet = true))
+                behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                                    behandlingsresultatstype = Behandlingsresultatstype
+                                                            .HENLAGT_KRAVGRUNNLAG_NULLSTILT)
+            }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }
     }

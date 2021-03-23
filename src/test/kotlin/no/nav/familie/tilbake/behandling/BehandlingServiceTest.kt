@@ -11,28 +11,40 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -45,11 +57,24 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var brevsporingRepository: BrevsporingRepository
+
+    @Autowired
+    private lateinit var taskRepository: TaskRepository
+
+    @Autowired
     private lateinit var behandlingService: BehandlingService
 
     private final val fom: LocalDate = LocalDate.now().minusMonths(1)
     private final val tom: LocalDate = LocalDate.now()
 
+    @AfterEach
+    fun tearDown(){
+        taskRepository.deleteAll()
+    }
 
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {
@@ -302,6 +327,95 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(behandling.id) })
         assertEquals("Behandling ${behandling.id} er ikke på vent, kan ike gjenoppta", exception.message)
+    }
+
+    @Test
+    fun `henleggBehandling skal henlegge behandling og sende henleggelsesbrev`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
+        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
+                                                                      opprettetTid = LocalDateTime.now().minusDays(10))))
+        // sender varselsbrev
+        brevsporingRepository.insert(Brevsporing(behandlingId = behandling.id,
+                                                 journalpostId = "testverdi",
+                                                 dokumentId = "testverdi",
+                                                 brevtype = Brevtype.VARSEL))
+        behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
+
+        behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                            behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(2, behandlingsstegstilstand.size)
+        assertEquals(Behandlingssteg.VARSEL, behandlingsstegstilstand[0].behandlingssteg)
+        assertEquals(Behandlingsstegstatus.UTFØRT, behandlingsstegstilstand[0].behandlingsstegsstatus)
+        assertEquals(Behandlingssteg.GRUNNLAG, behandlingsstegstilstand[1].behandlingssteg)
+        assertEquals(Behandlingsstegstatus.AVBRUTT, behandlingsstegstilstand[1].behandlingsstegsstatus)
+
+        val behandlingssresultat = behandling.sisteResultat
+        assertNotNull(behandlingssresultat)
+        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
+
+        val task = taskRepository.findByStatus(Status.UBEHANDLET)
+        assertEquals(1, task.count())
+        assertEquals(SendHenleggelsesbrevTask.TYPE, task[0].type)
+    }
+
+    @Test
+    fun `henleggBehandling skal henlegge behandling uten henleggelsesbrev`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
+        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
+                                                                      opprettetTid = LocalDateTime.now().minusDays(10))))
+
+        behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                            behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(1, behandlingsstegstilstand.size)
+        assertEquals(Behandlingssteg.GRUNNLAG, behandlingsstegstilstand[0].behandlingssteg)
+        assertEquals(Behandlingsstegstatus.AVBRUTT, behandlingsstegstilstand[0].behandlingsstegsstatus)
+
+        val behandlingssresultat = behandling.sisteResultat
+        assertNotNull(behandlingssresultat)
+        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
+
+        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).isEmpty() }
+    }
+
+    @Test
+    fun `henleggBehandling skal ikke henlegge behandling som opprettet nå`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                                behandlingsresultatstype =
+                                                Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+        }
+        assertEquals("Behandling med behandlingId=${behandling.id} kan ikke henlegges.", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
