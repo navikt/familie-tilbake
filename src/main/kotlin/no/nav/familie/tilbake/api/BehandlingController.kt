@@ -93,9 +93,10 @@ class BehandlingController(val behandlingService: BehandlingService,
                         handling = "Saksbehandler henlegger behandling",
                         henteParam = "behandlingId")
     fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
-                          @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto) {
+                          @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String>{
         behandlingService.henleggBehandling(behandlingId = behandlingId,
                                             behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype,
                                             fritekst = henleggelsesbrevFritekstDto.fritekst)
+        return Ressurs.success("OK")
     }
 }

@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FAKTA
@@ -16,6 +17,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VILKÅR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
@@ -278,6 +280,16 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
             mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
                     .isEmpty()
         }
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingsstegstilstand.filter { VARSEL != it.behandlingssteg }
+                    .all { Behandlingsstegstatus.AVBRUTT == it.behandlingsstegsstatus }
+        }
+        assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
     }
 
     private fun settBehandlingTilForeslåVedtakSteg() {

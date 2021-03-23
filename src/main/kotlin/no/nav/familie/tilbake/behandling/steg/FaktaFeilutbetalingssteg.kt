@@ -35,6 +35,7 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FAKTA} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FAKTA,
                                                                                       Behandlingsstegstatus.KLAR))

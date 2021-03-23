@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -32,6 +33,7 @@ import java.util.UUID
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakRepository: FagsakRepository,
+                        private val taskRepository: TaskRepository,
                         private val brevsporingRepository: BrevsporingRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService) {
@@ -94,30 +96,25 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun henleggBehandling(behandlingId: UUID,
                           behandlingsresultatstype: Behandlingsresultatstype,
-                          fritekst: String?=null) {
+                          fritekst: String? = null) {
         val behandling = finnBehandling(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
-        if (!kanHenleggeBehandling(behandling)) {
+        if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
                        frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        //oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
-        if (behandling.sisteResultat != null) {
-            behandlingRepository.update(
-                    behandling.copy(resultater = setOf(
-                            Behandlingsresultat(type = behandlingsresultatstype)
-                    )))
-        } else {
-            behandlingRepository.insert(
-                    behandling.copy(resultater = setOf(
-                            Behandlingsresultat(type = behandlingsresultatstype))))
-        }
+
+        //oppdaterer behandlingsresultat og behandling
+        behandling.lagreResultat(Behandlingsresultat(type = behandlingsresultatstype))
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst)
+            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
         }
     }
 
@@ -191,9 +188,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                       fagsystem = fagsystem)
     }
 
-    private fun kanHenleggeBehandling(behandling: Behandling): Boolean {
+    private fun kanHenleggeBehandling(behandling: Behandling,
+                                      behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
         var kanHenlegges = true
-        if (TILBAKEKREVING == behandling.type) {
+        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
+            kanHenlegges = true
+        } else if (TILBAKEKREVING == behandling.type) {
             kanHenlegges = !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
                                                          behandling.opprettetTidspunkt < LocalDate.now()
                                                                  .atStartOfDay()
