@@ -408,7 +408,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException> {
             behandlingService.henleggBehandling(behandlingId = behandling.id,
@@ -416,6 +416,25 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
         }
         assertEquals("Behandling med behandlingId=${behandling.id} kan ikke henlegges.", exception.message)
+    }
+
+    @Test
+    fun `henleggBehandling skal ikke henlegge behandling som er allerede avsluttet`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                                behandlingsresultatstype =
+                                                Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,
