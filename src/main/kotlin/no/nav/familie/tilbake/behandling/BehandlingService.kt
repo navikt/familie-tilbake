@@ -65,8 +65,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun settBehandlingPåVent(behandlingPåVentDto: BehandlingPåVentDto) {
-        val behandling = finnBehandling(behandlingPåVentDto.behandlingId)
+    fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
+        val behandling = finnBehandling(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
         val behandlingId = behandling.id
 

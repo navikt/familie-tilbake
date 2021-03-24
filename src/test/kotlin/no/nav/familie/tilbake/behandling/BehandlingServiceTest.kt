@@ -72,7 +72,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private final val tom: LocalDate = LocalDate.now()
 
     @AfterEach
-    fun tearDown(){
+    fun tearDown() {
         taskRepository.deleteAll()
     }
 
@@ -245,8 +245,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     fun `settBehandlingPåVent skal ikke sett behandling på vent hvis behandling ikke finnes`() {
         val behandlingId = UUID.randomUUID()
         val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandlingId,
-                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+            behandlingService.settBehandlingPåVent(behandlingId,
+                                                   BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().plusWeeks(4)))
         })
         assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
@@ -262,8 +262,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
-                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+            behandlingService.settBehandlingPåVent(behandling.id,
+                                                   BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().minusDays(4)))
         })
         assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
@@ -279,8 +279,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
-                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+            behandlingService.settBehandlingPåVent(behandling.id,
+                                                   BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now()))
         })
         assertEquals("Fristen må være større enn dagens dato for behandling ${behandling.id}", exception.message)
@@ -296,8 +296,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
 
         assertDoesNotThrow {
-            behandlingService.settBehandlingPåVent(BehandlingPåVentDto(behandlingId = behandling.id,
-                                                                       venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
+            behandlingService.settBehandlingPåVent(behandling.id,
+                                                   BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().plusDays(1)))
         }
     }
