@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -16,6 +17,7 @@ class MottattGrunnlagssteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     private val logger = LoggerFactory.getLogger(this::class.java)
 
 
+    @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId)) {
@@ -24,6 +26,11 @@ class MottattGrunnlagssteg(val kravgrunnlagRepository: KravgrunnlagRepository,
                                                                                           Behandlingsstegstatus.UTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
+    }
+
+    @Transactional
+    override fun gjenopptaSteg(behandlingId: UUID) {
+        utførSteg(behandlingId)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
