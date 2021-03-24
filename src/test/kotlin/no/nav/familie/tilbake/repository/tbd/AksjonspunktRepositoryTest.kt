@@ -36,7 +36,7 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
         aksjonspunktRepository.insert(aksjonspunkt)
 
         val lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
-        assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(aksjonspunkt, "sporbar", "versjon")
+        assertThat(lagretAksjonspunkt).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(aksjonspunkt)
         assertEquals(1, lagretAksjonspunkt.versjon)
     }
 
@@ -49,7 +49,9 @@ internal class AksjonspunktRepositoryTest : OppslagSpringRunnerTest() {
         aksjonspunktRepository.update(oppdatertAksjonspunkt)
 
         lagretAksjonspunkt = aksjonspunktRepository.findByIdOrThrow(aksjonspunkt.id)
-        assertThat(lagretAksjonspunkt).isEqualToIgnoringGivenFields(oppdatertAksjonspunkt, "sporbar", "versjon")
+        assertThat(lagretAksjonspunkt).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertAksjonspunkt)
         assertEquals(2, lagretAksjonspunkt.versjon)
     }
 

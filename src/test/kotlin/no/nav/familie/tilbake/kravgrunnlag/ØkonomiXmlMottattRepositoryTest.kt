@@ -21,7 +21,9 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretØkonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(økonomiXmlMottatt.id)
 
-        assertThat(lagretØkonomiXmlMottatt).isEqualToIgnoringGivenFields(økonomiXmlMottatt, "sporbar", "versjon")
+        assertThat(lagretØkonomiXmlMottatt).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(økonomiXmlMottatt)
         assertEquals(1, lagretØkonomiXmlMottatt.versjon)
     }
 
@@ -34,7 +36,9 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.update(oppdatertØkonomiXmlMottatt)
 
         lagretØkonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(økonomiXmlMottatt.id)
-        assertThat(lagretØkonomiXmlMottatt).isEqualToIgnoringGivenFields(oppdatertØkonomiXmlMottatt, "sporbar", "versjon")
+        assertThat(lagretØkonomiXmlMottatt).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertØkonomiXmlMottatt)
         assertEquals(2, lagretØkonomiXmlMottatt.versjon)
     }
 

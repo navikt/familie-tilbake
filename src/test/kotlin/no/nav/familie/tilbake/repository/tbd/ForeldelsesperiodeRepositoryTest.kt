@@ -40,8 +40,9 @@ internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
 
-        assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(foreldelsesperiode,
-                                                                          "sporbar", "versjon")
+        assertThat(lagretForeldelsesperiode).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(foreldelsesperiode)
         assertEquals(1, lagretForeldelsesperiode.versjon)
     }
 
@@ -54,8 +55,9 @@ internal class ForeldelsesperiodeRepositoryTest : OppslagSpringRunnerTest() {
         foreldelsesperiodeRepository.update(oppdatertForeldelsesperiode)
 
         lagretForeldelsesperiode = foreldelsesperiodeRepository.findByIdOrThrow(foreldelsesperiode.id)
-        assertThat(lagretForeldelsesperiode).isEqualToIgnoringGivenFields(oppdatertForeldelsesperiode,
-                                                                          "sporbar", "versjon")
+        assertThat(lagretForeldelsesperiode).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertForeldelsesperiode)
         assertEquals(2, lagretForeldelsesperiode.versjon)
     }
 
