@@ -33,6 +33,14 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
         }
     }
 
+    @Transactional
+    override fun gjenopptaSteg(behandlingId: UUID) {
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
+                                                                                      Behandlingsstegstatus.KLAR))
+    }
+
+
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FAKTA
     }

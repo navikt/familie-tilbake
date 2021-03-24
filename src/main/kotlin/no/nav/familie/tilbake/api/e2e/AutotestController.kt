@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.e2e
+package no.nav.familie.tilbake.api.e2e
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
@@ -17,8 +17,8 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/autotest")
 @ProtectedWithClaims(issuer = "azuread")
-@Profile("e2e","local","integrasjonstest")
-class AutotestController (private val taskRepository: TaskRepository) {
+@Profile("e2e", "local", "integrasjonstest")
+class AutotestController(private val taskRepository: TaskRepository) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
@@ -27,8 +27,9 @@ class AutotestController (private val taskRepository: TaskRepository) {
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
-        return Ressurs.success("")
+        return Ressurs.success("OK")
     }
+
     @PostMapping(path = ["/opprett/statusmelding/"])
     fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
         taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
@@ -36,6 +37,6 @@ class AutotestController (private val taskRepository: TaskRepository) {
                                  properties = Properties().apply {
                                      this["callId"] = UUID.randomUUID()
                                  }))
-        return Ressurs.success("")
+        return Ressurs.success("OK")
     }
 }

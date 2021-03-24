@@ -46,7 +46,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val data = behandlingRepository.findById(behandlingId)
         if (data.isPresent) {
             val behandling = data.get()
-            val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling)
+            val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
             val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                     .hentBehandlingsstegstilstand(behandling)
             val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
@@ -77,6 +77,26 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
+    }
+
+    @Transactional
+    fun taBehandlingAvvent(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
+                         ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
+                                       frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
+                                       httpStatus = HttpStatus.BAD_REQUEST)
+
+        if (behandling.erAvsluttet()) {
+            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet.",
+                       frontendFeilmelding = "Behandling med id=$behandlingId er allerede ferdig behandlet.",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        if(!behandlingskontrollService.erBehandlingPåVent(behandlingId)){
+            throw Feil(message = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
+                       frontendFeilmelding = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        stegService.gjenopptaSteg(behandlingId)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
