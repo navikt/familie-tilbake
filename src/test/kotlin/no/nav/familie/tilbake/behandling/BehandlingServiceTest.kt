@@ -29,6 +29,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
@@ -64,6 +65,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var taskRepository: TaskRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
@@ -409,6 +413,25 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.henleggBehandling(behandlingId = behandling.id,
+                                                behandlingsresultatstype =
+                                                Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+        }
+        assertEquals("Behandling med behandlingId=${behandling.id} kan ikke henlegges.", exception.message)
+    }
+
+    @Test
+    fun `henleggBehandling skal ikke henlegge behandling som har aktivt kravgrunnlag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val kravgrunnlag = Testdata.kravgrunnlag431
+        kravgrunnlagRepository.insert(kravgrunnlag.copy(behandlingId = behandling.id))
 
         val exception = assertFailsWith<RuntimeException> {
             behandlingService.henleggBehandling(behandlingId = behandling.id,

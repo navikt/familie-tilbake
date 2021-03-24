@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
@@ -35,6 +36,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakRepository: FagsakRepository,
                         private val taskRepository: TaskRepository,
                         private val brevsporingRepository: BrevsporingRepository,
+                        private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService) {
 
@@ -198,6 +200,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          behandling.opprettetTidspunkt < LocalDate.now()
                                                                  .atStartOfDay()
                                                                  .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                           && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return kanHenlegges
     }
