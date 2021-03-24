@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepos
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -16,6 +17,7 @@ class Varselssteg(val behandlingskontrollService: BehandlingskontrollService,
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
         if (brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId,
@@ -25,6 +27,14 @@ class Varselssteg(val behandlingskontrollService: BehandlingskontrollService,
                                                                                           Behandlingsstegstatus.UTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
+    }
+
+    @Transactional
+    override fun gjenopptaSteg(behandlingId: UUID){
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.VARSEL,
+                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

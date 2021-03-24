@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.STARTET
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.TILBAKEFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -15,6 +16,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -64,6 +66,29 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     @Transactional
+    fun behandleStegPåNytt(behandlingId: UUID, behandledeSteg: Behandlingssteg) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.erAvsluttet()) {
+            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
+        }
+        if (erBehandlingPåVent(behandlingId)) {
+            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                       frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        val aktivtBehandlingssteg = finnAktivtSteg(behandlingId)
+                                    ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
+
+        if (behandledeSteg.sekvens < aktivtBehandlingssteg.sekvens) {
+            for (i in aktivtBehandlingssteg.sekvens downTo behandledeSteg.sekvens + 1 step 1) {
+                val behandlingssteg = Behandlingssteg.fraSekvens(i)
+                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
+            }
+            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
+        }
+    }
+
+    @Transactional
     fun settBehandlingPåVent(behandlingId: UUID, venteårsak: Venteårsak, tidsfrist: LocalDate) {
         val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
                 behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -77,9 +102,9 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       tidsfrist = tidsfrist))
     }
 
-    fun erBehandlingPåVent(behandling: Behandling): Boolean {
+    fun erBehandlingPåVent(behandlingId: UUID): Boolean {
         val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
-                behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+                behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         val aktivtBehandlingsstegstilstand: Behandlingsstegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
                                                                        ?: return false
         return VENTER == aktivtBehandlingsstegstilstand.behandlingsstegsstatus
@@ -107,6 +132,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         //forutsetter at behandling kan ha kun et aktiv steg om gangen
     }
 
+    fun finnAktivStegstilstand(behandlingId: UUID): Behandlingsstegstilstand? {
+        return finnAktivStegstilstand(behandlingsstegstilstandRepository.findByBehandlingId(behandlingId))
+    }
+
     @Transactional
     fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -120,7 +149,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 ?: throw Feil(message = "Behandling med id=$behandlingId og " +
                                         "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke")
         behandlingsstegstilstandRepository
-                .update(behandlingsstegstilstand.copy(behandlingsstegsstatus =  behandlingsstegsinfo.behandlingsstegstatus,
+                .update(behandlingsstegstilstand.copy(behandlingsstegsstatus = behandlingsstegsinfo.behandlingsstegstatus,
                                                       venteårsak = behandlingsstegsinfo.venteårsak,
                                                       tidsfrist = behandlingsstegsinfo.tidsfrist))
     }
@@ -196,10 +225,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
                 // setter tidsfristen fra sperret dato
                 lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                     behandlingsstegstatus = VENTER,
-                                     venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                                     tidsfrist = kravgrunnlag.sporbar.endret.endretTid
-                                             .toLocalDate())
+                                        behandlingsstegstatus = VENTER,
+                                        venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                                        tidsfrist = kravgrunnlag.sporbar.endret.endretTid
+                                                .toLocalDate())
             }
             harAktivtGrunnlag(behandling) -> {
                 lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.FAKTA,

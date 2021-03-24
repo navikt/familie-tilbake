@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.data.Testdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -274,6 +275,33 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                                        venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().plusDays(1)))
         }
+    }
+
+    @Test
+    fun `taBehandlingAvvent skal ikke gjenoppta når behandling ikke finnes`() {
+        val behandlingId = UUID.randomUUID()
+        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(behandlingId) })
+        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
+    }
+
+    @Test
+    fun `taBehandlingAvvent skal ikke gjenoppta når behandling er avsluttet`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        val behandling = behandlingRepository.insert(Testdata.behandling)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(lagretBehandling.id) })
+        assertEquals("Behandling med id=${lagretBehandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `taBehandlingAvvent skal ikke gjenoppta når behandling er ikke på vent`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        val behandling = behandlingRepository.insert(Testdata.behandling)
+
+        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(behandling.id) })
+        assertEquals("Behandling ${behandling.id} er ikke på vent, kan ike gjenoppta", exception.message)
     }
 
     private fun assertFellesBehandlingRespons(behandlingDto: BehandlingDto,

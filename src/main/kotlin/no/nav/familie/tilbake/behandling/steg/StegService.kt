@@ -11,13 +11,30 @@ import java.util.UUID
 class StegService(val steg: List<IBehandlingssteg>,
                   val behandlingskontrollService: BehandlingskontrollService) {
 
-    fun håndterSteg(behandlingId: UUID,
-                    behandlingsstegDto: BehandlingsstegDto? = null) {
-        if (behandlingsstegDto != null) {
-            val behandledeSteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
-            hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
-        }
+    fun håndterSteg(behandlingId: UUID) {
+        val aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
+        hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+    }
+
+    fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+        val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
+        behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
+
+        hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
+        val aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE) {
+            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        }
+    }
+
+    fun gjenopptaSteg(behandlingId: UUID) {
+        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+
+        hentStegInstans(aktivtBehandlingssteg).gjenopptaSteg(behandlingId)
+    }
+
+    private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
                                     ?: throw  Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
                                                    frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg")
@@ -25,12 +42,12 @@ class StegService(val steg: List<IBehandlingssteg>,
                                             Behandlingssteg.GRUNNLAG,
                                             Behandlingssteg.FAKTA,
                                             Behandlingssteg.FORELDELSE,
-                                            Behandlingssteg.VILKÅRSVURDERING)) {
+                                            Behandlingssteg.VILKÅRSVURDERING,
+                                            Behandlingssteg.FORESLÅ_VEDTAK)) {
             throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")
         }
 
-        //utfører steg 2 ganger for å sjekke om det nye steget kan utføres automatisk
-        hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        return aktivtBehandlingssteg
     }
 
     private fun hentStegInstans(behandlingssteg: Behandlingssteg): IBehandlingssteg {

@@ -62,15 +62,27 @@ class BehandlingController(val behandlingService: BehandlingService,
                         handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
                         henteParam = "behandlingId")
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
-                     @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto) {
-        stegService.håndterSteg(behandlingId,behandlingsstegDto)
+                             @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
+        stegService.håndterSteg(behandlingId, behandlingsstegDto)
+        return Ressurs.success("OK")
     }
 
     @PutMapping(path = ["/vent/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Setter saksbehandler behandling på vent eller utvider fristen")
-    fun settBehandlingPåVent(@Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto) {
+    fun settBehandlingPåVent(@Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto): Ressurs<String> {
         behandlingService.settBehandlingPåVent(behandlingPåVentDto)
+        return Ressurs.success("OK")
+    }
+
+    @PutMapping(path = ["{behandlingId}/gjenoppta/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
+                        henteParam = "behandlingId")
+    fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+        behandlingService.taBehandlingAvvent(behandlingId)
+        return Ressurs.success("OK")
     }
 }
