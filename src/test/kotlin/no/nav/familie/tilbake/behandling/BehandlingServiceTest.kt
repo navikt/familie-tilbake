@@ -357,6 +357,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+        assertEquals(LocalDate.now(), behandling.avsluttetDato)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(2, behandlingsstegstilstand.size)
@@ -392,6 +393,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+        assertEquals(LocalDate.now(), behandling.avsluttetDato)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)

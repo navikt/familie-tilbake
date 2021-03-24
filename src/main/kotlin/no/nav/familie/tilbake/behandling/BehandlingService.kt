@@ -113,7 +113,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         //oppdaterer behandlingsresultat og behandling
         behandling.lagreResultat(Behandlingsresultat(type = behandlingsresultatstype))
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET,
+                                                    avsluttetDato = LocalDate.now()))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
             taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
