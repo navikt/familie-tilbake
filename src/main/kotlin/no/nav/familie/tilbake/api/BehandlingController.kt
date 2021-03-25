@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -67,12 +68,14 @@ class BehandlingController(val behandlingService: BehandlingService,
         return Ressurs.success("OK")
     }
 
-    @PutMapping(path = ["/vent/v1"],
+    @PutMapping(path = ["{behandlingId}/vent/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Setter saksbehandler behandling på vent eller utvider fristen")
-    fun settBehandlingPåVent(@Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto): Ressurs<String> {
-        behandlingService.settBehandlingPåVent(behandlingPåVentDto)
+                        handling = "Setter saksbehandler behandling på vent eller utvider fristen",
+                        henteParam = "behandlingId")
+    fun settBehandlingPåVent(@PathVariable("behandlingId") behandlingId: UUID,
+                             @Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto): Ressurs<String> {
+        behandlingService.settBehandlingPåVent(behandlingId, behandlingPåVentDto)
         return Ressurs.success("OK")
     }
 
@@ -83,6 +86,19 @@ class BehandlingController(val behandlingService: BehandlingService,
                         henteParam = "behandlingId")
     fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         behandlingService.taBehandlingAvvent(behandlingId)
+        return Ressurs.success("OK")
+    }
+
+    @PutMapping(path = ["{behandlingId}/henlegg/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Saksbehandler henlegger behandling",
+                        henteParam = "behandlingId")
+    fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
+                          @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String> {
+        behandlingService.henleggBehandling(behandlingId = behandlingId,
+                                            behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype,
+                                            fritekst = henleggelsesbrevFritekstDto.fritekst)
         return Ressurs.success("OK")
     }
 }

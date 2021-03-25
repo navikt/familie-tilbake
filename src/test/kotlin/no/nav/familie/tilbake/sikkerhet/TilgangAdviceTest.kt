@@ -216,15 +216,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        // POST request uten body
-        opprettRequest("/api/behandling/vent/v1/", HttpMethod.POST, token)
+        opprettRequest("/api/behandling/$behandlingId/vent/v1/", HttpMethod.PUT, token)
 
-        every { mockJoinpoint.args } returns arrayOf(BehandlingPåVentDto(behandlingId = behandlingId,
-                                                                         venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+        every { mockJoinpoint.args } returns arrayOf(behandling.id,
+                                                     BehandlingPåVentDto(venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                                          tidsfrist = LocalDate.now().plusWeeks(2)))
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
         every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
-        every { mockRolleTilgangssjekk.henteParam } returns ""
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }

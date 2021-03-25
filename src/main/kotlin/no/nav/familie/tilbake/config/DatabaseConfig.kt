@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.config
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import no.nav.familie.tilbake.common.repository.Endret
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -49,10 +50,28 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @Bean
     override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(listOf(YearMonthTilLocalDateConverter(),
+        return JdbcCustomConversions(listOf(KravstatuskodeLesConverter(),
+                                            KravstatuskodeSkrivConverter(),
+                                            YearMonthTilLocalDateConverter(),
                                             LocalDateTilYearMonthConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PropertiesWrapperTilStringConverter()))
+    }
+
+    @ReadingConverter
+    class KravstatuskodeLesConverter : Converter<String, Kravstatuskode> {
+
+        override fun convert(kode: String): Kravstatuskode {
+            return Kravstatuskode.fraKode(kode)
+        }
+    }
+
+    @WritingConverter
+    class KravstatuskodeSkrivConverter : Converter<Kravstatuskode, String> {
+
+        override fun convert(kravstatuskode: Kravstatuskode): String {
+            return kravstatuskode.kode
+        }
     }
 
     @WritingConverter

@@ -3,10 +3,14 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -14,9 +18,13 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +34,9 @@ import java.util.UUID
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakRepository: FagsakRepository,
+                        private val taskRepository: TaskRepository,
+                        private val brevsporingRepository: BrevsporingRepository,
+                        private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService) {
 
@@ -43,31 +54,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional(readOnly = true)
     fun hentBehandling(behandlingId: UUID): BehandlingDto {
-        val data = behandlingRepository.findById(behandlingId)
-        if (data.isPresent) {
-            val behandling = data.get()
-            val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
-            val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
-                    .hentBehandlingsstegstilstand(behandling)
-            val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
+        val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
+                .hentBehandlingsstegstilstand(behandling)
+        val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
 
-            return BehandlingMapper.tilRespons(behandling = behandling,
-                                               erBehandlingPåVent = erBehandlingPåVent,
-                                               kanHenleggeBehandling = kanBehandlingHenlegges,
-                                               behandlingsstegsinfoer = behandlingsstegsinfoer)
-        }
-        throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                   frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
-                   httpStatus = HttpStatus.BAD_REQUEST)
+        return BehandlingMapper.tilRespons(behandling = behandling,
+                                           erBehandlingPåVent = erBehandlingPåVent,
+                                           kanHenleggeBehandling = kanBehandlingHenlegges,
+                                           behandlingsstegsinfoer = behandlingsstegsinfoer)
     }
 
     @Transactional
-    fun settBehandlingPåVent(behandlingPåVentDto: BehandlingPåVentDto) {
-        val behandlingId = behandlingPåVentDto.behandlingId
-        behandlingRepository.findByIdOrNull(behandlingId)
-        ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                      frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
-                      httpStatus = HttpStatus.BAD_REQUEST)
+    fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingAlleredeErAvsluttet(behandling)
+        val behandlingId = behandling.id
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
             throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
@@ -81,22 +84,41 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun taBehandlingAvvent(behandlingId: UUID) {
-        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
-                         ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                                       frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
-                                       httpStatus = HttpStatus.BAD_REQUEST)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
-        if (behandling.erAvsluttet()) {
-            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet.",
-                       frontendFeilmelding = "Behandling med id=$behandlingId er allerede ferdig behandlet.",
-                       httpStatus = HttpStatus.BAD_REQUEST)
-        }
-        if(!behandlingskontrollService.erBehandlingPåVent(behandlingId)){
+        if (!behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
             throw Feil(message = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
                        frontendFeilmelding = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
         stegService.gjenopptaSteg(behandlingId)
+    }
+
+    @Transactional
+    fun henleggBehandling(behandlingId: UUID,
+                          behandlingsresultatstype: Behandlingsresultatstype,
+                          fritekst: String? = null) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingAlleredeErAvsluttet(behandling)
+
+        if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
+            throw Feil(message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
+                       frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+
+        //oppdaterer behandlingsstegstilstand
+        behandlingskontrollService.henleggBehandlingssteg(behandlingId)
+
+        //oppdaterer behandlingsresultat og behandling
+        behandlingRepository.update(behandling.copy(resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
+                                                    status = Behandlingsstatus.AVSLUTTET,
+                                                    avsluttetDato = LocalDate.now()))
+
+        if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
+            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
+        }
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -169,15 +191,43 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                       fagsystem = fagsystem)
     }
 
-    private fun kanHenleggeBehandling(behandling: Behandling): Boolean {
-        var kanHenlegges = true
-        if (TILBAKEKREVING == behandling.type) {
-            kanHenlegges = !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
+    private fun kanHenleggeBehandling(behandling: Behandling,
+                                      behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
+        if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
+            return true
+        } else if (TILBAKEKREVING == behandling.type) {
+            return !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
                                                          behandling.opprettetTidspunkt < LocalDate.now()
                                                                  .atStartOfDay()
                                                                  .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                           && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
-        return kanHenlegges
+        return true
+    }
+
+    private fun kanSendeHenleggelsesbrev(behandling: Behandling, behandlingsresultatstype: Behandlingsresultatstype): Boolean {
+        when (behandling.type) {
+            TILBAKEKREVING -> {
+                if (brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandling.id,
+                                                                            setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))) {
+                    return true
+                }
+            }
+            REVURDERING_TILBAKEKREVING -> {
+                if (Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
+        if (behandling.erAvsluttet()) {
+            throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                       frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
     }
 
     companion object {

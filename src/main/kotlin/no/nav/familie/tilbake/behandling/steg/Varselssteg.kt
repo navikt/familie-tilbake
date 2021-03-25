@@ -31,6 +31,7 @@ class Varselssteg(val behandlingskontrollService: BehandlingskontrollService,
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID){
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VARSEL} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.VARSEL,
                                                                                       Behandlingsstegstatus.UTFØRT))
