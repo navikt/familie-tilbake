@@ -31,6 +31,7 @@ class MottattGrunnlagssteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         utførSteg(behandlingId)
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.GRUNNLAG} steg")
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

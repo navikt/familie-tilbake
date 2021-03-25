@@ -30,6 +30,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID){
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
                                                                                       Behandlingsstegstatus.KLAR))

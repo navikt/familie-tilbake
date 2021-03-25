@@ -3,6 +3,7 @@ package no.nav.familie.tilbake
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -121,7 +122,8 @@ abstract class OppslagSpringRunnerTest {
                Varsel::class,
                Brevsporing::class,
                ØkonomiXmlMottattArkiv::class,
-               Verge::class)
+               Verge::class,
+               Task::class)
                 .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

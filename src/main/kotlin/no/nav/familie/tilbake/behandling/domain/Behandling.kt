@@ -62,6 +62,7 @@ data class Behandling(@Id
 
     val endretTidspunkt: LocalDateTime
         get() = sporbar.endret.endretTid
+
 }
 
 data class Fagsystemsbehandling(@Id
