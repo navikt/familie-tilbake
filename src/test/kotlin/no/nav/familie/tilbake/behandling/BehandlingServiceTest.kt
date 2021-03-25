@@ -233,24 +233,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentBehandling skal ikke hente behandling når behandling ikke finnes`() {
-        val behandlingId = UUID.randomUUID()
-        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.hentBehandling(behandlingId) })
-        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
-    }
-
-    @Test
-    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis behandling ikke finnes`() {
-        val behandlingId = UUID.randomUUID()
-        val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.settBehandlingPåVent(behandlingId,
-                                                   BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
-                                                                       tidsfrist = LocalDate.now().plusWeeks(4)))
-        })
-        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
-    }
-
-    @Test
     fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er mindre enn i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
@@ -298,13 +280,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                    BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().plusDays(1)))
         }
-    }
-
-    @Test
-    fun `taBehandlingAvvent skal ikke gjenoppta når behandling ikke finnes`() {
-        val behandlingId = UUID.randomUUID()
-        val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(behandlingId) })
-        assertEquals("Behandling finnes ikke for behandlingId=$behandlingId", exception.message)
     }
 
     @Test

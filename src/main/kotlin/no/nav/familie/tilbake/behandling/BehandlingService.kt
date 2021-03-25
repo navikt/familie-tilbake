@@ -18,13 +18,13 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -54,7 +54,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional(readOnly = true)
     fun hentBehandling(behandlingId: UUID): BehandlingDto {
-        val behandling = finnBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                 .hentBehandlingsstegstilstand(behandling)
@@ -68,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
-        val behandling = finnBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
         val behandlingId = behandling.id
 
@@ -84,7 +84,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun taBehandlingAvvent(behandlingId: UUID) {
-        val behandling = finnBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         if (!behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
@@ -99,7 +99,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun henleggBehandling(behandlingId: UUID,
                           behandlingsresultatstype: Behandlingsresultatstype,
                           fritekst: String? = null) {
-        val behandling = finnBehandling(behandlingId)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
@@ -220,13 +220,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             }
         }
         return false
-    }
-
-    private fun finnBehandling(behandlingId: UUID): Behandling {
-        return behandlingRepository.findByIdOrNull(behandlingId)
-               ?: throw Feil(message = "Behandling finnes ikke for behandlingId=$behandlingId",
-                             frontendFeilmelding = "Behandling finnes ikke for behandlingId=$behandlingId",
-                             httpStatus = HttpStatus.BAD_REQUEST)
     }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
