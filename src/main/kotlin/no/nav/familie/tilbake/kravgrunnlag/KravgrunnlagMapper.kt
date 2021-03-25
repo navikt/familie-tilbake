@@ -52,18 +52,16 @@ object KravgrunnlagMapper {
 
     private fun tilKravgrunnlagsbeløp(beløpPosteringer: List<DetaljertKravgrunnlagBelopDto>): Set<Kravgrunnlagsbeløp433> {
         return beløpPosteringer.map {
-            Kravgrunnlagsbeløp433(
-                    klassekode = Klassekode.fraKode(it.kodeKlasse),
-                    klassetype = Klassetype.fraKode(it.typeKlasse.value()),
-                    opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
-                    nyttBeløp = it.belopNy,
-                    tilbakekrevesBeløp = it.belopTilbakekreves,
-                    uinnkrevdBeløp = it.belopUinnkrevd,
-                    skatteprosent = it.skattProsent,
-                    resultatkode = it.kodeResultat,
-                    årsakskode = it.kodeAArsak,
-                    skyldkode = it.kodeSkyld,
-            )
+            Kravgrunnlagsbeløp433(klassekode = Klassekode.fraKode(it.kodeKlasse),
+                                  klassetype = Klassetype.fraKode(it.typeKlasse.value()),
+                                  opprinneligUtbetalingsbeløp = it.belopOpprUtbet,
+                                  nyttBeløp = it.belopNy,
+                                  tilbakekrevesBeløp = it.belopTilbakekreves,
+                                  uinnkrevdBeløp = it.belopUinnkrevd,
+                                  skatteprosent = it.skattProsent,
+                                  resultatkode = it.kodeResultat,
+                                  årsakskode = it.kodeAArsak,
+                                  skyldkode = it.kodeSkyld)
         }.toSet()
 
     }

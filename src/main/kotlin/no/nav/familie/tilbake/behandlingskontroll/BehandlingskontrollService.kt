@@ -102,6 +102,14 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       tidsfrist = tidsfrist))
     }
 
+    @Transactional
+    fun henleggBehandlingssteg(behandlingId: UUID) {
+        val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
+                behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        behandlingsstegstilstand.filter { it.behandlingssteg != Behandlingssteg.VARSEL }
+                .forEach { behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = AVBRUTT)) }
+    }
+
     fun erBehandlingPåVent(behandlingId: UUID): Boolean {
         val behandlingsstegstilstand: List<Behandlingsstegstilstand> =
                 behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -243,7 +251,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {
-        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivtFagsystem.tilbakekrevingsvalg
+        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg
                && !behandling.manueltOpprettet
     }
 

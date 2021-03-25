@@ -157,8 +157,7 @@ object Testdata {
     val grupperingVurdertForeldelse = GrupperingVurdertForeldelse(vurdertForeldelseId = vurdertForeldelse.id,
                                                                   behandlingId = behandling.id)
 
-    val foreldelsesperiode = Foreldelsesperiode(vurdertForeldelseId = vurdertForeldelse.id,
-                                                periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+    val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                 foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                                                 begrunnelse = "testverdi",
                                                 foreldelsesfrist = LocalDate.now(),
@@ -167,7 +166,7 @@ object Testdata {
     val feilKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.KL_KODE_FEIL_BA,
                                                           klassetype = Klassetype.FEIL,
                                                           opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
-                                                          nyttBeløp = BigDecimal("123.11"),
+                                                          nyttBeløp = BigDecimal("10000"),
                                                           tilbakekrevesBeløp = BigDecimal.ZERO,
                                                           uinnkrevdBeløp = BigDecimal.ZERO,
                                                           resultatkode = "testverdi",
@@ -175,18 +174,19 @@ object Testdata {
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
 
-    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.BATR,
+    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(id = UUID.randomUUID(),
+                                                          klassekode = Klassekode.BATR,
                                                           klassetype = Klassetype.YTEL,
-                                                          opprinneligUtbetalingsbeløp = BigDecimal("123.11"),
+                                                          opprinneligUtbetalingsbeløp = BigDecimal("10000"),
                                                           nyttBeløp = BigDecimal.ZERO,
-                                                          tilbakekrevesBeløp = BigDecimal("123.11"),
+                                                          tilbakekrevesBeløp = BigDecimal("10000"),
                                                           uinnkrevdBeløp = BigDecimal.ZERO,
                                                           resultatkode = "testverdi",
                                                           årsakskode = "testverdi",
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
 
-    private val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+     val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                                   beløp = setOf(feilKravgrunnlagsbeløp433,
                                                                                 ytelKravgrunnlagsbeløp433),
                                                                   månedligSkattebeløp = BigDecimal("123.11"))

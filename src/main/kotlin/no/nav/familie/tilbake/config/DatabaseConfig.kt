@@ -18,6 +18,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.PlatformTransactionManager
+import java.sql.Date
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.Optional
 import javax.sql.DataSource
 
@@ -49,6 +52,8 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
     override fun jdbcCustomConversions(): JdbcCustomConversions {
         return JdbcCustomConversions(listOf(KravstatuskodeLesConverter(),
                                             KravstatuskodeSkrivConverter(),
+                                            YearMonthTilLocalDateConverter(),
+                                            LocalDateTilYearMonthConverter(),
                                             StringTilPropertiesWrapperConverter(),
                                             PropertiesWrapperTilStringConverter()))
     }
@@ -59,7 +64,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
         override fun convert(kode: String): Kravstatuskode {
             return Kravstatuskode.fraKode(kode)
         }
-
     }
 
     @WritingConverter
@@ -68,6 +72,28 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
         override fun convert(kravstatuskode: Kravstatuskode): String {
             return kravstatuskode.kode
         }
+    }
+
+    @WritingConverter
+    class YearMonthTilLocalDateConverter : Converter<YearMonth?, LocalDate> {
+
+        override fun convert(yearMonth: YearMonth): LocalDate {
+            return yearMonth.let {
+                LocalDate.of(it.year, it.month, 1)
+            }
+        }
+    }
+
+    @ReadingConverter
+    class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
+
+        override fun convert(date: Date): YearMonth {
+            return date.let {
+                val localDate = date.toLocalDate()
+                YearMonth.of(localDate.year, localDate.month)
+            }
+        }
 
     }
+
 }

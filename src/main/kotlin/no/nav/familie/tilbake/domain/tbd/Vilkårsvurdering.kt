@@ -28,7 +28,7 @@ data class Vilkårsvurderingsperiode(@Id
                                     val id: UUID = UUID.randomUUID(),
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val periode: Periode,
-                                    val navoppfulgt: Navoppfulgt? = null,
+                                    val navoppfulgt: Navoppfulgt = Navoppfulgt.UDEFINERT,
                                     @Column("vilkarsvurderingsresultat")
                                     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
                                     val begrunnelse: String,

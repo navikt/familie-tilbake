@@ -1,23 +1,27 @@
 package no.nav.familie.tilbake.common
 
 import java.time.LocalDate
+import java.time.Period
+import java.time.YearMonth
 
-data class Periode(val fom: LocalDate,
-                   val tom: LocalDate) : Comparable<Periode> {
+data class Periode(val fom: YearMonth,
+                   val tom: YearMonth) : Comparable<Periode> {
+
+    constructor(fom : LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
 
     init {
-        require(tom >= fom) { "Til-og-med-dato før fra-og-med-dato: $fom>$tom" }
+        require(tom >= fom) { "Til-og-med-måned før fra-og-med-måned: $fom > $tom" }
     }
 
-    private fun overlapper(dato: LocalDate): Boolean {
+    private fun overlapper(dato: YearMonth): Boolean {
         return dato in fom..tom
     }
 
-    private fun overlapper(other: Periode): Boolean {
+    fun overlapper(other: Periode): Boolean {
         return overlapper(other.fom) || overlapper(other.tom)
     }
 
-    fun union(annen: Periode): Periode? {
+    fun snitt(annen: Periode): Periode? {
         return if (!overlapper(annen)) {
             null
         } else if (this == annen) {
@@ -26,6 +30,10 @@ data class Periode(val fom: LocalDate,
             Periode(maxOf(fom, annen.fom),
                     minOf(tom, annen.tom))
         }
+    }
+
+    fun lengdeIMåneder(): Long {
+        return  (tom.year * 12 + tom.monthValue) - (fom.year *12 + fom.monthValue) + 1L
     }
 
     companion object {

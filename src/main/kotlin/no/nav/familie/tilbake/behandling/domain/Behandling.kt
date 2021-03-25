@@ -51,7 +51,7 @@ data class Behandling(@Id
 
     val aktivtVarsel get() = varsler.firstOrNull { it.aktiv }
 
-    val aktivtFagsystem get() = fagsystemsbehandling.first { it.aktiv }
+    val aktivFagsystemsbehandling get() = fagsystemsbehandling.first { it.aktiv }
 
     val harVerge get() = verger.any { it.aktiv }
 
@@ -62,6 +62,7 @@ data class Behandling(@Id
 
     val endretTidspunkt: LocalDateTime
         get() = sporbar.endret.endretTid
+
 }
 
 data class Fagsystemsbehandling(@Id

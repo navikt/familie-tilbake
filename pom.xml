@@ -28,6 +28,7 @@
         <nav.security.version>1.3.3</nav.security.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>3.0.0</jaxb-core.version>
+        <com.openhtmltopdf.version>1.0.8</com.openhtmltopdf.version>
         <jaxb-impl.version>3.0.0</jaxb-impl.version>
         <cxf.version>3.4.3</cxf.version>
         <mockk.version>1.11.0</mockk.version>
@@ -151,22 +152,22 @@
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-core</artifactId>
-            <version>1.0.6</version>
+            <version>${com.openhtmltopdf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-pdfbox</artifactId>
-            <version>1.0.6</version>
+            <version>${com.openhtmltopdf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
-            <version>1.0.8</version>
+            <version>${com.openhtmltopdf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-slf4j</artifactId>
-            <version>1.0.8</version>
+            <version>${com.openhtmltopdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

@@ -114,7 +114,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     private fun assertFagsystemsbehandling(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
                                            behandling: Behandling) {
-        val fagsystemsbehandling = behandling.aktivtFagsystem
+        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
         val faktainfo = faktaFeilutbetalingDto.faktainfo
         assertEquals(fagsystemsbehandling.tilbakekrevingsvalg, faktainfo.tilbakekrevingsvalg)
         assertEquals(fagsystemsbehandling.revurderingsvedtaksdato, faktaFeilutbetalingDto.revurderingsvedtaksdato)
@@ -127,7 +127,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
                                             hendelsestype: Hendelsestype?,
                                             hendelsesundertype: Hendelsesundertype?) {
         assertEquals(periode, faktaFeilutbetalingDto.totalFeilutbetaltPeriode)
-        assertEquals(BigDecimal.valueOf(123.11), faktaFeilutbetalingDto.totaltFeilutbetaltBeløp)
+        assertEquals(BigDecimal.valueOf(1000000, 2), faktaFeilutbetalingDto.totaltFeilutbetaltBeløp)
 
         assertEquals(1, faktaFeilutbetalingDto.feilutbetaltePerioder.size)
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()

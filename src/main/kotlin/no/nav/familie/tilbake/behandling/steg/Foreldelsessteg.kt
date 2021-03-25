@@ -30,6 +30,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID){
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
                                                                                       Behandlingsstegstatus.KLAR))
@@ -37,7 +38,7 @@ class Foreldelsessteg(val behandlingskontrollService: BehandlingskontrollService
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return kravgrunnlag.perioder.any { it.periode.fom < LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED) }
+        return kravgrunnlag.perioder.any { it.periode.fom.atDay(1) < LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED) }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
