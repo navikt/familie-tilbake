@@ -37,7 +37,7 @@ class SendHenleggelsesbrevTask(private val henleggelsesbrevService: Henleggelses
                      payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
                      triggerTid = LocalDateTime.now().plusSeconds(15))
 
-        const val TYPE = "distribuerVedtaksbrev"
+        const val TYPE = "distribuerHenleggelsesbrev"
     }
 
 
