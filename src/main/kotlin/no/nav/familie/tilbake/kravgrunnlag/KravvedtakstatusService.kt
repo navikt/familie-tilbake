@@ -90,7 +90,7 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                     behandling: Behandling) {
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL -> {
-                oppdaterKravgrunnlag(kravgrunnlag431.copy(sperret = true))
+                kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
                 val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
                 behandlingskontrollService
                         .tilbakehoppBehandlingssteg(behandling.id,
@@ -103,21 +103,17 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                     ))
             }
             Kravstatuskode.ENDRET -> {
-                oppdaterKravgrunnlag(kravgrunnlag431.copy(sperret = false))
+                kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
             }
             Kravstatuskode.AVSLUTTET -> {
-                oppdaterKravgrunnlag(kravgrunnlag431.copy(avsluttet = true))
+                kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
                 behandlingService.henleggBehandling(behandlingId = behandling.id,
                                                     behandlingsresultatstype = Behandlingsresultatstype
                                                             .HENLAGT_KRAVGRUNNLAG_NULLSTILT)
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }
-    }
-
-    private fun oppdaterKravgrunnlag(kravgrunnlag431: Kravgrunnlag431) {
-        kravgrunnlagRepository.update(kravgrunnlag431)
     }
 
 }

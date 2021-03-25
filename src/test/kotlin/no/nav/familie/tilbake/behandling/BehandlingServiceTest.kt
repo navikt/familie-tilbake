@@ -34,7 +34,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepos
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -74,11 +73,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     private final val fom: LocalDate = LocalDate.now().minusMonths(1)
     private final val tom: LocalDate = LocalDate.now()
-
-    @AfterEach
-    fun tearDown() {
-        taskRepository.deleteAll()
-    }
 
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {

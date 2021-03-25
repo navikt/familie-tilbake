@@ -112,8 +112,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
 
         //oppdaterer behandlingsresultat og behandling
-        behandling.lagreResultat(Behandlingsresultat(type = behandlingsresultatstype))
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET,
+        behandlingRepository.update(behandling.copy(resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
+                                                    status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
@@ -193,17 +193,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanHenleggeBehandling(behandling: Behandling,
                                       behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
-        var kanHenlegges = true
         if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
-            kanHenlegges = true
+            return true
         } else if (TILBAKEKREVING == behandling.type) {
-            kanHenlegges = !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
+            return !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
                                                          behandling.opprettetTidspunkt < LocalDate.now()
                                                                  .atStartOfDay()
                                                                  .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
                            && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
-        return kanHenlegges
+        return true
     }
 
     private fun kanSendeHenleggelsesbrev(behandling: Behandling, behandlingsresultatstype: Behandlingsresultatstype): Boolean {
