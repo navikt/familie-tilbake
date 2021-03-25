@@ -251,7 +251,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {
-        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivtFagsystem.tilbakekrevingsvalg
+        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg
                && !behandling.manueltOpprettet
     }
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class InsertUpdateRepositoryImpl<T>(val entityOperations: JdbcAggregateOperations) : InsertUpdateRepository<T> {
+class InsertUpdateRepositoryImpl<T : Any>(val entityOperations: JdbcAggregateOperations) : InsertUpdateRepository<T> {
 
     override fun insert(t: T): T {
         return entityOperations.insert(t)

@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 object FaktaFeilutbetalingMapper {
 
@@ -55,8 +56,8 @@ object FaktaFeilutbetalingMapper {
     }
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Periode {
-        var totalPeriodeFom: LocalDate? = null
-        var totalPeriodeTom: LocalDate? = null
+        var totalPeriodeFom: YearMonth? = null
+        var totalPeriodeTom: YearMonth? = null
         for (periode in perioder) {
             totalPeriodeFom = if (totalPeriodeFom == null || totalPeriodeFom > periode.fom) periode.fom else totalPeriodeFom
             totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom

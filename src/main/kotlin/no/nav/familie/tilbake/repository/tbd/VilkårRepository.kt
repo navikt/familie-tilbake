@@ -9,4 +9,8 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering>
+interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
+
+    fun findByBehandlingId(behandlingId: UUID): Vilkårsvurdering?
+}
+
