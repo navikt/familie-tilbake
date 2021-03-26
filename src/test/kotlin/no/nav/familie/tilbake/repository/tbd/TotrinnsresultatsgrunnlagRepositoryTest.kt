@@ -53,8 +53,10 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
 
         val lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
 
-        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag).isEqualToIgnoringGivenFields(totrinnsresultatsgrunnlag,
-                                                                                            "sporbar", "versjon")
+        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag)
+                .usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(totrinnsresultatsgrunnlag)
         assertEquals(1, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 
@@ -68,7 +70,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
 
         lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
         Assertions.assertThat(lagretTotrinnsresultatsgrunnlag)
-                .isEqualToIgnoringGivenFields(oppdatertTotrinnsresultatsgrunnlag, "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertTotrinnsresultatsgrunnlag)
         assertEquals(2, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 

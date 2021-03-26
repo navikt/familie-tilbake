@@ -287,8 +287,8 @@ object Testdata {
                                           meldingstype = Meldingstype.VEDTAK)
 
     val brevsporing = Brevsporing(behandlingId = behandling.id,
-                                       journalpostId = "testverdi",
-                                       dokumentId = "testverdi",
-                                       brevtype = Brevtype.VARSEL)
+                                  journalpostId = "testverdi",
+                                  dokumentId = "testverdi",
+                                  brevtype = Brevtype.VARSEL)
 
 }

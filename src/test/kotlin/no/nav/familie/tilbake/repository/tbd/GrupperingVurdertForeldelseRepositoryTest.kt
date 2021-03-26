@@ -42,7 +42,7 @@ internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTe
                 grupperingVurdertForeldelseRepository.findByIdOrThrow(grupperingVurdertForeldelse.id)
 
         assertThat(lagretGrupperingVurdertForeldelse)
-                .isEqualToIgnoringGivenFields(grupperingVurdertForeldelse, "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(grupperingVurdertForeldelse)
         assertEquals(1, lagretGrupperingVurdertForeldelse.versjon)
     }
 
@@ -58,8 +58,7 @@ internal class GrupperingVurdertForeldelseRepositoryTest : OppslagSpringRunnerTe
         lagretGrupperingVurdertForeldelse =
                 grupperingVurdertForeldelseRepository.findByIdOrThrow(grupperingVurdertForeldelse.id)
         assertThat(lagretGrupperingVurdertForeldelse)
-                .isEqualToIgnoringGivenFields(oppdatertGrupperingVurdertForeldelse,
-                                              "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertGrupperingVurdertForeldelse)
         assertEquals(2, lagretGrupperingVurdertForeldelse.versjon)
     }
 

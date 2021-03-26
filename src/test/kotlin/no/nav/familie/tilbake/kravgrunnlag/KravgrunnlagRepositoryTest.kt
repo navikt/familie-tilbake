@@ -38,8 +38,9 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
 
-        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(kravgrunnlag431,
-                                                                       "sporbar", "perioder", "versjon")
+        assertThat(lagretKravgrunnlag431).usingRecursiveComparison()
+                .ignoringFields("sporbar", "perioder", "versjon")
+                .isEqualTo(kravgrunnlag431)
         assertEquals(1, lagretKravgrunnlag431.versjon)
     }
 
@@ -52,8 +53,9 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(oppdatertKravgrunnlag431)
 
         lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
-        assertThat(lagretKravgrunnlag431).isEqualToIgnoringGivenFields(oppdatertKravgrunnlag431,
-                                                                       "sporbar", "perioder", "versjon")
+        assertThat(lagretKravgrunnlag431).usingRecursiveComparison()
+                .ignoringFields("sporbar", "perioder", "versjon")
+                .isEqualTo(oppdatertKravgrunnlag431)
         assertEquals(2, lagretKravgrunnlag431.versjon)
     }
 
@@ -63,8 +65,9 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        assertThat(kravgrunnlag431).isEqualToIgnoringGivenFields(findByBehandlingId,
-                                                                 "sporbar", "perioder", "versjon")
+        assertThat(kravgrunnlag431).usingRecursiveComparison()
+                .ignoringFields("sporbar", "perioder", "versjon")
+                .isEqualTo(findByBehandlingId)
     }
 
 }

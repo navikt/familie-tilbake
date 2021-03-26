@@ -37,8 +37,9 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        assertThat(lagretBehandlingsstegstilstand).isEqualToIgnoringGivenFields(behandlingsstegstilstand,
-                "sporbar", "versjon")
+        assertThat(lagretBehandlingsstegstilstand).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(behandlingsstegstilstand)
         assertEquals(1, lagretBehandlingsstegstilstand.versjon)
     }
 
@@ -53,7 +54,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
         assertThat(lagretBehandlingsstegstilstand)
-                .isEqualToIgnoringGivenFields(oppdatertBehandlingsstegstilstand, "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertBehandlingsstegstilstand)
         assertEquals(2, lagretBehandlingsstegstilstand.versjon)
     }
 

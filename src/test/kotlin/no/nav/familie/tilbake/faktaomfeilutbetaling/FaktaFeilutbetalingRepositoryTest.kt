@@ -38,8 +38,9 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
 
-        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(faktaFeilutbetaling,
-                "sporbar", "versjon")
+        assertThat(lagretFaktaFeilutbetaling).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(faktaFeilutbetaling)
         assertEquals(1, lagretFaktaFeilutbetaling.versjon)
     }
 
@@ -52,8 +53,9 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingRepository.update(oppdatertFaktaFeilutbetaling)
 
         lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
-        assertThat(lagretFaktaFeilutbetaling).isEqualToIgnoringGivenFields(oppdatertFaktaFeilutbetaling,
-                "sporbar", "versjon")
+        assertThat(lagretFaktaFeilutbetaling).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertFaktaFeilutbetaling)
         assertEquals(2, lagretFaktaFeilutbetaling.versjon)
     }
 
@@ -63,7 +65,9 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandling.id)
 
-        assertThat(findByBehandlingId).isEqualToIgnoringGivenFields(faktaFeilutbetaling, "sporbar", "versjon")
+        assertThat(findByBehandlingId).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(faktaFeilutbetaling)
     }
 
 }

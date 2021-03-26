@@ -21,7 +21,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        assertThat(lagretFagsak).isEqualToIgnoringGivenFields(fagsak, "sporbar", "versjon")
+        assertThat(lagretFagsak).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(fagsak)
         assertEquals(1, lagretFagsak.versjon)
     }
 
@@ -34,7 +34,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.update(oppdatertFagsak)
 
         lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        assertThat(lagretFagsak).isEqualToIgnoringGivenFields(oppdatertFagsak, "sporbar", "versjon")
+        assertThat(lagretFagsak).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertFagsak)
         assertEquals(2, lagretFagsak.versjon)
     }
 

@@ -36,8 +36,9 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
 
-        assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(vedtaksbrevsperiode,
-                                                                           "sporbar", "versjon")
+        assertThat(lagretVedtaksbrevsperiode).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(vedtaksbrevsperiode)
         assertEquals(1, lagretVedtaksbrevsperiode.versjon)
     }
 
@@ -50,8 +51,9 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         vedtaksbrevsperiodeRepository.update(oppdatertVedtaksbrevsperiode)
 
         lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
-        assertThat(lagretVedtaksbrevsperiode).isEqualToIgnoringGivenFields(oppdatertVedtaksbrevsperiode,
-                                                                           "sporbar", "versjon")
+        assertThat(lagretVedtaksbrevsperiode).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertVedtaksbrevsperiode)
         assertEquals(2, lagretVedtaksbrevsperiode.versjon)
     }
 

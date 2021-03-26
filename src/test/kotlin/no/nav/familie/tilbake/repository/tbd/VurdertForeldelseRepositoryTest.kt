@@ -36,8 +36,9 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
 
-        assertThat(lagretVurdertForeldelse).isEqualToIgnoringGivenFields(vurdertForeldelse,
-                                                                         "sporbar", "versjon")
+        assertThat(lagretVurdertForeldelse).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(vurdertForeldelse)
         assertEquals(1, lagretVurdertForeldelse.versjon)
     }
 
@@ -50,8 +51,9 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         vurdertForeldelseRepository.update(oppdatertVurdertForeldelse)
 
         lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
-        assertThat(lagretVurdertForeldelse).isEqualToIgnoringGivenFields(oppdatertVurdertForeldelse,
-                                                                         "sporbar", "versjon")
+        assertThat(lagretVurdertForeldelse).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertVurdertForeldelse)
         assertEquals(2, lagretVurdertForeldelse.versjon)
     }
 

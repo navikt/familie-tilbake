@@ -36,7 +36,9 @@ internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() 
 
         val lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
 
-        assertThat(lagretMottakersVarselrespons).isEqualToIgnoringGivenFields(mottakersVarselrespons, "sporbar", "versjon")
+        assertThat(lagretMottakersVarselrespons).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(mottakersVarselrespons)
         assertEquals(1, lagretMottakersVarselrespons.versjon)
     }
 
@@ -50,7 +52,7 @@ internal class MottakersVarselresponsRepositoryTest : OppslagSpringRunnerTest() 
 
         lagretMottakersVarselrespons = mottakersVarselresponsRepository.findByIdOrThrow(mottakersVarselrespons.id)
         assertThat(lagretMottakersVarselrespons)
-                .isEqualToIgnoringGivenFields(oppdatertMottakersVarselrespons, "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertMottakersVarselrespons)
         assertEquals(2, lagretMottakersVarselrespons.versjon)
     }
 

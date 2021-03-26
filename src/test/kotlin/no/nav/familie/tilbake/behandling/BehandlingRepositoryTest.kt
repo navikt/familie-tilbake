@@ -30,7 +30,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(lagretBehandling).isEqualToIgnoringGivenFields(behandling, "sporbar", "versjon")
+        assertThat(lagretBehandling).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(behandling)
         assertEquals(1, lagretBehandling.versjon)
     }
 
@@ -43,7 +43,9 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(oppdatertBehandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(lagretBehandling).isEqualToIgnoringGivenFields(oppdatertBehandling, "sporbar", "versjon")
+        assertThat(lagretBehandling).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertBehandling)
         assertEquals(2, lagretBehandling.versjon)
     }
 
