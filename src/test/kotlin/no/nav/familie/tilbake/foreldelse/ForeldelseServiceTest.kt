@@ -108,7 +108,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                                             BehandlingsstegForeldelseDto(
                                                     listOf(foreldelsesperiode)))
         }
-        assertEquals("Periode med ${foreldelsesperiode.periode} er mindre enn en måned", exception.message)
+        assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
     }
 
     @Test
@@ -121,55 +121,8 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                                             BehandlingsstegForeldelseDto(
                                                     listOf(foreldelsesperiode)))
         }
-        assertEquals("Periode med ${foreldelsesperiode.periode} er mindre enn en måned", exception.message)
+        assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
     }
-
-    @Test
-    fun `beregnBeløp skal beregne feilutbetaltBeløp når saksbehandler deler opp periode`() {
-        val beregnetPerioderDto = foreldelseService.beregnBeløp(behandlingId = behandling.id,
-                                                                perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                                             LocalDate.of(2017, 1, 31)),
-                                                                                  PeriodeDto(LocalDate.of(2017, 2, 1),
-                                                                                             LocalDate.of(2017, 2, 28))))
-        assertEquals(2, beregnetPerioderDto.beregnetPerioder.size)
-        assertEquals(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                LocalDate.of(2017, 1, 31)), beregnetPerioderDto.beregnetPerioder[0].periode)
-        assertEquals(BigDecimal("10000"), beregnetPerioderDto.beregnetPerioder[0].feilutbetaltBeløp)
-        assertEquals(PeriodeDto(LocalDate.of(2017, 2, 1),
-                                LocalDate.of(2017, 2, 28)), beregnetPerioderDto.beregnetPerioder[1].periode)
-        assertEquals(BigDecimal("10000"), beregnetPerioderDto.beregnetPerioder[1].feilutbetaltBeløp)
-    }
-
-    @Test
-    fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke starter første dato`() {
-        val exception = assertFailsWith<RuntimeException> {
-            foreldelseService.beregnBeløp(behandlingId = behandling.id,
-                                          perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                       LocalDate.of(2017, 1, 31)),
-                                                            PeriodeDto(LocalDate.of(2017, 2, 16),
-                                                                       LocalDate.of(2017, 2, 28))))
-        }
-        assertEquals("Periode med ${
-            PeriodeDto(LocalDate.of(2017, 2, 16),
-                       LocalDate.of(2017, 2, 28))
-        } er mindre enn en måned", exception.message)
-    }
-
-    @Test
-    fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke slutter siste dato`() {
-        val exception = assertFailsWith<RuntimeException> {
-            foreldelseService.beregnBeløp(behandlingId = behandling.id,
-                                          perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                       LocalDate.of(2017, 1, 27)),
-                                                            PeriodeDto(LocalDate.of(2017, 2, 1),
-                                                                       LocalDate.of(2017, 2, 28))))
-        }
-        assertEquals("Periode med ${
-            PeriodeDto(LocalDate.of(2017, 1, 1),
-                       LocalDate.of(2017, 1, 27))
-        } er mindre enn en måned", exception.message)
-    }
-
 
     private fun lagForeldelsesperiode(fom: LocalDate, tom: LocalDate): ForeldelsesperiodeDto {
         return ForeldelsesperiodeDto(

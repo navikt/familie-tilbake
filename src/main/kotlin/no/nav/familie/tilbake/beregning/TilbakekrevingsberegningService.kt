@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.tilbake.api.dto.BeregnetPeriodeDto
+import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
@@ -46,6 +49,18 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
                                                                          totalTilbakekrevingsbeløp,
                                                                          totalFeilutbetaltBeløp),
                                   beregningsresultatsperioder = (beregningsresultatperioder))
+    }
+
+    fun beregnBeløp(behandlingId: UUID, perioder: List<PeriodeDto>): BeregnetPerioderDto {
+        // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
+        KravgrunnlagsberegningService.validatePerioder(perioder)
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+
+        return BeregnetPerioderDto(beregnetPerioder = perioder.map {
+            val feilutbetaltBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, Periode(it.fom, it.tom))
+            BeregnetPeriodeDto(periode = it,
+                               feilutbetaltBeløp = feilutbetaltBeløp)
+        })
     }
 
     private fun hentVilkårsvurdering(behandlingId: UUID): Vilkårsvurdering? {
