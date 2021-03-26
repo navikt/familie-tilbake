@@ -2,7 +2,10 @@ package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
+import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
@@ -18,12 +21,14 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -42,9 +47,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var brevsporingRepository: BrevsporingRepository
-
-    @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
@@ -52,6 +54,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
+
+    @Autowired
+    private lateinit var foreldelseService: ForeldelseService
 
     @Autowired
     private lateinit var stegService: StegService
@@ -166,6 +171,37 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `håndterSteg skal utføre foreldelse og fortsette til vilkårsvurdering`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+
+        var kravgrunnlag431 = Testdata.kravgrunnlag431
+        for (grunnlagsperiode in kravgrunnlag431.perioder) {
+            kravgrunnlag431 =
+                    kravgrunnlag431.copy(perioder = setOf(grunnlagsperiode.copy(
+                            periode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                              tom = LocalDate.of(2010, 1, 31)))))
+        }
+        kravgrunnlagRepository.insert(kravgrunnlag431)
+        val behandlingsstegForeldelseDto = BehandlingsstegForeldelseDto(
+                foreldetPerioder = listOf(ForeldelsesperiodeDto(periode = PeriodeDto(LocalDate.of(2010, 1, 1),
+                                                                                     LocalDate.of(2010, 1, 31)),
+                                                                begrunnelse = "foreldelses begrunnelse",
+                                                                foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET)))
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto) }
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertEquals(3, behandlingsstegstilstander.size)
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+        assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingssteg?.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+
+        assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
+    }
+
+    @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i varselssteg`() {
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
                                     Behandlingsstegstatus.VENTER,
@@ -244,8 +280,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
-        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = Periode(LocalDate.now().minusMonths(1),
-                                                                                             LocalDate.now()),
+        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(LocalDate.of(2021, 1, 1),
+                                                                                                LocalDate.of(2021, 1, 31)),
                                                                            hendelsestype = Hendelsestype.BA_ANNET,
                                                                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
@@ -270,10 +306,20 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val faktaFeilutbetalingsperioder = faktaFeilutbetaling.perioder.toList()
         assertEquals(1, faktaFeilutbetalingsperioder.size)
         val faktaFeilutbetaltePerioderDto = behandlingsstegFaktaDto.feilutbetaltePerioder[0]
-        assertEquals(faktaFeilutbetaltePerioderDto.periode, faktaFeilutbetalingsperioder[0].periode)
+        assertEquals(faktaFeilutbetaltePerioderDto.periode, PeriodeDto(faktaFeilutbetalingsperioder[0].periode))
         assertEquals(faktaFeilutbetaltePerioderDto.hendelsestype, faktaFeilutbetalingsperioder[0].hendelsestype)
         assertEquals(faktaFeilutbetaltePerioderDto.hendelsesundertype, faktaFeilutbetalingsperioder[0].hendelsesundertype)
         assertEquals(faktaFeilutbetaling.begrunnelse, "testverdi")
+    }
+
+    private fun assertForeldelsesdata(foreldelsesperiodeDto: ForeldelsesperiodeDto) {
+        val vurdertForeldelsesdata = foreldelseService.hentVurdertForeldelse(behandlingId)
+        assertEquals(1, vurdertForeldelsesdata.foreldetPerioder.size)
+        val vurdertForeldetData = vurdertForeldelsesdata.foreldetPerioder[0]
+        assertEquals(foreldelsesperiodeDto.begrunnelse, vurdertForeldetData.begrunnelse)
+        assertEquals(foreldelsesperiodeDto.foreldelsesvurderingstype, vurdertForeldetData.foreldelsesvurderingstype)
+        assertEquals(BigDecimal("10000.00"), vurdertForeldetData.feilutbetaltBeløp)
+        assertEquals(foreldelsesperiodeDto.periode, vurdertForeldetData.periode)
     }
 
 }

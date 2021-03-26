@@ -24,7 +24,7 @@ object KravgrunnlagsberegningService {
         }
     }
 
-    private fun beregnFeilutbetaltBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Periode): BigDecimal {
+    fun beregnFeilutbetaltBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Periode): BigDecimal {
         val feilutbetaltBeløpUtleder = { kgPeriode: Kravgrunnlagsperiode432 ->
             kgPeriode.beløp
                     .filter { it.klassetype == Klassetype.FEIL }

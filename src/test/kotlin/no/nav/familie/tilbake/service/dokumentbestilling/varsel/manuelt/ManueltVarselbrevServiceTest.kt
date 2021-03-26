@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
@@ -162,8 +163,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                               LocalDate.of(2019, 10, 30))
 
         return FaktaFeilutbetalingDto(totaltFeilutbetaltBeløp = BigDecimal(9000),
-                                      totalFeilutbetaltPeriode = periode,
-                                      feilutbetaltePerioder = listOf(FeilutbetalingsperiodeDto(periode,
+                                      totalFeilutbetaltPeriode = PeriodeDto(periode) ,
+                                      feilutbetaltePerioder = listOf(FeilutbetalingsperiodeDto(PeriodeDto(periode),
                                                                                                BigDecimal(9000))),
                                       revurderingsvedtaksdato = LocalDate.now().minusDays(1),
                                       begrunnelse = "",
