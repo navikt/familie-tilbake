@@ -182,6 +182,26 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml periode ikke starter første dag i måned`() {
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_periode_starter_ikke_første_dag.xml")
+
+        val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
+        assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
+                     "Perioden 2020-08-15-2020-08-31 starter ikke første dag i måned.",
+                     exception.message)
+    }
+
+    @Test
+    fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml periode ikke slutter siste dag i måned`() {
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_periode_slutter_ikke_siste_dag.xml")
+
+        val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
+        assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
+                     "Perioden 2020-08-01-2020-08-28 slutter ikke siste dag i måned.",
+                     exception.message)
+    }
+
+    @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml mangler FEIL postering`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_uten_FEIL_postering.xml")
 
