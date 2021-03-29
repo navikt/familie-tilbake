@@ -22,7 +22,7 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
         val feilutbetaltePerioder = LogiskPeriodeUtil
                 .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
 
-        return ForeldelseMapper.tilRespons(feilutbetaltePerioder, vurdertForeldelse)
+        return ForeldelseMapper.tilRespons(feilutbetaltePerioder, kravgrunnlag, vurdertForeldelse)
     }
 
     @Transactional

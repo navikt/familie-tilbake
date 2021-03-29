@@ -80,12 +80,49 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentVurdertForeldelse skal returnere allerede vurdert foreldelse data`() {
+        foreldelseService
+                .lagreVurdertForeldelse(behandling.id,
+                                        BehandlingsstegForeldelseDto(
+                                                listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                                             LocalDate.of(2017, 1, 31),
+                                                                             Foreldelsesvurderingstype.FORELDET),
+                                                       lagForeldelsesperiode(LocalDate.of(2017, 2, 1),
+                                                                             LocalDate.of(2017, 2, 28),
+                                                                             Foreldelsesvurderingstype.IKKE_FORELDET))))
+
+        val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
+
+        assertEquals(2, vurdertForeldelseDto.foreldetPerioder.size)
+        val førstePeriode = vurdertForeldelseDto.foreldetPerioder[0]
+        assertEquals(LocalDate.of(2017, 1, 1), førstePeriode.periode.fom)
+        assertEquals(LocalDate.of(2017, 1, 31), førstePeriode.periode.tom)
+        //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
+        assertEquals(BigDecimal("10000.00"), førstePeriode.feilutbetaltBeløp)
+        assertEquals(Foreldelsesvurderingstype.FORELDET, førstePeriode.foreldelsesvurderingstype)
+        assertEquals("foreldelses begrunnelse", førstePeriode.begrunnelse)
+        assertEquals(LocalDate.of(2017, 2, 28), førstePeriode.foreldelsesfrist)
+        assertNull(førstePeriode.oppdagelsesdato)
+
+        val andrePeriode = vurdertForeldelseDto.foreldetPerioder[1]
+        assertEquals(LocalDate.of(2017, 2, 1), andrePeriode.periode.fom)
+        assertEquals(LocalDate.of(2017, 2, 28), andrePeriode.periode.tom)
+        //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
+        assertEquals(BigDecimal("10000.00"), andrePeriode.feilutbetaltBeløp)
+        assertEquals(Foreldelsesvurderingstype.IKKE_FORELDET, andrePeriode.foreldelsesvurderingstype)
+        assertEquals("foreldelses begrunnelse", andrePeriode.begrunnelse)
+        assertEquals(LocalDate.of(2017, 2, 28),andrePeriode.foreldelsesfrist)
+        assertNull(andrePeriode.oppdagelsesdato)
+    }
+
+    @Test
     fun `lagreVurdertForeldelse skal lagre foreldelses data for en gitt behandling`() {
         foreldelseService
                 .lagreVurdertForeldelse(behandling.id,
                                         BehandlingsstegForeldelseDto(
                                                 listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
-                                                                             LocalDate.of(2017, 1, 31)))))
+                                                                             LocalDate.of(2017, 1, 31),
+                                                                             Foreldelsesvurderingstype.FORELDET))))
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         assertNotNull(vurdertForeldelse)
@@ -101,7 +138,8 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVurdertForeldelse skal ikke lagre foreldelses data når periode ikke starter med første dato`() {
         val foreldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 10),
-                                                       LocalDate.of(2017, 1, 31))
+                                                       LocalDate.of(2017, 1, 31),
+                                                       Foreldelsesvurderingstype.FORELDET)
         val exception = assertFailsWith<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
@@ -114,7 +152,8 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVurdertForeldelse skal ikke lagre foreldelses data når periode ikke slutter med siste dato`() {
         val foreldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
-                                                       LocalDate.of(2017, 1, 27))
+                                                       LocalDate.of(2017, 1, 27),
+                                                       Foreldelsesvurderingstype.FORELDET)
         val exception = assertFailsWith<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
@@ -124,11 +163,13 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
     }
 
-    private fun lagForeldelsesperiode(fom: LocalDate, tom: LocalDate): ForeldelsesperiodeDto {
+    private fun lagForeldelsesperiode(fom: LocalDate,
+                                      tom: LocalDate,
+                                      foreldelsesvurderingstype: Foreldelsesvurderingstype): ForeldelsesperiodeDto {
         return ForeldelsesperiodeDto(
                 periode = PeriodeDto(fom, tom),
                 begrunnelse = "foreldelses begrunnelse",
-                foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
+                foreldelsesvurderingstype = foreldelsesvurderingstype,
                 foreldelsesfrist = LocalDate.of(2017, 2, 28))
     }
 
