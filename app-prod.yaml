@@ -34,6 +34,7 @@ spec:
           - id: 199c2b39-e535-4ae8-ac59-8ccbee7991ae # 0000-GA-Barnetrygd-Veileder
           - id: e40090eb-c2fb-400e-b412-e9084019a73b # 0000-GA-Kontantstøtte
           - id: 54cd86b8-2e23-48b2-8852-b05b5827bb0f # 0000-GA-Kontantstøtte-Veileder
+          - id: 87190cf3-b278-457d-8ab7-1a5c55a9edd7 # Group_87190cf3-b278-457d-8ab7-1a5c55a9edd7 tilgang til prosessering
       enabled: true
   accessPolicy:
     inbound:

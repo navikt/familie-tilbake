@@ -32,6 +32,7 @@ spec:
           - id: ee5e0b5e-454c-4612-b931-1fe363df7c2c # 0000-GA-Enslig-Forsorger-Saksbehandler
           - id: 01166863-22f1-4e16-9785-d7a05a22df74 # 0000-GA-Enslig-Forsorger-Beslutter
           - id: 19dcbfde-4cdb-4c64-a1ea-ac9802b03339 # 0000-GA-Enslig-Forsorger-Veileder
+          - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # 0000-GA-STDAPPS - tilgang til prosessering
       enabled: true
       tenant: trygdeetaten.no
   accessPolicy:
