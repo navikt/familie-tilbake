@@ -20,7 +20,7 @@
         <urn:referanse>0</urn:referanse>
         <urn:tilbakekrevingsPeriode>
             <urn:periode>
-                <mmel:fom>2020-08-01</mmel:fom>
+                <mmel:fom>2020-08-15</mmel:fom>
                 <mmel:tom>2020-08-31</mmel:tom>
             </urn:periode>
             <urn:belopSkattMnd>0.00</urn:belopSkattMnd>
@@ -45,8 +45,8 @@
         </urn:tilbakekrevingsPeriode>
         <urn:tilbakekrevingsPeriode>
             <urn:periode>
-                <mmel:fom>2020-08-01</mmel:fom>
-                <mmel:tom>2020-08-31</mmel:tom>
+                <mmel:fom>2020-09-01</mmel:fom>
+                <mmel:tom>2020-09-30</mmel:tom>
             </urn:periode>
             <urn:belopSkattMnd>0.00</urn:belopSkattMnd>
             <urn:tilbakekrevingsBelop>
