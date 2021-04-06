@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -19,6 +20,11 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
+        if (behandlingskontrollService.erBehandlingPåVent(behandlingId)){
+            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                       frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
         behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
 
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)

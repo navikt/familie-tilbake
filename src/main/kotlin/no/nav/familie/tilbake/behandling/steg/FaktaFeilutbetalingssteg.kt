@@ -7,7 +7,9 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -44,5 +46,10 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
 
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FAKTA
+    }
+
+    @EventListener
+    fun slettFaktaOmFeilutbetaling(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+        faktaFeilutbetalingService.deaktiverFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 }
