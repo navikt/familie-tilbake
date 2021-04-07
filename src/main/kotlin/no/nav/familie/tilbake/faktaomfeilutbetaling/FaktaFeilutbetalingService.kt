@@ -49,6 +49,13 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
     }
 
     fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {
-        return faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandlingId)
+        return faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+    }
+
+    @Transactional
+    fun deaktiverFaktaOmFeilutbetaling(behandlingId: UUID) {
+        faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
+            faktaFeilutbetalingRepository.update(it)
+        }
     }
 }

@@ -7,7 +7,9 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -18,6 +20,9 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    override fun utførSteg(behandlingId: UUID) {
+        // Denne metoden gjør ingenting. Det skrives bare for å unngå feilen når ENDR kravgrunnlag mottas
+    }
 
     @Transactional
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
@@ -41,8 +46,12 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
                                                                                       Behandlingsstegstatus.KLAR))
     }
 
-
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FAKTA
+    }
+
+    @EventListener
+    fun slettFaktaOmFeilutbetaling(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+        faktaFeilutbetalingService.deaktiverFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 }

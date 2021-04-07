@@ -10,5 +10,5 @@ import java.util.UUID
 interface FaktaFeilutbetalingRepository : RepositoryInterface<FaktaFeilutbetaling, UUID>,
                                           InsertUpdateRepository<FaktaFeilutbetaling> {
 
-    fun findByAktivIsTrueAndBehandlingId(behandlingId: UUID): FaktaFeilutbetaling?
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling?
 }

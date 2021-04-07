@@ -37,4 +37,11 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
                                                                behandlingsstegForeldelseDto.foreldetPerioder))
     }
 
+    @Transactional
+    fun deaktiverVurdertForeldelse(behandlingId: UUID){
+        foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
+            foreldelseRepository.update(it)
+        }
+    }
+
 }
