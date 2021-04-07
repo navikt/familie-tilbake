@@ -318,7 +318,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val vurdertForeldetData = vurdertForeldelsesdata.foreldetPerioder[0]
         assertEquals(foreldelsesperiodeDto.begrunnelse, vurdertForeldetData.begrunnelse)
         assertEquals(foreldelsesperiodeDto.foreldelsesvurderingstype, vurdertForeldetData.foreldelsesvurderingstype)
-        assertEquals(BigDecimal("10000.00"), vurdertForeldetData.feilutbetaltBeløp)
+        assertEquals(BigDecimal("10000"), vurdertForeldetData.feilutbetaltBeløp)
         assertEquals(foreldelsesperiodeDto.periode, vurdertForeldetData.periode)
     }
 

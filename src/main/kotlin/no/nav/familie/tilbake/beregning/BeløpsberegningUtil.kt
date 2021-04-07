@@ -11,7 +11,7 @@ object BeløpsberegningUtil {
     }
 
     fun beregnBeløp(vurderingsperiode: Periode, kravgrunnlagsperiode: Periode, beløpPerMåned: BigDecimal): BigDecimal {
-        val overlapp = vurderingsperiode.snitt(kravgrunnlagsperiode)
+        val overlapp = kravgrunnlagsperiode.snitt(vurderingsperiode)
         if (overlapp != null) {
             return beløpPerMåned.multiply(BigDecimal.valueOf(overlapp.lengdeIMåneder()))
         }

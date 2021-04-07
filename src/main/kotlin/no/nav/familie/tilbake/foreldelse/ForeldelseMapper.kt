@@ -31,8 +31,10 @@ object ForeldelseMapper {
                                                                              ?: logiskePerioder.map {
                                                                                  VurdertForeldelsesperiodeDto(
                                                                                          periode = PeriodeDto(it.periode),
-                                                                                         feilutbetaltBeløp = it.feilutbetaltBeløp)
-                                                                               }
+                                                                                         feilutbetaltBeløp =
+                                                                                         it.feilutbetaltBeløp.setScale(
+                                                                                                 0, RoundingMode.HALF_UP))
+                                                                             }
 
         return VurdertForeldelseDto(foreldetPerioder = vurdertForeldelsesperioder)
     }

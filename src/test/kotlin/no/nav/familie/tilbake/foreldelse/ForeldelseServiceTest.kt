@@ -72,7 +72,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals(LocalDate.of(2017, 1, 1), foreldetPeriode.periode.fom)
         assertEquals(LocalDate.of(2017, 2, 28), foreldetPeriode.periode.tom)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("20000.00"), foreldetPeriode.feilutbetaltBeløp)
+        assertEquals(BigDecimal("20000"), foreldetPeriode.feilutbetaltBeløp)
         assertNull(foreldetPeriode.foreldelsesvurderingstype)
         assertNull(foreldetPeriode.begrunnelse)
         assertNull(foreldetPeriode.foreldelsesfrist)
@@ -98,7 +98,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals(LocalDate.of(2017, 1, 1), førstePeriode.periode.fom)
         assertEquals(LocalDate.of(2017, 1, 31), førstePeriode.periode.tom)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("10000.00"), førstePeriode.feilutbetaltBeløp)
+        assertEquals(BigDecimal("10000"), førstePeriode.feilutbetaltBeløp)
         assertEquals(Foreldelsesvurderingstype.FORELDET, førstePeriode.foreldelsesvurderingstype)
         assertEquals("foreldelses begrunnelse", førstePeriode.begrunnelse)
         assertEquals(LocalDate.of(2017, 2, 28), førstePeriode.foreldelsesfrist)
@@ -108,7 +108,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals(LocalDate.of(2017, 2, 1), andrePeriode.periode.fom)
         assertEquals(LocalDate.of(2017, 2, 28), andrePeriode.periode.tom)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("10000.00"), andrePeriode.feilutbetaltBeløp)
+        assertEquals(BigDecimal("10000"), andrePeriode.feilutbetaltBeløp)
         assertEquals(Foreldelsesvurderingstype.IKKE_FORELDET, andrePeriode.foreldelsesvurderingstype)
         assertEquals("foreldelses begrunnelse", andrePeriode.begrunnelse)
         assertEquals(LocalDate.of(2017, 2, 28),andrePeriode.foreldelsesfrist)
