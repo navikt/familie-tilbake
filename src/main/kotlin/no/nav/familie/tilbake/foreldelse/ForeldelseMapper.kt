@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import java.math.RoundingMode
 import java.util.UUID
 
 object ForeldelseMapper {
@@ -21,7 +22,7 @@ object ForeldelseMapper {
             VurdertForeldelsesperiodeDto(periode = PeriodeDto(it.periode),
                                          feilutbetaltBeløp = KravgrunnlagsberegningService
                                                  .beregnFeilutbetaltBeløp(kravgrunnlag431,
-                                                                          it.periode).setScale(2),
+                                                                          it.periode).setScale(0, RoundingMode.HALF_UP),
                                          begrunnelse = it.begrunnelse,
                                          foreldelsesvurderingstype = it.foreldelsesvurderingstype,
                                          foreldelsesfrist = it.foreldelsesfrist,
@@ -31,7 +32,7 @@ object ForeldelseMapper {
                                                                                  VurdertForeldelsesperiodeDto(
                                                                                          periode = PeriodeDto(it.periode),
                                                                                          feilutbetaltBeløp = it.feilutbetaltBeløp)
-                                                                             }
+                                                                               }
 
         return VurdertForeldelseDto(foreldetPerioder = vurdertForeldelsesperioder)
     }
