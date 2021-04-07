@@ -29,6 +29,10 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
     fun lagreVurdertForeldelse(behandlingId: UUID, behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto) {
         // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
         KravgrunnlagsberegningService.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
+        val eksisterendeData = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        if(eksisterendeData != null){
+            foreldelseRepository.update(eksisterendeData.copy(aktiv = false))
+        }
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId,
                                                                behandlingsstegForeldelseDto.foreldetPerioder))
     }
