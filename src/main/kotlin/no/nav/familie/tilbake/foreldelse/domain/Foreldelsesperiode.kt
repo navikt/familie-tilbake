@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.domain.tbd
+package no.nav.familie.tilbake.foreldelse.domain
 
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -32,5 +32,4 @@ enum class Foreldelsesvurderingstype(val navn: String) {
     FORELDET("Perioden er foreldet"),
     IKKE_FORELDET("Perioden er ikke foreldet"),
     TILLEGGSFRIST("Perioden er ikke foreldet, regel om tilleggsfrist (10 år) benyttes"),
-    UDEFINERT("Ikke Definert")
 }
