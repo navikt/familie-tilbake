@@ -14,8 +14,6 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
-import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
-import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
 import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
@@ -27,11 +25,12 @@ import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
@@ -102,7 +101,6 @@ abstract class OppslagSpringRunnerTest {
                ÅrsakTotrinnsvurdering::class,
                MottakersVarselrespons::class,
                VurdertForeldelse::class,
-               GrupperingVurdertForeldelse::class,
                Foreldelsesperiode::class,
                Kravgrunnlag431::class,
                Kravgrunnlagsperiode432::class,

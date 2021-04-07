@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.tilbake.api.dto.BeregnetPeriodeDto
+import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
@@ -11,15 +14,15 @@ import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
-import no.nav.familie.tilbake.domain.tbd.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
+import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.repository.tbd.VilkårsvurderingRepository
-import no.nav.familie.tilbake.repository.tbd.VurdertForeldelseRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -48,12 +51,24 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
                                   beregningsresultatsperioder = (beregningsresultatperioder))
     }
 
+    fun beregnBeløp(behandlingId: UUID, perioder: List<PeriodeDto>): BeregnetPerioderDto {
+        // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
+        KravgrunnlagsberegningService.validatePerioder(perioder)
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+
+        return BeregnetPerioderDto(beregnetPerioder = perioder.map {
+            val feilutbetaltBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, Periode(it.fom, it.tom))
+            BeregnetPeriodeDto(periode = it,
+                               feilutbetaltBeløp = feilutbetaltBeløp)
+        })
+    }
+
     private fun hentVilkårsvurdering(behandlingId: UUID): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingId(behandlingId)
     }
 
     private fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? {
-        return vurdertForeldelseRepository.findByBehandlingId(behandlingId)
+        return vurdertForeldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
     private fun finnPerioder(vurdertForeldelse: VurdertForeldelse?, vilkårsvurdering: Vilkårsvurdering?): List<Periode> {

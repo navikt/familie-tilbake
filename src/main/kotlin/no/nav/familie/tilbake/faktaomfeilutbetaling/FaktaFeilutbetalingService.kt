@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -37,7 +38,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
         }
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> = behandlingsstegFaktaDto.feilutbetaltePerioder.map {
-            FaktaFeilutbetalingsperiode(periode = it.periode,
+            FaktaFeilutbetalingsperiode(periode = Periode(it.periode.fom, it.periode.tom),
                                         hendelsestype = it.hendelsestype,
                                         hendelsesundertype = it.hendelsesundertype)
         }.toSet()

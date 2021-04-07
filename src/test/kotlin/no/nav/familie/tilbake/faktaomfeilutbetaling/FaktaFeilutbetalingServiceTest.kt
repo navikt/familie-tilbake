@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -42,8 +43,8 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private val behandling = Testdata.behandling
-    private val periode = Periode(fom = LocalDate.now().minusMonths(2),
-                                  tom = LocalDate.now())
+    private val periode = Periode(fom = YearMonth.now().minusMonths(2),
+                                  tom = YearMonth.now())
 
     @BeforeEach
     fun init() {
@@ -126,14 +127,14 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private fun assertFeilutbetaltePerioder(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
                                             hendelsestype: Hendelsestype?,
                                             hendelsesundertype: Hendelsesundertype?) {
-        assertEquals(periode, faktaFeilutbetalingDto.totalFeilutbetaltPeriode)
+        assertEquals(PeriodeDto(periode), faktaFeilutbetalingDto.totalFeilutbetaltPeriode)
         assertEquals(BigDecimal.valueOf(1000000, 2), faktaFeilutbetalingDto.totaltFeilutbetaltBeløp)
 
         assertEquals(1, faktaFeilutbetalingDto.feilutbetaltePerioder.size)
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()
         assertEquals(hendelsestype, feilutbetaltePeriode.hendelsestype)
         assertEquals(hendelsesundertype, feilutbetaltePeriode.hendelsesundertype)
-        assertEquals(periode, feilutbetaltePeriode.periode)
+        assertEquals(PeriodeDto(periode), feilutbetaltePeriode.periode)
     }
 
 }
