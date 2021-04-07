@@ -18,7 +18,7 @@ data class Periode(val fom: YearMonth,
     }
 
     fun overlapper(other: Periode): Boolean {
-        return overlapper(other.fom) || overlapper(other.tom)
+        return overlapper(other.fom) || overlapper(other.tom) || other.overlapper(fom)
     }
 
     fun snitt(annen: Periode): Periode? {
