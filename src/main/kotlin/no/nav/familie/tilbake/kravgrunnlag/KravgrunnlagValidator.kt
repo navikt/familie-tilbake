@@ -19,6 +19,8 @@ object KravgrunnlagValidator {
     fun validerGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
         validerReferanse(kravgrunnlag)
         validerPeriodeInnenforMåned(kravgrunnlag)
+        validerPeriodeStarterFørsteDagIMåned(kravgrunnlag)
+        validerPeriodeSlutterSisteDagIMåned(kravgrunnlag)
         validerOverlappendePerioder(kravgrunnlag)
         validerSkatt(kravgrunnlag)
         validerPerioderHarFeilutbetalingspostering(kravgrunnlag)
@@ -42,6 +44,26 @@ object KravgrunnlagValidator {
                 throw UgyldigKravgrunnlagFeil(
                         melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
                                   " Perioden ${periode.fom}-${periode.tom} er ikke innenfor en kalendermåned.")
+            }
+        }
+    }
+
+    private fun validerPeriodeStarterFørsteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
+        kravgrunnlag.tilbakekrevingsPeriode.forEach {
+            if (it.periode.fom.dayOfMonth != 1) {
+                throw UgyldigKravgrunnlagFeil(
+                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                  " Perioden ${it.periode.fom}-${it.periode.tom} starter ikke første dag i måned.")
+            }
+        }
+    }
+
+    private fun validerPeriodeSlutterSisteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
+        kravgrunnlag.tilbakekrevingsPeriode.forEach {
+            if (it.periode.tom.dayOfMonth != YearMonth.from(it.periode.tom).lengthOfMonth()) {
+                throw UgyldigKravgrunnlagFeil(
+                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                  " Perioden ${it.periode.fom}-${it.periode.tom} slutter ikke siste dag i måned.")
             }
         }
     }
@@ -142,11 +164,11 @@ object KravgrunnlagValidator {
     private fun validerYtelseMotFeilutbetaling(kravgrunnlag: DetaljertKravgrunnlagDto) {
         for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
             val sumTilbakekrevesFraYtelsePosteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
-                                                               .filter { finnesYtelsespostering(it.typeKlasse) }
-                                                               .sumOf(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
+                    .filter { finnesYtelsespostering(it.typeKlasse) }
+                    .sumOf(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
             val sumNyttBelopFraFeilposteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
-                                                         .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
-                                                         .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
+                    .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
+                    .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
             if (sumNyttBelopFraFeilposteringer.compareTo(sumTilbakekrevesFraYtelsePosteringer) != 0) {
                 throw UgyldigKravgrunnlagFeil(
                         melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +

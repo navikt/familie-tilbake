@@ -20,7 +20,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insert(vilkår)
 
         val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        assertThat(lagretVilkår).isEqualToIgnoringGivenFields(vilkår, "sporbar", "versjon")
+        assertThat(lagretVilkår).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(vilkår)
         assertEquals(1, lagretVilkår.versjon)
     }
 
@@ -33,7 +33,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.update(oppdatertVilkår)
 
         lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        assertThat(lagretVilkår).isEqualToIgnoringGivenFields(oppdatertVilkår, "sporbar", "versjon")
+        assertThat(lagretVilkår).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertVilkår)
         assertEquals(2, lagretVilkår.versjon)
     }
 

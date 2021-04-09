@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,9 +28,6 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
-    private lateinit var grupperingVurdertForeldelseRepository: GrupperingVurdertForeldelseRepository
-
-    @Autowired
     private lateinit var vurdertForeldelseRepository: VurdertForeldelseRepository
 
     @Autowired
@@ -43,7 +41,6 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
         behandlingRepository.insert(Testdata.behandling)
         faktaFeilutbetalingRepository.insert(Testdata.faktaFeilutbetaling)
         vurdertForeldelseRepository.insert(Testdata.vurdertForeldelse)
-        grupperingVurdertForeldelseRepository.insert(Testdata.grupperingVurdertForeldelse)
         vilkårsvurderingRepository.insert(Testdata.vilkår)
     }
 
@@ -53,8 +50,10 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
 
         val lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
 
-        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag).isEqualToIgnoringGivenFields(totrinnsresultatsgrunnlag,
-                                                                                            "sporbar", "versjon")
+        Assertions.assertThat(lagretTotrinnsresultatsgrunnlag)
+                .usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(totrinnsresultatsgrunnlag)
         assertEquals(1, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 
@@ -68,7 +67,7 @@ internal class TotrinnsresultatsgrunnlagRepositoryTest : OppslagSpringRunnerTest
 
         lagretTotrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByIdOrThrow(totrinnsresultatsgrunnlag.id)
         Assertions.assertThat(lagretTotrinnsresultatsgrunnlag)
-                .isEqualToIgnoringGivenFields(oppdatertTotrinnsresultatsgrunnlag, "sporbar", "versjon")
+                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertTotrinnsresultatsgrunnlag)
         assertEquals(2, lagretTotrinnsresultatsgrunnlag.versjon)
     }
 

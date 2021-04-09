@@ -40,7 +40,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
 
-        assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(brevsporing, "sporbar", "versjon")
+        assertThat(lagretBrevsporing).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(brevsporing)
         assertEquals(1, lagretBrevsporing.versjon)
     }
 
@@ -53,7 +53,9 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
         brevsporingRepository.update(oppdatertBrevsporing)
 
         lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
-        assertThat(lagretBrevsporing).isEqualToIgnoringGivenFields(oppdatertBrevsporing, "sporbar", "versjon")
+        assertThat(lagretBrevsporing).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertBrevsporing)
         assertEquals(2, lagretBrevsporing.versjon)
     }
 
@@ -68,7 +70,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
                 brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(Testdata.behandling.id,
                                                                                                        Brevtype.VARSEL)
 
-        assertThat(funnetBrevsporing).isEqualToIgnoringGivenFields(nyesteBrevsporing, "sporbar", "versjon")
+        assertThat(funnetBrevsporing).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(nyesteBrevsporing)
 
     }
 

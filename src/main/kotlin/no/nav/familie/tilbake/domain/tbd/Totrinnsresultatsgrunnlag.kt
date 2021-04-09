@@ -11,7 +11,7 @@ data class Totrinnsresultatsgrunnlag(@Id
                                      val id: UUID = UUID.randomUUID(),
                                      val behandlingId: UUID,
                                      val faktaFeilutbetalingId: UUID?,
-                                     val grupperingVurdertForeldelseId: UUID,
+                                     val vurdertForeldelseId: UUID,
                                      @Column("vilkarsvurdering_id")
                                      val vilkårsvurderingId: UUID,
                                      val aktiv: Boolean = true,

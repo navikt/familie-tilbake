@@ -41,7 +41,9 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretRevurderingsårsak = revurderingsårsakRepository.findByIdOrThrow(revurderingsårsak.id)
 
-        assertThat(lagretRevurderingsårsak).isEqualToIgnoringGivenFields(revurderingsårsak, "sporbar", "versjon")
+        assertThat(lagretRevurderingsårsak).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(revurderingsårsak)
         assertEquals(1, lagretRevurderingsårsak.versjon)
     }
 
@@ -54,7 +56,9 @@ internal class RevurderingsårsakRepositoryTest : OppslagSpringRunnerTest() {
         revurderingsårsakRepository.update(oppdatertRevurderingsårsak)
 
         lagretRevurderingsårsak = revurderingsårsakRepository.findByIdOrThrow(revurderingsårsak.id)
-        assertThat(lagretRevurderingsårsak).isEqualToIgnoringGivenFields(oppdatertRevurderingsårsak, "sporbar", "versjon")
+        assertThat(lagretRevurderingsårsak).usingRecursiveComparison()
+                .ignoringFields("sporbar", "versjon")
+                .isEqualTo(oppdatertRevurderingsårsak)
         assertEquals(2, lagretRevurderingsårsak.versjon)
     }
 

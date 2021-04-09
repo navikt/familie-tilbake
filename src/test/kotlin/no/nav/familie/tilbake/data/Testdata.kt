@@ -25,10 +25,7 @@ import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
-import no.nav.familie.tilbake.domain.tbd.Foreldelsesperiode
-import no.nav.familie.tilbake.domain.tbd.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.domain.tbd.Friteksttype
-import no.nav.familie.tilbake.domain.tbd.GrupperingVurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Navoppfulgt
@@ -44,7 +41,6 @@ import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
-import no.nav.familie.tilbake.domain.tbd.VurdertForeldelse
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Årsakstype
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
@@ -52,6 +48,9 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
@@ -68,6 +67,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -152,16 +152,14 @@ object Testdata {
                                                         akseptertFaktagrunnlag = true,
                                                         kilde = "testverdi")
 
-    val vurdertForeldelse = VurdertForeldelse(behandlingId = behandling.id)
-
-    val grupperingVurdertForeldelse = GrupperingVurdertForeldelse(vurdertForeldelseId = vurdertForeldelse.id,
-                                                                  behandlingId = behandling.id)
-
     val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                 foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                                                 begrunnelse = "testverdi",
                                                 foreldelsesfrist = LocalDate.now(),
                                                 oppdagelsesdato = LocalDate.now())
+
+    val vurdertForeldelse = VurdertForeldelse(behandlingId = behandling.id,
+                                              foreldelsesperioder = setOf(foreldelsesperiode))
 
     val feilKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.KL_KODE_FEIL_BA,
                                                           klassetype = Klassetype.FEIL,
@@ -174,8 +172,7 @@ object Testdata {
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
 
-    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(id = UUID.randomUUID(),
-                                                          klassekode = Klassekode.BATR,
+    val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(klassekode = Klassekode.BATR,
                                                           klassetype = Klassetype.YTEL,
                                                           opprinneligUtbetalingsbeløp = BigDecimal("10000"),
                                                           nyttBeløp = BigDecimal.ZERO,
@@ -186,10 +183,11 @@ object Testdata {
                                                           skyldkode = "testverdi",
                                                           skatteprosent = BigDecimal("35.1100"))
 
-     val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-                                                                  beløp = setOf(feilKravgrunnlagsbeløp433,
-                                                                                ytelKravgrunnlagsbeløp433),
-                                                                  månedligSkattebeløp = BigDecimal("123.11"))
+    val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(periode = Periode(YearMonth.now().minusMonths(1),
+                                                                            YearMonth.now()),
+                                                          beløp = setOf(feilKravgrunnlagsbeløp433,
+                                                                        ytelKravgrunnlagsbeløp433),
+                                                          månedligSkattebeløp = BigDecimal("123.11"))
 
     val kravgrunnlag431 = Kravgrunnlag431(behandlingId = behandling.id,
                                           vedtakId = BigInteger.ZERO,
@@ -268,7 +266,7 @@ object Testdata {
 
     val totrinnsresultatsgrunnlag = Totrinnsresultatsgrunnlag(behandlingId = behandling.id,
                                                               faktaFeilutbetalingId = faktaFeilutbetaling.id,
-                                                              grupperingVurdertForeldelseId = grupperingVurdertForeldelse.id,
+                                                              vurdertForeldelseId = vurdertForeldelse.id,
                                                               vilkårsvurderingId = vilkår.id)
 
     val vedtaksbrevsoppsummering = Vedtaksbrevsoppsummering(behandlingId = behandling.id,
@@ -287,8 +285,8 @@ object Testdata {
                                           meldingstype = Meldingstype.VEDTAK)
 
     val brevsporing = Brevsporing(behandlingId = behandling.id,
-                                       journalpostId = "testverdi",
-                                       dokumentId = "testverdi",
-                                       brevtype = Brevtype.VARSEL)
+                                  journalpostId = "testverdi",
+                                  dokumentId = "testverdi",
+                                  brevtype = Brevtype.VARSEL)
 
 }

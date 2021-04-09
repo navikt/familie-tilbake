@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.Periode
@@ -41,12 +42,12 @@ object FaktaFeilutbetalingMapper {
     private fun hentFeilutbetaltePerioder(faktaFeilutbetaling: FaktaFeilutbetaling?,
                                           logiskePerioder: List<LogiskPeriode>): List<FeilutbetalingsperiodeDto> {
         return faktaFeilutbetaling?.perioder?.map {
-            FeilutbetalingsperiodeDto(periode = it.periode,
+            FeilutbetalingsperiodeDto(periode = PeriodeDto(it.periode),
                                       feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
                                       hendelsestype = it.hendelsestype,
                                       hendelsesundertype = it.hendelsesundertype)
         } ?: logiskePerioder.map {
-            FeilutbetalingsperiodeDto(periode = it.periode,
+            FeilutbetalingsperiodeDto(periode = PeriodeDto(it.periode),
                                       feilutbetaltBeløp = it.feilutbetaltBeløp)
         }
     }
@@ -55,13 +56,13 @@ object FaktaFeilutbetalingMapper {
         return logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
     }
 
-    private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Periode {
+    private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): PeriodeDto {
         var totalPeriodeFom: YearMonth? = null
         var totalPeriodeTom: YearMonth? = null
         for (periode in perioder) {
             totalPeriodeFom = if (totalPeriodeFom == null || totalPeriodeFom > periode.fom) periode.fom else totalPeriodeFom
             totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom
         }
-        return Periode(totalPeriodeFom!!, totalPeriodeTom!!)
+        return PeriodeDto(totalPeriodeFom!!, totalPeriodeTom!!)
     }
 }
