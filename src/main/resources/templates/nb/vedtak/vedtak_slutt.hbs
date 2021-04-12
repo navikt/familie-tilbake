@@ -1,0 +1,47 @@
+{{#if (neq 1 antallPerioder)}}
+_{{#if hjemmel.lovhjemmelFlertall}}Lovhjemlene{{else}}Lovhjemmelen{{/if}} vi har brukt
+{{else}}
+
+{{/if}}
+Vedtaket er gjort etter {{hjemmel.lovhjemmelVedtak}}.
+{{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
+    {{#if (neq brevmetadata.ytelsestype "ES")}}
+_Skatt
+        {{#if skalIkkeViseSkatt }}
+NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
+        {{else}}
+Beløpet du skal betale tilbake etter skatt er trukket fra, er beregnet etter ditt gjennomsnittlige skattetrekk per måned. Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.
+
+NAV gir opplysninger til Skattetaten om skattebeløpet og om beløpet du skal betale tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
+        {{/if}}
+    {{/if}}
+_Hvordan betale tilbake pengene du skylder
+    {{#if behandling.erRevurdering}}
+NAV Innkreving vil korrigere beløpet du skal betale tilbake. Du finner mer informasjon på nav.no/innkreving.
+    {{else}}
+Du vil motta krav fra NAV Innkreving på det beløpet du skal betale tilbake. Du finner mer informasjon på nav.no/innkreving.
+    {{/if}}
+{{/if}}
+_Du har rett til å klage
+Du kan klage innen {{konfigurasjon.klagefristIUker}} uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.
+{{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
+
+Du må som hovedregel begynne å betale beløpet tilbake, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.
+{{/if}}
+_Du har rett til innsyn
+På nav.no/dittnav kan du se dokumentene i saken din.
+_Har du spørsmål?
+Du finner nyttig informasjon på {{ytelseUrl}}
+Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+
+Med vennlig hilsen
+NAV Familie- og pensjonsytelser {{behandlendeEnhetsNavn}}
+{{ansvarligSaksbehandler}}{{#if finnesVerge}}
+
+Brev med likt innhold er sendt til {{annenMottakerNavn}}
+{{/if}}
+{{#if harVedlegg}}
+
+
+Vedlegg: Resultatet av tilbakebetalingssaken
+{{/if}}

@@ -10,37 +10,69 @@ import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.helper.ConditionalHelpers
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.BaseDokument
-import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Brevoverskriftsdata
+import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Språkstøtte
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
 object FellesTekstformaterer {
 
+    private val TEMPLATE_CACHE: MutableMap<String, Template> = HashMap()
+
     private val OM = ObjectMapperForUtvekslingAvDataMedHandlebars.INSTANCE
-    private fun opprettHandlebarsKonfigurasjon(): Handlebars {
-        val loader = ClassPathTemplateLoader().apply {
-            charset = StandardCharsets.UTF_8
-            prefix = "/templates/"
-            suffix = ".hbs"
+
+    fun lagBrevtekst(data: Språkstøtte, filsti: String): String {
+        val template = getTemplate(data.språkkode, filsti)
+        return applyTemplate(data, template)
+    }
+
+    fun lagDeltekst(data: Språkstøtte, filsti: String): String {
+        val template = getTemplateFraPartial(data.språkkode, filsti)
+        return applyTemplate(data, template)
+    }
+
+    private fun getTemplate(språkkode: Språkkode, filsti: String): Template {
+        val språkstøttetFilsti: String = lagSpråkstøttetFilsti(filsti, språkkode)
+        if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
+            return TEMPLATE_CACHE[språkstøttetFilsti]!!
         }
-        return Handlebars(loader).apply {
-            charset = StandardCharsets.UTF_8
-            setInfiniteLoops(false)
-            setPrettyPrint(true)
-            registerHelpers(ConditionalHelpers::class.java)
+        TEMPLATE_CACHE[språkstøttetFilsti] =
+                opprettTemplate(språkstøttetFilsti)
+        return TEMPLATE_CACHE[språkstøttetFilsti]!!
+    }
+
+    private fun getTemplateFraPartial(språkkode: Språkkode, partial: String): Template {
+        val språkstøttetFilsti: String = lagSpråkstøttetFilsti(partial, språkkode)
+        if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
+            return TEMPLATE_CACHE[språkstøttetFilsti]!!
+        }
+        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(
+                lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
+                språkstøttetFilsti
+        )
+        return TEMPLATE_CACHE[språkstøttetFilsti]!!
+    }
+
+    private fun opprettTemplate(språkstøttetFilsti: String): Template {
+        return opprettHandlebarsKonfigurasjon().compile(språkstøttetFilsti)
+    }
+
+    private fun opprettTemplateFraPartials(vararg partials: String): Template {
+        val partialString = partials.joinToString("") { "{{> $it}}\n" }
+        return try {
+            opprettHandlebarsKonfigurasjon().compileInline(partialString)
+        } catch (e: IOException) {
+            error("Klarte ikke å kompilere partial template $partials")
         }
     }
 
-    fun applyTemplate(template: Template, data: Any): String {
+    private fun applyTemplate(data: Any, template: Template): String {
         return try {
             //Går via JSON for å
             //1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
             //2. ha egen navngiving på variablene i template for enklere å lese template
             //3. unngår at template feiler når variable endrer navn
             val jsonNode: JsonNode = OM.valueToTree(data)
-            val context: Context = Context.newBuilder(jsonNode)
+            val context = Context.newBuilder(jsonNode)
                     .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
                     .build()
             template.apply(context).trim()
@@ -49,32 +81,26 @@ object FellesTekstformaterer {
         }
     }
 
-    fun opprettHandlebarsTemplate(filsti: String, språkkode: Språkkode): Template {
-        val handlebars: Handlebars = opprettHandlebarsKonfigurasjon()
-//        handlebars.registerHelper("lookup-map", MapLookupHelper())
-        handlebars.registerHelper("kroner", KroneFormattererMedTusenskille())
-        handlebars.registerHelper("dato", DatoHelper())
-        handlebars.registerHelper("kortdato", KortdatoHelper())
-        handlebars.registerHelper("storForbokstav", StorBokstavHelper())
-        return handlebars.compile(lagSpråkstøttetFilsti(filsti, språkkode))
-    }
-
-    fun lagFritekst(dokument: BaseDokument, filsti: String): String {
-        return try {
-            val template = opprettHandlebarsTemplate(filsti, dokument.språkkode)
-            applyTemplate(template, dokument)
-        } catch (e: IOException) {
-            throw IllegalStateException("Feil ved tekstgenerering", e)
+    private fun opprettHandlebarsKonfigurasjon(): Handlebars {
+        val loader = ClassPathTemplateLoader().apply {
+            charset = StandardCharsets.UTF_8
+            prefix = "/templates/"
+            suffix = ".hbs"
         }
-    }
 
-    fun lagOverskrift(brevmetadata: Brevmetadata, filsti: String): String {
-        return try {
-            val brevoverskriftsdata = Brevoverskriftsdata(brevmetadata)
-            val template = opprettHandlebarsTemplate(filsti, brevmetadata.språkkode)
-            template.apply(brevoverskriftsdata)
-        } catch (e: IOException) {
-            throw IllegalStateException("Feil ved tekstgenerering", e)
+        return Handlebars(loader).apply {
+            charset = StandardCharsets.UTF_8
+            setInfiniteLoops(false)
+            setPrettyPrint(true)
+            registerHelpers(ConditionalHelpers::class.java)
+            registerHelper("kroner", KroneFormattererMedTusenskille())
+            registerHelper("dato", DatoHelper())
+            registerHelper("kortdato", KortdatoHelper())
+            registerHelper("storForbokstav", StorBokstavHelper())
+            registerHelper("switch", SwitchHelper())
+            registerHelper("case", CaseHelper())
+            registerHelper("var", VariableHelper())
+            registerHelper("lookup-map", MapLookupHelper())
         }
     }
 

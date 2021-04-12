@@ -10,4 +10,7 @@ import java.util.UUID
 @Repository
 @Transactional
 interface VedtaksbrevsperiodeRepository : RepositoryInterface<Vedtaksbrevsperiode, UUID>,
-                                          InsertUpdateRepository<Vedtaksbrevsperiode>
+                                          InsertUpdateRepository<Vedtaksbrevsperiode> {
+
+    fun findByBehandlingId(behandlingId: UUID): List<Vedtaksbrevsperiode>
+}

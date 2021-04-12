@@ -1,0 +1,82 @@
+{{#* inline "fritekst"}}
+{{#if vurderinger.fritekst}}
+
+{{vurderinger.fritekst}}
+{{/if}}
+{{/inline}}
+{{#* inline "ikke-krev-småbeløp"}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Selv om du burde forstått at beløpet var feil, er beløpet lavere enn {{kroner konfigurasjon.fireRettsgebyr}}. Du må derfor ikke betale tilbake beløpet.
+{{/inline}}
+{{#if (not vurderinger.harForeldelsesavsnitt) }}
+_Hvordan har vi kommet fram til at du {{#if resultat.tilbakekrevesBeløp}}{{else}}ikke {{/if}}må betale tilbake?
+{{/if}}
+{{#if (eq vurderinger.vilkårsvurderingsresultat "FORSTO_BURDE_FORSTÅTT")}}
+    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+        {{> ikke-krev-småbeløp}}
+        {{else}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Selv hvis du har meldt fra til oss, kan vi kreve tilbake det du har fått for mye dersom du burde forstått at beløpet var feil.
+{{> fritekst}}
+
+Ut fra informasjonen du har fått, burde du etter vår vurdering forstått at du fikk for mye utbetalt. Derfor kan vi kreve tilbake.
+        {{/if}}
+    {{/if}}
+    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Selv hvis du har meldt fra til oss, kan vi kreve tilbake det du har fått for mye dersom du må ha forstått at beløpet var feil.
+{{> fritekst}}
+
+Ut fra informasjonen du har fått, må du etter vår vurdering ha forstått at du fikk for mye utbetalt. Derfor kan vi kreve tilbake.
+    {{/if}}
+{{/if}}
+{{#if (eq vurderinger.vilkårsvurderingsresultat "FEIL_OPPLYSNINGER_FRA_BRUKER")}}
+    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+        {{> ikke-krev-småbeløp}}
+        {{else}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Etter vår vurdering burde du forstått at opplysningene du ga oss var uriktige. Derfor kan vi kreve pengene tilbake.
+{{> fritekst}}
+        {{/if}}
+    {{/if}}
+    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Etter vår vurdering må du ha forstått at opplysningene du ga oss var uriktige. Derfor kan vi kreve pengene tilbake.
+{{> fritekst}}
+    {{/if}}
+{{/if}}
+{{#if (eq vurderinger.vilkårsvurderingsresultat "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER")}}
+    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+        {{> ikke-krev-småbeløp}}
+        {{else}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Etter vår vurdering burde du forstått at du ikke ga oss alle opplysningene vi trengte tidsnok for å sikre at du fikk riktig utbetaling. Derfor kan vi kreve pengene tilbake.
+{{> fritekst}}
+        {{/if}}
+    {{/if}}
+    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til. Etter vår vurdering må du ha forstått at du ikke ga oss alle opplysningene vi trengte tidsnok for å sikre at du fikk riktig utbetaling. Derfor kan vi kreve pengene tilbake.
+{{> fritekst}}
+    {{/if}}
+{{/if}}
+{{#if (eq vurderinger.vilkårsvurderingsresultat "GOD_TRO")}}
+    {{#if vurderinger.beløpIBehold}}
+Vi har ikke gitt deg den informasjonen du trengte for å forstå at beløpet du fikk utbetalt var feil. Du har opplyst at du ikke har brukt {{kroner vurderinger.beløpIBehold}}. Disse kan vi kreve betale, selv om du ikke forstod at utbetalingen var feil.
+    {{else}}
+Vi har ikke gitt deg den informasjonen du trengte for å forstå at beløpet du fikk utbetalt var feil. Du må ikke betale tilbake fordi vi har opplysninger om at du ikke har noe igjen av pengene.
+    {{/if}}
+{{> fritekst}}
+{{/if}}
+{{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
+Du har fått informasjon om hvor mye du har rett til å få i {{ytelsesnavnUbestemt}} og at du må melde fra om endringer til NAV. Informasjonen du har fått forklarer om du har rett til {{ytelsesnavnUbestemt}} og hvor mye du har rett til å få utbetalt.
+{{>fritekst}}
+
+    {{#switch vurderinger.vilkårsvurderingsresultat}}
+    {{#case "FORSTO_BURDE_FORSTÅTT"}}
+Vi mener at du forstod at beløpet du fikk utbetalt var feil. Du må derfor betale tilbake det du har fått for mye.
+    {{/case}}
+    {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
+Etter vår vurdering forsto du at du ga oss uriktige opplysninger. Derfor må du betale tilbake det du har fått for mye.
+    {{/case}}
+    {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
+Vi vurderer at du forsto at du ikke ga oss alle nødvendige opplysninger i saken din. Du må derfor betale tilbake det du har fått for mye.
+    {{/case}}
+    {{/switch}}
+{{/if}}

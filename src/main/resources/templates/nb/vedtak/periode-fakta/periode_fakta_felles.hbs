@@ -1,0 +1,53 @@
+{{#* inline "fakta-medlemskap"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "IKKE_BOSATT"}}
+Du er ikke medlem av folketrygden fordi du har oppholdt deg så mye i utlandet at du ikke anses som bosatt i Norge, og du er heller ikke arbeidstaker i Norge. Derfor har du ikke rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "MEDLEM_I_ANNET_LAND"}}
+Du er ikke medlem av folketrygden fordi du er omfattet av trygdeordningen i et annet land. Derfor har du ikke rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "IKKE_LOVLIG_OPPHOLD"}}
+Du er ikke medlem av folketrygden fordi du ikke har oppholdstillatelse i Norge. Derfor har du ikke rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "UTVANDRET"}}
+Du er ikke medlem av folketrygden fordi du har flyttet fra Norge og heller ikke regnes som arbeidstaker i Norge. Derfor har du ikke rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+    {{/switch}}
+
+Du har fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+{{/inline}}
+{{#* inline "fakta-økonomi-feil"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "DOBBELUTBETALING"}}
+Vi har gjort en feil og utbetalt {{ytelsesnavnUbestemt}} to ganger i denne perioden. Du skulle hatt {{kroner kravgrunnlag.riktigBeløp}}, men du fikk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+        {{#case "FOR_MYE_UTBETALT"}}
+Vi har gjort en feil og utbetalt for mye i {{ytelsesnavnUbestemt}} i denne perioden. Du skulle hatt {{kroner kravgrunnlag.riktigBeløp}}, men du fikk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+        {{#case "ØKONOMI_FEIL_TREKK"}}
+I denne perioden har vi ikke trukket fra hele skattetrekket på beløpet vi har utbetalt. Du skulle fått {{kroner kravgrunnlag.riktigBeløp}}, men du fikk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+        {{#case "ØKONOMI_FEIL_FERIEPENGER"}}
+I denne perioden har vi utbetalt for mye i feriepenger. Du skulle fått {{kroner kravgrunnlag.riktigBeløp}}, men du fikk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+    {{/switch}}
+{{/inline}}
+{{#* inline "fakta-stønadsperiode"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "IKKE_OMSORG"}}
+Vi har fått melding om at du ikke har omsorg for barnet ditt. {{storForbokstav ytelsesnavnBestemt}} skulle vært stanset fra og med {{dato datoer.opphørsdatoIkkeOmsorg}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt fra denne datoen, har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+        {{#case "BARN_DØD"}}
+Vi har fått melding om at barnet ditt døde. {{storForbokstav ytelsesnavnBestemt}} skulle vært stanset fra og med {{dato datoer.opphørsdatoDødtBarn}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt fra denne datoen, har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt.
+        {{/case}}
+        {{#case "MOTTAKER_DØD"}}
+Vi har fått melding om at {{søker.navn}} døde. {{storForbokstav ytelsesnavnBestemt}} skulle vært stanset fra og med {{dato datoer.opphørsdatoDødSøker}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt fra denne datoen, er det utbetalt {{kroner kravgrunnlag.feilutbetaltBeløp}} for mye.
+        {{/case}}
+    {{/switch}}
+{{/inline}}

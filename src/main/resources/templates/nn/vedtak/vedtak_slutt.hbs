@@ -1,0 +1,47 @@
+{{#if (neq 1 antallPerioder)}}
+_{{#if hjemmel.lovhjemmelFlertall}}Lovhjemler{{else}}Lovhjemmelen{{/if}} vi har brukt
+{{else}}
+
+{{/if}}
+Vedtaket er gjort etter {{hjemmel.lovhjemmelVedtak}}.
+{{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
+    {{#if (neq brevmetadata.ytelsestype "ES")}}
+_Skatt
+        {{#if skalIkkeViseSkatt }}
+NAV gjev opplysningar til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
+        {{else}}
+Beløpet du skal betale tilbake etter skatt er trekt frå, er berekna etter ditt gjennomsnittlege skattetrekk per månad. Det gjer at beløpet du skal betale tilbake etter skatt, ikkje alltid er likt med det beløpet du mottok på konto.
+
+NAV gjev opplysningar til Skattetaten om skattebeløpet og om beløpet du skal betale tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
+        {{/if}}
+    {{/if}}
+_Korleis betale tilbake pengane du skuldar
+    {{#if behandling.erRevurdering}}
+NAV Innkreving vil korrigere beløpet du skal betale tilbake. Du finn meir informasjon på nav.no/innkreving.
+    {{else}}
+Du vil få krav frå NAV Innkrevjing på det beløpet du skal betale tilbake. Du finn meir informasjon på nav.no/innkreving.
+    {{/if}}
+{{/if}}
+_Du har rett til å klage
+Du kan klage innan {{konfigurasjon.klagefristIUker}} veker frå den datoen du fekk vedtaket. Du finn skjema og informasjon på nav.no/klage.
+{{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
+
+Du må som hovudregel begynne å betale beløpet tilbake, sjølv om du klagar på dette vedtaket. Dette følgjer av forvaltningslova § 42. Vi vil betale tilbake pengane du har betalt inn, om du får vedtak om at du ikkje trong å betale tilbake heile eller delar av beløpet du skulda.
+{{/if}}
+_Du har rett til innsyn
+På nav.no/dittnav kan du sjå dokumenta i saka di.
+_Har du spørsmål?
+Du finn nyttig informasjon på {{ytelseUrl}}
+Om du ikkje finn svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+
+Med vennleg helsing
+NAV Familie- og pensjonsytelsar {{behandlendeEnhetsNavn}}
+{{ansvarligSaksbehandler}}{{#if finnesVerge}}
+
+Brev med likt innhald er sendt til {{annenMottakerNavn}}
+{{/if}}
+{{#if harVedlegg}}
+
+
+Vedlegg: Resultatet av tilbakebetalingssaka
+{{/if}}

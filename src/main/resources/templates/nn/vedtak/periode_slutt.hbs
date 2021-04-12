@@ -1,0 +1,31 @@
+{{#if resultat.rentebeløp}}
+_Renter
+    {{#switch vurderinger.aktsomhetsresultat}}
+    {{#case "GROV_UAKTSOMHET"}}
+        {{#switch vurderinger.vilkårsvurderingsresultat}}
+        {{#case "FORSTO_BURDE_FORSTÅTT"}}
+Etter vår vurdering må du ha forstått at det du fekk utbetalt var feil. Derfor må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
+Etter vår vurdering må du ha forstått at du gav oss uriktige opplysningar. Derfor må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
+Etter vår vurdering må du ha forstått at du ikkje gav NAV alle nødvendige opplysningar. Derfor må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "FORSETT"}}
+        {{#switch vurderinger.vilkårsvurderingsresultat}}
+        {{#case "FORSTO_BURDE_FORSTÅTT"}}
+Etter vår vurdering forstod du at det du fekk utbetalt var feil. Derfor må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
+Fordi vi har vurdert at du forstod at du gav oss uriktige opplysningar, må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
+Fordi vi har vurdert at du forstod at du ikkje gav oss alle nødvendige opplysningar, må du betale eit rentetillegg på 10 prosent. Det vil seie {{kroner resultat.rentebeløp}}{{> før-skatt}}. Dette er i tillegg til det feilutbetalte beløpet.
+        {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{/switch}}
+{{/if}}

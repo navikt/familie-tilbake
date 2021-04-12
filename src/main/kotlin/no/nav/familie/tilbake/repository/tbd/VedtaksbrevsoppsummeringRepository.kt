@@ -10,4 +10,7 @@ import java.util.UUID
 @Repository
 @Transactional
 interface VedtaksbrevsoppsummeringRepository : RepositoryInterface<Vedtaksbrevsoppsummering, UUID>,
-                                               InsertUpdateRepository<Vedtaksbrevsoppsummering>
+                                               InsertUpdateRepository<Vedtaksbrevsoppsummering> {
+
+    fun findByBehandlingId(behandlingId: UUID): Vedtaksbrevsoppsummering?
+}

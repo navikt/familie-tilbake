@@ -7,10 +7,10 @@ import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.ha
 internal object TekstformatererInnhentDokumentasjonsbrev {
 
     fun lagFritekst(dokument: InnhentDokumentasjonsbrevsdokument): String {
-        return FellesTekstformaterer.lagFritekst(dokument, "innhentdokumentasjon/innhent_dokumentasjon")
+        return FellesTekstformaterer.lagBrevtekst(dokument, "innhentdokumentasjon/innhent_dokumentasjon")
     }
 
     fun lagOverskrift(brevmetadata: Brevmetadata): String {
-        return FellesTekstformaterer.lagOverskrift(brevmetadata, "innhentdokumentasjon/innhent_dokumentasjon_overskrift")
+        return FellesTekstformaterer.lagBrevtekst(brevmetadata, "innhentdokumentasjon/innhent_dokumentasjon_overskrift")
     }
 }
