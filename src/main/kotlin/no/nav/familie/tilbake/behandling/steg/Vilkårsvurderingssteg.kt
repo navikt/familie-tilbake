@@ -6,7 +6,9 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VILKÅRSVURDERING
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -34,5 +36,10 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
 
     override fun getBehandlingssteg(): Behandlingssteg {
         return VILKÅRSVURDERING
+    }
+
+    @EventListener
+    fun slettVilkårsvurdering(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+        //TODO deaktiver lagret vilkårsvurdering data for behandlingId
     }
 }
