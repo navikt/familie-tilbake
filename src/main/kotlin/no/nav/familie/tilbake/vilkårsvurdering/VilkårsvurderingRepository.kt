@@ -1,8 +1,8 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.vilkårsvurdering
 
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -11,6 +11,5 @@ import java.util.UUID
 @Transactional
 interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
 
-    fun findByBehandlingId(behandlingId: UUID): Vilkårsvurdering?
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Vilkårsvurdering?
 }
-

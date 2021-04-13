@@ -13,16 +13,16 @@ import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
-import no.nav.familie.tilbake.repository.tbd.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID
@@ -64,7 +64,7 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
     }
 
     private fun hentVilkårsvurdering(behandlingId: UUID): Vilkårsvurdering? {
-        return vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        return vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
     private fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? {

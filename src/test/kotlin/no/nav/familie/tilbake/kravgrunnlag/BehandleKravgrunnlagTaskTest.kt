@@ -190,7 +190,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                 ForeldelsesperiodeDto(
                                         periode = PeriodeDto(YearMonth.of(2018, 1), YearMonth.of(2018, 2)),
                                         begrunnelse = "Foreldelse begrunnelse",
-                                        foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET
+                                        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET
                                 )
                         )
                 )

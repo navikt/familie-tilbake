@@ -23,24 +23,15 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
-import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import no.nav.familie.tilbake.domain.tbd.Friteksttype
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
-import no.nav.familie.tilbake.domain.tbd.Navoppfulgt
 import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
-import no.nav.familie.tilbake.domain.tbd.SærligGrunn
 import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
 import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Årsakstype
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
@@ -63,6 +54,14 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -232,7 +231,6 @@ object Testdata {
 
     val vilkårsperiode =
             Vilkårsvurderingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-                                     navoppfulgt = Navoppfulgt.HAR_IKKE_FULGT_OPP,
                                      vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                                      begrunnelse = "testverdi",
                                      aktsomhet = vilkårsvurderingAktsomhet,

@@ -9,12 +9,6 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.domain.tbd.Aktsomhet
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -23,7 +17,13 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
-import no.nav.familie.tilbake.repository.tbd.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -191,7 +191,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `beregn skal beregne tilbakekrevingsbeløp for periode som ikke er foreldet medSkattProsent når beregnet periode er på tvers av grunnlag periode`() {
+    fun `beregn skal beregne tilbakekrevingsbeløp for ikkeForeldetPeriode når beregnetPeriode er på tvers av grunnlagPeriode`() {
         val periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         val periode1 = Periode(LocalDate.of(2019, 5, 4), LocalDate.of(2019, 5, 6))
         val logiskPeriode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 6))
@@ -241,11 +241,12 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(kravgrunnlag431.copy(perioder = setOf(førsteKravgrunnlagsperiode,
                                                                             andreKravgrunnlagsperiode)))
 
-        val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
-                                                                perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                                             LocalDate.of(2017, 1, 31)),
-                                                                                  PeriodeDto(LocalDate.of(2017, 2, 1),
-                                                                                             LocalDate.of(2017, 2, 28))))
+        val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(
+                behandlingId = Testdata.behandling.id,
+                perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
+                                             LocalDate.of(2017, 1, 31)),
+                                  PeriodeDto(LocalDate.of(2017, 2, 1),
+                                             LocalDate.of(2017, 2, 28))))
         assertEquals(2, beregnetPerioderDto.beregnetPerioder.size)
         assertEquals(PeriodeDto(LocalDate.of(2017, 1, 1),
                                 LocalDate.of(2017, 1, 31)), beregnetPerioderDto.beregnetPerioder[0].periode)
@@ -259,10 +260,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke starter første dato`() {
         val exception = assertFailsWith<RuntimeException> {
             tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
-                                          perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                       LocalDate.of(2017, 1, 31)),
-                                                            PeriodeDto(LocalDate.of(2017, 2, 16),
-                                                                       LocalDate.of(2017, 2, 28))))
+                                                        perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
+                                                                                     LocalDate.of(2017, 1, 31)),
+                                                                          PeriodeDto(LocalDate.of(2017, 2, 16),
+                                                                                     LocalDate.of(2017, 2, 28))))
         }
         assertEquals("Periode med ${
             PeriodeDto(LocalDate.of(2017, 2, 16),
@@ -274,10 +275,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke slutter siste dato`() {
         val exception = assertFailsWith<RuntimeException> {
             tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
-                                          perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                                                       LocalDate.of(2017, 1, 27)),
-                                                            PeriodeDto(LocalDate.of(2017, 2, 1),
-                                                                       LocalDate.of(2017, 2, 28))))
+                                                        perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
+                                                                                     LocalDate.of(2017, 1, 27)),
+                                                                          PeriodeDto(LocalDate.of(2017, 2, 1),
+                                                                                     LocalDate.of(2017, 2, 28))))
         }
         assertEquals("Periode med ${
             PeriodeDto(LocalDate.of(2017, 1, 1),

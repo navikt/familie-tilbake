@@ -1,18 +1,24 @@
 package no.nav.familie.tilbake.api.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class))
+              JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class))
 abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
@@ -56,3 +62,43 @@ data class ForeldelsesperiodeDto(val periode: PeriodeDto,
                                  val foreldelsesfrist: LocalDate? = null,
                                  val oppdagelsesdato: LocalDate? = null)
 
+
+@JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEG_NAVN)
+data class BehandlingsstegVilkårsvurderingDto(@JsonProperty("vilkarsvurderingsperioder")
+                                              val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>)
+    : BehandlingsstegDto() {
+
+    override fun getSteg(): String {
+        return STEG_NAVN
+    }
+
+    companion object {
+
+        const val STEG_NAVN = "VILKÅRSVURDERING"
+    }
+}
+
+data class VilkårsvurderingsperiodeDto(
+        val periode: PeriodeDto,
+        @JsonProperty("vilkarsvurderingsresultat")
+        val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+        val begrunnelse: String,
+        val godTroDto: GodTroDto? = null,
+        val aktsomhetDto: AktsomhetDto? = null)
+
+data class GodTroDto(@JsonProperty("belopErIBehold") val beløpErIBehold: Boolean,
+                     @JsonProperty("belopTilbakekreves") val beløpTilbakekreves: BigDecimal? = null,
+                     val begrunnelse: String)
+
+data class AktsomhetDto(val aktsomhet: Aktsomhet,
+                        val ileggRenter: Boolean? = null,
+                        val andelTilbakekreves: BigDecimal? = null,
+                        @JsonProperty("manueltSattBelop") val manueltSattBeløp: BigDecimal? = null,
+                        val begrunnelse: String,
+                        @JsonProperty("serligGrunner") val særligGrunner: List<SærligGrunnDto>? = null,
+                        @JsonProperty("serligeGrunnerTilReduksjon") val særligeGrunnerTilReduksjon: Boolean = false,
+                        @JsonProperty("tilbakekrevSmabelop") val tilbakekrevSmåbeløp: Boolean = true,
+                        @JsonProperty("serligeGrunnerBegrunnelse") val særligeGrunnerBegrunnelse: String? = null)
+
+data class SærligGrunnDto(@JsonProperty("serligGrunn") val særligGrunn: SærligGrunn,
+                          val begrunnelse: String? = null)

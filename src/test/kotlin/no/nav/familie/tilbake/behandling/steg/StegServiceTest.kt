@@ -30,6 +30,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -171,7 +172,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `håndterSteg skal utføre foreldelse og fortsette til vilkårsvurdering`() {
+    fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder er foreldet`() {
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
@@ -191,6 +192,48 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto) }
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertEquals(4, behandlingsstegstilstander.size)
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
+        assertEquals(Behandlingssteg.FORESLÅ_VEDTAK, aktivtBehandlingssteg?.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.AUTOUTFØRT)
+
+        assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
+    }
+
+    @Test
+    fun `håndterSteg skal utføre foreldelse og fortsette til vilkårsvurdering når minst en periode ikke er foreldet`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+
+        val førstePeriode = Testdata.kravgrunnlagsperiode432
+                .copy(id = UUID.randomUUID(),
+                      periode = Periode(fom = LocalDate.of(2018, 1, 1),
+                                        tom = LocalDate.of(2018, 1, 31)),
+                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+        val andrePeriode = Testdata.kravgrunnlagsperiode432
+                .copy(id = UUID.randomUUID(),
+                      periode = Periode(fom = LocalDate.of(2018, 2, 1),
+                                        tom = LocalDate.of(2018, 2, 28)),
+                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+
+        val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
+        kravgrunnlagRepository.insert(kravgrunnlag431)
+        val behandlingsstegForeldelseDto = BehandlingsstegForeldelseDto(
+                foreldetPerioder = listOf(ForeldelsesperiodeDto(periode = PeriodeDto(førstePeriode.periode),
+                                                                begrunnelse = "foreldelses begrunnelse",
+                                                                foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET),
+                                          ForeldelsesperiodeDto(periode = PeriodeDto(andrePeriode.periode),
+                                                                begrunnelse = "foreldelses begrunnelse",
+                                                                foreldelsesvurderingstype =
+                                                                Foreldelsesvurderingstype.IKKE_FORELDET)))
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto) }
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertEquals(3, behandlingsstegstilstander.size)
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstander)
         assertEquals(Behandlingssteg.VILKÅRSVURDERING, aktivtBehandlingssteg?.behandlingssteg)
@@ -198,7 +241,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
 
-        assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
     }
 
     @Test

@@ -83,15 +83,15 @@ data class Kravgrunnlagsbeløp433(@Id
                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                  val sporbar: Sporbar = Sporbar())
 
-enum class Klassekode {
-    KL_KODE_FEIL_BA,
-    KL_KODE_FEIL_EFOG,
-    KL_KODE_FEIL_PEN,
-    BATR,
-    BATRSMA,
-    EFOG,
-    EFBT,
-    EFSP;
+enum class Klassekode(val aktivitet: String) {
+    KL_KODE_FEIL_BA(""),
+    KL_KODE_FEIL_EFOG(""),
+    KL_KODE_FEIL_PEN(""),
+    BATR("Barnetrygd"),
+    BATRSMA("Småbarnstillegg"),
+    EFOG("Overgangsstønad"),
+    EFBT("Barnetilsyn"),
+    EFSP("Skolepenger");
 
     companion object {
 

@@ -5,12 +5,12 @@ import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.isZero
-import no.nav.familie.tilbake.domain.tbd.Aktsomhet
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
-import no.nav.familie.tilbake.domain.tbd.Vurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -75,7 +75,6 @@ internal object TilbakekrevingsberegningVilkår {
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
                                                     .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
-                val statement = ""
             }
         }
         return skattBeløp.setScale(0, RoundingMode.DOWN)
@@ -94,7 +93,7 @@ internal object TilbakekrevingsberegningVilkår {
     private fun finnRenter(vurdering: Vilkårsvurderingsperiode): Boolean {
         val aktsomhet: VilkårsvurderingAktsomhet? = vurdering.aktsomhet
         if (aktsomhet != null) {
-            val erForsett: Boolean = Aktsomhet.FORSETT.equals(aktsomhet.aktsomhet)
+            val erForsett: Boolean = Aktsomhet.FORSETT == aktsomhet.aktsomhet
             return erForsett && (aktsomhet.ileggRenter == null || aktsomhet.ileggRenter) ||
                    aktsomhet.ileggRenter != null && aktsomhet.ileggRenter
         }

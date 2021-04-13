@@ -52,6 +52,6 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
 
     @EventListener
     fun slettFaktaOmFeilutbetaling(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
-        faktaFeilutbetalingService.deaktiverFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
+        faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 }

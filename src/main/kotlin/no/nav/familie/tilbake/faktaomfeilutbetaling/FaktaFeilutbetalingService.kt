@@ -32,10 +32,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
 
     @Transactional
     fun lagreFaktaomfeilutbetaling(behandlingId: UUID, behandlingsstegFaktaDto: BehandlingsstegFaktaDto) {
-        val eksisterendeFaktaData: FaktaFeilutbetaling? = hentAktivFaktaOmFeilutbetaling(behandlingId)
-        if (eksisterendeFaktaData != null) {
-            faktaFeilutbetalingRepository.update(eksisterendeFaktaData.copy(aktiv = false))
-        }
+        deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> = behandlingsstegFaktaDto.feilutbetaltePerioder.map {
             FaktaFeilutbetalingsperiode(periode = Periode(it.periode.fom, it.periode.tom),
@@ -53,7 +50,7 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
     }
 
     @Transactional
-    fun deaktiverFaktaOmFeilutbetaling(behandlingId: UUID) {
+    fun deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId: UUID) {
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
             faktaFeilutbetalingRepository.update(it)
         }
