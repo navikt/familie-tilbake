@@ -251,7 +251,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                          vilkårPerioder: Set<Vilkårsvurderingsperiode>,
                                          foreldelse: VurdertForeldelse?,
                                          vedtaksbrevType: Vedtaksbrevstype): List<HbVedtaksbrevsperiode> {
-        val fakta: FaktaFeilutbetaling = faktaRepository.findByAktivIsTrueAndBehandlingId(behandlingId)
+        val fakta: FaktaFeilutbetaling = faktaRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
                                          ?: error("Vedtaksbrev mangler fakta for behandling: $behandlingId")
         return if (vedtaksbrevType == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) emptyList()
         else resulatPerioder.map {
