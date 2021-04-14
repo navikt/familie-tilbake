@@ -25,7 +25,7 @@ import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
 import no.nav.familie.tilbake.domain.tbd.Aktsomhet
 import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
-import no.nav.familie.tilbake.domain.tbd.Fritekstavsnittstype
+import no.nav.familie.tilbake.domain.tbd.Friteksttype
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Navoppfulgt
@@ -276,7 +276,7 @@ object Testdata {
     val vedtaksbrevsperiode = Vedtaksbrevsperiode(behandlingId = behandling.id,
                                                   periode = Periode(LocalDate.now(), LocalDate.now()),
                                                   fritekst = "testverdi",
-                                                  fritekststype = Fritekstavsnittstype.FAKTA)
+                                                  fritekststype = Friteksttype.FAKTA)
 
     val økonomiXmlSendt = ØkonomiXmlSendt(behandlingId = behandling.id,
                                           melding = "testverdi",

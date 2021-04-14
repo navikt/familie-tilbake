@@ -13,13 +13,13 @@ data class Vedtaksbrevsperiode(@Id
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val periode: Periode,
                                val fritekst: String,
-                               val fritekststype: Fritekstavsnittstype,
+                               val fritekststype: Friteksttype,
                                @Version
                                val versjon: Long = 0,
                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                val sporbar: Sporbar = Sporbar())
 
-enum class Fritekstavsnittstype {
+enum class Friteksttype {
     FAKTA,
     FORELDELSE,
     VILKÅR,

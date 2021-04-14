@@ -28,11 +28,13 @@ object VedtakHjemmel {
         val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype, vilkårsperioder)
         val renter = visHjemmelForRenter && erRenterBenyttet(vilkårsperioder)
         val barnetrygd = Ytelsestype.BARNETRYGD == ytelsestype
+        val kontantstøtte = Ytelsestype.KONTANTSTØTTE == ytelsestype
         val hjemler: MutableList<Hjemler> = ArrayList()
         if (vilkårsperioder.isNotEmpty()) {
             when {
                 ignorerteSmåbeløp -> hjemler.add(Hjemler.FOLKETRYGD_22_15_SJETTE)
                 barnetrygd -> hjemler.add(Hjemler.BARNETRYGD_13_OG_FOLKETRYGD_22_15)
+                kontantstøtte -> hjemler.add(Hjemler.KONTANTSTØTTE_11)
                 renter -> hjemler.add(Hjemler.FOLKETRYGD_22_15_OG_22_17_A)
                 else -> hjemler.add(Hjemler.FOLKETRYGD_22_15)
             }
@@ -102,6 +104,7 @@ object VedtakHjemmel {
         FORELDELSE_2_3("foreldelsesloven §§ 2 og 3", "foreldingslova §§ 2 og 3"),
         FORVALTNING_35_A("forvaltningsloven § 35 a)", "forvaltningslova § 35 a)"),
         FORVALTNING_35_C("forvaltningsloven § 35 c)", "forvaltningslova § 35 c)"),
+        KONTANTSTØTTE_11("kontantstøtteloven § 11", "kontantstøttelova § 11"),
         BARNETRYGD_13_OG_FOLKETRYGD_22_15("barnetrygdloven § 13 og folketrygdloven § 22-15",
                                           "barnetrygdlova § 13 og folketrygdlova § 22-15");
 

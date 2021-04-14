@@ -65,14 +65,14 @@ data class Behandling(@Id
         get() = sporbar.endret.endretTid
 
     fun utledVedtaksbrevType(): Vedtaksbrevstype {
-        return if (erBehandlingRevurderingOgHarÅrsakFeilutbetalingBortfalt()) {
+        return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
         } else {
             Vedtaksbrevstype.ORDINÆR
         }
     }
 
-    private fun erBehandlingRevurderingOgHarÅrsakFeilutbetalingBortfalt(): Boolean {
+    private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
         return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type
                && this.årsaker.any {
             Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
@@ -155,7 +155,7 @@ data class Behandlingsårsak(@Id
                             val sporbar: Sporbar = Sporbar())
 
 enum class Behandlingsårsakstype(val navn: String) {
-    REVURDERING_KLAGE_NFP("Revurdering NOS omgjør vedtak basert på klage"),
+    REVURDERING_KLAGE_NFP("Revurdering NFP omgjør vedtak basert på klage"),
     REVURDERING_KLAGE_KA("Revurdering etter KA-behandlet klage"),
     REVURDERING_OPPLYSNINGER_OM_VILKÅR("Nye opplysninger om vilkårsvurdering"),
     REVURDERING_OPPLYSNINGER_OM_FORELDELSE("Nye opplysninger om foreldelse"),

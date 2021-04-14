@@ -2,14 +2,14 @@ package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.common.Periode
-import no.nav.familie.tilbake.domain.tbd.Fritekstavsnittstype
+import no.nav.familie.tilbake.domain.tbd.Friteksttype
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
 
 object VedtaksbrevMapper {
 
     fun mapFritekstFraDb(fritekstPerioder: List<Vedtaksbrevsperiode>): List<PeriodeMedTekstDto> {
 
-        val perioderTilMap = HashMap<Periode, MutableMap<Fritekstavsnittstype, String>>()
+        val perioderTilMap = HashMap<Periode, MutableMap<Friteksttype, String>>()
 
         fritekstPerioder.forEach {
             val avsnittTilTekst = perioderTilMap.getOrDefault(it.periode, mutableMapOf())
@@ -19,11 +19,11 @@ object VedtaksbrevMapper {
 
         return perioderTilMap.entries.map { (periode, avsnittTilTekst) ->
             PeriodeMedTekstDto(periode = periode,
-                               faktaAvsnitt = avsnittTilTekst[Fritekstavsnittstype.FAKTA],
-                               foreldelseAvsnitt = avsnittTilTekst[Fritekstavsnittstype.FORELDELSE],
-                               vilkårAvsnitt = avsnittTilTekst[Fritekstavsnittstype.VILKÅR],
-                               særligeGrunnerAvsnitt = avsnittTilTekst[Fritekstavsnittstype.SÆRLIGE_GRUNNER],
-                               særligeGrunnerAnnetAvsnitt = avsnittTilTekst[Fritekstavsnittstype.SÆRLIGE_GRUNNER_ANNET])
+                               faktaAvsnitt = avsnittTilTekst[Friteksttype.FAKTA],
+                               foreldelseAvsnitt = avsnittTilTekst[Friteksttype.FORELDELSE],
+                               vilkårAvsnitt = avsnittTilTekst[Friteksttype.VILKÅR],
+                               særligeGrunnerAvsnitt = avsnittTilTekst[Friteksttype.SÆRLIGE_GRUNNER],
+                               særligeGrunnerAnnetAvsnitt = avsnittTilTekst[Friteksttype.SÆRLIGE_GRUNNER_ANNET])
         }
     }
 
