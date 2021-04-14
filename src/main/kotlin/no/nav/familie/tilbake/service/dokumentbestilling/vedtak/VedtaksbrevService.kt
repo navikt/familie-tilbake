@@ -75,9 +75,9 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                          private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
                          private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
                          private val brevSporingRepository: BrevsporingRepository,
-                         private val tilbakekrevingBeregningTjeneste: TilbakekrevingsberegningService,
-                         private val eksternDataForBrevTjeneste: EksterneDataForBrevService,
-                         private val pdfBrevTjeneste: PdfBrevService) {
+                         private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
+                         private val eksterneDataForBrevService: EksterneDataForBrevService,
+                         private val pdfBrevService: PdfBrevService) {
 
     fun sendVedtaksbrev(behandlingId: UUID, brevmottager: Brevmottager) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -95,7 +95,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                 overskrift = data.overskrift,
                                 brevtekst = data.brevtekst,
                                 vedleggHtml = vedleggHtml)
-        pdfBrevTjeneste.sendBrev(behandling,
+        pdfBrevService.sendBrev(behandling,
                                  fagsak,
                                  Brevtype.VEDTAK,
                                  brevData)
@@ -121,7 +121,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                          overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
                          brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
                          vedleggHtml = vedleggHtml)
-        return pdfBrevTjeneste.genererForhåndsvisning(brevData)
+        return pdfBrevService.genererForhåndsvisning(brevData)
     }
 
     fun hentForhåndsvisningVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
@@ -150,8 +150,8 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                        oppsummeringFritekst: String?,
                                        perioderFritekst: List<PeriodeMedTekstDto>,
                                        brevmottager: Brevmottager): Vedtaksbrevsdata {
-        val personinfo: Personinfo = eksternDataForBrevTjeneste.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-        val beregnetResultat = tilbakekrevingBeregningTjeneste.beregn(behandling.id)
+        val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+        val beregnetResultat = tilbakekrevingBeregningService.beregn(behandling.id)
         val brevMetadata: Brevmetadata = lagMetadataForVedtaksbrev(behandling,
                                                                    fagsak,
                                                                    personinfo,
@@ -176,7 +176,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                      brevmetadata: Brevmetadata): HbVedtaksbrevsdata {
         val resulatPerioder = beregnetResultat.beregningsresultatsperioder
         val vedtakResultatType = beregnetResultat.vedtaksresultat
-        val vilkårPerioder = finnVilkårVurderingPerioder(behandling.id)
+        val vilkårPerioder = finnVilkårsvurderingsperioder(behandling.id)
         val foreldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         val vedtaksbrevType = behandling.utledVedtaksbrevType()
         val hbVedtaksResultatBeløp = HbVedtaksResultatBeløp(resulatPerioder)
@@ -262,7 +262,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     private fun hentEffektForBruker(behandling: Behandling,
                                     totaltTilbakekrevesMedRenter: BigDecimal): VedtakHjemmel.EffektForBruker {
         val behandlingÅrsak: Behandlingsårsak = behandling.årsaker.first()
-        val originaltBeregnetResultat = tilbakekrevingBeregningTjeneste.beregn(behandlingÅrsak.id)
+        val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.id)
         val originalBeregningsresultatsperioder = originaltBeregnetResultat.beregningsresultatsperioder
 
         val originalBehandlingTotaltMedRenter: BigDecimal = originalBeregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp }
@@ -290,8 +290,9 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                         dødsdato = null)
     }
 
-    private fun finnVilkårVurderingPerioder(behandlingId: UUID): Set<Vilkårsvurderingsperiode> {
-        return vilkårsvurderingRepository.findByBehandlingId(behandlingId)?.perioder ?: emptySet()
+    private fun finnVilkårsvurderingsperioder(behandlingId: UUID): Set<Vilkårsvurderingsperiode> {
+        return vilkårsvurderingRepository.findByBehandlingId(behandlingId)?.perioder
+               ?: error("Det er ingen vurderinger utført på behandling $behandlingId. Vedtaksbrev kan ikke genereres")
     }
 
     private fun finnVarsletDato(behandlingId: UUID): LocalDate {
@@ -307,14 +308,14 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         return if (varselbeløp == null) null else BigDecimal(varselbeløp)
     }
 
-    fun lagMetadataForVedtaksbrev(behandling: Behandling,
+    private fun lagMetadataForVedtaksbrev(behandling: Behandling,
                                   fagsak: Fagsak,
                                   personinfo: Personinfo,
                                   vedtakResultatType: Vedtaksresultat?,
                                   brevmottager: Brevmottager): Brevmetadata {
         val språkkode: Språkkode = fagsak.bruker.språkkode
         val adresseinfo: Adresseinfo =
-                eksternDataForBrevTjeneste.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+                eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
         val ytelsesnavn = fagsak.ytelsestype.navn[språkkode]!!
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val tilbakekreves = Vedtaksresultat.FULL_TILBAKEBETALING == vedtakResultatType ||

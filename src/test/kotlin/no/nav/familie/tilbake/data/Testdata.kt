@@ -152,7 +152,7 @@ object Testdata {
                                                         akseptertFaktagrunnlag = true,
                                                         kilde = "testverdi")
 
-    val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
+    private val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                 foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                                                 begrunnelse = "testverdi",
                                                 foreldelsesfrist = LocalDate.now(),
@@ -230,7 +230,7 @@ object Testdata {
                                       særligeGrunnerBegrunnelse = "testverdi",
                                       vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn))
 
-    private val vilkårsperiode =
+    val vilkårsperiode =
             Vilkårsvurderingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                      navoppfulgt = Navoppfulgt.HAR_IKKE_FULGT_OPP,
                                      vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
