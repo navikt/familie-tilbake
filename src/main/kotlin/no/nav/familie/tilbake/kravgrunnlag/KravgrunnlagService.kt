@@ -4,8 +4,12 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional
 class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRepository,
                           private val behandlingRepository: BehandlingRepository,
                           private val mottattXmlService: ØkonomiXmlMottattService,
-                          private val stegService: StegService) {
+                          private val stegService: StegService,
+                          private val behandlingskontrollService: BehandlingskontrollService,
+                          private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
 
     @Transactional
     fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
@@ -36,6 +42,11 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         lagreKravgrunnlag(kravgrunnlag431)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
+        if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
+            endretKravgrunnlagEventPublisher.fireEvent(behandlingId = behandling.id)
+            // flytter behandlingssteg tilbake til fakta
+            behandlingskontrollService.behandleStegPåNytt(behandlingId = behandling.id, Behandlingssteg.FAKTA)
+        }
         stegService.håndterSteg(behandling.id)
     }
 

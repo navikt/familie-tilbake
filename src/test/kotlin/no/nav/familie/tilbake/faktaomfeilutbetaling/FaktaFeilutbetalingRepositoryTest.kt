@@ -60,10 +60,10 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `findByBehandlingId returnerer resultat når det finnes en forekomst`() {
+    fun `findByBehandlingIdAndAktivIsTrue returnerer resultat når det finnes en forekomst`() {
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
 
-        val findByBehandlingId = faktaFeilutbetalingRepository.findByAktivIsTrueAndBehandlingId(behandling.id)
+        val findByBehandlingId = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
         assertThat(findByBehandlingId).usingRecursiveComparison()
                 .ignoringFields("sporbar", "versjon")

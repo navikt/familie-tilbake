@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -70,11 +69,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet()) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
-        }
-        if (erBehandlingPåVent(behandlingId)) {
-            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
-                       frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
-                       httpStatus = HttpStatus.BAD_REQUEST)
         }
         val aktivtBehandlingssteg = finnAktivtSteg(behandlingId)
                                     ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")

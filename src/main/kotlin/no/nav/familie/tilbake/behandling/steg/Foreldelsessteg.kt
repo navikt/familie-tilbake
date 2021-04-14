@@ -8,7 +8,9 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -57,6 +59,11 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
 
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FORELDELSE
+    }
+
+    @EventListener
+    fun slettVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+        foreldelseService.deaktiverVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 
     companion object {
