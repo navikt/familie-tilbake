@@ -121,11 +121,11 @@ object VilkårsvurderingMapper {
             return VurdertAktsomhetDto(aktsomhet = vilkårsvurderingAktsomhet.aktsomhet,
                                        ileggRenter = vilkårsvurderingAktsomhet.ileggRenter,
                                        andelTilbakekreves = vilkårsvurderingAktsomhet.andelTilbakekreves,
-                                       manueltSattBeløp = vilkårsvurderingAktsomhet.manueltSattBeløp,
+                                       beløpTilbakekreves = vilkårsvurderingAktsomhet.manueltSattBeløp,
                                        begrunnelse = vilkårsvurderingAktsomhet.begrunnelse,
                                        særligeGrunnerTilReduksjon = vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon,
                                        særligeGrunnerBegrunnelse = vilkårsvurderingAktsomhet.særligeGrunnerBegrunnelse,
-                                       særligGrunner = tilSærligGrunnerDto(vilkårsvurderingAktsomhet
+                                       særligeGrunner = tilSærligGrunnerDto(vilkårsvurderingAktsomhet
                                                                                    .vilkårsvurderingSærligeGrunner),
                                        tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp
             )
@@ -138,11 +138,11 @@ object VilkårsvurderingMapper {
             return VilkårsvurderingAktsomhet(aktsomhet = aktsomhetDto.aktsomhet,
                                              ileggRenter = utledIleggRenter(aktsomhetDto.ileggRenter, fagsystem),
                                              andelTilbakekreves = aktsomhetDto.andelTilbakekreves,
-                                             manueltSattBeløp = aktsomhetDto.manueltSattBeløp,
+                                             manueltSattBeløp = aktsomhetDto.beløpTilbakekreves,
                                              begrunnelse = aktsomhetDto.begrunnelse,
                                              særligeGrunnerTilReduksjon = aktsomhetDto.særligeGrunnerTilReduksjon,
                                              særligeGrunnerBegrunnelse = aktsomhetDto.særligeGrunnerBegrunnelse,
-                                             vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligGrunner),
+                                             vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligeGrunner),
                                              tilbakekrevSmåbeløp = aktsomhetDto.tilbakekrevSmåbeløp)
         }
         return null

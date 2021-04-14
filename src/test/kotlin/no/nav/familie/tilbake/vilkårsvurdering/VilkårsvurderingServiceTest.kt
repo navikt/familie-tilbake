@@ -265,9 +265,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         assertFalse { aktsomhetDto.særligeGrunnerTilReduksjon }
         assertNull(aktsomhetDto.andelTilbakekreves)
         assertNull(aktsomhetDto.ileggRenter)
-        assertNull(aktsomhetDto.manueltSattBeløp)
+        assertNull(aktsomhetDto.beløpTilbakekreves)
         assertEquals("Særlig grunner begrunnelse", aktsomhetDto.særligeGrunnerBegrunnelse)
-        val særligGrunner = aktsomhetDto.særligGrunner
+        val særligGrunner = aktsomhetDto.særligeGrunner
         assertNotNull(særligGrunner)
         assertTrue { særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn } }
         assertTrue { særligGrunner.all { it.begrunnelse == null } }
@@ -337,7 +337,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     lagVilkårsvurderingMedSimpelAktsomhet(manueltSattBeløp = BigDecimal(30000),
                                                           særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
         }
-        assertEquals("Manuel satt beløp kan ikke være mer enn feilutbetalt beløp", exception.message)
+        assertEquals("Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp", exception.message)
     }
 
     @Test
@@ -434,10 +434,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         begrunnelse = "Vilkårsvurdering begrunnelse",
                         aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                     andelTilbakekreves = andelTilbakekreves,
-                                                    manueltSattBeløp = manueltSattBeløp,
+                                                    beløpTilbakekreves = manueltSattBeløp,
                                                     ileggRenter = ileggRenter,
                                                     begrunnelse = "Aktsomhet begrunnelse",
-                                                    særligGrunner = listOf(særligGrunn),
+                                                    særligeGrunner = listOf(særligGrunn),
                                                     tilbakekrevSmåbeløp = false,
                                                     særligeGrunnerBegrunnelse = "Særlig grunner begrunnelse"
                         ))))

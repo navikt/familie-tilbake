@@ -31,8 +31,8 @@ object VilkårsvurderingValidator {
     }
 
     private fun validerAnnetBegrunnelse(aktsomhetDto: AktsomhetDto?) {
-        if (aktsomhetDto?.særligGrunner != null) {
-            val særligGrunner = aktsomhetDto.særligGrunner
+        if (aktsomhetDto?.særligeGrunner != null) {
+            val særligGrunner = aktsomhetDto.særligeGrunner
             when {
                 særligGrunner.any { SærligGrunn.ANNET != it.særligGrunn && it.begrunnelse != null } -> {
                     throw Feil(message = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
@@ -51,19 +51,20 @@ object VilkårsvurderingValidator {
     private fun validerBeløp(kravgrunnlag431: Kravgrunnlag431,
                              periode: Periode,
                              vilkårsvurderingsperiode: VilkårsvurderingsperiodeDto) {
+        val feilMelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
         if (vilkårsvurderingsperiode.godTroDto?.beløpTilbakekreves != null) {
             val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             if (vilkårsvurderingsperiode.godTroDto.beløpTilbakekreves > feilutbetalteBeløp) {
-                throw Feil(message = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp",
-                           frontendFeilmelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp",
+                throw Feil(message = feilMelding,
+                           frontendFeilmelding = feilMelding,
                            httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
-        if (vilkårsvurderingsperiode.aktsomhetDto?.manueltSattBeløp != null) {
+        if (vilkårsvurderingsperiode.aktsomhetDto?.beløpTilbakekreves != null) {
             val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
-            if (vilkårsvurderingsperiode.aktsomhetDto.manueltSattBeløp > feilutbetalteBeløp) {
-                throw Feil(message = "Manuel satt beløp kan ikke være mer enn feilutbetalt beløp",
-                           frontendFeilmelding = "Manuel satt beløp kan ikke være mer enn feilutbetalt beløp",
+            if (vilkårsvurderingsperiode.aktsomhetDto.beløpTilbakekreves > feilutbetalteBeløp) {
+                throw Feil(message = feilMelding,
+                           frontendFeilmelding = feilMelding,
                            httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
