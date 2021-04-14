@@ -65,7 +65,7 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
     }
 
     @EventListener
-    fun slettVilkårsvurdering(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+    fun deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
         vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(endretKravgrunnlagEvent.behandlingId)
     }
 
