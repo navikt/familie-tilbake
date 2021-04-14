@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
@@ -19,14 +18,29 @@ data class FaktaFeilutbetalingsperiode(@Id
                                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                        val sporbar: Sporbar = Sporbar())
 
-enum class Hendelsestype(@JsonIgnore val sortering: Int) {
-
-    BA_ANNET(999),
-    EF_ANNET(999),
-    KS_ANNET(999),
+enum class Hendelsestype {
+    BA_ANNET,
+    EF_ANNET,
+    KS_ANNET,
+    ENDRING_STØNADSPERIODEN,
+    ØKONOMIFEIL,
+    MEDLEMSKAP
 }
 
-enum class Hendelsesundertype(@JsonIgnore val sortering: Int) {
+enum class Hendelsesundertype {
 
-    ANNET_FRITEKST(999)
+    MOTTAKER_DØD,
+    BARN_DØD,
+    IKKE_OMSORG,
+    ANNET_FRITEKST,
+    IKKE_BOSATT,
+    MEDLEM_I_ANNET_LAND,
+    IKKE_LOVLIG_OPPHOLD,
+    UTVANDRET,
+    DOBBELUTBETALING,
+    FOR_MYE_UTBETALT,
+    ØKONOMI_FEIL_TREKK,
+    ØKONOMI_FEIL_FERIEPENGER
+
 }
+

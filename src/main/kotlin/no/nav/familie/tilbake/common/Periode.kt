@@ -1,13 +1,12 @@
 package no.nav.familie.tilbake.common
 
 import java.time.LocalDate
-import java.time.Period
 import java.time.YearMonth
 
 data class Periode(val fom: YearMonth,
                    val tom: YearMonth) : Comparable<Periode> {
 
-    constructor(fom : LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
+    constructor(fom: LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
 
     init {
         require(tom >= fom) { "Til-og-med-måned før fra-og-med-måned: $fom > $tom" }
@@ -32,8 +31,12 @@ data class Periode(val fom: YearMonth,
         }
     }
 
+    fun omslutter(annen: Periode): Boolean {
+        return annen.fom >= fom && annen.tom <= tom
+    }
+
     fun lengdeIMåneder(): Long {
-        return  (tom.year * 12 + tom.monthValue) - (fom.year *12 + fom.monthValue) + 1L
+        return (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L
     }
 
     companion object {

@@ -5,10 +5,10 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 private const val EF_URL = "nav.no/familie/alene-med-barn"
 
-open class BaseDokument(open val ytelsestype: Ytelsestype,
-                        open val språkkode: Språkkode,
-                        open val behandlendeEnhetsNavn: String,
-                        open val ansvarligSaksbehandler: String) {
+open class BaseDokument(val ytelsestype: Ytelsestype,
+                        override val språkkode: Språkkode,
+                        val behandlendeEnhetsNavn: String,
+                        val ansvarligSaksbehandler: String) : Språkstøtte {
 
     private val infoMap =
             mapOf(Ytelsestype.BARNETRYGD to Ytelsesinfo("nav.no/barnetrygd",
@@ -59,7 +59,7 @@ open class BaseDokument(open val ytelsestype: Ytelsestype,
     @Suppress("unused") // Handlebars
     val ytelsesnavnUbestemt = ytelsesnavn.ubestemt
 
-    @Suppress("unused") // Handlebars
+    @Suppress("unused") open // Handlebars
     val ytelsesnavnBestemt = ytelsesnavn.bestemt
 
     @Suppress("unused") // Handlebars

@@ -1,11 +1,14 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
+import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.Avsnitt
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,7 +27,8 @@ import java.util.UUID
 class DokumentController(private val varselbrevService: VarselbrevService,
                          private val manueltVarselbrevService: ManueltVarselbrevService,
                          private val innhentDokumentasjonbrevService: InnhentDokumentasjonbrevService,
-                         private val henleggelsesbrevService: HenleggelsesbrevService) {
+                         private val henleggelsesbrevService: HenleggelsesbrevService,
+                         private val vedtaksbrevService: VedtaksbrevService) {
 
     @GetMapping("/forhandsvis-manueltVarselbrev/{behandlingId}",
                 produces = [MediaType.APPLICATION_PDF_VALUE])
@@ -62,6 +66,22 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     fun hentForhåndsvisningHenleggelsesbrev(@PathVariable behandlingId: UUID,
                                             fritekst: String): ByteArray {
         return henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, fritekst)
+    }
+
+    @PostMapping("/forhandsvis-vedtaksbrev",
+                 produces = [MediaType.APPLICATION_PDF_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
+    fun hentForhåndsvisningVedtaksbrev(@RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
+        return vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+    }
+
+    @GetMapping("/forhandsvis-vedtaksbrevtekst/{behandlingId}",
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Forhåndsviser brev",
+                        henteParam = "behandlingId")
+    fun hentForhåndsvisningVedtaksbrevtekst(@PathVariable behandlingId: UUID): List<Avsnitt> {
+        return vedtaksbrevService.hentForhåndsvisningVedtaksbrevSomTekst(behandlingId)
     }
 
 }

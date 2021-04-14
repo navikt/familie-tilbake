@@ -1,0 +1,53 @@
+{{#* inline "fakta-medlemskap"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "IKKE_BOSATT"}}
+Du er ikkje medlem av folketrygda fordi du har opphalde deg så mykje i utlandet at du ikkje blir rekna som busett i Noreg, og du er heller ikkje arbeidstaker i Noreg. Derfor har du ikkje rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "MEDLEM_I_ANNET_LAND"}}
+Du er ikkje medlem av folketrygda fordi du er omfatta av trygdeordninga i eit anna land. Derfor har du ikkje rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "IKKE_LOVLIG_OPPHOLD"}}
+Du er ikkje medlem av folketrygda fordi du ikkje har opphaldsløyve i Noreg. Derfor har du ikkje rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+        {{#case "UTVANDRET"}}
+Du er ikkje medlem av folketrygda fordi du har flytta frå Noreg og heller ikkje blir rekna som arbeidstakar i Noreg. Derfor har du ikkje rett til {{ytelsesnavnUbestemt}}.
+        {{/case}}
+    {{/switch}}
+
+Du har fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+{{/inline}}
+{{#* inline "fakta-økonomi-feil"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "DOBBELUTBETALING"}}
+Vi har gjort ein feil og betalt ut {{ytelsesnavnUbestemt}} to gonger i denne perioden. Du skulle ha hatt {{kroner kravgrunnlag.riktigBeløp}}, men du fekk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+        {{#case "FOR_MYE_UTBETALT"}}
+Vi har gjort ein feil og betalt ut for mykje i {{ytelsesnavnUbestemt}} i denne perioden. Du skulle ha hatt {{kroner kravgrunnlag.riktigBeløp}}, men du fekk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+        {{#case "ØKONOMI_FEIL_TREKK"}}
+I denne perioden har vi ikkje trekt frå heile skattetrekket på beløpet vi har betalt ut. Du skulle ha fått {{kroner kravgrunnlag.riktigBeløp}}, men du fekk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+        {{#case "ØKONOMI_FEIL_FERIEPENGER"}}
+I denne perioden har vi betalt ut for mykje i feriepengar. Du skulle ha fått {{kroner kravgrunnlag.riktigBeløp}}, men du fekk {{kroner kravgrunnlag.utbetaltBeløp}}. Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+    {{/switch}}
+{{/inline}}
+{{#* inline "fakta-stønadsperiode"}}
+    {{#switch fakta.hendelsesundertype}}
+        {{#case "IKKE_OMSORG"}}
+Vi har fått melding om at du ikkje har omsorg for barnet ditt. {{storForbokstav ytelsesnavnBestemt}} skulle ha vore stansa frå og med {{dato datoer.opphørsdatoIkkeOmsorg}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt frå denne datoen, har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+        {{#case "BARN_DØD"}}
+Vi har fått melding om at barnet ditt døydde. Foreldrepengane skulle ha vore stansa frå og med {{dato datoer.opphørsdatoDødtBarn}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt frå denne datoen, har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+        {{#case "MOTTAKER_DØD"}}
+Vi har fått melding om at {{søker.navn}} døydde. Foreldrepengane skulle ha vore stansa frå og med {{dato datoer.opphørsdatoDødSøker}}.
+
+Fordi {{ytelsesnavnBestemt}} er blitt utbetalt frå denne datoen, har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt.
+        {{/case}}
+    {{/switch}}
+{{/inline}}

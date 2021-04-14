@@ -11,10 +11,10 @@ data class Beregningsresultatsperiode(val periode: Periode,
                                       val renteprosent: BigDecimal? = null,
                                       val manueltSattTilbakekrevingsbeløp: BigDecimal? = null,
                                       val tilbakekrevingsbeløpUtenRenter: BigDecimal,
-                                      val rentebeløp: BigDecimal? = null,
+                                      val rentebeløp: BigDecimal,
                                       val tilbakekrevingsbeløp: BigDecimal,
                                       val skattebeløp: BigDecimal? = null,
-                                      val tilbakekrevingsbeløpEtterSkatt: BigDecimal? = null,
+                                      val tilbakekrevingsbeløpEtterSkatt: BigDecimal,
                                       val utbetaltYtelsesbeløp: BigDecimal? = null,//rått beløp, ikke justert for evt. trekk
                                       val riktigYtelsesbeløp: BigDecimal? = null) //rått beløp, ikke justert for evt. trekk
 

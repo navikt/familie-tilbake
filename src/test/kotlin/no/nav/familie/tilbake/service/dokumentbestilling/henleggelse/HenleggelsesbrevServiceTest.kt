@@ -31,7 +31,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
-    private lateinit var henleggelsesbrevTjeneste: HenleggelsesbrevService
+    private lateinit var henleggelsesbrevService: HenleggelsesbrevService
     private var behandlingId = Testdata.behandling.id
 
     @Autowired
@@ -44,7 +44,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
-        henleggelsesbrevTjeneste = HenleggelsesbrevService(behandlingRepository,
+        henleggelsesbrevService = HenleggelsesbrevService(behandlingRepository,
                                                            brevSporingRepository,
                                                            fagsakRepository,
                                                            eksterneDataForBrevService,
@@ -65,7 +65,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendHenleggelsebrev skal sende henleggelsesbrev`() {
-        henleggelsesbrevTjeneste.sendHenleggelsebrev(behandlingId, null, Brevmottager.BRUKER)
+        henleggelsesbrevService.sendHenleggelsebrev(behandlingId, null, Brevmottager.BRUKER)
 
         verify {
             spyPdfBrevService.sendBrev(Testdata.behandling,
@@ -79,7 +79,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningHenleggelsesbrev skal returnere pdf for henleggelsebrev`() {
-        val bytes = henleggelsesbrevTjeneste.hentForhåndsvisningHenleggelsesbrev(behandlingId, null)
+        val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, null)
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -89,7 +89,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
                 .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
-        val bytes = henleggelsesbrevTjeneste.hentForhåndsvisningHenleggelsesbrev(behandlingId,
+        val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId,
                                                                                  REVURDERING_HENLEGGELSESBREV_FRITEKST)
 
         PdfaValidator.validatePdf(bytes)
@@ -103,7 +103,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         } returns (null)
 
         val e = Assertions.assertThrows(IllegalStateException::class.java) {
-            henleggelsesbrevTjeneste.sendHenleggelsebrev(behandlingId,
+            henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
                                                          null,
                                                          Brevmottager.BRUKER)
         }
@@ -117,7 +117,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
                 .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val e = Assertions.assertThrows(IllegalStateException::class.java) {
-            henleggelsesbrevTjeneste.sendHenleggelsebrev(behandlingId,
+            henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
                                                          null,
                                                          Brevmottager.BRUKER)
         }

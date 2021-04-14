@@ -37,7 +37,7 @@ class PdfGenerator {
         return genererPDF(logo + html, dokumentvariant)
     }
 
-    private fun genererPDF(html: String, dokumentvariant: Dokumentvariant): ByteArray {
+    fun genererPDF(html: String, dokumentvariant: Dokumentvariant): ByteArray {
         val baos = ByteArrayOutputStream()
         genererPDF(html, baos, dokumentvariant)
         val bytes = baos.toByteArray()

@@ -102,7 +102,10 @@ class StorBokstavHelper : Helper<String> {
 
 class KroneFormattererMedTusenskille : Helper<Any> {
 
-    override fun apply(context: Any, options: Options?): Any {
+    override fun apply(context: Any?, options: Options?): Any {
+        if (context == null) {
+            return "ERROR"
+        }
         val key = context.toString()
         val utf8nonBreakingSpace = '\u00A0'
         val beløp = BigDecimal(key)

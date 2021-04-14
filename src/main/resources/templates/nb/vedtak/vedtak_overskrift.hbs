@@ -1,0 +1,11 @@
+{{#switch totalresultat.hovedresultat}}
+    {{#case "FULL_TILBAKEBETALING"}}
+Du må betale tilbake {{ytelsesnavnBestemt}}
+    {{/case}}
+    {{#case "DELVIS_TILBAKEBETALING"}}
+Du må betale tilbake {{ytelsesnavnBestemt}}
+    {{/case}}
+    {{#case "INGEN_TILBAKEBETALING"}}
+Du må ikke betale tilbake {{ytelsesnavnBestemt}}
+    {{/case}}
+{{/switch}}

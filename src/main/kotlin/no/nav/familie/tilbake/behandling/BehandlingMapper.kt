@@ -29,17 +29,18 @@ object BehandlingMapper {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser
                 .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
-        val fagsystemsbehandling = Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
-                                                        tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
-                                                        revurderingsvedtaksdato =
-                                                        opprettTilbakekrevingRequest.revurderingsvedtaksdato,
-                                                        resultat = faktainfo.revurderingsresultat,
-                                                        årsak = faktainfo.revurderingsårsak,
-                                                        konsekvenser = fagsystemskonsekvenser)
+        val fagsystemsbehandling =
+                Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
+                                     tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
+                                     revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
+                                     resultat = faktainfo.revurderingsresultat,
+                                     årsak = faktainfo.revurderingsårsak,
+                                     konsekvenser = fagsystemskonsekvenser)
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
 
-        return Behandling(fagsakId = fagsak.id, type = Behandlingstype.TILBAKEKREVING,
+        return Behandling(fagsakId = fagsak.id,
+                          type = Behandlingstype.TILBAKEKREVING,
                           ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
                           behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,

@@ -1,0 +1,53 @@
+<h4>Oversikt over resultatet av tilbakebetalingssaken</h4>
+    <table>
+        <thead>
+        <tr>
+            <th class="periode">Periode</th>
+            <th>Feilutbetalt beløp</th>
+            <th>Tilbakebetaling</th>
+        {{#if totalresultat.totaltRentebeløp}}
+            <th>Renter</th>
+        {{/if}}
+        {{#if skalIkkeViseSkatt}}
+            <th class="sum">Beløp du skal betale tilbake</th>
+        {{else}}
+            <th>Beløp før skatt</th>
+            <th class="sum">Beløp du skal betale tilbake etter skatt er trukket fra</th>
+        {{/if}}
+        </tr>
+        </thead>
+        <tbody>
+    {{#each perioder }}
+        <tr>
+            <td class="periode">{{kortdato periode.fom}} – {{kortdato periode.tom}}</td>
+            <td class="tall">{{kroner kravgrunnlag.feilutbetaltBeløp}}</td>
+            {{#if (not resultat.tilbakekrevesBeløp)}}
+            <td>Ingen tilbakebetaling</td>
+            {{else if (eq resultat.tilbakekrevesBeløp kravgrunnlag.feilutbetaltBeløp)}}
+            <td>Hele beløpet</td>
+            {{else}}
+            <td>Deler av beløpet</td>
+            {{/if}}
+            {{#if totalresultat.totaltRentebeløp}}
+            <td class="tall">{{#if resultat.rentebeløp}}{{kroner resultat.rentebeløp}}{{/if}}</td>
+            {{/if}}
+            {{#if (not skalIkkeViseSkatt)}}
+            <td class="tall">{{kroner resultat.tilbakekrevesBeløpMedRenter}}</td>
+            {{/if}}
+            <td class="tall sum">{{kroner resultat.tilbakekrevesBeløpUtenSkattMedRenter}}</td>
+        </tr>
+    {{/each}}
+        <tr>
+            <td class="periode sumrad">Sum</td>
+            <td class="tall sumrad"></td>
+            <td class="sumrad"></td>
+        {{#if totalresultat.totaltRentebeløp}}
+            <td class="tall sumrad"></td>
+        {{/if}}
+        {{#if (not skalIkkeViseSkatt)}}
+            <td class="tall sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}</td>
+        {{/if}}
+            <td class="tall sum sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}</td>
+        </tr>
+        </tbody>
+    </table>
