@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode
 
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
-import no.nav.familie.tilbake.domain.tbd.Vurdering
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
 import java.math.BigDecimal
 import java.time.LocalDate
 

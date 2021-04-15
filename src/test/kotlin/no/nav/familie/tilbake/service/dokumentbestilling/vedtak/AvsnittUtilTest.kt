@@ -3,9 +3,6 @@ package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.domain.tbd.Aktsomhet
-import no.nav.familie.tilbake.domain.tbd.SærligGrunn
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -18,8 +15,8 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.H
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbPerson
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbTotalresultat
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
-import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
@@ -27,6 +24,9 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.p
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -79,27 +79,27 @@ class AvsnittUtilTest {
                                              kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
                                              fakta = HbFakta(Hendelsestype.EF_ANNET, Hendelsesundertype.ANNET_FRITEKST),
                                              vurderinger =
-                                            HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                                          vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                                                                  .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                                                          aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                                                          fritekst = "Du er heldig som slapp å betale alt!",
-                                                          særligeGrunner = HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
-                                                                                                   SærligGrunn.STØRRELSE_BELØP))),
+                                             HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                                                           vilkårsvurderingsresultat = Vilkårsvurderingsresultat
+                                                                   .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                                                           aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                                                           fritekst = "Du er heldig som slapp å betale alt!",
+                                                           særligeGrunner = HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
+                                                                                                    SærligGrunn.STØRRELSE_BELØP))),
                                              resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002)),
                        HbVedtaksbrevsperiode(periode = februar,
                                              vurderinger =
-                                            HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                                          vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                                                                  .FORSTO_BURDE_FORSTÅTT,
-                                                          aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                                                          særligeGrunner =
-                                                          HbSærligeGrunner(listOf(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL,
-                                                                                  SærligGrunn.STØRRELSE_BELØP))),
+                                             HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                                                           vilkårsvurderingsresultat = Vilkårsvurderingsresultat
+                                                                   .FORSTO_BURDE_FORSTÅTT,
+                                                           aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                                                           særligeGrunner =
+                                                           HbSærligeGrunner(listOf(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL,
+                                                                                   SærligGrunn.STØRRELSE_BELØP))),
                                              fakta = HbFakta(Hendelsestype.ØKONOMIFEIL, Hendelsesundertype.DOBBELUTBETALING),
                                              kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal(3000),
-                                                                          riktigBeløp = BigDecimal(3000),
-                                                                          utbetaltBeløp = BigDecimal(6000)),
+                                                                           riktigBeløp = BigDecimal(3000),
+                                                                           utbetaltBeløp = BigDecimal(6000)),
                                              resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(3000)))
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 

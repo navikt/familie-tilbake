@@ -17,12 +17,8 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.domain.tbd.Aktsomhet
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
@@ -32,7 +28,6 @@ import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.repository.tbd.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.repository.tbd.VedtaksbrevsperiodeRepository
-import no.nav.familie.tilbake.repository.tbd.VilkårsvurderingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
@@ -50,9 +45,9 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.H
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbPerson
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbTotalresultat
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
-import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevDatoer
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
@@ -60,6 +55,11 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.p
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -96,9 +96,9 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                 brevtekst = data.brevtekst,
                                 vedleggHtml = vedleggHtml)
         pdfBrevService.sendBrev(behandling,
-                                 fagsak,
-                                 Brevtype.VEDTAK,
-                                 brevData)
+                                fagsak,
+                                Brevtype.VEDTAK,
+                                brevData)
     }
 
     fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
@@ -291,7 +291,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun finnVilkårsvurderingsperioder(behandlingId: UUID): Set<Vilkårsvurderingsperiode> {
-        return vilkårsvurderingRepository.findByBehandlingId(behandlingId)?.perioder
+        return vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.perioder
                ?: error("Det er ingen vurderinger utført på behandling $behandlingId. Vedtaksbrev kan ikke genereres")
     }
 
@@ -309,10 +309,10 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagMetadataForVedtaksbrev(behandling: Behandling,
-                                  fagsak: Fagsak,
-                                  personinfo: Personinfo,
-                                  vedtakResultatType: Vedtaksresultat?,
-                                  brevmottager: Brevmottager): Brevmetadata {
+                                          fagsak: Fagsak,
+                                          personinfo: Personinfo,
+                                          vedtakResultatType: Vedtaksresultat?,
+                                          brevmottager: Brevmottager): Brevmetadata {
         val språkkode: Språkkode = fagsak.bruker.språkkode
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)

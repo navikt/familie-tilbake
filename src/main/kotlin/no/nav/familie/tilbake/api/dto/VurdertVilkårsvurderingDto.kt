@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import java.math.BigDecimal
 
 data class VurdertVilkårsvurderingDto(val perioder: List<VurdertVilkårsvurderingsperiodeDto>,
-                                      val rettsgebyr: BigDecimal)
+                                      val rettsgebyr: Long)
 
 data class VurdertVilkårsvurderingsperiodeDto(val periode: PeriodeDto,
                                               val feilutbetaltBeløp: BigDecimal,

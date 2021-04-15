@@ -22,7 +22,6 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.repository.tbd.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.repository.tbd.VedtaksbrevsperiodeRepository
-import no.nav.familie.tilbake.repository.tbd.VilkårsvurderingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
@@ -31,6 +30,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
