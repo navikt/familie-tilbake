@@ -162,7 +162,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         assertTrue { foreldetPeriode.reduserteBeløper.isEmpty() }
         assertAktiviteter(foreldetPeriode.aktiviteter)
         assertEquals(BigDecimal(10000), foreldetPeriode.aktiviteter[0].beløp)
-        assertNull(foreldetPeriode.begrunnelse)
+        assertEquals("foreldelse begrunnelse 1", foreldetPeriode.begrunnelse)
         assertNull(foreldetPeriode.vilkårsvurderingsresultatInfo)
 
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]

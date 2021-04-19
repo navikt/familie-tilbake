@@ -36,7 +36,7 @@ object VilkårsvurderingMapper {
 
     fun tilRespons(vilkårsvurdering: Vilkårsvurdering?,
                    perioder: List<Periode>,
-                   foreldetPerioder: List<Periode>,
+                   foreldetPerioderMedBegrunnelse: Map<Periode, String>,
                    faktaFeilutbetaling: FaktaFeilutbetaling,
                    kravgrunnlag431: Kravgrunnlag431): VurdertVilkårsvurderingDto {
         //Når perioder er allerede behandlet
@@ -62,14 +62,15 @@ object VilkårsvurderingMapper {
             )
         }
 
-        val samletPerioder = foreldetPerioder.map {
+        val samletPerioder = foreldetPerioderMedBegrunnelse.map { (periode,begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
-                    periode = PeriodeDto(it),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                    foreldet = true
+                    periode = PeriodeDto(periode),
+                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
+                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
+                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
+                    aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
+                    foreldet = true,
+                    begrunnelse = begrunnelse
             )
         }.plus(vilkårsvurdertePerioder)
         return VurdertVilkårsvurderingDto(perioder = samletPerioder,

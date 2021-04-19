@@ -29,7 +29,7 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val perioder = mutableListOf<Periode>()
-        val foreldetPerioder = mutableListOf<Periode>()
+        val foreldetPerioderMedBegrunnelse = mutableMapOf<Periode, String>()
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
         if (vurdertForeldelse == null) {
             // fakta perioder
@@ -40,11 +40,11 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
                     .forEach { perioder.add(it.periode) }
             // foreldet perioder
             vurdertForeldelse.foreldelsesperioder.filter { it.erForeldet() }
-                    .forEach { foreldetPerioder.add(it.periode) }
+                    .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
         }
         return VilkårsvurderingMapper.tilRespons(vilkårsvurdering = vilkårsvurdering,
-                                                 perioder = perioder,
-                                                 foreldetPerioder = foreldetPerioder,
+                                                 perioder = perioder.toList(),
+                                                 foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
                                                  faktaFeilutbetaling = faktaOmFeilutbetaling,
                                                  kravgrunnlag431 = kravgrunnlag431)
     }
