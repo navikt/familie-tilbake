@@ -20,11 +20,6 @@ import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
 import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurdering
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingAktsomhet
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingGodTro
-import no.nav.familie.tilbake.domain.tbd.VilkårsvurderingSærligGrunn
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -37,6 +32,11 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
+import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

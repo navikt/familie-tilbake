@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.domain.tbd
+package no.nav.familie.tilbake.vilkårsvurdering.domain
 
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -28,7 +28,6 @@ data class Vilkårsvurderingsperiode(@Id
                                     val id: UUID = UUID.randomUUID(),
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val periode: Periode,
-                                    val navoppfulgt: Navoppfulgt = Navoppfulgt.UDEFINERT,
                                     @Column("vilkarsvurderingsresultat")
                                     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
                                     val begrunnelse: String,
@@ -127,17 +126,6 @@ enum class AnnenVurdering(override val navn: String) : Vurdering {
 
     GOD_TRO("Handlet i god tro"),
     FORELDET("Foreldet");
-}
-
-enum class Navoppfulgt {
-    NAV_KAN_IKKE_LASTES,
-    HAR_IKKE_FULGT_OPP,
-    HAR_BENYTTET_FEIL,
-    HAR_IKKE_SJEKKET,
-    BEREGNINGSFEIL,
-    HAR_UTFØRT_FEIL,
-    HAR_SENDT_TIL_FEIL_MOTTAKER,
-    UDEFINERT
 }
 
 enum class Vilkårsvurderingsresultat(val navn: String) {

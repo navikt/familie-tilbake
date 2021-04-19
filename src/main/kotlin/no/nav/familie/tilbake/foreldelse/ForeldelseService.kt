@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.foreldelse
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -25,20 +26,27 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
         return ForeldelseMapper.tilRespons(feilutbetaltePerioder, kravgrunnlag, vurdertForeldelse)
     }
 
+    fun hentAktivVurdertForeldelse(behandlingId: UUID): VurdertForeldelse? {
+        return foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+    }
+
+    fun erPeriodeForeldet(behandlingId: UUID, periode: Periode): Boolean {
+        return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
+                       ?.any { periode == it.periode && it.erForeldet() }
+               ?: false
+    }
+
     @Transactional
     fun lagreVurdertForeldelse(behandlingId: UUID, behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto) {
         // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
         KravgrunnlagsberegningService.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
-        val eksisterendeData = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        if(eksisterendeData != null){
-            foreldelseRepository.update(eksisterendeData.copy(aktiv = false))
-        }
+        deaktiverEksisterendeVurdertForeldelse(behandlingId)
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId,
                                                                behandlingsstegForeldelseDto.foreldetPerioder))
     }
 
     @Transactional
-    fun deaktiverVurdertForeldelse(behandlingId: UUID){
+    fun deaktiverEksisterendeVurdertForeldelse(behandlingId: UUID) {
         foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
             foreldelseRepository.update(it)
         }

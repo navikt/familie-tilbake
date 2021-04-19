@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.beregning.modell
 
 import no.nav.familie.tilbake.common.Periode
-import no.nav.familie.tilbake.domain.tbd.Vurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
 import java.math.BigDecimal
 
 data class Beregningsresultatsperiode(val periode: Periode,

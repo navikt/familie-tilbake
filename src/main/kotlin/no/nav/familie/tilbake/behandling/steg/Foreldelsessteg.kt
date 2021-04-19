@@ -62,8 +62,8 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     }
 
     @EventListener
-    fun slettVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
-        foreldelseService.deaktiverVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
+    fun deaktiverEksisterendeVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
+        foreldelseService.deaktiverEksisterendeVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 
     companion object {

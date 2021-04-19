@@ -29,7 +29,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
         val aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE) {
+        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE || aktivtBehandlingssteg == Behandlingssteg.VILKÅRSVURDERING) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
         }
     }

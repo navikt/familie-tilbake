@@ -3,8 +3,6 @@ package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.domain.tbd.AnnenVurdering
-import no.nav.familie.tilbake.domain.tbd.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsestypePerYtelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
@@ -28,6 +26,8 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.p
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -129,15 +129,15 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     private fun lagPeriodeBuilder(fakta: HbFakta): HbVedtaksbrevsperiode {
         return HbVedtaksbrevsperiode(periode = januar,
                                      kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                                                  utbetaltBeløp = BigDecimal.valueOf(33333),
-                                                                  riktigBeløp = BigDecimal.valueOf(23333)),
+                                                                   utbetaltBeløp = BigDecimal.valueOf(33333),
+                                                                   riktigBeløp = BigDecimal.valueOf(23333)),
                                      vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                                                aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                                                                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                                                                beløpIBehold = BigDecimal.valueOf(10000)),
+                                                                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,
+                                                                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                                                                 beløpIBehold = BigDecimal.valueOf(10000)),
                                      resultat = HbResultat(tilbakekrevesBeløp = BigDecimal(10000),
-                                                          rentebeløp = BigDecimal(1000),
-                                                          tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)),
+                                                           rentebeløp = BigDecimal(1000),
+                                                           tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)),
                                      fakta = fakta)
     }
 
