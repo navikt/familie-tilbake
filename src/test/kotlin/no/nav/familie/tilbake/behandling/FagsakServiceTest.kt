@@ -5,10 +5,12 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +18,8 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
@@ -62,6 +66,32 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException>(block =
                                                           { fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId) })
         assertEquals("Fagsak finnes ikke for Barnetrygd og $eksternFagsakId", exception.message)
+    }
+
+    @Test
+    fun `finnesÅpenTilbakekrevingsbehandling skal returnere false om fagsak ikke finnes`() {
+        val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, UUID.randomUUID().toString())
+        assertFalse { finnesBehandling.finnesÅpenBehandling }
+    }
+
+    @Test
+    fun `finnesÅpenTilbakekrevingsbehandling skal returnere false om behandling er avsluttet`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        var behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
+        assertFalse { finnesBehandling.finnesÅpenBehandling }
+    }
+
+    @Test
+    fun `finnesÅpenTilbakekrevingsbehandling skal returnere true om det finnes en åpen behandling`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+
+        val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
+        assertTrue { finnesBehandling.finnesÅpenBehandling }
     }
 
     private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {
