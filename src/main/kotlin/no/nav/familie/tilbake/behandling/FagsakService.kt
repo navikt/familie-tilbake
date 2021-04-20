@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.api.dto.FagsakDto
+import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.http.HttpStatus
@@ -27,5 +28,18 @@ class FagsakService(val fagsakRepository: FagsakRepository,
         return FagsakMapper.tilRespons(fagsak = fagsak,
                                        personinfo = personInfo,
                                        behandlinger = behandlinger)
+    }
+
+    @Transactional(readOnly = true)
+    fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingsresponsDto {
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
+                                                                        eksternFagsakId = eksternFagsakId)
+        var finneÅpenBehandling = false
+        if (fagsak != null) {
+            finneÅpenBehandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                    ytelsestype = fagsak.ytelsestype,
+                    eksternFagsakId = eksternFagsakId) != null
+        }
+        return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finneÅpenBehandling)
     }
 }
