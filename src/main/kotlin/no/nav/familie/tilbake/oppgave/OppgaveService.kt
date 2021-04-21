@@ -1,8 +1,15 @@
 package no.nav.familie.tilbake.oppgave
 
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -13,7 +20,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
 
 @Service
 class OppgaveService(private val behandlingRepository: BehandlingRepository,
@@ -21,7 +28,9 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                      private val integrasjonerClient: IntegrasjonerClient) {
 
 
-    private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
+    private val antallOppgaveTyper = Oppgavetype.values().associateWith {
+        Metrics.counter("oppgave.opprettet", "type", it.name)
+    }
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
@@ -46,7 +55,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
-        økTellerForAntallOppgaveTyper(oppgavetype)
+        antallOppgaveTyper[oppgavetype]!!.increment()
 
         return opprettetOppgaveId
     }
@@ -73,14 +82,6 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         }
         integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
 
-    }
-
-    private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
-        if (antallOppgaveTyper[oppgavetype] == null) {
-            antallOppgaveTyper[oppgavetype] = Metrics.counter("oppgave.opprettet", "type", oppgavetype.name)
-        }
-
-        antallOppgaveTyper[oppgavetype]?.increment()
     }
 
 

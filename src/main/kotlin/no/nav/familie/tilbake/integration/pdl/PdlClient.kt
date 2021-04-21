@@ -8,7 +8,11 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
-import no.nav.familie.tilbake.integration.pdl.internal.*
+import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier

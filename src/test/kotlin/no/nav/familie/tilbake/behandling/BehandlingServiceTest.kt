@@ -1,9 +1,15 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.*
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -11,7 +17,11 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
-import no.nav.familie.tilbake.behandling.domain.*
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -31,8 +41,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.test.*
+import java.util.UUID
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 

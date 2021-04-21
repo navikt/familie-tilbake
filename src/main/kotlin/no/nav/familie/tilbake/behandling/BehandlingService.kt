@@ -9,9 +9,14 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
-import no.nav.familie.tilbake.behandling.domain.*
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
+import no.nav.familie.tilbake.behandling.domain.Bruker
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -29,7 +34,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
