@@ -1,11 +1,10 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
-import java.util.ArrayList
 
 internal object AvsnittUtil {
 

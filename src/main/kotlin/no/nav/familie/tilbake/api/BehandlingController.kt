@@ -27,8 +27,8 @@ import javax.validation.Valid
 @RequestMapping("/api/behandling")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BehandlingController(val behandlingService: BehandlingService,
-                           val stegService: StegService) {
+class BehandlingController(private val behandlingService: BehandlingService,
+                           private val stegService: StegService) {
 
 
     @PostMapping(path = ["/v1"],

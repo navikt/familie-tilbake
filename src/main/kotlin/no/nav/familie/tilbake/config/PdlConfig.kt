@@ -16,6 +16,7 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
         const val PATH_GRAPHQL = "graphql"
 
         val hentEnkelPersonQuery = graphqlQuery("hentperson-enkel")
+        val hentIdenterQuery = graphqlQuery("hentIdenter")
 
         private fun graphqlQuery(pdlResource: String) = PdlConfig::class.java.getResource("/pdl/$pdlResource.graphql")
                 .readText()

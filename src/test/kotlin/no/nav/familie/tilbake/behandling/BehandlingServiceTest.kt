@@ -340,8 +340,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
 
         val task = taskRepository.findByStatus(Status.UBEHANDLET)
-        assertEquals(1, task.count())
-        assertEquals(SendHenleggelsesbrevTask.TYPE, task[0].type)
+        assertEquals(2, task.count())
+        assertEquals(SendHenleggelsesbrevTask.TYPE, task[1].type)
     }
 
     @Test
@@ -373,7 +373,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(behandlingssresultat)
         assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
 
-        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).isEmpty() }
+
+        assertNull(taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE })
     }
 
     @Test

@@ -1,7 +1,7 @@
 {
   "errors": [
     {
-      "message": "Person ikke funnet",
+      "message": "Ikke tilgang til å se person",
       "locations": [
         {
           "line": 2,
@@ -12,11 +12,11 @@
         "hentPerson"
       ],
       "extensions": {
-        "code": "Not found",
+        "code": "unauthorized",
         "details": {
-          "type": "not-found",
-          "cause": "cause-0001-ikkefunnet",
-          "policy": "ikke-funnet"
+          "type": "abac-deny",
+          "cause": "cause-0001-manglerrolle",
+          "policy": "adressebeskyttelse_strengt_fortrolig_adresse"
         },
         "classification": "ExecutionAborted"
       }

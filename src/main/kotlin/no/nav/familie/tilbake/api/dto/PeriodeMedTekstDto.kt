@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
 import no.nav.familie.tilbake.common.Periode
-import java.time.YearMonth
 import javax.validation.constraints.Size
 
 class PeriodeMedTekstDto(val periode: Periode,

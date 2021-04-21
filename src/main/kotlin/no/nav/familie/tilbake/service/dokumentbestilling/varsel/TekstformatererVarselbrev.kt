@@ -1,11 +1,9 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.FellesTekstformaterer
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Brevoverskriftsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import java.time.LocalDate
 
 object TekstformatererVarselbrev {
 

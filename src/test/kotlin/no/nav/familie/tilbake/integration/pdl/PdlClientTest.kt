@@ -75,7 +75,7 @@ class PdlClientTest {
 
         val exception = assertFailsWith<RuntimeException>(block =
                                                           { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
-        assertEquals("Feil ved oppslag på person: Ikke tilgang til å se person", exception.message)
+        assertEquals("Feil ved oppslag på person: Person ikke funnet", exception.message)
     }
 
 

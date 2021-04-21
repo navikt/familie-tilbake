@@ -14,5 +14,6 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjo
         const val PATH_ORGANISASJON = "api/organisasjon"
         const val PATH_ARKIVER = "api/arkiv/v3"
         const val PATH_DISTRIBUER = "api/dist/v1"
+        const val PATH_OPPGAVE = "/oppgave/"
     }
 }

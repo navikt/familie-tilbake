@@ -29,6 +29,7 @@ class PdlClient(val pdlConfig: PdlConfig,
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
+
     fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = PdlConfig.hentEnkelPersonQuery)
@@ -50,6 +51,7 @@ class PdlClient(val pdlConfig: PdlConfig,
         }
     }
 
+
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
@@ -62,3 +64,4 @@ class PdlClient(val pdlConfig: PdlConfig,
         return Tema.valueOf(fagsystem.tema)
     }
 }
+

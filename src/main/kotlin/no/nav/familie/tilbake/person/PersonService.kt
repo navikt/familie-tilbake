@@ -11,4 +11,5 @@ class PersonService(val pdlClient: PdlClient) {
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): Personinfo {
         return pdlClient.hentPersoninfo(personIdent, fagsystem)
     }
+
 }

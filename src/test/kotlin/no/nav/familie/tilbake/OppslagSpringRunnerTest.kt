@@ -56,7 +56,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl")
+@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-oppgave")
 abstract class OppslagSpringRunnerTest {
 
     private final val listAppender = initLoggingEventListAppender()

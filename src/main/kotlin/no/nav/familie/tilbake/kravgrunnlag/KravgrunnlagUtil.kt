@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.status.v1.EndringKravOgVedtakstatus
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import java.io.StringReader
 import java.math.BigDecimal
-import java.util.Comparator
 import java.util.SortedMap
 import javax.xml.XMLConstants
 import javax.xml.bind.JAXBContext
