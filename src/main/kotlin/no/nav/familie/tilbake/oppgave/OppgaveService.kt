@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -50,8 +49,8 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
                 enhetsnummer = behandling.behandlendeEnhet,
-                behandlingstype = Behandlingstype.Tilbakekreving.value,
-                behandlingstema = Behandlingstema.Tilbakebetaling.value
+                behandlingstype = "ae0161",
+                behandlingstema = Behandlingstema.Barnetrygd.value
         )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
