@@ -3,33 +3,33 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -38,14 +38,26 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val brevsporingRepository: BrevsporingRepository,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
-                        private val stegService: StegService) {
+                        private val stegService: StegService,
+                        private val taskService: TaskService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun opprettBehandlingAutomatisk(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        return opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
+        val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
+
+        //Lag oppgave for behandling
+        taskService.save(
+            Task(type = LagOppgaveTask.TYPE,
+                 payload = behandling.id.toString(),
+                 properties = Properties().apply {
+                                  this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: UUID.randomUUID().toString()
+                              })
+        )
+
+        return behandling
     }
 
     fun opprettBehandlingManuell(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {

@@ -4,39 +4,17 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
-import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
-import no.nav.familie.tilbake.behandling.domain.Varsel
-import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.database.DbContainerInitializer
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
-import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
-import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
-import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
-import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
-import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
-import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
+import no.nav.familie.tilbake.domain.tbd.*
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
-import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
-import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.kravgrunnlag.domain.*
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
-import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
-import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
-import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
-import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.familie.tilbake.vilkårsvurdering.domain.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,7 +34,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl")
+@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-oppgave")
 abstract class OppslagSpringRunnerTest {
 
     private final val listAppender = initLoggingEventListAppender()

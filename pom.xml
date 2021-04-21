@@ -22,11 +22,10 @@
         <jvmTarget>11</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.4.32</kotlin.version>
-        <felles.version>1.20210414105303_1ed87ef</felles.version>
+        <felles.version>1.20210419103325_d044927</felles.version>
         <common-java-modules.version>2.2021.04.08_11.42-d0c0afd39ca0</common-java-modules.version>
         <kontrakter.version>2.0_20210317125829_2bee9c0</kontrakter.version>
         <nav.security.version>1.3.5</nav.security.version>
-        <felles.version>1.20210419103325_d044927</felles.version>
         <common-java-modules.version>2.2021.03.26_09.45-569ba329264c</common-java-modules.version>
         <kontrakter.version>2.0_20210415153406_ea38051</kontrakter.version>
         <nav.security.version>1.3.5</nav.security.version>

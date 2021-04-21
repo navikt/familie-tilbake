@@ -1,15 +1,9 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.*
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
-import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -17,11 +11,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -41,12 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import java.util.*
+import kotlin.test.*
 
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
@@ -340,8 +326,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
 
         val task = taskRepository.findByStatus(Status.UBEHANDLET)
-        assertEquals(1, task.count())
-        assertEquals(SendHenleggelsesbrevTask.TYPE, task[0].type)
+        assertEquals(2, task.count())
+        assertEquals(SendHenleggelsesbrevTask.TYPE, task[1].type)
     }
 
     @Test
@@ -373,7 +359,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(behandlingssresultat)
         assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
 
-        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).isEmpty() }
+
+        assertNull(taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE })
     }
 
     @Test

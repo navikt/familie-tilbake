@@ -8,13 +8,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
-import no.nav.familie.tilbake.integration.pdl.internal.PdlHentIdenterResponse
-import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
-import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
-import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
-import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import org.apache.commons.lang3.StringUtils
+import no.nav.familie.tilbake.integration.pdl.internal.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -53,18 +47,6 @@ class PdlClient(val pdlConfig: PdlConfig,
         }
     }
 
-    fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.hentIdenterQuery)
-        val response = postForEntity<PdlHentIdenterResponse>(pdlConfig.pdlUri,
-                                                             pdlPersonRequest,
-                                                             httpHeaders(fagsystem))
-
-        if (!response.harFeil()) return response
-        throw Feil(message = "Feil mot pdl: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
-    }
 
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
@@ -79,9 +61,3 @@ class PdlClient(val pdlConfig: PdlConfig,
     }
 }
 
-
-
-
-private fun String.graphqlCompatible(): String {
-    return StringUtils.normalizeSpace(this.replace("\n", ""))
-}

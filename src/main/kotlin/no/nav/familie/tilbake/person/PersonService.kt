@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.person
 
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -13,14 +12,4 @@ class PersonService(val pdlClient: PdlClient) {
         return pdlClient.hentPersoninfo(personIdent, fagsystem)
     }
 
-    fun hentAktørId(personIdent: String, fagsystem: Fagsystem): List<String> {
-        val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem)
-        return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" && !it.historisk }.map { it.ident }
-    }
-
-    fun hentAktivAktørId(ident: String, fagsystem: Fagsystem): String {
-        val aktørId = hentAktørId(ident, fagsystem)
-        if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
-        return aktørId.first()
-    }
 }

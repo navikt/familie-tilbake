@@ -1,9 +1,7 @@
 package no.nav.familie.tilbake.integration.pdl
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
@@ -76,29 +74,6 @@ class PdlClientTest {
         val exception = assertFailsWith<RuntimeException>(block =
                                                           { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
         assertEquals("Feil ved oppslag på person: Person ikke funnet", exception.message)
-    }
-
-    @Test
-    fun `hentIdenter skal hente aktiv aktørid for tema barnetrygd med ok respons fra PDL`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlAktorIdResponse.json"))))
-
-        val respons = pdlClient.hentIdenter("11111122222", Fagsystem.BA)
-
-        assertNotNull(respons)
-        assertNotNull(respons.data.pdlIdenter)
-
-    }
-
-    @Test
-    fun `hentIdenter skal ikke hente person info når person ikke finnes`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
-
-        val exception = assertFailsWith<RuntimeException>(block =
-                                                          { pdlClient.hentIdenter("11111122222", Fagsystem.BA) })
-        assertEquals("Feil mot pdl: Person ikke funnet", exception.message)
-
     }
 
 
