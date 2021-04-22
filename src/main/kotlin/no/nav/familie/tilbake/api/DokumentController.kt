@@ -70,7 +70,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     }
 
     @PostMapping("/forhandsvis-vedtaksbrev",
-                 produces = [MediaType.APPLICATION_PDF_VALUE])
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
     fun hentForhåndsvisningVedtaksbrev(@RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf (dto))
