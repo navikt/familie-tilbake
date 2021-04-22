@@ -180,7 +180,7 @@
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.18.2</version>
+            <version>1.18.8</version>
         </dependency>
 
 
