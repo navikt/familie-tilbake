@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
@@ -71,8 +72,8 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @PostMapping("/forhandsvis-vedtaksbrev",
                  produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
-    fun hentForhåndsvisningVedtaksbrev(@RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
-        return vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+    fun hentForhåndsvisningVedtaksbrev(@RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
+        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf (dto))
     }
 
     @GetMapping("/forhandsvis-vedtaksbrevtekst/{behandlingId}",
@@ -80,8 +81,8 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Forhåndsviser brev",
                         henteParam = "behandlingId")
-    fun hentForhåndsvisningVedtaksbrevtekst(@PathVariable behandlingId: UUID): List<Avsnitt> {
-        return vedtaksbrevService.hentForhåndsvisningVedtaksbrevSomTekst(behandlingId)
+    fun hentForhåndsvisningVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
+        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevSomTekst (behandlingId))
     }
 
 }
