@@ -50,7 +50,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                 beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
                 enhetsnummer = behandling.behandlendeEnhet,
                 behandlingstype = "ae0161",
-                behandlingstema = Behandlingstema.Barnetrygd.value
+                behandlingstema = null
         )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
