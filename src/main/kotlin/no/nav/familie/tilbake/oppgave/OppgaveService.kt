@@ -49,8 +49,8 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
                 enhetsnummer = behandling.behandlendeEnhet,
-                behandlingstema = Behandlingstema.Tilbakebetaling.value,
-                tilordnetRessurs = behandling.ansvarligSaksbehandler
+                behandlingstype = "ae0161",
+                behandlingstema = null
         )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
