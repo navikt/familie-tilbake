@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
+import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -9,6 +10,7 @@ import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -31,5 +33,14 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
     fun beregnBeløp(@PathVariable("behandlingId") behandlingId: UUID,
                     @Valid @RequestBody perioder: List<PeriodeDto>): Ressurs<BeregnetPerioderDto> {
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
+    }
+
+    @GetMapping(path = ["{behandlingId}/beregn/resultat/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Henter beregningsresultat",
+                        henteParam = "behandlingId")
+    fun hentBeregningsresultat(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BeregningsresultatDto> {
+        return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
     }
 }

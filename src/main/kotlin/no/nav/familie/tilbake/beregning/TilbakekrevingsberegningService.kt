@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.beregning
 
 import no.nav.familie.tilbake.api.dto.BeregnetPeriodeDto
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
+import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
+import no.nav.familie.tilbake.api.dto.BeregningsresultatsperiodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -33,6 +35,21 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
                                       private var vilkårsvurderingRepository: VilkårsvurderingRepository,
                                       private var behandlingRepository: BehandlingRepository,
                                       private var kravgrunnlagsberegningService: KravgrunnlagsberegningService) {
+
+    fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
+        val beregningsresultat = beregn(behandlingId)
+        val beregningsresultatsperioder = beregningsresultat.beregningsresultatsperioder.map {
+            BeregningsresultatsperiodeDto(periode = PeriodeDto(it.periode),
+                                          vurdering = it.vurdering,
+                                          feilutbetaltBeløp = it.feilutbetaltBeløp,
+                                          andelAvBeløp = it.andelAvBeløp,
+                                          renteprosent = it.renteprosent,
+                                          tilbakekrevingsbeløp = it.manueltSattTilbakekrevingsbeløp ?: it.tilbakekrevingsbeløp,
+                                          tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt)
+        }
+        return BeregningsresultatDto(beregningsresultatsperioder = beregningsresultatsperioder,
+                                     vedtaksresultat = beregningsresultat.vedtaksresultat)
+    }
 
     fun beregn(behandlingId: UUID): Beregningsresultat {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
