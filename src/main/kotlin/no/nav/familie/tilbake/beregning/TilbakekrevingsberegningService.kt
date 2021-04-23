@@ -44,7 +44,7 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
                                           feilutbetaltBeløp = it.feilutbetaltBeløp,
                                           andelAvBeløp = it.andelAvBeløp,
                                           renteprosent = it.renteprosent,
-                                          tilbakekrevingsbeløp = it.manueltSattTilbakekrevingsbeløp ?: it.tilbakekrevingsbeløp,
+                                          tilbakekrevingsbeløp = it.tilbakekrevingsbeløp,
                                           tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt)
         }
         return BeregningsresultatDto(beregningsresultatsperioder = beregningsresultatsperioder,
