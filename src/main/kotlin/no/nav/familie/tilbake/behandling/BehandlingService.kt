@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
@@ -137,6 +138,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
             taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
         }
+
+        // Ferdigstill oppgave
+        taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
+                                 payload = behandling.id.toString()))
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
