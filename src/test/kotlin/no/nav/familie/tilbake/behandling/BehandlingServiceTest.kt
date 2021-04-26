@@ -340,7 +340,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
 
         val task = taskRepository.findByStatus(Status.UBEHANDLET)
-        assertEquals(2, task.count())
+        assertEquals(3, task.count())
         assertEquals(SendHenleggelsesbrevTask.TYPE, task[1].type)
     }
 
