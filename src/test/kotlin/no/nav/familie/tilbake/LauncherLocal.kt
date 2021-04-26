@@ -11,9 +11,9 @@ class LauncherLocal
 
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active",
-                       "local, mock-pdl, mock-oauth") //QAD hack for å få riktige profiler til spring 2.4.3
+                       "local, mock-pdl, mock-oauth, mock-oppgave") //QAD hack for å få riktige profiler til spring 2.4.3
     SpringApplicationBuilder(ApplicationConfig::class.java)
             .initializers(DbContainerInitializer())
-            .profiles("local", "mock-pdl", "mock-oauth")
+            .profiles("local", "mock-pdl", "mock-oauth",  "mock-oppgave")
             .run(*args)
 }
