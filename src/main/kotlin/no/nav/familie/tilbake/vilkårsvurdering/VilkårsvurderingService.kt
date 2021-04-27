@@ -38,7 +38,7 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
                     .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                     .forEach { perioder.add(it.periode) }
         } else {
-            // Ikke foreldet perioder
+            // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
             vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }
                     .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                     .forEach { perioder.add(it.periode) }
