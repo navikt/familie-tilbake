@@ -15,12 +15,12 @@ internal object AvsnittUtil {
 
     fun lagVedtaksbrevDeltIAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata, hovedoverskrift: String): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
-        Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
-        resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdata, hovedoverskrift))
+        val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
+        resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, hovedoverskrift))
         if (vedtaksbrevsdata.felles.vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR) {
-            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdata))
+            resultat.addAll(lagPerioderavsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         }
-        resultat.add(lagAvsluttendeAvsnitt(vedtaksbrevsdata))
+        resultat.add(lagAvsluttendeAvsnitt(vedtaksbrevsdataMedFriteksmarkeringer))
         return resultat
     }
 
