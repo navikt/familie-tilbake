@@ -39,20 +39,25 @@ object VilkårsvurderingMapper {
                    foreldetPerioderMedBegrunnelse: Map<Periode, String>,
                    faktaFeilutbetaling: FaktaFeilutbetaling,
                    kravgrunnlag431: Kravgrunnlag431): VurdertVilkårsvurderingDto {
-        //Når perioder er allerede behandlet
-        val vilkårsvurdertePerioder = vilkårsvurdering?.perioder?.map {
-            VurdertVilkårsvurderingsperiodeDto(
-                    periode = PeriodeDto(it.periode),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it.periode),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
-                    begrunnelse = it.begrunnelse,
-                    foreldet = false,
-                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it)
-            )
-        }
-        val ikkeBehandletPerioder = perioder.map { //Når perioder er ikke behandlet
+
+        //allerede behandlet perioder
+        val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
+                ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
+                ?.map {
+                    VurdertVilkårsvurderingsperiodeDto(
+                            periode = PeriodeDto(it.periode),
+                            feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
+                            hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it.periode),
+                            reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
+                            aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
+                            begrunnelse = it.begrunnelse,
+                            foreldet = false,
+                            vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it)
+                    )
+                }
+
+        //ikke behandlet perioder
+        val ikkeBehandletPerioder = perioder.map {
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(it),
                     feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
@@ -63,6 +68,7 @@ object VilkårsvurderingMapper {
             )
         }
 
+        // foreldet perioder
         val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(periode),
@@ -74,6 +80,8 @@ object VilkårsvurderingMapper {
                     begrunnelse = begrunnelse
             )
         }
+
+        // samlet alle perioder
         val samletPerioder = ikkeBehandletPerioder.toMutableList()
         samletPerioder.addAll(foreldetPerioder)
         vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
