@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
-import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
