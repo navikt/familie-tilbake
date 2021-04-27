@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.sikkerhet
 import io.jsonwebtoken.Jwts
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg

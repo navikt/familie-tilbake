@@ -12,7 +12,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -57,7 +57,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun distribuerJournalpost(journalpostId: String, fagsystem: Fagsystem): String {
         val request = DistribuerJournalpostRequest(journalpostId,
-                                                   fagsystem.name,
+                                                   fagsystem,
                                                    integrasjonerConfig.applicationName)
 
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()

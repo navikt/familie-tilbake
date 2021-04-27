@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype

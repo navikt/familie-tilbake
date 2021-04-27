@@ -1,10 +1,11 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf
 
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
-import no.nav.familie.kontrakter.felles.dokarkiv.IdType
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
@@ -26,7 +27,7 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
         val adresseinfo: Adresseinfo = brevmetadata.mottageradresse
         return when (mottager) {
             Brevmottager.BRUKER -> AvsenderMottaker(id = adresseinfo.personIdent,
-                                                    idType = IdType.FNR,
+                                                    idType = BrukerIdType.FNR,
                                                     navn = adresseinfo.mottagernavn)
             Brevmottager.VERGE -> lagVergemottager(behandling)
         }
@@ -37,11 +38,11 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
                            ?: throw IllegalStateException("Brevmottager er verge, men verge finnes ikke. " +
                                                           "Behandling ${behandling.id}")
         return if (verge.orgNr != null) {
-            AvsenderMottaker(idType = IdType.ORGNR,
+            AvsenderMottaker(idType = BrukerIdType.ORGNR,
                              id = verge.orgNr,
                              navn = verge.navn)
         } else {
-            AvsenderMottaker(idType = IdType.ORGNR,
+            AvsenderMottaker(idType = BrukerIdType.ORGNR,
                              id = verge.ident!!,
                              navn = verge.navn)
         }
@@ -58,7 +59,7 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
                                 filType = FilType.PDFA,
                                 filnavn = if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) "vedtak.pdf" else "brev.pdf",
                                 tittel = brevmetadata.tittel,
-                                dokumentType = brevmetadata.ytelsestype.kode + "-TILB")
+                                dokumentType = Dokumenttype.BARNETRYGD_TILBAKEKREVING_VEDTAK)
         val request = ArkiverDokumentRequest(fnr = fagsak.bruker.ident,
                                              forsøkFerdigstill = true,
                                              hoveddokumentvarianter = listOf(dokument),

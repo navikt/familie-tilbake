@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.api.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import java.time.LocalDate

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
