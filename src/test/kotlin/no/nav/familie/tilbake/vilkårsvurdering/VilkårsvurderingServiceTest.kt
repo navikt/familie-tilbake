@@ -131,20 +131,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering fra foreldelse perioder som ikke er foreldet`() {
-        foreldelseRepository.insert(VurdertForeldelse(
-                behandlingId = behandling.id,
-                foreldelsesperioder = setOf(
-                        Foreldelsesperiode(
-                                periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-                                foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
-                                begrunnelse = "foreldelse begrunnelse 1"
-                        ),
-                        Foreldelsesperiode(
-                                periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
-                                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-                                begrunnelse = "foreldelse begrunnelse 2"
-                        )),
-        ))
+        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
@@ -165,17 +152,17 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("foreldelse begrunnelse 1", foreldetPeriode.begrunnelse)
         assertNull(foreldetPeriode.vilkårsvurderingsresultatInfo)
 
-        val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
+        val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
-        assertFalse { vurdertPeriode.foreldet }
-        assertEquals(BigDecimal("10000"), vurdertPeriode.feilutbetaltBeløp)
-        assertEquals(BigDecimal(10000), vurdertPeriode.aktiviteter[0].beløp)
-        assertTrue { vurdertPeriode.reduserteBeløper.isEmpty() }
-        assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertNull(vurdertPeriode.begrunnelse)
-        assertNull(vurdertPeriode.vilkårsvurderingsresultatInfo)
+                                LocalDate.of(2020, 2, 29)), ikkeForeldetPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, ikkeForeldetPeriode.hendelsestype)
+        assertFalse { ikkeForeldetPeriode.foreldet }
+        assertEquals(BigDecimal("10000"), ikkeForeldetPeriode.feilutbetaltBeløp)
+        assertEquals(BigDecimal(10000), ikkeForeldetPeriode.aktiviteter[0].beløp)
+        assertTrue { ikkeForeldetPeriode.reduserteBeløper.isEmpty() }
+        assertAktiviteter(ikkeForeldetPeriode.aktiviteter)
+        assertNull(ikkeForeldetPeriode.begrunnelse)
+        assertNull(ikkeForeldetPeriode.vilkårsvurderingsresultatInfo)
     }
 
     @Test
@@ -277,7 +264,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     fun `hentVilkårsvurdering skal hente allerede lagret god tro vilkårsvurdering`() {
         vilkårsvurderingService.lagreVilkårsvurdering(
                 behandlingId = behandling.id,
-                behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro())
+                behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(
+                        perioder = listOf(PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)))))
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
         assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
@@ -303,6 +291,123 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("God tro begrunnelse", godTroDto.begrunnelse)
         assertNull(godTroDto.beløpTilbakekreves)
     }
+
+    @Test
+    fun `hentVilkårsvurdering skal hente foreldelse perioder som endret til IKKE_FORELDET`() {
+        // en periode med FORELDET og andre er IKKE_FORELDET
+        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+
+        var vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
+        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+
+        // behandle vilkårsvurdering
+        vilkårsvurderingService
+                .lagreVilkårsvurdering(behandling.id,
+                                       lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 2),
+                                                                                                 YearMonth.of(2020, 2)))))
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        // endret begge perioder til IKKE_FORELDET
+        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
+        oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.IKKE_FORELDET,
+                                     Foreldelsesvurderingstype.IKKE_FORELDET)
+
+        vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+
+        val ikkeVurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
+        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
+                                LocalDate.of(2020, 1, 31)), ikkeVurdertPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, ikkeVurdertPeriode.hendelsestype)
+        assertEquals(BigDecimal("10000"), ikkeVurdertPeriode.feilutbetaltBeløp)
+        assertTrue { ikkeVurdertPeriode.reduserteBeløper.isEmpty() }
+        assertAktiviteter(ikkeVurdertPeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), ikkeVurdertPeriode.aktiviteter[0].beløp)
+        assertNull(ikkeVurdertPeriode.vilkårsvurderingsresultatInfo)
+        assertNull(ikkeVurdertPeriode.begrunnelse)
+
+        val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
+        assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
+                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(BigDecimal("10000"), vurdertPeriode.feilutbetaltBeløp)
+        assertAktiviteter(vurdertPeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), vurdertPeriode.aktiviteter[0].beløp)
+        assertEquals("Vilkårsvurdering begrunnelse", vurdertPeriode.begrunnelse)
+
+        val vilkårsvurderingsresultatDto = vurdertPeriode.vilkårsvurderingsresultatInfo
+        assertNotNull(vilkårsvurderingsresultatDto)
+        assertNull(vilkårsvurderingsresultatDto.aktsomhet)
+        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        val godTroDto = vilkårsvurderingsresultatDto.godTro
+        assertNotNull(godTroDto)
+        assertTrue { godTroDto.beløpErIBehold }
+        assertEquals("God tro begrunnelse", godTroDto.begrunnelse)
+        assertNull(godTroDto.beløpTilbakekreves)
+    }
+
+    @Test
+    fun `hentVilkårsvurdering skal hente perioder som endret til FORELDET`() {
+        // en periode med FORELDET og andre er IKKE_FORELDET
+        lagForeldese(Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.IKKE_FORELDET)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+
+        var vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
+        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+
+        // behandle vilkårsvurdering
+        vilkårsvurderingService
+                .lagreVilkårsvurdering(behandling.id,
+                                       lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 2),
+                                                                                                 YearMonth.of(2020, 2)))))
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        // endret begge perioder til FORELDET
+        val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
+        oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.FORELDET,
+                                     Foreldelsesvurderingstype.FORELDET)
+
+        vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
+
+        val førsteForeldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
+        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
+                                LocalDate.of(2020, 1, 31)), førsteForeldetPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, førsteForeldetPeriode.hendelsestype)
+        assertEquals(BigDecimal("10000"), førsteForeldetPeriode.feilutbetaltBeløp)
+        assertTrue { førsteForeldetPeriode.reduserteBeløper.isEmpty() }
+        assertAktiviteter(førsteForeldetPeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), førsteForeldetPeriode.aktiviteter[0].beløp)
+        assertNull(førsteForeldetPeriode.vilkårsvurderingsresultatInfo)
+        assertEquals("foreldelse begrunnelse 1", førsteForeldetPeriode.begrunnelse)
+
+        val andreForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
+        assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
+                                LocalDate.of(2020, 2, 29)), andreForeldetPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, andreForeldetPeriode.hendelsestype)
+        assertEquals(BigDecimal("10000"), andreForeldetPeriode.feilutbetaltBeløp)
+        assertTrue { andreForeldetPeriode.reduserteBeløper.isEmpty() }
+        assertAktiviteter(andreForeldetPeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), andreForeldetPeriode.aktiviteter[0].beløp)
+        assertNull(andreForeldetPeriode.vilkårsvurderingsresultatInfo)
+        assertEquals("foreldelse begrunnelse 2", andreForeldetPeriode.begrunnelse)
+    }
+
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når andelTilbakekreves er mer enn 100 prosent `() {
@@ -346,7 +451,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(
                     behandlingId = behandling.id,
-                    behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(beløpTilbakekreves = BigDecimal(30000)))
+                    behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(
+                            perioder = listOf(PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2))),
+                            beløpTilbakekreves = BigDecimal(30000)))
         }
         assertEquals("Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp", exception.message)
     }
@@ -443,16 +550,50 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         ))))
     }
 
-    private fun lagVilkårsvurderingMedGodTro(beløpTilbakekreves: BigDecimal? = null): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(vilkårsvurderingsperioder = listOf(
-                VilkårsvurderingsperiodeDto(
-                        periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Vilkårsvurdering begrunnelse",
-                        godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
-                                              beløpErIBehold = true,
-                                              beløpTilbakekreves = beløpTilbakekreves)
-                )))
+    private fun lagVilkårsvurderingMedGodTro(perioder: List<PeriodeDto>,
+                                             beløpTilbakekreves: BigDecimal? = null): BehandlingsstegVilkårsvurderingDto {
+        return BehandlingsstegVilkårsvurderingDto(vilkårsvurderingsperioder = perioder.map {
+            VilkårsvurderingsperiodeDto(
+                    periode = it,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    begrunnelse = "Vilkårsvurdering begrunnelse",
+                    godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
+                                          beløpErIBehold = true,
+                                          beløpTilbakekreves = beløpTilbakekreves)
+            )
+        })
+    }
+
+    private fun lagForeldese(vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
+        foreldelseRepository.insert(VurdertForeldelse(
+                behandlingId = behandling.id,
+                foreldelsesperioder = setOf(
+                        Foreldelsesperiode(
+                                periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                                foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
+                                begrunnelse = "foreldelse begrunnelse 1"
+                        ),
+                        Foreldelsesperiode(
+                                periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                                foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
+                                begrunnelse = "foreldelse begrunnelse 2"
+                        )),
+        ))
+    }
+
+    private fun oppdaterForeldelsesvurdering(vurdertForeldelse: VurdertForeldelse,
+                                             vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
+        foreldelseRepository.update(vurdertForeldelse.copy(foreldelsesperioder = setOf(
+                Foreldelsesperiode(
+                        periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                        foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
+                        begrunnelse = "foreldelse begrunnelse 1"
+                ),
+                Foreldelsesperiode(
+                        periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                        foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
+                        begrunnelse = "foreldelse begrunnelse 2"
+                ))))
     }
 
 }

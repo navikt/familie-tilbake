@@ -3,9 +3,12 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
+import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
+import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
@@ -24,6 +27,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -34,6 +39,7 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
@@ -49,6 +55,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -240,8 +249,64 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingssteg?.behandlingsstegsstatus)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
-
     }
+
+    @Test
+    fun `håndterSteg skal utføre foreldelse og fortsette til foreslå vedtak når alle perioder endret til foreldet`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
+
+        var kravgrunnlag431 = Testdata.kravgrunnlag431
+        for (grunnlagsperiode in kravgrunnlag431.perioder) {
+            kravgrunnlag431 =
+                    kravgrunnlag431.copy(perioder = setOf(grunnlagsperiode.copy(
+                            periode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                              tom = LocalDate.of(2010, 1, 31)))))
+        }
+        kravgrunnlagRepository.insert(kravgrunnlag431)
+        // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
+        var behandlingsstegForeldelseDto = BehandlingsstegForeldelseDto(
+                foreldetPerioder = listOf(ForeldelsesperiodeDto(
+                        periode = PeriodeDto(LocalDate.of(2010, 1, 1),
+                                             LocalDate.of(2010, 1, 31)),
+                        begrunnelse = "foreldelses begrunnelse",
+                        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET)))
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto) }
+        var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+
+        // behandler vilkårsvurderingssteg
+        val behandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(VilkårsvurderingsperiodeDto(
+                        periode = PeriodeDto(LocalDate.of(2010, 1, 1),
+                                             LocalDate.of(2010, 1, 31)),
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Vilkårsvurdering begrunnelse",
+                        godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
+                                              beløpErIBehold = false)
+                ))
+        )
+        stegService.håndterSteg(behandlingId, behandlingsstegVilkårsvurderingDto)
+        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+
+        // behandler foreldelse steg på nytt og endrer periode til foreldet
+        behandlingsstegForeldelseDto = BehandlingsstegForeldelseDto(
+                foreldetPerioder = listOf(ForeldelsesperiodeDto(
+                        periode = PeriodeDto(LocalDate.of(2010, 1, 1),
+                                             LocalDate.of(2010, 1, 31)),
+                        begrunnelse = "foreldelses begrunnelse",
+                        foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET)))
+        stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto)
+        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.AUTOUTFØRT)
+
+        // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
+        assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId))
+    }
+
 
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i varselssteg`() {
