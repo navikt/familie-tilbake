@@ -56,7 +56,6 @@ object VilkårsvurderingMapper {
                     )
                 }
 
-        //ikke behandlet perioder
         val ikkeBehandletPerioder = perioder.map {
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(it),
@@ -68,7 +67,6 @@ object VilkårsvurderingMapper {
             )
         }
 
-        // foreldet perioder
         val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(periode),
@@ -81,7 +79,6 @@ object VilkårsvurderingMapper {
             )
         }
 
-        // samlet alle perioder
         val samletPerioder = ikkeBehandletPerioder.toMutableList()
         samletPerioder.addAll(foreldetPerioder)
         vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
