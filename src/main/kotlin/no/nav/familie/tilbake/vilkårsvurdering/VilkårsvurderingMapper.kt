@@ -51,7 +51,8 @@ object VilkårsvurderingMapper {
                     foreldet = false,
                     vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it)
             )
-        } ?: perioder.map { //Når perioder er ikke behandlet
+        }
+        val ikkeBehandletPerioder = perioder.map { //Når perioder er ikke behandlet
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(it),
                     feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
@@ -62,7 +63,7 @@ object VilkårsvurderingMapper {
             )
         }
 
-        val samletPerioder = foreldetPerioderMedBegrunnelse.map { (periode,begrunnelse) ->
+        val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
                     periode = PeriodeDto(periode),
                     feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
@@ -72,8 +73,12 @@ object VilkårsvurderingMapper {
                     foreldet = true,
                     begrunnelse = begrunnelse
             )
-        }.plus(vilkårsvurdertePerioder)
-        return VurdertVilkårsvurderingDto(perioder = samletPerioder,
+        }
+        val samletPerioder = ikkeBehandletPerioder.toMutableList()
+        samletPerioder.addAll(foreldetPerioder)
+        vilkårsvurdertePerioder?.let { samletPerioder.addAll(it) }
+
+        return VurdertVilkårsvurderingDto(perioder = samletPerioder.sortedBy { it.periode.fom },
                                           rettsgebyr = Constants.rettsgebyr)
     }
 
@@ -127,7 +132,7 @@ object VilkårsvurderingMapper {
                                        særligeGrunnerTilReduksjon = vilkårsvurderingAktsomhet.særligeGrunnerTilReduksjon,
                                        særligeGrunnerBegrunnelse = vilkårsvurderingAktsomhet.særligeGrunnerBegrunnelse,
                                        særligeGrunner = tilSærligGrunnerDto(vilkårsvurderingAktsomhet
-                                                                                   .vilkårsvurderingSærligeGrunner),
+                                                                                    .vilkårsvurderingSærligeGrunner),
                                        tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp
             )
         }

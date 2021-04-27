@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -33,10 +34,13 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
         if (vurdertForeldelse == null) {
             // fakta perioder
-            faktaOmFeilutbetaling.perioder.forEach { perioder.add(it.periode) }
+            faktaOmFeilutbetaling.perioder
+                    .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
+                    .forEach { perioder.add(it.periode) }
         } else {
             // Ikke foreldet perioder
             vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }
+                    .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
                     .forEach { perioder.add(it.periode) }
             // foreldet perioder
             vurdertForeldelse.foreldelsesperioder.filter { it.erForeldet() }
@@ -71,5 +75,9 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.copy(aktiv = false)?.let {
             vilkårsvurderingRepository.update(it)
         }
+    }
+
+    private fun erPeriodeAlleredeVurdert(vilkårsvurdering: Vilkårsvurdering?, periode: Periode): Boolean {
+        return vilkårsvurdering?.perioder?.any { it.periode == periode } == true
     }
 }

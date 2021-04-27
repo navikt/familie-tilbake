@@ -165,17 +165,17 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("foreldelse begrunnelse 1", foreldetPeriode.begrunnelse)
         assertNull(foreldetPeriode.vilkårsvurderingsresultatInfo)
 
-        val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
+        val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
-        assertFalse { vurdertPeriode.foreldet }
-        assertEquals(BigDecimal("10000"), vurdertPeriode.feilutbetaltBeløp)
-        assertEquals(BigDecimal(10000), vurdertPeriode.aktiviteter[0].beløp)
-        assertTrue { vurdertPeriode.reduserteBeløper.isEmpty() }
-        assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertNull(vurdertPeriode.begrunnelse)
-        assertNull(vurdertPeriode.vilkårsvurderingsresultatInfo)
+                                LocalDate.of(2020, 2, 29)), ikkeForeldetPeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, ikkeForeldetPeriode.hendelsestype)
+        assertFalse { ikkeForeldetPeriode.foreldet }
+        assertEquals(BigDecimal("10000"), ikkeForeldetPeriode.feilutbetaltBeløp)
+        assertEquals(BigDecimal(10000), ikkeForeldetPeriode.aktiviteter[0].beløp)
+        assertTrue { ikkeForeldetPeriode.reduserteBeløper.isEmpty() }
+        assertAktiviteter(ikkeForeldetPeriode.aktiviteter)
+        assertNull(ikkeForeldetPeriode.begrunnelse)
+        assertNull(ikkeForeldetPeriode.vilkårsvurderingsresultatInfo)
     }
 
     @Test
