@@ -295,12 +295,11 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                ?: error("Det er ingen vurderinger utført på behandling $behandlingId. Vedtaksbrev kan ikke genereres")
     }
 
-    private fun finnVarsletDato(behandlingId: UUID): LocalDate {
+    private fun finnVarsletDato(behandlingId: UUID): LocalDate? {
         val varselbrevData = brevSporingRepository
                 .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.VARSEL)
 
         return varselbrevData?.sporbar?.opprettetTid?.toLocalDate()
-               ?: error("Det finnes ikke varsel for behandling med id $behandlingId")
     }
 
     private fun finnVarsletBeløp(behandling: Behandling): BigDecimal? {
