@@ -31,6 +31,8 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         if (harAllePerioderForeldet(behandlingId)) {
+            // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
+            vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
