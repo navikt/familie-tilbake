@@ -69,6 +69,7 @@ class AvsnittUtilTest {
                                                                                      BigDecimal(23002),
                                                                                      BigDecimal(23002),
                                                                                      BigDecimal.ZERO),
+                                                     fritekstoppsummering = "Her finner du friteksten til oppsummeringen",
                                                      hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                                                      varsel = HbVarsel(varsletBeløp = BigDecimal(33001),
                                                                        varsletDato = LocalDate.of(2020, 4, 4)),
@@ -108,12 +109,16 @@ class AvsnittUtilTest {
         assertThat(resultat).hasSize(4)
         assertThat(resultat[0].avsnittstype).isEqualTo(Avsnittstype.OPPSUMMERING)
         assertThat(resultat[0].underavsnittsliste).hasSize(1)
+        assertThat(resultat[0].underavsnittsliste[0].fritekstTillatt).isTrue()
         assertThat(resultat[1].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
-        assertThat(resultat[1].underavsnittsliste).hasSize(2)
+        assertThat(resultat[1].underavsnittsliste).hasSize(3)
+        resultat[1].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isTrue() }
         assertThat(resultat[2].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
         assertThat(resultat[2].underavsnittsliste).hasSize(3)
+        resultat[2].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isTrue() }
         assertThat(resultat[3].avsnittstype).isEqualTo(Avsnittstype.TILLEGGSINFORMASJON)
         assertThat(resultat[3].underavsnittsliste).hasSize(6)
+        resultat[3].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isFalse() }
     }
 
 

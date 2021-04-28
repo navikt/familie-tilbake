@@ -35,6 +35,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
 import java.time.LocalDate
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
@@ -102,7 +103,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         vilkårsvurderingRepository.insert(Testdata.vilkår.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
-        brevSporingRepository.insert(Testdata.brevsporing)
+//        brevSporingRepository.insert(Testdata.brevsporing)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
@@ -139,9 +140,15 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                                       "Dette er en stor og gild oppsummeringstekst",
                                                       listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
                                                                                            LocalDate.now()),
-                                                                                faktaAvsnitt = "fakta")))
+                                                                                faktaAvsnitt = "Friktekst om fakta",
+                                                                                foreldelseAvsnitt = "Friktekst om foreldelse",
+                                                                                vilkårAvsnitt = "Friktekst om vilkår",
+                                                                                særligeGrunnerAvsnitt = "Friktekst om særligeGrunner",
+                                                                                særligeGrunnerAnnetAvsnitt = "Friktekst om særligeGrunnerAnnet")))
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+        val file = File("Test.pdf")
+        file.writeBytes(bytes)
 
         PdfaValidator.validatePdf(bytes)
     }
