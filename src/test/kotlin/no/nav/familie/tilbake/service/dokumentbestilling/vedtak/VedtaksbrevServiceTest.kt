@@ -7,6 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -14,7 +15,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
@@ -137,8 +137,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf`() {
         val dto = HentForhåndvisningVedtaksbrevPdfDto(Testdata.behandling.id,
                                                       "Dette er en stor og gild oppsummeringstekst",
-                                                      listOf(PeriodeMedTekstDto(Periode(LocalDate.now().minusDays(1),
-                                                                                        LocalDate.now()),
+                                                      listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
+                                                                                           LocalDate.now()),
                                                                                 faktaAvsnitt = "fakta")))
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)

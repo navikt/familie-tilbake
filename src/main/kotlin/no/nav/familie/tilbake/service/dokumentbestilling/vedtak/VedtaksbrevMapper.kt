@@ -18,7 +18,7 @@ object VedtaksbrevMapper {
         }
 
         return perioderTilMap.entries.map { (periode, avsnittTilTekst) ->
-            PeriodeMedTekstDto(periode = periode,
+            PeriodeMedTekstDto(periode = periode.toDto(),
                                faktaAvsnitt = avsnittTilTekst[Friteksttype.FAKTA],
                                foreldelseAvsnitt = avsnittTilTekst[Friteksttype.FORELDELSE],
                                vilkårAvsnitt = avsnittTilTekst[Friteksttype.VILKÅR],

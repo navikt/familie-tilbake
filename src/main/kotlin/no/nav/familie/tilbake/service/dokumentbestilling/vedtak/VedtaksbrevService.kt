@@ -343,7 +343,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                    foreldelse: VurdertForeldelse?,
                                    perioderFritekst: List<PeriodeMedTekstDto>): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { it.periode == periode }
+        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode.fom, it.periode.tom) == periode }
         return HbVedtaksbrevsperiode(periode = Handlebarsperiode(periode),
                                      kravgrunnlag = utledKravgrunnlag(resultatPeriode),
                                      fakta = utledFakta(periode, fakta, fritekster),

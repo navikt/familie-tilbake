@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.common
 
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -37,6 +38,11 @@ data class Periode(val fom: YearMonth,
 
     fun lengdeIMåneder(): Long {
         return (tom.year * 12 + tom.monthValue) - (fom.year * 12 + fom.monthValue) + 1L
+    }
+
+    fun toDto(): PeriodeDto {
+        return PeriodeDto(LocalDate.of(this.fom.year, this.fom.month, 1),
+                          LocalDate.of(this.tom.year, this.tom.month, this.tom.lengthOfMonth()))
     }
 
     companion object {
