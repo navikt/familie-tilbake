@@ -1,6 +1,7 @@
-package no.nav.familie.tilbake.domain.tbd
+package no.nav.familie.tilbake.totrinn.domain
 
 import no.nav.familie.tilbake.common.repository.Sporbar
+import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded

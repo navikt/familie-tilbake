@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåvedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
@@ -27,6 +28,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.totrinn.TotrinnsresultatsgrunnlagRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
@@ -58,6 +60,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var totrinnsresultatsgrunnlagRepository: TotrinnsresultatsgrunnlagRepository
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -275,17 +280,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
-        // behandler vilkårsvurderingssteg
-        val behandlingsstegVilkårsvurderingDto = BehandlingsstegVilkårsvurderingDto(
-                vilkårsvurderingsperioder = listOf(VilkårsvurderingsperiodeDto(
-                        periode = PeriodeDto(LocalDate.of(2010, 1, 1),
-                                             LocalDate.of(2010, 1, 31)),
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Vilkårsvurdering begrunnelse",
-                        godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
-                                              beløpErIBehold = false)
-                ))
-        )
+        // behandle vilkårsvurderingssteg
+        val behandlingsstegVilkårsvurderingDto = lagBehandlingsstegVilkårsvurderingDto(
+                PeriodeDto(LocalDate.of(2010, 1, 1),
+                           LocalDate.of(2010, 1, 31)))
         stegService.håndterSteg(behandlingId, behandlingsstegVilkårsvurderingDto)
         behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -305,6 +303,35 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
         assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId))
+    }
+
+    @Test
+    fun `håndterSteg skal utføre foreslå vedtak og forsette til fatte vedtak`() {
+        // behandle fakta steg
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
+
+        // behandle vilkårsvurderingssteg
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(
+                PeriodeDto(LocalDate.of(2021, 1, 1),
+                           LocalDate.of(2021, 1, 31))))
+
+        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåvedtaksstegDto())
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+        assertFaktadata(behandlingsstegFaktaDto)
+
+        val totrinnsresultatsgrunnlag = totrinnsresultatsgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        assertNotNull(totrinnsresultatsgrunnlag)
+        assertNotNull(totrinnsresultatsgrunnlag.faktaFeilutbetalingId)
+        assertNotNull(totrinnsresultatsgrunnlag.vilkårsvurderingId)
+        assertNull(totrinnsresultatsgrunnlag.vurdertForeldelseId)
     }
 
 
@@ -393,6 +420,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
                                        begrunnelse = "testverdi")
+    }
+
+    private fun lagBehandlingsstegVilkårsvurderingDto(periode: PeriodeDto): BehandlingsstegVilkårsvurderingDto {
+        return BehandlingsstegVilkårsvurderingDto(
+                vilkårsvurderingsperioder = listOf(VilkårsvurderingsperiodeDto(
+                        periode = periode,
+                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                        begrunnelse = "Vilkårsvurdering begrunnelse",
+                        godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
+                                              beløpErIBehold = false)
+                ))
+        )
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,

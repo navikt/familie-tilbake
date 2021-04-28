@@ -45,7 +45,7 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
     fun `update med gyldige verdier skal oppdatere en forekomst av Vedtaksbrevsoppsummering i basen`() {
         vedtaksbrevsoppsummeringRepository.insert(vedtaksbrevsoppsummering)
         var lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        val oppdatertVedtaksbrevsoppsummering = lagretVedtaksbrevsoppsummering.copy(fritekst = "bob")
+        val oppdatertVedtaksbrevsoppsummering = lagretVedtaksbrevsoppsummering.copy(oppsummeringFritekst = "bob")
 
         vedtaksbrevsoppsummeringRepository.update(oppdatertVedtaksbrevsoppsummering)
 

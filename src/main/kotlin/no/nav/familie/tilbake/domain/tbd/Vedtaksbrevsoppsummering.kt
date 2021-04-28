@@ -10,7 +10,6 @@ data class Vedtaksbrevsoppsummering(@Id
                                     val id: UUID = UUID.randomUUID(),
                                     val behandlingId: UUID,
                                     val oppsummeringFritekst: String?,
-                                    val fritekst: String?,
                                     @Version
                                     val versjon: Long = 0,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
