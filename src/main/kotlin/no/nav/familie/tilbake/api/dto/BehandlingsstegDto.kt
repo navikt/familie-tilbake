@@ -118,6 +118,6 @@ data class BehandlingsstegForeslåvedtaksstegDto(val fritekstAvsnitt: FritekstAv
 
 data class FritekstAvsnittDto(@Size(max = 10000, message = "Oppsummeringstekst er for lang")
                               var oppsummeringstekst: String? = null,
-                              @Size(max = 50, message = "For mange perioder")
+                              @Size(max = 100, message = "For mange perioder")
                               @Valid
                               var perioderMedTekst: List<PeriodeMedTekstDto>)

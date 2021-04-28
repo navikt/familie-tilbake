@@ -7,7 +7,7 @@ import javax.validation.constraints.Size
 class HentForhåndvisningVedtaksbrevPdfDto(var behandlingId: UUID,
                                           @Size(max = 10000, message = "Oppsummeringstekst er for lang")
                                           var oppsummeringstekst: String? = null,
-                                          @Size(max = 50, message = "For mange perioder") @Valid
+                                          @Size(max = 100, message = "For mange perioder") @Valid
                                           var perioderMedTekst: List<PeriodeMedTekstDto>)
 
 
