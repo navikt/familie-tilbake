@@ -28,13 +28,21 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
 
     @Transactional
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
-        logger.info("Behandling $behandlingId er på ${Behandlingssteg.VILKÅRSVURDERING} steg")
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåvedtaksstegDto
         foreslåvedtaksstegDto.fritekstAvsnitt?.let {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId,
                                                                foreslåvedtaksstegDto.fritekstAvsnitt)
         }
         flyttBehandlingTilVidere(behandlingId)
+    }
+
+    @Transactional
+    override fun gjenopptaSteg(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
+                                                                                      Behandlingsstegstatus.KLAR))
     }
 
     private fun flyttBehandlingTilVidere(behandlingId: UUID) {
