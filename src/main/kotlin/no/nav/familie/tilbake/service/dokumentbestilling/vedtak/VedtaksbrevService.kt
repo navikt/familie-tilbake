@@ -40,7 +40,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevServi
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
-import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbPerson
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbTotalresultat
@@ -181,13 +180,13 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vedtaksbrevType = behandling.utledVedtaksbrevType()
         val hbVedtaksResultatBeløp = HbVedtaksResultatBeløp(resulatPerioder)
         val effektForBruker: VedtakHjemmel.EffektForBruker = utledEffektForBruker(behandling, hbVedtaksResultatBeløp)
-        val hjemmelstekst = VedtakHjemmel.lagHjemmelstekst(vedtakResultatType,
-                                                           foreldelse,
-                                                           vilkårPerioder,
-                                                           effektForBruker,
-                                                           fagsak.ytelsestype,
-                                                           brevmetadata.språkkode,
-                                                           visHjemmelForRenter = true) // sannsynligvis hjemmel
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(vedtakResultatType,
+                                                 foreldelse,
+                                                 vilkårPerioder,
+                                                 effektForBruker,
+                                                 fagsak.ytelsestype,
+                                                 brevmetadata.språkkode,
+                                                 visHjemmelForRenter = true) // sannsynligvis hjemmel
         val perioder: List<HbVedtaksbrevsperiode> = lagHbVedtaksbrevPerioder(behandling.id,
                                                                              perioderFritekst,
                                                                              resulatPerioder,
@@ -209,7 +208,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                     totaltFeilutbetaltBeløp = hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp,
                                     fritekstoppsummering = oppsummeringFritekst,
                                     vedtaksbrevstype = vedtaksbrevType,
-                                    hjemmel = HbHjemmel(hjemmelstekst),
+                                    hjemmel = hbHjemmel,
                                     totalresultat = hbTotalresultat,
                                     konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
                                     datoer = HbVedtaksbrevDatoer(perioder),
