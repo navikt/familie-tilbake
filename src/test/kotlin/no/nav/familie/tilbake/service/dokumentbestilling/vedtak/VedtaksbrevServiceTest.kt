@@ -190,6 +190,26 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når en av de periodene er ugyldig`() {
+        lagFakta()
+        val perioderMedTekst = listOf(
+                PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                                   faktaAvsnitt = "fakta fritekst",
+                                   vilkårAvsnitt = "vilkår fritekst"),
+                PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 10), YearMonth.of(2021, 10)),
+                                   faktaAvsnitt = "ugyldig",
+                                   vilkårAvsnitt = "ugyldig"))
+        val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
+                                                    perioderMedTekst = perioderMedTekst)
+
+        val exception = assertFailsWith<RuntimeException> {
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
+                                                               fritekstAvsnittDto)
+        }
+        assertEquals("Periode 2021-10-01-2021-10-31 er ugyldig for behandling ${behandling.id}", exception.message)
+    }
+
+    @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når oppsummeringstekst er for lang`() {
         lagFakta()
         val exception = assertFailsWith<RuntimeException> {
@@ -202,6 +222,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
+        lagFakta()
         lagVilkårsvurdering()
         val exception = assertFailsWith<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,

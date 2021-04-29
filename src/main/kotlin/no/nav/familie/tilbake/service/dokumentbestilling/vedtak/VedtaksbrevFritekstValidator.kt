@@ -27,6 +27,8 @@ object VedtaksbrevFritekstValidator {
                                        avsnittMedPerioder: List<PeriodeMedTekstDto>,
                                        vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
                                        vedtaksbrevstype: Vedtaksbrevstype) {
+
+        validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
         vilkårsvurdering?.let {
             validerFritekstISærligGrunnerAnnetAvsnitt(it,
                                                       vedtaksbrevFritekstPerioder)
@@ -37,6 +39,19 @@ object VedtaksbrevFritekstValidator {
         }
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)
         validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering)
+    }
+
+    private fun validerPerioder(behandling: Behandling,
+                                avsnittMedPerioder: List<PeriodeMedTekstDto>,
+                                faktaFeilutbetaling: FaktaFeilutbetaling) {
+        avsnittMedPerioder.forEach {
+            if (!faktaFeilutbetaling.perioder.any { faktaPeriode -> faktaPeriode.periode.omslutter(Periode(it.periode)) }) {
+                throw Feil(message = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig for behandling ${behandling.id}",
+                           frontendFeilmelding = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
+                                                 "for behandling ${behandling.id}",
+                           httpStatus = HttpStatus.BAD_REQUEST)
+            }
+        }
     }
 
     private fun validerNårOppsummeringsfritekstErPåkrevd(behandling: Behandling,
