@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.api.dto.AktivitetDto
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.GodTroDto

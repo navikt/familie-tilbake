@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository

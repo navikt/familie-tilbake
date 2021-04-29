@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository

@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.tilbake.api.dto.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.HenleggelsesbrevService

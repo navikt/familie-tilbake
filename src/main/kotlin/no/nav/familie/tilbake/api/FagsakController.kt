@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
 import no.nav.familie.tilbake.behandling.FagsakService

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 // Denne enum-en brukes kun for tilgangskontroll
