@@ -30,10 +30,7 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåvedtaksstegDto
-        foreslåvedtaksstegDto.fritekstAvsnitt?.let {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId,
-                                                               foreslåvedtaksstegDto.fritekstAvsnitt)
-        }
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstAvsnitt)
         flyttBehandlingTilVidere(behandlingId)
     }
 

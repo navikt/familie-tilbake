@@ -104,7 +104,7 @@ data class SærligGrunnDto(val særligGrunn: SærligGrunn,
                           val begrunnelse: String? = null)
 
 @JsonTypeName(BehandlingsstegForeslåvedtaksstegDto.STEG_NAVN)
-data class BehandlingsstegForeslåvedtaksstegDto(val fritekstAvsnitt: FritekstAvsnittDto? = null) : BehandlingsstegDto() {
+data class BehandlingsstegForeslåvedtaksstegDto(val fritekstAvsnitt: FritekstAvsnittDto) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
         return STEG_NAVN

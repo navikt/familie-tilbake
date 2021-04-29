@@ -7,8 +7,10 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåvedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
+import no.nav.familie.tilbake.api.dto.FritekstAvsnittDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
+import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -318,7 +320,14 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 PeriodeDto(LocalDate.of(2021, 1, 1),
                            LocalDate.of(2021, 1, 31))))
 
-        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåvedtaksstegDto())
+        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåvedtaksstegDto(
+                fritekstAvsnitt = FritekstAvsnittDto(
+                        perioderMedTekst = listOf(PeriodeMedTekstDto(
+                                periode = PeriodeDto(LocalDate.of(2021, 1, 1),
+                                                     LocalDate.of(2021, 1, 31)),
+                                faktaAvsnitt = "fakta tekst"
+                        ))
+                )))
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
