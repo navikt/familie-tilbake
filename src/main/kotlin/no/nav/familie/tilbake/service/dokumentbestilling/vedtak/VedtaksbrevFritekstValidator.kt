@@ -102,14 +102,14 @@ object VedtaksbrevFritekstValidator {
             it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
             it.aktsomhet.vilkårsvurderingSærligeGrunner
                     .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
-        }.forEach { vilkårsvurderingsperiode ->
+        }.forEach {
             val perioder = finnFritekstPerioder(vedtaksbrevFritekstPerioder,
-                                                vilkårsvurderingsperiode.periode,
+                                                it.periode,
                                                 Friteksttype.SÆRLIGE_GRUNNER_ANNET)
 
             if (perioder.isEmpty()) {
-                throw Feil(message = "Mangler ANNET Særliggrunner fritekst for ${vilkårsvurderingsperiode.periode}",
-                           frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${vilkårsvurderingsperiode.periode} ",
+                throw Feil(message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
+                           frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
                            httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
