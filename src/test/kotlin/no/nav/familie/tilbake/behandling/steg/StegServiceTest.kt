@@ -3,11 +3,11 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåvedtaksstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
-import no.nav.familie.tilbake.api.dto.FritekstAvsnittDto
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -320,8 +320,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 PeriodeDto(LocalDate.of(2021, 1, 1),
                            LocalDate.of(2021, 1, 31))))
 
-        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåvedtaksstegDto(
-                fritekstAvsnitt = FritekstAvsnittDto(
+        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(
+                fritekstavsnitt = FritekstavsnittDto(
                         perioderMedTekst = listOf(PeriodeMedTekstDto(
                                 periode = PeriodeDto(LocalDate.of(2021, 1, 1),
                                                      LocalDate.of(2021, 1, 31)),

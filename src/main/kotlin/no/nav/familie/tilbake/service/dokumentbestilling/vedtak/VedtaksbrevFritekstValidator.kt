@@ -28,7 +28,7 @@ object VedtaksbrevFritekstValidator {
                                        vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
                                        vedtaksbrevstype: Vedtaksbrevstype) {
         vilkårsvurdering?.let {
-            validerFritekstISærligGrunnerAnnetAvsnitt(vilkårsvurdering,
+            validerFritekstISærligGrunnerAnnetAvsnitt(it,
                                                       vedtaksbrevFritekstPerioder)
         }
 
@@ -62,7 +62,7 @@ object VedtaksbrevFritekstValidator {
             else -> 10000
         }
         if (vedtaksbrevsoppsummering.oppsummeringFritekst != null &&
-            vedtaksbrevsoppsummering.oppsummeringFritekst.length >= maksTekstLengde) {
+            vedtaksbrevsoppsummering.oppsummeringFritekst.length > maksTekstLengde) {
             throw Feil(message = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
                        frontendFeilmelding = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
                        httpStatus = HttpStatus.BAD_REQUEST)

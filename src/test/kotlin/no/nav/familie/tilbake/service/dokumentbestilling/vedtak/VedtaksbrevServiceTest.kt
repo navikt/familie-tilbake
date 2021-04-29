@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.api.dto.FritekstAvsnittDto
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -52,7 +52,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
-import java.io.File
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.test.assertEquals
@@ -165,19 +164,18 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf`() {
-        val dto = HentForhåndvisningVedtaksbrevPdfDto(Testdata.behandling.id,
-                                                      "Dette er en stor og gild oppsummeringstekst",
-                                                      listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
-                                                                                           LocalDate.now()),
-                                                                                faktaAvsnitt = "Friktekst om fakta",
-                                                                                foreldelseAvsnitt = "Friktekst om foreldelse",
-                                                                                vilkårAvsnitt = "Friktekst om vilkår",
-                                                                                særligeGrunnerAvsnitt = "Friktekst om særligeGrunner",
-                                                                                særligeGrunnerAnnetAvsnitt = "Friktekst om særligeGrunnerAnnet")))
+        val dto = HentForhåndvisningVedtaksbrevPdfDto(
+                Testdata.behandling.id,
+                "Dette er en stor og gild oppsummeringstekst",
+                listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
+                                                     LocalDate.now()),
+                                          faktaAvsnitt = "Friktekst om fakta",
+                                          foreldelseAvsnitt = "Friktekst om foreldelse",
+                                          vilkårAvsnitt = "Friktekst om vilkår",
+                                          særligeGrunnerAvsnitt = "Friktekst om særligeGrunner",
+                                          særligeGrunnerAnnetAvsnitt = "Friktekst om særligeGrunnerAnnet")))
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
-        val file = File("Test.pdf")
-        file.writeBytes(bytes)
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -236,13 +234,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
                                    vilkårAvsnitt = "vilkår fritekst")
         )
-        val fritekstAvsnittDto = FritekstAvsnittDto(oppsummeringstekst = "oppsummeringstekst",
+        val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
                                                     perioderMedTekst = perioderMedTekst)
 
         val exception = assertFailsWith<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(
                     behandlingId = behandling.id,
-                    fritekstAvsnittDto = fritekstAvsnittDto
+                    fritekstavsnittDto = fritekstAvsnittDto
             )
         }
         assertEquals("Mangler fakta fritekst for ${LocalDate.of(2021, 3, 1)}-" +
@@ -261,22 +259,22 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         assertDoesNotThrow {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(
                     behandlingId = behandling.id,
-                    fritekstAvsnittDto = fritekstAvsnittDto
+                    fritekstavsnittDto = fritekstAvsnittDto
             )
         }
 
-        val avsnitter = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
-        assertTrue { avsnitter.isNotEmpty() }
-        assertEquals(3, avsnitter.size)
+        val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
+        assertTrue { avsnittene.isNotEmpty() }
+        assertEquals(3, avsnittene.size)
 
-        val oppsummeringsavsnitt = avsnitter.firstOrNull { Avsnittstype.OPPSUMMERING == it.avsnittstype }
+        val oppsummeringsavsnitt = avsnittene.firstOrNull { Avsnittstype.OPPSUMMERING == it.avsnittstype }
         assertNotNull(oppsummeringsavsnitt)
         assertEquals(1, oppsummeringsavsnitt.underavsnittsliste.size)
         val oppsummeringsunderavsnitt = oppsummeringsavsnitt.underavsnittsliste[0]
         assertUnderavsnitt(underavsnitt = oppsummeringsunderavsnitt, fritekst = "oppsummering fritekst",
                            fritekstTillatt = true, fritekstPåkrevet = false)
 
-        val periodeAvsnitter = avsnitter.firstOrNull { Avsnittstype.PERIODE == it.avsnittstype }
+        val periodeAvsnitter = avsnittene.firstOrNull { Avsnittstype.PERIODE == it.avsnittstype }
         assertNotNull(periodeAvsnitter)
         assertEquals(LocalDate.of(2021, 1, 1), periodeAvsnitter.fom)
         assertEquals(LocalDate.of(2021, 3, 31), periodeAvsnitter.tom)
@@ -305,13 +303,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                            fritekst = "særliggrunner fritekst\nsærliggrunner annet fritekst",
                            fritekstTillatt = true, fritekstPåkrevet = true)
 
-        val tilleggsavsnitt = avsnitter.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
+        val tilleggsavsnitt = avsnittene.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
         assertNotNull(tilleggsavsnitt)
     }
 
     private fun lagFritekstAvsnittDto(faktaFritekst: String? = null,
                                       oppsummeringstekst: String? = null,
-                                      særligGrunnerAnnetFritekst: String? = null): FritekstAvsnittDto {
+                                      særligGrunnerAnnetFritekst: String? = null): FritekstavsnittDto {
         val perioderMedTekst = listOf(
                 PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                                    faktaAvsnitt = faktaFritekst,
@@ -319,7 +317,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                    foreldelseAvsnitt = "foreldelse fritekst",
                                    særligeGrunnerAvsnitt = "særliggrunner fritekst",
                                    særligeGrunnerAnnetAvsnitt = særligGrunnerAnnetFritekst))
-        return FritekstAvsnittDto(oppsummeringstekst = oppsummeringstekst,
+        return FritekstavsnittDto(oppsummeringstekst = oppsummeringstekst,
                                   perioderMedTekst = perioderMedTekst)
     }
 

@@ -1,7 +1,8 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
+import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -135,12 +136,12 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstAvsnittDto: FritekstAvsnittDto) {
+    fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevType()
-        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstAvsnittDto.oppsummeringstekst)
+        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
         val vedtaksbrevsperioder = VedtaksbrevFritekstMapper
-                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstAvsnittDto.perioderMedTekst)
+                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
 
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -149,7 +150,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                                                     faktaFeilutbetaling = faktaFeilutbetaling,
                                                                     vilkårsvurdering = vilkårsvurdering,
                                                                     vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
-                                                                    avsnittMedPerioder = fritekstAvsnittDto.perioderMedTekst,
+                                                                    avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
                                                                     vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
                                                                     vedtaksbrevstype = vedtaksbrevstype)
         // slett og legge til Vedtaksbrevsoppsummering
@@ -374,7 +375,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                    foreldelse: VurdertForeldelse?,
                                    perioderFritekst: List<PeriodeMedTekstDto>): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode.fom, it.periode.tom) == periode }
+        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode) == periode }
         return HbVedtaksbrevsperiode(periode = Handlebarsperiode(periode),
                                      kravgrunnlag = utledKravgrunnlag(resultatPeriode),
                                      fakta = utledFakta(periode, fakta, fritekster),

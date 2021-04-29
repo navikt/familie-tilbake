@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåvedtaksstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -23,15 +23,15 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
-        flyttBehandlingTilVidere(behandlingId)
+        flyttBehandlingVidere(behandlingId)
     }
 
     @Transactional
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
-        val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåvedtaksstegDto
-        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstAvsnitt)
-        flyttBehandlingTilVidere(behandlingId)
+        val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
+        flyttBehandlingVidere(behandlingId)
     }
 
     @Transactional
@@ -42,7 +42,7 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
                                                                                       Behandlingsstegstatus.KLAR))
     }
 
-    private fun flyttBehandlingTilVidere(behandlingId: UUID) {
+    private fun flyttBehandlingVidere(behandlingId: UUID) {
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
                                                                                       Behandlingsstegstatus.UTFØRT))

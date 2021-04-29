@@ -20,7 +20,7 @@ import javax.validation.constraints.Size
 @JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
               JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
               JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegForeslåvedtaksstegDto::class))
+              JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class))
 abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
@@ -103,8 +103,8 @@ data class AktsomhetDto(val aktsomhet: Aktsomhet,
 data class SærligGrunnDto(val særligGrunn: SærligGrunn,
                           val begrunnelse: String? = null)
 
-@JsonTypeName(BehandlingsstegForeslåvedtaksstegDto.STEG_NAVN)
-data class BehandlingsstegForeslåvedtaksstegDto(val fritekstAvsnitt: FritekstAvsnittDto) : BehandlingsstegDto() {
+@JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEG_NAVN)
+data class BehandlingsstegForeslåVedtaksstegDto(val fritekstavsnitt: FritekstavsnittDto) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
         return STEG_NAVN
@@ -116,7 +116,7 @@ data class BehandlingsstegForeslåvedtaksstegDto(val fritekstAvsnitt: FritekstAv
     }
 }
 
-data class FritekstAvsnittDto(@Size(max = 10000, message = "Oppsummeringstekst er for lang")
+data class FritekstavsnittDto(@Size(max = 10000, message = "Oppsummeringstekst er for lang")
                               var oppsummeringstekst: String? = null,
                               @Size(max = 100, message = "For mange perioder")
                               @Valid

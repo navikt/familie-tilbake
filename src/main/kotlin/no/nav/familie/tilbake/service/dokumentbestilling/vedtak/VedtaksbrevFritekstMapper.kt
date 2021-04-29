@@ -51,60 +51,55 @@ object VedtaksbrevFritekstMapper {
 
 
     private fun lagFaktaAvsnitt(behandlingId: UUID, faktaAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
-        if (faktaAvsnittMedPeriode.faktaAvsnitt != null) {
-            return Vedtaksbrevsperiode(behandlingId = behandlingId,
-                                       periode = Periode(faktaAvsnittMedPeriode.periode),
-                                       fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
-                                       fritekststype = Friteksttype.FAKTA
+        return faktaAvsnittMedPeriode.faktaAvsnitt?.let {
+            Vedtaksbrevsperiode(behandlingId = behandlingId,
+                                periode = Periode(faktaAvsnittMedPeriode.periode),
+                                fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
+                                fritekststype = Friteksttype.FAKTA
             )
         }
-        return null
     }
 
     private fun lagForeldelseAvsnitt(behandlingId: UUID, foreldelsesAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
-        if (foreldelsesAvsnittMedPeriode.foreldelseAvsnitt != null) {
-            return Vedtaksbrevsperiode(behandlingId = behandlingId,
-                                       periode = Periode(foreldelsesAvsnittMedPeriode.periode),
-                                       fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
-                                       fritekststype = Friteksttype.FORELDELSE
+        return foreldelsesAvsnittMedPeriode.foreldelseAvsnitt?.let {
+            Vedtaksbrevsperiode(behandlingId = behandlingId,
+                                periode = Periode(foreldelsesAvsnittMedPeriode.periode),
+                                fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
+                                fritekststype = Friteksttype.FORELDELSE
             )
         }
-        return null
     }
 
     private fun lagVilkårsvurderingAvsnitt(behandlingId: UUID,
                                            vilkårAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
-        if (vilkårAvsnittMedPeriode.vilkårAvsnitt != null) {
-            return Vedtaksbrevsperiode(behandlingId = behandlingId,
-                                       periode = Periode(vilkårAvsnittMedPeriode.periode),
-                                       fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
-                                       fritekststype = Friteksttype.VILKÅR
+        return vilkårAvsnittMedPeriode.vilkårAvsnitt?.let {
+            Vedtaksbrevsperiode(behandlingId = behandlingId,
+                                periode = Periode(vilkårAvsnittMedPeriode.periode),
+                                fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
+                                fritekststype = Friteksttype.VILKÅR
             )
         }
-        return null
     }
 
     private fun lagSærligGrunnerAvsnitt(behandlingId: UUID,
                                         særligGrunnerAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
-        if (særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt != null) {
-            return Vedtaksbrevsperiode(behandlingId = behandlingId,
-                                       periode = Periode(særligGrunnerAvsnittMedPeriode.periode),
-                                       fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
-                                       fritekststype = Friteksttype.SÆRLIGE_GRUNNER
+        return særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt?.let {
+            Vedtaksbrevsperiode(behandlingId = behandlingId,
+                                periode = Periode(særligGrunnerAvsnittMedPeriode.periode),
+                                fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
+                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER
             )
         }
-        return null
     }
 
     private fun lagSærligGrunnerAnnetAvsnitt(behandlingId: UUID,
                                              særligGrunnerAnnetAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
-        if (særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt != null) {
-            return Vedtaksbrevsperiode(behandlingId = behandlingId,
-                                       periode = Periode(særligGrunnerAnnetAvsnittMedPeriode.periode),
-                                       fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
-                                       fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET
+        return særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt?.let {
+            Vedtaksbrevsperiode(behandlingId = behandlingId,
+                                periode = Periode(særligGrunnerAnnetAvsnittMedPeriode.periode),
+                                fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
+                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET
             )
         }
-        return null
     }
 }
