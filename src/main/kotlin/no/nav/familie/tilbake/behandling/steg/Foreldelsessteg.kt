@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +20,9 @@ import java.util.UUID
 @Service
 class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
                       val behandlingskontrollService: BehandlingskontrollService,
-                      val foreldelseService: ForeldelseService) : IBehandlingssteg {
+                      val foreldelseService: ForeldelseService,
+                      @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
+                      val foreldelseAntallMåned: Long) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -54,7 +57,7 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return kravgrunnlag.perioder.any { it.periode.fom.atDay(1) < LocalDate.now().minusMonths(FORELDELSE_ANTALL_MÅNED) }
+        return kravgrunnlag.perioder.any { it.periode.fom.atDay(1) < LocalDate.now().minusMonths(foreldelseAntallMåned) }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -66,8 +69,4 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
         foreldelseService.deaktiverEksisterendeVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
 
-    companion object {
-
-        const val FORELDELSE_ANTALL_MÅNED = 30L
-    }
 }
