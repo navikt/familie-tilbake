@@ -28,8 +28,6 @@ import no.nav.familie.tilbake.domain.tbd.Friteksttype
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
-import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
-import no.nav.familie.tilbake.domain.tbd.Totrinnsvurdering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
@@ -54,6 +52,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.totrinn.domain.Totrinnsresultatsgrunnlag
+import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -268,8 +268,7 @@ object Testdata {
                                                               vilkårsvurderingId = vilkår.id)
 
     val vedtaksbrevsoppsummering = Vedtaksbrevsoppsummering(behandlingId = behandling.id,
-                                                            oppsummeringFritekst = "testverdi",
-                                                            fritekst = "testverdi")
+                                                            oppsummeringFritekst = "testverdi")
 
     val vedtaksbrevsperiode = Vedtaksbrevsperiode(behandlingId = behandling.id,
                                                   periode = Periode(LocalDate.now(), LocalDate.now()),

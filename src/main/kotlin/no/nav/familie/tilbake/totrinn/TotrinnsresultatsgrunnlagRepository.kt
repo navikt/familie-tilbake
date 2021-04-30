@@ -1,13 +1,14 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.totrinn
 
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.familie.tilbake.domain.tbd.Totrinnsresultatsgrunnlag
+import no.nav.familie.tilbake.totrinn.domain.Totrinnsresultatsgrunnlag
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Repository
-@Transactional
 interface TotrinnsresultatsgrunnlagRepository : RepositoryInterface<Totrinnsresultatsgrunnlag, UUID>,
-                                                InsertUpdateRepository<Totrinnsresultatsgrunnlag>
+                                                InsertUpdateRepository<Totrinnsresultatsgrunnlag> {
+
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Totrinnsresultatsgrunnlag?
+}

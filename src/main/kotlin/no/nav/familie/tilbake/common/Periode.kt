@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.common
 
+import no.nav.familie.tilbake.api.dto.PeriodeDto
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -7,6 +8,8 @@ data class Periode(val fom: YearMonth,
                    val tom: YearMonth) : Comparable<Periode> {
 
     constructor(fom: LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
+
+    constructor(periodeDto: PeriodeDto): this(periodeDto.fom, periodeDto.tom)
 
     init {
         require(tom >= fom) { "Til-og-med-måned før fra-og-med-måned: $fom > $tom" }

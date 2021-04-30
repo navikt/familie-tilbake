@@ -76,13 +76,13 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf (dto))
     }
 
-    @GetMapping("/forhandsvis-vedtaksbrevtekst/{behandlingId}",
+    @GetMapping("/vedtaksbrevtekst/{behandlingId}",
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Forhåndsviser brev",
                         henteParam = "behandlingId")
-    fun hentForhåndsvisningVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
-        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevSomTekst (behandlingId))
+    fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
+        return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst (behandlingId))
     }
 
 }

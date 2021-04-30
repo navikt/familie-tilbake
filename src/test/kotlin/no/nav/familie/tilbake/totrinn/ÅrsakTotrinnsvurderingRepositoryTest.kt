@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.totrinn
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.domain.tbd.Årsakstype
+import no.nav.familie.tilbake.repository.tbd.ÅrsakTotrinnsvurderingRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

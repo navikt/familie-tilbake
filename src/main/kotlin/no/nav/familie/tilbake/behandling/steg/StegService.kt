@@ -49,7 +49,8 @@ class StegService(val steg: List<IBehandlingssteg>,
                                             Behandlingssteg.FAKTA,
                                             Behandlingssteg.FORELDELSE,
                                             Behandlingssteg.VILKÅRSVURDERING,
-                                            Behandlingssteg.FORESLÅ_VEDTAK)) {
+                                            Behandlingssteg.FORESLÅ_VEDTAK,
+                                            Behandlingssteg.FATTE_VEDTAK)) {
             throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")
         }
 

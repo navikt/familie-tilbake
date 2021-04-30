@@ -12,12 +12,15 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import java.math.BigDecimal
 import java.time.LocalDate
+import javax.validation.Valid
+import javax.validation.constraints.Size
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
               JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class))
+              JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class))
 abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
@@ -99,3 +102,22 @@ data class AktsomhetDto(val aktsomhet: Aktsomhet,
 
 data class SærligGrunnDto(val særligGrunn: SærligGrunn,
                           val begrunnelse: String? = null)
+
+@JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEG_NAVN)
+data class BehandlingsstegForeslåVedtaksstegDto(val fritekstavsnitt: FritekstavsnittDto) : BehandlingsstegDto() {
+
+    override fun getSteg(): String {
+        return STEG_NAVN
+    }
+
+    companion object {
+
+        const val STEG_NAVN = "FORESLÅ_VEDTAK"
+    }
+}
+
+data class FritekstavsnittDto(@Size(max = 10000, message = "Oppsummeringstekst er for lang")
+                              var oppsummeringstekst: String? = null,
+                              @Size(max = 100, message = "For mange perioder")
+                              @Valid
+                              var perioderMedTekst: List<PeriodeMedTekstDto>)

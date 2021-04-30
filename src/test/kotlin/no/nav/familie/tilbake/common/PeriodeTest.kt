@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.common
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
+import kotlin.test.assertTrue
 
 internal class PeriodeTest {
 
@@ -35,5 +36,12 @@ internal class PeriodeTest {
         assertThat(snitt1til2).isEqualTo(Periode(YearMonth.of(2019, 3), YearMonth.of(2019, 5)))
     }
 
+    @Test
+    fun `omslutter returnerer true for periode med overlap`(){
+        val periode1 = Periode(YearMonth.of(2019,1), YearMonth.of(2019,3))
+        val periode2 = Periode(YearMonth.of(2019,1), YearMonth.of(2019,1))
+
+        assertTrue { periode1.omslutter(periode2) }
+    }
 
 }
