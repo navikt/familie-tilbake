@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.service.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -61,6 +62,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligG
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -123,13 +125,44 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         return pdfBrevService.genererForhåndsvisning(brevData)
     }
 
-    fun hentForhåndsvisningVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
+    fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksbrevData = hentDataForVedtaksbrev(behandling, fagsak, getBrevmottager(behandling))
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
+    }
+
+    @Transactional
+    fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val vedtaksbrevstype = behandling.utledVedtaksbrevType()
+        val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
+        val vedtaksbrevsperioder = VedtaksbrevFritekstMapper
+                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
+
+        // Valider om obligatoriske fritekster er satt
+        val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(behandling = behandling,
+                                                                    faktaFeilutbetaling = faktaFeilutbetaling,
+                                                                    vilkårsvurdering = vilkårsvurdering,
+                                                                    vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
+                                                                    avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
+                                                                    vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
+                                                                    vedtaksbrevstype = vedtaksbrevstype)
+        // slett og legge til Vedtaksbrevsoppsummering
+        val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+        if (eksisterendeVedtaksbrevsoppsummering != null) {
+            vedtaksbrevsoppsummeringRepository.delete(eksisterendeVedtaksbrevsoppsummering)
+        }
+        vedtaksbrevsoppsummeringRepository.insert(vedtaksbrevsoppsummering)
+
+        // slett og legge til Vedtaksbrevsperiode
+        val eksisterendeVedtaksbrevperioder = vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId)
+        eksisterendeVedtaksbrevperioder.forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
+        vedtaksbrevsperioder.forEach { vedtaksbrevsperiodeRepository.insert(it) }
     }
 
     private fun getBrevmottager(behandlingId: Behandling): Brevmottager {
@@ -341,7 +374,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                    foreldelse: VurdertForeldelse?,
                                    perioderFritekst: List<PeriodeMedTekstDto>): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { it.periode == periode }
+        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode) == periode }
         return HbVedtaksbrevsperiode(periode = Handlebarsperiode(periode),
                                      kravgrunnlag = utledKravgrunnlag(resultatPeriode),
                                      fakta = utledFakta(periode, fakta, fritekster),
@@ -434,7 +467,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     private fun hentFriteksterTilPerioder(behandlingId: UUID): List<PeriodeMedTekstDto> {
         val eksisterendePerioderForBrev: List<Vedtaksbrevsperiode> =
                 vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId)
-        return VedtaksbrevMapper.mapFritekstFraDb(eksisterendePerioderForBrev)
+        return VedtaksbrevFritekstMapper.mapFritekstFraDb(eksisterendePerioderForBrev)
     }
 
     private fun hentOppsummeringFritekst(behandlingId: UUID): String? {
