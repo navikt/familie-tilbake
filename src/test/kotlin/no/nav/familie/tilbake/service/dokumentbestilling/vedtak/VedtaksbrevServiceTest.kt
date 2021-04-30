@@ -300,7 +300,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         assertEquals(LocalDate.of(2021, 1, 1), periodeAvsnitter.fom)
         assertEquals(LocalDate.of(2021, 3, 31), periodeAvsnitter.tom)
 
-        assertEquals(3, periodeAvsnitter.underavsnittsliste.size)
+        assertEquals(4, periodeAvsnitter.underavsnittsliste.size)
         val faktaUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
         assertNotNull(faktaUnderavsnitt)
@@ -317,11 +317,18 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         assertUnderavsnitt(underavsnitt = vilkårUnderavsnitt, fritekst = "vilkår fritekst",
                            fritekstTillatt = true, fritekstPåkrevet = false)
 
+        val særligGrunnerUnderavsnitt = periodeAvsnitter.underavsnittsliste
+                .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
+        assertNotNull(særligGrunnerUnderavsnitt)
+        assertUnderavsnitt(underavsnitt = særligGrunnerUnderavsnitt,
+                           fritekst = "særliggrunner fritekst",
+                           fritekstTillatt = true, fritekstPåkrevet = false)
+
         val særligGrunnerAnnetUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
         assertNotNull(særligGrunnerAnnetUnderavsnitt)
         assertUnderavsnitt(underavsnitt = særligGrunnerAnnetUnderavsnitt,
-                           fritekst = "særliggrunner fritekst\nsærliggrunner annet fritekst",
+                           fritekst = "særliggrunner annet fritekst",
                            fritekstTillatt = true, fritekstPåkrevet = true)
 
         val tilleggsavsnitt = avsnittene.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
