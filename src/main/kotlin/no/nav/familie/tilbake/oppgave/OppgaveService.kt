@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -9,7 +11,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -42,14 +43,14 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         val opprettOppgave = OpprettOppgaveRequest(
                 ident = OppgaveIdentV2(ident = fagsak.bruker.ident, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
-                saksId = behandling.eksternBrukId.toString(),
+                saksId = fagsak.eksternFagsakId,
                 tema = fagsak.ytelsestype.tilTema(),
                 oppgavetype = oppgavetype,
                 behandlesAvApplikasjon = "familie-tilbake",
                 fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
+                beskrivelse = lagOppgaveTekst(fagsak.eksternFagsakId, behandling.eksternBrukId.toString(), fagsak.fagsystem.name),
                 enhetsnummer = behandling.behandlendeEnhet,
-                behandlingstype = "ae0161",
+                behandlingstype = Behandlingstype.Tilbakekreving.value,
                 behandlingstema = null
         )
 
@@ -85,14 +86,15 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
     }
 
 
-    private fun lagOppgaveTekst(fagsakId: String, fagsystem: String, beskrivelse: String? = null): String {
+    private fun lagOppgaveTekst(eksternFagsakId: String, eksternbrukBehandlingID: String, fagsystem: String, beskrivelse: String? = null): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } +
-               "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${fagsakId}"
+               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/${eksternbrukBehandlingID}" +
+               "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n"
+
     }
 
     companion object {
