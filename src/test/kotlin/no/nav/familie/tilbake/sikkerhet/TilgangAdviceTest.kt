@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -233,8 +232,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val fagsak = Fagsak(bruker = Bruker("1232"),
                             eksternFagsakId = "123",
                             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-                            ytelsestype = ytelsestype,
-                            status = Fagsaksstatus.OPPRETTET)
+                            ytelsestype = ytelsestype)
         tilgangAdvice.fagsakRepository.insert(fagsak)
         val behandling = Behandling(fagsakId = fagsak.id,
                                     type = Behandlingstype.TILBAKEKREVING,

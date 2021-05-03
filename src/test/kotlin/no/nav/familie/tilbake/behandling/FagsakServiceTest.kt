@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import org.junit.jupiter.api.Test
@@ -41,7 +40,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         assertEquals(eksternFagsakId, fagsakDto.eksternFagsakId)
         assertEquals(Språkkode.NB, fagsakDto.språkkode)
-        assertEquals(Fagsaksstatus.OPPRETTET, fagsakDto.status)
         assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
         assertEquals(Fagsystem.BA, fagsakDto.fagsystem)
 

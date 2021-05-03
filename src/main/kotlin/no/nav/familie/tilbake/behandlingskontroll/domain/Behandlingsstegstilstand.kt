@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandlingskontroll.domain
 
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -21,18 +22,20 @@ data class Behandlingsstegstilstand(@Id
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
-enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean, private val beskrivelse: String) {
+enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
+                           val behandlingsstatus: Behandlingsstatus, private val beskrivelse: String) {
 
-    VARSEL(1, false, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
-    GRUNNLAG(2, false, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
-    VERGE(3, true, "Fakta om verge"),
-    FAKTA(4, true, "Fakta om Feilutbetaling"),
-    FORELDELSE(5, true, "Vurder om feilutbetalte perioder er foreldet"),
-    VILKÅRSVURDERING(6, true, "Vurdere om og hva som skal tilbakekreves"),
-    FORESLÅ_VEDTAK(7, true, "Foreslår vedtak"),
-    FATTE_VEDTAK(8, true, "Fatter vedtak"),
-    IVERKSETT_VEDTAK(9, false, "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"),
-    AVSLUTTET(10, false, "Behandlingen er ferdig behandlet");
+    VARSEL(1, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
+    GRUNNLAG(2, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
+    VERGE(3, true, Behandlingsstatus.UTREDES, "Fakta om verge"),
+    FAKTA(4, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
+    FORELDELSE(5, true, Behandlingsstatus.UTREDES, "Vurder om feilutbetalte perioder er foreldet"),
+    VILKÅRSVURDERING(6, true, Behandlingsstatus.UTREDES, "Vurdere om og hva som skal tilbakekreves"),
+    FORESLÅ_VEDTAK(7, true, Behandlingsstatus.UTREDES, "Foreslår vedtak"),
+    FATTE_VEDTAK(8, true, Behandlingsstatus.FATTER_VEDTAK, "Fatter vedtak"),
+    IVERKSETT_VEDTAK(9, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
+                     "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"),
+    AVSLUTTET(10, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");
 
     companion object {
 

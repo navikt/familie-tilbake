@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
-import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
@@ -20,7 +20,6 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -437,7 +436,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(behandling.eksternBrukId, behandlingDto.eksternBrukId)
         assertFalse { behandlingDto.erBehandlingHenlagt }
         assertEquals(Behandlingstype.TILBAKEKREVING.name, behandlingDto.type.name)
-        assertEquals(Behandlingsstatus.OPPRETTET, behandlingDto.status)
+        assertEquals(Behandlingsstatus.UTREDES, behandlingDto.status)
         assertEquals(behandling.opprettetDato, behandlingDto.opprettetDato)
         assertNull(behandlingDto.avsluttetDato)
         assertNull(behandlingDto.vedtaksdato)
@@ -468,7 +467,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(opprettTilbakekrevingRequest.eksternFagsakId, fagsak.eksternFagsakId)
         assertEquals(opprettTilbakekrevingRequest.ytelsestype.name, fagsak.ytelsestype.name)
         assertEquals(opprettTilbakekrevingRequest.fagsystem, fagsak.fagsystem)
-        assertEquals(Fagsaksstatus.OPPRETTET, fagsak.status)
         assertEquals(opprettTilbakekrevingRequest.språkkode, fagsak.bruker.språkkode)
         assertEquals(opprettTilbakekrevingRequest.personIdent, fagsak.bruker.ident)
     }

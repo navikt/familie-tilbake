@@ -94,6 +94,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         behandlingsstegstilstandRepository.update(aktivtBehandlingsstegstilstand.copy(behandlingsstegsstatus = VENTER,
                                                                                       venteårsak = venteårsak,
                                                                                       tidsfrist = tidsfrist))
+        //oppdater tilsvarende behandlingsstatus
+        oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
     }
 
     @Transactional
@@ -154,6 +156,9 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 .update(behandlingsstegstilstand.copy(behandlingsstegsstatus = behandlingsstegsinfo.behandlingsstegstatus,
                                                       venteårsak = behandlingsstegsinfo.venteårsak,
                                                       tidsfrist = behandlingsstegsinfo.tidsfrist))
+
+        //oppdater tilsvarende behandlingsstatus
+        oppdaterBehandlingsstatus(behandlingId, behandlingsstegsinfo.behandlingssteg)
     }
 
     private fun settBehandlingsstegOgStatus(behandlingId: UUID,
@@ -169,6 +174,9 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         // oppdaterte behandlingsteg med riktig status
         behandlingsstegstilstandRepository
                 .update(nybehandlingstegstilstand.copy(behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
+
+        //oppdater tilsvarende behandlingsstatus
+        oppdaterBehandlingsstatus(behandlingId, nesteStegMedStatus.behandlingssteg)
     }
 
     private fun persisterBehandlingsstegOgStatus(behandlingId: UUID,
@@ -266,6 +274,11 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                     behandlingsstegstatus = behandlingsstegstatus,
                                     venteårsak = venteårsak,
                                     tidsfrist = venteårsak?.defaultVenteTidIUker?.let { tidsfrist?.plusWeeks(it) })
+    }
+
+    private fun oppdaterBehandlingsstatus(behandlingId: UUID, behandlingssteg: Behandlingssteg) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
     }
 
 }

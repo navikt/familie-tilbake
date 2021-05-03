@@ -5,13 +5,11 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
-import no.nav.familie.tilbake.behandling.domain.Fagsaksstatus
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import java.time.LocalDate
 import java.util.UUID
 
 data class FagsakDto(val eksternFagsakId: String,
-                     val status: Fagsaksstatus,
                      val ytelsestype: Ytelsestype,
                      val fagsystem: Fagsystem,
                      val språkkode: Språkkode,
