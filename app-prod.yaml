@@ -40,7 +40,7 @@ spec:
     inbound:
       rules:
         - application: familie-ba-sak
-          namespace: default
+          namespace: teamfamilie
         - application: familie-ef-sak
           namespace: default
         - application: familie-ks-sak
