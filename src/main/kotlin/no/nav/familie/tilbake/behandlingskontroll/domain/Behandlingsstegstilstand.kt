@@ -23,7 +23,8 @@ data class Behandlingsstegstilstand(@Id
                                     val sporbar: Sporbar = Sporbar())
 
 enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
-                           val behandlingsstatus: Behandlingsstatus, private val beskrivelse: String) {
+                           val behandlingsstatus: Behandlingsstatus,
+                           private val beskrivelse: String) {
 
     VARSEL(1, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
