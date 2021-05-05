@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -17,10 +18,13 @@ import javax.validation.constraints.Size
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
-              JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class))
+@JsonSubTypes(
+        JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
+        JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
+        JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
+        JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class),
+        JsonSubTypes.Type(value = BehandlingsstegFatteVedtaksstegDto::class),
+)
 abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
@@ -121,3 +125,20 @@ data class FritekstavsnittDto(@Size(max = 10000, message = "Oppsummeringstekst e
                               @Size(max = 100, message = "For mange perioder")
                               @Valid
                               var perioderMedTekst: List<PeriodeMedTekstDto>)
+
+@JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEG_NAVN)
+data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<VurdertTotrinnDto>) : BehandlingsstegDto() {
+
+    override fun getSteg(): String {
+        return STEG_NAVN
+    }
+
+    companion object {
+
+        const val STEG_NAVN = "FATTE_VEDTAK"
+    }
+}
+
+data class VurdertTotrinnDto(val behandlingssteg: Behandlingssteg,
+                             val godkjent: Boolean,
+                             val begrunnelse: String)

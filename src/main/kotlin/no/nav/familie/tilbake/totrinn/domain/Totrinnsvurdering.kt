@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.totrinn.domain
 
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
@@ -10,7 +10,7 @@ import java.util.UUID
 data class Totrinnsvurdering(@Id
                              val id: UUID = UUID.randomUUID(),
                              val behandlingId: UUID,
-                             val aksjonspunktsdefinisjon: Aksjonspunktsdefinisjon,
+                             val behandlingssteg: Behandlingssteg,
                              val godkjent: Boolean,
                              val begrunnelse: String?,
                              val aktiv: Boolean = true,

@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -57,11 +58,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         //Lag oppgave for behandling
         taskService.save(
-            Task(type = LagOppgaveTask.TYPE,
-                 payload = behandling.id.toString(),
-                 properties = Properties().apply {
-                                  this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: UUID.randomUUID().toString()
-                              })
+                Task(type = LagOppgaveTask.TYPE,
+                     payload = behandling.id.toString(),
+                     properties = Properties().apply {
+                         this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: UUID.randomUUID().toString()
+                     })
         )
 
         return behandling
@@ -89,7 +90,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
-        val behandlingId = behandling.id
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
             throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
@@ -99,6 +99,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
+        oppdaterAnsvarligSaksbehandler(behandlingId)
     }
 
     @Transactional
@@ -112,6 +113,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
         stegService.gjenopptaSteg(behandlingId)
+
+        oppdaterAnsvarligSaksbehandler(behandlingId)
     }
 
     @Transactional
@@ -142,6 +145,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         // Ferdigstill oppgave
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandling.id.toString()))
+    }
+
+    @Transactional
+    fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -220,10 +229,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
-                                                         behandling.opprettetTidspunkt < LocalDate.now()
-                                                                 .atStartOfDay()
-                                                                 .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
-                           && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
+                                                 behandling.opprettetTidspunkt < LocalDate.now()
+                                                         .atStartOfDay()
+                                                         .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                   && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
     }

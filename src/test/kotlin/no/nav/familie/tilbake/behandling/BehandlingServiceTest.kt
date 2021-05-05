@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
+import io.mockk.every
+import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
@@ -21,10 +23,12 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -34,6 +38,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevspori
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
@@ -70,8 +75,17 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingService: BehandlingService
 
+    @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
     private final val fom: LocalDate = LocalDate.now().minusMonths(1)
     private final val tom: LocalDate = LocalDate.now()
+
+    @BeforeEach
+    fun init() {
+        mockkObject(ContextService)
+        every { ContextService.hentSaksbehandler() }.returns("Z0000")
+    }
 
     @Test
     fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {
@@ -266,7 +280,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er større enn i dag`() {
+    fun `settBehandlingPåVent skal sette behandling på vent hvis frisdato er større enn i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
@@ -279,6 +293,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                    BehandlingPåVentDto(venteårsak = Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                                        tidsfrist = LocalDate.now().plusDays(1)))
         }
+        assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
+        assertAnsvarligSaksbehandler(behandling)
     }
 
     @Test
@@ -299,6 +315,28 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val exception = assertFailsWith<RuntimeException>(block = { behandlingService.taBehandlingAvvent(behandling.id) })
         assertEquals("Behandling ${behandling.id} er ikke på vent, kan ike gjenoppta", exception.message)
+    }
+
+    @Test
+    fun `taBehandlingAvvent skal gjenoppta når behandling er på vent`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(behandlingId = behandling.id))
+
+        behandlingService.settBehandlingPåVent(behandlingId = behandling.id,
+                                               behandlingPåVentDto = BehandlingPåVentDto(Venteårsak.AVVENTER_DOKUMENTASJON,
+                                                                                         LocalDate.now().plusDays(2)))
+
+        assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
+
+        behandlingService.taBehandlingAvvent(behandling.id)
+
+        assertFalse { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
+        assertAnsvarligSaksbehandler(behandling)
     }
 
     @Test
@@ -443,7 +481,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("8020", behandlingDto.enhetskode)
         assertEquals("Oslo", behandlingDto.enhetsnavn)
         assertNull(behandlingDto.resultatstype)
-        assertEquals("VL", behandlingDto.ansvarligSaksbehandler)
+        assertEquals("Z0000", behandlingDto.ansvarligSaksbehandler)
         assertNull(behandlingDto.ansvarligBeslutter)
     }
 
@@ -553,5 +591,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             revurderingsvedtaksdato = fom,
                                             verge = verge,
                                             faktainfo = faktainfo)
+    }
+
+    private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals("Z0000", lagretBehandling.ansvarligSaksbehandler)
+        assertNull(lagretBehandling.ansvarligBeslutter)
     }
 }

@@ -59,12 +59,14 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @PostMapping(path = ["{behandlingId}/steg/v1"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
+    // Rollen blir endret til BESLUTTER i Tilgangskontroll for FatteVedtak steg
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
                         henteParam = "behandlingId")
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
+        behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         return Ressurs.success("OK")
     }
 

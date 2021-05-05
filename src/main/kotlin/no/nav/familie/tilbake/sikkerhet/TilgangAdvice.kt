@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.ContextService
@@ -127,7 +128,8 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody, minimumBehandlerRolle),
+                         handling = handling)
             }
             eksternBrukIdFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = eksternBrukIdParam, requestBody = requestBody)
@@ -206,6 +208,15 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         throw Feil(message = feilmelding,
                    frontendFeilmelding = feilmelding,
                    httpStatus = HttpStatus.BAD_REQUEST)
+    }
+
+    private fun bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody: Any,
+                                                            minimumBehandlerRolle: Behandlerrolle): Behandlerrolle {
+        // Behandlerrolle blir endret til Beslutter kun når FatteVedtak steg utføres
+        if (requestBody is BehandlingsstegFatteVedtaksstegDto) {
+            return Behandlerrolle.BESLUTTER
+        }
+        return minimumBehandlerRolle
     }
 
 }

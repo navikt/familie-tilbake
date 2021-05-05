@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.VedtaksbrevService
-import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,7 +14,6 @@ import java.util.UUID
 
 @Service
 class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollService,
-                         val totrinnService: TotrinnService,
                          val vedtaksbrevService: VedtaksbrevService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -47,7 +45,6 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
                                                                                       Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
-        totrinnService.lagTotrinnsresultat(behandlingId)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

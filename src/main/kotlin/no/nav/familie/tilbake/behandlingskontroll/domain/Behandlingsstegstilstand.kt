@@ -23,20 +23,21 @@ data class Behandlingsstegstilstand(@Id
                                     val sporbar: Sporbar = Sporbar())
 
 enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
+                           val kanBesluttes: Boolean,
                            val behandlingsstatus: Behandlingsstatus,
                            private val beskrivelse: String) {
 
-    VARSEL(1, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
-    GRUNNLAG(2, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
-    VERGE(3, true, Behandlingsstatus.UTREDES, "Fakta om verge"),
-    FAKTA(4, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
-    FORELDELSE(5, true, Behandlingsstatus.UTREDES, "Vurder om feilutbetalte perioder er foreldet"),
-    VILKÅRSVURDERING(6, true, Behandlingsstatus.UTREDES, "Vurdere om og hva som skal tilbakekreves"),
-    FORESLÅ_VEDTAK(7, true, Behandlingsstatus.UTREDES, "Foreslår vedtak"),
-    FATTE_VEDTAK(8, true, Behandlingsstatus.FATTER_VEDTAK, "Fatter vedtak"),
-    IVERKSETT_VEDTAK(9, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
+    VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
+    GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
+    VERGE(3, true, false, Behandlingsstatus.UTREDES, "Fakta om verge"),
+    FAKTA(4, true, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
+    FORELDELSE(5, true, true, Behandlingsstatus.UTREDES, "Vurder om feilutbetalte perioder er foreldet"),
+    VILKÅRSVURDERING(6, true, true, Behandlingsstatus.UTREDES, "Vurdere om og hva som skal tilbakekreves"),
+    FORESLÅ_VEDTAK(7, true, true, Behandlingsstatus.UTREDES, "Foreslår vedtak"),
+    FATTE_VEDTAK(8, true, false, Behandlingsstatus.FATTER_VEDTAK, "Fatter vedtak"),
+    IVERKSETT_VEDTAK(9, false, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
                      "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"),
-    AVSLUTTET(10, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");
+    AVSLUTTET(10, false, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");
 
     companion object {
 
@@ -63,7 +64,6 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
                    ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
         }
     }
-
 
 }
 
