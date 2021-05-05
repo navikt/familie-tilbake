@@ -20,7 +20,7 @@ import java.util.UUID
 @Validated
 class TotrinnController(private val totrinnService: TotrinnService) {
 
-    @GetMapping(path = ["/v1/{behandlingId}/totrinn"],
+    @GetMapping(path = ["/{behandlingId}/totrinn/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter totrinnsvurderinger for en gitt behandling",

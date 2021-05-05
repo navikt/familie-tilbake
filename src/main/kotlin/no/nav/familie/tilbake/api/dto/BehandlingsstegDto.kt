@@ -141,4 +141,5 @@ data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<Vurd
 
 data class VurdertTotrinnDto(val behandlingssteg: Behandlingssteg,
                              val godkjent: Boolean,
+                             @Size(max = 1500, message = "begrunnelse er for lang")
                              val begrunnelse: String)
