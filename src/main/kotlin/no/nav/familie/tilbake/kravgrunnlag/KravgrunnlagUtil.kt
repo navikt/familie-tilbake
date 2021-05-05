@@ -28,7 +28,7 @@ object KravgrunnlagUtil {
         val feilutbetalingPrPeriode = mutableMapOf<Periode, BigDecimal>()
         for (kravgrunnlagPeriode432 in kravgrunnlag.perioder) {
             val feilutbetaltBeløp = kravgrunnlagPeriode432.beløp
-                    .filter { Klassetype.FEIL === it.klassetype }
+                    .filter { Klassetype.FEIL == it.klassetype }
                     .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
             if (feilutbetaltBeløp.compareTo(BigDecimal.ZERO) != 0) {
                 feilutbetalingPrPeriode[kravgrunnlagPeriode432.periode] = feilutbetaltBeløp

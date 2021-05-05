@@ -15,7 +15,6 @@ data class Fagsak(@Id
                   val eksternFagsakId: String,
                   val fagsystem: Fagsystem,
                   val ytelsestype: Ytelsestype,
-                  val status: Fagsaksstatus = Fagsaksstatus.OPPRETTET,
                   @Version
                   val versjon: Long = 0,
                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
@@ -24,10 +23,4 @@ data class Fagsak(@Id
     val ytelsesnavn
         get() = ytelsestype.navn[bruker.språkkode]
                 ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
-}
-
-enum class Fagsaksstatus {
-    OPPRETTET,
-    UNDER_BEHANDLING,
-    AVSLUTTET;
 }
