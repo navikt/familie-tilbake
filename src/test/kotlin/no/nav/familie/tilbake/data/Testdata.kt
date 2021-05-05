@@ -191,7 +191,7 @@ object Testdata {
     val kravgrunnlag431 = Kravgrunnlag431(behandlingId = behandling.id,
                                           vedtakId = BigInteger.ZERO,
                                           kravstatuskode = Kravstatuskode.NYTT,
-                                          fagområdekode = Fagområdekode.BA,
+                                          fagområdekode = Fagområdekode.EFOG,
                                           fagsystemId = "testverdi",
                                           fagsystemVedtaksdato = LocalDate.now(),
                                           omgjortVedtakId = BigInteger.ZERO,
