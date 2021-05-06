@@ -61,7 +61,7 @@ internal object AvsnittUtil {
         var avsnitt = Avsnitt(avsnittstype = Avsnittstype.PERIODE,
                               fom = data.periode.periode.fom,
                               tom = data.periode.periode.tom,
-                              overskrift = overskrift)
+                              overskrift = fjernOverskriftFormattering(overskrift))
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
@@ -76,7 +76,7 @@ internal object AvsnittUtil {
                    underavsnittstype: Underavsnittstype?): Avsnitt {
         var lokaltAvsnitt = avsnitt
         var lokalUnderavsnittstype = underavsnittstype
-        val splittet = generertTekst.split("\r?\n".toRegex()).toMutableList()
+        val splittet = generertTekst.split("\r?\n".toRegex()).filter { it.isNotBlank() }.toMutableList()
         if (avsnitt.overskrift.isNullOrBlank() && erOverskrift(splittet.first())) {
             val linje: String = splittet.removeAt(0)
             lokaltAvsnitt = avsnitt.copy(overskrift = fjernOverskriftFormattering(linje))
@@ -86,10 +86,33 @@ internal object AvsnittUtil {
         var fritekstTillatt = false
         var overskrift: String? = null
         var fritekst: MutableList<String> = ArrayList()
-        var brødtekst: MutableList<String> = ArrayList()
+        var brødtekst: String? = null
         val underavsnitt = mutableListOf<Underavsnitt>()
 
+
         for (linje in splittet) {
+
+            fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
+            fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) =
+                    brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
+
+            if (!leserFritekst &&
+                (fritekstTillatt
+                 || nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje)
+                 || avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje))) {
+                underavsnitt.add(Underavsnitt(overskrift,
+                                              brødtekst,
+                                              fritekst.joinToString("\n"),
+                                              fritekstTillatt,
+                                              fritekstPåkrevet,
+                                              lokalUnderavsnittstype))
+                overskrift = null
+                brødtekst = null
+                fritekstTillatt = false
+                fritekstPåkrevet = false
+                fritekst = ArrayList()
+            }
+
             when {
                 Vedtaksbrevsfritekst.erFritekstStart(linje) -> {
                     check(!leserFritekst) { "Feil med vedtaksbrev, har markering for 2 fritekst-start etter hverandre" }
@@ -106,30 +129,18 @@ internal object AvsnittUtil {
                     fritekst.add(linje)
                 }
                 erOverskrift(linje) -> {
-                    if (overskrift != null || brødtekst.isNotEmpty() || fritekst.isNotEmpty()) {
-                        underavsnitt.add(Underavsnitt(overskrift,
-                                                      brødtekst.joinToString("\n"),
-                                                      fritekst.joinToString("\n"),
-                                                      fritekstTillatt,
-                                                      fritekstPåkrevet,
-                                                      lokalUnderavsnittstype))
-                    }
-                    fritekstTillatt = false
-                    fritekstPåkrevet = false
                     overskrift = fjernOverskriftFormattering(linje)
-                    fritekst = ArrayList()
-                    brødtekst = ArrayList()
-
                 }
                 linje.isNotBlank() -> {
-                    brødtekst.add(linje)
+                    brødtekst = linje
                 }
             }
         }
 
-        if (overskrift != null || brødtekst.isNotEmpty() || fritekst.isNotEmpty()) {
+        if (overskrift != null || brødtekst != null || fritekstTillatt) {
+
             underavsnitt.add(Underavsnitt(overskrift,
-                                          brødtekst.joinToString("\n"),
+                                          brødtekst,
                                           fritekst.joinToString("\n"),
                                           fritekstTillatt,
                                           fritekstPåkrevet,
@@ -138,6 +149,7 @@ internal object AvsnittUtil {
 
         return lokaltAvsnitt.copy(underavsnittsliste = lokaltAvsnitt.underavsnittsliste + underavsnitt)
     }
+
 
     private fun parseUnderavsnittstype(tekst: String): Underavsnittstype? {
         val rest = Vedtaksbrevsfritekst.fjernFritekstmarkering(tekst)

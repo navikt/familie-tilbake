@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/dokument")
@@ -45,7 +46,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @PostMapping("/forhandsvis-varselbrev",
                  produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
-    fun hentForhåndsvisningVarselbrev(@RequestBody forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
+    fun hentForhåndsvisningVarselbrev(@Valid @RequestBody forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
@@ -72,7 +73,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @PostMapping("/forhandsvis-vedtaksbrev",
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
-    fun hentForhåndsvisningVedtaksbrev(@RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
+    fun hentForhåndsvisningVedtaksbrev(@Valid @RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf (dto))
     }
 
