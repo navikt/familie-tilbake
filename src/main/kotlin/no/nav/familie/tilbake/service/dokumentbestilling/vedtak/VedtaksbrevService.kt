@@ -323,8 +323,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun finnVilkårsvurderingsperioder(behandlingId: UUID): Set<Vilkårsvurderingsperiode> {
-        return vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.perioder
-               ?: error("Det er ingen vurderinger utført på behandling $behandlingId. Vedtaksbrev kan ikke genereres")
+        return vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)?.perioder ?: emptySet()
     }
 
     private fun finnVarsletDato(behandlingId: UUID): LocalDate? {
