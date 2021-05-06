@@ -34,18 +34,22 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                          private val vedtaksbrevService: VedtaksbrevService) {
 
     @PostMapping("/forhandsvis/{behandlingId}",
-                     produces = [MediaType.APPLICATION_JSON_VALUE])
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Forhåndsviser brev",
                         henteParam = "behandlingId")
     fun hentForhåndsvisningManueltVarselbrev(@PathVariable behandlingId: UUID,
                                              @RequestBody dto: ForhåndsvisningBrevDto): Ressurs<ByteArray> {
         if (dto.malType == Dokumentmalstype.INNHENT_DOKUMENTASJON) {
-            return Ressurs.success(innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, dto.fritekst))
+            return Ressurs.success(innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId,
+                                                                                                               dto.fritekst))
         } else if (dto.malType == Dokumentmalstype.VARSEL || dto.malType == Dokumentmalstype.KORRIGERT_VARSEL) {
-            return Ressurs.success(manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, dto.malType, dto.fritekst))
+            return Ressurs.success(manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId,
+                                                                                                 dto.malType,
+                                                                                                 dto.fritekst))
         } else {
-            return Ressurs.funksjonellFeil(melding = "Dokumentmal $dto.malType er ikke støttet", frontendFeilmelding = "Dokumentmal $dto.malType er ikke støttet");
+            return Ressurs.funksjonellFeil(melding = "Dokumentmal $dto.malType er ikke støttet",
+                                           frontendFeilmelding = "Dokumentmal $dto.malType er ikke støttet");
         }
     }
 
