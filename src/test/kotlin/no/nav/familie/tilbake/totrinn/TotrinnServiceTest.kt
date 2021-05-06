@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -140,6 +141,29 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             }
         }
 
+    }
+
+    @Test
+    fun `lagreTotrinnsvurderinger skal ikke lagre når det mangler steg i request som kan besluttes`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val exception = assertFailsWith<RuntimeException> {
+            totrinnService
+                    .lagreTotrinnsvurderinger(behandlingId = behandlingId,
+                                              totrinnsvurderinger = listOf(
+                                                      VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
+                                                                        godkjent = true, begrunnelse = "testverdi"),
+                                                      VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                                                                        godkjent = false, begrunnelse = "testverdi")))
+        }
+
+        assertEquals("Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering", exception.message)
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,

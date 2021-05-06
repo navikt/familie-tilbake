@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -40,6 +41,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenlegg
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -90,6 +92,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         every { ContextService.hentSaksbehandler() }.returns("Z0000")
         every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        clearMocks(ContextService)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -38,6 +39,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -95,6 +97,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         mockkObject(ContextService)
         every { ContextService.hentSaksbehandler() }.returns("Z0000")
+    }
+
+    @AfterEach
+    fun tearDown() {
+        clearMocks(ContextService)
     }
 
     @Test
