@@ -32,6 +32,7 @@ abstract class BehandlingsstegDto protected constructor() {
 
 @JsonTypeName(BehandlingsstegFaktaDto.STEG_NAVN)
 data class BehandlingsstegFaktaDto(val feilutbetaltePerioder: List<FaktaFeilutbetalingsperiodeDto>,
+                                   @Size(max = 1500, message = "begrunnelse er for lang")
                                    val begrunnelse: String) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
@@ -63,6 +64,7 @@ data class BehandlingsstegForeldelseDto(val foreldetPerioder: List<Foreldelsespe
 }
 
 data class ForeldelsesperiodeDto(val periode: PeriodeDto,
+                                 @Size(max = 1500, message = "begrunnelse er for lang")
                                  val begrunnelse: String,
                                  val foreldelsesvurderingstype: Foreldelsesvurderingstype,
                                  val foreldelsesfrist: LocalDate? = null,
@@ -86,18 +88,21 @@ data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: L
 data class VilkårsvurderingsperiodeDto(
         val periode: PeriodeDto,
         val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+        @Size(max = 1500, message = "begrunnelse er for lang")
         val begrunnelse: String,
         val godTroDto: GodTroDto? = null,
         val aktsomhetDto: AktsomhetDto? = null)
 
 data class GodTroDto(val beløpErIBehold: Boolean,
                      val beløpTilbakekreves: BigDecimal? = null,
+                     @Size(max = 1500, message = "begrunnelse er for lang")
                      val begrunnelse: String)
 
 data class AktsomhetDto(val aktsomhet: Aktsomhet,
                         val ileggRenter: Boolean? = null,
                         val andelTilbakekreves: BigDecimal? = null,
                         val beløpTilbakekreves: BigDecimal? = null,
+                        @Size(max = 1500, message = "begrunnelse er for lang")
                         val begrunnelse: String,
                         val særligeGrunner: List<SærligGrunnDto>? = null,
                         val særligeGrunnerTilReduksjon: Boolean = false,
@@ -105,6 +110,7 @@ data class AktsomhetDto(val aktsomhet: Aktsomhet,
                         val særligeGrunnerBegrunnelse: String? = null)
 
 data class SærligGrunnDto(val særligGrunn: SærligGrunn,
+                          @Size(max = 1500, message = "begrunnelse er for lang")
                           val begrunnelse: String? = null)
 
 @JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEG_NAVN)
@@ -141,5 +147,5 @@ data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<Vurd
 
 data class VurdertTotrinnDto(val behandlingssteg: Behandlingssteg,
                              val godkjent: Boolean,
-                             @Size(max = 1500, message = "begrunnelse er for lang")
-                             val begrunnelse: String)
+                             @Size(max = 2000, message = "begrunnelse er for lang")
+                             val begrunnelse: String? = null)
