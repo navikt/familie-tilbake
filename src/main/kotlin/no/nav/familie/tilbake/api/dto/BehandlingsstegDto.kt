@@ -30,18 +30,18 @@ abstract class BehandlingsstegDto protected constructor() {
     abstract fun getSteg(): String
 }
 
-@JsonTypeName(BehandlingsstegFaktaDto.STEG_NAVN)
+@JsonTypeName(BehandlingsstegFaktaDto.STEGNAVN)
 data class BehandlingsstegFaktaDto(val feilutbetaltePerioder: List<FaktaFeilutbetalingsperiodeDto>,
                                    @Size(max = 1500, message = "begrunnelse er for lang")
                                    val begrunnelse: String) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
-        return STEG_NAVN
+        return STEGNAVN
     }
 
     companion object {
 
-        const val STEG_NAVN = "FAKTA"
+        const val STEGNAVN = "FAKTA"
     }
 }
 
@@ -50,16 +50,16 @@ data class FaktaFeilutbetalingsperiodeDto(val periode: PeriodeDto,
                                           val hendelsesundertype: Hendelsesundertype)
 
 
-@JsonTypeName(BehandlingsstegForeldelseDto.STEG_NAVN)
+@JsonTypeName(BehandlingsstegForeldelseDto.STEGNAVN)
 data class BehandlingsstegForeldelseDto(val foreldetPerioder: List<ForeldelsesperiodeDto>) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
-        return STEG_NAVN
+        return STEGNAVN
     }
 
     companion object {
 
-        const val STEG_NAVN = "FORELDELSE"
+        const val STEGNAVN = "FORELDELSE"
     }
 }
 
@@ -71,17 +71,17 @@ data class ForeldelsesperiodeDto(val periode: PeriodeDto,
                                  val oppdagelsesdato: LocalDate? = null)
 
 
-@JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEG_NAVN)
+@JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEGNAVN)
 data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>)
     : BehandlingsstegDto() {
 
     override fun getSteg(): String {
-        return STEG_NAVN
+        return STEGNAVN
     }
 
     companion object {
 
-        const val STEG_NAVN = "VILKÅRSVURDERING"
+        const val STEGNAVN = "VILKÅRSVURDERING"
     }
 }
 
@@ -113,16 +113,16 @@ data class SærligGrunnDto(val særligGrunn: SærligGrunn,
                           @Size(max = 1500, message = "begrunnelse er for lang")
                           val begrunnelse: String? = null)
 
-@JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEG_NAVN)
+@JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEGNAVN)
 data class BehandlingsstegForeslåVedtaksstegDto(val fritekstavsnitt: FritekstavsnittDto) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
-        return STEG_NAVN
+        return STEGNAVN
     }
 
     companion object {
 
-        const val STEG_NAVN = "FORESLÅ_VEDTAK"
+        const val STEGNAVN = "FORESLÅ_VEDTAK"
     }
 }
 
@@ -132,16 +132,16 @@ data class FritekstavsnittDto(@Size(max = 10000, message = "Oppsummeringstekst e
                               @Valid
                               var perioderMedTekst: List<PeriodeMedTekstDto>)
 
-@JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEG_NAVN)
+@JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEGNAVN)
 data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<VurdertTotrinnDto>) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
-        return STEG_NAVN
+        return STEGNAVN
     }
 
     companion object {
 
-        const val STEG_NAVN = "FATTE_VEDTAK"
+        const val STEGNAVN = "FATTE_VEDTAK"
     }
 }
 

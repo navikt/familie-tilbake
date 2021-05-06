@@ -37,6 +37,9 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepos
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
+import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -85,6 +88,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         mockkObject(ContextService)
         every { ContextService.hentSaksbehandler() }.returns("Z0000")
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+                InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
     }
 
     @Test
@@ -191,6 +196,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFalse { behandlingDto.kanHenleggeBehandling }
         assertTrue { behandlingDto.harVerge }
         assertTrue { behandlingDto.erBehandlingPåVent }
+        assertTrue { behandlingDto.kanEndres }
         assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
                                    behandling = behandling,
                                    behandlingssteg = Behandlingssteg.GRUNNLAG,
@@ -212,6 +218,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFalse { behandlingDto.kanHenleggeBehandling }
         assertTrue { behandlingDto.harVerge }
         assertTrue { behandlingDto.erBehandlingPåVent }
+        assertTrue { behandlingDto.kanEndres }
         assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
                                    behandling = behandling,
                                    behandlingssteg = Behandlingssteg.VARSEL,
@@ -238,6 +245,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertTrue { behandlingDto.kanHenleggeBehandling }
         assertFalse { behandlingDto.harVerge }
         assertTrue { behandlingDto.erBehandlingPåVent }
+        assertTrue { behandlingDto.kanEndres }
         assertBehandlingsstegsinfo(behandlingDto = behandlingDto,
                                    behandling = behandling,
                                    behandlingssteg = Behandlingssteg.VARSEL,
@@ -246,7 +254,79 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er mindre enn i dag`() {
+    fun `hentBehandling skal hente behandling når behandling er avsluttet`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFalse { behandlingDto.kanEndres }
+        assertFalse { behandlingDto.kanHenleggeBehandling }
+    }
+
+    @Test
+    fun `hentBehandling skal ikke endre behandling av veileder`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+                InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.VEILEDER)))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFalse { behandlingDto.kanEndres }
+    }
+
+    @Test
+    fun `hentBehandling skal ikke endre behandling av saksbehandler når behandling er på fattevedtak steg`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+                InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER)))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFalse { behandlingDto.kanEndres }
+    }
+
+    @Test
+    fun `hentBehandling skal endre behandling av beslutter når behandling er på fattevedtak steg`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+                InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertTrue { behandlingDto.kanEndres }
+    }
+
+    @Test
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis fristdato er mindre enn i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
@@ -263,7 +343,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis frisdato er i dag`() {
+    fun `settBehandlingPåVent skal ikke sett behandling på vent hvis fristdato er i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
@@ -280,7 +360,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `settBehandlingPåVent skal sette behandling på vent hvis frisdato er større enn i dag`() {
+    fun `settBehandlingPåVent skal sette behandling på vent hvis fristdato er større enn i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,

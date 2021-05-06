@@ -111,11 +111,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er på vent`() {
-        lagBehandlingsstegstilstand(
-                Behandlingssteg.FAKTA,
-                Behandlingsstegstatus.VENTER,
-                Venteårsak.AVVENTER_DOKUMENTASJON
-        )
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.AVVENTER_DOKUMENTASJON)
 
         val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 

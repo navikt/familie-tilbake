@@ -53,6 +53,7 @@ object BehandlingMapper {
     fun tilRespons(behandling: Behandling,
                    erBehandlingPåVent: Boolean,
                    kanHenleggeBehandling: Boolean,
+                   kanEndres: Boolean,
                    behandlingsstegsinfoer: List<Behandlingsstegsinfo>): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
@@ -75,6 +76,7 @@ object BehandlingMapper {
                              harVerge = behandling.harVerge,
                              kanHenleggeBehandling = kanHenleggeBehandling,
                              erBehandlingPåVent = erBehandlingPåVent,
+                             kanEndres = kanEndres,
                              behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
 
     }
