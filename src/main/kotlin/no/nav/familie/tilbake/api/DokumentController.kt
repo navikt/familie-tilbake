@@ -38,8 +38,8 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Forhåndsviser brev",
                         henteParam = "behandlingId")
-    fun hentForhåndsvisningManueltVarselbrev(@PathVariable behandlingId: UUID,
-                                             @RequestBody dto: ForhåndsvisningBrevDto): Ressurs<ByteArray> {
+    fun hentForhåndsvisningBrevMedDokumentMal(@PathVariable behandlingId: UUID,
+                                              @RequestBody dto: ForhåndsvisningBrevDto): Ressurs<ByteArray> {
         if (dto.malType == Dokumentmalstype.INNHENT_DOKUMENTASJON) {
             return Ressurs.success(innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId,
                                                                                                                dto.fritekst))
