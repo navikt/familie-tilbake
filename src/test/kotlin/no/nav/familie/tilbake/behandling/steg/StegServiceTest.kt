@@ -431,6 +431,26 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).isEmpty() }
     }
 
+    @Test
+    fun `håndterSteg skal ikke utføre fatte vedtak steg når beslutter er samme som saksbehandler`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
+                                                    ansvarligSaksbehandler = "Z0000"))
+
+        val exception = assertFailsWith<RuntimeException> {
+            stegService.håndterSteg(behandlingId,
+                                    lagBehandlingsstegFatteVedtaksstegDto(godkjent = true))
+        }
+
+        assertEquals("ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler", exception.message)
+    }
+
 
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i varselssteg`() {

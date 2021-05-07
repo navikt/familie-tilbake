@@ -274,6 +274,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (behandling.erAvsluttet()) {
             return false
         }
+        if (!environment.activeProfiles.any { it == "local" } &&
+            Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
+            behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
+            return false
+        }
         val inloggetBrukerstilgang = ContextService
                 .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", environment)
 

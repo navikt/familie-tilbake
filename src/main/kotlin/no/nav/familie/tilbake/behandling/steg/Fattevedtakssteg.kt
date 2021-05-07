@@ -26,6 +26,7 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
         // step1: oppdater ansvarligBeslutter
+        totrinnService.validerAnsvarligBeslutter(behandlingId)
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
 
         // step2: lagre totrinnsvurderinger
@@ -57,4 +58,5 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FATTE_VEDTAK
     }
+
 }

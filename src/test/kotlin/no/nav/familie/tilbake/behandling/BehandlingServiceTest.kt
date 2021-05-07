@@ -325,11 +325,32 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK))
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
+                                                          ansvarligSaksbehandler = "VL"))
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
         assertTrue { behandlingDto.kanEndres }
+    }
+
+    @Test
+    fun `hentBehandling skal ikke endre behandling med fattevedtak steg og beslutter er samme som saksbehandler`() {
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+                InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
+                                                          ansvarligSaksbehandler = "Z0000"))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        assertFalse { behandlingDto.kanEndres }
     }
 
     @Test
