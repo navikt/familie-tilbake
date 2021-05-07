@@ -29,6 +29,11 @@ rolle:
     beslutter: ""
 
 
+prosessering:
+  fixedDelayString:
+    in:
+      milliseconds: 1000
+
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
 OPPDRAG_SERVICE_URL: #Mockes ut lokalt
@@ -37,24 +42,3 @@ CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 PDL_URL: #Mockes ut lokalt
 
-rolle:
-  barnetrygd:
-    veileder: "93a26831-9866-4410-927b-74ff51a9107c"
-    saksbehandler: "d21e00a4-969d-4b28-8782-dc818abfae65"
-    beslutter: "9449c153-5a1e-44a7-84c6-7cc7a8867233"
-  enslig:
-    veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"
-    saksbehandler: "ee5e0b5e-454c-4612-b931-1fe363df7c2c"
-    beslutter: "01166863-22f1-4e16-9785-d7a05a22df74"
-  kontantstøtte:
-    veileder: ""
-    saksbehandler: ""
-    beslutter: ""
-
-
-
-
-prosessering:
-  fixedDelayString:
-    in:
-      milliseconds: 1000
