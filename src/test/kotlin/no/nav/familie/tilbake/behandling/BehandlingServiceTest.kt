@@ -90,7 +90,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         mockkObject(ContextService)
         every { ContextService.hentSaksbehandler() }.returns("Z0000")
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.SYSTEM_TILGANG to Behandlerrolle.SYSTEM)))
     }
 
@@ -279,7 +279,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av veileder`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.VEILEDER)))
 
         val opprettTilbakekrevingRequest =
@@ -296,7 +296,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling av saksbehandler når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.SAKSBEHANDLER)))
 
         val opprettTilbakekrevingRequest =
@@ -315,7 +315,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal endre behandling av beslutter når behandling er på fattevedtak steg`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
 
         val opprettTilbakekrevingRequest =
@@ -335,7 +335,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandling skal ikke endre behandling med fattevedtak steg og beslutter er samme som saksbehandler`() {
-        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any(), any()) }.returns(
+        every { ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(any(), any()) }.returns(
                 InnloggetBrukertilgang(tilganger = mapOf(Tilgangskontrollsfagsystem.BARNETRYGD to Behandlerrolle.BESLUTTER)))
 
         val opprettTilbakekrevingRequest =

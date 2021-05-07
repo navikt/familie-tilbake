@@ -280,7 +280,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return false
         }
         val inloggetBrukerstilgang = ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling", environment)
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
 
         val tilganger = inloggetBrukerstilgang.tilganger
 

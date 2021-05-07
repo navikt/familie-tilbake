@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 
 object ContextService {
@@ -31,11 +30,10 @@ object ContextService {
     }
 
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig,
-                                                               handling: String,
-                                                               environment: Environment): InnloggetBrukertilgang {
+                                                               handling: String): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
         val brukerTilganger = mutableMapOf<Tilgangskontrollsfagsystem, Behandlerrolle>()
-        if (saksbehandler == SYSTEM_FORKORTELSE || environment.activeProfiles.any { "local" == it }) {
+        if (saksbehandler == SYSTEM_FORKORTELSE) {
             brukerTilganger[Tilgangskontrollsfagsystem.SYSTEM_TILGANG] = Behandlerrolle.SYSTEM
         }
         val grupper = hentGrupper()

@@ -14,7 +14,6 @@ import org.aspectj.lang.annotation.Before
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -28,8 +27,7 @@ import java.util.UUID
 @Configuration
 class TilgangAdvice(val rolleConfig: RolleConfig,
                     val behandlingRepository: BehandlingRepository,
-                    val fagsakRepository: FagsakRepository,
-                    val environment: Environment) {
+                    val fagsakRepository: FagsakRepository) {
 
     private final val behandlingIdParam = "behandlingId"
     private final val ytelsestypeParam = "ytelsestype"
@@ -44,7 +42,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         val handling = rolletilgangssjekk.handling
 
         val brukerRolleOgFagsystemstilgang =
-                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling, environment)
+                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
 
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
 
@@ -166,11 +164,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                          brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                          minimumBehandlerRolle: Behandlerrolle,
                          handling: String) {
-        if (environment.activeProfiles.any { "local" == it } ||
-            brukerRolleOgFagsystemstilgang.tilganger.containsValue(Behandlerrolle.SYSTEM)) {
+        // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
+        if(brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)){
             return
         }
-
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
         validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
 
