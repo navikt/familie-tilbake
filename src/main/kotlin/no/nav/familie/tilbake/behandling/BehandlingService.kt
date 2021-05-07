@@ -271,7 +271,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet() || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
             return false
         }
         if (!environment.activeProfiles.any { it == "local" } &&
