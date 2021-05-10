@@ -14,15 +14,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/familie-tilbake
     driver-class-name: org.postgresql.Driver
 
-
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_URL: http://localhost:8085
-OPPDRAG_SERVICE_URL: #Mockes ut lokalt
-SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
-CREDENTIAL_USERNAME: not-a-real-srvuser
-CREDENTIAL_PASSWORD: not-a-real-pw
-PDL_URL: #Mockes ut lokalt
-
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"
@@ -38,9 +29,16 @@ rolle:
     beslutter: ""
 
 
-
-
 prosessering:
   fixedDelayString:
     in:
       milliseconds: 1000
+
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+FAMILIE_INTEGRASJONER_URL: http://localhost:8085
+OPPDRAG_SERVICE_URL: #Mockes ut lokalt
+SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
+PDL_URL: #Mockes ut lokalt
+

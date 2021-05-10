@@ -6,7 +6,6 @@ enum class Behandlerrolle(val nivå: Int) {
     BESLUTTER(3),
     SAKSBEHANDLER(2),
     VEILEDER(1),
-    UKJENT(0)
 }
 
 class InnloggetBrukertilgang(val tilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)

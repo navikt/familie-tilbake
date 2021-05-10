@@ -66,10 +66,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
     @Transactional
     fun behandleStegPåNytt(behandlingId: UUID, behandledeSteg: Behandlingssteg) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet()) {
-            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
-        }
         val aktivtBehandlingssteg = finnAktivtSteg(behandlingId)
                                     ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")
 
@@ -148,8 +144,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                        "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres")
         }
         val behandlingsstegstilstand =
-                behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
-                                                                                        behandlingsstegsinfo.behandlingssteg)
+                behandlingsstegstilstandRepository
+                        .findByBehandlingIdAndBehandlingssteg(behandlingId, behandlingsstegsinfo.behandlingssteg)
                 ?: throw Feil(message = "Behandling med id=$behandlingId og " +
                                         "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke")
         behandlingsstegstilstandRepository

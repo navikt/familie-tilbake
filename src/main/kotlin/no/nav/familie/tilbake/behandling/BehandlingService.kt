@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskService
@@ -20,22 +19,24 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -46,7 +47,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
-                        private val taskService: TaskService) {
+                        private val taskService: TaskService,
+                        private val rolleConfig: RolleConfig) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -57,11 +59,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         //Lag oppgave for behandling
         taskService.save(
-            Task(type = LagOppgaveTask.TYPE,
-                 payload = behandling.id.toString(),
-                 properties = Properties().apply {
-                                  this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: UUID.randomUUID().toString()
-                              })
+                Task(type = LagOppgaveTask.TYPE,
+                     payload = behandling.id.toString())
         )
 
         return behandling
@@ -74,14 +73,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional(readOnly = true)
     fun hentBehandling(behandlingId: UUID): BehandlingDto {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                 .hentBehandlingsstegstilstand(behandling)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
+        val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
 
         return BehandlingMapper.tilRespons(behandling = behandling,
                                            erBehandlingPåVent = erBehandlingPåVent,
                                            kanHenleggeBehandling = kanBehandlingHenlegges,
+                                           kanEndres = kanEndres,
                                            behandlingsstegsinfoer = behandlingsstegsinfoer)
     }
 
@@ -89,7 +91,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
-        val behandlingId = behandling.id
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
             throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
@@ -99,6 +100,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
+        oppdaterAnsvarligSaksbehandler(behandlingId)
     }
 
     @Transactional
@@ -112,6 +114,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
         stegService.gjenopptaSteg(behandlingId)
+
+        oppdaterAnsvarligSaksbehandler(behandlingId)
     }
 
     @Transactional
@@ -142,6 +146,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         // Ferdigstill oppgave
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandling.id.toString()))
+    }
+
+    @Transactional
+    fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -220,10 +230,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
-                                                         behandling.opprettetTidspunkt < LocalDate.now()
-                                                                 .atStartOfDay()
-                                                                 .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
-                           && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
+                                                 behandling.opprettetTidspunkt < LocalDate.now()
+                                                         .atStartOfDay()
+                                                         .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                   && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
     }
@@ -256,6 +266,31 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     companion object {
 
         const val OPPRETTELSE_DAGER_BEGRENSNING = 6L
+    }
+
+    private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
+        if (behandling.erAvsluttet() || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
+            return false
+        }
+        if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
+            behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
+            return false
+        }
+        val inloggetBrukerstilgang = ContextService
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+
+        val tilganger = inloggetBrukerstilgang.tilganger
+
+        val behandlerRolle =
+                if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
+                else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
+
+        return when (behandlerRolle) {
+            Behandlerrolle.VEILEDER -> false
+            Behandlerrolle.SAKSBEHANDLER -> (Behandlingsstatus.UTREDES == behandling.status)
+            Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
+            else -> false
+        }
     }
 
 }
