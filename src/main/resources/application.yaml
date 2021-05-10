@@ -67,14 +67,6 @@ management:
     db:
       enabled: true
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
-BA_SAK_CLIENT_ID: ""
-EF_SAK_CLIENT_ID: ""
-FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
-STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
-PDL_URL: http://pdl-api
-
 oppdrag.mq:
   queuemanager: QM1
   kravgrunnlag: DEV.QUEUE.1
@@ -98,3 +90,12 @@ rolle:
     veileder: ""
     saksbehandler: ""
     beslutter: ""
+
+AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+BA_SAK_CLIENT_ID: ""
+EF_SAK_CLIENT_ID: ""
+FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
+STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+PDL_URL: http://pdl-api
+FORELDELSE_ANTALL_MÅNED: 30

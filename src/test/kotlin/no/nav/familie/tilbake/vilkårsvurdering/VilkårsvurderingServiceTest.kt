@@ -166,6 +166,43 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentVilkårsvurdering skal hente vilkårsvurdering når perioder er delt opp`() {
+        //delt opp i to perioder
+        val periode1 = PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        val periode2 = PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        val behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(
+                perioder = listOf(periode1, periode2))
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
+
+        val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
+        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
+        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
+        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+
+        val førstePeriode = vurdertVilkårsvurderingDto.perioder[0]
+        assertEquals(periode1, førstePeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, førstePeriode.hendelsestype)
+        assertEquals(BigDecimal(10000), førstePeriode.feilutbetaltBeløp)
+        assertFalse { førstePeriode.foreldet }
+        assertAktiviteter(førstePeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), førstePeriode.aktiviteter[0].beløp)
+        var vilkårsvurderingsresultatDto = førstePeriode.vilkårsvurderingsresultatInfo
+        assertNotNull(vilkårsvurderingsresultatDto)
+        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+
+        val andrePeriode = vurdertVilkårsvurderingDto.perioder[1]
+        assertEquals(periode2, andrePeriode.periode)
+        assertEquals(Hendelsestype.BA_ANNET, andrePeriode.hendelsestype)
+        assertEquals(BigDecimal(10000), andrePeriode.feilutbetaltBeløp)
+        assertFalse { andrePeriode.foreldet }
+        assertAktiviteter(andrePeriode.aktiviteter)
+        assertEquals(BigDecimal(10000), andrePeriode.aktiviteter[0].beløp)
+        vilkårsvurderingsresultatDto = andrePeriode.vilkårsvurderingsresultatInfo
+        assertNotNull(vilkårsvurderingsresultatDto)
+        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+    }
+
+    @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering med reduserte beløper`() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)

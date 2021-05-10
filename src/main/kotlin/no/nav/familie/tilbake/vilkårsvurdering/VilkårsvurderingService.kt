@@ -78,6 +78,6 @@ class VilkårsvurderingService(val vilkårsvurderingRepository: Vilkårsvurderin
     }
 
     private fun erPeriodeAlleredeVurdert(vilkårsvurdering: Vilkårsvurdering?, periode: Periode): Boolean {
-        return vilkårsvurdering?.perioder?.any { it.periode == periode } == true
+        return vilkårsvurdering?.perioder?.any { periode.omslutter(it.periode) } == true
     }
 }

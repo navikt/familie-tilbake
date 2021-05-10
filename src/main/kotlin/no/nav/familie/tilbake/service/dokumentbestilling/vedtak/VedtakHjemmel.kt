@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -15,13 +16,13 @@ object VedtakHjemmel {
             listOf(Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
 
-    fun lagHjemmelstekst(vedtaksresultatstype: Vedtaksresultat,
-                         foreldelse: VurdertForeldelse?,
-                         vilkårsperioder: Set<Vilkårsvurderingsperiode>,
-                         effektForBruker: EffektForBruker,
-                         ytelsestype: Ytelsestype,
-                         språkkode: Språkkode,
-                         visHjemmelForRenter: Boolean): String {
+    fun lagHjemmel(vedtaksresultatstype: Vedtaksresultat,
+                   foreldelse: VurdertForeldelse?,
+                   vilkårsperioder: Set<Vilkårsvurderingsperiode>,
+                   effektForBruker: EffektForBruker,
+                   ytelsestype: Ytelsestype,
+                   språkkode: Språkkode,
+                   visHjemmelForRenter: Boolean): HbHjemmel {
         val foreldetVanlig = erNoeSattTilVanligForeldet(foreldelse)
         val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(foreldelse)
         val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype, vilkårsperioder)
@@ -49,7 +50,8 @@ object VedtakHjemmel {
         if (EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER == effektForBruker) {
             hjemler.add(Hjemler.FORVALTNING_35_C)
         }
-        return join(hjemler, " og ", språkkode)
+        val hjemmelstekst = join(hjemler, " og ", språkkode)
+        return HbHjemmel(hjemmelstekst, hjemmelstekst.contains("og"))
     }
 
     private fun erRenterBenyttet(vilkårPerioder: Set<Vilkårsvurderingsperiode>): Boolean {

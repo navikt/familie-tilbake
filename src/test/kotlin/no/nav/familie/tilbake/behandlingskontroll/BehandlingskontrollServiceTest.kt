@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -77,23 +79,30 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val sisteStegstilstand = behandlingsstegstilstand[0]
         assertEquals(VARSEL, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING, sisteStegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
     }
 
     @Test
     fun `fortsettBehandling skal ikke fortsette til grunnlagssteg når behandling venter på varsel steg`() {
-        lagBehandlingsstegstilstand(setOf(lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)))
+        behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertEquals(1, behandlingsstegstilstand.size)
+        assertEquals(VARSEL, behandlingsstegstilstand[0].behandlingssteg)
+        assertEquals(VENTER, behandlingsstegstilstand[0].behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertEquals(1, behandlingsstegstilstand.size)
-        val sisteStegstilstand = behandlingsstegstilstand[0]
-        assertEquals(VARSEL, sisteStegstilstand.behandlingssteg)
-        assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
-        assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING, sisteStegstilstand.venteårsak)
-        assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
+        val nyStegstilstand = behandlingsstegstilstand[0]
+        assertEquals(VARSEL, nyStegstilstand.behandlingssteg)
+        assertEquals(VENTER, nyStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
+        assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING, nyStegstilstand.venteårsak)
+        assertEquals(behandling.opprettetDato.plusWeeks(4), nyStegstilstand.tidsfrist)
     }
 
 
@@ -111,6 +120,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val sisteStegstilstand = behandlingsstegstilstand[0]
         assertEquals(GRUNNLAG, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, sisteStegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
     }
@@ -127,6 +137,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(aktivtstegstilstand)
         assertEquals(GRUNNLAG, aktivtstegstilstand.behandlingssteg)
         assertEquals(VENTER, aktivtstegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtstegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), aktivtstegstilstand.tidsfrist)
     }
@@ -146,6 +157,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(aktivtstegstilstand)
         assertEquals(GRUNNLAG, aktivtstegstilstand.behandlingssteg)
         assertEquals(VENTER, aktivtstegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, aktivtstegstilstand.venteårsak)
         assertEquals(oppdatertKravgrunnlag.sporbar.endret.endretTid.plusWeeks(4).toLocalDate(), aktivtstegstilstand.tidsfrist)
     }
@@ -164,6 +176,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(aktivtstegstilstand)
         assertEquals(FAKTA, aktivtstegstilstand.behandlingssteg)
         assertEquals(KLAR, aktivtstegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertNull(aktivtstegstilstand.venteårsak)
         assertNull(aktivtstegstilstand.tidsfrist)
     }
@@ -183,6 +196,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         val sisteStegstilstand = behandlingsstegstilstand[0]
         assertEquals(FAKTA, sisteStegstilstand.behandlingssteg)
         assertEquals(KLAR, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertNull(sisteStegstilstand.venteårsak)
         assertNull(sisteStegstilstand.tidsfrist)
     }
@@ -198,6 +212,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(FORELDELSE, sisteStegstilstand.behandlingssteg)
         assertEquals(KLAR, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertNull(sisteStegstilstand.venteårsak)
         assertNull(sisteStegstilstand.tidsfrist)
     }
@@ -215,6 +230,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(VILKÅRSVURDERING, sisteStegstilstand.behandlingssteg)
         assertEquals(KLAR, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertNull(sisteStegstilstand.venteårsak)
         assertNull(sisteStegstilstand.tidsfrist)
     }
@@ -255,6 +271,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(FAKTA, sisteStegstilstand.behandlingssteg)
         assertEquals(KLAR, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertNull(sisteStegstilstand.venteårsak)
         assertNull(sisteStegstilstand.tidsfrist)
     }
@@ -278,6 +295,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(VARSEL, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING, sisteStegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
 
@@ -307,6 +325,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(GRUNNLAG, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, sisteStegstilstand.venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(4), sisteStegstilstand.tidsfrist)
 
@@ -334,6 +353,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(FAKTA, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.AVVENTER_DOKUMENTASJON, sisteStegstilstand.venteårsak)
         assertEquals(tidsfrist, sisteStegstilstand.tidsfrist)
     }
@@ -371,6 +391,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         assertNotNull(sisteStegstilstand)
         assertEquals(VARSEL, sisteStegstilstand.behandlingssteg)
         assertEquals(VENTER, sisteStegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING, sisteStegstilstand.venteårsak)
         assertEquals(tidsfrist.plusWeeks(2), sisteStegstilstand.tidsfrist)
     }
@@ -402,5 +423,10 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                                     behandlingsstegstatus = VENTER,
                                     venteårsak = venteårsak,
                                     tidsfrist = behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker))
+    }
+
+    private fun assertBehandlingsstatus(behandlingId: UUID, behandlingsstatus: Behandlingsstatus) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        assertEquals(behandlingsstatus, behandling.status)
     }
 }

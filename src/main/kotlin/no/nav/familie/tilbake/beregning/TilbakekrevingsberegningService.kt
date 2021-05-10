@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -59,7 +60,7 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
         val perioderMedBeløp: Map<Periode, FordeltKravgrunnlagsbeløp> =
                 kravgrunnlagsberegningService.fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag, vurderingsperioder)
         val beregningsresultatperioder =
-                beregn(kravgrunnlag, vurdertForeldelse, vilkårsvurdering, perioderMedBeløp, true)
+                beregn(kravgrunnlag, vurdertForeldelse, vilkårsvurdering, perioderMedBeløp, skalBeregneRenter(kravgrunnlag.fagområdekode))
         val totalTilbakekrevingsbeløp = beregningsresultatperioder.sumOf { it.tilbakekrevingsbeløp }
         val totalFeilutbetaltBeløp = beregningsresultatperioder.sumOf { it.feilutbetaltBeløp }
         return Beregningsresultat(vedtaksresultat = bestemVedtakResultat(behandlingId,
@@ -174,6 +175,10 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
                         GrunnlagsperiodeMedSkatteprosent(it.periode, maksTilbakekrevesBeløp, kgBeløp.skatteprosent)
                     }
                 }.flatten()
+    }
+
+    private fun skalBeregneRenter(fagområdekode: Fagområdekode): Boolean {
+        return Fagområdekode.BA != fagområdekode
     }
 
     private fun bestemVedtakResultat(behandlingId: UUID,
