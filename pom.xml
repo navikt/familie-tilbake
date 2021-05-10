@@ -21,7 +21,7 @@
         <java.version>11</java.version>
         <jvmTarget>11</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin.version>1.5.0</kotlin.version>
         <felles.version>1.20210419103325_d044927</felles.version>
         <common-java-modules.version>2.2021.05.03_09.21-91f2fc8f059e</common-java-modules.version>
         <kontrakter.version>2.0_20210506101703_8c0e695</kontrakter.version>
