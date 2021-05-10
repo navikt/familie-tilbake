@@ -89,7 +89,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun settBehandlingPåVent(behandlingId: UUID, behandlingPåVentDto: BehandlingPåVentDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
-        val behandlingId = behandling.id
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
             throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",

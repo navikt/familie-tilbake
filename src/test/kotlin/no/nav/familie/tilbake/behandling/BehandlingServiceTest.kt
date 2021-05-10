@@ -552,6 +552,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             varsel = varsel,
                                             revurderingsvedtaksdato = fom,
                                             verge = verge,
+                                            saksbehandlerIdent = "z9912345",
                                             faktainfo = faktainfo)
     }
 }

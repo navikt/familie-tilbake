@@ -280,6 +280,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                             enhetsnavn = "Oslo",
                                             revurderingsvedtaksdato = LocalDate.now(),
                                             varsel = varsel,
+                                            saksbehandlerIdent = "z1234567",
                                             faktainfo = faktainfo)
     }
 
