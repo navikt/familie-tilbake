@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -24,7 +25,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet() || Behandlingsstatus.IVERKSETTER_VEDTAK == behandling.status) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
         }
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
