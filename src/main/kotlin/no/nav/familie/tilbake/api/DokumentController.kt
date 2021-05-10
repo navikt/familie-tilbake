@@ -79,8 +79,8 @@ class DokumentController(private val varselbrevService: VarselbrevService,
 
     @GetMapping("/vedtaksbrevtekst/{behandlingId}",
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Forhåndsviser brev",
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Henter vedtaksbrevtekst",
                         henteParam = "behandlingId")
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst (behandlingId))
