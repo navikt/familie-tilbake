@@ -36,9 +36,7 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         // step3a: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
         if (finnesUnderkjenteSteg) {
-            behandlingskontrollService.tilbakehoppBehandlingssteg(behandlingId,
-                                                                  Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                                       Behandlingsstegstatus.KLAR))
+            behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
         } else {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,

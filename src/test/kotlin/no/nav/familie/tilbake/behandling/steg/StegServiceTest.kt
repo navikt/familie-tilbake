@@ -391,7 +391,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `håndterSteg skal avbryte fatte vedtak og tilbakeføre til foreslå vedtak når beslutter underkjente steg`() {
+    fun `håndterSteg skal tilbakeføre fatte vedtak og flytte til foreslå vedtak når beslutter underkjente steg`() {
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -402,7 +402,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.AVBRUTT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
 
         assertAnsvarligBeslutter()
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
