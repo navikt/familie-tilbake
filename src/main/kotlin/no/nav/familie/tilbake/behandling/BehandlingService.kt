@@ -33,7 +33,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,8 +48,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
                         private val taskService: TaskService,
-                        private val rolleConfig: RolleConfig,
-                        private val environment: Environment) {
+                        private val rolleConfig: RolleConfig) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -274,8 +272,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (behandling.erAvsluttet() || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
             return false
         }
-        if (!environment.activeProfiles.any { it == "local" } &&
-            Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
+        if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
             behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
             return false
         }

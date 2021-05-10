@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,8 +19,7 @@ import java.util.UUID
 @Service
 class TotrinnService(private val behandlingRepository: BehandlingRepository,
                      private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
-                     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-                     private val environment: Environment) {
+                     private val totrinnsvurderingRepository: TotrinnsvurderingRepository) {
 
     @Transactional(readOnly = true)
     fun hentTotrinnsvurderinger(behandlingId: UUID): TotrinnsvurderingDto {
@@ -51,8 +49,7 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
 
     fun validerAnsvarligBeslutter(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (!environment.activeProfiles.any { it == "local" } &&
-            behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
+        if (behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
             throw Feil(message = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
                        frontendFeilmelding = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
                        httpStatus = HttpStatus.BAD_REQUEST)
