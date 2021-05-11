@@ -27,11 +27,8 @@ import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import no.nav.familie.tilbake.domain.tbd.Friteksttype
 import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
-import no.nav.familie.tilbake.domain.tbd.Revurderingsårsak
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.domain.tbd.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.ÅrsakTotrinnsvurdering
-import no.nav.familie.tilbake.domain.tbd.Årsakstype
 import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -52,7 +49,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.totrinn.domain.Totrinnsresultatsgrunnlag
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
@@ -131,31 +127,26 @@ object Testdata {
                                     tidsfrist = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
                                     status = Aksjonspunktsstatus.OPPRETTET)
 
-    val revurderingsårsak = Revurderingsårsak(aksjonspunktId = aksjonspunkt.id,
-                                              årsakstype = Årsakstype.FEIL_LOV)
-
     val behandlingsstegstilstand = Behandlingsstegstilstand(behandlingId = behandling.id,
                                                             behandlingssteg = Behandlingssteg.FAKTA,
                                                             behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
 
     val totrinnsvurdering = Totrinnsvurdering(behandlingId = behandling.id,
-                                              aksjonspunktsdefinisjon = Aksjonspunktsdefinisjon.FATTE_VEDTAK,
+                                              behandlingssteg = Behandlingssteg.FAKTA,
                                               godkjent = true,
                                               begrunnelse = "testverdi")
 
-    val årsakTotrinnsvurdering = ÅrsakTotrinnsvurdering(årsakstype = Årsakstype.ANNET,
-                                                        totrinnsvurderingId = totrinnsvurdering.id)
 
     val mottakersVarselrespons = MottakersVarselrespons(behandlingId = behandling.id,
                                                         akseptertFaktagrunnlag = true,
                                                         kilde = "testverdi")
 
     private val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-                                                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-                                                begrunnelse = "testverdi",
-                                                foreldelsesfrist = LocalDate.now(),
-                                                oppdagelsesdato = LocalDate.now())
+                                                        foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
+                                                        begrunnelse = "testverdi",
+                                                        foreldelsesfrist = LocalDate.now(),
+                                                        oppdagelsesdato = LocalDate.now())
 
     val vurdertForeldelse = VurdertForeldelse(behandlingId = behandling.id,
                                               foreldelsesperioder = setOf(foreldelsesperiode))
@@ -261,11 +252,6 @@ object Testdata {
     val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(melding = "testverdi",
                                                         eksternFagsakId = "testverdi",
                                                         ytelsestype = Ytelsestype.BARNETRYGD)
-
-    val totrinnsresultatsgrunnlag = Totrinnsresultatsgrunnlag(behandlingId = behandling.id,
-                                                              faktaFeilutbetalingId = faktaFeilutbetaling.id,
-                                                              vurdertForeldelseId = vurdertForeldelse.id,
-                                                              vilkårsvurderingId = vilkår.id)
 
     val vedtaksbrevsoppsummering = Vedtaksbrevsoppsummering(behandlingId = behandling.id,
                                                             oppsummeringFritekst = "testverdi")
