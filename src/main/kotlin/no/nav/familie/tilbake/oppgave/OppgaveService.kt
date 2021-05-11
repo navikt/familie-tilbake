@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -9,12 +11,12 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.person.PersonService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -25,7 +27,8 @@ import java.util.UUID
 @Service
 class OppgaveService(private val behandlingRepository: BehandlingRepository,
                      private val fagsakRepository: FagsakRepository,
-                     private val integrasjonerClient: IntegrasjonerClient) {
+                     private val integrasjonerClient: IntegrasjonerClient,
+                     private val personService: PersonService) {
 
 
     private val antallOppgaveTyper = Oppgavetype.values().associateWith {
@@ -39,9 +42,10 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+        val aktorId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
 
         val opprettOppgave = OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = fagsak.bruker.ident, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID), //Oppgave api støtter PT ikke FolkeregisterIdent
                 saksId = behandling.eksternBrukId.toString(),
                 tema = fagsak.ytelsestype.tilTema(),
                 oppgavetype = oppgavetype,
@@ -49,7 +53,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
                 enhetsnummer = behandling.behandlendeEnhet,
-                behandlingstype = "ae0161",
+                behandlingstype = Behandlingstype.Tilbakekreving.value,
                 behandlingstema = null
         )
 

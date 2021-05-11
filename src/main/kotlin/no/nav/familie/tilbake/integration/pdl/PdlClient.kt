@@ -3,11 +3,12 @@ package no.nav.familie.tilbake.integration.pdl
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
+import no.nav.familie.tilbake.integration.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
@@ -50,6 +51,20 @@ class PdlClient(val pdlConfig: PdlConfig,
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
+    fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                                                query = PdlConfig.hentIdenterQuery)
+        val response = postForEntity<PdlHentIdenterResponse>(pdlConfig.pdlUri,
+                                                             pdlPersonRequest,
+                                                             httpHeaders(fagsystem))
+
+        if (!response.harFeil()) return response
+        throw Feil(message = "Feil mot pdl: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
+    }
+
 
 
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
