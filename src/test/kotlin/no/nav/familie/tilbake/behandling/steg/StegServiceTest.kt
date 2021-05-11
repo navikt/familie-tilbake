@@ -3,6 +3,9 @@ package no.nav.familie.tilbake.behandling.steg
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
@@ -36,6 +39,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
+import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -44,6 +49,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -73,6 +79,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var totrinnsvurderingRepository: TotrinnsvurderingRepository
+
+    @Autowired
+    private lateinit var taskRepository: TaskRepository
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -363,6 +372,49 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.FATTER_VEDTAK)
         assertFaktadata(behandlingsstegFaktaDto)
+
+        assertOppgave(Oppgavetype.BehandleSak, FerdigstillOppgaveTask.TYPE)
+        assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
+    }
+
+    @Test
+    fun `håndterSteg skal utføre foreslå vedtak på nytt når beslutter underkjente steg og forsette til fatte vedtak`() {
+        // behandle fakta steg
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
+
+        // behandle vilkårsvurderingssteg
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(
+                PeriodeDto(LocalDate.of(2021, 1, 1),
+                           LocalDate.of(2021, 1, 31))))
+
+        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(
+                fritekstavsnitt = FritekstavsnittDto(
+                        perioderMedTekst = listOf(PeriodeMedTekstDto(
+                                periode = PeriodeDto(LocalDate.of(2021, 1, 1),
+                                                     LocalDate.of(2021, 1, 31)),
+                                faktaAvsnitt = "fakta tekst"
+                        ))
+                )))
+
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = false))
+
+        val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+
+        stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(
+                fritekstavsnitt = FritekstavsnittDto(
+                        perioderMedTekst = listOf(PeriodeMedTekstDto(
+                                periode = PeriodeDto(LocalDate.of(2021, 1, 1),
+                                                     LocalDate.of(2021, 1, 31)),
+                                faktaAvsnitt = "fakta tekst"
+                        ))
+                )))
+        assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, FerdigstillOppgaveTask.TYPE)
+        assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
     }
 
     @Test
@@ -388,6 +440,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertFalse { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent } }
+
+        assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
     }
 
     @Test
@@ -413,6 +467,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertFalse { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORELDELSE } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent } }
+
+        assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
+        assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, LagOppgaveTask.TYPE)
     }
 
     @Test
@@ -611,6 +668,17 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private fun assertAnsvarligBeslutter() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         assertEquals("Z0000", behandling.ansvarligBeslutter)
+    }
+
+    private fun assertOppgave(oppgavetype: Oppgavetype, tasktype: String) {
+        val taskene = taskRepository.findByStatusIn(status = listOf(Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
+                                                                    Status.BEHANDLER, Status.FERDIG), page = Pageable.unpaged())
+        assertTrue {
+            taskene.any {
+                oppgavetype.name == it.metadata.getProperty("oppgavetype") &&
+                tasktype == it.type
+            }
+        }
     }
 
 }

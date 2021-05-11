@@ -1,11 +1,13 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,7 +16,8 @@ import java.util.UUID
 
 @Service
 class Fattevedtakssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                       private val totrinnService: TotrinnService) : IBehandlingssteg {
+                       private val totrinnService: TotrinnService,
+                       private val oppgaveTaskService: OppgaveTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,10 +36,14 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
 
-        // step3a: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
+        // step3: lukk Godkjenne vedtak oppgaver
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+
+        // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
         if (finnesUnderkjenteSteg) {
             behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
+            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.BehandleUnderkjentVedtak)
         } else {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,

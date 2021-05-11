@@ -1,11 +1,10 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -24,8 +23,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
-import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
@@ -47,7 +45,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
-                        private val taskService: TaskService,
+                        private val oppgaveTaskService: OppgaveTaskService,
                         private val rolleConfig: RolleConfig) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -58,10 +56,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
         //Lag oppgave for behandling
-        taskService.save(
-                Task(type = LagOppgaveTask.TYPE,
-                     payload = behandling.id.toString())
-        )
+        oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
         return behandling
     }
@@ -144,8 +139,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         // Ferdigstill oppgave
-        taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
-                                 payload = behandling.id.toString()))
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.BehandleSak)
     }
 
     @Transactional

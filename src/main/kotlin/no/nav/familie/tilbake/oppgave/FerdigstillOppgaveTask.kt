@@ -19,7 +19,8 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
 
     override fun doTask(task: Task) {
         log.info("FerdigstillOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-        oppgaveService.ferdigstillOppgave(behandlingId = UUID.fromString(task.payload), Oppgavetype.BehandleSak)
+        val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
+        oppgaveService.ferdigstillOppgave(behandlingId = UUID.fromString(task.payload), oppgavetype)
     }
 
     companion object {
