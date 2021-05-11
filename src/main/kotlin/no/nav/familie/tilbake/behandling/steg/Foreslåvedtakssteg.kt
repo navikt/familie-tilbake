@@ -61,10 +61,8 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        with(oppgaveTaskService){
-            ferdigstilleOppgaveTask(behandlingId, oppgavetype)
-            opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
-        }
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype)
+        oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

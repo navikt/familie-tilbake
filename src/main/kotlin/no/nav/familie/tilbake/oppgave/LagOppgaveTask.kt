@@ -22,7 +22,8 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep
         log.info("LagOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         oppgaveService.opprettOppgave(behandlingId = UUID.fromString(task.payload),
-                                      oppgavetype, LocalDate.now().plusDays(21))
+                                      oppgavetype = oppgavetype,
+                                      fristForFerdigstillelse = LocalDate.now().plusDays(21))
     }
 
     companion object {

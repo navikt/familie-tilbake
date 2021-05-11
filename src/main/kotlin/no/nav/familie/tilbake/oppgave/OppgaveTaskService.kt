@@ -12,18 +12,18 @@ import java.util.UUID
 class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
-    fun opprettOppgaveTask(behandlingId:UUID, oppgavetype: Oppgavetype){
+    fun opprettOppgaveTask(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val properties = Properties()
-        properties.setProperty("oppgavetype",oppgavetype.name)
+        properties.setProperty("oppgavetype", oppgavetype.name)
         taskRepository.save(Task(type = LagOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
     }
 
     @Transactional
-    fun ferdigstilleOppgaveTask(behandlingId:UUID, oppgavetype: Oppgavetype){
+    fun ferdigstilleOppgaveTask(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val properties = Properties()
-        properties.setProperty("oppgavetype",oppgavetype.name)
+        properties.setProperty("oppgavetype", oppgavetype.name)
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))

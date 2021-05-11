@@ -70,7 +70,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                                     handling: String) {
         when (param) {
             behandlingIdParam -> {
-                val behandlingId = requestBody[0] as UUID
+                val behandlingId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
                 var behandlerRolle = minimumBehandlerRolle
                 if (requestBody.size > 1) {
@@ -82,20 +82,20 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
             }
             ytelsestypeParam -> {
-                val ytelsestype = Ytelsestype.valueOf(requestBody[0].toString())
+                val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
                 val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             fagsystemParam -> {
-                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody[0].toString())
+                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.first().toString())
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             eksternBrukIdParam -> {
-                val eksternBrukId = requestBody[0] as UUID
+                val eksternBrukId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
