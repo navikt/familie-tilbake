@@ -40,12 +40,12 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                         henteParam = "behandlingId")
     fun hentForhåndsvisningBrevMedDokumentMal(@PathVariable behandlingId: UUID,
                                               @RequestBody dto: ForhåndsvisningBrevDto): Ressurs<ByteArray> {
-        if (dto.malType == Dokumentmalstype.INNHENT_DOKUMENTASJON) {
+        if (dto.maltype == Dokumentmalstype.INNHENT_DOKUMENTASJON) {
             return Ressurs.success(innhentDokumentasjonbrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId,
                                                                                                                dto.fritekst))
-        } else if (dto.malType == Dokumentmalstype.VARSEL || dto.malType == Dokumentmalstype.KORRIGERT_VARSEL) {
+        } else if (dto.maltype == Dokumentmalstype.VARSEL || dto.maltype == Dokumentmalstype.KORRIGERT_VARSEL) {
             return Ressurs.success(manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandlingId,
-                                                                                                 dto.malType,
+                                                                                                 dto.maltype,
                                                                                                  dto.fritekst))
         } else {
             return Ressurs.funksjonellFeil(melding = "Dokumentmal $dto.malType er ikke støttet",
@@ -74,16 +74,16 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
     fun hentForhåndsvisningVedtaksbrev(@Valid @RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
-        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf (dto))
+        return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
     }
 
     @GetMapping("/vedtaksbrevtekst/{behandlingId}",
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
+                produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter vedtaksbrevtekst",
                         henteParam = "behandlingId")
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
-        return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst (behandlingId))
+        return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
     }
 
 }
