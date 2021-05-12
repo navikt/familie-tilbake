@@ -11,6 +11,8 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -195,14 +197,51 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `sjekkTilgang skal ha tilgang i behandleSteg POST request uten body`() {
+    fun `sjekkTilgang skal saksbehandler ha tilgang i Fakta utførBehandlingssteg POST request`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         // POST request uten body
         opprettRequest("/api/behandling/$behandlingId/steg/v1/", HttpMethod.POST, token)
 
-        every { mockJoinpoint.args } returns arrayOf(behandlingId)
+        every { mockJoinpoint.args } returns arrayOf(behandlingId, BehandlingsstegFaktaDto(feilutbetaltePerioder = emptyList(),
+                                                                                           begrunnelse = "testverdi"))
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal saksbehandler ikke ha tilgang i Fattevedtak utførBehandlingssteg POST request`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        // POST request uten body
+        opprettRequest("/api/behandling/$behandlingId/steg/v1/", HttpMethod.POST, token)
+
+        every { mockJoinpoint.args } returns arrayOf(behandlingId,
+                                                     BehandlingsstegFatteVedtaksstegDto(totrinnsvurderinger = emptyList()))
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        assertEquals("abc med rolle SAKSBEHANDLER har ikke tilgang til å Håndterer behandlingens aktiv steg og fortsetter" +
+                     " den til neste steg. Krever BESLUTTER.", exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal beslutter ha tilgang i Fattevedtak utførBehandlingssteg POST request`() {
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
+        // POST request uten body
+        opprettRequest("/api/behandling/$behandlingId/steg/v1/", HttpMethod.POST, token)
+
+        every { mockJoinpoint.args } returns arrayOf(behandlingId,
+                                                     BehandlingsstegFatteVedtaksstegDto(totrinnsvurderinger = emptyList()))
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
         every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
@@ -226,7 +265,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
-
 
     private fun opprettBehandling(ytelsestype: Ytelsestype): Behandling {
         val fagsak = Fagsak(bruker = Bruker("1232"),

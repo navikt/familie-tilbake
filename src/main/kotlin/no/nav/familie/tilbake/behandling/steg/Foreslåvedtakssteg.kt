@@ -1,12 +1,15 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.VedtaksbrevService
+import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +17,9 @@ import java.util.UUID
 
 @Service
 class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollService,
-                         val vedtaksbrevService: VedtaksbrevService) : IBehandlingssteg {
+                         val vedtaksbrevService: VedtaksbrevService,
+                         val oppgaveTaskService: OppgaveTaskService,
+                         val totrinnService: TotrinnService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -30,6 +35,9 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
         flyttBehandlingVidere(behandlingId)
+
+        // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
+        håndterOppgave(behandlingId)
     }
 
     @Transactional
@@ -45,6 +53,16 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
                                                                                       Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
+    }
+
+    private fun håndterOppgave(behandlingId: UUID) {
+        val finnesUnderkjenteSteg = totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)
+        var oppgavetype = Oppgavetype.BehandleSak
+        if (finnesUnderkjenteSteg) {
+            oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
+        }
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype)
+        oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
