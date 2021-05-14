@@ -698,7 +698,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             varsel = varsel,
                                             revurderingsvedtaksdato = fom,
                                             verge = verge,
-                                            faktainfo = faktainfo)
+                                            faktainfo = faktainfo,
+                                            saksbehandlerIdent = "bob")
     }
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {

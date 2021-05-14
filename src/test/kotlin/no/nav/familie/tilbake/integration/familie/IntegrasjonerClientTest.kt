@@ -11,7 +11,7 @@ import io.mockk.mockk
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.Fagsystem

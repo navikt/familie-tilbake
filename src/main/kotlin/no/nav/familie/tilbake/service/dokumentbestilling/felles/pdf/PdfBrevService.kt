@@ -1,17 +1,22 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf
 
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.header.TekstformatererHeader
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.service.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.service.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Properties
 
 @Service
-class PdfBrevService(private val journalføringService: JournalføringService) {
+class PdfBrevService(private val journalføringService: JournalføringService,
+                     private val taskService: TaskService) {
 
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
     private val pdfGenerator: PdfGenerator = PdfGenerator()
@@ -30,27 +35,47 @@ class PdfBrevService(private val journalføringService: JournalføringService) {
         valider(brevtype, varsletBeløp)
         valider(brevtype, data)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
-//        TODO opprettes task
-        //        lagTaskerForUtsendingOgSporing(behandlingId, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
+        lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
+    }
+
+    private fun lagTaskerForUtsendingOgSporing(behandling: Behandling,
+                                               fagsak: Fagsak,
+                                               brevtype: Brevtype,
+                                               varsletBeløp: Long?,
+                                               fritekst: String?,
+                                               brevdata: Brevdata,
+                                               dokumentreferanse: JournalpostIdOgDokumentId) {
+
+        val idString = behandling.id.toString()
+        val properties: Properties = Properties().apply {
+            setProperty("journalpostId", dokumentreferanse.journalpostId)
+            setProperty("fagsystem", fagsak.fagsystem.name)
+            setProperty("journalpostId", dokumentreferanse.journalpostId)
+            setProperty("dokumentId", dokumentreferanse.dokumentId)
+            setProperty("mottager", brevdata.mottager.name)
+            setProperty("brevType", brevtype.name)
+            varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
+            fritekst?.also { setProperty("fritekst", fritekst) }
+            brevdata.tittel?.also { setProperty("tittel", it) }
+        }
+        logger.info("Oppretter task for publisering av brev for behandlingId=${behandling.id}]")
+        taskService.save(Task(PubliserJournalpostTask.TYPE, idString, properties))
     }
 
     private fun lagOgJournalførBrev(behandling: Behandling,
                                     fagsak: Fagsak,
                                     brevtype: Brevtype,
                                     data: Brevdata): JournalpostIdOgDokumentId {
-        return JournalpostIdOgDokumentId("dummy")
-        //  TODO Kommenteres inn når familie integrasjoner er tilpasset
-//        val html = lagHtml(data)
-//        val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, DokumentVariant.ENDELIG)
+        val html = lagHtml(data)
+        val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
 
-        //        return journalføringService.journalførUtgåendeBrev(behandling,
-//                                                            fagsak,
-//                                                            mapBrevTypeTilDokumentKategori(brevtype),
-//                                                            data.metadata,
-//                                                            data.mottaker,
-//                                                            pdf)
+        return journalføringService.journalførUtgåendeBrev(behandling,
+                                                           fagsak,
+                                                           mapBrevtypeTilDokumentkategori(brevtype),
+                                                           data.metadata,
+                                                           data.mottager,
+                                                           pdf)
     }
-
 
     private fun mapBrevtypeTilDokumentkategori(brevType: Brevtype): Dokumentkategori {
         return if (Brevtype.VEDTAK === brevType) {
