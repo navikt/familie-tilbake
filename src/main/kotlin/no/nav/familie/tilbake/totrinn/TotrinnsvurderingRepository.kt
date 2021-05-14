@@ -11,5 +11,5 @@ import java.util.UUID
 @Transactional
 interface TotrinnsvurderingRepository : RepositoryInterface<Totrinnsvurdering, UUID>, InsertUpdateRepository<Totrinnsvurdering> {
 
-    fun findByBehandlingIdAndAktivIsTrue(behandlingId:UUID): List<Totrinnsvurdering>
+    fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): List<Totrinnsvurdering>
 }

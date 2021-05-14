@@ -8,7 +8,7 @@ class VarselService(val varselRepository: VarselRepository) {
 
     fun lagre(payload: String, varseltekst: String, varselbeløp: Long) {
 
-        varselRepository.insert(Varsel(varseltekst = varseltekst, varselbeløp = varselbeløp ))
+        varselRepository.insert(Varsel(varseltekst = varseltekst, varselbeløp = varselbeløp))
 
     }
 

@@ -1,9 +1,10 @@
 package no.nav.familie.tilbake.integration.familie
 
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -12,8 +13,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -78,8 +77,8 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        val uri =
-                URI.create(integrasjonerConfig.integrasjonUri.toString() + "${IntegrasjonerConfig.PATH_OPPGAVE}/${patchOppgave.id}/oppdater")
+        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
+                             + "${IntegrasjonerConfig.PATH_OPPGAVE}/${patchOppgave.id}/oppdater")
 
         return patchForEntity<Ressurs<OppgaveResponse>>(uri,
                                                         patchOppgave,
@@ -87,8 +86,8 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): OppgaveResponse {
-        val baseUri =
-                URI.create(integrasjonerConfig.integrasjonUri.toString() + "${IntegrasjonerConfig.PATH_OPPGAVE}/$oppgaveId/fordel")
+        val baseUri = URI.create(integrasjonerConfig.integrasjonUri.toString()
+                                 + "${IntegrasjonerConfig.PATH_OPPGAVE}/$oppgaveId/fordel")
         val uri = if (saksbehandler == null)
             baseUri
         else

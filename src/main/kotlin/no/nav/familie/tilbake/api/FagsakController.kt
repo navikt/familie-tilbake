@@ -36,9 +36,9 @@ class FagsakController(val fagsakService: FagsakService) {
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Sjekk om det finnes en åpen tilbakekrevingsbehandling",
                         henteParam = "fagsystem")
-    fun finnesÅpenTilbakekrevingsbehandling(
-            @PathVariable("fagsystem") fagsystem: Fagsystem,
-            @PathVariable("fagsak") eksternFagsakId: String): Ressurs<FinnesBehandlingsresponsDto> {
+    fun finnesÅpenTilbakekrevingsbehandling(@PathVariable("fagsystem") fagsystem: Fagsystem,
+                                            @PathVariable("fagsak")
+                                            eksternFagsakId: String): Ressurs<FinnesBehandlingsresponsDto> {
         return Ressurs.success(fagsakService.finnesÅpenTilbakekrevingsbehandling(fagsystem = fagsystem,
                                                                                  eksternFagsakId = eksternFagsakId))
     }

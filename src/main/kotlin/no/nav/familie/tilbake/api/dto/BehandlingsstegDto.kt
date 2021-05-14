@@ -18,13 +18,11 @@ import javax.validation.constraints.Size
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes(
-        JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
-        JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
-        JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
-        JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class),
-        JsonSubTypes.Type(value = BehandlingsstegFatteVedtaksstegDto::class),
-)
+@JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegFatteVedtaksstegDto::class))
 abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
@@ -85,13 +83,12 @@ data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: L
     }
 }
 
-data class VilkårsvurderingsperiodeDto(
-        val periode: PeriodeDto,
-        val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
-        @Size(max = 1500, message = "begrunnelse er for lang")
-        val begrunnelse: String,
-        val godTroDto: GodTroDto? = null,
-        val aktsomhetDto: AktsomhetDto? = null)
+data class VilkårsvurderingsperiodeDto(val periode: PeriodeDto,
+                                       val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+                                       @Size(max = 1500, message = "begrunnelse er for lang")
+                                       val begrunnelse: String,
+                                       val godTroDto: GodTroDto? = null,
+                                       val aktsomhetDto: AktsomhetDto? = null)
 
 data class GodTroDto(val beløpErIBehold: Boolean,
                      val beløpTilbakekreves: BigDecimal? = null,

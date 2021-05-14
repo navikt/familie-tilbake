@@ -11,7 +11,7 @@ class HbVedtaksbrevDatoer(val opphørsdatoDødSøker: LocalDate? = null,
     constructor(perioder: List<HbVedtaksbrevsperiode>) : this(getFørsteDagForHendelsesundertype(perioder,
                                                                                                 Hendelsesundertype.MOTTAKER_DØD),
                                                               getFørsteDagForHendelsesundertype(perioder,
-                                                                                               Hendelsesundertype.BARN_DØD))
+                                                                                                Hendelsesundertype.BARN_DØD))
 
     companion object {
 

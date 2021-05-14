@@ -22,8 +22,7 @@ class IntegrasjonerClientConfig {
         every { integrasjonerClient.arkiver(any()) } answers {
             ArkiverDokumentResponse("jpId",
                                     false,
-                                    listOf(DokumentInfo("id"))
-            )
+                                    listOf(DokumentInfo("id")))
         }
         return integrasjonerClient
     }

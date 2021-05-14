@@ -45,10 +45,8 @@ object FellesTekstformaterer {
         if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
             return TEMPLATE_CACHE[språkstøttetFilsti]!!
         }
-        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(
-                lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
-                språkstøttetFilsti
-        )
+        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
+                                                                        språkstøttetFilsti)
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 

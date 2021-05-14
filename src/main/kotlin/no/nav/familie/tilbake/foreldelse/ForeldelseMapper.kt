@@ -27,14 +27,10 @@ object ForeldelseMapper {
                                          foreldelsesvurderingstype = it.foreldelsesvurderingstype,
                                          foreldelsesfrist = it.foreldelsesfrist,
                                          oppdagelsesdato = it.oppdagelsesdato)
+        } ?: logiskePerioder.map {
+            VurdertForeldelsesperiodeDto(periode = PeriodeDto(it.periode),
+                                         feilutbetaltBeløp = it.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_UP))
         }
-                                                                             ?: logiskePerioder.map {
-                                                                                 VurdertForeldelsesperiodeDto(
-                                                                                         periode = PeriodeDto(it.periode),
-                                                                                         feilutbetaltBeløp =
-                                                                                         it.feilutbetaltBeløp.setScale(
-                                                                                                 0, RoundingMode.HALF_UP))
-                                                                             }
 
         return VurdertForeldelseDto(foreldetPerioder = vurdertForeldelsesperioder)
     }

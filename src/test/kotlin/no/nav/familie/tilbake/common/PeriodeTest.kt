@@ -37,9 +37,9 @@ internal class PeriodeTest {
     }
 
     @Test
-    fun `omslutter returnerer true for periode med overlap`(){
-        val periode1 = Periode(YearMonth.of(2019,1), YearMonth.of(2019,3))
-        val periode2 = Periode(YearMonth.of(2019,1), YearMonth.of(2019,1))
+    fun `omslutter returnerer true for periode med overlap`() {
+        val periode1 = Periode(YearMonth.of(2019, 1), YearMonth.of(2019, 3))
+        val periode2 = Periode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
         assertTrue { periode1.omslutter(periode2) }
     }

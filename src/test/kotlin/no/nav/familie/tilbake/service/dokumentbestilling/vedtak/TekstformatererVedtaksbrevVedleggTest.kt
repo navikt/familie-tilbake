@@ -119,13 +119,14 @@ class TekstformatererVedtaksbrevVedleggTest {
                                                                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                                                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                            fritekst = "Du er heldig som slapp å betale alt!",
-                                                           særligeGrunner = HbSærligeGrunner(
-                                                                   listOf(SærligGrunn.TID_FRA_UTBETALING,
-                                                                          SærligGrunn.STØRRELSE_BELØP))),
-                                             resultat = HbResultat(tilbakekrevesBeløpUtenSkattMedRenter =
-                                                                   BigDecimal.valueOf((tilbakekreves - skatt).toLong()),
-                                                                   tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
-                                                                   rentebeløp = BigDecimal.valueOf(renter.toLong()))))
+                                                           særligeGrunner =
+                                                           HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
+                                                                                   SærligGrunn.STØRRELSE_BELØP))),
+                                             resultat =
+                                             HbResultat(tilbakekrevesBeløpUtenSkattMedRenter =
+                                                        BigDecimal.valueOf((tilbakekreves - skatt).toLong()),
+                                                        tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
+                                                        rentebeløp = BigDecimal.valueOf(renter.toLong()))))
         return HbVedtaksbrevsdata(vedtaksbrevData, perioder)
     }
 
@@ -171,7 +172,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                                                                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                                                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                            fritekst = "Du er heldig som slapp å betale alt!",
-                                                           særligeGrunner = HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
+                                                           særligeGrunner = HbSærligeGrunner(listOf(SærligGrunn
+                                                                                                            .TID_FRA_UTBETALING,
                                                                                                     SærligGrunn.STØRRELSE_BELØP),
                                                                                              null,
                                                                                              null)),

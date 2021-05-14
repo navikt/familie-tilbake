@@ -17,29 +17,27 @@ import java.util.UUID
 object KravgrunnlagMapper {
 
     fun tilKravgrunnlag431(kravgrunnlag: DetaljertKravgrunnlagDto, behandlingId: UUID): Kravgrunnlag431 {
-        return Kravgrunnlag431(
-                behandlingId = behandlingId,
-                vedtakId = kravgrunnlag.vedtakId,
-                omgjortVedtakId = kravgrunnlag.vedtakIdOmgjort,
-                kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
-                fagområdekode = Fagområdekode.fraKode(kravgrunnlag.kodeFagomraade),
-                fagsystemId = kravgrunnlag.fagsystemId,
-                fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
-                gjelderVedtakId = kravgrunnlag.vedtakGjelderId,
-                gjelderType = GjelderType.fraKode(kravgrunnlag.typeGjelderId.value()),
-                utbetalesTilId = kravgrunnlag.utbetalesTilId,
-                utbetIdType = GjelderType.fraKode(kravgrunnlag.typeUtbetId.value()),
-                hjemmelkode = kravgrunnlag.kodeHjemmel,
-                beregnesRenter = "J" == kravgrunnlag.renterBeregnes?.value(),
-                ansvarligEnhet = kravgrunnlag.enhetAnsvarlig,
-                behandlingsenhet = kravgrunnlag.enhetBehandl,
-                bostedsenhet = kravgrunnlag.enhetBosted,
-                kontrollfelt = kravgrunnlag.kontrollfelt,
-                saksbehandlerId = kravgrunnlag.saksbehId,
-                referanse = kravgrunnlag.referanse,
-                eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
-                perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode)
-        )
+        return Kravgrunnlag431(behandlingId = behandlingId,
+                               vedtakId = kravgrunnlag.vedtakId,
+                               omgjortVedtakId = kravgrunnlag.vedtakIdOmgjort,
+                               kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
+                               fagområdekode = Fagområdekode.fraKode(kravgrunnlag.kodeFagomraade),
+                               fagsystemId = kravgrunnlag.fagsystemId,
+                               fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
+                               gjelderVedtakId = kravgrunnlag.vedtakGjelderId,
+                               gjelderType = GjelderType.fraKode(kravgrunnlag.typeGjelderId.value()),
+                               utbetalesTilId = kravgrunnlag.utbetalesTilId,
+                               utbetIdType = GjelderType.fraKode(kravgrunnlag.typeUtbetId.value()),
+                               hjemmelkode = kravgrunnlag.kodeHjemmel,
+                               beregnesRenter = "J" == kravgrunnlag.renterBeregnes?.value(),
+                               ansvarligEnhet = kravgrunnlag.enhetAnsvarlig,
+                               behandlingsenhet = kravgrunnlag.enhetBehandl,
+                               bostedsenhet = kravgrunnlag.enhetBosted,
+                               kontrollfelt = kravgrunnlag.kontrollfelt,
+                               saksbehandlerId = kravgrunnlag.saksbehId,
+                               referanse = kravgrunnlag.referanse,
+                               eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
+                               perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode))
     }
 
     private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> {

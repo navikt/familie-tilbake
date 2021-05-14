@@ -9,7 +9,7 @@ data class Periode(val fom: YearMonth,
 
     constructor(fom: LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
 
-    constructor(periodeDto: PeriodeDto): this(periodeDto.fom, periodeDto.tom)
+    constructor(periodeDto: PeriodeDto) : this(periodeDto.fom, periodeDto.tom)
 
     init {
         require(tom >= fom) { "Til-og-med-måned før fra-og-med-måned: $fom > $tom" }

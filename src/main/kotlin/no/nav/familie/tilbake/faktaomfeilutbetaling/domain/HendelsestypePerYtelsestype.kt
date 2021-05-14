@@ -19,10 +19,7 @@ object HendelsestypePerYtelsestype {
                                                                   Hendelsestype.MEDLEMSKAP),
                                  Ytelsestype.KONTANTSTØTTE to setOf(Hendelsestype.KS_ANNET,
                                                                     Hendelsestype.ØKONOMIFEIL,
-                                                                    Hendelsestype.MEDLEMSKAP)
-
-
-    )
+                                                                    Hendelsestype.MEDLEMSKAP))
 
     fun getHendelsestyper(ytelsestype: Ytelsestype): Set<Hendelsestype> {
         return HIERARKI[ytelsestype] ?: error("Ikke-støttet ytelsestype: $ytelsestype")
