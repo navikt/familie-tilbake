@@ -163,7 +163,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                               LocalDate.of(2019, 10, 30))
 
         return FaktaFeilutbetalingDto(totaltFeilutbetaltBeløp = BigDecimal(9000),
-                                      totalFeilutbetaltPeriode = PeriodeDto(periode) ,
+                                      totalFeilutbetaltPeriode = PeriodeDto(periode),
                                       feilutbetaltePerioder = listOf(FeilutbetalingsperiodeDto(PeriodeDto(periode),
                                                                                                BigDecimal(9000))),
                                       revurderingsvedtaksdato = LocalDate.now().minusDays(1),

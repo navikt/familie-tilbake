@@ -85,11 +85,12 @@ class AvsnittUtilTest {
                                                                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                                                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                            fritekst = "Du er heldig som slapp å betale alt!",
-                                                           særligeGrunner = HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
-                                                                                                    SærligGrunn.STØRRELSE_BELØP,
-                                                                                                    SærligGrunn.ANNET),
-                                                                                             "Fritekst særlige grunner",
-                                                                                             "Fritekst særlige grunner annet")),
+                                                           særligeGrunner =
+                                                           HbSærligeGrunner(listOf(SærligGrunn.TID_FRA_UTBETALING,
+                                                                                   SærligGrunn.STØRRELSE_BELØP,
+                                                                                   SærligGrunn.ANNET),
+                                                                            "Fritekst særlige grunner",
+                                                                            "Fritekst særlige grunner annet")),
                                              resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002)),
                        HbVedtaksbrevsperiode(periode = februar,
                                              vurderinger =
@@ -115,10 +116,10 @@ class AvsnittUtilTest {
         assertThat(resultat[0].underavsnittsliste[0].fritekstTillatt).isTrue()
         assertThat(resultat[1].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
         assertThat(resultat[1].underavsnittsliste).hasSize(6)
-        assertThat(resultat[1].underavsnittsliste.filter { it.fritekstTillatt}.size ).isEqualTo(4)
+        assertThat(resultat[1].underavsnittsliste.filter { it.fritekstTillatt }.size).isEqualTo(4)
         assertThat(resultat[2].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
         assertThat(resultat[2].underavsnittsliste).hasSize(5)
-        assertThat(resultat[2].underavsnittsliste.filter { it.fritekstTillatt}.size ).isEqualTo(3)
+        assertThat(resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size).isEqualTo(3)
         assertThat(resultat[3].avsnittstype).isEqualTo(Avsnittstype.TILLEGGSINFORMASJON)
         assertThat(resultat[3].underavsnittsliste).hasSize(12)
         resultat[3].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isFalse() }

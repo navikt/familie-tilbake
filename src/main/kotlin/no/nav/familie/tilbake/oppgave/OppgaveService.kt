@@ -44,18 +44,18 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val aktorId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
 
-        val opprettOppgave = OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID), //Oppgave api støtter PT ikke FolkeregisterIdent
-                saksId = behandling.eksternBrukId.toString(),
-                tema = fagsak.ytelsestype.tilTema(),
-                oppgavetype = oppgavetype,
-                behandlesAvApplikasjon = "familie-tilbake",
-                fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
-                enhetsnummer = behandling.behandlendeEnhet,
-                behandlingstype = Behandlingstype.Tilbakekreving.value,
-                behandlingstema = null
-        )
+
+        val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = fagsak.bruker.ident,
+                                                                          gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                                                   saksId = behandling.eksternBrukId.toString(),
+                                                   tema = fagsak.ytelsestype.tilTema(),
+                                                   oppgavetype = oppgavetype,
+                                                   behandlesAvApplikasjon = "familie-tilbake",
+                                                   fristFerdigstillelse = fristForFerdigstillelse,
+                                                   beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
+                                                   enhetsnummer = behandling.behandlendeEnhet,
+                                                   behandlingstype = Behandlingstype.Tilbakekreving.value,
+                                                   behandlingstema = null)
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
@@ -77,10 +77,11 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val finnOppgaveResponse = integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
-                                                                                      oppgavetype = oppgavetype,
-                                                                                      saksreferanse = behandling.eksternBrukId.toString(),
-                                                                                      tema = fagsak.ytelsestype.tilTema()))
+        val finnOppgaveResponse =
+                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
+                                                                    oppgavetype = oppgavetype,
+                                                                    saksreferanse = behandling.eksternBrukId.toString(),
+                                                                    tema = fagsak.ytelsestype.tilTema()))
         if (finnOppgaveResponse.oppgaver.size > 1) {
             LOG.error("er mer enn en åpen oppgave for behandlingen")
         }
@@ -106,7 +107,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 }
 
 private fun Ytelsestype.tilTema(): Tema {
-    return when(this) {
+    return when (this) {
         Ytelsestype.BARNETRYGD -> Tema.BAR
         Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.SKOLEPENGER -> Tema.ENF
         Ytelsestype.KONTANTSTØTTE -> Tema.KON

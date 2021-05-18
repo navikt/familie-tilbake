@@ -83,13 +83,14 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     fun `hentVurdertForeldelse skal returnere allerede vurdert foreldelse data`() {
         foreldelseService
                 .lagreVurdertForeldelse(behandling.id,
-                                        BehandlingsstegForeldelseDto(
-                                                listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
-                                                                             LocalDate.of(2017, 1, 31),
-                                                                             Foreldelsesvurderingstype.FORELDET),
-                                                       lagForeldelsesperiode(LocalDate.of(2017, 2, 1),
-                                                                             LocalDate.of(2017, 2, 28),
-                                                                             Foreldelsesvurderingstype.IKKE_FORELDET))))
+                                        BehandlingsstegForeldelseDto(listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                                                                  LocalDate.of(2017, 1, 31),
+                                                                                                  Foreldelsesvurderingstype
+                                                                                                          .FORELDET),
+                                                                            lagForeldelsesperiode(LocalDate.of(2017, 2, 1),
+                                                                                                  LocalDate.of(2017, 2, 28),
+                                                                                                  Foreldelsesvurderingstype
+                                                                                                          .IKKE_FORELDET))))
 
         val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
 
@@ -111,7 +112,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals(BigDecimal("10000"), andrePeriode.feilutbetaltBeløp)
         assertEquals(Foreldelsesvurderingstype.IKKE_FORELDET, andrePeriode.foreldelsesvurderingstype)
         assertEquals("foreldelses begrunnelse", andrePeriode.begrunnelse)
-        assertEquals(LocalDate.of(2017, 2, 28),andrePeriode.foreldelsesfrist)
+        assertEquals(LocalDate.of(2017, 2, 28), andrePeriode.foreldelsesfrist)
         assertNull(andrePeriode.oppdagelsesdato)
     }
 
@@ -119,10 +120,10 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     fun `lagreVurdertForeldelse skal lagre foreldelses data for en gitt behandling`() {
         foreldelseService
                 .lagreVurdertForeldelse(behandling.id,
-                                        BehandlingsstegForeldelseDto(
-                                                listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
-                                                                             LocalDate.of(2017, 1, 31),
-                                                                             Foreldelsesvurderingstype.FORELDET))))
+                                        BehandlingsstegForeldelseDto(listOf(lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                                                                  LocalDate.of(2017, 1, 31),
+                                                                                                  Foreldelsesvurderingstype
+                                                                                                          .FORELDET))))
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         assertNotNull(vurdertForeldelse)
@@ -143,8 +144,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
-                                            BehandlingsstegForeldelseDto(
-                                                    listOf(foreldelsesperiode)))
+                                            BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)))
         }
         assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
     }
@@ -157,8 +157,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
-                                            BehandlingsstegForeldelseDto(
-                                                    listOf(foreldelsesperiode)))
+                                            BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)))
         }
         assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
     }
@@ -166,11 +165,10 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     private fun lagForeldelsesperiode(fom: LocalDate,
                                       tom: LocalDate,
                                       foreldelsesvurderingstype: Foreldelsesvurderingstype): ForeldelsesperiodeDto {
-        return ForeldelsesperiodeDto(
-                periode = PeriodeDto(fom, tom),
-                begrunnelse = "foreldelses begrunnelse",
-                foreldelsesvurderingstype = foreldelsesvurderingstype,
-                foreldelsesfrist = LocalDate.of(2017, 2, 28))
+        return ForeldelsesperiodeDto(periode = PeriodeDto(fom, tom),
+                                     begrunnelse = "foreldelses begrunnelse",
+                                     foreldelsesvurderingstype = foreldelsesvurderingstype,
+                                     foreldelsesfrist = LocalDate.of(2017, 2, 28))
     }
 
 }

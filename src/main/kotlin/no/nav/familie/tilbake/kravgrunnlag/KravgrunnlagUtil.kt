@@ -43,8 +43,8 @@ object KravgrunnlagUtil {
 
             //satt xsd for å validere mottatt xml
             val schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-            val kravgrunnlagSchema = schemaFactory.newSchema(
-                    this.javaClass.classLoader.getResource("xsd/kravgrunnlag_detalj.xsd"))
+            val kravgrunnlagSchema =
+                    schemaFactory.newSchema(this.javaClass.classLoader.getResource("xsd/kravgrunnlag_detalj.xsd"))
             jaxbUnmarshaller.schema = kravgrunnlagSchema
 
             (jaxbUnmarshaller.unmarshal(StringReader(kravgrunnlagXML)) as DetaljertKravgrunnlagMelding).detaljertKravgrunnlag
@@ -59,8 +59,8 @@ object KravgrunnlagUtil {
 
             //satt xsd for å validere mottatt xml
             val schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-            val statusmeldingSchema = schemaFactory.newSchema(
-                    this.javaClass.classLoader.getResource("xsd/krav_og_vedtakstatus.xsd"))
+            val statusmeldingSchema =
+                    schemaFactory.newSchema(this.javaClass.classLoader.getResource("xsd/krav_og_vedtakstatus.xsd"))
             jaxbUnmarshaller.schema = statusmeldingSchema
 
             (jaxbUnmarshaller.unmarshal(StringReader(statusmeldingXml)) as EndringKravOgVedtakstatus).kravOgVedtakstatus

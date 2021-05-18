@@ -54,9 +54,9 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
     }
 
     private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {
-        kravOgVedtakstatus.referanse ?: throw UgyldigStatusmeldingFeil(
-                melding = "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
-                          "Mangler referanse.")
+        kravOgVedtakstatus.referanse
+        ?: throw UgyldigStatusmeldingFeil(melding = "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
+                                                    "Mangler referanse.")
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
@@ -94,13 +94,11 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                 val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
                 behandlingskontrollService
                         .tilbakehoppBehandlingssteg(behandling.id,
-                                                    Behandlingsstegsinfo(
-                                                            behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                            behandlingsstegstatus = Behandlingsstegstatus.VENTER,
-                                                            venteårsak = venteårsak,
-                                                            tidsfrist = LocalDate.now()
-                                                                    .plusWeeks(venteårsak.defaultVenteTidIUker)
-                                                    ))
+                                                    Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                                         behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                                                         venteårsak = venteårsak,
+                                                                         tidsfrist = LocalDate.now()
+                                                                                 .plusWeeks(venteårsak.defaultVenteTidIUker)))
             }
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))

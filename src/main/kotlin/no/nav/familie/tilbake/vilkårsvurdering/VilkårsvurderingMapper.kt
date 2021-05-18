@@ -44,39 +44,34 @@ object VilkårsvurderingMapper {
         val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
                 ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
                 ?.map {
-                    VurdertVilkårsvurderingsperiodeDto(
-                            periode = PeriodeDto(it.periode),
-                            feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
-                            hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it.periode),
-                            reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
-                            aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
-                            begrunnelse = it.begrunnelse,
-                            foreldet = false,
-                            vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it)
-                    )
+                    VurdertVilkårsvurderingsperiodeDto(periode = PeriodeDto(it.periode),
+                                                       feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
+                                                       hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder,
+                                                                                         it.periode),
+                                                       reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
+                                                       aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
+                                                       begrunnelse = it.begrunnelse,
+                                                       foreldet = false,
+                                                       vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it))
                 }
 
         val ikkeBehandletPerioder = perioder.map {
-            VurdertVilkårsvurderingsperiodeDto(
-                    periode = PeriodeDto(it),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                    foreldet = false
-            )
+            VurdertVilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
+                                               feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
+                                               hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
+                                               reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
+                                               aktiviteter = hentAktiviteter(kravgrunnlag431, it),
+                                               foreldet = false)
         }
 
         val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
-            VurdertVilkårsvurderingsperiodeDto(
-                    periode = PeriodeDto(periode),
-                    feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
-                    hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
-                    reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
-                    aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
-                    foreldet = true,
-                    begrunnelse = begrunnelse
-            )
+            VurdertVilkårsvurderingsperiodeDto(periode = PeriodeDto(periode),
+                                               feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
+                                               hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
+                                               reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
+                                               aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
+                                               foreldet = true,
+                                               begrunnelse = begrunnelse)
         }
 
         val samletPerioder = ikkeBehandletPerioder.toMutableList()
@@ -94,8 +89,7 @@ object VilkårsvurderingMapper {
                                      begrunnelse = it.begrunnelse,
                                      vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
                                      godTro = tilDomeneGodTro(it.godTroDto),
-                                     aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem)
-            )
+                                     aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem))
         }.toSet()
         return Vilkårsvurdering(behandlingId = behandlingId,
                                 perioder = vilkårsvurderingsperiode)
@@ -138,8 +132,7 @@ object VilkårsvurderingMapper {
                                        særligeGrunnerBegrunnelse = vilkårsvurderingAktsomhet.særligeGrunnerBegrunnelse,
                                        særligeGrunner = tilSærligGrunnerDto(vilkårsvurderingAktsomhet
                                                                                     .vilkårsvurderingSærligeGrunner),
-                                       tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp
-            )
+                                       tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp)
         }
         return null
     }
@@ -208,12 +201,11 @@ object VilkårsvurderingMapper {
             periode.beløp
                     .filter { Klassetype.YTEL == it.klassetype && it.tilbakekrevesBeløp.compareTo(BigDecimal.ZERO) != 0 }
                     .forEach {
-                        aktiviteter.add(
-                                AktivitetDto(aktivitet = it.klassekode.aktivitet,
-                                             beløp = BeløpsberegningUtil
-                                                     .beregnBeløpForPeriode(tilbakekrevesBeløp = it.tilbakekrevesBeløp,
-                                                                            vurderingsperiode = vurdertVilkårsperiode,
-                                                                            kravgrunnlagsperiode = periode.periode)))
+                        aktiviteter.add(AktivitetDto(aktivitet = it.klassekode.aktivitet,
+                                                     beløp = BeløpsberegningUtil
+                                                             .beregnBeløpForPeriode(tilbakekrevesBeløp = it.tilbakekrevesBeløp,
+                                                                                    vurderingsperiode = vurdertVilkårsperiode,
+                                                                                    kravgrunnlagsperiode = periode.periode)))
                     }
         }
         // oppsummere samme aktiviteter

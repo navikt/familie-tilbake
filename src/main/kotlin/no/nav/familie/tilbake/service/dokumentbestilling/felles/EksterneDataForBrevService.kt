@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles
 
-import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.integration.pdl.PdlClient

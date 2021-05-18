@@ -24,10 +24,10 @@
         <kotlin.version>1.5.0</kotlin.version>
         <felles.version>1.20210510092430_d9bfcd5</felles.version>
         <common-java-modules.version>2.2021.05.03_09.21-91f2fc8f059e</common-java-modules.version>
-        <kontrakter.version>2.0_20210506101703_8c0e695</kontrakter.version>
+        <kontrakter.version>2.0_20210511151152_023dcab</kontrakter.version>
         <nav.security.version>1.3.7</nav.security.version>
         <common-java-modules.version>2.2021.03.26_09.45-569ba329264c</common-java-modules.version>
-        <kontrakter.version>2.0_20210427110428_c65325b</kontrakter.version>
+        <kontrakter.version>2.0_20210511090730_295c932</kontrakter.version>
         <nav.security.version>1.3.5</nav.security.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>3.0.1</jaxb-core.version>

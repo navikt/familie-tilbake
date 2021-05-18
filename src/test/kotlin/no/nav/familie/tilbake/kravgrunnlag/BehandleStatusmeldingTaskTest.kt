@@ -303,8 +303,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
                 .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
         assertTrue { aktivtBehandlingsstegstilstand != null }
         aktivtBehandlingsstegstilstand?.let {
-            behandlingsstegstilstandRepository.update(
-                    it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
+            behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
         }
         //sett aktivt behandlingssteg til FORESLÅ_VEDTAK
         lagBehandlingsstegstilstand(FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
@@ -322,12 +321,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
                                             behandlingsstegstatus: Behandlingsstegstatus,
                                             venteårsak: Venteårsak? = null,
                                             tidsfrist: LocalDate? = null) {
-        behandlingsstegstilstandRepository.insert(
-                Behandlingsstegstilstand(behandlingId = behandling.id,
-                                         behandlingssteg = behandlingssteg,
-                                         behandlingsstegsstatus = behandlingsstegstatus,
-                                         venteårsak = venteårsak,
-                                         tidsfrist = tidsfrist))
+        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
+                                                                           behandlingssteg = behandlingssteg,
+                                                                           behandlingsstegsstatus = behandlingsstegstatus,
+                                                                           venteårsak = venteårsak,
+                                                                           tidsfrist = tidsfrist))
     }
 
     private fun assertBehandlingstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,

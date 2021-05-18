@@ -48,7 +48,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
         if (HttpMethod.GET.matches(httpRequest.method) || rolletilgangssjekk.henteParam != "") {
             validateFagsystemTilgangIGetRequest(rolletilgangssjekk.henteParam,
-                                                joinpoint.args[0],
+                                                joinpoint.args,
                                                 brukerRolleOgFagsystemstilgang,
                                                 minimumBehandlerRolle,
                                                 handling)
@@ -64,34 +64,38 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     }
 
     private fun validateFagsystemTilgangIGetRequest(param: String,
-                                                    requestBody: Any,
+                                                    requestBody: Array<Any>,
                                                     brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                                     minimumBehandlerRolle: Behandlerrolle,
                                                     handling: String) {
         when (param) {
             behandlingIdParam -> {
-                val behandlingId = requestBody as UUID
+                val behandlingId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
-
+                var behandlerRolle = minimumBehandlerRolle
+                if (requestBody.size > 1) {
+                    behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody[1], minimumBehandlerRolle)
+                }
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = behandlerRolle,
+                         handling = handling)
 
             }
             ytelsestypeParam -> {
-                val ytelsestype = Ytelsestype.valueOf(requestBody.toString())
+                val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
                 val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             fagsystemParam -> {
-                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.toString())
+                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.first().toString())
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
             }
             eksternBrukIdParam -> {
-                val eksternBrukId = requestBody as UUID
+                val eksternBrukId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
@@ -126,7 +130,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody, minimumBehandlerRolle),
+                         minimumBehandlerRolle = minimumBehandlerRolle,
                          handling = handling)
             }
             eksternBrukIdFinnesIRequest -> {
@@ -165,7 +169,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                          minimumBehandlerRolle: Behandlerrolle,
                          handling: String) {
         // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
-        if(brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)){
+        if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) {
             return
         }
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen

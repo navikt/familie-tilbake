@@ -56,6 +56,10 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
+    fun finnesUnderkjenteStegITotrinnsvurdering(behandlingId: UUID): Boolean {
+        return totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).any { !it.godkjent }
+    }
+
     @Transactional
     fun oppdaterAnsvarligBeslutter(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

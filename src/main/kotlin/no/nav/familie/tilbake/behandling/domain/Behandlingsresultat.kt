@@ -22,10 +22,10 @@ data class Behandlingsresultat(@Id
 
         val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> =
                 setOf(Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                        Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
-                        Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                      Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
+                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
     }
 
 

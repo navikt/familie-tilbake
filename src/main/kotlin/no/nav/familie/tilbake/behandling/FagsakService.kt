@@ -36,9 +36,9 @@ class FagsakService(val fagsakRepository: FagsakRepository,
                                                                         eksternFagsakId = eksternFagsakId)
         var finneÅpenBehandling = false
         if (fagsak != null) {
-            finneÅpenBehandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
-                    ytelsestype = fagsak.ytelsestype,
-                    eksternFagsakId = eksternFagsakId) != null
+            finneÅpenBehandling =
+                    behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
+                                                                           eksternFagsakId = eksternFagsakId) != null
         }
         return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finneÅpenBehandling)
     }

@@ -45,10 +45,10 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
         henleggelsesbrevService = HenleggelsesbrevService(behandlingRepository,
-                                                           brevSporingRepository,
-                                                           fagsakRepository,
-                                                           eksterneDataForBrevService,
-                                                           spyPdfBrevService)
+                                                          brevSporingRepository,
+                                                          fagsakRepository,
+                                                          eksterneDataForBrevService,
+                                                          spyPdfBrevService)
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
@@ -90,7 +90,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
                 .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId,
-                                                                                 REVURDERING_HENLEGGELSESBREV_FRITEKST)
+                                                                                REVURDERING_HENLEGGELSESBREV_FRITEKST)
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -104,8 +104,8 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
         val e = Assertions.assertThrows(IllegalStateException::class.java) {
             henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
-                                                         null,
-                                                         Brevmottager.BRUKER)
+                                                        null,
+                                                        Brevmottager.BRUKER)
         }
 
         assertThat(e.message).contains("varsel ikke er sendt")
@@ -118,8 +118,8 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
         val e = Assertions.assertThrows(IllegalStateException::class.java) {
             henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
-                                                         null,
-                                                         Brevmottager.BRUKER)
+                                                        null,
+                                                        Brevmottager.BRUKER)
         }
 
         assertThat(e.message).contains("henleggelsesbrev uten fritekst")
