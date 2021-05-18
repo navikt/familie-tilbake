@@ -97,16 +97,19 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        totrinnService.lagreTotrinnsvurderinger(behandlingId = behandlingId,
-                                                totrinnsvurderinger = listOf(
-                                                        VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
-                                                                          godkjent = true, begrunnelse = "testverdi"),
-                                                        VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORELDELSE,
-                                                                          godkjent = true, begrunnelse = "testverdi"),
-                                                        VurdertTotrinnDto(behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
-                                                                          godkjent = false, begrunnelse = "testverdi"),
-                                                        VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                          godkjent = false, begrunnelse = "testverdi")))
+        totrinnService.lagreTotrinnsvurderinger(behandlingId,
+                                                listOf(VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
+                                                                         godkjent = true,
+                                                                         begrunnelse = "testverdi"),
+                                                       VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORELDELSE,
+                                                                         godkjent = true,
+                                                                         begrunnelse = "testverdi"),
+                                                       VurdertTotrinnDto(behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                                                                         godkjent = false,
+                                                                         begrunnelse = "testverdi"),
+                                                       VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                                                                         godkjent = false,
+                                                                         begrunnelse = "testverdi")))
 
         val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
         assertTrue { totrinnsvurderingDto.totrinnsstegsinfo.isNotEmpty() }
@@ -154,13 +157,13 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val exception = assertFailsWith<RuntimeException> {
-            totrinnService
-                    .lagreTotrinnsvurderinger(behandlingId = behandlingId,
-                                              totrinnsvurderinger = listOf(
-                                                      VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
-                                                                        godkjent = true, begrunnelse = "testverdi"),
-                                                      VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                        godkjent = false, begrunnelse = "testverdi")))
+            totrinnService.lagreTotrinnsvurderinger(behandlingId,
+                                                    listOf(VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
+                                                                             godkjent = true,
+                                                                             begrunnelse = "testverdi"),
+                                                           VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                                                                             godkjent = false,
+                                                                             begrunnelse = "testverdi")))
         }
 
         assertEquals("Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering", exception.message)
@@ -170,8 +173,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                                             behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandlingId,
                                                                            behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus)
-        )
+                                                                           behandlingsstegsstatus = behandlingsstegstatus))
     }
 
 

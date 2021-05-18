@@ -6,7 +6,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

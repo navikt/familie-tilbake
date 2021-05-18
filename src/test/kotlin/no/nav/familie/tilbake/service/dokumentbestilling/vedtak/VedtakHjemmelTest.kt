@@ -24,7 +24,7 @@ class VedtakHjemmelTest {
     fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter bokmål`() {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -40,7 +40,7 @@ class VedtakHjemmelTest {
     fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter nynorsk`() {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -48,7 +48,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NN,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15")
         assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
     }
 
@@ -58,7 +58,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.FORSETT, ileggRenter = false)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -66,7 +66,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
         assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
     }
 
@@ -77,7 +77,7 @@ class VedtakHjemmelTest {
                     it.copy(aktsomhet = Aktsomhet.FORSETT)
                 }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -85,7 +85,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
     }
 
@@ -96,7 +96,7 @@ class VedtakHjemmelTest {
                     it.copy(aktsomhet = Aktsomhet.FORSETT)
                 }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -104,7 +104,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  false)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
         assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
     }
 
@@ -114,7 +114,7 @@ class VedtakHjemmelTest {
             it.copy(tilbakekrevSmåbeløp = false)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -122,7 +122,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 sjette ledd")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 sjette ledd")
         assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
     }
 
@@ -132,7 +132,7 @@ class VedtakHjemmelTest {
             it.copy(tilbakekrevSmåbeløp = false)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -140,7 +140,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NN,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15 sjette ledd")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15 sjette ledd")
         assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
     }
 
@@ -152,7 +152,7 @@ class VedtakHjemmelTest {
 
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  emptySet(),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -160,7 +160,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("foreldelsesloven §§ 2 og 3")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("foreldelsesloven §§ 2 og 3")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
 
     }
@@ -175,7 +175,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = false)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -183,7 +183,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
 
     }
@@ -197,7 +197,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = true)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -205,7 +205,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
     }
 
@@ -220,7 +220,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = false)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -228,7 +228,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
     }
 
@@ -244,7 +244,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = true)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
@@ -252,7 +252,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
     }
 
@@ -260,7 +260,7 @@ class VedtakHjemmelTest {
     fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter er klage`() {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  null,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
@@ -268,7 +268,7 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-         assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og forvaltningsloven § 35 c)")
+        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og forvaltningsloven § 35 c)")
         assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
     }
 
@@ -283,7 +283,7 @@ class VedtakHjemmelTest {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = true)
         }
 
-        val  hbHjemmel  = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                  vurdertForeldelse,
                                                  vurderingPerioder,
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,

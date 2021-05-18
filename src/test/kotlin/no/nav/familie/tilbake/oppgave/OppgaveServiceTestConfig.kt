@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
 class OppgaveServiceTestConfig {
+
     @Bean
     @Profile("mock-oppgave")
     @Primary

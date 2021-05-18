@@ -38,7 +38,7 @@ class StegService(val steg: List<IBehandlingssteg>,
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
         // Behandling kan ikke tilbakeføres når er på FatteVedtak steg
         if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg) {
-            if(behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto){
+            if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
                 hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
             }
             return

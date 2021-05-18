@@ -67,7 +67,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
-        if (behandlingsstegDto !is BehandlingsstegFatteVedtaksstegDto){
+        if (behandlingsstegDto !is BehandlingsstegFatteVedtaksstegDto) {
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }
         return Ressurs.success("OK")

@@ -21,7 +21,7 @@ internal class LogiskPeriodeUtilTest {
 
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
                                                                   periode2 to BigDecimal.valueOf(200)).toSortedMap())
-        
+
         assertEquals(1, resultat.size)
         assertEquals(januar, resultat[0].fom)
         assertEquals(mai, resultat[0].tom)

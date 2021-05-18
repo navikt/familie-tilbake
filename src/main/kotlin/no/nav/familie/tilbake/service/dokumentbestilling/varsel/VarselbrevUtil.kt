@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
-import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel

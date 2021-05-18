@@ -60,7 +60,11 @@ class TilbakekrevingsberegningService(private var kravgrunnlagRepository: Kravgr
         val perioderMedBeløp: Map<Periode, FordeltKravgrunnlagsbeløp> =
                 kravgrunnlagsberegningService.fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag, vurderingsperioder)
         val beregningsresultatperioder =
-                beregn(kravgrunnlag, vurdertForeldelse, vilkårsvurdering, perioderMedBeløp, skalBeregneRenter(kravgrunnlag.fagområdekode))
+                beregn(kravgrunnlag,
+                       vurdertForeldelse,
+                       vilkårsvurdering,
+                       perioderMedBeløp,
+                       skalBeregneRenter(kravgrunnlag.fagområdekode))
         val totalTilbakekrevingsbeløp = beregningsresultatperioder.sumOf { it.tilbakekrevingsbeløp }
         val totalFeilutbetaltBeløp = beregningsresultatperioder.sumOf { it.feilutbetaltBeløp }
         return Beregningsresultat(vedtaksresultat = bestemVedtakResultat(behandlingId,

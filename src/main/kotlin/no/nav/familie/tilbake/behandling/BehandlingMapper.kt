@@ -27,8 +27,7 @@ object BehandlingMapper {
                             fagsystem: Fagsystem,
                             fagsak: Fagsak): Behandling {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
-        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser
-                .map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
+        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling =
                 Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
                                      tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
@@ -77,6 +76,7 @@ object BehandlingMapper {
                              kanHenleggeBehandling = kanHenleggeBehandling,
                              erBehandlingPåVent = erBehandlingPåVent,
                              kanEndres = kanEndres,
+                             varselSendt = behandling.aktivtVarsel != null,
                              behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
 
     }

@@ -31,8 +31,8 @@ object KravgrunnlagValidator {
     }
 
     private fun validerReferanse(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        kravgrunnlag.referanse ?: throw UgyldigKravgrunnlagFeil(
-                melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. Mangler referanse.")
+        kravgrunnlag.referanse ?: throw UgyldigKravgrunnlagFeil(melding = "Ugyldig kravgrunnlag for kravgrunnlagId " +
+                                                                          "${kravgrunnlag.kravgrunnlagId}. Mangler referanse.")
     }
 
     private fun validerPeriodeInnenforMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
@@ -41,9 +41,8 @@ object KravgrunnlagValidator {
             val fomMåned = YearMonth.of(periode.fom.year, periode.fom.month)
             val tomMåned = YearMonth.of(periode.tom.year, periode.tom.month)
             if (fomMåned != tomMåned) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                                  " Perioden ${periode.fom}-${periode.tom} er ikke innenfor en kalendermåned.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                              " Perioden ${periode.fom}-${periode.tom} er ikke innenfor en kalendermåned.")
             }
         }
     }
@@ -51,9 +50,8 @@ object KravgrunnlagValidator {
     private fun validerPeriodeStarterFørsteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
         kravgrunnlag.tilbakekrevingsPeriode.forEach {
             if (it.periode.fom.dayOfMonth != 1) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                                  " Perioden ${it.periode.fom}-${it.periode.tom} starter ikke første dag i måned.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                              " Perioden ${it.periode.fom}-${it.periode.tom} starter ikke første dag i måned.")
             }
         }
     }
@@ -61,9 +59,8 @@ object KravgrunnlagValidator {
     private fun validerPeriodeSlutterSisteDagIMåned(kravgrunnlag: DetaljertKravgrunnlagDto) {
         kravgrunnlag.tilbakekrevingsPeriode.forEach {
             if (it.periode.tom.dayOfMonth != YearMonth.from(it.periode.tom).lengthOfMonth()) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                                  " Perioden ${it.periode.fom}-${it.periode.tom} slutter ikke siste dag i måned.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                              " Perioden ${it.periode.fom}-${it.periode.tom} slutter ikke siste dag i måned.")
             }
         }
     }
@@ -71,10 +68,9 @@ object KravgrunnlagValidator {
     private fun validerPerioderHarFeilutbetalingspostering(kravgrunnlag: DetaljertKravgrunnlagDto) {
         kravgrunnlag.tilbakekrevingsPeriode.forEach {
             if (it.tilbakekrevingsBelop.none { beløp -> finnesFeilutbetalingspostering(beløp.typeKlasse) }) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                  "Perioden ${it.periode.fom}-${it.periode.tom} " +
-                                  "mangler postering med klasseType=FEIL.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                                              "Perioden ${it.periode.fom}-${it.periode.tom} " +
+                                              "mangler postering med klasseType=FEIL.")
             }
         }
     }
@@ -82,10 +78,9 @@ object KravgrunnlagValidator {
     private fun validerPerioderHarYtelsespostering(kravgrunnlag: DetaljertKravgrunnlagDto) {
         kravgrunnlag.tilbakekrevingsPeriode.forEach {
             if (it.tilbakekrevingsBelop.none { beløp -> finnesYtelsespostering(beløp.typeKlasse) }) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                  "Perioden ${it.periode.fom}-${it.periode.tom} " +
-                                  "mangler postering med klasseType=YTEL.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                                              "Perioden ${it.periode.fom}-${it.periode.tom} " +
+                                              "mangler postering med klasseType=YTEL.")
             }
         }
     }
@@ -98,9 +93,8 @@ object KravgrunnlagValidator {
             val forrigePeriode = sortertePerioder[i - 1]
             val nåværendePeriode = sortertePerioder[i]
             if (nåværendePeriode.fom <= forrigePeriode.tom) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
-                                  " Overlappende perioder $forrigePeriode og $nåværendePeriode.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}." +
+                                              " Overlappende perioder $forrigePeriode og $nåværendePeriode.")
             }
         }
     }
@@ -124,9 +118,8 @@ object KravgrunnlagValidator {
                 månedligSkattBeløp = periode.belopSkattMnd
             } else {
                 if (månedligSkattBeløp.compareTo(periode.belopSkattMnd) != 0) {
-                    throw UgyldigKravgrunnlagFeil(
-                            melding = "Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
-                                      "For måned $måned er opplyses ulike verdier maks skatt i ulike perioder")
+                    throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
+                                                  "For måned $måned er opplyses ulike verdier maks skatt i ulike perioder")
                 }
             }
             for (postering in periode.tilbakekrevingsBelop) {
@@ -135,16 +128,13 @@ object KravgrunnlagValidator {
         }
         totalSkatt = totalSkatt.divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN)
         if (månedligSkattBeløp == null) {
-            throw UgyldigKravgrunnlagFeil(
-                    melding = "Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
-                              "Mangler max skatt for måned $måned"
-            )
+            throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
+                                          "Mangler max skatt for måned $måned")
         }
         if (totalSkatt > månedligSkattBeløp) {
-            throw UgyldigKravgrunnlagFeil(
-                    melding = "Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
-                              "For måned $måned er maks skatt $månedligSkattBeløp, " +
-                              "men maks tilbakekreving ganget med skattesats blir $totalSkatt")
+            throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
+                                          "For måned $måned er maks skatt $månedligSkattBeløp, " +
+                                          "men maks tilbakekreving ganget med skattesats blir $totalSkatt")
         }
     }
 
@@ -152,10 +142,10 @@ object KravgrunnlagValidator {
         for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
             for (beløp in kravgrunnlagsperiode.tilbakekrevingsBelop) {
                 if (finnesFeilutbetalingspostering(beløp.typeKlasse) && beløp.belopNy < BigDecimal.ZERO) {
-                    throw UgyldigKravgrunnlagFeil(
-                            melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                      "Perioden ${kravgrunnlagsperiode.periode.fom}-${kravgrunnlagsperiode.periode.tom} " +
-                                      "har FEIL postering med negativ beløp")
+                    throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                                                  "Perioden ${kravgrunnlagsperiode.periode.fom}-" +
+                                                  "${kravgrunnlagsperiode.periode.tom} " +
+                                                  "har FEIL postering med negativ beløp")
                 }
             }
         }
@@ -170,12 +160,12 @@ object KravgrunnlagValidator {
                     .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
                     .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
             if (sumNyttBelopFraFeilposteringer.compareTo(sumTilbakekrevesFraYtelsePosteringer) != 0) {
-                throw UgyldigKravgrunnlagFeil(
-                        melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                  "For perioden ${kravgrunnlagsperiode.periode.fom}-${kravgrunnlagsperiode.periode.tom} " +
-                                  "total tilkakekrevesBeløp i YTEL posteringer er $sumTilbakekrevesFraYtelsePosteringer," +
-                                  "mens total nytt beløp i FEIL posteringer er $sumNyttBelopFraFeilposteringer. " +
-                                  "Det er forventet at disse er like.")
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                                              "For perioden ${kravgrunnlagsperiode.periode.fom}" +
+                                              "-${kravgrunnlagsperiode.periode.tom} total tilkakekrevesBeløp i YTEL " +
+                                              "posteringer er $sumTilbakekrevesFraYtelsePosteringer, mens total nytt beløp i " +
+                                              "FEIL posteringer er $sumNyttBelopFraFeilposteringer. " +
+                                              "Det er forventet at disse er like.")
             }
         }
     }
@@ -186,13 +176,12 @@ object KravgrunnlagValidator {
                 if (finnesYtelsespostering(kgBeløp.typeKlasse)) {
                     val diff: BigDecimal = kgBeløp.belopOpprUtbet.subtract(kgBeløp.belopNy)
                     if (kgBeløp.belopTilbakekreves > diff) {
-                        throw UgyldigKravgrunnlagFeil(
-                                melding = "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                          "For perioden ${kravgrunnlagsperiode.periode.fom}-${kravgrunnlagsperiode.periode.tom}" +
-                                          " finnes YTEL-postering " +
-                                          "med tilbakekrevesBeløp ${kgBeløp.belopTilbakekreves} som er " +
-                                          "større enn differanse mellom nyttBeløp ${kgBeløp.belopNy} " +
-                                          "og opprinneligBeløp ${kgBeløp.belopOpprUtbet}")
+                        throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                                                      "For perioden ${kravgrunnlagsperiode.periode.fom}-" +
+                                                      "${kravgrunnlagsperiode.periode.tom} finnes YTEL-postering " +
+                                                      "med tilbakekrevesBeløp ${kgBeløp.belopTilbakekreves} som er " +
+                                                      "større enn differanse mellom nyttBeløp ${kgBeløp.belopNy} " +
+                                                      "og opprinneligBeløp ${kgBeløp.belopOpprUtbet}")
                     }
                 }
             }

@@ -279,12 +279,19 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(kravgrunnlag431.copy(perioder = setOf(førsteKravgrunnlagsperiode,
                                                                             andreKravgrunnlagsperiode)))
 
-        val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(
-                behandlingId = Testdata.behandling.id,
-                perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                             LocalDate.of(2017, 1, 31)),
-                                  PeriodeDto(LocalDate.of(2017, 2, 1),
-                                             LocalDate.of(2017, 2, 28))))
+        val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
+                                                                              perioder = listOf(PeriodeDto(LocalDate.of(2017,
+                                                                                                                        1,
+                                                                                                                        1),
+                                                                                                           LocalDate.of(2017,
+                                                                                                                        1,
+                                                                                                                        31)),
+                                                                                                PeriodeDto(LocalDate.of(2017,
+                                                                                                                        2,
+                                                                                                                        1),
+                                                                                                           LocalDate.of(2017,
+                                                                                                                        2,
+                                                                                                                        28))))
         assertEquals(2, beregnetPerioderDto.beregnetPerioder.size)
         assertEquals(PeriodeDto(LocalDate.of(2017, 1, 1),
                                 LocalDate.of(2017, 1, 31)), beregnetPerioderDto.beregnetPerioder[0].periode)

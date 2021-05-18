@@ -55,8 +55,7 @@ object VedtaksbrevFritekstMapper {
             Vedtaksbrevsperiode(behandlingId = behandlingId,
                                 periode = Periode(faktaAvsnittMedPeriode.periode),
                                 fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
-                                fritekststype = Friteksttype.FAKTA
-            )
+                                fritekststype = Friteksttype.FAKTA)
         }
     }
 
@@ -65,8 +64,7 @@ object VedtaksbrevFritekstMapper {
             Vedtaksbrevsperiode(behandlingId = behandlingId,
                                 periode = Periode(foreldelsesAvsnittMedPeriode.periode),
                                 fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
-                                fritekststype = Friteksttype.FORELDELSE
-            )
+                                fritekststype = Friteksttype.FORELDELSE)
         }
     }
 
@@ -76,8 +74,7 @@ object VedtaksbrevFritekstMapper {
             Vedtaksbrevsperiode(behandlingId = behandlingId,
                                 periode = Periode(vilkårAvsnittMedPeriode.periode),
                                 fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
-                                fritekststype = Friteksttype.VILKÅR
-            )
+                                fritekststype = Friteksttype.VILKÅR)
         }
     }
 
@@ -87,8 +84,7 @@ object VedtaksbrevFritekstMapper {
             Vedtaksbrevsperiode(behandlingId = behandlingId,
                                 periode = Periode(særligGrunnerAvsnittMedPeriode.periode),
                                 fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
-                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER
-            )
+                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER)
         }
     }
 
@@ -98,8 +94,7 @@ object VedtaksbrevFritekstMapper {
             Vedtaksbrevsperiode(behandlingId = behandlingId,
                                 periode = Periode(særligGrunnerAnnetAvsnittMedPeriode.periode),
                                 fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
-                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET
-            )
+                                fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET)
         }
     }
 }
