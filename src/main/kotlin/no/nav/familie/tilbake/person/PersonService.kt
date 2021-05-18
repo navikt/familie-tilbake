@@ -15,7 +15,7 @@ class PersonService(val pdlClient: PdlClient) {
 
     fun hentAktørId(personIdent: String, fagsystem: Fagsystem): List<String> {
         val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem)
-        return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" && !it.historisk }.map { it.ident }
+        return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" }.map { it.ident }
     }
 
     fun hentAktivAktørId(ident: String, fagsystem: Fagsystem): String {
