@@ -44,9 +44,11 @@ data class Behandling(@Id
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar()) {
 
-    fun erAvsluttet(): Boolean {
-        return Behandlingsstatus.AVSLUTTET == status
-    }
+    val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
+
+    private val erUnderIverksettelse get() = Behandlingsstatus.IVERKSETTER_VEDTAK == status
+
+    val erSaksbehandlingAvsluttet get() = erAvsluttet || erUnderIverksettelse
 
     val aktivVerge get() = verger.firstOrNull { it.aktiv }
 

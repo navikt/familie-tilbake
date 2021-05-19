@@ -285,7 +285,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                     "Perioden 2020-08-01-2020-08-31 mangler postering med klasseType=FEIL.",
+                     "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=FEIL.",
                      exception.message)
     }
 
@@ -295,7 +295,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = assertFailsWith<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         assertEquals("Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                     "Perioden 2020-08-01-2020-08-31 mangler postering med klasseType=YTEL.",
+                     "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=YTEL.",
                      exception.message)
     }
 

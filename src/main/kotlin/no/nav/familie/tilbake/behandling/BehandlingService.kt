@@ -223,7 +223,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
-            return !behandling.erAvsluttet() && (!behandling.manueltOpprettet &&
+            return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
                                                  behandling.opprettetTidspunkt < LocalDate.now()
                                                          .atStartOfDay()
                                                          .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
@@ -250,7 +250,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet) {
             throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        httpStatus = HttpStatus.BAD_REQUEST)
@@ -263,7 +263,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
-        if (behandling.erAvsluttet() || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
+        if (behandling.erAvsluttet || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
             return false
         }
         if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&

@@ -77,7 +77,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendManueltVarselBrev skal sende manuelt varselbrev`() {
-        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
+        manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
         verify {
             spyPdfBrevService.sendBrev(eq(behandling),
                                        eq(fagsak),
@@ -92,13 +92,13 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
-        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
+        manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)))
         val behandling = behandlingRepository.update(behandlingCopy)
 
         //act
-        manueltVarselbrevService.sendKorrigertVarselBrev(behandling.id, korrigertVarseltekst, Brevmottager.BRUKER)
+        manueltVarselbrevService.sendKorrigertVarselBrev(behandling, korrigertVarseltekst, Brevmottager.BRUKER)
 
         //assert
         verify {
@@ -115,14 +115,14 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         //arrange
-        manueltVarselbrevService.sendManueltVarselBrev(behandling.id, varseltekst, Brevmottager.BRUKER)
+        manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
         val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
                                                                     varselbeløp = 100L)),
                                              verger = setOf(Testdata.verge))
         val behandling = behandlingRepository.update(behandlingCopy)
 
         //act
-        manueltVarselbrevService.sendKorrigertVarselBrev(behandling.id, varseltekst, Brevmottager.VERGE)
+        manueltVarselbrevService.sendKorrigertVarselBrev(behandling, varseltekst, Brevmottager.VERGE)
 
         //assert
         verify {

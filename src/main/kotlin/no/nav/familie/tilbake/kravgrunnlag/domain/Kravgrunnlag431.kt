@@ -20,24 +20,24 @@ data class Kravgrunnlag431(@Id
                            val sperret: Boolean = false,
                            val avsluttet: Boolean = false,
                            val vedtakId: BigInteger,
-                           val omgjortVedtakId: BigInteger?,
+                           val omgjortVedtakId: BigInteger? = null,
                            val kravstatuskode: Kravstatuskode,
                            @Column("fagomradekode")
                            val fagområdekode: Fagområdekode,
                            val fagsystemId: String,
-                           val fagsystemVedtaksdato: LocalDate?,
+                           val fagsystemVedtaksdato: LocalDate? = null,
                            val gjelderVedtakId: String,
                            val gjelderType: GjelderType,
                            val utbetalesTilId: String,
                            val utbetIdType: GjelderType,
-                           val hjemmelkode: String?,
-                           val beregnesRenter: Boolean?,
+                           val hjemmelkode: String? = null,
+                           val beregnesRenter: Boolean? = null,
                            val ansvarligEnhet: String,
                            val bostedsenhet: String,
                            val behandlingsenhet: String,
                            val kontrollfelt: String,
                            val saksbehandlerId: String,
-                           val referanse: String?,
+                           val referanse: String? = null,
                            val eksternKravgrunnlagId: BigInteger,
                            @MappedCollection(idColumn = "kravgrunnlag431_id")
                            val perioder: Set<Kravgrunnlagsperiode432> = setOf(),
@@ -72,11 +72,11 @@ data class Kravgrunnlagsbeløp433(@Id
                                  @Column("tilbakekreves_belop")
                                  val tilbakekrevesBeløp: BigDecimal,
                                  @Column("uinnkrevd_belop")
-                                 val uinnkrevdBeløp: BigDecimal?,
-                                 val resultatkode: String?,
+                                 val uinnkrevdBeløp: BigDecimal? = null,
+                                 val resultatkode: String? = null,
                                  @Column("arsakskode")
-                                 val årsakskode: String?,
-                                 val skyldkode: String?,
+                                 val årsakskode: String? = null,
+                                 val skyldkode: String? = null,
                                  val skatteprosent: BigDecimal,
                                  @Version
                                  val versjon: Long = 0,
@@ -113,7 +113,7 @@ enum class Klassetype(val navn: String) {
 
         fun fraKode(kode: String): Klassetype {
             return values().firstOrNull { it.name == kode }
-                   ?: throw IllegalArgumentException("Ukjent KlasseType $kode")
+                   ?: throw IllegalArgumentException("Ukjent Klassetype $kode")
         }
     }
 }

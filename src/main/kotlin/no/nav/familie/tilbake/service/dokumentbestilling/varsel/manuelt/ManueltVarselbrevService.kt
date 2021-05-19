@@ -29,8 +29,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                private val pdfBrevService: PdfBrevService,
                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
-    fun sendManueltVarselBrev(behandlingId: UUID, fritekst: String, brevmottager: Brevmottager) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+    fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varselbrevsdokument = lagVarselbrevForSending(fritekst,
                                                           behandling,
@@ -51,11 +50,11 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                 fritekst)
     }
 
-    fun hentForhåndsvisningManueltVarselbrev(behandlingId: UUID, malType: Dokumentmalstype, fritekst: String): ByteArray {
+    fun hentForhåndsvisningManueltVarselbrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
-        val data = when (malType) {
+        val data = when (maltype) {
             Dokumentmalstype.VARSEL -> {
                 val varselbrevsdokument = lagVarselbrevForSending(fritekst,
                                                                   behandling,
@@ -70,7 +69,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                 lagKorrigertVarselbrev(varselbrevsdokument)
             }
             else -> {
-                throw IllegalArgumentException("Ikke-støttet DokumentMalType: $malType")
+                throw IllegalArgumentException("Ikke-støttet Dokumentmalstype: $maltype")
             }
         }
         return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
@@ -79,8 +78,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                                               metadata = data.brevmetadata))
     }
 
-    fun sendKorrigertVarselBrev(behandlingId: UUID, fritekst: String, brevmottager: Brevmottager) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+    fun sendKorrigertVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varselbrevsdokument = lagVarselbrevForSending(fritekst,
                                                           behandling,

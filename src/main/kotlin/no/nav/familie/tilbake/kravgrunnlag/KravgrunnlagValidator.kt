@@ -70,7 +70,7 @@ object KravgrunnlagValidator {
             if (it.tilbakekrevingsBelop.none { beløp -> finnesFeilutbetalingspostering(beløp.typeKlasse) }) {
                 throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
                                               "Perioden ${it.periode.fom}-${it.periode.tom} " +
-                                              "mangler postering med klasseType=FEIL.")
+                                              "mangler postering med klassetype=FEIL.")
             }
         }
     }
@@ -80,7 +80,7 @@ object KravgrunnlagValidator {
             if (it.tilbakekrevingsBelop.none { beløp -> finnesYtelsespostering(beløp.typeKlasse) }) {
                 throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
                                               "Perioden ${it.periode.fom}-${it.periode.tom} " +
-                                              "mangler postering med klasseType=YTEL.")
+                                              "mangler postering med klassetype=YTEL.")
             }
         }
     }

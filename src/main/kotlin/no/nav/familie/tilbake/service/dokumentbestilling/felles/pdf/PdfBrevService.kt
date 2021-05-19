@@ -50,7 +50,6 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
             setProperty("fagsystem", fagsak.fagsystem.name)
-            setProperty("journalpostId", dokumentreferanse.journalpostId)
             setProperty("dokumentId", dokumentreferanse.dokumentId)
             setProperty("mottager", brevdata.mottager.name)
             setProperty("brevType", brevtype.name)

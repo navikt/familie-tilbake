@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
@@ -26,6 +27,22 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
                                       private val behandlingRepository: BehandlingRepository,
                                       private val eksterneDataForBrevService: EksterneDataForBrevService,
                                       private val pdfBrevService: PdfBrevService) {
+
+    fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
+        val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
+        val brevdata = Brevdata(mottager = brevmottager,
+                                metadata = fritekstbrevsdata.brevmetadata,
+                                overskrift = fritekstbrevsdata.overskrift,
+                                brevtekst = fritekstbrevsdata.brevtekst)
+        pdfBrevService.sendBrev(behandling = behandling,
+                                fagsak = fagsak,
+                                brevtype = Brevtype.INNHENT_DOKUMENTASJON,
+                                data = brevdata,
+                                fritekst = fritekst)
+    }
+
 
     fun hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId: UUID,
                                                     fritekst: String): ByteArray {

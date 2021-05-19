@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.service.dokumentbestilling.fritekstbrev.Fritekstbr
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Service
 @Transactional
@@ -26,8 +25,7 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
                         private val eksterneDataForBrevService: EksterneDataForBrevService,
                         private val pdfBrevService: PdfBrevService) {
 
-    fun sendVarselbrev(behandlingId: UUID, brevmottager: Brevmottager) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+    fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottager)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)

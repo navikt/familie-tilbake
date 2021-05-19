@@ -25,7 +25,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet() || Behandlingsstatus.IVERKSETTER_VEDTAK == behandling.status) {
+        if (behandling.erAvsluttet || Behandlingsstatus.IVERKSETTER_VEDTAK == behandling.status) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
         }
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())

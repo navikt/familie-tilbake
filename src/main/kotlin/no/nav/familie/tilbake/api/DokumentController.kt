@@ -48,8 +48,8 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                                                                                                  dto.maltype,
                                                                                                  dto.fritekst))
         } else {
-            return Ressurs.funksjonellFeil(melding = "Dokumentmal $dto.malType er ikke støttet",
-                                           frontendFeilmelding = "Dokumentmal $dto.malType er ikke støttet");
+            return Ressurs.funksjonellFeil(melding = "Dokumentmal $dto.maltype er ikke støttet",
+                                           frontendFeilmelding = "Dokumentmal $dto.maltype er ikke støttet")
         }
     }
 

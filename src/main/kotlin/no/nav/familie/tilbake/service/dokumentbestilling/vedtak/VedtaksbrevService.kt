@@ -80,8 +80,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                          private val eksterneDataForBrevService: EksterneDataForBrevService,
                          private val pdfBrevService: PdfBrevService) {
 
-    fun sendVedtaksbrev(behandlingId: UUID, brevmottager: Brevmottager) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+    fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksbrevData = hentDataForVedtaksbrev(behandling, fagsak, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata

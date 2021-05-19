@@ -131,7 +131,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         vilkårsvurderingRepository.insert(Testdata.vilkår.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
-//        brevSporingRepository.insert(Testdata.brevsporing)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
@@ -148,7 +147,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val brevtypeSlot = slot<Brevtype>()
         val brevdataSlot = slot<Brevdata>()
 
-        vedtaksbrevService.sendVedtaksbrev(Testdata.behandling.id, Brevmottager.BRUKER)
+        vedtaksbrevService.sendVedtaksbrev(Testdata.behandling, Brevmottager.BRUKER)
 
         verify {
             spyPdfBrevService.sendBrev(capture(behandlingSlot),
@@ -156,7 +155,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                        capture(brevtypeSlot),
                                        capture(brevdataSlot))
         }
-        assertThat(behandlingSlot.captured).isEqualTo(behandling)
+        assertThat(behandlingSlot.captured).isEqualTo(Testdata.behandling)
         assertThat(fagsakSlot.captured).isEqualTo(fagsak)
         assertThat(brevtypeSlot.captured).isEqualTo(Brevtype.VEDTAK)
         assertThat(brevdataSlot.captured.overskrift).isEqualTo("Du må betale tilbake barnetrygden")
