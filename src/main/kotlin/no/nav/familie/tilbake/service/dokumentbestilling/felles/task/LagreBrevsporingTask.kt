@@ -35,7 +35,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
     }
 
     override fun onCompletion(task: Task) {
-        val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottaker"))
+        val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         // TODO Opprette task for Historikkinnslag.
 

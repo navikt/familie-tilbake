@@ -66,7 +66,7 @@ data class Behandling(@Id
     val endretTidspunkt: LocalDateTime
         get() = sporbar.endret.endretTid
 
-    fun utledVedtaksbrevType(): Vedtaksbrevstype {
+    fun utledVedtaksbrevstype(): Vedtaksbrevstype {
         return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
         } else {
