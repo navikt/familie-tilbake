@@ -72,14 +72,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                 .hentBehandlingsstegstilstand(behandling)
+        val varselSendt = brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId, setOf(Brevtype.VARSEL,
+                                                                                                      Brevtype.KORRIGERT_VARSEL))
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
 
-        return BehandlingMapper.tilRespons(behandling = behandling,
-                                           erBehandlingPåVent = erBehandlingPåVent,
-                                           kanHenleggeBehandling = kanBehandlingHenlegges,
-                                           kanEndres = kanEndres,
-                                           behandlingsstegsinfoer = behandlingsstegsinfoer)
+        return BehandlingMapper.tilRespons(behandling,
+                                           erBehandlingPåVent,
+                                           kanBehandlingHenlegges,
+                                           kanEndres,
+                                           behandlingsstegsinfoer,
+                                           varselSendt)
     }
 
     @Transactional

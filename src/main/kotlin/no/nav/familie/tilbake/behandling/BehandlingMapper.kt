@@ -53,7 +53,8 @@ object BehandlingMapper {
                    erBehandlingPåVent: Boolean,
                    kanHenleggeBehandling: Boolean,
                    kanEndres: Boolean,
-                   behandlingsstegsinfoer: List<Behandlingsstegsinfo>): BehandlingDto {
+                   behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
+                   varselSendt: Boolean): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
@@ -76,7 +77,7 @@ object BehandlingMapper {
                              kanHenleggeBehandling = kanHenleggeBehandling,
                              erBehandlingPåVent = erBehandlingPåVent,
                              kanEndres = kanEndres,
-                             varselSendt = behandling.aktivtVarsel != null,
+                             varselSendt = varselSendt,
                              behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
 
     }
