@@ -23,9 +23,10 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
         secureLog.info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
 
         val behandlingId: UUID = UUID.fromString(task.payload)
-        val historikkinnslagType = TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagType"))
+        val historikkinnslagstype =
+                TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktor"))
-        historikkService.lagHistorikkinnslag(behandlingId, historikkinnslagType, aktør)
+        historikkService.lagHistorikkinnslag(behandlingId, historikkinnslagstype, aktør)
     }
 
     companion object {

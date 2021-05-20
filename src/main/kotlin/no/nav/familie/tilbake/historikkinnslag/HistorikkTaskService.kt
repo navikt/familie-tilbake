@@ -14,7 +14,7 @@ class HistorikkTaskService(private val taskRepository: TaskRepository) {
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                          aktør: Aktør) {
         val properties = Properties()
-        properties.setProperty("historikkinnslagType", historikkinnslagstype.name)
+        properties.setProperty("historikkinnslagstype", historikkinnslagstype.name)
         properties.setProperty("aktor", aktør.name)
 
         taskRepository.save(Task(type = LagHistorikkinnslagTask.TYPE,

@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -27,6 +29,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
@@ -120,6 +124,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -141,8 +147,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val alleKravgrunnlag = kravgrunnlagRepository.findByBehandlingId(behandling.id)
         assertEquals(2, alleKravgrunnlag.size)
-        assertEquals(Kravstatuskode.NYTT, alleKravgrunnlag[0].kravstatuskode)
-        assertFalse { alleKravgrunnlag[0].aktiv }
+        assertTrue { alleKravgrunnlag.any { Kravstatuskode.NYTT == it.kravstatuskode && !it.aktiv } }
 
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         assertNotNull(kravgrunnlag)
@@ -161,6 +166,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -225,6 +232,10 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         assertNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
         assertNull(foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -394,7 +405,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun readXml(fileName: String): String {
-        return this::class.java.getResource(fileName).readText()
+        val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
+        return url.readText()
     }
 
     private fun opprettTask(kravgrunnlagXml: String): Task {
@@ -448,6 +460,18 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             behandlingsstegstilstand.any {
                 behandlingssteg == it.behandlingssteg
                 && behandlingsstegstatus == it.behandlingsstegsstatus
+            }
+        }
+    }
+
+    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                    aktør: Aktør) {
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                aktør.name == it.metadata["aktor"] &&
+                behandling.id.toString() == it.payload
             }
         }
     }

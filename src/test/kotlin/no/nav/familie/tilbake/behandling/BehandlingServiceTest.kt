@@ -722,7 +722,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagType"] &&
+                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktor"] &&
                 behandlingId.toString() == it.payload
             }

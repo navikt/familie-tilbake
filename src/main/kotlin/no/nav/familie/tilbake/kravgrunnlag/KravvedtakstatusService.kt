@@ -110,6 +110,10 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
+
+                historikkTaskService.lagHistorikkTask(behandling.id,
+                                                      TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                                                      aktør = Aktør.VEDTAKSLØSNING)
             }
             Kravstatuskode.AVSLUTTET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
