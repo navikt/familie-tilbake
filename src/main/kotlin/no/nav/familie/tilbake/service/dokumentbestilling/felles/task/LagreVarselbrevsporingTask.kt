@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer varselbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
-class LagreVarselbrevsporingTask(private val varselService: VarselService,
-                                 private val taskService: TaskService) : AsyncTaskStep {
+class LagreVarselbrevsporingTask(private val varselService: VarselService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 

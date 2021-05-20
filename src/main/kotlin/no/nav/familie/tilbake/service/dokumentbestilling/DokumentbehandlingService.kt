@@ -4,23 +4,26 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
 @Service
 @Transactional
 class DokumentbehandlingService(private val behandlingRepository: BehandlingRepository,
-                                private val brevSporingRepository: BrevsporingRepository,
+                                private val behandlingskontrollService: BehandlingskontrollService,
                                 private val kravgrunnlagRepository: KravgrunnlagRepository,
                                 private val taskService: TaskService,
                                 private val manueltVarselBrevTjeneste: ManueltVarselbrevService,
@@ -58,6 +61,14 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
                                       setProperty("fritekst", fritekst)
                                   })
         taskService.save(sendVarselbrev)
+        settPåVent(behandling)
+    }
+
+    private fun settPåVent(behandling: Behandling) {
+        val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+        behandlingskontrollService.settBehandlingPåVent(behandling.id,
+                                                        Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                        fristTid)
     }
 
 
@@ -69,5 +80,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
                                                 behandling.id.toString(),
                                                 Properties().apply { setProperty("fritekst", fritekst) })
         taskService.save(sendInnhentDokumentasjonBrev)
+        settPåVent(behandling)
     }
 }
