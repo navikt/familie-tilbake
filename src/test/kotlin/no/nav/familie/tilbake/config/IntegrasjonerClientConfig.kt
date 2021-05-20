@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,6 +25,11 @@ class IntegrasjonerClientConfig {
                                     false,
                                     listOf(DokumentInfo("id")))
         }
+
+        every { integrasjonerClient.distribuerJournalpost(any(), any()) } returns "42"
+
+        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
+
         return integrasjonerClient
     }
 }

@@ -15,10 +15,12 @@ fun main(args: Array<String>) {
     properties["DATASOURCE_PASSWORD"] = "test"
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
+    //QAD hack for å få riktige profiler til spring 2.4.3
     System.setProperty("spring.profiles.active",
-                       "local, mock-pdl, mock-oauth, mock-oppgave") //QAD hack for å få riktige profiler til spring 2.4.3
+                       "local, mock-pdl, mock-oauth, mock-oppgave, mock-integrasjoner")
+
     SpringApplicationBuilder(LauncherLocalPostgres::class.java)
-            .profiles("local", "mock-pdl", "mock-oauth", "mock-oppgave")
+            .profiles("local", "mock-pdl", "mock-oauth", "mock-oppgave", "mock-integrasjoner")
             .properties(properties)
             .run(*args)
 }
