@@ -4,9 +4,9 @@ Du har fått {{kroner beløp}} for mykje utbetalt i {{ytelsesnavnUbestemt}} frå
 {{else}}
 Du har fått {{kroner beløp}} for mykje utbetalt i {{ytelsesnavnUbestemt}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
 
-Periodane du har fått for mykje utbetalt for, er:
-*-{{#each feilutbetaltePerioder }}
-Frå og med {{dato fom}} til og med {{dato tom}}{{/each}}-*
+{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodane{{/eq}} du har fått for mykje utbetalt for, er:
+*-{{#each feilutbetaltePerioder}}
+Frå og med {{dato fom}} til og med {{dato tom}}.{{/each}}-*
 {{/if}}
 Før vi avgjer om du skal betale tilbake, kan du uttale deg innan {{dato fristdatoForTilbakemelding}}.
 {{#if ytelseMedSkatt}}

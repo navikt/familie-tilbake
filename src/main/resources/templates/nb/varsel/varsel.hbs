@@ -4,9 +4,9 @@ Du har fått {{kroner beløp}} for mye utbetalt i {{ytelsesnavnUbestemt}} fra og
 {{else}}
 Du har fått {{kroner beløp}} for mye utbetalt i {{ytelsesnavnUbestemt}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
 
-Periodene du har fått for mye utbetalt for, er:
+{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} du har fått for mye utbetalt for, er:
 *-{{#each feilutbetaltePerioder }}
-Fra og med {{dato fom}} til og med {{dato tom}}{{/each}}-*
+Fra og med {{dato fom}} til og med {{dato tom}}.{{/each}}-*
 {{/if}}
 Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{dato fristdatoForTilbakemelding}}.
 {{#if ytelseMedSkatt}}
