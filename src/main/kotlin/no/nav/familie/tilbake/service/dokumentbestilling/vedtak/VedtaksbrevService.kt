@@ -80,8 +80,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                          private val eksterneDataForBrevService: EksterneDataForBrevService,
                          private val pdfBrevService: PdfBrevService) {
 
-    fun sendVedtaksbrev(behandlingId: UUID, brevmottager: Brevmottager) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+    fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksbrevData = hentDataForVedtaksbrev(behandling, fagsak, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata
@@ -137,7 +136,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val vedtaksbrevstype = behandling.utledVedtaksbrevType()
+        val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
         val vedtaksbrevsperioder = VedtaksbrevFritekstMapper
                 .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
@@ -210,7 +209,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vedtakResultatType = beregnetResultat.vedtaksresultat
         val vilkårPerioder = finnVilkårsvurderingsperioder(behandling.id)
         val foreldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        val vedtaksbrevType = behandling.utledVedtaksbrevType()
+        val vedtaksbrevtype = behandling.utledVedtaksbrevstype()
         val hbVedtaksResultatBeløp = HbVedtaksResultatBeløp(resulatPerioder)
         val effektForBruker: VedtakHjemmel.EffektForBruker = utledEffektForBruker(behandling, hbVedtaksResultatBeløp)
         val hbHjemmel = VedtakHjemmel.lagHjemmel(vedtakResultatType,
@@ -225,7 +224,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                                                              resulatPerioder,
                                                                              vilkårPerioder,
                                                                              foreldelse,
-                                                                             vedtaksbrevType)
+                                                                             vedtaksbrevtype)
         val hbTotalresultat: HbTotalresultat = lagHbTotalresultat(vedtakResultatType, hbVedtaksResultatBeløp)
         val hbBehandling: HbBehandling = lagHbBehandling(behandling)
         val varsletBeløp = finnVarsletBeløp(behandling)
@@ -240,7 +239,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                     erFeilutbetaltBeløpKorrigertNed = erFeilutbetaltBeløpKorrigertNed,
                                     totaltFeilutbetaltBeløp = hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp,
                                     fritekstoppsummering = oppsummeringFritekst,
-                                    vedtaksbrevstype = vedtaksbrevType,
+                                    vedtaksbrevstype = vedtaksbrevtype,
                                     hjemmel = hbHjemmel,
                                     totalresultat = hbTotalresultat,
                                     konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
@@ -282,10 +281,10 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                          resulatPerioder: List<Beregningsresultatsperiode>,
                                          vilkårPerioder: Set<Vilkårsvurderingsperiode>,
                                          foreldelse: VurdertForeldelse?,
-                                         vedtaksbrevType: Vedtaksbrevstype): List<HbVedtaksbrevsperiode> {
+                                         vedtaksbrevtype: Vedtaksbrevstype): List<HbVedtaksbrevsperiode> {
         val fakta: FaktaFeilutbetaling = faktaRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
                                          ?: error("Vedtaksbrev mangler fakta for behandling: $behandlingId")
-        return if (vedtaksbrevType == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) emptyList()
+        return if (vedtaksbrevtype == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) emptyList()
         else resulatPerioder.map {
             lagBrevdataPeriode(it, fakta, vilkårPerioder, foreldelse, perioderFritekst)
         }

@@ -50,10 +50,9 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
             setProperty("fagsystem", fagsak.fagsystem.name)
-            setProperty("journalpostId", dokumentreferanse.journalpostId)
             setProperty("dokumentId", dokumentreferanse.dokumentId)
             setProperty("mottager", brevdata.mottager.name)
-            setProperty("brevType", brevtype.name)
+            setProperty("brevtype", brevtype.name)
             varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
             fritekst?.also { setProperty("fritekst", fritekst) }
             brevdata.tittel?.also { setProperty("tittel", it) }
@@ -77,8 +76,8 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                                                            pdf)
     }
 
-    private fun mapBrevtypeTilDokumentkategori(brevType: Brevtype): Dokumentkategori {
-        return if (Brevtype.VEDTAK === brevType) {
+    private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {
+        return if (Brevtype.VEDTAK === brevtype) {
             Dokumentkategori.VEDTAKSBREV
         } else {
             Dokumentkategori.BREV
@@ -101,16 +100,16 @@ class PdfBrevService(private val journalføringService: JournalføringService,
 
     companion object {
 
-        private fun valider(brevType: Brevtype, varsletBeløp: Long?) {
+        private fun valider(brevtype: Brevtype, varsletBeløp: Long?) {
             val harVarsletBeløp = varsletBeløp != null
-            require(brevType.gjelderVarsel() == harVarsletBeløp) {
+            require(brevtype.gjelderVarsel() == harVarsletBeløp) {
                 "Utvikler-feil: Varslet beløp skal brukes hvis, og bare hvis, brev gjelder varsel"
             }
         }
 
-        private fun valider(brevType: Brevtype, data: Brevdata) {
-            require(!(brevType == Brevtype.FRITEKST && data.tittel == null)) {
-                "Utvikler-feil: For brevType = $brevType må tittel være satt"
+        private fun valider(brevtype: Brevtype, data: Brevdata) {
+            require(!(brevtype == Brevtype.FRITEKST && data.tittel == null)) {
+                "Utvikler-feil: For brevtype = $brevtype må tittel være satt"
             }
         }
     }

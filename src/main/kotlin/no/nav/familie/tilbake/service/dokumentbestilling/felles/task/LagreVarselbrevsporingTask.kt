@@ -7,14 +7,14 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.VarselService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = LagreVarselbrevsporingTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer varselbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
-class LagreVarselbrevsporingTask(private val varselService: VarselService,
-                                 private val taskService: TaskService) : AsyncTaskStep {
+class LagreVarselbrevsporingTask(private val varselService: VarselService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -23,7 +23,8 @@ class LagreVarselbrevsporingTask(private val varselService: VarselService,
 
         val varseltekst: String = task.metadata.getProperty("fritekst")
         val varselbeløp: Long = task.metadata.getProperty("varselbeløp").toLong()
-        varselService.lagre(task.payload, varseltekst, varselbeløp)
+        val behandlingId = UUID.fromString(task.payload)
+        varselService.lagre(behandlingId, varseltekst, varselbeløp)
     }
 
     companion object {

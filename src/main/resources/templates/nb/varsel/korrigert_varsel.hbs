@@ -3,18 +3,16 @@ Vi varslet deg {{dato varsletDato}} om at du hadde fått utbetalt {{kroner varsl
 
 Riktig beløp som er utbetalt for mye er {{kroner beløp}}{{> førSkatt}}.
 
-{{#if ytelseMedSkatt}}
 {{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} du har fått for mye utbetalt for, er:
 *-{{#each feilutbetaltePerioder }}
-Fra og med {{fom}} til og med {{tom}}.{{/each}}-*
-{{/if}}
-Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{fristdatoForTilbakemelding}}.
+Fra og med {{dato fom}} til og med {{dato tom}}.{{/each}}-*
+Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{dato fristdatoForTilbakemelding}}.
 {{#if ytelseMedSkatt}}
 
 Hvis du må betale tilbake, reduserer vi beløpet med trukket skatt.
 {{/if}}
 _Dette har skjedd
-Saken din ble endret {{endringsdato}}, og endringen har ført til at du har fått utbetalt for mye.
+{{storForbokstav ytelsesnavnEiendomsform}} ble endret {{dato endringsdato}}, og endringen har ført til at du har fått utbetalt for mye.
 {{#if varseltekstFraSaksbehandler}}
 
 {{{varseltekstFraSaksbehandler}}}

@@ -31,7 +31,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     @Transactional
     fun fortsettBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet) {
             return
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -49,7 +49,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     @Transactional
     fun tilbakehoppBehandlingssteg(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så kan ikke forsette til ${behandlingsstegsinfo.behandlingssteg}")
         }
@@ -139,7 +139,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     @Transactional
     fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet()) {
+        if (behandling.erAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres")
         }
