@@ -125,7 +125,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun taBehandlingAvvent(behandlingId: UUID) {
+    fun taBehandlingAvvent(behandlingId: UUID) { // Denne metoden brukes kun for å gjenoppta behandling manuelt av saksbehandler
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
@@ -265,9 +265,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
-                                                 behandling.opprettetTidspunkt < LocalDate.now()
-                                                         .atStartOfDay()
-                                                         .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                                               behandling.opprettetTidspunkt < LocalDate.now()
+                                                       .atStartOfDay()
+                                                       .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
                    && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true

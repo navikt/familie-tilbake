@@ -128,7 +128,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
                         this["dokumentId"] = dokumentId
                         this["journalpostId"] = journalpostId
                         this["brevtype"] = brevtype.name
-                        this["mottaker"] = Brevmottager.BRUKER.name
+                        this["mottager"] = Brevmottager.BRUKER.name
                     })
     }
 
