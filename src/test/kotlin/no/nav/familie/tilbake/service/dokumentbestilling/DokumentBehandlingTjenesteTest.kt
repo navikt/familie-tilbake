@@ -66,7 +66,6 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
 
     private lateinit var dokumentBehandlingTjeneste: DokumentbehandlingService
 
-    //BeforeEach kalles både her og i subklasse
     @BeforeEach
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
