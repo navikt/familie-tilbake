@@ -34,7 +34,6 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
 
-        //historikkinnslag
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
                                               Aktør.SAKSBEHANDLER)

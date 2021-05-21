@@ -46,7 +46,6 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         lagreKravgrunnlag(kravgrunnlag431)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
-        // historikkinnslag
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
                                               Aktør.VEDTAKSLØSNING)

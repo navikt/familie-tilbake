@@ -13,7 +13,6 @@ import java.util.UUID
 class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
         val melding = objectMapper.writeValueAsString(request)
@@ -22,13 +21,9 @@ class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
                 .addCallback({
                                  log.info("Historikkinnslag for $behandlingId med $key er sendt. " +
                                           "Fikk offset ${it?.recordMetadata?.offset()}")
-                                 secureLog.info("Historikkinnslag for $behandlingId med $key er sendt. " +
-                                                "Fikk offset ${it?.recordMetadata?.offset()}")
                              },
                              {
                                  log.warn("Historikkinnslag kan ikke sendes for $behandlingId med $key. Feiler med ${it.message}")
-                                 secureLog.warn("Historikkinnslag kan ikke sendes for $behandlingId med $key. " +
-                                                "Feiler med ${it.message}")
                              })
     }
 }

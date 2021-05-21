@@ -38,7 +38,6 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
             vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
 
-            //historikkinnslag
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
@@ -57,7 +56,6 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
 
-        //historikkinnslag
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,

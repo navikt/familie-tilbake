@@ -16,11 +16,9 @@ import java.util.UUID
 class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
-    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         log.info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-        secureLog.info("LagHistorikkinnslagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
 
         val behandlingId: UUID = UUID.fromString(task.payload)
         val historikkinnslagstype =

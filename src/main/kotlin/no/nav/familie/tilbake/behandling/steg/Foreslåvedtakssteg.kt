@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -39,20 +40,20 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
 
-        //historikkinnslag - foreslå vedtak vurdert
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
                                               Aktør.SAKSBEHANDLER)
 
         flyttBehandlingVidere(behandlingId)
 
-        //historikkinnslag - send saken til beslutter
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER,
-                                              Aktør.SAKSBEHANDLER)
-
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         håndterOppgave(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
+                                              aktør = Aktør.SAKSBEHANDLER,
+                                              triggerTid = LocalDateTime.now().plusSeconds(50))
     }
 
     @Transactional

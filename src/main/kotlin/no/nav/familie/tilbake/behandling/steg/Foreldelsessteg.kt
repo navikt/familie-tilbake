@@ -34,7 +34,6 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
-            //historikkinnslag
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
@@ -49,10 +48,8 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto))
 
-        //historikkinnslag
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
-        //behandlingskontroll
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
                                                                                       Behandlingsstegstatus.UTFØRT))

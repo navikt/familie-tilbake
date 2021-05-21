@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -65,10 +66,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
-        // historikkinnslag
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                              Aktør.VEDTAKSLØSNING)
+        val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+        if (aktivBehandlingsstegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
+            historikkTaskService.lagHistorikkTask(behandling.id,
+                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                                  Aktør.VEDTAKSLØSNING)
+        }
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
@@ -118,7 +121,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                         behandlingPåVentDto.tidsfrist)
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        // historikkinnslag
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               Aktør.SAKSBEHANDLER)
@@ -138,10 +140,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        // historikkinnslag
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                              Aktør.SAKSBEHANDLER)
+        if (!behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
+            historikkTaskService.lagHistorikkTask(behandling.id,
+                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                                                  Aktør.SAKSBEHANDLER)
+        }
     }
 
     @Transactional
@@ -165,7 +168,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
 
-        //historikkinnslag
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
@@ -206,6 +208,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         fagsakRepository.insert(fagsak)
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
+
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+                                              Aktør.VEDTAKSLØSNING)
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)

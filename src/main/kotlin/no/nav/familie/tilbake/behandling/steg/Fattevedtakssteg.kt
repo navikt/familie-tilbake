@@ -48,7 +48,6 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         if (finnesUnderkjenteSteg) {
             behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
 
-            //historikkinnslag
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                                                   Aktør.BESLUTTER)
@@ -57,7 +56,6 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
                                                                                           Behandlingsstegstatus.UTFØRT))
-            //historikkinnslag
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                                                   Aktør.BESLUTTER)

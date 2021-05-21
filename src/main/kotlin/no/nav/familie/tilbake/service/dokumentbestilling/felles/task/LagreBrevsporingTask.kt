@@ -42,7 +42,6 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
 
-        //historikkinnslag
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype),
                                               aktør = Aktør.VEDTAKSLØSNING)

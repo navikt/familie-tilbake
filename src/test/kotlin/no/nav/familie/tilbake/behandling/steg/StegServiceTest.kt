@@ -387,11 +387,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.FATTER_VEDTAK)
         assertFaktadata(behandlingsstegFaktaDto)
 
-        //oppgave
         assertOppgave(Oppgavetype.BehandleSak, FerdigstillOppgaveTask.TYPE)
         assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
 
-        //historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.SAKSBEHANDLER)
     }
@@ -421,11 +419,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
-        //oppgave
         assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, FerdigstillOppgaveTask.TYPE)
         assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
 
-        //historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER, Aktør.BESLUTTER)
     }
 
@@ -453,10 +449,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent } }
 
-        //oppgave
         assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
 
-        //historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
     }
 
