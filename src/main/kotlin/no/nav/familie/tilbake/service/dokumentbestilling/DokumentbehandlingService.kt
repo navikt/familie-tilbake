@@ -7,11 +7,11 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import org.springframework.stereotype.Service
@@ -38,6 +38,11 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
     }
 
+    fun bestillAutomatiskVarselbrev(behandlingId: UUID) {
+        val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        håndterAutomatiskSendVarsel(behandling)
+    }
+
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
@@ -53,9 +58,9 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
-        val sendVarselbrev = Task(SendManueltVarselbrevTask.TYPE,
-                                  behandling.id.toString(),
-                                  Properties().apply {
+        val sendVarselbrev = Task(type = SendManueltVarselbrevTask.TYPE,
+                                  payload = behandling.id.toString(),
+                                  properties = Properties().apply {
                                       setProperty("maltype", maltype.name)
                                       setProperty("fritekst", fritekst)
                                   })
@@ -63,8 +68,16 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         settPåVent(behandling)
     }
 
+    private fun håndterAutomatiskSendVarsel(behandling: Behandling) {
+
+        val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
+                                  payload = behandling.id.toString())
+        taskService.save(sendVarselbrev)
+        settPåVent(behandling)
+    }
+
     private fun settPåVent(behandling: Behandling) {
-        val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+        val fristTid = LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
         behandlingskontrollService.settBehandlingPåVent(behandling.id,
                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                         fristTid)

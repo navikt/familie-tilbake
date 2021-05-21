@@ -45,8 +45,8 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val aktorId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
 
 
-        val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = fagsak.bruker.ident,
-                                                                          gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+        val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktorId,
+                                                                          gruppe = IdentGruppe.AKTOERID),
                                                    saksId = behandling.eksternBrukId.toString(),
                                                    tema = fagsak.ytelsestype.tilTema(),
                                                    oppgavetype = oppgavetype,
