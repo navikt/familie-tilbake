@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.BestillBrevDto
+import no.nav.familie.tilbake.api.dto.ForhåndsvisningHenleggelsesbrevDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.service.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
@@ -55,14 +56,12 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
-    @GetMapping("/forhandsvis-henleggelse/{behandlingId}",
-                produces = [MediaType.APPLICATION_PDF_VALUE])
+    @PostMapping("/forhandsvis-henleggelsesbrev",
+                     produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Forhåndsviser brev",
-                        henteParam = "behandlingId")
-    fun hentForhåndsvisningHenleggelsesbrev(@PathVariable behandlingId: UUID,
-                                            fritekst: String): ByteArray {
-        return henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, fritekst)
+                        handling = "Forhåndsviser henleggelsesbrev",)
+    fun hentForhåndsvisningHenleggelsesbrev(@Valid @RequestBody dto: ForhåndsvisningHenleggelsesbrevDto): Ressurs<ByteArray> {
+        return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
 
     @PostMapping("/forhandsvis-vedtaksbrev",
