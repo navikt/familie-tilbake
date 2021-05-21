@@ -8,6 +8,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -20,7 +22,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
@@ -42,7 +43,10 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var brevSporingRepository: BrevsporingRepository
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
@@ -67,16 +71,18 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
+        behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
         dokumentBehandlingTjeneste = DokumentbehandlingService(behandlingRepository,
-                                                               brevSporingRepository,
+                                                               behandlingskontrollService,
                                                                kravgrunnlagRepository,
                                                                taskService,
                                                                mockManueltVarselBrevTjeneste,
                                                                mockInnhentDokumentasjonbrevTjeneste)
+
     }
 
     @Test
-    fun `skal kunne bestille varselbrev når grunnlag finnes`() {
+    fun `bestillBrev skal kunne bestille varselbrev når grunnlag finnes`() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
         dokumentBehandlingTjeneste.bestillBrev(behandlingId, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
@@ -86,14 +92,14 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal ikke kunne bestille varselbrev når grunnlag ikke finnes`() {
+    fun `bestillBrev skal ikke kunne bestille varselbrev når grunnlag ikke finnes`() {
         Assertions.assertThatThrownBy {
             dokumentBehandlingTjeneste.bestillBrev(behandling.id, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
         }.hasMessage("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
     }
 
     @Test
-    fun `skal kunne bestille innhent dokumentasjon brev når grunnlag finnes`() {
+    fun `bestillBrev skal kunne bestille innhent dokumentasjon brev når grunnlag finnes`() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
         dokumentBehandlingTjeneste.bestillBrev(behandlingId,
@@ -106,7 +112,7 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal_ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
+    fun `bestillBrev skal ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
         Assertions.assertThatThrownBy {
             dokumentBehandlingTjeneste.bestillBrev(behandling.id,
                                                    Dokumentmalstype.INNHENT_DOKUMENTASJON,
