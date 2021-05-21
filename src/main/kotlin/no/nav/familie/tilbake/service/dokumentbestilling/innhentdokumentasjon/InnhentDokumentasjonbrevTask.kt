@@ -19,19 +19,19 @@ import java.util.UUID
                      beskrivelse = "Sender innhent dokumentasjonsbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
 class InnhentDokumentasjonbrevTask(val behandlingRepository: BehandlingRepository,
-                                   val innhentDokumentasjonBrevTjeneste: InnhentDokumentasjonbrevService,
-                                   val behandlingskontrollTjeneste: BehandlingskontrollService) : AsyncTaskStep {
+                                   val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
+                                   val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fritekst: String = task.metadata.getProperty("fritekst")
         if (behandling.harVerge) {
-            innhentDokumentasjonBrevTjeneste.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
+            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
         }
-        innhentDokumentasjonBrevTjeneste.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
+        innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
         val tidsfrist = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
-        behandlingskontrollTjeneste.settBehandlingPåVent(behandlingId,
+        behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                          Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                          tidsfrist)
     }

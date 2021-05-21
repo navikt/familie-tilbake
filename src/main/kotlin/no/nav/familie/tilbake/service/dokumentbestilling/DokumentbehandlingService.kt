@@ -26,8 +26,8 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
                                 private val behandlingskontrollService: BehandlingskontrollService,
                                 private val kravgrunnlagRepository: KravgrunnlagRepository,
                                 private val taskService: TaskService,
-                                private val manueltVarselBrevTjeneste: ManueltVarselbrevService,
-                                private val innhentDokumentasjonBrevTjeneste: InnhentDokumentasjonbrevService) {
+                                private val manueltVarselBrevService: ManueltVarselbrevService,
+                                private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService) {
 
     fun bestillBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -36,15 +36,14 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         } else if (Dokumentmalstype.INNHENT_DOKUMENTASJON == maltype) {
             håndterInnhentDokumentasjon(behandling, fritekst)
         }
-// TODO       historikkinnslagTjeneste.opprettHistorikkinnslagForBrevBestilt(behandling, maltype)
     }
 
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            dokument = manueltVarselBrevTjeneste.hentForhåndsvisningManueltVarselbrev(behandlingId, maltype, fritekst)
+            dokument = manueltVarselBrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, maltype, fritekst)
         } else if (Dokumentmalstype.INNHENT_DOKUMENTASJON == maltype) {
-            dokument = innhentDokumentasjonBrevTjeneste.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
+            dokument = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
         }
         return dokument
     }

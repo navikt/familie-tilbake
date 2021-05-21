@@ -14,7 +14,7 @@ import java.util.UUID
                      maxAntallFeil = 3,
                      beskrivelse = "Sender varselbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
-class SendVarselbrevTask(private val varselbrevTjeneste: VarselbrevService,
+class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 
 
@@ -22,9 +22,9 @@ class SendVarselbrevTask(private val varselbrevTjeneste: VarselbrevService,
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
-            varselbrevTjeneste.sendVarselbrev(behandling, Brevmottager.VERGE)
+            varselbrevService.sendVarselbrev(behandling, Brevmottager.VERGE)
         }
-        varselbrevTjeneste.sendVarselbrev(behandling, Brevmottager.BRUKER)
+        varselbrevService.sendVarselbrev(behandling, Brevmottager.BRUKER)
     }
 
     companion object {

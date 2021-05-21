@@ -37,7 +37,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
 
-class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
+class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -61,22 +61,22 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
 
     private lateinit var behandling: Behandling
 
-    private val mockManueltVarselBrevTjeneste: ManueltVarselbrevService = mockk()
-    private val mockInnhentDokumentasjonbrevTjeneste: InnhentDokumentasjonbrevService = mockk()
+    private val mockManueltVarselBrevService: ManueltVarselbrevService = mockk()
+    private val mockInnhentDokumentasjonbrevService: InnhentDokumentasjonbrevService = mockk()
 
-    private lateinit var dokumentBehandlingTjeneste: DokumentbehandlingService
+    private lateinit var dokumentBehandlingService: DokumentbehandlingService
 
     @BeforeEach
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
-        dokumentBehandlingTjeneste = DokumentbehandlingService(behandlingRepository,
+        dokumentBehandlingService = DokumentbehandlingService(behandlingRepository,
                                                                behandlingskontrollService,
                                                                kravgrunnlagRepository,
                                                                taskService,
-                                                               mockManueltVarselBrevTjeneste,
-                                                               mockInnhentDokumentasjonbrevTjeneste)
+                                                               mockManueltVarselBrevService,
+                                                               mockInnhentDokumentasjonbrevService)
 
     }
 
@@ -84,7 +84,7 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     fun `bestillBrev skal kunne bestille varselbrev når grunnlag finnes`() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
-        dokumentBehandlingTjeneste.bestillBrev(behandlingId, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
+        dokumentBehandlingService.bestillBrev(behandlingId, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
         assertThat(tasks.first().type).isEqualTo(SendManueltVarselbrevTask.TYPE)
@@ -93,7 +93,7 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     @Test
     fun `bestillBrev skal ikke kunne bestille varselbrev når grunnlag ikke finnes`() {
         Assertions.assertThatThrownBy {
-            dokumentBehandlingTjeneste.bestillBrev(behandling.id, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
+            dokumentBehandlingService.bestillBrev(behandling.id, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
         }.hasMessage("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
     }
 
@@ -101,7 +101,7 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     fun `bestillBrev skal kunne bestille innhent dokumentasjon brev når grunnlag finnes`() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
-        dokumentBehandlingTjeneste.bestillBrev(behandlingId,
+        dokumentBehandlingService.bestillBrev(behandlingId,
                                                Dokumentmalstype.INNHENT_DOKUMENTASJON,
                                                "Bestilt innhent dokumentasjon")
 
@@ -113,7 +113,7 @@ class DokumentBehandlingTjenesteTest : OppslagSpringRunnerTest() {
     @Test
     fun `bestillBrev skal ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
         Assertions.assertThatThrownBy {
-            dokumentBehandlingTjeneste.bestillBrev(behandling.id,
+            dokumentBehandlingService.bestillBrev(behandling.id,
                                                    Dokumentmalstype.INNHENT_DOKUMENTASJON,
                                                    "Bestilt innhent dokumentasjon")
         }.hasMessage("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")

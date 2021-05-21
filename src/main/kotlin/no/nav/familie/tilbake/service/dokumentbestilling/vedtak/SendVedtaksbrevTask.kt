@@ -16,7 +16,7 @@ import java.util.UUID
                      beskrivelse = "Sender vedtaksbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
 class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository,
-                          private val vedtaksbrevTjeneste: VedtaksbrevService) : AsyncTaskStep {
+                          private val vedtaksbrevService: VedtaksbrevService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -24,9 +24,9 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
-            vedtaksbrevTjeneste.sendVedtaksbrev(behandling, Brevmottager.VERGE)
+            vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
         }
-        vedtaksbrevTjeneste.sendVedtaksbrev(behandling, Brevmottager.BRUKER)
+        vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.BRUKER)
         log.info("Utført for behandling: {}", behandlingId)
     }
 

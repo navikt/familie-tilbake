@@ -20,8 +20,8 @@ import java.util.UUID
                      beskrivelse = "Sender manuelt varselbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
 class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
-                                val manueltVarselBrevTjeneste: ManueltVarselbrevService,
-                                val behandlingskontrollTjeneste: BehandlingskontrollService) : AsyncTaskStep {
+                                val manueltVarselBrevService: ManueltVarselbrevService,
+                                val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -32,18 +32,18 @@ class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
 
         if (Dokumentmalstype.VARSEL == maltype) {
             if (behandling.harVerge) {
-                manueltVarselBrevTjeneste.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
+                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
-            manueltVarselBrevTjeneste.sendManueltVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
+            manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
 
         } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
             if (behandling.harVerge) {
-                manueltVarselBrevTjeneste.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
+                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
-            manueltVarselBrevTjeneste.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
+            manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
         }
         val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
-        behandlingskontrollTjeneste.settBehandlingPåVent(behandling.id,
+        behandlingskontrollService.settBehandlingPåVent(behandling.id,
                                                          Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                          fristTid)
     }
