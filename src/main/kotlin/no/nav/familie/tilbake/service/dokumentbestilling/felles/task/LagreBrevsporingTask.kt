@@ -41,10 +41,11 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
     override fun onCompletion(task: Task) {
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
+        val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype),
-                                              aktør = Aktør.VEDTAKSLØSNING)
+                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
@@ -58,6 +59,16 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
             Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
             Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
             Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT
+        }
+    }
+
+    private fun utledAktør(brevtype: Brevtype,
+                           ansvarligSaksbehandler: String?): Aktør {
+        return when {
+            brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
+            brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
+            ansvarligSaksbehandler != null && ansvarligSaksbehandler != "VL" -> Aktør.SAKSBEHANDLER
+            else -> Aktør.VEDTAKSLØSNING
         }
     }
 

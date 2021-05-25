@@ -62,7 +62,14 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for varselbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VARSEL))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.VEDTAKSLØSNING)
+    }
+
+    @Test
+    fun `onCompletion skal lage historikk task for manuelt varselbrev`() {
+        lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VARSEL, "Z0000"))
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -76,7 +83,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for korrigert varselbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.KORRIGERT_VARSEL))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -90,7 +97,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for henleggelsesbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.HENLEGGELSE))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -104,7 +111,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for innhent dokumentasjon`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.INNHENT_DOKUMENTASJON))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -118,10 +125,10 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for vedtaksbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT, Aktør.VEDTAKSLØSNING)
     }
 
-    private fun opprettTask(behandlingId: UUID, brevtype: Brevtype): Task {
+    private fun opprettTask(behandlingId: UUID, brevtype: Brevtype, ansvarligSaksbehandler: String? = "VL"): Task {
         return Task(type = LagreBrevsporingTask.TYPE,
                     payload = behandlingId.toString(),
                     properties = Properties().apply {
@@ -129,6 +136,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
                         this["journalpostId"] = journalpostId
                         this["brevtype"] = brevtype.name
                         this["mottager"] = Brevmottager.BRUKER.name
+                        this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
                     })
     }
 
@@ -140,12 +148,15 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertEquals(journalpostId, brevsporing.journalpostId)
     }
 
-    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype) {
+    private fun assertHistorikkTask(
+            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+            aktør: Aktør,
+    ) {
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                Aktør.VEDTAKSLØSNING.name == it.metadata["aktor"] &&
+                aktør.name == it.metadata["aktor"] &&
                 behandlingId.toString() == it.payload
             }
         }
