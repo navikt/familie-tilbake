@@ -1,11 +1,14 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -20,6 +23,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                           private val mottattXmlService: ØkonomiXmlMottattService,
                           private val stegService: StegService,
                           private val behandlingskontrollService: BehandlingskontrollService,
+                          private val historikkTaskService: HistorikkTaskService,
                           private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
 
     @Transactional
@@ -41,6 +45,11 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         lagreKravgrunnlag(kravgrunnlag431)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
+
+        // historikkinnslag
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
+                                              Aktør.VEDTAKSLØSNING)
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
             endretKravgrunnlagEventPublisher.fireEvent(behandlingId = behandling.id)

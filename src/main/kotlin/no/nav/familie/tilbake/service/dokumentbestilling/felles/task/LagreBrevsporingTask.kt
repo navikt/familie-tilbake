@@ -1,9 +1,12 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles.task
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.BrevsporingService
@@ -17,7 +20,8 @@ import java.util.UUID
                      beskrivelse = "Lagrer brev",
                      triggerTidVedFeilISekunder = 60 * 5)
 class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
-                           private val taskService: TaskService) : AsyncTaskStep {
+                           private val taskService: TaskService,
+                           private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -37,10 +41,24 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
     override fun onCompletion(task: Task) {
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
-        // TODO Opprette task for Historikkinnslag.
+
+        //historikkinnslag
+        historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
+                                              historikkinnslagstype = utledHistorikkinnslagType(brevtype),
+                                              aktør = Aktør.VEDTAKSLØSNING)
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
+        }
+    }
+
+    private fun utledHistorikkinnslagType(brevtype: Brevtype): TilbakekrevingHistorikkinnslagstype {
+        return when (brevtype) {
+            Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT
+            Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT
+            Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
+            Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
+            Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT
         }
     }
 

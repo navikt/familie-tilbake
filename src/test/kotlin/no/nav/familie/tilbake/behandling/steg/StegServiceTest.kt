@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -38,6 +39,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
@@ -156,6 +159,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -183,6 +190,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -215,6 +226,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -248,6 +261,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -287,6 +304,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -334,6 +354,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
         assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId))
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -362,8 +387,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.FATTER_VEDTAK)
         assertFaktadata(behandlingsstegFaktaDto)
 
+        //oppgave
         assertOppgave(Oppgavetype.BehandleSak, FerdigstillOppgaveTask.TYPE)
         assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -371,7 +401,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // behandle fakta steg
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
 
         // behandle vilkårsvurderingssteg
@@ -391,8 +420,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
 
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
+
+        //oppgave
         assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, FerdigstillOppgaveTask.TYPE)
         assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER, Aktør.BESLUTTER)
     }
 
     @Test
@@ -419,7 +453,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent } }
 
+        //oppgave
         assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
+
+        //historikk
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
     }
 
     @Test
@@ -652,6 +690,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             taskene.any {
                 oppgavetype.name == it.metadata.getProperty("oppgavetype") &&
                 tasktype == it.type
+            }
+        }
+    }
+
+    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                    aktør: Aktør) {
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                historikkinnslagstype.name == it.metadata["historikkinnslagType"] &&
+                aktør.name == it.metadata["aktor"] &&
+                behandlingId.toString() == it.payload
             }
         }
     }

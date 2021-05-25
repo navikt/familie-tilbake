@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -24,6 +25,8 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
@@ -49,6 +52,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
+                        private val historikkTaskService: HistorikkTaskService,
                         private val rolleConfig: RolleConfig) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -60,6 +64,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
+
+        // historikkinnslag
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+                                              Aktør.VEDTAKSLØSNING)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
@@ -108,6 +117,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
         oppdaterAnsvarligSaksbehandler(behandlingId)
+
+        // historikkinnslag
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional
@@ -123,6 +137,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.gjenopptaSteg(behandlingId)
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
+
+        // historikkinnslag
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional
@@ -145,6 +164,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
+
+        //historikkinnslag
+        val aktør = when (behandlingsresultatstype) {
+            Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+            Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
+            else -> Aktør.SAKSBEHANDLER
+        }
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                                              aktør)
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
             taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))

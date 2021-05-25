@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
@@ -33,6 +34,8 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
@@ -114,6 +117,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFagsystemsbehandling(behandling, opprettTilbakekrevingRequest)
         assertVarselData(behandling, opprettTilbakekrevingRequest)
         assertTrue { behandling.verger.isEmpty() }
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -131,6 +135,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFagsystemsbehandling(behandling, opprettTilbakekrevingRequest)
         assertVarselData(behandling, opprettTilbakekrevingRequest)
         assertVerge(behandling, opprettTilbakekrevingRequest)
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -148,6 +153,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFagsystemsbehandling(behandling, opprettTilbakekrevingRequest)
         assertTrue { behandling.varsler.isEmpty() }
         assertTrue { behandling.verger.isEmpty() }
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -403,6 +409,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         }
         assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
         assertAnsvarligSaksbehandler(behandling)
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -445,6 +452,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         assertFalse { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
         assertAnsvarligSaksbehandler(behandling)
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -467,7 +475,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
 
         behandlingService.henleggBehandling(behandlingId = behandling.id,
-                                            behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
+                                            behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
@@ -482,11 +490,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingssresultat = behandling.sisteResultat
         assertNotNull(behandlingssresultat)
-        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, behandlingssresultat.type)
+        assertEquals(Behandlingsresultatstype.HENLAGT_FEILOPPRETTET, behandlingssresultat.type)
 
-        val task = taskRepository.findByStatus(Status.UBEHANDLET)
-        assertEquals(4, task.count())
-        assertEquals(SendHenleggelsesbrevTask.TYPE, task[2].type)
+        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendHenleggelsesbrevTask.TYPE } }
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT, Aktør.SAKSBEHANDLER)
     }
 
     @Test
@@ -520,6 +527,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
 
         assertNull(taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE })
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT, Aktør.VEDTAKSLØSNING)
     }
 
     @Test
@@ -706,5 +714,18 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals("Z0000", lagretBehandling.ansvarligSaksbehandler)
         assertNull(lagretBehandling.ansvarligBeslutter)
+    }
+
+    private fun assertHistorikkTask(behandlingId: UUID,
+                                    historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                    aktør: Aktør) {
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                historikkinnslagstype.name == it.metadata["historikkinnslagType"] &&
+                aktør.name == it.metadata["aktor"] &&
+                behandlingId.toString() == it.payload
+            }
+        }
     }
 }

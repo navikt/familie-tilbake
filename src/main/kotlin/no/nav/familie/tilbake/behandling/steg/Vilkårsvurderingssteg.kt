@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -11,6 +12,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.A
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.slf4j.LoggerFactory
@@ -23,7 +26,8 @@ import java.util.UUID
 @Service
 class Vilkårsvurderingssteg(val behandlingskontrollService: BehandlingskontrollService,
                             val vilkårsvurderingService: VilkårsvurderingService,
-                            val foreldelseService: ForeldelseService) : IBehandlingssteg {
+                            val foreldelseService: ForeldelseService,
+                            val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +37,10 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
         if (harAllePerioderForeldet(behandlingId)) {
             // hvis det finnes noen periode som ble vurdert før i vilkårsvurdering, må slettes
             vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
+
+            //historikkinnslag
+            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
@@ -48,6 +56,9 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
+
+        //historikkinnslag
+        lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
@@ -74,5 +85,11 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
     private fun harAllePerioderForeldet(behandlingId: UUID): Boolean {
         return foreldelseService.hentAktivVurdertForeldelse(behandlingId)
                        ?.foreldelsesperioder?.all { it.erForeldet() } ?: false
+    }
+
+    private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
+                                              aktør)
     }
 }

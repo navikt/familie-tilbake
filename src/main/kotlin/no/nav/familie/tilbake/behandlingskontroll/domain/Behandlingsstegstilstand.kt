@@ -91,12 +91,12 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
     }
 }
 
-enum class Venteårsak(val defaultVenteTidIUker: Long) {
+enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) {
 
-    VENT_PÅ_BRUKERTILBAKEMELDING(4),
-    VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4),
-    AVVENTER_DOKUMENTASJON(0),
-    UTVIDET_TILSVAR_FRIST(0),
-    ENDRE_TILKJENT_YTELSE(0),
-    VENT_PÅ_MULIG_MOTREGNING(0)
+    VENT_PÅ_BRUKERTILBAKEMELDING(4, "Venter på tilbakemelding fra bruker"),
+    VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4, "Venter på kravgrunnlag fra økonomi"),
+    AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
+    UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
+    ENDRE_TILKJENT_YTELSE(0, "Mulig endring i tilkjent ytelse"),
+    VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse")
 }
