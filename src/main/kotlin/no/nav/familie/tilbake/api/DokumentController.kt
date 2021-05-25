@@ -57,11 +57,9 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     }
 
     @PostMapping("/forhandsvis-henleggelsesbrev",
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(
-            minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-            handling = "Forhåndsviser henleggelsesbrev",
-    )
+                     produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Forhåndsviser henleggelsesbrev")
     fun hentForhåndsvisningHenleggelsesbrev(@Valid @RequestBody dto: ForhåndsvisningHenleggelsesbrevDto): Ressurs<ByteArray> {
         return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
