@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -50,8 +49,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
-                        private val rolleConfig: RolleConfig,
-                        private val taskService: TaskService) {
+                        private val rolleConfig: RolleConfig) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -66,7 +64,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
                                       payload = behandling.id.toString())
-            taskService.save(sendVarselbrev)
+            taskRepository.save(sendVarselbrev)
         }
 
         return behandling
