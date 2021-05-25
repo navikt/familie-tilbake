@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
-import no.nav.familie.tilbake.service.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import org.springframework.stereotype.Service
@@ -38,10 +37,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
     }
 
-    fun bestillAutomatiskVarselbrev(behandlingId: UUID) {
-        val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        håndterAutomatiskSendVarsel(behandling)
-    }
 
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
@@ -64,14 +59,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
                                       setProperty("maltype", maltype.name)
                                       setProperty("fritekst", fritekst)
                                   })
-        taskService.save(sendVarselbrev)
-        settPåVent(behandling)
-    }
-
-    private fun håndterAutomatiskSendVarsel(behandling: Behandling) {
-
-        val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
-                                  payload = behandling.id.toString())
         taskService.save(sendVarselbrev)
         settPåVent(behandling)
     }
