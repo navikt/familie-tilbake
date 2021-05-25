@@ -3,7 +3,9 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
@@ -27,6 +29,7 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
@@ -57,6 +60,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
+
+        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
+            val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
+                                      payload = behandling.id.toString())
+            taskRepository.save(sendVarselbrev)
+        }
 
         return behandling
     }

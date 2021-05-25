@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
@@ -38,6 +37,7 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
     }
 
+
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
@@ -53,9 +53,9 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
-        val sendVarselbrev = Task(SendManueltVarselbrevTask.TYPE,
-                                  behandling.id.toString(),
-                                  Properties().apply {
+        val sendVarselbrev = Task(type = SendManueltVarselbrevTask.TYPE,
+                                  payload = behandling.id.toString(),
+                                  properties = Properties().apply {
                                       setProperty("maltype", maltype.name)
                                       setProperty("fritekst", fritekst)
                                   })
@@ -64,7 +64,7 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
     }
 
     private fun settPåVent(behandling: Behandling) {
-        val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+        val fristTid = LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
         behandlingskontrollService.settBehandlingPåVent(behandling.id,
                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                         fristTid)
