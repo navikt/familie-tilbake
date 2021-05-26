@@ -109,14 +109,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
+        oppdaterAnsvarligSaksbehandler(behandlingId)
+
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
-        oppdaterAnsvarligSaksbehandler(behandlingId)
-
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional

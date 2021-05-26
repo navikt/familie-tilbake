@@ -105,6 +105,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       tidsfrist = tidsfrist))
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional

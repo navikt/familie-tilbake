@@ -5,13 +5,10 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -42,10 +39,6 @@ class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
             }
             manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
         }
-        val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
-        behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                         fristTid)
     }
 
     companion object {
