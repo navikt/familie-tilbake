@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.varsel
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
-import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -20,10 +19,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class VarselbrevService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakRepository: FagsakRepository,
+class VarselbrevService(private val fagsakRepository: FagsakRepository,
                         private val eksterneDataForBrevService: EksterneDataForBrevService,
-                        private val pdfBrevService: PdfBrevService) {
+                        private val pdfBrevService: PdfBrevService,
+                        private val varselbrevUtil: VarselbrevUtil) {
+
 
     fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -54,7 +54,7 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
 
-        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSending(fagsak,
+        return varselbrevUtil.sammenstillInfoFraFagsystemerForSending(fagsak,
                                                                       behandling,
                                                                       adresseinfo,
                                                                       personinfo,
@@ -85,7 +85,7 @@ class VarselbrevService(private val behandlingRepository: BehandlingRepository,
                                                                               request.verge,
                                                                               request.fagsystem)
 
-        return VarselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(adresseinfo,
+        return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(adresseinfo,
                                                                          request,
                                                                          personinfo)
     }

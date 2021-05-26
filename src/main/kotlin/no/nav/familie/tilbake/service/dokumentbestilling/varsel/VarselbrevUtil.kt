@@ -12,14 +12,20 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevmottagerUtil
+import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.service.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 
-object VarselbrevUtil {
+@Service
+class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrevService) {
 
-    private const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
-    private const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
+    companion object {
+
+        private const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
+        private const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
+    }
 
     fun sammenstillInfoFraFagsystemerForSending(fagsak: Fagsak,
                                                 behandling: Behandling,
@@ -49,6 +55,7 @@ object VarselbrevUtil {
 
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
+        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(ContextService.hentSaksbehandler())
 
         val metadata = Brevmetadata(behandlendeEnhetId = request.behandlendeEnhetId,
                                     behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
@@ -60,7 +67,7 @@ object VarselbrevUtil {
                                     vergenavn = vergenavn,
                                     ytelsestype = request.ytelsestype,
                                     språkkode = request.språkkode,
-                                    ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+                                    ansvarligSaksbehandler = ansvarligSaksbehandler,
                                     tittel = tittel)
 
         return Varselbrevsdokument(brevmetadata = metadata,
@@ -77,6 +84,7 @@ object VarselbrevUtil {
                                        fagsak: Fagsak,
                                        vergenavn: String?,
                                        erKorrigert: Boolean): Brevmetadata {
+        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
 
         return Brevmetadata(sakspartId = personinfo.ident,
                             sakspartsnavn = personinfo.navn,
@@ -85,7 +93,7 @@ object VarselbrevUtil {
                             mottageradresse = adresseinfo,
                             behandlendeEnhetId = behandling.behandlendeEnhet,
                             behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                            ansvarligSaksbehandler = "VL",
+                            ansvarligSaksbehandler = ansvarligSaksbehandler,
                             saksnummer = fagsak.eksternFagsakId,
                             språkkode = fagsak.bruker.språkkode,
                             ytelsestype = fagsak.ytelsestype,
@@ -126,4 +134,5 @@ object VarselbrevUtil {
     private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Handlebarsperiode> {
         return feilutbetalingsfakta.feilutbetaltePerioder.map { Handlebarsperiode(it.periode.fom, it.periode.tom) }
     }
+
 }

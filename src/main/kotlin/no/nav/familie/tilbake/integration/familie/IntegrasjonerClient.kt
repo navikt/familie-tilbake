@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 
 @Component
 class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
@@ -29,11 +30,6 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     override val pingUri: URI =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
-
-    private val organisasjonUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
-            .build()
-            .toUri()
 
     private val arkiverUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
@@ -45,8 +41,19 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
+    private fun hentSaksbehandlerUri(id: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER)
+                    .pathSegment(id)
+                    .build()
+                    .toUri()
+
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
-            UriComponentsBuilder.fromUri(organisasjonUri).pathSegment(organisasjonsnummer).build().toUri()
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
+                    .pathSegment(organisasjonsnummer)
+                    .build()
+                    .toUri()
 
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
@@ -66,6 +73,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
         return getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
+    }
+
+    fun hentSaksbehandler(id: String): Saksbehandler {
+        return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
