@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -66,14 +65,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
-        val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-        if (aktivBehandlingsstegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
-            historikkTaskService.lagHistorikkTask(behandling.id,
-                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                                  Aktør.VEDTAKSLØSNING)
-        }
-
-        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
+        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_MED_VARSEL) {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
                                       payload = behandling.id.toString())
             taskRepository.save(sendVarselbrev)

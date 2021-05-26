@@ -53,7 +53,7 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                                                       .BEHANDLING_SENDT_TIL_BESLUTTER,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              triggerTid = LocalDateTime.now().plusSeconds(50))
+                                              triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 
     @Transactional

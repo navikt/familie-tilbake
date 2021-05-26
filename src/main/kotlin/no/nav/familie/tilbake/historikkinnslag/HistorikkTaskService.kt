@@ -22,7 +22,6 @@ class HistorikkTaskService(private val taskRepository: TaskRepository) {
         val task = Task(type = LagHistorikkinnslagTask.TYPE,
                         payload = behandlingId.toString(),
                         properties = properties)
-        triggerTid?.let { task.medTriggerTid(it) }
-        taskRepository.save(task)
+        triggerTid?.let { taskRepository.save(task.medTriggerTid(triggerTid)) } ?: taskRepository.save(task)
     }
 }

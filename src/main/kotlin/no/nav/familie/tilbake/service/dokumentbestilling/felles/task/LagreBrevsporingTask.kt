@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.BrevsporingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -45,7 +46,8 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype),
-                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler))
+                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                                              triggerTid = LocalDateTime.now().plusSeconds(5))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
