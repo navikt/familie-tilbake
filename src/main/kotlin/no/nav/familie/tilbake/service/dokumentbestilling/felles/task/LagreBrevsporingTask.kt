@@ -45,16 +45,25 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
-                                              historikkinnslagstype = utledHistorikkinnslagType(brevtype),
+                                              historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
                                               aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                                              triggerTid = LocalDateTime.now().plusSeconds(5))
+                                              triggerTid = LocalDateTime.now().plusSeconds(2))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
         }
     }
 
-    private fun utledHistorikkinnslagType(brevtype: Brevtype): TilbakekrevingHistorikkinnslagstype {
+    private fun utledHistorikkinnslagType(brevtype: Brevtype, mottager: Brevmottager): TilbakekrevingHistorikkinnslagstype {
+        if (Brevmottager.VERGE == mottager) {
+            return when (brevtype) {
+                Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT_TIL_VERGE
+                Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT_TIL_VERGE
+                Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE
+                Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT_TIL_VERGE
+                Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT_TIL_VERGE
+            }
+        }
         return when (brevtype) {
             Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT
             Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT

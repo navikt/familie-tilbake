@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.historikkinnslag
 import no.nav.familie.kontrakter.felles.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 
+private const val VARSELBREV_TEKST = "Varselbrev tilbakebetaling"
+
 enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
                                                val tekst: String? = null,
                                                val type: Historikkinnslagstype = Historikkinnslagstype.HENDELSE,
@@ -38,18 +40,33 @@ enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
 
     // Brev type
     VARSELBREV_SENDT(tittel = "Varselbrev sendt",
-                     tekst = "Varselbrev tilbakebetaling",
+                     tekst = VARSELBREV_TEKST,
                      type = Historikkinnslagstype.BREV),
-    KORRIGERT_VARSELBREV_SENDT(tittel = "Varselbrev sendt",
-                               tekst = "Varselbrev tilbakebetaling",
+    VARSELBREV_SENDT_TIL_VERGE(tittel = "Varselbrev sendt til verge",
+                               tekst = VARSELBREV_TEKST,
                                type = Historikkinnslagstype.BREV),
+    KORRIGERT_VARSELBREV_SENDT(tittel = "Varselbrev sendt",
+                               tekst = VARSELBREV_TEKST,
+                               type = Historikkinnslagstype.BREV),
+    KORRIGERT_VARSELBREV_SENDT_TIL_VERGE(tittel = "Varselbrev sendt til verge",
+                                         tekst = VARSELBREV_TEKST,
+                                         type = Historikkinnslagstype.BREV),
     VEDTAKSBREV_SENDT(tittel = "Vedtaksbrev sendt",
                       tekst = "Vedtak om tilbakebetaling",
                       type = Historikkinnslagstype.BREV),
+    VEDTAKSBREV_SENDT_TIL_VERGE(tittel = "Vedtaksbrev sendt til verge",
+                                tekst = "Vedtak om tilbakebetaling",
+                                type = Historikkinnslagstype.BREV),
     HENLEGGELSESBREV_SENDT(tittel = "Henleggelsesbrev sendt",
                            tekst = "Henleggelsesbrev",
                            type = Historikkinnslagstype.BREV),
+    HENLEGGELSESBREV_SENDT_TIL_VERGE(tittel = "Henleggelsesbrev sendt til verge",
+                                     tekst = "Henleggelsesbrev",
+                                     type = Historikkinnslagstype.BREV),
     INNHENT_DOKUMENTASJON_BREV_SENDT(tittel = "Innhent dokumentasjon sendt",
                                      tekst = "Innhent dokumentasjon",
-                                     type = Historikkinnslagstype.BREV);
+                                     type = Historikkinnslagstype.BREV),
+    INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE(tittel = "Innhent dokumentasjon sendt til verge",
+                                               tekst = "Innhent dokumentasjon",
+                                               type = Historikkinnslagstype.BREV)
 }
