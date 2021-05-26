@@ -158,6 +158,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
 
+        oppdaterAnsvarligSaksbehandler(behandlingId)
+
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
