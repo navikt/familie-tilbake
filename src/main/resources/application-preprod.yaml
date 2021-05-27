@@ -43,8 +43,3 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.c
 PDL_URL: http://pdl-api-q1.pdl
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 FORELDELSE_ANTALL_MÅNED: 3
-
-KAFKA_BROKERS: nav-prod-kafka-nav-prod.aivencloud.com:26484
-KAFKA_TRUSTSTORE_PATH: /var/run/secrets/nais.io/kafka/client.truststore.jks
-KAFKA_CREDSTORE_PASSWORD: changeme
-KAFKA_KEYSTORE_PATH: /var/run/secrets/nais.io/kafka/client.keystore.p12
