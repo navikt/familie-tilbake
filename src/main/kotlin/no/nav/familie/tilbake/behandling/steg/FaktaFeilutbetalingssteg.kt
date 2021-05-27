@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -7,6 +8,8 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -16,7 +19,8 @@ import java.util.UUID
 
 @Service
 class FaktaFeilutbetalingssteg(val behandlingskontrollService: BehandlingskontrollService,
-                               val faktaFeilutbetalingService: FaktaFeilutbetalingService) : IBehandlingssteg {
+                               val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+                               val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -29,6 +33,10 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg")
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+                                              Aktør.SAKSBEHANDLER)
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,

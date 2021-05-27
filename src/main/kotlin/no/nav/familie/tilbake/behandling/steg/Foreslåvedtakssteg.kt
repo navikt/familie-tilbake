@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
@@ -7,19 +8,23 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollService,
                          val vedtaksbrevService: VedtaksbrevService,
                          val oppgaveTaskService: OppgaveTaskService,
-                         val totrinnService: TotrinnService) : IBehandlingssteg {
+                         val totrinnService: TotrinnService,
+                         val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -34,10 +39,21 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
+                                              Aktør.SAKSBEHANDLER)
+
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         håndterOppgave(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
+                                              aktør = Aktør.SAKSBEHANDLER,
+                                              triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 
     @Transactional

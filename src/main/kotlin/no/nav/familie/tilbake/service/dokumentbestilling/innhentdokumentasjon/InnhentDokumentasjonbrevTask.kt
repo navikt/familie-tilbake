@@ -18,9 +18,9 @@ import java.util.UUID
                      maxAntallFeil = 3,
                      beskrivelse = "Sender innhent dokumentasjonsbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
-class InnhentDokumentasjonbrevTask(val behandlingRepository: BehandlingRepository,
-                                   val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
-                                   val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
+class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingRepository,
+                                   private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
+                                   private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -30,10 +30,15 @@ class InnhentDokumentasjonbrevTask(val behandlingRepository: BehandlingRepositor
             innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
         }
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
-        val tidsfrist = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
-        behandlingskontrollService.settBehandlingPåVent(behandlingId,
-                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                         tidsfrist)
+
+        // utvider fristen bare når tasken ikke kjørte ordentlig ved første omgang
+        if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
+            val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+            behandlingskontrollService.settBehandlingPåVent(behandling.id,
+                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                            fristTid)
+        }
+
     }
 
     companion object {

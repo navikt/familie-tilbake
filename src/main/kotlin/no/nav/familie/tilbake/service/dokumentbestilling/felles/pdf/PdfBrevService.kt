@@ -33,7 +33,6 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                  varsletBeløp: Long? = null,
                  fritekst: String? = null) {
         valider(brevtype, varsletBeløp)
-        valider(brevtype, data)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
     }
@@ -53,6 +52,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
             setProperty("dokumentId", dokumentreferanse.dokumentId)
             setProperty("mottager", brevdata.mottager.name)
             setProperty("brevtype", brevtype.name)
+            setProperty("ansvarligSaksbehandler", brevdata.metadata.ansvarligSaksbehandler)
             varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
             fritekst?.also { setProperty("fritekst", fritekst) }
             brevdata.tittel?.also { setProperty("tittel", it) }
@@ -94,7 +94,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         return DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
     }
 
-    private fun lagHeader(data: Brevdata): String? {
+    private fun lagHeader(data: Brevdata): String {
         return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
     }
 
@@ -104,12 +104,6 @@ class PdfBrevService(private val journalføringService: JournalføringService,
             val harVarsletBeløp = varsletBeløp != null
             require(brevtype.gjelderVarsel() == harVarsletBeløp) {
                 "Utvikler-feil: Varslet beløp skal brukes hvis, og bare hvis, brev gjelder varsel"
-            }
-        }
-
-        private fun valider(brevtype: Brevtype, data: Brevdata) {
-            require(!(brevtype == Brevtype.FRITEKST && data.tittel == null)) {
-                "Utvikler-feil: For brevtype = $brevtype må tittel være satt"
             }
         }
     }

@@ -25,8 +25,10 @@ class SendHenleggelsesbrevTask(private val henleggelsesbrevService: Henleggelses
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
 
-        val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
-        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, brevmottager)
+        if (behandling.harVerge) {
+            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.VERGE)
+        }
+        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.BRUKER)
     }
 
     companion object {

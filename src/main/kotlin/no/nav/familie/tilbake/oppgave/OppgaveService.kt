@@ -52,7 +52,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                                                    oppgavetype = oppgavetype,
                                                    behandlesAvApplikasjon = "familie-tilbake",
                                                    fristFerdigstillelse = fristForFerdigstillelse,
-                                                   beskrivelse = lagOppgaveTekst(fagsakId.toString(), fagsak.fagsystem.name),
+                                                   beskrivelse = lagOppgaveTekst(fagsak.eksternFagsakId, behandling.eksternBrukId.toString(), fagsak.fagsystem.name),
                                                    enhetsnummer = behandling.behandlendeEnhet,
                                                    behandlingstype = Behandlingstype.Tilbakekreving.value,
                                                    behandlingstema = null)
@@ -90,14 +90,17 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
     }
 
 
-    private fun lagOppgaveTekst(fagsakId: String, fagsystem: String, beskrivelse: String? = null): String {
+    private fun lagOppgaveTekst(eksternFagsakId: String,
+                                eksternbrukBehandlingID: String,
+                                fagsystem: String,
+                                beskrivelse: String? = null): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } +
                "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${fagsakId}"
+               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/${eksternbrukBehandlingID}"
     }
 
     companion object {
