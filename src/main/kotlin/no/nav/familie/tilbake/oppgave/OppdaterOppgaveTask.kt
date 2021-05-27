@@ -18,7 +18,7 @@ import java.util.UUID
 
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagOppgaveTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = OppdaterOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Oppdaterer oppgave",
                      triggerTidVedFeilISekunder = 60 * 5)
