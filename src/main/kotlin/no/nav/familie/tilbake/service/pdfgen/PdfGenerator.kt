@@ -110,6 +110,6 @@ class PdfGenerator {
     }
 
     private fun hentCss(format: DocFormat): String {
-        return FileStructureUtil.readResourceAsString("formats/" + format.name.toLowerCase() + "/style.css")
+        return FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase() + "/style.css")
     }
 }

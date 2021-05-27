@@ -57,12 +57,8 @@ object FaktaFeilutbetalingMapper {
     }
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): PeriodeDto {
-        var totalPeriodeFom: YearMonth? = null
-        var totalPeriodeTom: YearMonth? = null
-        for (periode in perioder) {
-            totalPeriodeFom = if (totalPeriodeFom == null || totalPeriodeFom > periode.fom) periode.fom else totalPeriodeFom
-            totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom
-        }
+        val totalPeriodeFom: YearMonth = perioder.minOf { it.fom }
+        val totalPeriodeTom: YearMonth = perioder.maxOf { it.tom }
         return PeriodeDto(totalPeriodeFom!!, totalPeriodeTom!!)
     }
 }

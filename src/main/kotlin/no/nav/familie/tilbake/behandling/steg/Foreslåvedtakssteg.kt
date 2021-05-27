@@ -57,10 +57,7 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
 
     private fun håndterOppgave(behandlingId: UUID) {
         val finnesUnderkjenteSteg = totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)
-        var oppgavetype = Oppgavetype.BehandleSak
-        if (finnesUnderkjenteSteg) {
-            oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
-        }
+        val oppgavetype = if (finnesUnderkjenteSteg) Oppgavetype.BehandleUnderkjentVedtak else Oppgavetype.BehandleSak
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype)
         oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
     }

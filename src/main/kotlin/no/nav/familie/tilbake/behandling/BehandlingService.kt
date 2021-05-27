@@ -61,7 +61,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
-        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
+        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
                                       payload = behandling.id.toString())
             taskRepository.save(sendVarselbrev)

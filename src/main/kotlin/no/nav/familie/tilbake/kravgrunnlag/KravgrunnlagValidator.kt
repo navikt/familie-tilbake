@@ -111,26 +111,20 @@ object KravgrunnlagValidator {
     private fun validerSkattForPeriode(måned: YearMonth,
                                        perioder: List<DetaljertKravgrunnlagPeriodeDto>,
                                        kravgrunnlagId: BigInteger) {
-        var månedligSkattBeløp: BigDecimal? = null
-        var totalSkatt = BigDecimal.ZERO
-        for (periode in perioder) {
-            if (månedligSkattBeløp == null) {
-                månedligSkattBeløp = periode.belopSkattMnd
-            } else {
-                if (månedligSkattBeløp.compareTo(periode.belopSkattMnd) != 0) {
-                    throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
-                                                  "For måned $måned er opplyses ulike verdier maks skatt i ulike perioder")
-                }
+        val månedligSkattBeløp = perioder.firstOrNull()?.belopSkattMnd
+                                 ?: throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
+                                                                  "Mangler max skatt for måned $måned")
+
+        val totalSkatt = perioder.sumOf { periode ->
+            if (månedligSkattBeløp.compareTo(periode.belopSkattMnd) != 0) {
+                throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
+                                              "For måned $måned er opplyses ulike verdier maks skatt i ulike perioder")
             }
-            for (postering in periode.tilbakekrevingsBelop) {
-                totalSkatt += postering.belopTilbakekreves.multiply(postering.skattProsent)
+            periode.tilbakekrevingsBelop.sumOf { postering ->
+                postering.belopTilbakekreves.multiply(postering.skattProsent)
             }
-        }
-        totalSkatt = totalSkatt.divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN)
-        if (månedligSkattBeløp == null) {
-            throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
-                                          "Mangler max skatt for måned $måned")
-        }
+        }.divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN)
+
         if (totalSkatt > månedligSkattBeløp) {
             throw UgyldigKravgrunnlagFeil("Ugyldig kravgrunnlag for kravgrunnlagId $kravgrunnlagId. " +
                                           "For måned $måned er maks skatt $månedligSkattBeløp, " +

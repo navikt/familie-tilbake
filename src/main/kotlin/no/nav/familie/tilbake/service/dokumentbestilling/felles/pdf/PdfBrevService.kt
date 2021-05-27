@@ -94,7 +94,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         return DokprodTilHtml.dokprodInnholdTilHtml(data.brevtekst)
     }
 
-    private fun lagHeader(data: Brevdata): String? {
+    private fun lagHeader(data: Brevdata): String {
         return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
     }
 

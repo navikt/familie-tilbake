@@ -69,14 +69,15 @@ internal object TilbakekrevingsberegningVilkår {
         } else {
             bruttoTilbakekrevesBeløp.divide(totalKgTilbakekrevesBeløp, 4, RoundingMode.HALF_UP)
         }
-        var skattBeløp: BigDecimal = BigDecimal.ZERO
-        for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
-            if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
-                val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
-                skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                                                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
-            }
-        }
+        val skattBeløp: BigDecimal =
+                perioderMedSkatteprosent.sumOf {
+                    if (periode.overlapper(it.periode)) {
+                        val delTilbakekrevesBeløp: BigDecimal = it.tilbakekrevingsbeløp.multiply(andel)
+                        delTilbakekrevesBeløp.multiply(it.skatteprosent).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                    } else {
+                        BigDecimal.ZERO
+                    }
+                }
         return skattBeløp.setScale(0, RoundingMode.DOWN)
     }
 

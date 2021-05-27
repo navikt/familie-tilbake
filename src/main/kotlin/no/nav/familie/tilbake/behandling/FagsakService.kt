@@ -34,12 +34,10 @@ class FagsakService(val fagsakRepository: FagsakRepository,
     fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingsresponsDto {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
                                                                         eksternFagsakId = eksternFagsakId)
-        var finneÅpenBehandling = false
-        if (fagsak != null) {
-            finneÅpenBehandling =
-                    behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
-                                                                           eksternFagsakId = eksternFagsakId) != null
-        }
+        val finneÅpenBehandling = fagsak?.let {
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
+                                                                   eksternFagsakId = eksternFagsakId) != null
+        } ?: false
         return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finneÅpenBehandling)
     }
 }

@@ -35,7 +35,7 @@ class StegService(val steg: List<IBehandlingssteg>,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        val aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
         // Behandling kan ikke tilbakeføres når er på FatteVedtak steg
         if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg) {
             if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
@@ -47,9 +47,9 @@ class StegService(val steg: List<IBehandlingssteg>,
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
 
         //sjekk om aktivtBehandlingssteg kan autoutføres
-        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE || aktivtBehandlingssteg == Behandlingssteg.VILKÅRSVURDERING) {
-            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        val behandlingsstegEtterNyBehandling = hentAktivBehandlingssteg(behandlingId)
+        if (behandlingsstegEtterNyBehandling == Behandlingssteg.FORELDELSE || behandlingsstegEtterNyBehandling == Behandlingssteg.VILKÅRSVURDERING) {
+            hentStegInstans(behandlingsstegEtterNyBehandling).utførSteg(behandlingId)
         }
     }
 

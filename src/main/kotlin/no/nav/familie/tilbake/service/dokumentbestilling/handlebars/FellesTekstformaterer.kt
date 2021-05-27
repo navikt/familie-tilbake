@@ -103,6 +103,6 @@ object FellesTekstformaterer {
     }
 
     private fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {
-        return String.format("%s/%s", språkkode.name.toLowerCase(), filsti)
+        return String.format("%s/%s", språkkode.name.lowercase(), filsti)
     }
 }

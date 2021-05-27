@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.vedtak.handlebars.dto.V
 internal object AvsnittUtil {
 
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
-    const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
+    private const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
 
@@ -58,17 +58,16 @@ internal object AvsnittUtil {
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
         val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_slutt")
-        var avsnitt = Avsnitt(avsnittstype = Avsnittstype.PERIODE,
+        val avsnitt = Avsnitt(avsnittstype = Avsnittstype.PERIODE,
                               fom = data.periode.periode.fom,
                               tom = data.periode.periode.tom,
                               overskrift = fjernOverskriftFormattering(overskrift))
 
-        avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
-        avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
-        avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
-        avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
-        avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
-        return avsnitt
+        val avsnittMedFakta = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
+        val avsnittMedForeldelse = parseTekst(foreldelsestekst, avsnittMedFakta, Underavsnittstype.FORELDELSE)
+        val avsnittMedVilkår = parseTekst(vilkårstekst, avsnittMedForeldelse, Underavsnittstype.VILKÅR)
+        val avsnittMedSærligeGrunner = parseTekst(særligeGrunnerstekst, avsnittMedVilkår, Underavsnittstype.SÆRLIGEGRUNNER)
+        return parseTekst(avsluttendeTekst, avsnittMedSærligeGrunner, null)
     }
 
     fun parseTekst(generertTekst: String,

@@ -39,13 +39,13 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
 
 
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
-        var dokument = ByteArray(0)
-        if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            dokument = manueltVarselBrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, maltype, fritekst)
+        return if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
+            manueltVarselBrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, maltype, fritekst)
         } else if (Dokumentmalstype.INNHENT_DOKUMENTASJON == maltype) {
-            dokument = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
+            innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId, fritekst)
+        } else {
+            ByteArray(0)
         }
-        return dokument
     }
 
     private fun håndterManueltSendVarsel(behandling: Behandling, maltype: Dokumentmalstype, fritekst: String) {

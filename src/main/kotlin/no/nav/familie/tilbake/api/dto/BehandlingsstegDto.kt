@@ -124,10 +124,10 @@ data class BehandlingsstegForeslåVedtaksstegDto(val fritekstavsnitt: Fritekstav
 }
 
 data class FritekstavsnittDto(@Size(max = 10000, message = "Oppsummeringstekst er for lang")
-                              var oppsummeringstekst: String? = null,
+                              val oppsummeringstekst: String? = null,
                               @Size(max = 100, message = "For mange perioder")
                               @Valid
-                              var perioderMedTekst: List<PeriodeMedTekstDto>)
+                              val perioderMedTekst: List<PeriodeMedTekstDto>)
 
 @JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEGNAVN)
 data class BehandlingsstegFatteVedtaksstegDto(val totrinnsvurderinger: List<VurdertTotrinnDto>) : BehandlingsstegDto() {
