@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.integration.kafka
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -24,6 +25,8 @@ class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
                              },
                              {
                                  log.warn("Historikkinnslag kan ikke sendes for $behandlingId med $key. Feiler med ${it.message}")
+                                 throw Feil(message = "Historikkinnslag kan ikke sendes for $behandlingId med $key. " +
+                                                      "Feiler med ${it.message}", it)
                              })
     }
 }
