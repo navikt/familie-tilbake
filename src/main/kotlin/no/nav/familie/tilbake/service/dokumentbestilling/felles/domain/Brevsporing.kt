@@ -22,9 +22,7 @@ enum class Brevtype {
     KORRIGERT_VARSEL,
     VEDTAK,
     HENLEGGELSE,
-    INNHENT_DOKUMENTASJON,
-    FRITEKST,
-    UDEFINERT;
+    INNHENT_DOKUMENTASJON;
 
     fun gjelderVarsel(): Boolean {
         return this in setOf(VARSEL, KORRIGERT_VARSEL)

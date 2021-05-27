@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagOppgaveTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = FerdigstillOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Ferdigstiller oppgave for behandling",
                      triggerTidVedFeilISekunder = 60 * 5)

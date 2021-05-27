@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandlingskontroll
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -14,17 +15,21 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class BehandlingskontrollService(private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
                                  private val behandlingRepository: BehandlingRepository,
-                                 private val kravgrunnlagRepository: KravgrunnlagRepository) {
+                                 private val kravgrunnlagRepository: KravgrunnlagRepository,
+                                 private val historikkTaskService: HistorikkTaskService) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -40,6 +45,14 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         if (aktivtStegstilstand == null) {
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
             persisterBehandlingsstegOgStatus(behandlingId, nesteStegMetaData)
+            if (nesteStegMetaData.behandlingsstegstatus == VENTER) {
+                historikkTaskService.lagHistorikkTask(
+                        behandlingId = behandlingId,
+                        historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                        aktør = Aktør.VEDTAKSLØSNING,
+                        triggerTid = LocalDateTime.now().plusSeconds(2)
+                )
+            }
         } else {
             log.info("Behandling har allerede et aktivt steg=${aktivtStegstilstand.behandlingssteg} " +
                      "med status=${aktivtStegstilstand.behandlingsstegsstatus}")
@@ -92,6 +105,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       tidsfrist = tidsfrist))
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional

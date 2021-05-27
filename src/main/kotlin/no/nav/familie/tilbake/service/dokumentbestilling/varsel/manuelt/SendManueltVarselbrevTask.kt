@@ -42,10 +42,14 @@ class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
             }
             manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
         }
-        val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
-        behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                         fristTid)
+
+        // utvider fristen bare når tasken ikke kjørte ordentlig ved første omgang
+        if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
+            val fristTid = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+            behandlingskontrollService.settBehandlingPåVent(behandling.id,
+                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                            fristTid)
+        }
     }
 
     companion object {

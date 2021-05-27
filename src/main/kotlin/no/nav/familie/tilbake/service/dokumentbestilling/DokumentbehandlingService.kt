@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.service.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
@@ -64,10 +65,10 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
     }
 
     private fun settPåVent(behandling: Behandling) {
-        val fristTid = LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
+        val tidsfrist = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
         behandlingskontrollService.settBehandlingPåVent(behandling.id,
                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                        fristTid)
+                                                        tidsfrist)
     }
 
 
