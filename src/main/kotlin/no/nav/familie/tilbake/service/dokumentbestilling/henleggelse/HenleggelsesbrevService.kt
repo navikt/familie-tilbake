@@ -81,13 +81,13 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
                                                                               brevmottager,
                                                                               behandling.aktivVerge,
                                                                               fagsak.fagsystem)
-
+        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val metadata = Brevmetadata(behandlendeEnhetId = behandling.behandlendeEnhet,
                                     behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
                                     ytelsestype = fagsak.ytelsestype,
                                     språkkode = fagsak.bruker.språkkode,
-                                    ansvarligSaksbehandler = "VL",
+                                    ansvarligSaksbehandler = ansvarligSaksbehandler,
                                     sakspartId = personinfo.ident,
                                     mottageradresse = adresseinfo,
                                     saksnummer = fagsak.eksternFagsakId,

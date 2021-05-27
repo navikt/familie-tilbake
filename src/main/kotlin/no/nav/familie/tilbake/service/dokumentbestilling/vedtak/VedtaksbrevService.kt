@@ -60,7 +60,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -349,8 +348,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val tilbakekreves = Vedtaksresultat.FULL_TILBAKEBETALING == vedtakResultatType ||
                             Vedtaksresultat.DELVIS_TILBAKEBETALING == vedtakResultatType
-        val ansvarligSaksbehandler =
-                if (StringUtils.isNotEmpty(behandling.ansvarligSaksbehandler)) behandling.ansvarligSaksbehandler else "VL"
+        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
 
         return Brevmetadata(ansvarligSaksbehandler = ansvarligSaksbehandler,
                             behandlendeEnhetId = behandling.behandlendeEnhet,

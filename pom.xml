@@ -23,9 +23,9 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.5.10</kotlin.version>
         <felles.version>1.20210510092430_d9bfcd5</felles.version>
-        <kontrakter.version>2.0_20210512151913_a3b9d92</kontrakter.version>
+        <common-java-modules.version>2.2021.05.11_12.29-3d27c78d42c9</common-java-modules.version>
+        <kontrakter.version>2.0_20210525110357_9fd3d56</kontrakter.version>
         <nav.security.version>1.3.7</nav.security.version>
-        <common-java-modules.version>2.2021.03.26_09.45-569ba329264c</common-java-modules.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>3.0.1</jaxb-core.version>
         <com.openhtmltopdf.version>1.0.8</com.openhtmltopdf.version>

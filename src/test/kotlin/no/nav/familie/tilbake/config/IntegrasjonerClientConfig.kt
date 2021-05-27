@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -34,6 +35,7 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
 
+        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler("Bob", "Burger")
         every { integrasjonerClient.finnOppgaver(any()) } answers {
             FinnOppgaveResponseDto(antallTreffTotalt = 1,
                                    oppgaver = listOf(Oppgave(id = 1)))

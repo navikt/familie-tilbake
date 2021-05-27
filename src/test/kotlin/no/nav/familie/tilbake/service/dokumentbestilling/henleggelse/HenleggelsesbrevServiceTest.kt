@@ -56,6 +56,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
                 .returns(Adresseinfo("Bob", "DUMMY_FØDSELSNUMMER"))
+        every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns "Siri Saksbehandler"
         every {
             brevSporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId,
                                                                                                    Brevtype.VARSEL)

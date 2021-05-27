@@ -4,16 +4,23 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 
 @Service
-class EksterneDataForBrevService(private val pdlClient: PdlClient) {
+class EksterneDataForBrevService(private val pdlClient: PdlClient,
+                                 private val integrasjonerClient: IntegrasjonerClient) {
 
     fun hentPerson(ident: String, fagsystem: Fagsystem): Personinfo {
         return pdlClient.hentPersoninfo(ident, fagsystem)
+    }
+
+    fun hentSaksbehandlernavn(id: String): String {
+        val saksbehandler = integrasjonerClient.hentSaksbehandler(id)
+        return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
     fun hentAdresse(personinfo: Personinfo): Adresseinfo {
@@ -52,16 +59,15 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient) {
                                          vergenavn: String,
                                          personinfo: Personinfo,
                                          brevmottager: Brevmottager): Adresseinfo {
-//  TODO kommenteres inn når servicen i integrasjoner er oppe å kjøre
-//        val virksomhet: Organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
-        val organisasjon = Organisasjon("987654321", "Dummy")
-        return fra(organisasjon, vergenavn, personinfo, brevmottager)
+
+        val organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
+        return lagAdresseinfo(organisasjon, vergenavn, personinfo, brevmottager)
     }
 
-    private fun fra(organisasjon: Organisasjon,
-                    vergeNavn: String,
-                    personinfo: Personinfo,
-                    brevmottager: Brevmottager): Adresseinfo {
+    private fun lagAdresseinfo(organisasjon: Organisasjon,
+                               vergeNavn: String,
+                               personinfo: Personinfo,
+                               brevmottager: Brevmottager): Adresseinfo {
         val organisasjonsnavn: String = organisasjon.navn
         val vedVergeNavn = "v/ $vergeNavn"
         val annenMottagersNavn = "$organisasjonsnavn $vedVergeNavn"
