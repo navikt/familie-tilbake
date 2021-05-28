@@ -24,7 +24,9 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
         val historikkinnslagstype =
                 TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktor"))
-        historikkService.lagHistorikkinnslag(behandlingId, historikkinnslagstype, aktør)
+        val begrunnelse = task.metadata.getProperty("begrunnelse")
+
+        historikkService.lagHistorikkinnslag(behandlingId, historikkinnslagstype, aktør, begrunnelse)
     }
 
     companion object {

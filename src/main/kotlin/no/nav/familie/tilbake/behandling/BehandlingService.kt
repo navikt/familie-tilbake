@@ -10,6 +10,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -138,11 +139,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun henleggBehandling(behandlingId: UUID,
-                          behandlingsresultatstype: Behandlingsresultatstype,
-                          fritekst: String? = null) {
+    fun henleggBehandling(behandlingId: UUID, henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
+
+        val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
 
         if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
@@ -165,12 +166,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
             else -> Aktør.SAKSBEHANDLER
         }
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-                                              aktør)
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                                              aktør = aktør,
+                                              begrunnelse = henleggelsesbrevFritekstDto.begrunnelse)
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
+            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, henleggelsesbrevFritekstDto.fritekst))
         }
 
         // Ferdigstill oppgave

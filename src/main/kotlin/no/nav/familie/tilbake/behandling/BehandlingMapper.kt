@@ -14,7 +14,6 @@ import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -40,7 +39,7 @@ object BehandlingMapper {
 
         return Behandling(fagsakId = fagsak.id,
                           type = Behandlingstype.TILBAKEKREVING,
-                          ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+                          ansvarligSaksbehandler = opprettTilbakekrevingRequest.saksbehandlerIdent,
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
                           behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
