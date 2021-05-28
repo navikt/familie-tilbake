@@ -22,7 +22,7 @@ enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
     BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER(tittel = "Vedtak underkjent"),
     VEDTAK_FATTET(tittel = "Vedtak fattet", tekst = "Resultat: "),
     BEHANDLING_AVSLUTTET(tittel = "Behandling avsluttet"),
-    BEHANDLING_HENLAGT(tittel = "Behandling henlagt"),
+    BEHANDLING_HENLAGT(tittel = "Behandling henlagt", tekst = "Årsak: "),
 
     // Skjermlenke type
     FAKTA_VURDERT(tittel = "Fakta vurdert",

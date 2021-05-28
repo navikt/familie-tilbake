@@ -86,7 +86,16 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                 val resultatstype: Behandlingsresultatstype? = behandling.sisteResultat?.type
                 resultatstype?.let { historikkinnslagstype.tekst + it.navn }
             }
-            BEHANDLING_HENLAGT -> begrunnelse
+            BEHANDLING_HENLAGT -> {
+                val resultatstype: Behandlingsresultatstype = requireNotNull(behandling.sisteResultat?.type)
+                when (resultatstype) {
+                    Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> historikkinnslagstype.tekst + resultatstype.navn
+                    else -> {
+                        historikkinnslagstype.tekst + resultatstype.navn + ", " + "Begrunnelse: " + begrunnelse
+                    }
+                }
+            }
             else -> historikkinnslagstype.tekst
         }
     }
