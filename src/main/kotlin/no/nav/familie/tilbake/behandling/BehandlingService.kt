@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -53,7 +54,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
                         private val historikkTaskService: HistorikkTaskService,
-                        private val rolleConfig: RolleConfig) {
+                        private val rolleConfig: RolleConfig,
+                        @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
+                        private val opprettelseDagerBegrensning: Long) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -265,7 +268,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
                                                behandling.opprettetTidspunkt < LocalDate.now()
                                                        .atStartOfDay()
-                                                       .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                                                       .minusDays(opprettelseDagerBegrensning)
+                                              )
                    && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
@@ -294,11 +298,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
-    }
-
-    companion object {
-
-        const val OPPRETTELSE_DAGER_BEGRENSNING = 6L
     }
 
     private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
