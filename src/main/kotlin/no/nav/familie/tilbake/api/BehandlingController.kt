@@ -101,7 +101,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                         henteParam = "behandlingId")
     fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
                           @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String> {
-        behandlingService.henleggBehandling(behandlingId = behandlingId, henleggelsesbrevFritekstDto)
+        behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
         return Ressurs.success("OK")
     }
 }

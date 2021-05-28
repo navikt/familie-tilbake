@@ -496,8 +496,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsresultatstype.HENLAGT_FEILOPPRETTET, behandlingssresultat.type)
 
         assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendHenleggelsesbrevTask.TYPE } }
-        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-                            Aktør.SAKSBEHANDLER, "testverdi")
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                            Aktør.SAKSBEHANDLER,
+                            "testverdi")
     }
 
     @Test
@@ -534,8 +536,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
 
         assertNull(taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE })
-        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-                            Aktør.VEDTAKSLØSNING, "testverdi")
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                            Aktør.VEDTAKSLØSNING,
+                            "testverdi")
     }
 
     @Test
@@ -732,7 +736,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     private fun assertHistorikkTask(behandlingId: UUID,
                                     historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                    aktør: Aktør, tekst: String? = null) {
+                                    aktør: Aktør,
+                                    tekst: String? = null) {
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
