@@ -33,6 +33,8 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.distribuerJournalpost(any(), any()) } returns "42"
 
+        every { integrasjonerClient.hentDokument(any(), any()) } returns readMockfileFromResources()
+
         every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
 
         every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler("Bob", "Burger")
@@ -44,5 +46,9 @@ class IntegrasjonerClientConfig {
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
 
         return integrasjonerClient
+    }
+
+    fun readMockfileFromResources(): ByteArray {
+        return javaClass.getResource("/mockpdf/mocktest.pdf").readBytes()
     }
 }

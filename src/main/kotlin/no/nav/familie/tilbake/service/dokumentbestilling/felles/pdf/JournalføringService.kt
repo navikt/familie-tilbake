@@ -23,6 +23,10 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
+        return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
+    }
+
     fun journalførUtgåendeBrev(behandling: Behandling,
                                fagsak: Fagsak,
                                dokumentkategori: Dokumentkategori,
