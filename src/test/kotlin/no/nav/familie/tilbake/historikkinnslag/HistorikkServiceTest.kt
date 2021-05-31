@@ -190,6 +190,53 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er automatisk henlagt`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(
+                behandling.copy(resultater =
+                                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
+        historikkService.lagHistorikkinnslag(behandlingId,
+                                             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                                             Aktør.VEDTAKSLØSNING)
+
+        verify {
+            spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
+                                                  capture(keySlot),
+                                                  capture(historikkinnslagRecordSlot))
+        }
+
+        assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
+                                      aktørIdent = "VL",
+                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
+                                      tekst = "Årsak: Kravgrunnlaget er nullstilt",
+                                      type = Historikkinnslagstype.HENDELSE)
+    }
+
+    @Test
+    fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er manuelt henlagt`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(
+                behandling.copy(resultater =
+                                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET))))
+        historikkService.lagHistorikkinnslag(behandlingId,
+                                             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                                             Aktør.VEDTAKSLØSNING,
+                                             "testverdi")
+
+        verify {
+            spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
+                                                  capture(keySlot),
+                                                  capture(historikkinnslagRecordSlot))
+        }
+
+        assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
+                                      aktørIdent = "VL",
+                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
+                                      tekst = "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
+                                      type = Historikkinnslagstype.HENDELSE)
+    }
+
+    @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling sender henleggelsesbrev`() {
         brevsporingRepository.insert(Brevsporing(behandlingId = behandlingId,
                                                  brevtype = Brevtype.HENLEGGELSE,

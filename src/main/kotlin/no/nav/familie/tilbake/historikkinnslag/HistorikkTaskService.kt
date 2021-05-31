@@ -14,10 +14,13 @@ class HistorikkTaskService(private val taskRepository: TaskRepository) {
     fun lagHistorikkTask(behandlingId: UUID,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                          aktør: Aktør,
-                         triggerTid: LocalDateTime? = null) {
+                         triggerTid: LocalDateTime? = null,
+                         begrunnelse: String? = null) {
+
         val properties = Properties()
         properties.setProperty("historikkinnslagstype", historikkinnslagstype.name)
         properties.setProperty("aktor", aktør.name)
+        begrunnelse?.let { properties.setProperty("begrunnelse", begrunnelse) }
 
         val task = Task(type = LagHistorikkinnslagTask.TYPE,
                         payload = behandlingId.toString(),
