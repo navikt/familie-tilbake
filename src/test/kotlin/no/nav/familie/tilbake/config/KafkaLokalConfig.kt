@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.kontrakter.felles.Applikasjon
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean
@@ -39,6 +40,8 @@ class KafkaLokalConfig {
 
     private fun producerConfigs() = mapOf(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
                                           ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                                          ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java)
+                                          ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                                          ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION to 1, // den sikrer rekkefølge
+                                          ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name)
 
 }
