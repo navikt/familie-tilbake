@@ -55,6 +55,14 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                     .build()
                     .toUri()
 
+    private fun hentJournalpostHentDokumentUri(journalpostId: String, dokumentInfoId: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT)
+                    .pathSegment(journalpostId)
+                    .path(dokumentInfoId)
+                    .build()
+                    .toUri()
+
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val response =
@@ -69,6 +77,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                                                    integrasjonerConfig.applicationName)
 
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
+    }
+
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+        return getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
     }
 
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
