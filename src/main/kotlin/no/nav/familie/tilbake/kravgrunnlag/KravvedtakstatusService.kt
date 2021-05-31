@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -113,9 +114,10 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             }
             Kravstatuskode.AVSLUTTET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
-                behandlingService.henleggBehandling(behandlingId = behandling.id,
-                                                    behandlingsresultatstype = Behandlingsresultatstype
-                                                            .HENLAGT_KRAVGRUNNLAG_NULLSTILT)
+                behandlingService
+                        .henleggBehandling(behandlingId = behandling.id,
+                                           HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype
+                                                   .HENLAGT_KRAVGRUNNLAG_NULLSTILT, begrunnelse = ""))
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }

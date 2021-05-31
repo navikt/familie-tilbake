@@ -283,7 +283,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettToken(behandlerNavn: String, gruppeNavn: List<String>): String {
-        val additionalParameters = mapOf("preferred_username" to behandlerNavn, "groups" to gruppeNavn)
+        val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
         return Jwts.builder().setExpiration(calendar.time)
