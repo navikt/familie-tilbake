@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.kontrakter.felles.Applikasjon
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -35,7 +36,10 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
     private fun producerConfigs() =
             mapOf(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
                   ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                  ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java) + securityConfig()
+                  ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                  ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
+                  ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
+                  ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name) + securityConfig()
 
     private fun securityConfig() = mapOf(
             CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SSL",
