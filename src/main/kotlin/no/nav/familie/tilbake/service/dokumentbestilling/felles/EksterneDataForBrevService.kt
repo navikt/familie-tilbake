@@ -72,7 +72,7 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient,
         val vedVergeNavn = "v/ $vergeNavn"
         val annenMottagersNavn = "$organisasjonsnavn $vedVergeNavn"
         return if (Brevmottager.VERGE == brevmottager) {
-            Adresseinfo(personinfo.ident, organisasjonsnavn, personinfo.navn)
+            Adresseinfo(organisasjon.organisasjonsnummer, organisasjon.navn, personinfo.navn)
         } else {
             Adresseinfo(personinfo.ident, personinfo.navn, annenMottagersNavn)
         }

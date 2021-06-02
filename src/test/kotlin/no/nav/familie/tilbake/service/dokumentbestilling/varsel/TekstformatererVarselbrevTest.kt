@@ -126,6 +126,6 @@ class TekstformatererVarselbrevTest {
     }
 
     private fun lagAdresseinfo(): Adresseinfo {
-        return Adresseinfo("Test", "123456")
+        return Adresseinfo("123456", "Test")
     }
 }

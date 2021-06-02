@@ -74,7 +74,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
         every {
             mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
-        }.returns(Adresseinfo("Test", "12345678901"))
+        }.returns(Adresseinfo("12345678901", "Test"))
 
         fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)
