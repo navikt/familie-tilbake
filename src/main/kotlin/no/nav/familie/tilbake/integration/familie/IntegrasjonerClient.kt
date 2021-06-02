@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 
 @Component
 class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
@@ -88,7 +88,9 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun hentSaksbehandler(id: String): Saksbehandler {
-        return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
+        //return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
+        //fixme skrur av henting av saksbehandler midlertidig
+        return Saksbehandler(fornavn = id, etternavn = "")
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
