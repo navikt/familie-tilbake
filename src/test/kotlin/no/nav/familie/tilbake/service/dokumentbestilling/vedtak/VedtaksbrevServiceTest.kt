@@ -137,7 +137,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
-        }.returns(Adresseinfo("Test", "12345678901"))
+        }.returns(Adresseinfo("12345678901", "Test"))
     }
 
     @Test

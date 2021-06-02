@@ -63,7 +63,7 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
     private fun lagMottager(behandling: Behandling, mottager: Brevmottager, brevmetadata: Brevmetadata): AvsenderMottaker {
         val adresseinfo: Adresseinfo = brevmetadata.mottageradresse
         return when (mottager) {
-            Brevmottager.BRUKER -> AvsenderMottaker(id = adresseinfo.personIdent,
+            Brevmottager.BRUKER -> AvsenderMottaker(id = adresseinfo.ident,
                                                     idType = BrukerIdType.FNR,
                                                     navn = adresseinfo.mottagernavn)
             Brevmottager.VERGE -> lagVergemottager(behandling)

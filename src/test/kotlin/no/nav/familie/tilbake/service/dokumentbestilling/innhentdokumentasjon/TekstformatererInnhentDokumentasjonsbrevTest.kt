@@ -15,7 +15,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     private val metadata = Brevmetadata(sakspartId = "12345678901",
                                         sakspartsnavn = "Test",
-                                        mottageradresse = Adresseinfo("Test", "12345678901"),
+                                        mottageradresse = Adresseinfo("12345678901", "Test"),
                                         språkkode = Språkkode.NB,
                                         ytelsestype = Ytelsestype.BARNETILSYN,
                                         behandlendeEnhetsNavn = "Skien",
@@ -52,7 +52,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev for verge organisasjon`() {
-        val brevMetadata = metadata.copy(mottageradresse = Adresseinfo(personIdent = "12345678901",
+        val brevMetadata = metadata.copy(mottageradresse = Adresseinfo(ident = "12345678901",
                                                                        mottagernavn = "Semba AS c/o John Doe"),
                                          sakspartsnavn = "Test",
                                          vergenavn = "John Doe",

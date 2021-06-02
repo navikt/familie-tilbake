@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevReq
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
@@ -48,7 +47,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
-        }.returns(Adresseinfo("Test", "12345678901"))
+        }.returns(Adresseinfo("12345678901", "Test"))
     }
 
 

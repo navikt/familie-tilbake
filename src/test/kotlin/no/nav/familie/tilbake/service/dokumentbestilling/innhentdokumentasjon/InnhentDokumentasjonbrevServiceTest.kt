@@ -43,7 +43,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { mockEksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns "Siri Saksbehandler"
         every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
-                .returns(Adresseinfo("Bob", "DUMMY_FØDSELSNUMMER"))
+                .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
     }
 
     @Test
