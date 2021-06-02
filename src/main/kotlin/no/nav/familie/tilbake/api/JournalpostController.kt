@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.Journalføri
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,7 +26,7 @@ class JournalpostController(private val journalføringService: JournalføringSer
     fun hentDokument(@PathVariable behandlingId: UUID,
                      @PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
-            : Ressurs<ByteArray> {
-        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
+            : ResponseEntity<Ressurs<ByteArray>> {
+        return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
     }
 }
