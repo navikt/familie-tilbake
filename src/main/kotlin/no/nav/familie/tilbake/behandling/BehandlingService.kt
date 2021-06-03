@@ -188,6 +188,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
     }
 
+    @Transactional
+    fun endreAnsvarligSaksbehandler(behandlingId: UUID, saksbehandlerIdent: String) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = saksbehandlerIdent))
+    }
+
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
