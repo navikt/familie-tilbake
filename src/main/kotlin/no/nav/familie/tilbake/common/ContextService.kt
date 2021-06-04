@@ -15,7 +15,7 @@ object ContextService {
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(onSuccess = {
-                    it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE
+                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
                       onFailure = { SYSTEM_FORKORTELSE })
     }

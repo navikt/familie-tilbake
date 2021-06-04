@@ -49,7 +49,7 @@ class TekstformatererVedtaksbrevTest {
 
     private val brevmetadata = Brevmetadata(sakspartId = "123456",
                                             sakspartsnavn = "Test",
-                                            mottageradresse = Adresseinfo("bob", "ident"),
+                                            mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
                                             behandlendeEnhetsNavn = "Skien",

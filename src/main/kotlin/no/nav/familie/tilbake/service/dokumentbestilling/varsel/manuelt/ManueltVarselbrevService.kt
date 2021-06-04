@@ -27,7 +27,8 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                private val fagsakRepository: FagsakRepository,
                                private val eksterneDataForBrevService: EksterneDataForBrevService,
                                private val pdfBrevService: PdfBrevService,
-                               private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
+                               private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+                               private val varselbrevUtil: VarselbrevUtil) {
 
     fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -131,14 +132,14 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
         //Henter feilutbetaling fakta
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
 
-        val metadata = VarselbrevUtil.sammenstillInfoForBrevmetadata(behandling,
+        val metadata = varselbrevUtil.sammenstillInfoForBrevmetadata(behandling,
                                                                      personinfo,
                                                                      adresseinfo,
                                                                      fagsak,
                                                                      vergenavn,
                                                                      erKorrigert)
 
-        return VarselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata,
+        return varselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata,
                                                                                        fritekst,
                                                                                        feilutbetalingsfakta,
                                                                                        aktivtVarsel)

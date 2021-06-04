@@ -27,12 +27,13 @@ rolle:
     saksbehandler: ""
     beslutter: ""
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 
 
-FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.dev.adeo.no
+FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner-q1.teamfamilie
 SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
 
-PDL_URL: https://pdl-api.nais.preprod.local
+AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+PDL_URL: http://pdl-api-q1.pdl
 FORELDELSE_ANTALL_MÅNED: 3
+OPPRETTELSE_DAGER_BEGRENSNING: 1

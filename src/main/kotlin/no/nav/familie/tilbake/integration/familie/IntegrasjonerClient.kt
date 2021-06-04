@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -30,11 +31,6 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     override val pingUri: URI =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
 
-    private val organisasjonUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
-            .build()
-            .toUri()
-
     private val arkiverUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
             .build()
@@ -45,8 +41,27 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
+    private fun hentSaksbehandlerUri(id: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER)
+                    .pathSegment(id)
+                    .build()
+                    .toUri()
+
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
-            UriComponentsBuilder.fromUri(organisasjonUri).pathSegment(organisasjonsnummer).build().toUri()
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
+                    .pathSegment(organisasjonsnummer)
+                    .build()
+                    .toUri()
+
+    private fun hentJournalpostHentDokumentUri(journalpostId: String, dokumentInfoId: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT)
+                    .pathSegment(journalpostId)
+                    .path(dokumentInfoId)
+                    .build()
+                    .toUri()
 
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
@@ -64,8 +79,18 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
 
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+        return getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+    }
+
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
         return getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
+    }
+
+    fun hentSaksbehandler(id: String): Saksbehandler {
+        //return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
+        //fixme skrur av henting av saksbehandler midlertidig
+        return Saksbehandler(fornavn = id, etternavn = "")
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {

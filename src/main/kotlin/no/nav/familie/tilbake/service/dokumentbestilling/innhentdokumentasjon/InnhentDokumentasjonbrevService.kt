@@ -76,6 +76,7 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
         val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
         val brevmetadata = Brevmetadata(sakspartId = personinfo.ident,
                                         sakspartsnavn = personinfo.navn,
                                         finnesVerge = behandling.harVerge,
@@ -83,7 +84,7 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
                                         mottageradresse = adresseinfo,
                                         behandlendeEnhetId = behandling.behandlendeEnhet,
                                         behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                                        ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+                                        ansvarligSaksbehandler = ansvarligSaksbehandler,
                                         saksnummer = fagsak.eksternFagsakId,
                                         språkkode = fagsak.bruker.språkkode,
                                         ytelsestype = fagsak.ytelsestype,

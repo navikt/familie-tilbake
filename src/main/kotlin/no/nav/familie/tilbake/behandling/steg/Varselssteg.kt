@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import org.slf4j.LoggerFactory
@@ -12,8 +13,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Varselssteg(val behandlingskontrollService: BehandlingskontrollService,
-                  val brevsporingRepository: BrevsporingRepository) : IBehandlingssteg {
+class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService,
+                  private val historikkTaskService: HistorikkTaskService,
+                  private val brevsporingRepository: BrevsporingRepository) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -36,6 +38,7 @@ class Varselssteg(val behandlingskontrollService: BehandlingskontrollService,
                                                                  Behandlingsstegsinfo(Behandlingssteg.VARSEL,
                                                                                       Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
+
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

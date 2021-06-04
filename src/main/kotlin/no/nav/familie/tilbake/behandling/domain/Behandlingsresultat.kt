@@ -69,5 +69,5 @@ enum class Behandlingsresultatstype(val navn: String) {
     HENLAGT("Henlagt"),  // kun brukes i frontend
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
     DELVIS_TILBAKEBETALING("Delvis tilbakebetaling"),
-    FULL_TILBAKEBETALING("Tilbakebetaling");
+    FULL_TILBAKEBETALING("Full tilbakebetaling");
 }

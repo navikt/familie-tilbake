@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.service.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.service.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.service.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,6 +47,9 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var pdfBrevService: PdfBrevService
 
+    @Autowired
+    private lateinit var varselbrevUtil: VarselbrevUtil
+
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
@@ -60,7 +64,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                                                             fagsakRepository,
                                                             mockEksterneDataForBrevService,
                                                             spyPdfBrevService,
-                                                            mockFeilutbetalingService)
+                                                            mockFeilutbetalingService,
+                                                            varselbrevUtil)
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
                 .returns(lagFeilutbetaling())
@@ -69,7 +74,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
         every {
             mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
-        }.returns(Adresseinfo("Test", "12345678901"))
+        }.returns(Adresseinfo("12345678901", "Test"))
 
         fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)

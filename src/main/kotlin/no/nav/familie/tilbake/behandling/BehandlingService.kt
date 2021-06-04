@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -9,6 +10,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -24,6 +26,8 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
@@ -34,6 +38,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,7 +54,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
-                        private val rolleConfig: RolleConfig) {
+                        private val historikkTaskService: HistorikkTaskService,
+                        private val rolleConfig: RolleConfig,
+                        @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
+                        private val opprettelseDagerBegrensning: Long) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -61,7 +69,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
-        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)  {
+        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_MED_VARSEL) {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
                                       payload = behandling.id.toString())
             taskRepository.save(sendVarselbrev)
@@ -104,14 +113,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
+        oppdaterAnsvarligSaksbehandler(behandlingId)
+
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
-        oppdaterAnsvarligSaksbehandler(behandlingId)
     }
 
     @Transactional
-    fun taBehandlingAvvent(behandlingId: UUID) {
+    fun taBehandlingAvvent(behandlingId: UUID) { // Denne metoden brukes kun for å gjenoppta behandling manuelt av saksbehandler
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
@@ -123,14 +133,18 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.gjenopptaSteg(behandlingId)
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional
-    fun henleggBehandling(behandlingId: UUID,
-                          behandlingsresultatstype: Behandlingsresultatstype,
-                          fritekst: String? = null) {
+    fun henleggBehandling(behandlingId: UUID, henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
+
+        val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
 
         if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
@@ -146,8 +160,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
 
+        oppdaterAnsvarligSaksbehandler(behandlingId)
+
+        val aktør = when (behandlingsresultatstype) {
+            Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+            Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
+            else -> Aktør.SAKSBEHANDLER
+        }
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+                                              aktør = aktør,
+                                              begrunnelse = henleggelsesbrevFritekstDto.begrunnelse)
+
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, fritekst))
+            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, henleggelsesbrevFritekstDto.fritekst))
         }
 
         // Ferdigstill oppgave
@@ -177,6 +203,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         fagsakRepository.insert(fagsak)
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
+
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+                                              Aktør.VEDTAKSLØSNING)
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
@@ -236,9 +266,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return true
         } else if (TILBAKEKREVING == behandling.type) {
             return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
-                                                 behandling.opprettetTidspunkt < LocalDate.now()
-                                                         .atStartOfDay()
-                                                         .minusDays(OPPRETTELSE_DAGER_BEGRENSNING))
+                                               behandling.opprettetTidspunkt < LocalDate.now()
+                                                       .atStartOfDay()
+                                                       .minusDays(opprettelseDagerBegrensning)
+                                              )
                    && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
@@ -262,20 +293,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
-        if (behandling.erAvsluttet) {
+        if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
 
-    companion object {
-
-        const val OPPRETTELSE_DAGER_BEGRENSNING = 6L
-    }
-
     private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
-        if (behandling.erAvsluttet || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
+        if (behandling.erSaksbehandlingAvsluttet) {
             return false
         }
         if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&

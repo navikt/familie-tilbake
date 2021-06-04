@@ -28,6 +28,8 @@ spec:
   azure:
     application:
       claims:
+        extra:
+          - "NAVident"
         groups:
           - id: 847e3d72-9dc1-41c3-80ff-f5d4acdd5d46 # 0000-GA-Barnetrygd
           - id: 7a271f87-39fb-468b-a9ee-6cf3c070f548 # 0000-GA-Barnetrygd-Beslutter
@@ -75,3 +77,5 @@ spec:
       value: /run/secrets/nais.io/srvfamilie-tilbake/username
     - name: CREDENTIAL_PASSWORD
       value: /run/secrets/nais.io/srvfamilie-tilbake/password
+  kafka:
+    pool: nav-prod

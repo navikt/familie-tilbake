@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -12,6 +14,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -26,7 +30,8 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                               private val mottattXmlService: ØkonomiXmlMottattService,
                               private val stegService: StegService,
                               private val behandlingskontrollService: BehandlingskontrollService,
-                              private val behandlingService: BehandlingService) {
+                              private val behandlingService: BehandlingService,
+                              private val historikkTaskService: HistorikkTaskService) {
 
     @Transactional
     fun håndterMottattStatusmelding(statusmeldingXml: String) {
@@ -99,6 +104,9 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                                          venteårsak = venteårsak,
                                                                          tidsfrist = LocalDate.now()
                                                                                  .plusWeeks(venteårsak.defaultVenteTidIUker)))
+                historikkTaskService.lagHistorikkTask(behandling.id,
+                                                      TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                                      aktør = Aktør.VEDTAKSLØSNING)
             }
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
@@ -106,9 +114,10 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             }
             Kravstatuskode.AVSLUTTET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
-                behandlingService.henleggBehandling(behandlingId = behandling.id,
-                                                    behandlingsresultatstype = Behandlingsresultatstype
-                                                            .HENLAGT_KRAVGRUNNLAG_NULLSTILT)
+                behandlingService
+                        .henleggBehandling(behandlingId = behandling.id,
+                                           HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype
+                                                   .HENLAGT_KRAVGRUNNLAG_NULLSTILT, begrunnelse = ""))
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }

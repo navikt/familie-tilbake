@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -23,7 +24,7 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         oppgaveService.opprettOppgave(behandlingId = UUID.fromString(task.payload),
                                       oppgavetype = oppgavetype,
-                                      fristForFerdigstillelse = LocalDate.now().plusDays(21))
+                                      fristForFerdigstillelse = LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker))
     }
 
     companion object {

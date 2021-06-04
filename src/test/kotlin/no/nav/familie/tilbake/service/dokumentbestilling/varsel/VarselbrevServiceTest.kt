@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevReq
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
@@ -25,28 +24,30 @@ import java.time.LocalDate
 
 internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
-    private val behandlingRepository: BehandlingRepository = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
 
     @Autowired
     private lateinit var pdfBrevService: PdfBrevService
 
+    @Autowired
+    private lateinit var varselbrevUtil: VarselbrevUtil
+
     private lateinit var varselbrevService: VarselbrevService
 
     @BeforeEach
     fun init() {
-        varselbrevService = VarselbrevService(behandlingRepository,
-                                              fagsakRepository,
+        varselbrevService = VarselbrevService(fagsakRepository,
                                               eksterneDataForBrevService,
-                                              pdfBrevService)
+                                              pdfBrevService,
+                                              varselbrevUtil)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
-        }.returns(Adresseinfo("Test", "12345678901"))
+        }.returns(Adresseinfo("12345678901", "Test"))
     }
 
 

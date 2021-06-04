@@ -17,7 +17,7 @@ class TekstformatererHenleggelsesbrevTest {
 
     private val brevmetadata = Brevmetadata(sakspartId = "12345678901",
                                             sakspartsnavn = "Test",
-                                            mottageradresse = Adresseinfo("Test", "12345678901"),
+                                            mottageradresse = Adresseinfo("12345678901", "Test"),
                                             vergenavn = "John Doe",
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.BARNETILSYN,
