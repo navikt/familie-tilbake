@@ -8,6 +8,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.avstemming.AvstemmingService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,12 +20,13 @@ import java.util.UUID
                      beskrivelse = "Avstemming av krav.")
 class AvstemmingBatchTask(val taskService: TaskService,
                           val avstemmingService: AvstemmingService,
-                          val sftpBatchService: IntegrasjonerClient) : AsyncTaskStep {
+                          val sftpBatchService: IntegrasjonerClient,
+                          environment: Environment) : AsyncTaskStep {
 
     val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingBatchTask::class.java)
 
-    val miljø = "p" // else "q"
+    val miljø = if (environment.activeProfiles.contains("prod")) "p" else "q"
 
     override fun doTask(task: Task) {
         val dato = LocalDate.parse(task.payload)
