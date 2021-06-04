@@ -3,8 +3,9 @@ package no.nav.familie.tilbake.api.e2e
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.tilbake.api.dto.EndreAnsvarligSaksbehandlerDto
-import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.api.e2e.dto.EndreAnsvarligSaksbehandlerDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -27,7 +28,7 @@ import javax.validation.Valid
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("e2e", "local", "integrasjonstest")
 class AutotestController(private val taskRepository: TaskRepository,
-                         private val behandlingService: BehandlingService) {
+                         private val behandlingRepository: BehandlingRepository) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
@@ -55,7 +56,8 @@ class AutotestController(private val taskRepository: TaskRepository,
                         handling = "endre ansvarlig saksbehandler")
     fun endreAnsvarligSaksbehandler(@PathVariable("behandlingId") behandlingId: UUID,
                                     @Valid @RequestBody dto: EndreAnsvarligSaksbehandlerDto): Ressurs<String> {
-        behandlingService.endreAnsvarligSaksbehandler(behandlingId, dto.nyAnsvarligSaksbehandler)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = dto.ansvarligSaksbehandler))
         return Ressurs.success("OK")
     }
 }
