@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.api.e2e
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.tilbake.api.e2e.dto.EndreAnsvarligSaksbehandlerDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
@@ -50,14 +49,14 @@ class AutotestController(private val taskRepository: TaskRepository,
         return Ressurs.success("OK")
     }
 
-    @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/"],
+    @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/{nySaksbehandlerIdent}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SYSTEM,
                         handling = "endre ansvarlig saksbehandler")
     fun endreAnsvarligSaksbehandler(@PathVariable("behandlingId") behandlingId: UUID,
-                                    @Valid @RequestBody dto: EndreAnsvarligSaksbehandlerDto): Ressurs<String> {
+                                    @PathVariable("nySaksbehandlerIdent") ansvarligSaksbehandler: String): Ressurs<String> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = dto.ansvarligSaksbehandler))
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ansvarligSaksbehandler))
         return Ressurs.success("OK")
     }
 }
