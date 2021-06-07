@@ -1,8 +1,12 @@
 package no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 object DokprodTilHtml {
 
-    fun dokprodInnholdTilHtml(dokprod: String): String {
+    fun dokprodInnholdTilHtml(tekst: String): String {
+        val dokprod: String = sanitize(tekst)
         val builder = StringBuilder()
         val avsnittene = hentAvsnittene(dokprod)
         var samepageStarted = false
@@ -60,6 +64,23 @@ object DokprodTilHtml {
             }
         }
         return ekstraLinjeskiftFørHilsing(konverterNbsp(builder.toString()))
+    }
+
+    fun sanitize(name: String): String {
+        val builder = StringBuilder()
+        for (element in name) {
+            when (element) {
+                '"' -> builder.append("&quot;")
+                '\'' -> builder.append("&apos;")
+                '<' -> builder.append("&lt;")
+                '>' -> builder.append("&gt;")
+                '&' -> builder.append("&amp;")
+                else -> {
+                    builder.append(element)
+                }
+            }
+        }
+        return builder.toString()
     }
 
     private fun hentAvsnittene(dokprod: String): List<String> {
