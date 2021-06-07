@@ -49,14 +49,14 @@ class AutotestController(private val taskRepository: TaskRepository,
         return Ressurs.success("OK")
     }
 
-    @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/{nySaksbehandlerIdent}"],
+    @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SYSTEM,
                         handling = "endre ansvarlig saksbehandler")
-    fun endreAnsvarligSaksbehandler(@PathVariable("behandlingId") behandlingId: UUID,
-                                    @PathVariable("nySaksbehandlerIdent") ansvarligSaksbehandler: String): Ressurs<String> {
+    fun endreAnsvarligSaksbehandler(@PathVariable behandlingId: UUID,
+                                    @PathVariable nyAnsvarligSaksbehandler: String): Ressurs<String> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ansvarligSaksbehandler))
+        behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = nyAnsvarligSaksbehandler))
         return Ressurs.success("OK")
     }
 }
