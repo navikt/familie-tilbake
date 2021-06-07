@@ -1,12 +1,10 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
 import org.slf4j.LoggerFactory
@@ -41,9 +39,6 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
                                                                                       Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                              Aktør.SAKSBEHANDLER)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

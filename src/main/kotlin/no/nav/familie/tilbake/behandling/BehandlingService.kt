@@ -134,11 +134,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        if (!behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
-            historikkTaskService.lagHistorikkTask(behandling.id,
-                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                                  Aktør.SAKSBEHANDLER)
-        }
+        historikkTaskService.lagHistorikkTask(behandling.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     @Transactional
@@ -295,7 +293,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
-        if (behandling.erAvsluttet) {
+        if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                        httpStatus = HttpStatus.BAD_REQUEST)
@@ -303,7 +301,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun kanBehandlingEndres(behandling: Behandling, fagsystem: Fagsystem): Boolean {
-        if (behandling.erAvsluttet || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
+        if (behandling.erSaksbehandlingAvsluttet) {
             return false
         }
         if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
