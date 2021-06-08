@@ -36,3 +36,4 @@ SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
 PDL_URL: https://pdl-api.nais.adeo.no
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.nais.adeo.no
+TILBAKEKREVING_V1_URL: https://cics.adeo.no/oppdrag/K231CW80

@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -21,7 +22,8 @@ import java.util.UUID
 class Fattevedtakssteg(private val behandlingskontrollService: BehandlingskontrollService,
                        private val totrinnService: TotrinnService,
                        private val oppgaveTaskService: OppgaveTaskService,
-                       private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+                       private val historikkTaskService: HistorikkTaskService,
+                       private val behandlingsvedtakService: BehandlingsvedtakService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -59,6 +61,8 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                                                   Aktør.BESLUTTER)
+            // step 5: opprett behandlingsvedtak og oppdater behandlingsresultat
+            behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         }
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }

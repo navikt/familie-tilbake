@@ -3,9 +3,11 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -16,7 +18,8 @@ import java.util.UUID
                      beskrivelse = "Sender vedtaksbrev",
                      triggerTidVedFeilISekunder = 60 * 5)
 class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository,
-                          private val vedtaksbrevService: VedtaksbrevService) : AsyncTaskStep {
+                          private val vedtaksbrevService: VedtaksbrevService,
+                          private val taskService: TaskService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -28,6 +31,10 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
         }
         vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.BRUKER)
         log.info("Utført for behandling: {}", behandlingId)
+    }
+
+    override fun onCompletion(task: Task) {
+        taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload))
     }
 
     companion object {
