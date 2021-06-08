@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.pdf.JournalføringService
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
