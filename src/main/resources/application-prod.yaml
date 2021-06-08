@@ -4,6 +4,7 @@ spring:
   datasource:
   url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
 
+no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
   queuemanager: MPLSC02

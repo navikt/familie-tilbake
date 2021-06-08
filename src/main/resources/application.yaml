@@ -33,7 +33,6 @@ no.nav.security.jwt:
     discoveryurl: ${AZUREAD_DISCOVERY_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     cookie_name: azure_token
-    proxyurl: http://webproxy-nais.nav.no:8088
   client:
     registration:
       familie-integrasjoner:
