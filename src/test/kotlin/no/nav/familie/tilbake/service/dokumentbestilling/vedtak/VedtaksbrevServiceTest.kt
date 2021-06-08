@@ -52,6 +52,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import java.io.File
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.test.assertEquals
@@ -172,6 +173,21 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                                                                 "Friktekst om vilkår",
                                                                                 "Friktekst om særligeGrunner",
                                                                                 "Friktekst om særligeGrunnerAnnet")))
+
+        val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+
+        PdfaValidator.validatePdf(bytes)
+    }
+
+    @Test
+    fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf med xml-spesialtegn`() {
+        val dto = HentForhåndvisningVedtaksbrevPdfDto(Testdata.behandling.id,
+                                                      "Dette er en stor og gild oppsummeringstekst",
+                                                      listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
+                                                                                           LocalDate.now()),
+                                                                                faktaAvsnitt = "&bob",
+                                                                                vilkårAvsnitt = "<bob>",
+                                                                                særligeGrunnerAnnetAvsnitt = "'bob' \"bob\"")))
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
 
