@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.integration.familie
 
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -41,6 +42,11 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
+    private val sftpUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_SFTP)
+            .build()
+            .toUri()
+
     private fun hentSaksbehandlerUri(id: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
                     .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER)
@@ -68,6 +74,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         val response =
                 postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
         return response.getDataOrThrow()
+    }
+
+    fun sendFil(fil: Fil) {
+        putForEntity<Any>(sftpUri, fil)
     }
 
     fun distribuerJournalpost(journalpostId: String,
