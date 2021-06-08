@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.avstemming.batch
+package no.nav.familie.tilbake.avstemming.task
 
 import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -16,15 +16,15 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvstemmingBatchTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = AvstemmingTask.TYPE,
                      beskrivelse = "Avstemming av krav.")
-class AvstemmingBatchTask(val taskService: TaskService,
-                          val avstemmingService: AvstemmingService,
-                          val sftpBatchService: IntegrasjonerClient,
-                          environment: Environment) : AsyncTaskStep {
+class AvstemmingTask(val taskService: TaskService,
+                     val avstemmingService: AvstemmingService,
+                     val integrasjonerClient: IntegrasjonerClient,
+                     environment: Environment) : AsyncTaskStep {
 
     val applikasjon = "familie-tilbake"
-    private val logger = LoggerFactory.getLogger(AvstemmingBatchTask::class.java)
+    private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
 
     val miljø = if (environment.activeProfiles.contains("prod")) "p" else "q"
 
@@ -38,14 +38,16 @@ class AvstemmingBatchTask(val taskService: TaskService,
             val kjøreTidspunkt = LocalDateTime.now().format(DATO_TIDSPUNKT_FORMATTER)
             val filnavn = String.format(FILNAVN_MAL, applikasjon, miljø, forDato, kjøreTidspunkt)
             val fil = Fil(filnavn, resultat)
-            sftpBatchService.sendFil(fil)
+            integrasjonerClient.sendFil(fil)
             logger.info("Filen {} er overført til avstemming sftp", filnavn)
         }
     }
 
     override fun onCompletion(task: Task) {
         val dato = LocalDate.parse(task.payload)
-        val nesteAvstemming = Task(TYPE, dato.plusDays(1).toString())
+        val nesteAvstemming = Task(type = TYPE,
+                                   payload = dato.plusDays(1).toString(),
+                                   triggerTid = dato.plusDays(2).atTime(8, 0))
         taskService.save(nesteAvstemming)
     }
 
