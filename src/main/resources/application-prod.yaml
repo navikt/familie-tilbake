@@ -1,18 +1,10 @@
-no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
-    cookie_name: azure_token
 
-ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 
 spring:
   datasource:
-    url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
+  url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
 
-SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
-PDL_URL: https://pdl-api.nais.adeo.no
+no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
   queuemanager: MPLSC02
@@ -38,5 +30,9 @@ rolle:
     saksbehandler: "e40090eb-c2fb-400e-b412-e9084019a73b"
     beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
 
+AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+SECURITYTOKENSERVICE_URL: https://sts.adeo.no/SecurityTokenServiceProvider/
+PDL_URL: https://pdl-api.nais.adeo.no
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.nais.adeo.no

@@ -5,10 +5,12 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
@@ -41,6 +43,30 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
                 .isEqualTo(økonomiXmlSendt)
         assertEquals(1, lagretØkonomiXmlSendt.versjon)
     }
+
+
+    @Test
+    fun `findByMeldingstypeAndSporbarOpprettetTidAfter skal finne forekomster hvis det finnes for søkekriterier`() {
+        økonomiXmlSendtRepository.insert(økonomiXmlSendt)
+
+        val lagretØkonomiXmlSendt =
+                økonomiXmlSendtRepository.findByMeldingstypeOgOpprettetPåDato(Meldingstype.VEDTAK, LocalDate.now())
+
+
+        assertThat(lagretØkonomiXmlSendt).isNotEmpty
+    }
+
+    @Test
+    fun `findByMeldingstypeAndSporbarOpprettetTidAfter skal ikke finne forekomster hvis det ikke finnes for søkekriterier`() {
+        økonomiXmlSendtRepository.insert(økonomiXmlSendt)
+
+        val lagretØkonomiXmlSendt =
+                økonomiXmlSendtRepository.findByMeldingstypeOgOpprettetPåDato(Meldingstype.VEDTAK, LocalDate.now().plusDays(1))
+
+
+        assertThat(lagretØkonomiXmlSendt).isEmpty()
+    }
+
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlSendt i basen`() {

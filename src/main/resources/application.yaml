@@ -32,7 +32,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZUREAD_DISCOVERY_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
@@ -99,3 +98,5 @@ FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: http://pdl-api
 FORELDELSE_ANTALL_MÅNED: 30
+ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
+PROXY_URL: http://webproxy-nais.nav.no:8088

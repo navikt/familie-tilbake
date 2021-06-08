@@ -23,9 +23,9 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevsporing
-import no.nav.familie.tilbake.service.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

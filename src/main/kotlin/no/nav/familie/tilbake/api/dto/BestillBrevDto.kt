@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
-import no.nav.familie.tilbake.service.dokumentbestilling.brevmaler.Dokumentmalstype
+import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import java.util.UUID
 import javax.validation.constraints.Size
 

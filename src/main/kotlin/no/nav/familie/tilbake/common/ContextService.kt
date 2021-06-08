@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.springframework.http.HttpStatus
+import org.springframework.jca.context.SpringContextResourceAdapter
 
 object ContextService {
 
