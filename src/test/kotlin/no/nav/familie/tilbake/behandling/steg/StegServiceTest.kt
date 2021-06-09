@@ -463,7 +463,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsresultatstype.INGEN_TILBAKEBETALING, behandlingsresultat.type)
         val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
         assertNotNull(behandlingsvedtak)
-        assertEquals("Z0000", behandlingsvedtak.ansvarligSaksbehandler)
         assertEquals(Iverksettingsstatus.UNDER_IVERKSETTING, behandlingsvedtak.iverksettingsstatus)
         assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE } }
     }

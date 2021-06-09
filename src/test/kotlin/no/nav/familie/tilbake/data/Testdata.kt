@@ -96,8 +96,7 @@ object Testdata {
                       kilde = "testverdi",
                       begrunnelse = "testverdi")
 
-    private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
-                                                      ansvarligSaksbehandler = "testverdi")
+    private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())
 
     private val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 

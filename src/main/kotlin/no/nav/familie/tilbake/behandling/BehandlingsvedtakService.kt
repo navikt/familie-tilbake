@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +24,6 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
         val behandlingsresultatstype = utledBehandlingsresultatype(beregningsresultat.vedtaksresultat)
 
         val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
-                                                  ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
                                                   iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT)
         val behandlingsresultat = Behandlingsresultat(type = behandlingsresultatstype,
                                                       behandlingsvedtak = behandlingsvedtak)

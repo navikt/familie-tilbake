@@ -68,8 +68,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     private fun lagTilbakekrevingsbeløp(kravgrunnlagsbeløp: Set<Kravgrunnlagsbeløp433>,
                                         beregnetPeriode: Beregningsresultatsperiode): List<Tilbakekrevingsbeløp> {
         val antallMåned = BigDecimal(beregnetPeriode.periode.lengdeIMåneder())
-        val del = BigDecimal.ONE.divide(antallMåned)
-        val tilbakrekrevesbeløp = (beregnetPeriode.tilbakekrevingsbeløp * del).setScale(0, RoundingMode.HALF_UP)
+        val tilbakrekrevesbeløp = beregnetPeriode.tilbakekrevingsbeløp.divide(antallMåned, 0, RoundingMode.HALF_UP)
 
         return kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {

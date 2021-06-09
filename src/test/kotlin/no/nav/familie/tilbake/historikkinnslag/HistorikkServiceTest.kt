@@ -22,10 +22,10 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -299,10 +299,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
                 behandling.copy(resultater =
                                 setOf(Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
-                                                          behandlingsvedtak = Behandlingsvedtak(
-                                                                  vedtaksdato = LocalDate.now(),
-                                                                  ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                                                                  iverksettingsstatus = Iverksettingsstatus.IVERKSATT)))))
+                                                          behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
+                                                                                                iverksettingsstatus =
+                                                                                                Iverksettingsstatus.IVERKSATT)))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                                              Aktør.BESLUTTER)

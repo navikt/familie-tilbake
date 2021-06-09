@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -45,7 +46,8 @@ class AvsluttBehandlingTask(private val behandlingRepository: BehandlingReposito
                                                                     behandlingsstegstatus = Behandlingsstegstatus.UTFØRT))
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET,
+                                                    avsluttetDato = LocalDate.now()))
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
