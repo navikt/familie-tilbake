@@ -135,7 +135,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             var justertebeløp = periode.beløp
             while (diff.isGreaterThanZero()) {
                 justertebeløp = justertebeløp.map { beløp ->
-                    if (Klassetype.FEIL == beløp.klassetype || !beløp.tilbakekrevesBeløp.isGreaterThanZero()) {
+                    if (Klassetype.FEIL == beløp.klassetype) {
                         beløp
                     } else {
                         diff = diff.subtract(BigDecimal.ONE)
@@ -155,10 +155,10 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             var justertebeløp = periode.beløp
             while (diff.isLessThanZero()) {
                 justertebeløp = justertebeløp.map { beløp ->
-                    if (Klassetype.FEIL == beløp.klassetype || !beløp.tilbakekrevesBeløp.isLessThanZero()) {
+                    if (Klassetype.FEIL == beløp.klassetype) {
                         beløp
                     } else {
-                        diff = diff.subtract(BigDecimal.ONE)
+                        diff = diff.add(BigDecimal.ONE)
                         beløp.copy(tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.add(BigDecimal.ONE),
                                    uinnkrevdBeløp = beløp.uinnkrevdBeløp.subtract(BigDecimal.ONE))
                     }
