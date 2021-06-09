@@ -23,7 +23,9 @@ import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -41,6 +43,7 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
@@ -427,6 +430,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal utføre fatte vedtak og forsette til iverksette vedtak når beslutter godkjenner alt`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -450,8 +455,17 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent } }
 
         assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
-
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingsresultat = behandling.sisteResultat
+        assertNotNull(behandlingsresultat)
+        assertEquals(Behandlingsresultatstype.INGEN_TILBAKEBETALING, behandlingsresultat.type)
+        val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
+        assertNotNull(behandlingsvedtak)
+        assertEquals("Z0000", behandlingsvedtak.ansvarligSaksbehandler)
+        assertEquals(Iverksettingsstatus.UNDER_IVERKSETTING, behandlingsvedtak.iverksettingsstatus)
+        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE } }
     }
 
     @Test
