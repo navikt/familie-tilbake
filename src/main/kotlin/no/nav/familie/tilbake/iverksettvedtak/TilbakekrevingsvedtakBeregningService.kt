@@ -42,7 +42,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             // oppdaterer kravgrunnlagsperioderMedSkatt med gjenstående skatt
             // (ved å trekke totalSkattBeløp fra månedligeSkattebeløp)
             kravgrunnlagsperioderMedSkatt = oppdaterGjenståendeSkattetrekk(perioder, kravgrunnlagsperioderMedSkatt)
-            perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt.toMutableMap())
+            perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
 
             //renter
             val totalTilbakekrevingsbeløp = beregnTotalTilbakekrevesbeløp(perioder)
@@ -183,8 +183,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
     private fun justerAvrundingSkatt(beregnetPeriode: Beregningsresultatsperiode,
                                      perioder: List<Tilbakekrevingsperiode>,
-                                     kravgrunnlagsperioderMedSkatt: MutableMap<Periode, BigDecimal>)
-            : List<Tilbakekrevingsperiode> {
+                                     kravgrunnlagsperioderMedSkatt: Map<Periode, BigDecimal>): List<Tilbakekrevingsperiode> {
+        val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         val totalSkattBeløp = perioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
         val beregnetSkattBeløp = beregnetPeriode.skattebeløp
         var differanse = totalSkattBeløp.subtract(beregnetSkattBeløp)
@@ -197,12 +197,12 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                     beløp
                 } else {
                     val justerSkattOpp = differanse.isLessThanZero() &&
-                                         kravgrunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
+                                         grunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
                     val justerSkattNed = differanse.isGreaterThanZero() &&
                                          beløp.skattBeløp >= BigDecimal.ONE
                     if (justerSkattOpp || justerSkattNed) {
                         val justering = BigDecimal(differanse.signum()).negate()
-                        kravgrunnlagsperioderMedSkatt[periode] = kravgrunnlagsperioderMedSkatt.getNotNull(periode).add(differanse)
+                        grunnlagsperioderMedSkatt[periode] = grunnlagsperioderMedSkatt.getNotNull(periode).add(differanse)
                         differanse = differanse.add(justering)
                         beløp.copy(skattBeløp = beløp.skattBeløp.add(BigDecimal.ONE))
                     } else {
