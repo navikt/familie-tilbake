@@ -67,29 +67,31 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
     private fun lagTilbakekrevingsbeløp(kravgrunnlagsbeløp: Set<Kravgrunnlagsbeløp433>,
                                         beregnetPeriode: Beregningsresultatsperiode): List<Tilbakekrevingsbeløp> {
-        val antallMåned = BigDecimal(beregnetPeriode.periode.lengdeIMåneder())
-        val tilbakrekrevesbeløp = beregnetPeriode.tilbakekrevingsbeløp.divide(antallMåned, 0, RoundingMode.HALF_UP)
-
         return kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {
                 Klassetype.FEIL -> Tilbakekrevingsbeløp(klassetype = it.klassetype,
                                                         klassekode = it.klassekode,
-                                                        nyttBeløp = it.nyttBeløp,
+                                                        nyttBeløp = it.nyttBeløp.setScale(0),
                                                         utbetaltBeløp = BigDecimal.ZERO,
                                                         tilbakekrevesBeløp = BigDecimal.ZERO,
                                                         uinnkrevdBeløp = BigDecimal.ZERO,
                                                         skattBeløp = BigDecimal.ZERO,
                                                         kodeResultat = utledKodeResulat(beregnetPeriode))
-                Klassetype.YTEL -> Tilbakekrevingsbeløp(klassetype = it.klassetype,
-                                                        klassekode = it.klassekode,
-                                                        nyttBeløp = it.nyttBeløp,
-                                                        utbetaltBeløp = it.opprinneligUtbetalingsbeløp,
-                                                        tilbakekrevesBeløp = tilbakrekrevesbeløp,
-                                                        uinnkrevdBeløp = it.opprinneligUtbetalingsbeløp
-                                                                .subtract(tilbakrekrevesbeløp),
-                                                        skattBeløp = beregnSkattBeløp(tilbakrekrevesbeløp,
-                                                                                      it.skatteprosent),
-                                                        kodeResultat = utledKodeResulat(beregnetPeriode))
+                Klassetype.YTEL -> {
+                    val beregnetTilbakrevesbeløp = beregnTilbakekrevesbeløp(beregnetPeriode, it)
+                    val opprinneligTilbakekrevesbeløp: BigDecimal = it.tilbakekrevesBeløp
+
+                    Tilbakekrevingsbeløp(klassetype = it.klassetype,
+                                         klassekode = it.klassekode,
+                                         nyttBeløp = it.nyttBeløp.setScale(0),
+                                         utbetaltBeløp = it.opprinneligUtbetalingsbeløp.setScale(0),
+                                         tilbakekrevesBeløp = beregnetTilbakrevesbeløp,
+                                         uinnkrevdBeløp = opprinneligTilbakekrevesbeløp
+                                                 .subtract(beregnetTilbakrevesbeløp).setScale(0),
+                                         skattBeløp = beregnSkattBeløp(beregnetTilbakrevesbeløp,
+                                                                       it.skatteprosent),
+                                         kodeResultat = utledKodeResulat(beregnetPeriode))
+                }
 
                 else -> null
             }
@@ -214,6 +216,12 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             }
             it.copy(beløp = justertebeløp)
         }
+    }
+
+    private fun beregnTilbakekrevesbeløp(beregnetPeriode: Beregningsresultatsperiode,
+                                         kravgrunnlagsbeløp: Kravgrunnlagsbeløp433): BigDecimal {
+        return kravgrunnlagsbeløp.tilbakekrevesBeløp.multiply(beregnetPeriode.tilbakekrevingsbeløpUtenRenter)
+                .divide(beregnetPeriode.feilutbetaltBeløp, 0, RoundingMode.HALF_UP)
     }
 
     private fun beregnTotalTilbakekrevesbeløp(perioder: List<Tilbakekrevingsperiode>): BigDecimal {
