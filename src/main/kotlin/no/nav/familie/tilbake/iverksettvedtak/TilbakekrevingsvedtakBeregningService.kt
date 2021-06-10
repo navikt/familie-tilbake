@@ -67,7 +67,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             when (it.klassetype) {
                 Klassetype.FEIL -> Tilbakekrevingsbeløp(klassetype = it.klassetype,
                                                         klassekode = it.klassekode,
-                                                        nyttBeløp = it.nyttBeløp.setScale(0),
+                                                        nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
                                                         utbetaltBeløp = BigDecimal.ZERO,
                                                         tilbakekrevesBeløp = BigDecimal.ZERO,
                                                         uinnkrevdBeløp = BigDecimal.ZERO,
@@ -79,11 +79,11 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
                     Tilbakekrevingsbeløp(klassetype = it.klassetype,
                                          klassekode = it.klassekode,
-                                         nyttBeløp = it.nyttBeløp.setScale(0),
-                                         utbetaltBeløp = it.opprinneligUtbetalingsbeløp.setScale(0),
+                                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
+                                         utbetaltBeløp = it.opprinneligUtbetalingsbeløp.setScale(0, RoundingMode.HALF_UP),
                                          tilbakekrevesBeløp = beregnetTilbakrevesbeløp,
                                          uinnkrevdBeløp = opprinneligTilbakekrevesbeløp
-                                                 .subtract(beregnetTilbakrevesbeløp).setScale(0),
+                                                 .subtract(beregnetTilbakrevesbeløp).setScale(0, RoundingMode.HALF_UP),
                                          skattBeløp = beregnSkattBeløp(beregnetTilbakrevesbeløp,
                                                                        it.skatteprosent),
                                          kodeResultat = utledKodeResulat(beregnetPeriode))
