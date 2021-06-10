@@ -16,6 +16,6 @@ interface ØkonomiXmlSendtRepository : RepositoryInterface<ØkonomiXmlSendt, UUI
     fun findByBehandlingId(behandlingId: UUID): ØkonomiXmlSendt?
 
     // language=PostgreSQL
-    @Query("""SELECT * FROM okonomi_xml_sendt WHERE opprettet_tid::DATE = :opprettetTid """)
+    @Query("SELECT * FROM okonomi_xml_sendt WHERE opprettet_tid::DATE = :opprettetTid ")
     fun findByOpprettetPåDato(opprettetTid: LocalDate): Collection<ØkonomiXmlSendt>
 }

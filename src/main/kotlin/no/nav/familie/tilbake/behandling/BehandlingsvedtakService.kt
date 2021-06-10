@@ -21,7 +21,7 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
         val beregningsresultat = tilbakeBeregningService.beregn(behandlingId)
-        val behandlingsresultatstype = utledBehandlingsresultatype(beregningsresultat.vedtaksresultat)
+        val behandlingsresultatstype = utledBehandlingsresultatstype(beregningsresultat.vedtaksresultat)
 
         val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
                                                   iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT)
@@ -41,7 +41,7 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
         behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
     }
 
-    private fun utledBehandlingsresultatype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype {
+    private fun utledBehandlingsresultatstype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype {
         return when (vedtaksresultat) {
             Vedtaksresultat.INGEN_TILBAKEBETALING -> Behandlingsresultatstype.INGEN_TILBAKEBETALING
             Vedtaksresultat.DELVIS_TILBAKEBETALING -> Behandlingsresultatstype.DELVIS_TILBAKEBETALING

@@ -22,7 +22,6 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = AvsluttBehandlingTask.TYPE,
-                     maxAntallFeil = 3,
                      beskrivelse = "Avslutter behandling",
                      triggerTidVedFeilISekunder = 60 * 5)
 class AvsluttBehandlingTask(private val behandlingRepository: BehandlingRepository,

@@ -27,13 +27,12 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         val beregningsresultat = tilbakekrevingsberegningService.beregn(behandlingId)
 
         val kravgrunnlagsperioder = kravgrunnlag431.perioder.toList().sortedBy { it.periode.fom }
-        val beregnetPeioder = beregningsresultat.beregningsresultatsperioder.sortedBy { it.periode.fom }
+        val beregnetePerioder = beregningsresultat.beregningsresultatsperioder.sortedBy { it.periode.fom }
 
         // oppretter kravgrunnlagsperioderMedSkatt basert på månedligSkattebeløp
         var kravgrunnlagsperioderMedSkatt = kravgrunnlagsperioder.associate { it.periode to it.månedligSkattebeløp }
 
-        val tilbakekrevingsperioder = mutableListOf<Tilbakekrevingsperiode>()
-        for (beregnetPeriode in beregnetPeioder) {
+        return beregnetePerioder.map { beregnetPeriode ->
             var perioder = lagTilbakekrevingsperioder(kravgrunnlagsperioder, beregnetPeriode)
 
             // avrunding tilbakekrevesbeløp og uinnkrevd beløp
@@ -52,11 +51,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                 renteBeløp = beregnetPeriode.rentebeløp.multiply(totalTilbakekrevingsbeløp)
                         .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
             }
-            perioder.forEach { it.renter = renteBeløp }
-
-            tilbakekrevingsperioder.addAll(perioder)
-        }
-        return tilbakekrevingsperioder
+            perioder.map { it.copy(renter = renteBeløp) }
+        }.flatten()
     }
 
     private fun lagTilbakekrevingsperioder(kravgrunnlagsperioder: List<Kravgrunnlagsperiode432>,
@@ -105,7 +101,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
     private fun utledKodeResulat(beregnetPeriode: Beregningsresultatsperiode): KodeResultat {
         return when {
-            beregnetPeriode.vurdering?.let { it == AnnenVurdering.FORELDET } == true -> {
+            beregnetPeriode.vurdering == AnnenVurdering.FORELDET -> {
                 KodeResultat.FORELDET
             }
             beregnetPeriode.tilbakekrevingsbeløpUtenRenter.isZero() -> {

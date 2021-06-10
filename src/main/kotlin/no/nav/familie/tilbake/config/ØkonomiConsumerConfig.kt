@@ -23,16 +23,17 @@ class ØkonomiConsumerConfig(@Value("\${TILBAKEKREVING_V1_URL}") private val til
 
     @Bean
     fun økonomiService(): TilbakekrevingPortType {
-        val factoryBean = JaxWsProxyFactoryBean()
-        factoryBean.wsdlURL = WSDL
-        factoryBean.serviceName = SERVICE
-        factoryBean.endpointName = PORT
-        factoryBean.serviceClass = TilbakekrevingPortType::class.java
-        factoryBean.address = tilbakekrevingUrl
-        factoryBean.features.add(WSAddressingFeature())
-        factoryBean.features.add(loggingFeature())
-        factoryBean.outInterceptors.add(LoggingOutInterceptor())
-        factoryBean.inInterceptors.add(LoggingInInterceptor())
+        val factoryBean = JaxWsProxyFactoryBean().apply {
+            wsdlURL = WSDL
+            serviceName = SERVICE
+            endpointName = PORT
+            serviceClass = TilbakekrevingPortType::class.java
+            address = tilbakekrevingUrl
+            features.add(WSAddressingFeature())
+            features.add(loggingFeature())
+            outInterceptors.add(LoggingOutInterceptor())
+            inInterceptors.add(LoggingInInterceptor())
+        }
         return factoryBean.create(TilbakekrevingPortType::class.java)
     }
 

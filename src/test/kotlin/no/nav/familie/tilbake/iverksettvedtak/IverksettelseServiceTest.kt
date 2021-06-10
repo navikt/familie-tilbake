@@ -103,13 +103,12 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         behandlingVedtakService.opprettBehandlingsvedtak(behandlingId)
 
-        iverksettelseService = IverksettelseService(
-                behandlingRepository,
-                kravgrunnlagRepository,
-                økonomiXmlSendtRepository,
-                tilbakekrevingsvedtakBeregningService,
-                behandlingVedtakService,
-                økonomiConsumer)
+        iverksettelseService = IverksettelseService(behandlingRepository,
+                                                    kravgrunnlagRepository,
+                                                    økonomiXmlSendtRepository,
+                                                    tilbakekrevingsvedtakBeregningService,
+                                                    behandlingVedtakService,
+                                                    økonomiConsumer)
     }
 
     @Test
@@ -163,24 +162,23 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                                                   ytelPostering.copy(id = UUID.randomUUID())))
         }.toSet()
 
-        val kravgrunnlag = Kravgrunnlag431(
-                behandlingId = behandlingId,
-                vedtakId = BigInteger.ZERO,
-                kravstatuskode = Kravstatuskode.NYTT,
-                fagområdekode = Fagområdekode.BA,
-                fagsystemId = fagsak.eksternFagsakId,
-                gjelderVedtakId = "testverdi",
-                gjelderType = GjelderType.PERSON,
-                utbetalesTilId = "testverdi",
-                utbetIdType = GjelderType.PERSON,
-                ansvarligEnhet = "testverdi",
-                bostedsenhet = "testverdi",
-                behandlingsenhet = "testverdi",
-                kontrollfelt = "testverdi",
-                referanse = behandling.aktivFagsystemsbehandling.eksternId,
-                eksternKravgrunnlagId = BigInteger.ZERO,
-                saksbehandlerId = "testverdi",
-                perioder = kravgrunnlagsperioder)
+        val kravgrunnlag = Kravgrunnlag431(behandlingId = behandlingId,
+                                           vedtakId = BigInteger.ZERO,
+                                           kravstatuskode = Kravstatuskode.NYTT,
+                                           fagområdekode = Fagområdekode.BA,
+                                           fagsystemId = fagsak.eksternFagsakId,
+                                           gjelderVedtakId = "testverdi",
+                                           gjelderType = GjelderType.PERSON,
+                                           utbetalesTilId = "testverdi",
+                                           utbetIdType = GjelderType.PERSON,
+                                           ansvarligEnhet = "testverdi",
+                                           bostedsenhet = "testverdi",
+                                           behandlingsenhet = "testverdi",
+                                           kontrollfelt = "testverdi",
+                                           referanse = behandling.aktivFagsystemsbehandling.eksternId,
+                                           eksternKravgrunnlagId = BigInteger.ZERO,
+                                           saksbehandlerId = "testverdi",
+                                           perioder = kravgrunnlagsperioder)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         return kravgrunnlag

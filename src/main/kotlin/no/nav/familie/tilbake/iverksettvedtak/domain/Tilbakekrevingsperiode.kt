@@ -9,15 +9,15 @@ import java.math.BigDecimal
 
 data class Tilbakekrevingsperiode(
         val periode: Periode,
-        var renter: BigDecimal = BigDecimal.ZERO,
+        val renter: BigDecimal = BigDecimal.ZERO,
         val beløp: List<Tilbakekrevingsbeløp> = listOf())
 
 data class Tilbakekrevingsbeløp(val klassetype: Klassetype,
                                 val klassekode: Klassekode,
                                 val nyttBeløp: BigDecimal,
                                 val utbetaltBeløp: BigDecimal,
-                                var tilbakekrevesBeløp: BigDecimal,
-                                var uinnkrevdBeløp: BigDecimal,
+                                val tilbakekrevesBeløp: BigDecimal,
+                                val uinnkrevdBeløp: BigDecimal,
                                 val skattBeløp: BigDecimal,
                                 val kodeResultat: KodeResultat)
 
