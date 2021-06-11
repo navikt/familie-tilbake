@@ -42,4 +42,18 @@ class FagsakService(val fagsakRepository: FagsakRepository,
         }
         return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finneÅpenBehandling)
     }
+
+    @Transactional(readOnly = true)
+    fun hentBehandlingerForFagsak(fagsystem: Fagsystem,
+                                  eksternFagsakId: String): List<no.nav.familie.kontrakter.felles.tilbakekreving.Behandling> {
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
+                                                                        eksternFagsakId = eksternFagsakId)
+
+        return if (fagsak != null) {
+            val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
+            behandlinger.map { BehandlingMapper.tilBehandlingerForFagsystem(it) }
+        } else {
+            emptyList();
+        }
+    }
 }
