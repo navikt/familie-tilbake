@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
 import no.nav.familie.tilbake.behandling.FagsakService
@@ -41,5 +42,16 @@ class FagsakController(val fagsakService: FagsakService) {
                                             eksternFagsakId: String): Ressurs<FinnesBehandlingsresponsDto> {
         return Ressurs.success(fagsakService.finnesÅpenTilbakekrevingsbehandling(fagsystem = fagsystem,
                                                                                  eksternFagsakId = eksternFagsakId))
+    }
+
+    @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/behandlinger/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Henter behandlinger for bruk i fagsystem",
+                        henteParam = "fagsystem")
+    fun hentBehandlingerForFagsystem(@PathVariable("fagsystem") fagsystem: Fagsystem,
+                                     @PathVariable("fagsak")
+                                     eksternFagsakId: String): Ressurs<List<Behandling>> {
+        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId));
     }
 }

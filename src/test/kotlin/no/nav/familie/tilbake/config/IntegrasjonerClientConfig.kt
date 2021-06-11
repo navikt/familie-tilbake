@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import java.util.UUID
 
 @Configuration
 @Profile("mock-integrasjoner")
@@ -37,7 +38,10 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
 
-        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler("Bob", "Burger")
+        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(azureId = UUID.randomUUID(),
+                                                                                     navIdent = "vl",
+                                                                                     fornavn = "Bob",
+                                                                                     etternavn = "Burger")
         every { integrasjonerClient.finnOppgaver(any()) } answers {
             FinnOppgaveResponseDto(antallTreffTotalt = 1,
                                    oppgaver = listOf(Oppgave(id = 1)))
