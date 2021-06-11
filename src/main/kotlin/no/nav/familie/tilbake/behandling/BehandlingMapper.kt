@@ -1,12 +1,27 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.HENLAGT
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.IKKE_FASTSATT
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_KA
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
@@ -118,5 +133,64 @@ object BehandlingMapper {
             }
         }
         return emptySet()
+    }
+
+    fun tilBehandlingerForFagsystem(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandling {
+        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
+            it.sporbar.endret.endretTid
+        }
+        return no.nav.familie.kontrakter.felles.tilbakekreving.Behandling(behandlingId = behandling.eksternBrukId,
+                                                                          opprettetTidspunkt = behandling.opprettetTidspunkt,
+                                                                          aktiv = !behandling.erAvsluttet,
+                                                                          type = mapType(behandling),
+                                                                          status = mapStatus(behandling),
+                                                                          årsak = mapÅrsak(behandling),
+                                                                          vedtaksdato = behandling.avsluttetDato?.atStartOfDay(),
+                                                                          resultat = mapResultat(resultat))
+    }
+
+    private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype {
+        return when (behandling.type) {
+            Behandlingstype.TILBAKEKREVING -> TILBAKEKREVING
+            Behandlingstype.REVURDERING_TILBAKEKREVING -> REVURDERING_TILBAKEKREVING
+        }
+    }
+
+    private fun mapStatus(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus {
+        return when (behandling.status) {
+            Behandlingsstatus.AVSLUTTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.AVSLUTTET
+            Behandlingsstatus.UTREDES -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.UTREDES
+            Behandlingsstatus.FATTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.FATTER_VEDTAK
+            Behandlingsstatus.IVERKSETTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
+            Behandlingsstatus.OPPRETTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.OPPRETTET
+        }
+    }
+
+    private fun mapÅrsak(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype? {
+        if (behandling.årsaker.isEmpty()) return null
+        return when (behandling.årsaker.firstOrNull()?.type) {
+            Behandlingsårsakstype.REVURDERING_KLAGE_KA -> REVURDERING_KLAGE_KA
+            Behandlingsårsakstype.REVURDERING_KLAGE_NFP -> REVURDERING_KLAGE_NFP
+            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> REVURDERING_OPPLYSNINGER_OM_VILKÅR
+            Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT -> REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+            else -> null
+        }
+    }
+
+    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
+        return when (resultat?.type) {
+            Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
+            Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
+            Behandlingsresultatstype.INGEN_TILBAKEBETALING -> INGEN_TILBAKEBETALING
+            Behandlingsresultatstype.IKKE_FASTSATT -> IKKE_FASTSATT
+            Behandlingsresultatstype.HENLAGT,
+            Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+            Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
+            Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
+            Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+            Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> HENLAGT
+            else -> null
+        }
     }
 }
