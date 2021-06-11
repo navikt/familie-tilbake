@@ -38,10 +38,10 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
 
-        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(azureId = UUID.randomUUID(),
-                                                                                     navIdent = "vl",
-                                                                                     fornavn = "Bob",
-                                                                                     etternavn = "Burger")
+        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(),
+                                                                                     "bb1234",
+                                                                                     "Bob",
+                                                                                     "Burger")
         every { integrasjonerClient.finnOppgaver(any()) } answers {
             FinnOppgaveResponseDto(antallTreffTotalt = 1,
                                    oppgaver = listOf(Oppgave(id = 1)))

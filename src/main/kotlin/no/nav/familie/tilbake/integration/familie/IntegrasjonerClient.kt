@@ -101,7 +101,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     fun hentSaksbehandler(id: String): Saksbehandler {
         //return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
         //fixme skrur av henting av saksbehandler midlertidig
-        return Saksbehandler(azureId = UUID.randomUUID(), navIdent = "vl", fornavn = id, etternavn = "")
+        return Saksbehandler(azureId = UUID.randomUUID(), navIdent = "", fornavn = id, etternavn = "")
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {

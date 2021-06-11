@@ -9,6 +9,9 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
@@ -23,11 +26,9 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT_TIL_VERGE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -41,10 +42,12 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
     fun lagHistorikkinnslag(behandlingId: UUID,
                             historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                             aktør: Aktør,
+                            opprettetTidspunkt: LocalDateTime,
                             begrunnelse: String? = null) {
         val request = lagHistorikkinnslagRequest(behandlingId = behandlingId,
                                                  aktør = aktør,
                                                  historikkinnslagstype = historikkinnslagstype,
+                                                 opprettetTidspunkt = opprettetTidspunkt,
                                                  begrunnelse = begrunnelse)
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
@@ -52,6 +55,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
     private fun lagHistorikkinnslagRequest(behandlingId: UUID,
                                            aktør: Aktør,
                                            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                           opprettetTidspunkt: LocalDateTime,
                                            begrunnelse: String?)
             : OpprettHistorikkinnslagRequest {
 
@@ -66,6 +70,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                               type = historikkinnslagstype.type,
                                               aktør = aktør,
                                               aktørIdent = hentAktørIdent(behandling, aktør),
+                                              opprettetTidspunkt = opprettetTidspunkt,
                                               steg = historikkinnslagstype.steg?.name,
                                               tittel = historikkinnslagstype.tittel,
                                               tekst = lagTekst(behandling, historikkinnslagstype, begrunnelse),

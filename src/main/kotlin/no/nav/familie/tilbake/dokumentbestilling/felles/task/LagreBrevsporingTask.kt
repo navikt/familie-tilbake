@@ -5,14 +5,14 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.BrevsporingService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -46,11 +46,15 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
-                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                                              triggerTid = LocalDateTime.now().plusSeconds(2))
+                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
+        }
+
+        // Behandling bør avsluttes etter å sende vedtaksbrev
+        if (brevtype == Brevtype.VEDTAK) {
+            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload))
         }
     }
 
