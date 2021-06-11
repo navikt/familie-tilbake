@@ -26,14 +26,14 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
 import org.slf4j.Logger
@@ -130,13 +130,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        frontendFeilmelding = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
-        stegService.gjenopptaSteg(behandlingId)
-
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
                                               Aktør.SAKSBEHANDLER)
+
+        stegService.gjenopptaSteg(behandlingId)
     }
 
     @Transactional

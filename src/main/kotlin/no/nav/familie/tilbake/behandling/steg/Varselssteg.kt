@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.slf4j.LoggerFactory
@@ -14,7 +13,6 @@ import java.util.UUID
 
 @Service
 class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                  private val historikkTaskService: HistorikkTaskService,
                   private val brevsporingRepository: BrevsporingRepository) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

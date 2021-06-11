@@ -34,6 +34,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
 import org.springframework.util.concurrent.SettableListenableFuture
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 
@@ -58,6 +59,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
+    private val opprettetTidspunkt = LocalDateTime.now()
 
     private val behandlingIdSlot = slot<UUID>()
     private val keySlot = slot<String>()
@@ -82,7 +84,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling oppretter automatisk`() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -100,7 +103,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                         LocalDate.now().plusDays(20))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -121,7 +125,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                         LocalDate.now().plusDays(20))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                             Aktør.SAKSBEHANDLER)
+                                             Aktør.SAKSBEHANDLER,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -138,7 +143,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling tar av vent manuelt`() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                             Aktør.SAKSBEHANDLER)
+                                             Aktør.SAKSBEHANDLER,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -154,7 +160,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling mottar et kravgrunnlag`() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -174,7 +181,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                  dokumentId = "testverdi"))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -197,7 +205,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                 setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
 
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
@@ -221,6 +230,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                              Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt,
                                              "testverdi")
 
         verify {
@@ -244,7 +254,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                  dokumentId = "testverdi"))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT,
-                                             Aktør.VEDTAKSLØSNING)
+                                             Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -263,7 +274,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når fakta steg er utført for behandling`() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                             Aktør.SAKSBEHANDLER)
+                                             Aktør.SAKSBEHANDLER,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -280,7 +292,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     fun `lagHistorikkinnslag skal lage historikkinnslag når foreldelse steg er utført for behandling`() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT,
-                                             Aktør.SAKSBEHANDLER)
+                                             Aktør.SAKSBEHANDLER,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -304,7 +317,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                                                 Iverksettingsstatus.IVERKSATT)))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                                             Aktør.BESLUTTER)
+                                             Aktør.BESLUTTER,
+                                             opprettetTidspunkt)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -329,6 +343,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         assertEquals(fagsak.eksternFagsakId, request.eksternFagsakId)
         assertEquals(aktør, request.aktør)
         assertEquals(aktørIdent, request.aktørIdent)
+        assertEquals(opprettetTidspunkt, request.opprettetTidspunkt)
         assertEquals(Fagsystem.BA, request.fagsystem)
         assertEquals(Applikasjon.FAMILIE_TILBAKE, request.applikasjon)
         assertEquals(tittel, request.tittel)

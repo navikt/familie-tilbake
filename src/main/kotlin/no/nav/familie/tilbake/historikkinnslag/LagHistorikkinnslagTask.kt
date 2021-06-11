@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -24,9 +25,14 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
         val historikkinnslagstype =
                 TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktor"))
+        val opprettetTidspunkt = LocalDateTime.parse(task.metadata.getProperty("opprettetTidspunkt"))
         val begrunnelse = task.metadata.getProperty("begrunnelse")
 
-        historikkService.lagHistorikkinnslag(behandlingId, historikkinnslagstype, aktør, begrunnelse)
+        historikkService.lagHistorikkinnslag(behandlingId,
+                                             historikkinnslagstype,
+                                             aktør,
+                                             opprettetTidspunkt,
+                                             begrunnelse)
     }
 
     companion object {

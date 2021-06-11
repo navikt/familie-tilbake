@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.util.UUID
 
 @Component
 class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
@@ -100,7 +101,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     fun hentSaksbehandler(id: String): Saksbehandler {
         //return getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
         //fixme skrur av henting av saksbehandler midlertidig
-        return Saksbehandler(fornavn = id, etternavn = "")
+        return Saksbehandler(azureId = UUID.randomUUID(), navIdent = "", fornavn = id, etternavn = "")
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {

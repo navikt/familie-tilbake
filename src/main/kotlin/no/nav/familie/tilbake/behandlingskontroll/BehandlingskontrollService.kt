@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -49,8 +48,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 historikkTaskService.lagHistorikkTask(
                         behandlingId = behandlingId,
                         historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                        aktør = Aktør.VEDTAKSLØSNING,
-                        triggerTid = LocalDateTime.now().plusSeconds(2)
+                        aktør = Aktør.VEDTAKSLØSNING
                 )
             }
         } else {
