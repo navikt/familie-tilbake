@@ -44,7 +44,6 @@ data class Behandlingsresultat(@Id
 data class Behandlingsvedtak(@Id
                              val id: UUID = UUID.randomUUID(),
                              val vedtaksdato: LocalDate,
-                             val ansvarligSaksbehandler: String,
                              val iverksettingsstatus: Iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
                              @Version
                              val versjon: Long = 0,

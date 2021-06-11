@@ -1,9 +1,8 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.familie.tilbake.domain.tbd.Meldingstype
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
+import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -14,6 +13,9 @@ import java.util.UUID
 @Transactional
 interface ØkonomiXmlSendtRepository : RepositoryInterface<ØkonomiXmlSendt, UUID>, InsertUpdateRepository<ØkonomiXmlSendt> {
 
-    @Query("Select * from okonomi_xml_sendt WHERE meldingstype = :meldingstype and opprettet_tid::date = :opprettetTid")
-    fun findByMeldingstypeOgOpprettetPåDato(meldingstype: Meldingstype, opprettetTid: LocalDate): Collection<ØkonomiXmlSendt>
+    fun findByBehandlingId(behandlingId: UUID): ØkonomiXmlSendt?
+
+    // language=PostgreSQL
+    @Query("SELECT * FROM okonomi_xml_sendt WHERE opprettet_tid::DATE = :opprettetTid ")
+    fun findByOpprettetPåDato(opprettetTid: LocalDate): Collection<ØkonomiXmlSendt>
 }

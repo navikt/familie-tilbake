@@ -86,6 +86,7 @@ object BehandlingMapper {
                              ansvarligBeslutter = behandling.ansvarligBeslutter,
                              opprettetDato = behandling.opprettetDato,
                              avsluttetDato = behandling.avsluttetDato,
+                             vedtaksdato = behandling.sisteResultat?.behandlingsvedtak?.vedtaksdato,
                              endretTidspunkt = behandling.endretTidspunkt,
                              harVerge = behandling.harVerge,
                              kanHenleggeBehandling = kanHenleggeBehandling,

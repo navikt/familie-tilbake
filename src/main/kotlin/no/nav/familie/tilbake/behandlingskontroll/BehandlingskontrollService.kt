@@ -291,7 +291,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
     private fun oppdaterBehandlingsstatus(behandlingId: UUID, behandlingssteg: Behandlingssteg) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
+        //oppdaterer tilsvarende behandlingstatus bortsett fra Avsluttet steg. Det håndteres separat av AvsluttBehandlingTask
+        if (Behandlingssteg.AVSLUTTET != behandlingssteg) {
+            behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
+        }
     }
 
 }

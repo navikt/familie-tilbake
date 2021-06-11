@@ -9,9 +9,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
-import no.nav.familie.tilbake.domain.tbd.Meldingstype
-import no.nav.familie.tilbake.domain.tbd.ØkonomiXmlSendt
-import no.nav.familie.tilbake.repository.tbd.ØkonomiXmlSendtRepository
+import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
+import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import org.slf4j.LoggerFactory
@@ -27,7 +26,7 @@ class AvstemmingService(private val behandlingRepository: BehandlingRepository,
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun oppsummer(dato: LocalDate): ByteArray? {
-        val sendteVedtak = sendtXmlRepository.findByMeldingstypeOgOpprettetPåDato(Meldingstype.VEDTAK, dato)
+        val sendteVedtak = sendtXmlRepository.findByOpprettetPåDato(dato)
         var antallFeilet = 0
         var antallFørstegangsvedtakUtenTilbakekreving = 0
         val rader = sendteVedtak.mapNotNull { sendtVedtak ->
