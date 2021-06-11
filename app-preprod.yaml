@@ -76,5 +76,9 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
+    - name: CREDENTIAL_USERNAME
+      value: /run/secrets/nais.io/srvfamilie-tilbake/username
+    - name: CREDENTIAL_PASSWORD
+      value: /run/secrets/nais.io/srvfamilie-tilbake/password
   kafka:
     pool: nav-dev
