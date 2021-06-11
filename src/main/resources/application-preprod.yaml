@@ -39,3 +39,4 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.c
 PDL_URL: http://pdl-api-q1.pdl
 FORELDELSE_ANTALL_MÅNED: 3
 OPPRETTELSE_DAGER_BEGRENSNING: 1
+TILBAKEKREVING_V1_URL: https://cics-q1.adeo.no/oppdrag/K231CW80

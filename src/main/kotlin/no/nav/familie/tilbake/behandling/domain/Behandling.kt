@@ -3,8 +3,8 @@ package no.nav.familie.tilbake.behandling.domain
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
+import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
@@ -46,7 +46,7 @@ data class Behandling(@Id
 
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
 
-    private val erUnderIverksettelse get() = Behandlingsstatus.IVERKSETTER_VEDTAK == status
+    val erUnderIverksettelse get() = Behandlingsstatus.IVERKSETTER_VEDTAK == status
 
     val erSaksbehandlingAvsluttet get() = erAvsluttet || erUnderIverksettelse
 

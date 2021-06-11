@@ -1,11 +1,10 @@
-package no.nav.familie.tilbake.repository.tbd
+package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.domain.tbd.Meldingstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,7 +49,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
 
         val lagretØkonomiXmlSendt =
-                økonomiXmlSendtRepository.findByMeldingstypeOgOpprettetPåDato(Meldingstype.VEDTAK, LocalDate.now())
+                økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now())
 
 
         assertThat(lagretØkonomiXmlSendt).isNotEmpty
@@ -61,7 +60,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
 
         val lagretØkonomiXmlSendt =
-                økonomiXmlSendtRepository.findByMeldingstypeOgOpprettetPåDato(Meldingstype.VEDTAK, LocalDate.now().plusDays(1))
+                økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now().plusDays(1))
 
 
         assertThat(lagretØkonomiXmlSendt).isEmpty()

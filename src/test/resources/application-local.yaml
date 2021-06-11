@@ -1,4 +1,3 @@
-
 spring:
   datasource:
     username: postgres
@@ -34,5 +33,6 @@ SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvid
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 PDL_URL: #Mockes ut lokalt
+TILBAKEKREVING_V1_URL: #Mockes ut lokalt
 OPPRETTELSE_DAGER_BEGRENSNING: 1
 

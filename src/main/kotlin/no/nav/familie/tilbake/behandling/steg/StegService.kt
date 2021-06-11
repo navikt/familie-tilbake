@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -25,7 +24,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet || Behandlingsstatus.IVERKSETTER_VEDTAK == behandling.status) {
+        if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
         }
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
@@ -36,10 +35,15 @@ class StegService(val steg: List<IBehandlingssteg>,
         }
 
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        // Behandling kan ikke tilbakeføres når er på FatteVedtak steg
-        if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg) {
+        // Behandling kan ikke tilbakeføres når er på FatteVedtak/IverksetteVedtak steg
+        if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg || Behandlingssteg.IVERKSETT_VEDTAK == aktivtBehandlingssteg) {
             if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
                 hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
+
+                aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+                if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
+                    hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+                }
             }
             return
         }
@@ -48,7 +52,8 @@ class StegService(val steg: List<IBehandlingssteg>,
 
         //sjekk om aktivtBehandlingssteg kan autoutføres
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE || aktivtBehandlingssteg == Behandlingssteg.VILKÅRSVURDERING) {
+        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE ||
+            aktivtBehandlingssteg == Behandlingssteg.VILKÅRSVURDERING) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
         }
     }
