@@ -198,9 +198,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                           " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
 
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
-        // oppretter fagsak
-        val fagsak = opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
-        fagsakRepository.insert(fagsak)
+        // oppretter fagsak hvis det ikke finnes ellers bruker det eksisterende
+        val eksisterendeFagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+        val fagsak = eksisterendeFagsak ?: opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
+
         val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
         behandlingRepository.insert(behandling)
 
@@ -254,10 +255,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                               fagsystem: Fagsystem): Fagsak {
         val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
                             språkkode = opprettTilbakekrevingRequest.språkkode)
-        return Fagsak(bruker = bruker,
-                      eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                      ytelsestype = ytelsestype,
-                      fagsystem = fagsystem)
+        return fagsakRepository.insert(Fagsak(bruker = bruker,
+                                              eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+                                              ytelsestype = ytelsestype,
+                                              fagsystem = fagsystem))
     }
 
     private fun kanHenleggeBehandling(behandling: Behandling,

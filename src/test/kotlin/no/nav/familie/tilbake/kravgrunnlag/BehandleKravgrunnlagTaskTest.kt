@@ -129,6 +129,42 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 mens behandling venter på brukerstilbakemelding`() {
+        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
+                                                                           behandlingssteg = Behandlingssteg.VARSEL,
+                                                                           behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                                                                           venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                                           tidsfrist = LocalDate.now().plusWeeks(3)))
+
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val task = opprettTask(kravgrunnlagXml)
+
+        assertDoesNotThrow { behandleKravgrunnlagTask.doTask(task) }
+
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        assertNotNull(kravgrunnlag)
+        assertEquals(Kravstatuskode.NYTT, kravgrunnlag.kravstatuskode)
+        assertEquals(fagsak.eksternFagsakId, kravgrunnlag.fagsystemId)
+        assertEquals(Ytelsestype.BARNETRYGD, KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name))
+
+        assertPerioder(kravgrunnlag)
+        assertBeløp(kravgrunnlag)
+
+        assertTrue {
+            mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(kravgrunnlag.eksternKravgrunnlagId,
+                                                                        kravgrunnlag.vedtakId).isEmpty()
+        }
+        assertTrue { mottattXmlArkivRepository.findAll().toList().isNotEmpty() }
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        //behandling venter fortsatt på brukerstilbakemelding, oppretter ikke grunnlagssteg
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER)
+        assertFalse { behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG } }
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+    }
+
+    @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
         lagGrunnlagssteg()
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")

@@ -14,7 +14,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -128,10 +127,6 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         val aktivBehandlingsresultat = behandling.sisteResultat
         assertNotNull(aktivBehandlingsresultat)
         assertEquals(Behandlingsresultatstype.FULL_TILBAKEBETALING, aktivBehandlingsresultat.type)
-
-        val behandlingsvedtak = aktivBehandlingsresultat.behandlingsvedtak
-        assertNotNull(behandlingsvedtak)
-        assertEquals(behandlingsvedtak.iverksettingsstatus, Iverksettingsstatus.IVERKSATT)
     }
 
     @Test
