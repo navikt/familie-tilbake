@@ -35,13 +35,13 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -195,6 +195,34 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                      " og eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
                      "som ikke er henlagt, kan ikke opprette en ny.", exception.message)
     }
+
+    @Test
+    fun `opprettBehandlingAutomatisk skal opprette automatisk når det allerede finnes avsluttet behandling for samme fagsak`() {
+        val forrigeOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                                                  finnesVarsel = true,
+                                                                                  manueltOpprettet = false,
+                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                          .OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val forrigeBehandling = behandlingService.opprettBehandlingAutomatisk(forrigeOpprettTilbakekrevingRequest)
+
+        val lagretBehandling = behandlingRepository.findByIdOrThrow(forrigeBehandling.id)
+        behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        //oppretter ny behandling for en annen eksternId
+        val nyOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                                             finnesVarsel = true,
+                                                                             manueltOpprettet = false,
+                                                                             tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                     .OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(nyOpprettTilbakekrevingRequest)
+        assertBehandling(behandling, nyOpprettTilbakekrevingRequest)
+        assertFagsak(behandling, nyOpprettTilbakekrevingRequest)
+        assertFagsystemsbehandling(behandling, nyOpprettTilbakekrevingRequest)
+        assertVarselData(behandling, nyOpprettTilbakekrevingRequest)
+        assertTrue { behandling.verger.isEmpty() }
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+    }
+
 
     @Test
     fun `hentBehandling skal hente behandling som opprettet uten varsel`() {
@@ -450,6 +478,50 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
 
         behandlingService.taBehandlingAvvent(behandling.id)
+
+        assertFalse { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
+        assertAnsvarligSaksbehandler(behandling)
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.SAKSBEHANDLER)
+    }
+
+    @Test
+    fun `taBehandlingAvvent skal gjenoppta behandling og hoppe til FAKTA steg når behandling venter på bruker med grunnlag`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER &&
+                it.venteårsak == Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
+            }
+        }
+
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(behandlingId = behandling.id))
+
+        behandlingService.taBehandlingAvvent(behandling.id)
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
+            }
+        }
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.FAKTA &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
+            }
+        }
+        assertFalse {
+            behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }
+        }
 
         assertFalse { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
         assertAnsvarligSaksbehandler(behandling)

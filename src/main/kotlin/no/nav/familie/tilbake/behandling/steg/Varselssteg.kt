@@ -4,29 +4,22 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                  private val brevsporingRepository: BrevsporingRepository) : IBehandlingssteg {
+class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
-        if (brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId,
-                                                                    setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(Behandlingssteg.VARSEL,
-                                                                                          Behandlingsstegstatus.UTFØRT))
-            behandlingskontrollService.fortsettBehandling(behandlingId)
-        }
+        logger.info("Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
+                    "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen")
     }
 
     @Transactional
