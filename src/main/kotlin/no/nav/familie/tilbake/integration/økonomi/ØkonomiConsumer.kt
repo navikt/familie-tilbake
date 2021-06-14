@@ -8,9 +8,9 @@ import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.remoting.soap.SoapFaultException
 import org.springframework.stereotype.Service
 import java.util.UUID
+import javax.xml.ws.soap.SOAPFaultException
 
 @Service
 class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
@@ -31,7 +31,7 @@ class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
             return respons
 
-        } catch (exception: SoapFaultException) {
+        } catch (exception: SOAPFaultException) {
             logger.error("tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
                          "Feiler med ${exception.message}")
             throw IntegrasjonException(msg = "Fikk feil fra økonomi ved iverksetting av behandling=$behandlingId",
