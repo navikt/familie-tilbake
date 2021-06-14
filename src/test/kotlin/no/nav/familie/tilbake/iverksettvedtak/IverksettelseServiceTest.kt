@@ -54,6 +54,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
@@ -143,6 +144,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals("Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
                      "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}",
                      exception.message)
+
+        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
+        assertNotNull(økonomiXmlSendt)
+        assertRequestXml(økonomiXmlSendt.melding)
+        assertNull(økonomiXmlSendt.kvittering)
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {
