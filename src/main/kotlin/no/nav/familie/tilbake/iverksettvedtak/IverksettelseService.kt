@@ -19,7 +19,6 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
@@ -40,9 +39,9 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
 
-        // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
+        // lagre request
         val requestXml = IverksettVedtakUtil.marshalIverksettVedtakRequest(behandlingId, request)
-        var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
+        var økonomiXmlSendt = økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
 
         // Send request til økonomi
         val respons = økonomiConsumer.iverksettVedtak(behandlingId, request)
@@ -52,11 +51,6 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = objectMapper.writeValueAsString(respons.mmel)))
 
         behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun lagreIverksettelsesvedtakRequest(behandlingId: UUID, requestXml: String): ØkonomiXmlSendt {
-        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
     }
 
     private fun lagIveksettelseRequest(ansvarligSaksbehandler: String,
