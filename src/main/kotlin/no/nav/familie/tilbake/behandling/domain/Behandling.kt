@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
-import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
@@ -174,26 +173,10 @@ enum class Behandlingsstatus(val kode: String) {
     UTREDES("UTRED")
 }
 
-enum class Behandlingstype(val behandlingssteg: List<Behandlingsstegstype>) {
+enum class Behandlingstype {
 
-    TILBAKEKREVING(listOf(Behandlingsstegstype.INNHENT_OPPLYSNINGER,
-                          Behandlingsstegstype.VARSEL_OM_TILBAKEKREVING,
-                          Behandlingsstegstype.MOTTA_KRAVGRUNNLAG_FRA_ØKONOMI,
-                          Behandlingsstegstype.FAKTA_OM_VERGE,
-                          Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
-                          Behandlingsstegstype.VURDER_FORELDELSE,
-                          Behandlingsstegstype.VURDER_TILBAKEKREVING,
-                          Behandlingsstegstype.FORESLÅ_VEDTAK,
-                          Behandlingsstegstype.FATTE_VEDTAK,
-                          Behandlingsstegstype.IVERKSETT_VEDTAK)),
-    REVURDERING_TILBAKEKREVING(listOf(Behandlingsstegstype.HENT_GRUNNLAG_FRA_ØKONOMI,
-                                      Behandlingsstegstype.FAKTA_OM_VERGE,
-                                      Behandlingsstegstype.FAKTA_OM_FEILUTBETALING,
-                                      Behandlingsstegstype.VURDER_FORELDELSE,
-                                      Behandlingsstegstype.VURDER_TILBAKEKREVING,
-                                      Behandlingsstegstype.FORESLÅ_VEDTAK,
-                                      Behandlingsstegstype.FATTE_VEDTAK,
-                                      Behandlingsstegstype.IVERKSETT_VEDTAK))
+    TILBAKEKREVING,
+    REVURDERING_TILBAKEKREVING
 }
 
 enum class Saksbehandlingstype {

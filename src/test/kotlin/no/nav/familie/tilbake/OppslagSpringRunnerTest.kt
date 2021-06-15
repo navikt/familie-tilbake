@@ -16,8 +16,6 @@ import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
-import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
@@ -88,10 +86,8 @@ abstract class OppslagSpringRunnerTest {
                Behandlingsårsak::class,
                Fagsystemsbehandling::class,
                Fagsystemskonsekvens::class,
-               Aksjonspunkt::class,
                Behandlingsstegstilstand::class,
                Totrinnsvurdering::class,
-               MottakersVarselrespons::class,
                VurdertForeldelse::class,
                Foreldelsesperiode::class,
                Kravgrunnlag431::class,
