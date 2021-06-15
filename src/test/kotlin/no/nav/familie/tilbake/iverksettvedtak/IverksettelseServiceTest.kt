@@ -45,10 +45,8 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import javax.xml.datatype.XMLGregorianCalendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -120,7 +118,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         assertNotNull(økonomiXmlSendt)
-        assertRequestXml(økonomiXmlSendt.melding)
+        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
         assertRespons(økonomiXmlSendt.kvittering, "00", "OK")
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -142,7 +140,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         assertNotNull(økonomiXmlSendt)
-        assertRequestXml(økonomiXmlSendt.melding)
+        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
         assertNull(økonomiXmlSendt.kvittering)
     }
 
@@ -243,8 +241,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         assertEquals(kodeMelding, mmelDto.kodeMelding)
     }
 
-    private fun assertRequestXml(melding: String) {
-        val request = IverksettVedtakUtil.unmarshallIverksettVedtakRequest(melding)
+    private fun assertRequestXml(melding: String, behandlingId: UUID, xmlId: UUID) {
+        val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId)
         assertNotNull(request)
 
         val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
@@ -306,12 +304,4 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             "IKKE_FORDELT" == it.kodeSkyld
         }
     }
-
-
-    private fun sammenlignDato(dato: LocalDate?, xmlDato: XMLGregorianCalendar) {
-        assertEquals(dato?.year, xmlDato.year)
-        assertEquals(dato?.monthValue, xmlDato.month)
-        assertEquals(dato?.dayOfMonth, xmlDato.day)
-    }
-
 }
