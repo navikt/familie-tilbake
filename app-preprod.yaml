@@ -79,9 +79,9 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
-    - name: CREDENTIAL_USERNAME
+    - name: CREDENTIAL_USERNAME_PATH
       value: /secret/serviceuser/username
-    - name: CREDENTIAL_PASSWORD
+    - name: CREDENTIAL_PASSWORD_PATH
       value: /secret/serviceuser/password
   kafka:
     pool: nav-dev
