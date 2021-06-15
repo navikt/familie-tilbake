@@ -23,8 +23,8 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /var/run/secrets/nais.io/serviceuser/dev/srv0000-ga-mq-famili
-        mountPath: /secret/serviceusermq
+      - kvPath: /var/run/secrets/nais.io/serviceuser/dev/srvfamilie-tilbake
+        mountPath: /secret/serviceuser
   azure:
     application:
       claims:
@@ -80,12 +80,8 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
     - name: CREDENTIAL_USERNAME
-      value: /run/secrets/nais.io/srvfamilie-tilbake/username
+      value: /secret/serviceuser/username
     - name: CREDENTIAL_PASSWORD
-      value: /run/secrets/nais.io/srvfamilie-tilbake/password
-    - name: CREDENTIAL_USERNAME_MQ
-      value: /secret/serviceusermq/username
-    - name: CREDENTIAL_PASSWORD_MQ
-      value: /secret/serviceusermq/password
+      value: /secret/serviceuser/password
   kafka:
     pool: nav-dev
