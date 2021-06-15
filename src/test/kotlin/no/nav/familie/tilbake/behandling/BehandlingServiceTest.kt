@@ -42,6 +42,7 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbre
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -87,8 +88,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
-    private final val fom: LocalDate = LocalDate.now().minusMonths(1)
-    private final val tom: LocalDate = LocalDate.now()
+    private val fom: LocalDate = LocalDate.now().minusMonths(1)
+    private val tom: LocalDate = LocalDate.now()
 
     @BeforeEach
     fun init() {
@@ -119,6 +120,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertVarselData(behandling, opprettTilbakekrevingRequest)
         assertTrue { behandling.verger.isEmpty() }
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
     }
 
     @Test
@@ -137,6 +139,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertVarselData(behandling, opprettTilbakekrevingRequest)
         assertVerge(behandling, opprettTilbakekrevingRequest)
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
     }
 
     @Test
@@ -155,6 +158,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertTrue { behandling.varsler.isEmpty() }
         assertTrue { behandling.verger.isEmpty() }
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
     }
 
     @Test
@@ -221,6 +225,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertVarselData(behandling, nyOpprettTilbakekrevingRequest)
         assertTrue { behandling.verger.isEmpty() }
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
     }
 
 
@@ -817,6 +822,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 aktør.name == it.metadata["aktor"] &&
                 behandlingId.toString() == it.payload &&
                 tekst == it.metadata["begrunnelse"]
+            }
+        }
+    }
+
+    private fun assertFinnKravgrunnlagTask(behandlingId: UUID) {
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                FinnKravgrunnlagTask.TYPE == it.type && behandlingId.toString() == it.payload
             }
         }
     }

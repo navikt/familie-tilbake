@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRepository,
@@ -95,18 +96,7 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                     behandling: Behandling) {
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL -> {
-                kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
-                val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-                behandlingskontrollService
-                        .tilbakehoppBehandlingssteg(behandling.id,
-                                                    Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                                         behandlingsstegstatus = Behandlingsstegstatus.VENTER,
-                                                                         venteårsak = venteårsak,
-                                                                         tidsfrist = LocalDate.now()
-                                                                                 .plusWeeks(venteårsak.defaultVenteTidIUker)))
-                historikkTaskService.lagHistorikkTask(behandling.id,
-                                                      TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                                      aktør = Aktør.VEDTAKSLØSNING)
+                håndterSperMeldingMedBehandling(behandling.id, kravgrunnlag431)
             }
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
@@ -121,6 +111,23 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }
+    }
+
+    @Transactional
+    fun håndterSperMeldingMedBehandling(behandlingId: UUID,
+                                        kravgrunnlag431: Kravgrunnlag431) {
+        kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
+        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        behandlingskontrollService
+                .tilbakehoppBehandlingssteg(behandlingId,
+                                            Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                                 behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                                                 venteårsak = venteårsak,
+                                                                 tidsfrist = LocalDate.now()
+                                                                         .plusWeeks(venteårsak.defaultVenteTidIUker)))
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              aktør = Aktør.VEDTAKSLØSNING)
     }
 
 }

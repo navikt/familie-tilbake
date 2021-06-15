@@ -33,6 +33,7 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -211,6 +212,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
+
+        // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
+        taskRepository.save(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandling.id.toString()))
 
         return behandling
     }
