@@ -22,6 +22,9 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+    paths:
+      - kvPath: /var/run/secrets/nais.io/serviceuser/dev/srvfamilie-tilbake
+        mountPath: /secret/serviceuser
   azure:
     application:
       claims:
@@ -76,9 +79,9 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
-    - name: CREDENTIAL_USERNAME
-      value: /run/secrets/nais.io/srvfamilie-tilbake/username
-    - name: CREDENTIAL_PASSWORD
-      value: /run/secrets/nais.io/srvfamilie-tilbake/password
+    - name: CREDENTIAL_USERNAME_PATH
+      value: /secret/serviceuser/username
+    - name: CREDENTIAL_PASSWORD_PATH
+      value: /secret/serviceuser/password
   kafka:
     pool: nav-dev
