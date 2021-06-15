@@ -22,6 +22,9 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+    paths:
+      - kvPath: /var/run/secrets/nais.io/serviceuser/dev/srv0000-ga-mq-famili
+        mountPath: /secret/serviceusermq
   azure:
     application:
       claims:
@@ -80,5 +83,9 @@ spec:
       value: /run/secrets/nais.io/srvfamilie-tilbake/username
     - name: CREDENTIAL_PASSWORD
       value: /run/secrets/nais.io/srvfamilie-tilbake/password
+    - name: CREDENTIAL_USERNAME_MQ
+      value: /secret/serviceusermq/username
+    - name: CREDENTIAL_PASSWORD_MQ
+      value: /secret/serviceusermq/password
   kafka:
     pool: nav-dev
