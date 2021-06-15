@@ -21,4 +21,5 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
 
     fun findByEksternFagsakIdAndYtelsestype(eksternFagsakId: String,
                                             ytelsestype: Ytelsestype): List<ØkonomiXmlMottatt>
+
 }
