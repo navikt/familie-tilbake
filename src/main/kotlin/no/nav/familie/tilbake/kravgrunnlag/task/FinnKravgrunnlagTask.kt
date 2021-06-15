@@ -16,7 +16,7 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = FinnKravgrunnlagTask.TYPE,
-                     beskrivelse = "Finner ikke tilkoblede grunnlag og statusmeldinger for samme fagsak " +
+                     beskrivelse = "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
                                    "og kobler dem til behandling",
                      triggerTidVedFeilISekunder = 60 * 5)
 class FinnKravgrunnlagTask(private val behandlingRepository: BehandlingRepository,
