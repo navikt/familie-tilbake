@@ -25,11 +25,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunkt
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsdefinisjon
-import no.nav.familie.tilbake.domain.tbd.Aksjonspunktsstatus
-import no.nav.familie.tilbake.domain.tbd.Behandlingsstegstype
-import no.nav.familie.tilbake.domain.tbd.MottakersVarselrespons
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
@@ -60,9 +55,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 object Testdata {
@@ -118,13 +111,6 @@ object Testdata {
     val behandlingsårsak = Behandlingsårsak(type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
                                             originalBehandlingId = null)
 
-    val aksjonspunkt = Aksjonspunkt(totrinnsbehandling = true,
-                                    behandlingsstegstype = Behandlingsstegstype.FAKTA_OM_VERGE,
-                                    aksjonspunktsdefinisjon = Aksjonspunktsdefinisjon.FATTE_VEDTAK,
-                                    behandlingId = behandling.id,
-                                    tidsfrist = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
-                                    status = Aksjonspunktsstatus.OPPRETTET)
-
     val behandlingsstegstilstand = Behandlingsstegstilstand(behandlingId = behandling.id,
                                                             behandlingssteg = Behandlingssteg.FAKTA,
                                                             behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
@@ -134,11 +120,6 @@ object Testdata {
                                               behandlingssteg = Behandlingssteg.FAKTA,
                                               godkjent = true,
                                               begrunnelse = "testverdi")
-
-
-    val mottakersVarselrespons = MottakersVarselrespons(behandlingId = behandling.id,
-                                                        akseptertFaktagrunnlag = true,
-                                                        kilde = "testverdi")
 
     private val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                         foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
