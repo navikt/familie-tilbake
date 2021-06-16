@@ -93,7 +93,8 @@ object BehandlingMapper {
                              erBehandlingPåVent = erBehandlingPåVent,
                              kanEndres = kanEndres,
                              varselSendt = varselSendt,
-                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
+                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
+                             fagsystemBehandlingId = behandling.aktivFagsystemsbehandling.eksternId)
 
     }
 
@@ -183,7 +184,6 @@ object BehandlingMapper {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
             Behandlingsresultatstype.INGEN_TILBAKEBETALING -> INGEN_TILBAKEBETALING
-            Behandlingsresultatstype.IKKE_FASTSATT -> IKKE_FASTSATT
             Behandlingsresultatstype.HENLAGT,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,

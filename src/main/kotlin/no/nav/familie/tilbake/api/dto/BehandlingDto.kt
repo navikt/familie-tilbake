@@ -29,7 +29,8 @@ data class BehandlingDto(val eksternBrukId: UUID,
                          val harVerge: Boolean,
                          val kanEndres: Boolean,
                          val varselSendt: Boolean,
-                         val behandlingsstegsinfo: List<BehandlingsstegsinfoDto>)
+                         val behandlingsstegsinfo: List<BehandlingsstegsinfoDto>,
+                         val fagsystemBehandlingId: String)
 
 data class BehandlingsstegsinfoDto(val behandlingssteg: Behandlingssteg,
                                    val behandlingsstegstatus: Behandlingsstegstatus,
