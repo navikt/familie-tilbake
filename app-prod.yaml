@@ -24,7 +24,7 @@ spec:
     enabled: true
     paths:
       - kvPath: /serviceuser/data/prod/srvfamilie-tilbake
-        mountPath: /var/run/secrets/nais.io/srvfamilie-tilbake
+        mountPath: /secret/serviceuser
   azure:
     application:
       claims:
@@ -74,8 +74,8 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: CREDENTIAL_USERNAME
-      value: /run/secrets/nais.io/srvfamilie-tilbake/username
+      value: /secret/serviceuser/username
     - name: CREDENTIAL_PASSWORD
-      value: /run/secrets/nais.io/srvfamilie-tilbake/password
+      value: /secret/serviceuser/password
   kafka:
     pool: nav-prod

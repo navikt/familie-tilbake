@@ -23,7 +23,7 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /var/run/secrets/nais.io/serviceuser/dev/srvfamilie-tilbake
+      - kvPath: /serviceuser/data/dev/srvfamilie-tilbake
         mountPath: /secret/serviceuser
   azure:
     application:
