@@ -39,7 +39,7 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         targetFactory.transportType = CommonConstants.WMQ_CM_CLIENT
         targetFactory.ccsid = UTF_8_WITH_PUA
         targetFactory.setIntProperty(JmsConstants.JMS_IBM_ENCODING, CMQC.MQENC_NATIVE)
-        targetFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
+        targetFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false)
         targetFactory.setIntProperty(JmsConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
 
         val cf = UserCredentialsConnectionFactoryAdapter()
