@@ -11,8 +11,8 @@ oppdrag.mq:
   channel: Q1_FAMILIE_TILBAKE
   hostname: b27apvl176.preprod.local
   port: 1413
-  user: ${MQ_SRVBRUKER}
-  password: ${MQ_PASSWORD}
+  user: ${CREDENTIAL_USERNAME}
+  password: ${CREDENTIAL_PASSWORD}
   enabled: true
 
 rolle:
