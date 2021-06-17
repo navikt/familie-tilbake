@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.HENLAGT
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.IKKE_FASTSATT
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
@@ -93,7 +92,8 @@ object BehandlingMapper {
                              erBehandlingPåVent = erBehandlingPåVent,
                              kanEndres = kanEndres,
                              varselSendt = varselSendt,
-                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer))
+                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
+                             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId)
 
     }
 
@@ -183,7 +183,6 @@ object BehandlingMapper {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
             Behandlingsresultatstype.INGEN_TILBAKEBETALING -> INGEN_TILBAKEBETALING
-            Behandlingsresultatstype.IKKE_FASTSATT -> IKKE_FASTSATT
             Behandlingsresultatstype.HENLAGT,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
