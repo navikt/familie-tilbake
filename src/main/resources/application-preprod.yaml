@@ -6,7 +6,7 @@ spring:
 no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
-  queuemanager: MQ1LSC02
+  queuemanager: MQLS02
   kravgrunnlag: QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG
   channel: Q1_FAMILIE_TILBAKE
   hostname: b27apvl220.preprod.local
