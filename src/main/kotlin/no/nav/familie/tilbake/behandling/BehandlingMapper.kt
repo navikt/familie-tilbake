@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.HENLAGT
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.IKKE_FASTSATT
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
@@ -94,7 +93,7 @@ object BehandlingMapper {
                              kanEndres = kanEndres,
                              varselSendt = varselSendt,
                              behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
-                             fagsystemBehandlingId = behandling.aktivFagsystemsbehandling.eksternId)
+                             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId)
 
     }
 
