@@ -1,18 +1,27 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
+import no.nav.familie.tilbake.api.dto.KanBehandlingOpprettesResponsDto
+import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.person.PersonService
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class FagsakService(val fagsakRepository: FagsakRepository,
-                    val behandlingRepository: BehandlingRepository,
-                    val personService: PersonService) {
+class FagsakService(private val fagsakRepository: FagsakRepository,
+                    private val behandlingRepository: BehandlingRepository,
+                    private val taskRepository: TaskRepository,
+                    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
+                    private val personService: PersonService) {
 
     @Transactional(readOnly = true)
     fun hentFagsak(fagsystem: Fagsystem, eksternFagsakId: String): FagsakDto {
@@ -34,13 +43,13 @@ class FagsakService(val fagsakRepository: FagsakRepository,
     fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingsresponsDto {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
                                                                         eksternFagsakId = eksternFagsakId)
-        var finneÅpenBehandling = false
+        var finnesÅpenBehandling = false
         if (fagsak != null) {
-            finneÅpenBehandling =
+            finnesÅpenBehandling =
                     behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
                                                                            eksternFagsakId = eksternFagsakId) != null
         }
-        return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finneÅpenBehandling)
+        return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finnesÅpenBehandling)
     }
 
     @Transactional(readOnly = true)
@@ -49,11 +58,50 @@ class FagsakService(val fagsakRepository: FagsakRepository,
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
                                                                         eksternFagsakId = eksternFagsakId)
 
-        return if (fagsak != null) {
+        return fagsak?.let {
             val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
             behandlinger.map { BehandlingMapper.tilBehandlingerForFagsystem(it) }
-        } else {
-            emptyList();
+        } ?: emptyList()
+    }
+
+    @Transactional(readOnly = true)
+    fun kanBehandlingOpprettesManuelt(eksternFagsakId: String,
+                                      ytelsestype: Ytelsestype): KanBehandlingOpprettesResponsDto {
+        val finnesÅpenTilbakekreving: Boolean =
+                behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
+        val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
+        val kravgrunnlagsreferanse = kravgrunnlagene.firstOrNull()?.referanse
+        val harAlledeMottattForespørselen: Boolean =
+                taskRepository.findByStatusIn(listOf(Status.UBEHANDLET, Status.BEHANDLER,
+                                                     Status.KLAR_TIL_PLUKK, Status.PLUKKET,
+                                                     Status.FEILET), Pageable.unpaged())
+                        .any {
+                            OpprettManueltBehandlingTask.TYPE == it.type &&
+                            eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
+                            ytelsestype.kode == it.metadata.getProperty("ytelsestype")
+                            kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
+                        }
+
+        val kanBehandlingOpprettes = !finnesÅpenTilbakekreving && kravgrunnlagene.isNotEmpty() && !harAlledeMottattForespørselen
+
+        return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = kanBehandlingOpprettes,
+                                                kravgrunnlagsreferanse = kravgrunnlagsreferanse.takeIf { kanBehandlingOpprettes },
+                                                melding = utledMelding(finnesÅpenTilbakekreving,
+                                                                       kravgrunnlagene.isNotEmpty(),
+                                                                       harAlledeMottattForespørselen))
+    }
+
+    private fun utledMelding(finnesÅpenTilbakekreving: Boolean,
+                             finnesKravgunnlag: Boolean,
+                             harAlledeMottattForespørselen: Boolean): String {
+        return when {
+            finnesÅpenTilbakekreving -> "Det finnes allerede en åpen tilbakekrevingsbehandling." +
+                                        "Kan ikke opprette manuelt tilbakekreving."
+            !finnesKravgunnlag -> "Det finnes ikke frakoblet kravgrunnlag. Kan ikke opprette manuelt tilbakekreving."
+            harAlledeMottattForespørselen -> "Det ligger allerede en opprettelse request." +
+                                             "Kan ikke opprette manuelt tilbakekreving igjen."
+            else -> "Det er mulig å opprette behandling manuelt."
         }
     }
+
 }

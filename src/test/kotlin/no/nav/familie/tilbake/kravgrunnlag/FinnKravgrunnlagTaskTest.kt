@@ -140,7 +140,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                    revurderingsvedtaksdato = LocalDate.now(),
                                                    faktainfo = faktainfo,
                                                    saksbehandlerIdent = "Z0000")
-        return behandlingService.opprettBehandlingAutomatisk(request)
+        return behandlingService.opprettBehandling(request)
     }
 
     private fun readXml(fileName: String): String {
