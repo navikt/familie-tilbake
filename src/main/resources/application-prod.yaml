@@ -13,7 +13,7 @@ oppdrag.mq:
   hostname: a01apvl269.adeo.no
   port: 1414
   user: ${SERVICEUSER_USERNAME}
-  password: ${SERVICEUSER_USERNAME}
+  password: ${SERVICEUSER_PASSWORD}
   enabled: false
 
 rolle:

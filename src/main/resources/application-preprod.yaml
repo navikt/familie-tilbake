@@ -12,7 +12,7 @@ oppdrag.mq:
   hostname: b27apvl220.preprod.local
   port: 1413
   user: ${SERVICEUSER_USERNAME}
-  password: ${SERVICEUSER_USERNAME}
+  password: ${SERVICEUSER_PASSWORD}
   enabled: true
 
 rolle:
