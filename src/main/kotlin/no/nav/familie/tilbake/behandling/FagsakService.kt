@@ -69,8 +69,18 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                       ytelsestype: Ytelsestype): KanBehandlingOpprettesResponsDto {
         val finnesÅpenTilbakekreving: Boolean =
                 behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
+        if (finnesÅpenTilbakekreving) {
+            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
+                                                    melding = "Det finnes allerede en åpen tilbakekrevingsbehandling." +
+                                                              "Kan ikke opprette manuelt tilbakekreving.")
+        }
         val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
-        val kravgrunnlagsreferanse = kravgrunnlagene.firstOrNull()?.referanse
+        if (kravgrunnlagene.isEmpty()) {
+            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
+                                                    melding = "Det finnes ikke frakoblet kravgrunnlag. " +
+                                                              "Kan ikke opprette manuelt tilbakekreving.")
+        }
+        val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
                 taskRepository.findByStatusIn(listOf(Status.UBEHANDLET, Status.BEHANDLER,
                                                      Status.KLAR_TIL_PLUKK, Status.PLUKKET,
@@ -82,26 +92,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                             kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
                         }
 
-        val kanBehandlingOpprettes = !finnesÅpenTilbakekreving && kravgrunnlagene.isNotEmpty() && !harAlledeMottattForespørselen
-
-        return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = kanBehandlingOpprettes,
-                                                kravgrunnlagsreferanse = kravgrunnlagsreferanse.takeIf { kanBehandlingOpprettes },
-                                                melding = utledMelding(finnesÅpenTilbakekreving,
-                                                                       kravgrunnlagene.isNotEmpty(),
-                                                                       harAlledeMottattForespørselen))
-    }
-
-    private fun utledMelding(finnesÅpenTilbakekreving: Boolean,
-                             finnesKravgunnlag: Boolean,
-                             harAlledeMottattForespørselen: Boolean): String {
-        return when {
-            finnesÅpenTilbakekreving -> "Det finnes allerede en åpen tilbakekrevingsbehandling." +
-                                        "Kan ikke opprette manuelt tilbakekreving."
-            !finnesKravgunnlag -> "Det finnes ikke frakoblet kravgrunnlag. Kan ikke opprette manuelt tilbakekreving."
-            harAlledeMottattForespørselen -> "Det ligger allerede en opprettelse request." +
-                                             "Kan ikke opprette manuelt tilbakekreving igjen."
-            else -> "Det er mulig å opprette behandling manuelt."
+        if (harAlledeMottattForespørselen) {
+            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
+                                                    melding = "Det ligger allerede en opprettelse request." +
+                                                              "Kan ikke opprette manuelt tilbakekreving igjen.")
         }
+        return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = true,
+                                                kravgrunnlagsreferanse = kravgrunnlagsreferanse,
+                                                melding = "Det er mulig å opprette behandling manuelt.")
     }
 
 }

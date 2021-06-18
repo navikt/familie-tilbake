@@ -235,10 +235,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettBehandling skal ikke opprette manuelt når det ikke finnes kravgrunnlag for samme fagsak,ytelsestype,eksternId`() {
         val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
-                                                                           finnesVarsel = true,
+                                                                           finnesVarsel = false,
                                                                            manueltOpprettet = true,
                                                                            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                   .OPPRETT_TILBAKEKREVING_MED_VARSEL)
+                                                                                   .OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
         val exception = assertFailsWith<RuntimeException> { behandlingService.opprettBehandling(opprettTilbakekrevingRequest) }
         assertEquals("Det finnes intet kravgrunnlag for ytelsestype=${opprettTilbakekrevingRequest.ytelsestype}," +
