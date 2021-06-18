@@ -7,13 +7,13 @@ spring:
 no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
-  queuemanager: MPLSC02
+  queuemanager: MPLS02
   kravgrunnlag: QA.P_FAMILIE_TILBAKE.KRAVGRUNNLAG
   channel: P_FAMILIE_TILBAKE
-  hostname: a01apvl063.adeo.no
+  hostname: a01apvl269.adeo.no
   port: 1414
-  user: ${MQ_SRVBRUKER}
-  password: ${MQ_PASSWORD}
+  user: ${SERVICEUSER_USERNAME}
+  password: ${SERVICEUSER_USERNAME}
   enabled: false
 
 rolle:
