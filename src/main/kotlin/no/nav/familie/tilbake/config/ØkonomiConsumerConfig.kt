@@ -21,8 +21,8 @@ import javax.xml.namespace.QName
 @Profile("!local")
 class ØkonomiConsumerConfig(
         @Value("\${SECURITYTOKENSERVICE_URL}") private val stsUrl: String,
-        @Value("\${SERVICEUSER_USERNAME}") private val systemuserUsername: String,
-        @Value("\${SERVICEUSER_PASSWORD}") private val systemuserPwd: String,
+        @Value("\${CREDENTIAL_USERNAME}") private val systemuserUsername: String,
+        @Value("\${CREDENTIAL_PASSWORD}") private val systemuserPwd: String,
         @Value("\${TILBAKEKREVING_V1_URL}") private val tilbakekrevingUrl: String) {
 
     private val WSDL = "wsdl/no/nav/tilbakekreving/tilbakekreving-v1-tjenestespesifikasjon.wsdl"
