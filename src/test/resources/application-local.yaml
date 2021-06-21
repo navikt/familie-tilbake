@@ -32,8 +32,6 @@ OPPDRAG_SERVICE_URL: #Mockes ut lokalt
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
-SERVICEUSER_USERNAME: not-real
-SERVICEUSER_PASSWORD: not-real-pw
 PDL_URL: #Mockes ut lokalt
 TILBAKEKREVING_V1_URL: #Mockes ut lokalt
 OPPRETTELSE_DAGER_BEGRENSNING: 1

@@ -12,8 +12,8 @@ oppdrag.mq:
   channel: P_FAMILIE_TILBAKE
   hostname: a01apvl269.adeo.no
   port: 1414
-  user: ${SERVICEUSER_USERNAME}
-  password: ${SERVICEUSER_PASSWORD}
+  user: ${CREDENTIAL_USERNAME}
+  password: ${CREDENTIAL_PASSWORD}
   enabled: false
 
 rolle:

@@ -12,5 +12,3 @@ FAMILIE_OPPDRAG_API_URL: http://localhost:8087
 
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
-SERVICEUSER_USERNAME: not-real
-SERVICEUSER_PASSWORD: not-real-pw
