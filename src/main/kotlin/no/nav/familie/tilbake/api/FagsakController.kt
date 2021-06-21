@@ -46,12 +46,14 @@ class FagsakController(private val fagsakService: FagsakService) {
                                                                                  eksternFagsakId = eksternFagsakId))
     }
 
-    @GetMapping(path = ["/fagsak/{fagsak}/ytelsestype/{ytelsestype}/kanBehandlingOpprettesManuelt/v1"],
+    @GetMapping(path = ["/ytelsestype/{ytelsestype}/fagsak/{fagsak}/kanBehandlingOpprettesManuelt/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Sjekk om det er mulig å opprette behandling manuelt")
-    fun kanBehandlingOpprettesManuelt(@PathVariable("fagsak") eksternFagsakId: String,
-                                      @PathVariable ytelsestype: Ytelsestype): Ressurs<KanBehandlingOpprettesResponsDto> {
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Sjekk om det er mulig å opprette behandling manuelt",
+                        henteParam = "ytelsestype")
+    fun kanBehandlingOpprettesManuelt(@PathVariable ytelsestype: Ytelsestype,
+                                      @PathVariable("fagsak")
+                                      eksternFagsakId: String): Ressurs<KanBehandlingOpprettesResponsDto> {
         return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
     }
 
