@@ -23,7 +23,7 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.5.10</kotlin.version>
         <felles.version>1.20210607085527_b0c86f4</felles.version>
-        <common-java-modules.version>2.2021.06.04_09.13-e0f33e1571bc</common-java-modules.version>
+        <common-java-modules.version>2.2021.06.11_06.26-ecbd6c9186d9</common-java-modules.version>
         <kontrakter.version>2.0_20210618112555_90ebc98</kontrakter.version>
         <nav.security.version>1.3.7</nav.security.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
