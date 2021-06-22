@@ -107,8 +107,6 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
 
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandling.id)
 
-        val writeValueAsString = objectMapper.writeValueAsString(vedtaksoppsummering)
-
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
