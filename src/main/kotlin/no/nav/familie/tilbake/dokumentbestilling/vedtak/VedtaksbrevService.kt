@@ -242,8 +242,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                     konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
                                     datoer = HbVedtaksbrevDatoer(perioder),
                                     søker = utledSøker(personinfo),
-                                    finnesVerge = brevmetadata.finnesVerge,
-                                    annenMottagernavn = BrevmottagerUtil.getannenMottagersNavn(brevmetadata))
+                                    finnesVerge = brevmetadata.finnesVerge)
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
 
