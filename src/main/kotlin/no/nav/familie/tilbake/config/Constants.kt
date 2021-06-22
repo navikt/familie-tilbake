@@ -22,6 +22,6 @@ object Constants {
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
-    val historikkTopic = "teamfamilie.historikk-topikk"
+    val historikkTopic = "teamfamilie.privat.historikk.topic"
 }
 
