@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
@@ -41,6 +42,17 @@ class BehandlingController(private val behandlingService: BehandlingService,
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
     }
+
+    @PostMapping(path = ["/manuelt/task/v1"],
+                 consumes = [MediaType.APPLICATION_JSON_VALUE],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving manuelt")
+    fun opprettBehandlingManuellTask(@Valid @RequestBody
+                                     opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest): Ressurs<String> {
+        behandlingService.opprettManuellBehandlingTask(opprettManueltTilbakekrevingRequest)
+        return Ressurs.success("Manuelt tilbakekrevingsbehandling opprettelse forespørselen innsendt")
+    }
+
 
     @GetMapping(path = ["/v1/{behandlingId}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])

@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -20,6 +21,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
@@ -45,6 +47,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -80,6 +83,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         return behandling
+    }
+
+    @Transactional
+    fun opprettManuellBehandlingTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
+        logger.info("Oppretter OpprettManueltBehandlingTask for request=$opprettManueltTilbakekrevingRequest")
+        val properties = Properties().apply {
+            setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
+            setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.kode)
+            setProperty("eksternId", opprettManueltTilbakekrevingRequest.eksternId)
+            setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
+        }
+        taskRepository.save(Task(type = OpprettManueltBehandlingTask.TYPE,
+                                 properties = properties,
+                                 payload = ""))
     }
 
     @Transactional(readOnly = true)
