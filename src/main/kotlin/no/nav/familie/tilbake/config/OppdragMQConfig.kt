@@ -4,6 +4,7 @@ import com.ibm.mq.constants.CMQC
 import com.ibm.mq.jms.MQQueueConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.common.CommonConstants
+import org.apache.activemq.jms.pool.PooledConnectionFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
@@ -30,7 +31,7 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
 
     @Bean
     @Throws(JMSException::class)
-    fun mqQueueConnectionFactory(): ConnectionFactory {
+    fun mqQueueConnectionFactory(): PooledConnectionFactory {
         val targetFactory = MQQueueConnectionFactory()
         targetFactory.hostName = hostname
         targetFactory.queueManager = queuemanager
@@ -46,7 +47,13 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         cf.setUsername(user)
         cf.setPassword(password)
         cf.setTargetConnectionFactory(targetFactory)
-        return cf
+
+        val pooledFactory = PooledConnectionFactory()
+        pooledFactory.connectionFactory = cf
+        pooledFactory.maxConnections = 10
+        pooledFactory.maximumActiveSessionPerConnection = 10
+
+        return pooledFactory
     }
 
 
