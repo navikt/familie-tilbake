@@ -47,4 +47,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: app-preprod.yaml
+          RESOURCE: app-preprod.yaml, kafka/dvh_sak_topic.yaml, kafka/dvh_vedtak_topic.yaml, kafka/hentfagsystemsbehandling_request_topic.yaml, kafka/hentfagsystemsbehandling_respons_topic.yaml

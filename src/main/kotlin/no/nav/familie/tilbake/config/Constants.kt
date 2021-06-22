@@ -21,7 +21,5 @@ object Constants {
     val grunnbeløp = grunnbeløpForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
-
-    val historikkTopic = "teamfamilie.privat.historikk.topic"
 }
 
