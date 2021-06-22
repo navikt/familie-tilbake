@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.5</version>
+        <version>2.5.1</version>
     </parent>
 
     <properties>
@@ -23,14 +23,14 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.5.10</kotlin.version>
         <felles.version>1.20210607085527_b0c86f4</felles.version>
-        <common-java-modules.version>2.2021.06.04_09.13-e0f33e1571bc</common-java-modules.version>
+        <common-java-modules.version>2.2021.06.11_06.26-ecbd6c9186d9</common-java-modules.version>
         <kontrakter.version>2.0_20210618112555_90ebc98</kontrakter.version>
         <nav.security.version>1.3.7</nav.security.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <jaxb-core.version>3.0.1</jaxb-core.version>
         <com.openhtmltopdf.version>1.0.8</com.openhtmltopdf.version>
         <jaxb-impl.version>3.0.1</jaxb-impl.version>
-        <cxf.version>3.4.3</cxf.version>
+        <cxf.version>3.4.4</cxf.version>
         <mockk.version>1.11.0</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -39,8 +39,8 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud>3.0.2</spring.cloud>
-        <spring.cloud-contract>3.0.2</spring.cloud-contract>
+        <spring.cloud>3.0.3</spring.cloud>
+        <spring.cloud-contract>3.0.3</spring.cloud-contract>
         <spring.vault>2.3.2</spring.vault>
         <testcontainers.version>1.15.3</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.23</version>
+            <version>2.0.24</version>
         </dependency>
         <dependency>
             <groupId>org.verapdf</groupId>
@@ -204,7 +204,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.20</version>
+            <version>42.2.22</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -238,14 +238,14 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.2</version>
         </dependency>
 
         <!-- NAV interne avhengigheter-->
         <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-jdbc</artifactId>
-            <version>1.20210510122226_422ab5c</version>
+            <version>1.20210617141104_8f0760d</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>

@@ -1,18 +1,19 @@
 package no.nav.familie.tilbake.avstemming
 
-import no.nav.familie.tilbake.avstemming.marshaller.TilbakekrevingsvedtakMarshaller
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.avstemming.marshaller.ØkonomiKvitteringTolk
-import no.nav.familie.tilbake.avstemming.marshaller.ØkonomiResponsMarshaller
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
+import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -100,10 +101,8 @@ class AvstemmingService(private val behandlingRepository: BehandlingRepository,
     companion object {
 
         private fun erSendtOK(melding: ØkonomiXmlSendt): Boolean {
-            val kvitteringXml: String = melding.kvittering ?: return false
-            val response: TilbakekrevingsvedtakResponse =
-                    ØkonomiResponsMarshaller.unmarshall(kvitteringXml, melding.behandlingId, melding.id)
-            return ØkonomiKvitteringTolk.erKvitteringOK(response)
+            val kvittering: MmelDto = melding.kvittering?.let { objectMapper.readValue(it) } ?: return false
+            return ØkonomiKvitteringTolk.erKvitteringOK(kvittering)
         }
     }
 }

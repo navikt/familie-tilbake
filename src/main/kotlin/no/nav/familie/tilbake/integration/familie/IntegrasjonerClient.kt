@@ -135,7 +135,8 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
 
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString() + "/oppgave/v4")
+        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
+                             + IntegrasjonerConfig.PATH_OPPGAVE + "/v4")
 
         return postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri,
                                                               finnOppgaveRequest,
@@ -145,7 +146,8 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun ferdigstillOppgave(oppgaveId: Long) {
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString() + "/oppgave/$oppgaveId/ferdigstill")
+        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
+                             + IntegrasjonerConfig.PATH_OPPGAVE + "/$oppgaveId/ferdigstill")
 
         patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8())
 

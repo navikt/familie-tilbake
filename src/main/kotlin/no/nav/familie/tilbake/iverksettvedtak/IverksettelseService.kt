@@ -41,7 +41,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
 
         // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
-        val requestXml = IverksettVedtakUtil.marshalIverksettVedtakRequest(behandlingId, request)
+        val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
