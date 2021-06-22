@@ -1,0 +1,82 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: familie-tilbake
+  namespace: teamfamilie
+  labels:
+    team: teamfamilie
+
+spec:
+  image: {{ image }}
+  port: 8030
+  liveness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  readiness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  vault:
+    enabled: false
+  gcp: # Database
+    sqlInstances:
+      - type: POSTGRES_13
+        name: familie-tilbake
+        diskAutoresize: true
+        highAvailability: true
+        autoBackupTime: "03:00"
+        databases:
+          - name: familie-tilbake
+            envVarPrefix: DB
+  azure:
+    application:
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: 847e3d72-9dc1-41c3-80ff-f5d4acdd5d46 # 0000-GA-Barnetrygd
+          - id: 7a271f87-39fb-468b-a9ee-6cf3c070f548 # 0000-GA-Barnetrygd-Beslutter
+          - id: 199c2b39-e535-4ae8-ac59-8ccbee7991ae # 0000-GA-Barnetrygd-Veileder
+          - id: e40090eb-c2fb-400e-b412-e9084019a73b # 0000-GA-Kontantstøtte
+          - id: 54cd86b8-2e23-48b2-8852-b05b5827bb0f # 0000-GA-Kontantstøtte-Veileder
+          - id: 87190cf3-b278-457d-8ab7-1a5c55a9edd7 # Group_87190cf3-b278-457d-8ab7-1a5c55a9edd7 tilgang til prosessering
+      enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak
+          namespace: teamfamilie
+        - application: familie-ef-sak
+          namespace: default
+        - application: familie-ks-sak
+          namespace: default
+        - application: familie-tilbake-frontend
+          namespace: teamfamilie
+          cluster: prod-gcp
+        - application: familie-prosessering
+          namespace: teamfamilie
+          cluster: gcp-prod
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  secureLogs:
+    enabled: true
+  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
+    - https://familie-tilbake.intern.nav.no
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod-gcp
+  kafka:
+    pool: nav-prod

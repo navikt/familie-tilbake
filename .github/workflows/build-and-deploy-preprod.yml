@@ -48,3 +48,9 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: app-preprod.yaml
+      - name: Deploy til dev-gcp
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: app-dev-gcp.yaml
