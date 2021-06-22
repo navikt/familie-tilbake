@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.integration.kafka
 import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.KafkaConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -17,7 +17,7 @@ class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
 
     fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
         val melding = objectMapper.writeValueAsString(request)
-        val producerRecord = ProducerRecord(Constants.historikkTopic, key, melding)
+        val producerRecord = ProducerRecord(KafkaConfig.HISTORIKK_TOPIC, key, melding)
         kafkaTemplate.send(producerRecord)
                 .addCallback({
                                  log.info("Historikkinnslag for $behandlingId med $key er sendt. " +

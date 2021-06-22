@@ -52,4 +52,13 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
             SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword,
     )
+
+    companion object {
+
+        val HISTORIKK_TOPIC = "teamfamilie.privat-historikk-topic"
+        val HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"
+        val HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
+        val SAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-sak-topic"
+        val VEDTAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-vedtak-topic"
+    }
 }
