@@ -21,7 +21,7 @@ class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : Asy
         val behandlingId = UUID.fromString(task.payload)
         val behandlingstilstand: Behandlingstilstand = objectMapper.readValue(task.metadata.getProperty("behandlingstilstand"))
         kafkaProducer.sendSaksdata(behandlingId,
-                                   behandlingstilstand.copy(tekniskTid = OffsetDateTime.now(ZoneOffset.UTC)))
+                                   behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC)))
     }
 
     companion object {

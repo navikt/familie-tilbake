@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -106,6 +107,8 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
 
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandling.id)
 
+        val writeValueAsString = objectMapper.writeValueAsString(vedtaksoppsummering)
+
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
@@ -160,13 +163,13 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtaksoppsummering.behandlingUuid).isNotNull()
         assertThat(vedtaksoppsummering.ansvarligBeslutter).isEqualTo(ANSVARLIG_BESLUTTER)
         assertThat(vedtaksoppsummering.ansvarligSaksbehandler).isEqualTo(ANSVARLIG_SAKSBEHANDLER)
-        assertThat(vedtaksoppsummering.behandlendeEnhetsKode).isNotEmpty()
-        assertThat(vedtaksoppsummering.behandlingOpprettetTid).isNotNull()
+        assertThat(vedtaksoppsummering.behandlendeEnhet).isNotEmpty()
+        assertThat(vedtaksoppsummering.behandlingOpprettetTidspunkt).isNotNull()
         assertThat(vedtaksoppsummering.behandlingstype).isEqualByComparingTo(Behandlingstype.TILBAKEKREVING)
         assertThat(vedtaksoppsummering.erBehandlingManueltOpprettet).isFalse()
         assertThat(vedtaksoppsummering.referertFagsaksbehandling).isNotNull()
         assertThat(vedtaksoppsummering.saksnummer).isEqualTo(saksnummer)
-        assertThat(vedtaksoppsummering.vedtakFattetTid).isNotNull()
+        assertThat(vedtaksoppsummering.vedtakFattetTidspunkt).isNotNull()
         assertThat(vedtaksoppsummering.ytelsestype).isEqualByComparingTo(Ytelsestype.OVERGANGSSTØNAD)
         assertThat(vedtaksoppsummering.forrigeBehandling).isNull()
     }

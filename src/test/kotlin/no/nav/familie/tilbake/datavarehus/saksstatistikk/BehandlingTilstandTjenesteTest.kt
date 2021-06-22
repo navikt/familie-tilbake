@@ -70,12 +70,12 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         assertThat(tilstand.behandlingsresultat).isEqualTo(Behandlingsresultatstype.IKKE_FASTSATT)
         assertThat(tilstand.venterPåBruker).isFalse()
         assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.erBehandlingManueltOpprettet).isFalse()
-        assertThat(tilstand.funksjonellTid).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
-        assertThat(tilstand.tekniskTid).isNull()
+        assertThat(tilstand.behandlingErManueltOpprettet).isFalse()
+        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
+        assertThat(tilstand.tekniskTidspunkt).isNull()
         assertThat(tilstand.ansvarligBeslutter).isEqualTo(behandling.ansvarligBeslutter)
         assertThat(tilstand.ansvarligSaksbehandler).isEqualTo(behandling.ansvarligSaksbehandler)
-        assertThat(tilstand.behandlendeEnhetsKode).isEqualTo(behandling.behandlendeEnhet)
+        assertThat(tilstand.ansvarligEnhet).isEqualTo(behandling.behandlendeEnhet)
     }
 
     @Test
@@ -98,12 +98,12 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         assertThat(tilstand.behandlingsresultat).isEqualTo(behandlingsresultat.type)
         assertThat(tilstand.venterPåBruker).isFalse()
         assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.erBehandlingManueltOpprettet).isFalse()
-        assertThat(tilstand.funksjonellTid).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
-        assertThat(tilstand.tekniskTid).isNull()
+        assertThat(tilstand.behandlingErManueltOpprettet).isFalse()
+        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
+        assertThat(tilstand.tekniskTidspunkt).isNull()
         assertThat(tilstand.ansvarligBeslutter).isEqualTo("Z111112")
         assertThat(tilstand.ansvarligSaksbehandler).isEqualTo("Z111111")
-        assertThat(tilstand.behandlendeEnhetsKode).isEqualTo("1234")
+        assertThat(tilstand.ansvarligEnhet).isEqualTo("1234")
     }
 
     @Test
@@ -125,7 +125,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         assertThat(tilstand.behandlingsresultat).isEqualTo(Testdata.behandlingsresultat.type)
         assertThat(tilstand.venterPåBruker).isTrue()
         assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.funksjonellTid).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
+        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
     }
 
 }

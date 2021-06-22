@@ -8,10 +8,11 @@ class VedtakPeriode(var fom: LocalDate,
                     var tom: LocalDate,
                     var hendelsestype: String,
                     var hendelsesundertype: String? = null,
-                    var harBruktSjetteLedd: Boolean = false,
-                    var aktsomhet: Aktsomhet? = null,
                     var vilkårsresultat: UtvidetVilkårsresultat,
-                    var særligeGrunner: SærligeGrunner? = null,
                     var feilutbetaltBeløp: BigDecimal,
                     var bruttoTilbakekrevingsbeløp: BigDecimal,
-                    var rentebeløp: BigDecimal)
+                    var rentebeløp: BigDecimal,
+                    var harBruktSjetteLedd: Boolean = false,
+                    var aktsomhet: Aktsomhet? = null,
+                    var særligeGrunner: SærligeGrunner? = null
+)

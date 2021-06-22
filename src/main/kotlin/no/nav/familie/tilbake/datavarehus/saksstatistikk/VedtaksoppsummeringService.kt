@@ -49,10 +49,10 @@ class VedtaksoppsummeringService(private val behandlingRepository: BehandlingRep
                                    ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
                                    ansvarligBeslutter = ansvarligBeslutter,
                                    behandlingstype = behandling.type,
-                                   behandlingOpprettetTid = behandling.opprettetTidspunkt.atOffset(ZoneOffset.UTC),
-                                   vedtakFattetTid = behandlingsvedtak.sporbar.opprettetTid.atOffset(ZoneOffset.UTC),
+                                   behandlingOpprettetTidspunkt = behandling.opprettetTidspunkt.atOffset(ZoneOffset.UTC),
+                                   vedtakFattetTidspunkt = behandlingsvedtak.sporbar.opprettetTid.atOffset(ZoneOffset.UTC),
                                    referertFagsaksbehandling = eksternBehandling,
-                                   behandlendeEnhetsKode = behandling.behandlendeEnhet,
+                                   behandlendeEnhet = behandling.behandlendeEnhet,
                                    erBehandlingManueltOpprettet = behandling.manueltOpprettet,
                                    forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
                                    perioder = hentVedtakPerioder(behandlingId))
