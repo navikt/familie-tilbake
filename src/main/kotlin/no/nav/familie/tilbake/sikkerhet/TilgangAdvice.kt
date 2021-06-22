@@ -29,10 +29,10 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                     val behandlingRepository: BehandlingRepository,
                     val fagsakRepository: FagsakRepository) {
 
-    private final val behandlingIdParam = "behandlingId"
-    private final val ytelsestypeParam = "ytelsestype"
-    private final val fagsystemParam = "fagsystem"
-    private final val eksternBrukIdParam = "eksternBrukId"
+    private val behandlingIdParam = "behandlingId"
+    private val ytelsestypeParam = "ytelsestype"
+    private val fagsystemParam = "fagsystem"
+    private val eksternBrukIdParam = "eksternBrukId"
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 

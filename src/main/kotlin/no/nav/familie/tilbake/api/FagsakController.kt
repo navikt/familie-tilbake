@@ -3,8 +3,10 @@ package no.nav.familie.tilbake.api
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
+import no.nav.familie.tilbake.api.dto.KanBehandlingOpprettesResponsDto
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class FagsakController(val fagsakService: FagsakService) {
+class FagsakController(private val fagsakService: FagsakService) {
 
     @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -42,6 +44,17 @@ class FagsakController(val fagsakService: FagsakService) {
                                             eksternFagsakId: String): Ressurs<FinnesBehandlingsresponsDto> {
         return Ressurs.success(fagsakService.finnesÅpenTilbakekrevingsbehandling(fagsystem = fagsystem,
                                                                                  eksternFagsakId = eksternFagsakId))
+    }
+
+    @GetMapping(path = ["/ytelsestype/{ytelsestype}/fagsak/{fagsak}/kanBehandlingOpprettesManuelt/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Sjekk om det er mulig å opprette behandling manuelt",
+                        henteParam = "ytelsestype")
+    fun kanBehandlingOpprettesManuelt(@PathVariable ytelsestype: Ytelsestype,
+                                      @PathVariable("fagsak")
+                                      eksternFagsakId: String): Ressurs<KanBehandlingOpprettesResponsDto> {
+        return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
     }
 
     @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/behandlinger/v1"],

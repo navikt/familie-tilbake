@@ -38,14 +38,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving")
     fun opprettBehandling(@Valid @RequestBody
                           opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Ressurs<String> {
-        val behandling = when {
-            opprettTilbakekrevingRequest.manueltOpprettet -> {
-                behandlingService.opprettBehandlingManuell(opprettTilbakekrevingRequest)
-            }
-            else -> {
-                behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
-            }
-        }
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
     }
 

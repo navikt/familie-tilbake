@@ -34,6 +34,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -52,6 +53,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val taskRepository: TaskRepository,
                         private val brevsporingRepository: BrevsporingRepository,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
+                        private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
@@ -64,7 +66,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
-    fun opprettBehandlingAutomatisk(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
+    fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
         //Lag oppgave for behandling
@@ -78,10 +80,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         return behandling
-    }
-
-    fun opprettBehandlingManuell(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        TODO("Ikke implementert ennå")
     }
 
     @Transactional(readOnly = true)
@@ -193,12 +191,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         validateFagsystem(ytelsestype, fagsystem)
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
+        val erManueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                     "og eksternId=$eksternId")
         secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                           " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
 
-        kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId)
+        kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId, erManueltOpprettet)
+
         // oppretter fagsak hvis det ikke finnes ellers bruker det eksisterende
         val eksisterendeFagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
         val fagsak = eksisterendeFagsak ?: opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
@@ -230,7 +230,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
                                        eksternFagsakId: String,
-                                       eksternId: String) {
+                                       eksternId: String,
+                                       erManueltOpprettet: Boolean) {
         val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
@@ -252,6 +253,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                            httpStatus = HttpStatus.BAD_REQUEST)
             }
         }
+
+        // uten kravgrunnlag er det ikke mulig å opprette behandling manuelt
+        if (erManueltOpprettet && !økonomiXmlMottattRepository
+                        .existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId, ytelsestype, eksternId)) {
+            val feilMelding = "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+                              "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
+            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
+        }
+
     }
 
     private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
