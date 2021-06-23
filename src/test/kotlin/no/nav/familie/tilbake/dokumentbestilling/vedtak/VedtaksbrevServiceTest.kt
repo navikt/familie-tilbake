@@ -127,7 +127,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        vilkårsvurderingRepository.insert(Testdata.vilkår.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
