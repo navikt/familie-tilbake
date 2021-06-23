@@ -33,7 +33,7 @@ data class Henleggelsesbrevsdokument(val brevmetadata: Brevmetadata,
             requireNotNull(varsletDato) { "varsletDato kan ikke være null" }
         }
         if (finnesVerge) {
-            requireNotNull(annenMottagersNavn) { "annenMottakerNavn kan ikke være null" }
+            requireNotNull(annenMottagersNavn) { "annenMottagersNavn kan ikke være null" }
         }
     }
 }

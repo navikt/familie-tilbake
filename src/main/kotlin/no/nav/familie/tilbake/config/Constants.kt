@@ -12,14 +12,15 @@ object Constants {
 
     val brukersSvarfrist: Period = Period.ofWeeks(3)
 
-    val kravgrunnlagXmlRootElement: String = "urn:detaljertKravgrunnlagMelding"
+    const val kravgrunnlagXmlRootElement: String = "urn:detaljertKravgrunnlagMelding"
 
-    val statusmeldingXmlRootElement: String = "urn:endringKravOgVedtakstatus"
+    const val statusmeldingXmlRootElement: String = "urn:endringKravOgVedtakstatus"
 
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     val grunnbeløp = grunnbeløpForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
+
 }
 

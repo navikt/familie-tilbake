@@ -78,7 +78,7 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 
     companion object {
 
-        private val aktiveStegStatuser = listOf(VENTER, KLAR)
+        val aktiveStegStatuser = listOf(VENTER, KLAR)
         private val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
 
         fun erStegAktiv(status: Behandlingsstegstatus): Boolean {
@@ -98,5 +98,18 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
     UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
     ENDRE_TILKJENT_YTELSE(0, "Mulig endring i tilkjent ytelse"),
-    VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse")
+    VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse");
+
+    companion object {
+
+        fun venterPåBruker(venteårsak: Venteårsak?): Boolean {
+            return venteårsak in listOf(VENT_PÅ_BRUKERTILBAKEMELDING, UTVIDET_TILSVAR_FRIST, AVVENTER_DOKUMENTASJON)
+        }
+
+        fun venterPåØkonomi(venteårsak: Venteårsak?): Boolean {
+            return venteårsak in listOf(VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, VENT_PÅ_MULIG_MOTREGNING)
+        }
+    }
+
+
 }

@@ -18,6 +18,13 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -27,13 +34,6 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
@@ -127,7 +127,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        vilkårsvurderingRepository.insert(Testdata.vilkår.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
