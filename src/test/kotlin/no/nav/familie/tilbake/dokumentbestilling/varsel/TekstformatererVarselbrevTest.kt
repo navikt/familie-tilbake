@@ -19,7 +19,7 @@ class TekstformatererVarselbrevTest {
                                         mottageradresse = lagAdresseinfo(),
                                         språkkode = Språkkode.NB,
                                         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                                        behandlendeEnhetsNavn = "Skien",
+                                        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                         ansvarligSaksbehandler = "Bob")
 
     private val varselbrevsdokument =
