@@ -54,10 +54,10 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
 
     companion object {
 
-        val HISTORIKK_TOPIC = "teamfamilie.historikk-topikk"
-        val SAK_TOPIC = "teamfamilie.datavarehus.sak.topic"
-        val VEDTAK_TOPIC = "teamfamilie.datavarehus.vedtak.topic"
+        val HISTORIKK_TOPIC = "teamfamilie.privat-historikk-topic"
+        val HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"
+        val HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
+        val SAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-sak-topic"
+        val VEDTAK_TOPIC = "teamfamilie.aapen-tbk-datavarehus-vedtak-topic"
     }
-
-
 }

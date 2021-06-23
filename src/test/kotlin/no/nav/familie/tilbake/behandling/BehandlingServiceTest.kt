@@ -43,6 +43,7 @@ import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -83,6 +84,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
+    private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
+
+    @Autowired
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
@@ -105,14 +109,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten verge`() {
+    fun `opprettBehandling skal opprette automatisk behandling uten verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false,
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         assertBehandling(behandling, opprettTilbakekrevingRequest)
         assertFagsak(behandling, opprettTilbakekrevingRequest)
@@ -124,14 +128,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling med verge`() {
+    fun `opprettBehandling skal opprette automatisk behandling med verge`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         assertBehandling(behandling, opprettTilbakekrevingRequest)
         assertFagsak(behandling, opprettTilbakekrevingRequest)
@@ -143,14 +147,14 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk skal opprette automatisk behandling uten varsel`() {
+    fun `opprettBehandling skal opprette automatisk behandling uten varsel`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false,
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         assertBehandling(behandling, opprettTilbakekrevingRequest)
         assertFagsak(behandling, opprettTilbakekrevingRequest)
@@ -162,16 +166,16 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
+    fun `opprettBehandling oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         })
         assertEquals("Det finnes allerede en åpen behandling for ytelsestype="
                      + opprettTilbakekrevingRequest.ytelsestype +
@@ -180,19 +184,19 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
+    fun `opprettBehandling skal ikke opprette automatisk behandling når siste tilbakekreving er ikke henlagt`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val exception = assertFailsWith<RuntimeException>(block = {
-            behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         })
         assertEquals("Det finnes allerede en avsluttet behandling for ytelsestype="
                      + opprettTilbakekrevingRequest.ytelsestype +
@@ -201,13 +205,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandlingAutomatisk skal opprette automatisk når det allerede finnes avsluttet behandling for samme fagsak`() {
+    fun `opprettBehandling skal opprette automatisk når det allerede finnes avsluttet behandling for samme fagsak`() {
         val forrigeOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
                                                                                   finnesVarsel = true,
                                                                                   manueltOpprettet = false,
                                                                                   tilbakekrevingsvalg = Tilbakekrevingsvalg
                                                                                           .OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val forrigeBehandling = behandlingService.opprettBehandlingAutomatisk(forrigeOpprettTilbakekrevingRequest)
+        val forrigeBehandling = behandlingService.opprettBehandling(forrigeOpprettTilbakekrevingRequest)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(forrigeBehandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
@@ -218,7 +222,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                                              manueltOpprettet = false,
                                                                              tilbakekrevingsvalg = Tilbakekrevingsvalg
                                                                                      .OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(nyOpprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(nyOpprettTilbakekrevingRequest)
         assertBehandling(behandling, nyOpprettTilbakekrevingRequest)
         assertFagsak(behandling, nyOpprettTilbakekrevingRequest)
         assertFagsystemsbehandling(behandling, nyOpprettTilbakekrevingRequest)
@@ -226,6 +230,53 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertTrue { behandling.verger.isEmpty() }
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         assertFinnKravgrunnlagTask(behandling.id)
+    }
+
+    @Test
+    fun `opprettBehandling skal ikke opprette manuelt når det ikke finnes kravgrunnlag for samme fagsak,ytelsestype,eksternId`() {
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                                           finnesVarsel = false,
+                                                                           manueltOpprettet = true,
+                                                                           tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                   .OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+
+        val exception = assertFailsWith<RuntimeException> { behandlingService.opprettBehandling(opprettTilbakekrevingRequest) }
+        assertEquals("Det finnes intet kravgrunnlag for ytelsestype=${opprettTilbakekrevingRequest.ytelsestype}," +
+                     "eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
+                     "og eksternId=${opprettTilbakekrevingRequest.eksternId}. " +
+                     "Tilbakekrevingsbehandling kan ikke opprettes manuelt.", exception.message)
+    }
+
+    @Test
+    fun `opprettBehandling skal opprette manuelt når det finnes kravgrunnlag for samme fagsak,ytelsestype,eksternId`() {
+        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                                           finnesVarsel = false,
+                                                                           manueltOpprettet = true,
+                                                                           tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                   .OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
+        økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+                                                                  ytelsestype = opprettTilbakekrevingRequest.ytelsestype,
+                                                                  referanse = opprettTilbakekrevingRequest.eksternId))
+
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+
+        assertBehandling(behandling, opprettTilbakekrevingRequest, true)
+        assertFagsak(behandling, opprettTilbakekrevingRequest)
+        assertFagsystemsbehandling(behandling, opprettTilbakekrevingRequest)
+        assertTrue { behandling.varsler.isEmpty() }
+        assertTrue { behandling.verger.isEmpty() }
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
+
+        val behandlingssteg = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingssteg.any {
+                Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
+                Behandlingsstegstatus.VENTER == it.behandlingsstegsstatus &&
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG == it.venteårsak
+            }
+        }
     }
 
 
@@ -236,7 +287,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
         assertFellesBehandlingRespons(behandlingDto, behandling)
@@ -258,7 +309,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
         assertFellesBehandlingRespons(behandlingDto, behandling)
@@ -280,7 +331,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val sporbar = behandling.sporbar.copy(opprettetTid = LocalDate.now().minusDays(10).atStartOfDay())
         val oppdatertBehandling = lagretBehandling.copy(sporbar = sporbar)
@@ -307,7 +358,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -327,7 +378,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
@@ -344,7 +395,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK))
 
@@ -363,7 +414,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
                                                           ansvarligSaksbehandler = "VL"))
@@ -383,7 +434,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
                                                           ansvarligSaksbehandler = "Z0000"))
@@ -400,7 +451,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException>(block = {
             behandlingService.settBehandlingPåVent(behandling.id,
@@ -417,7 +468,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException>(block = {
             behandlingService.settBehandlingPåVent(behandling.id,
@@ -434,7 +485,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         assertDoesNotThrow {
             behandlingService.settBehandlingPåVent(behandling.id,
@@ -473,7 +524,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(behandlingId = behandling.id))
 
         behandlingService.settBehandlingPåVent(behandlingId = behandling.id,
@@ -496,7 +547,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertTrue {
@@ -540,7 +591,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = true,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
@@ -586,7 +637,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
@@ -626,7 +677,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
 
         val exception = assertFailsWith<RuntimeException> {
             behandlingService
@@ -645,7 +696,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        val behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val kravgrunnlag = Testdata.kravgrunnlag431
         kravgrunnlagRepository.insert(kravgrunnlag.copy(behandlingId = behandling.id))
 
@@ -666,7 +717,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 finnesVarsel = false,
                                                 manueltOpprettet = false,
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        var behandling = behandlingService.opprettBehandlingAutomatisk(opprettTilbakekrevingRequest)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -721,10 +772,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandling(behandling: Behandling,
-                                 opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
+                                 opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+                                 manueltOpprettet: Boolean? = false) {
         assertEquals(Behandlingstype.TILBAKEKREVING.name, behandling.type.name)
         assertEquals(Behandlingsstatus.OPPRETTET.name, behandling.status.name)
-        assertEquals(false, behandling.manueltOpprettet)
+        assertEquals(manueltOpprettet, behandling.manueltOpprettet)
         assertEquals(opprettTilbakekrevingRequest.enhetId, behandling.behandlendeEnhet)
         assertEquals(opprettTilbakekrevingRequest.enhetsnavn, behandling.behandlendeEnhetsNavn)
         assertEquals(Saksbehandlingstype.ORDINÆR.name, behandling.saksbehandlingstype.name)
