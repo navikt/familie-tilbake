@@ -62,7 +62,7 @@ class AvstemmingService(private val behandlingRepository: BehandlingRepository,
         }
         return if (rader.isEmpty()) {
             null
-        } else Avstemmingsfil(rader).tilFlatfil()
+        } else FilMapper(rader).tilFlatfil()
     }
 
     private fun erFørstegangsvedtakUtenTilbakekreving(behandling: Behandling,
