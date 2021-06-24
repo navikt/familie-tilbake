@@ -226,6 +226,8 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val hbBehandling: HbBehandling = lagHbBehandling(behandling)
         val varsletBeløp = finnVarsletBeløp(behandling)
         val varsletDato = finnVarsletDato(behandling.id)
+        behandling.ansvarligBeslutter ?: error("Vedtak fatter for behnadling  ${behandling.id} uten ansvarlig beslutter.")
+        val ansvarligBeslutter = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligBeslutter)
         val erFeilutbetaltBeløpKorrigertNed =
                 varsletBeløp != null && hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp < varsletBeløp
         val vedtaksbrevFelles =
@@ -237,6 +239,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                     totaltFeilutbetaltBeløp = hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp,
                                     fritekstoppsummering = oppsummeringFritekst,
                                     vedtaksbrevstype = vedtaksbrevtype,
+                                    ansvarligBeslutter = ansvarligBeslutter,
                                     hjemmel = hbHjemmel,
                                     totalresultat = hbTotalresultat,
                                     konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
@@ -482,7 +485,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val totaltTilbakekrevesUtenRenter = resulatPerioder.sumOf { it.tilbakekrevingsbeløpUtenRenter }
         val totaltTilbakekrevesMedRenter = resulatPerioder.sumOf { it.tilbakekrevingsbeløp }
         val totaltRentebeløp = resulatPerioder.sumOf { it.rentebeløp }
-        private val totaltSkattetrekk = resulatPerioder.sumOf { it.skattebeløp ?: BigDecimal.ZERO }
+        private val totaltSkattetrekk = resulatPerioder.sumOf { it.skattebeløp }
         val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal = totaltTilbakekrevesMedRenter.subtract(totaltSkattetrekk)
         val totaltFeilutbetaltBeløp = resulatPerioder.sumOf { it.feilutbetaltBeløp }
 

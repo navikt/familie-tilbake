@@ -21,7 +21,7 @@ class TekstformatererHenleggelsesbrevTest {
                                             vergenavn = "John Doe",
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.BARNETILSYN,
-                                            behandlendeEnhetsNavn = "Skien",
+                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                             ansvarligSaksbehandler = "Bob")
 
 

@@ -42,7 +42,7 @@ class AvsnittUtilTest {
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                                            behandlendeEnhetsNavn = "Skien",
+                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                             ansvarligSaksbehandler = "Bob")
 
     private val vedtaksbrevFelles = HbVedtaksbrevFelles(brevmetadata = brevmetadata,
@@ -58,7 +58,8 @@ class AvsnittUtilTest {
                                                                                         BigDecimal.ZERO),
                                                         hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                                                         totaltFeilutbetaltBeløp = BigDecimal.valueOf(20000),
-                                                        vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+                                                        vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                                                        ansvarligBeslutter = "ansvarlig person sin signatur")
 
     @Test
     fun `lagVedtaksbrevDeltIAvsnitt skal generere brev delt i avsnitt og underavsnitt`() {

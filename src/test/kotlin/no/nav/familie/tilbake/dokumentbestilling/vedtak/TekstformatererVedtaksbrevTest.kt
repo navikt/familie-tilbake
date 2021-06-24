@@ -52,8 +52,8 @@ class TekstformatererVedtaksbrevTest {
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                                            behandlendeEnhetsNavn = "Skien",
-                                            ansvarligSaksbehandler = "Bob")
+                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                            ansvarligSaksbehandler = "Ansvarlig Saksbehandler")
 
     private val felles =
             HbVedtaksbrevFelles(brevmetadata = brevmetadata,
@@ -71,7 +71,8 @@ class TekstformatererVedtaksbrevTest {
                                 fagsaksvedtaksdato = LocalDate.now(),
                                 behandling = HbBehandling(),
                                 totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                                ansvarligBeslutter = "Ansvarlig Beslutter")
 
     @Test
     fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for OS og god tro uten tilbakekreving uten varsel`() {

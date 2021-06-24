@@ -33,6 +33,20 @@ object DokprodTilHtml {
                     }
                     continue
                 }
+                if (linje.startsWith("{venstrejustert}")) {
+                    val la = linje.replace("{venstrejustert}", "")
+                    val saksbehandler = la.substringBefore("{høyrejustert}")
+                    val beslutter = la.substringAfter("{høyrejustert}")
+                    builder.append("""<table class="signatur">
+                    <tr>
+                    <td class="saksbehandler">$saksbehandler</td>
+                    <td class="beslutter">$beslutter</td>
+                    </tr>
+                    </table>""")
+
+
+                    continue
+                }
                 val overskrift = linje.startsWith("_")
                 if (overskrift) {
                     if (samepageStarted) {
@@ -63,7 +77,7 @@ object DokprodTilHtml {
         return ekstraLinjeskiftFørHilsing(konverterNbsp(builder.toString()))
     }
 
-    fun sanitize(name: String): String {
+    private fun sanitize(name: String): String {
         val builder = StringBuilder()
         for (element in name) {
             when (element) {

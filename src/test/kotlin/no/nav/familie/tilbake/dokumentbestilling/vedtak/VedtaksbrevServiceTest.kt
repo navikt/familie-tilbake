@@ -102,7 +102,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
-    private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
+    private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
     private lateinit var vedtaksbrevService: VedtaksbrevService
 
@@ -133,6 +133,10 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
+        every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligSaksbehandler) }
+                .returns("Ansvarlig Saksbehandler")
+        every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligBeslutter!!) }
+                .returns("Ansvarlig Beslutter")
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
