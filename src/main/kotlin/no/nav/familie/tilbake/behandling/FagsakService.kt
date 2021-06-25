@@ -1,13 +1,13 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
-import no.nav.familie.tilbake.api.dto.KanBehandlingOpprettesResponsDto
-import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
+import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.person.PersonService
@@ -66,19 +66,19 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     @Transactional(readOnly = true)
     fun kanBehandlingOpprettesManuelt(eksternFagsakId: String,
-                                      ytelsestype: Ytelsestype): KanBehandlingOpprettesResponsDto {
+                                      ytelsestype: Ytelsestype): KanBehandlingOpprettesManueltRespons {
         val finnesÅpenTilbakekreving: Boolean =
                 behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
         if (finnesÅpenTilbakekreving) {
-            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
-                                                    melding = "Det finnes allerede en åpen tilbakekrevingsbehandling." +
-                                                              "Kan ikke opprette manuelt tilbakekreving.")
+            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
+                                                        melding = "Det finnes allerede en åpen tilbakekrevingsbehandling." +
+                                                                  "Kan ikke opprette manuelt tilbakekreving.")
         }
         val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (kravgrunnlagene.isEmpty()) {
-            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
-                                                    melding = "Det finnes ikke frakoblet kravgrunnlag. " +
-                                                              "Kan ikke opprette manuelt tilbakekreving.")
+            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
+                                                        melding = "Det finnes ikke frakoblet kravgrunnlag. " +
+                                                                  "Kan ikke opprette manuelt tilbakekreving.")
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
@@ -86,20 +86,20 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                                                      Status.KLAR_TIL_PLUKK, Status.PLUKKET,
                                                      Status.FEILET), Pageable.unpaged())
                         .any {
-                            OpprettManueltBehandlingTask.TYPE == it.type &&
+                            OpprettBehandlingManueltTask.TYPE == it.type &&
                             eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
                             ytelsestype.kode == it.metadata.getProperty("ytelsestype")
                             kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
                         }
 
         if (harAlledeMottattForespørselen) {
-            return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = false,
-                                                    melding = "Det ligger allerede en opprettelse request." +
-                                                              "Kan ikke opprette manuelt tilbakekreving igjen.")
+            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
+                                                        melding = "Det ligger allerede en opprettelse request." +
+                                                                  "Kan ikke opprette manuelt tilbakekreving igjen.")
         }
-        return KanBehandlingOpprettesResponsDto(kanBehandlingOpprettes = true,
-                                                kravgrunnlagsreferanse = kravgrunnlagsreferanse,
-                                                melding = "Det er mulig å opprette behandling manuelt.")
+        return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true,
+                                                    kravgrunnlagsreferanse = kravgrunnlagsreferanse,
+                                                    melding = "Det er mulig å opprette behandling manuelt.")
     }
 
 }

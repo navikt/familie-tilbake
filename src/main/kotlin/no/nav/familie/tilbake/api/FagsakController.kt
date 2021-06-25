@@ -3,10 +3,10 @@ package no.nav.familie.tilbake.api
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
+import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
-import no.nav.familie.tilbake.api.dto.KanBehandlingOpprettesResponsDto
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
@@ -53,7 +53,7 @@ class FagsakController(private val fagsakService: FagsakService) {
                         henteParam = "ytelsestype")
     fun kanBehandlingOpprettesManuelt(@PathVariable ytelsestype: Ytelsestype,
                                       @PathVariable("fagsak")
-                                      eksternFagsakId: String): Ressurs<KanBehandlingOpprettesResponsDto> {
+                                      eksternFagsakId: String): Ressurs<KanBehandlingOpprettesManueltRespons> {
         return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
     }
 

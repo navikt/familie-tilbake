@@ -7,20 +7,20 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OpprettManueltBehandlingTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = OpprettBehandlingManueltTask.TYPE,
                      beskrivelse = "oppretter behandling manuelt",
                      triggerTidVedFeilISekunder = 60 * 5)
-class OpprettManueltBehandlingTask : AsyncTaskStep {
+class OpprettBehandlingManueltTask : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        log.info("OpprettManueltBehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
+        log.info("OpprettBehandlingManueltTask prosesserer med id=${task.id} og metadata ${task.metadata}")
     }
 
     companion object {
 
-        const val TYPE = "opprettManueltBehandling"
+        const val TYPE = "opprettBehandlingManuelt"
     }
 
 }

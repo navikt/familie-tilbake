@@ -49,8 +49,8 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving manuelt")
     fun opprettBehandlingManuellTask(@Valid @RequestBody
                                      opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest): Ressurs<String> {
-        behandlingService.opprettManuellBehandlingTask(opprettManueltTilbakekrevingRequest)
-        return Ressurs.success("Manuelt tilbakekrevingsbehandling opprettelse forespørselen innsendt")
+        behandlingService.opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest)
+        return Ressurs.success("Manuell opprettelse av tilbakekreving er startet")
     }
 
 

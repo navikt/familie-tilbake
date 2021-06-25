@@ -21,7 +21,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.steg.StegService
-import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
+import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
@@ -88,15 +88,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettManuellBehandlingTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
-        logger.info("Oppretter OpprettManueltBehandlingTask for request=$opprettManueltTilbakekrevingRequest")
+    fun opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
+        logger.info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
         val properties = Properties().apply {
             setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
             setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.kode)
             setProperty("eksternId", opprettManueltTilbakekrevingRequest.eksternId)
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
         }
-        taskRepository.save(Task(type = OpprettManueltBehandlingTask.TYPE,
+        taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE,
                                  properties = properties,
                                  payload = ""))
     }

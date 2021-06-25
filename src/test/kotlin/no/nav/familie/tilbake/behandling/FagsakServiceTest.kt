@@ -11,7 +11,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
+import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
@@ -134,7 +134,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         properties["eksternFagsakId"] = mottattXml.eksternFagsakId
         properties["ytelsestype"] = Ytelsestype.BARNETRYGD.kode
         properties["eksternId"] = mottattXml.referanse
-        taskRepository.save(Task(type = OpprettManueltBehandlingTask.TYPE, properties = properties, payload = ""))
+        taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""))
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
         assertFalse { respons.kanBehandlingOpprettes }

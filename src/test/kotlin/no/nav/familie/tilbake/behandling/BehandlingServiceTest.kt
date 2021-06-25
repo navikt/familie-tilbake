@@ -28,7 +28,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
-import no.nav.familie.tilbake.behandling.task.OpprettManueltBehandlingTask
+import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -283,15 +283,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettManuellBehandlingTask skal opprette OpprettManueltBehandlingTask`() {
-        behandlingService.opprettManuellBehandlingTask(OpprettManueltTilbakekrevingRequest(eksternFagsakId = "testverdi",
+    fun `opprettBehandlingManuellTask skal opprette OpprettBehandlingManueltTask`() {
+        behandlingService.opprettBehandlingManuellTask(OpprettManueltTilbakekrevingRequest(eksternFagsakId = "testverdi",
                                                                                            ytelsestype = BARNETRYGD,
                                                                                            eksternId = "testverdi"))
 
         val taskene = taskRepository.findByStatus(Status.UBEHANDLET)
         assertEquals(1, taskene.size)
         val task = taskene[0]
-        assertEquals(OpprettManueltBehandlingTask.TYPE, task.type)
+        assertEquals(OpprettBehandlingManueltTask.TYPE, task.type)
         assertEquals("testverdi", task.metadata["eksternFagsakId"])
         assertEquals(Ytelsestype.BARNETRYGD.kode, task.metadata["ytelsestype"])
         assertEquals("testverdi", task.metadata["eksternId"])
