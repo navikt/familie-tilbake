@@ -18,6 +18,3 @@ spec:
     - team: teamfamilie
       application: familie-tilbake #owner
       access: readwrite   # readwrite
-    - team: teamfamilie
-      application: familie-ba-sak #owner, midlertidig skal oppdateres med riktig applikasjonsnavn etterpå
-      access: read   # readwrite
