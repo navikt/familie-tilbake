@@ -13,7 +13,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
-    private val vilkår = Testdata.vilkår
+    private val vilkår = Testdata.vilkårsvurdering
 
     @Test
     fun `insert med gyldige verdier skal persistere en forekomst av Vilkårsvurdering til basen`() {

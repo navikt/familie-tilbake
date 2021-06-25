@@ -48,3 +48,27 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: app-preprod.yaml
+      - name: Deploy dvh_sak_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: kafka/dvh_sak_topic.yaml
+      - name: Deploy dvh_vedtak_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: kafka/dvh_vedtak_topic.yaml
+      - name: Deploy hentfagsystemsbehandling_request_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: kafka/hentfagsystemsbehandling_request_topic.yaml
+      - name: Deploy hentfagsystemsbehandling_respons_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: kafka/hentfagsystemsbehandling_respons_topic.yaml

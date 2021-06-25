@@ -31,11 +31,11 @@ import java.math.BigDecimal
 import java.util.UUID
 
 @Service
-class TilbakekrevingsberegningService(private var kravgrunnlagRepository: KravgrunnlagRepository,
-                                      private var vurdertForeldelseRepository: VurdertForeldelseRepository,
-                                      private var vilkårsvurderingRepository: VilkårsvurderingRepository,
-                                      private var behandlingRepository: BehandlingRepository,
-                                      private var kravgrunnlagsberegningService: KravgrunnlagsberegningService) {
+class TilbakekrevingsberegningService(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                                      private val vurdertForeldelseRepository: VurdertForeldelseRepository,
+                                      private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+                                      private val behandlingRepository: BehandlingRepository,
+                                      private val kravgrunnlagsberegningService: KravgrunnlagsberegningService) {
 
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
         val beregningsresultat = beregn(behandlingId)

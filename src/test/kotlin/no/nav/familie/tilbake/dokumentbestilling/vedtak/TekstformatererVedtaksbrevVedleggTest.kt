@@ -46,7 +46,7 @@ class TekstformatererVedtaksbrevVedleggTest {
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                                            behandlendeEnhetsNavn = "Skien",
+                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                             ansvarligSaksbehandler = "Bob")
 
 
@@ -147,7 +147,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                                 fagsaksvedtaksdato = LocalDate.now(),
                                 behandling = HbBehandling(),
                                 totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                                ansvarligBeslutter = "ansvarlig person sin signatur")
 
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med flere perioder og med renter`() {

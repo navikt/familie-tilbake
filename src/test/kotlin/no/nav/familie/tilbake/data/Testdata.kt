@@ -91,14 +91,14 @@ object Testdata {
 
     private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())
 
-    private val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
+    val behandlingsresultat = Behandlingsresultat(behandlingsvedtak = behandlingsvedtak)
 
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
                                 opprettetDato = LocalDate.now(),
                                 avsluttetDato = LocalDate.now(),
-                                ansvarligSaksbehandler = "testverdi",
-                                ansvarligBeslutter = "testverdi",
+                                ansvarligSaksbehandler = "saksbehandler",
+                                ansvarligBeslutter = "beslutter",
                                 behandlendeEnhet = "testverdi",
                                 behandlendeEnhetsNavn = "testverdi",
                                 manueltOpprettet = false,
@@ -206,8 +206,8 @@ object Testdata {
                                      aktsomhet = vilkårsvurderingAktsomhet,
                                      godTro = vilkårsvurderingGodTro)
 
-    val vilkår = Vilkårsvurdering(behandlingId = behandling.id,
-                                  perioder = setOf(vilkårsperiode))
+    val vilkårsvurdering = Vilkårsvurdering(behandlingId = behandling.id,
+                                            perioder = setOf(vilkårsperiode))
 
     private val faktaFeilutbetalingsperiode =
             FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),

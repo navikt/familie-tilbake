@@ -68,10 +68,10 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsstegstatus.UTFØRT, stegstilstand[0].behandlingsstegsstatus)
 
         val tasker = taskRepository.findByStatus(Status.UBEHANDLET)
-        assertEquals(1, tasker.size)
-        assertEquals(LagHistorikkinnslagTask.TYPE, tasker[0].type)
-        assertEquals(behandlingId.toString(), tasker[0].payload)
-        val taskProperty = tasker[0].metadata
+        val historikkTask = tasker.first { it.type == LagHistorikkinnslagTask.TYPE }
+        assertEquals(LagHistorikkinnslagTask.TYPE, historikkTask.type)
+        assertEquals(behandlingId.toString(), historikkTask.payload)
+        val taskProperty = historikkTask.metadata
         assertEquals(Aktør.VEDTAKSLØSNING.name, taskProperty["aktor"])
         assertEquals(TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name, taskProperty["historikkinnslagstype"])
     }

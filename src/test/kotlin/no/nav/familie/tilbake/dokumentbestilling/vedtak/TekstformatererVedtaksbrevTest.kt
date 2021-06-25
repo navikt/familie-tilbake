@@ -3,9 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
@@ -28,6 +25,9 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
@@ -52,8 +52,8 @@ class TekstformatererVedtaksbrevTest {
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                                            behandlendeEnhetsNavn = "Skien",
-                                            ansvarligSaksbehandler = "Bob")
+                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                            ansvarligSaksbehandler = "Ansvarlig Saksbehandler")
 
     private val felles =
             HbVedtaksbrevFelles(brevmetadata = brevmetadata,
@@ -71,7 +71,8 @@ class TekstformatererVedtaksbrevTest {
                                 fagsaksvedtaksdato = LocalDate.now(),
                                 behandling = HbBehandling(),
                                 totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                                ansvarligBeslutter = "Ansvarlig Beslutter")
 
     @Test
     fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for OS og god tro uten tilbakekreving uten varsel`() {
@@ -102,6 +103,43 @@ class TekstformatererVedtaksbrevTest {
 
         val fasit = les("/vedtaksbrev/OS_ingen_tilbakekreving.txt")
         Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+    }
+
+    @Test
+    fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for OS og god tro uten tilbakekreving uten varsel med verge`() {
+        val perioder: List<HbVedtaksbrevsperiode> =
+                listOf(HbVedtaksbrevsperiode(periode = januar,
+                                             kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
+                                             fakta = HbFakta(Hendelsestype.ENDRING_STØNADSPERIODEN,
+                                                             Hendelsesundertype.MOTTAKER_DØD),
+                                             vurderinger =
+                                             HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                                                           vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                                                           aktsomhetsresultat = AnnenVurdering.GOD_TRO,
+                                                           beløpIBehold = BigDecimal.ZERO),
+                                             resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0)))
+        val vedtaksbrevData = felles.copy(fagsaksvedtaksdato = LocalDate.of(2019, 3, 21),
+                                          brevmetadata = brevmetadata.copy(mottageradresse = Adresseinfo("12345678901",
+                                                                                                         "Semba AS c/o John Doe"),
+                                                                           sakspartsnavn = "Test",
+                                                                           vergenavn = "John Doe",
+                                                                           finnesVerge = true),
+                                          finnesVerge = true,
+                                          varsel = null,
+                                          totalresultat = HbTotalresultat(Vedtaksresultat.INGEN_TILBAKEBETALING,
+                                                                          BigDecimal.ZERO,
+                                                                          BigDecimal.ZERO,
+                                                                          BigDecimal.ZERO,
+                                                                          BigDecimal.ZERO),
+                                          hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                                          datoer = HbVedtaksbrevDatoer(perioder = perioder),
+                                          vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+        val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+        val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+        val fasit = les("/vedtaksbrev/OS_ingen_tilbakekreving_med_verge.txt")
+        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit")
     }
 
     @Test

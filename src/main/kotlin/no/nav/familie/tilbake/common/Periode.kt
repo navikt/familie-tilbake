@@ -15,6 +15,10 @@ data class Periode(val fom: YearMonth,
         require(tom >= fom) { "Til-og-med-måned før fra-og-med-måned: $fom > $tom" }
     }
 
+    val fomDato: LocalDate get() = fom.atDay(1)
+
+    val tomDato: LocalDate get() = tom.atEndOfMonth()
+
     private fun overlapper(dato: YearMonth): Boolean {
         return dato in fom..tom
     }

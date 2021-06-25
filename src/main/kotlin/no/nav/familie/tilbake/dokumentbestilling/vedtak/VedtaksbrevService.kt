@@ -18,13 +18,6 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
-import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -53,6 +46,13 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -226,6 +226,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val hbBehandling: HbBehandling = lagHbBehandling(behandling)
         val varsletBeløp = finnVarsletBeløp(behandling)
         val varsletDato = finnVarsletDato(behandling.id)
+        val ansvarligBeslutter = behandling.ansvarligBeslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it) }
         val erFeilutbetaltBeløpKorrigertNed =
                 varsletBeløp != null && hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp < varsletBeløp
         val vedtaksbrevFelles =
@@ -237,13 +238,13 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                     totaltFeilutbetaltBeløp = hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp,
                                     fritekstoppsummering = oppsummeringFritekst,
                                     vedtaksbrevstype = vedtaksbrevtype,
+                                    ansvarligBeslutter = ansvarligBeslutter,
                                     hjemmel = hbHjemmel,
                                     totalresultat = hbTotalresultat,
                                     konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
                                     datoer = HbVedtaksbrevDatoer(perioder),
                                     søker = utledSøker(personinfo),
-                                    finnesVerge = brevmetadata.finnesVerge,
-                                    annenMottagernavn = BrevmottagerUtil.getannenMottagersNavn(brevmetadata))
+                                    finnesVerge = brevmetadata.finnesVerge)
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
 
@@ -483,7 +484,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val totaltTilbakekrevesUtenRenter = resulatPerioder.sumOf { it.tilbakekrevingsbeløpUtenRenter }
         val totaltTilbakekrevesMedRenter = resulatPerioder.sumOf { it.tilbakekrevingsbeløp }
         val totaltRentebeløp = resulatPerioder.sumOf { it.rentebeløp }
-        private val totaltSkattetrekk = resulatPerioder.sumOf { it.skattebeløp ?: BigDecimal.ZERO }
+        private val totaltSkattetrekk = resulatPerioder.sumOf { it.skattebeløp }
         val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal = totaltTilbakekrevesMedRenter.subtract(totaltSkattetrekk)
         val totaltFeilutbetaltBeløp = resulatPerioder.sumOf { it.feilutbetaltBeløp }
 

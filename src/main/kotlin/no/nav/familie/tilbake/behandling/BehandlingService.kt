@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
@@ -58,6 +59,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
+                        private val behandlingTilstandService: BehandlingTilstandService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
                         private val historikkTaskService: HistorikkTaskService,
@@ -177,6 +179,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                     avsluttetDato = LocalDate.now()))
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
+        behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
 
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
