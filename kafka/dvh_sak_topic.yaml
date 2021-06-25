@@ -13,8 +13,11 @@ spec:
     partitions: 1
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 72  # -1 means unlimited
+    retentionHours: -1  # -1 means unlimited
   acl:
     - team: teamfamilie
       application: familie-tilbake #owner
       access: readwrite   # readwrite
+    - team: teamfamilie
+      application: familie-ba-sak #owner, midlertidig skal oppdateres med riktig applikasjonsnavn etterpå
+      access: read   # readwrite
