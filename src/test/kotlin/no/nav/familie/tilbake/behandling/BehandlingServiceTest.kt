@@ -8,12 +8,14 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -26,6 +28,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -277,6 +280,22 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG == it.venteårsak
             }
         }
+    }
+
+    @Test
+    fun `opprettBehandlingManuellTask skal opprette OpprettBehandlingManueltTask`() {
+        behandlingService.opprettBehandlingManuellTask(OpprettManueltTilbakekrevingRequest(eksternFagsakId = "testverdi",
+                                                                                           ytelsestype = BARNETRYGD,
+                                                                                           eksternId = "testverdi"))
+
+        val taskene = taskRepository.findByStatus(Status.UBEHANDLET)
+        assertEquals(1, taskene.size)
+        val task = taskene[0]
+        assertEquals(OpprettBehandlingManueltTask.TYPE, task.type)
+        assertEquals("testverdi", task.metadata["eksternFagsakId"])
+        assertEquals(Ytelsestype.BARNETRYGD.kode, task.metadata["ytelsestype"])
+        assertEquals("testverdi", task.metadata["eksternId"])
+        assertEquals("Z0000", task.metadata["ansvarligSaksbehandler"])
     }
 
 
