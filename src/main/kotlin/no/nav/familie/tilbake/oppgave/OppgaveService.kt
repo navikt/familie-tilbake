@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -17,6 +16,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -76,14 +76,19 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val finnOppgaveRequest = FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
+                                                    oppgavetype = oppgavetype,
+                                                    saksreferanse = behandling.eksternBrukId.toString(),
+                                                    tema = fagsak.ytelsestype.tilTema())
 
         val finnOppgaveResponse =
-                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
-                                                                    oppgavetype = oppgavetype,
-                                                                    saksreferanse = behandling.eksternBrukId.toString(),
-                                                                    tema = fagsak.ytelsestype.tilTema()))
+                integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         if (finnOppgaveResponse.oppgaver.size > 1) {
             LOG.error("er mer enn en åpen oppgave for behandlingen")
+            SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
+        } else if (finnOppgaveResponse.oppgaver.isEmpty()) {
+            LOG.error("Fant ingen oppgave å ferdigstille")
+            SECURELOG.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
         }
         integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
 
@@ -106,6 +111,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
     companion object {
 
         private val LOG = LoggerFactory.getLogger(this::class.java)
+        val SECURELOG: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
