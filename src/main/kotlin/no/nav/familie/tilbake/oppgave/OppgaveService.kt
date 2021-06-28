@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -77,7 +76,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val finnOppgaveRequest = FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
+        val finnOppgaveRequest = FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
                                                     oppgavetype = oppgavetype,
                                                     saksreferanse = behandling.eksternBrukId.toString(),
                                                     tema = fagsak.ytelsestype.tilTema())
@@ -89,7 +88,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
             SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
         } else if (finnOppgaveResponse.oppgaver.isEmpty()) {
             LOG.error("Fant ingen oppgave å ferdigstille")
-            SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
+            SECURELOG.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
         }
         integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
 
