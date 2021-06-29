@@ -113,8 +113,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val respons = fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, Ytelsestype.BARNETRYGD)
         assertFalse { respons.kanBehandlingOpprettes }
         assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes allerede en åpen tilbakekrevingsbehandling." +
-                     "Kan ikke opprette manuelt tilbakekreving.", respons.melding)
+        assertEquals("Det finnes allerede en åpen tilbakekrevingsbehandling. Den ligger i saksoversikten.", respons.melding)
     }
 
     @Test
@@ -122,7 +121,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val respons = fagsakService.kanBehandlingOpprettesManuelt(UUID.randomUUID().toString(), Ytelsestype.BARNETRYGD)
         assertFalse { respons.kanBehandlingOpprettes }
         assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes ikke frakoblet kravgrunnlag. Kan ikke opprette manuelt tilbakekreving.", respons.melding)
+        assertEquals("Det finnes ingen feilutbetaling på saken, så du kan ikke opprette tilbakekrevingsbehandling.",
+                     respons.melding)
     }
 
     @Test
@@ -139,7 +139,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
         assertFalse { respons.kanBehandlingOpprettes }
         assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det ligger allerede en opprettelse request.Kan ikke opprette manuelt tilbakekreving igjen.",
+        assertEquals("Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. Behandlingen vil snart " +
+                     "bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, ta kontakt brukerstøtte for å rapportere feilen.",
                      respons.melding)
     }
 
