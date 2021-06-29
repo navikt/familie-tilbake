@@ -71,14 +71,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                 behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
         if (finnesÅpenTilbakekreving) {
             return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes allerede en åpen tilbakekrevingsbehandling." +
-                                                                  "Kan ikke opprette manuelt tilbakekreving.")
+                                                        melding = "Det finnes allerede en åpen tilbakekrevingsbehandling. " +
+                                                                  "Den ligger i saksoversikten.")
         }
         val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (kravgrunnlagene.isEmpty()) {
             return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes ikke frakoblet kravgrunnlag. " +
-                                                                  "Kan ikke opprette manuelt tilbakekreving.")
+                                                        melding = "Det finnes ingen feilutbetaling på saken, så du kan " +
+                                                                  "ikke opprette tilbakekrevingsbehandling.")
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
@@ -94,8 +94,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
         if (harAlledeMottattForespørselen) {
             return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det ligger allerede en opprettelse request." +
-                                                                  "Kan ikke opprette manuelt tilbakekreving igjen.")
+                                                        melding = "Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
+                                                                  "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom " +
+                                                                  "den ikke dukker opp, ta kontakt brukerstøtte for å rapportere feilen.")
         }
         return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true,
                                                     kravgrunnlagsreferanse = kravgrunnlagsreferanse,
