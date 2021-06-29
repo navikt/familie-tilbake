@@ -293,7 +293,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val task = taskene[0]
         assertEquals(OpprettBehandlingManueltTask.TYPE, task.type)
         assertEquals("testverdi", task.metadata["eksternFagsakId"])
-        assertEquals(Ytelsestype.BARNETRYGD.kode, task.metadata["ytelsestype"])
+        assertEquals(BARNETRYGD.name, task.metadata["ytelsestype"])
         assertEquals("testverdi", task.metadata["eksternId"])
         assertEquals("Z0000", task.metadata["ansvarligSaksbehandler"])
     }

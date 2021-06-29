@@ -92,7 +92,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         logger.info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
         val properties = Properties().apply {
             setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
-            setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.kode)
+            setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.name)
             setProperty("eksternId", opprettManueltTilbakekrevingRequest.eksternId)
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
         }
