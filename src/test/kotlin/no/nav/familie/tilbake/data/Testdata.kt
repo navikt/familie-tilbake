@@ -1,9 +1,11 @@
 package no.nav.familie.tilbake.data
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -59,6 +61,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 object Testdata {
+
+    val avstemmingsfil = Avstemmingsfil(fil = Fil("File.txt", ByteArray(100 ){1}))
 
     private val bruker = Bruker(ident = "321321321")
 

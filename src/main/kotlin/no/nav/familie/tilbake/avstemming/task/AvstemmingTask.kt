@@ -6,6 +6,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.avstemming.AvstemmingService
+import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
+import no.nav.familie.tilbake.avstemming.domain.AvstemmingsfilRepository
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -20,6 +22,7 @@ import java.util.UUID
                      beskrivelse = "Avstemming av krav.")
 class AvstemmingTask(val taskService: TaskService,
                      val avstemmingService: AvstemmingService,
+                     val avstemmingsfilRepository: AvstemmingsfilRepository,
                      val integrasjonerClient: IntegrasjonerClient,
                      environment: Environment) : AsyncTaskStep {
 
@@ -38,6 +41,7 @@ class AvstemmingTask(val taskService: TaskService,
             val kjøreTidspunkt = LocalDateTime.now().format(DATO_TIDSPUNKT_FORMATTER)
             val filnavn = String.format(FILNAVN_MAL, applikasjon, miljø, forDato, kjøreTidspunkt)
             val fil = Fil(filnavn, resultat)
+            avstemmingsfilRepository.insert(Avstemmingsfil(fil = fil))
             integrasjonerClient.sendFil(fil)
             logger.info("Filen {} er overført til avstemming sftp", filnavn)
         }
