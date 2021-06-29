@@ -132,7 +132,7 @@ internal object AvsnittUtil {
                     overskrift = fjernOverskriftFormattering(linje)
                 }
                 linje.isNotBlank() -> {
-                    brødtekst = linje
+                    brødtekst = fjernFormattering(linje)
                 }
             }
         }
@@ -148,6 +148,11 @@ internal object AvsnittUtil {
         }
 
         return lokaltAvsnitt.copy(underavsnittsliste = lokaltAvsnitt.underavsnittsliste + underavsnitt)
+    }
+
+    private fun fjernFormattering(linje: String): String {
+        return linje.removePrefix("{venstrejustert}").replace("{høyrejustert}", "\t\t\t")
+
     }
 
 
