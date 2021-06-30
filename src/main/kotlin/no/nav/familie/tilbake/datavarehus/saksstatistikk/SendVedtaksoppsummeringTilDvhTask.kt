@@ -10,17 +10,17 @@ import java.util.UUID
 import javax.validation.Validation
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendVedtakHendelserTilDvhTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = SendVedtaksoppsummeringTilDvhTask.TYPE,
                      beskrivelse = "Sender oppsummering av vedtak til datavarehus.")
-class SendVedtakHendelserTilDvhTask(private val vedtaksoppsummeringService: VedtaksoppsummeringService,
-                                    private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
+class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: VedtaksoppsummeringService,
+                                        private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
 
     private val validator = Validation.buildDefaultValidatorFactory().validator
 
 
     override fun doTask(task: Task) {
 
-        val behandlingId = UUID.fromString(task.metadata.getProperty("behandlingId"))
+        val behandlingId = UUID.fromString(task.payload)
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering)
