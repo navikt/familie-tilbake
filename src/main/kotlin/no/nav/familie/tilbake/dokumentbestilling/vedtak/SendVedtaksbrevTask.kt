@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -30,6 +31,11 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
         }
         vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.BRUKER)
         log.info("Utført for behandling: {}", behandlingId)
+    }
+
+    override fun onCompletion(task: Task) {
+        taskService.save(Task(type = SendVedtaksoppsummeringTilDvhTask.TYPE,
+                              payload = task.payload))
     }
 
     companion object {
