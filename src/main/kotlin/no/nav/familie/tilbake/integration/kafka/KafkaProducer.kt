@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.integration.kafka
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
@@ -26,7 +27,11 @@ class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
     }
 
     fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering) {
-        sendKafkamelding(behandlingId, KafkaConfig.VEDTAK_TOPIC, "error", request)
+        sendKafkamelding(behandlingId, KafkaConfig.VEDTAK_TOPIC, request.behandlingUuid.toString(), request)
+    }
+
+    fun sendHentFagsystemsbehandlingRequest(requestId:UUID, request: HentFagsystemsbehandlingRequest){
+        sendKafkamelding(requestId, KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC, requestId.toString(), request)
     }
 
     private fun sendKafkamelding(behandlingId: UUID, topic: String, key: String, request: Any) {
