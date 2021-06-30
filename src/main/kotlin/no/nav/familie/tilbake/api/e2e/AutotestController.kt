@@ -74,7 +74,7 @@ class AutotestController(private val taskRepository: TaskRepository,
         return Ressurs.success("OK")
     }
 
-    @PostMapping(path = ["/publish/fagsystemsbehandling/"])
+    @PostMapping(path = ["/publiser/fagsystemsbehandling"])
     fun publishFagsystemsbehandlingsdata(@Valid @RequestBody opprettManueltTilbakekrevingRequest
                                          : OpprettManueltTilbakekrevingRequest): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
@@ -92,12 +92,12 @@ class AutotestController(private val taskRepository: TaskRepository,
                                                                             revurderingsresultat = "OPPHØR",
                                                                             tilbakekrevingsvalg = Tilbakekrevingsvalg
                                                                                     .IGNORER_TILBAKEKREVING))
-        val requestSendt = requireNotNull(requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
-                                                                                                                 ytelsestype,
-                                                                                                                 eksternId))
+        val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
+                                                                                                  ytelsestype,
+                                                                                                  eksternId)
         val melding = objectMapper.writeValueAsString(respons)
         val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                                            requestSendt.id.toString(),
+                                            requestSendt?.id.toString(),
                                             melding)
         kafkaTemplate.send(producerRecord)
         return Ressurs.success("OK")
