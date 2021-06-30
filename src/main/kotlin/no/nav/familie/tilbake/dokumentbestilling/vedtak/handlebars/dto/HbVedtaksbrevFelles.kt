@@ -38,7 +38,11 @@ data class HbVedtaksbrevFelles(val brevmetadata: Brevmetadata,
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
+    val skattepliktig = Ytelsestype.OVERGANGSSTØNAD == brevmetadata.ytelsestype
+    @Suppress("unused") // Handlebars
     val isSkalIkkeViseSkatt = Ytelsestype.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
+
+
     val harVedlegg = vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR
     val hovedresultat = totalresultat.hovedresultat
 }
