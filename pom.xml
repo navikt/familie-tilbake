@@ -31,7 +31,7 @@
         <com.openhtmltopdf.version>1.0.9</com.openhtmltopdf.version>
         <jaxb-impl.version>3.0.1</jaxb-impl.version>
         <cxf.version>3.4.4</cxf.version>
-        <mockk.version>1.11.0</mockk.version>
+        <mockk.version>1.12.0</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
