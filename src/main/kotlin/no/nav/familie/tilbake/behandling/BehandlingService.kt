@@ -24,6 +24,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -136,6 +137,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingskontrollService.settBehandlingPåVent(behandlingId,
                                                         behandlingPåVentDto.venteårsak,
                                                         behandlingPåVentDto.tidsfrist)
+
+        val beskrivelse = when (behandlingPåVentDto.venteårsak) {
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING -> "Frist er oppdatert pga mottatt tilbakemelding fra bruker"
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG -> "Ny frist satt på bakgrunn av mottatt kravgrunnlag fra økonomi"
+            else -> "Frist er oppdatert av saksbehandler ${ContextService.hentSaksbehandler()}"
+        }
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
+                                               Oppgavetype.BehandleSak,
+                                               beskrivelse,
+                                               behandlingPåVentDto.tidsfrist)
     }
 
     @Transactional
@@ -155,6 +166,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                               Aktør.SAKSBEHANDLER)
 
         stegService.gjenopptaSteg(behandlingId)
+
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
+                                               Oppgavetype.BehandleSak,
+                                               "Behandling er tatt av vent",
+                                               LocalDate.now())
     }
 
     @Transactional

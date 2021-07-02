@@ -21,7 +21,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = OppdaterOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Oppdaterer oppgave",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 300)
 class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
                           private val integrasjonerClient: IntegrasjonerClient,
                           private val fagsakRepository: FagsakRepository,
@@ -34,7 +34,7 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         val frist = task.metadata.getProperty("frist")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
-        val behandlingId = UUID.fromString(task.metadata.getProperty("behandlingId"))
+        val behandlingId = UUID.fromString(task.payload)
 
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

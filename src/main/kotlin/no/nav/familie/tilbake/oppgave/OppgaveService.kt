@@ -37,6 +37,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
+                       beskrivelse: String?,
                        fristForFerdigstillelse: LocalDate): OppgaveResponse {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -52,7 +53,10 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                                                    oppgavetype = oppgavetype,
                                                    behandlesAvApplikasjon = "familie-tilbake",
                                                    fristFerdigstillelse = fristForFerdigstillelse,
-                                                   beskrivelse = lagOppgaveTekst(fagsak.eksternFagsakId, behandling.eksternBrukId.toString(), fagsak.fagsystem.name),
+                                                   beskrivelse = lagOppgaveTekst(fagsak.eksternFagsakId,
+                                                                                 behandling.eksternBrukId.toString(),
+                                                                                 fagsak.fagsystem.name,
+                                                                                 beskrivelse),
                                                    enhetsnummer = behandling.behandlendeEnhet,
                                                    behandlingstype = Behandlingstype.Tilbakekreving.value,
                                                    behandlingstema = null)
@@ -85,10 +89,12 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                 integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         if (finnOppgaveResponse.oppgaver.size > 1) {
             LOG.error("er mer enn en åpen oppgave for behandlingen")
-            SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
+            SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
+                            "$finnOppgaveRequest, $finnOppgaveResponse")
         } else if (finnOppgaveResponse.oppgaver.isEmpty()) {
             LOG.error("Fant ingen oppgave å ferdigstille")
-            SECURELOG.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, $finnOppgaveRequest, $finnOppgaveResponse")
+            SECURELOG.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
+                            "$finnOppgaveRequest, $finnOppgaveResponse")
         }
         integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
 
@@ -103,9 +109,9 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
             beskrivelse + "\n"
         } else {
             ""
-        } +
-               "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/${eksternbrukBehandlingID}"
+        } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/" +
+               eksternbrukBehandlingID
     }
 
     companion object {
