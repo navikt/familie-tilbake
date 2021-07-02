@@ -1,17 +1,61 @@
 {{> nb/vedtak/periode-fakta/periode_fakta_felles}}
 {{#switch fakta.hendelsestype}}
-    {{#case "MEDLEMSKAP"}}
-        {{> fakta-medlemskap}}
-    {{/case}}
-    {{#case "ØKONOMIFEIL"}}
-        {{> fakta-økonomi-feil}}
-    {{/case}}
-    {{#case "ENDRING_STØNADSPERIODEN"}}
-        {{> fakta-stønadsperiode}}
-    {{/case}}
-    {{#case "BA_ANNET"}}
+    {{#case "ANNET"}}
         {{#switch fakta.hendelsesundertype}}
             {{#case "ANNET_FRITEKST"}}
+            {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "BOR_MED_SØKER"}}
+        {{> fakta-bor}}
+    {{/case}}
+    {{#case "BOSATT_I_RIKET"}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "BARN_FLYTTET_FRA_NORGE"}}
+Du har fått {{ytelsesnavnUbestemt}} for barn som har flyttet fra Norge. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
+            {{#case "BRUKER_FLYTTET_FRA_NORGE"}}
+Du har fått {{ytelsesnavnUbestemt}} etter at du flyttet fra Norge. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden
+            {{/case}}
+            {{#case "BARN_BOR_IKKE_I_NORGE"}}
+Du har fått {{ytelsesnavnUbestemt}} for barn som ikke bodde i Norge. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
+            {{#case "BRUKER_BOR_IKKE_I_NORGE"}}
+Du har fått {{ytelsesnavnUbestemt}} uten at du bodde i Norge. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "LOVLIG_OPPHOLD"}}
+        {{> fakta-opphold}}
+    {{/case}}
+    {{#case "DØDSFALL"}}
+        {{> fakta-død}}
+    {{/case}}
+    {{#case "DELT_BOSTED"}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "ENIGHET_OM_OPPHØR_DELT_BOSTED"}}
+Du har fått {{ytelsesnavnUbestemt}} etter at avtalen om delt bosted er opphørt. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
+            {{#case "UENIGHET_OM_OPPHØR_DELT_BOSTED"}}
+Du har fått {{ytelsesnavnUbestemt}} etter at avtalen om delt bosted ikke lenger praktiseres. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "BARNS_ALDER"}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "BARN_OVER_18_ÅR"}}
+Du har fått {{ytelsesnavnUbestemt}} etter at barn fylte 18 år. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+                {{/case}}
+            {{#case "BARN_OVER_6_ÅR"}}
+Du har fått {{ytelsesnavnUbestemt}} med feil beløp etter at barn har fylt 6 år. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
             {{/case}}
         {{/switch}}
     {{/case}}

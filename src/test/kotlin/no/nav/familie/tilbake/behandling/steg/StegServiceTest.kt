@@ -616,7 +616,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
         val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(LocalDate.of(2021, 1, 1),
                                                                                                 LocalDate.of(2021, 1, 31)),
-                                                                           hendelsestype = Hendelsestype.BA_ANNET,
+                                                                           hendelsestype = Hendelsestype.ANNET,
                                                                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
                                        begrunnelse = "testverdi")

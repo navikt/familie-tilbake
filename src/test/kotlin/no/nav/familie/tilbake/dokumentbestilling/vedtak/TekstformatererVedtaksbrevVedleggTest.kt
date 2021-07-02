@@ -111,8 +111,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                 listOf(HbVedtaksbrevsperiode(periode = januar,
                                              kravgrunnlag = HbKravgrunnlag
                                                      .forFeilutbetaltBeløp(BigDecimal.valueOf(feilutbetalt.toLong())),
-                                             fakta = HbFakta(Hendelsestype.ØKONOMIFEIL,
-                                                             Hendelsesundertype.FOR_MYE_UTBETALT),
+                                             fakta = HbFakta(Hendelsestype.BOSATT_I_RIKET,
+                                                             Hendelsesundertype.BARN_BOR_IKKE_I_NORGE),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat
@@ -165,7 +165,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         val perioder =
                 listOf(HbVedtaksbrevsperiode(periode = januar,
                                              kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                                             fakta = HbFakta(Hendelsestype.EF_ANNET,
+                                             fakta = HbFakta(Hendelsestype.ANNET,
                                                              Hendelsesundertype.ANNET_FRITEKST),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -185,7 +185,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                                              kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal(3000),
                                                                            riktigBeløp = BigDecimal(3000),
                                                                            utbetaltBeløp = BigDecimal(6000)),
-                                             fakta = HbFakta(Hendelsestype.ØKONOMIFEIL, Hendelsesundertype.DOBBELUTBETALING),
+                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
@@ -198,7 +199,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                                              kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal(3000),
                                                                            riktigBeløp = BigDecimal(3000),
                                                                            utbetaltBeløp = BigDecimal(6000)),
-                                             fakta = HbFakta(Hendelsestype.ØKONOMIFEIL, Hendelsesundertype.DOBBELUTBETALING),
+                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat

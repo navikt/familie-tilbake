@@ -1,18 +1,18 @@
 {{> nn/vedtak/periode-fakta/periode_fakta_felles}}
 {{#switch fakta.hendelsestype}}
-    {{#case "MEDLEMSKAP"}}
-        {{> fakta-medlemskap}}
-    {{/case}}
-    {{#case "ØKONOMIFEIL"}}
-        {{> fakta-økonomi-feil}}
-    {{/case}}
-    {{#case "ENDRING_STØNADSPERIODEN"}}
-        {{> fakta-stønadsperiode}}
-    {{/case}}
-    {{#case "KS_ANNET"}}
+    {{#case "ANNET"}}
         {{#switch fakta.hendelsesundertype}}
             {{#case "ANNET_FRITEKST"}}
             {{/case}}
         {{/switch}}
+    {{/case}}
+    {{#case "LOVLIG_OPPHOLD"}}
+        {{> fakta-opphold}}
+    {{/case}}
+    {{#case "BOR_MED_SØKER"}}
+        {{> fakta-bor}}
+    {{/case}}
+    {{#case "DØDSFALL"}}
+        {{> fakta-død}}
     {{/case}}
 {{/switch}}

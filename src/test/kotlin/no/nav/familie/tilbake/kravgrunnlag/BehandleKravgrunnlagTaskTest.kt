@@ -215,7 +215,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandling.id,
                                 BehandlingsstegFaktaDto(listOf(FaktaFeilutbetalingsperiodeDto(PeriodeDto(YearMonth.of(2018, 1),
                                                                                                          YearMonth.of(2018, 2)),
-                                                                                              Hendelsestype.BA_ANNET,
+                                                                                              Hendelsestype.ANNET,
                                                                                               Hendelsesundertype.ANNET_FRITEKST)),
                                                         "Fakta begrunnelse"))
         // Håndter foreldelse steg

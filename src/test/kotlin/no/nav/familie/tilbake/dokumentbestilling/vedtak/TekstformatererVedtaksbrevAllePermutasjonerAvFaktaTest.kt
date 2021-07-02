@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigu
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbTotalresultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevDatoer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
@@ -21,9 +22,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsestypePerYtelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsesundertypePerHendelsestype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -42,7 +41,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                                             sakspartsnavn = "Test",
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
-                                            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                                            ytelsestype = Ytelsestype.BARNETRYGD,
                                             behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                             ansvarligSaksbehandler = "Bob")
 
@@ -58,20 +57,12 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for BT`() {
-        val unntak1 = setOf(HendelseMedUndertype(Hendelsestype.EF_ANNET,
-                                                 Hendelsesundertype.MOTTAKER_DØD),
-                            HendelseMedUndertype(Hendelsestype.EF_ANNET,
-                                                 Hendelsesundertype.IKKE_OMSORG))
-        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NB, unntak1)
+        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NB)
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for BT nynorsk`() {
-        val unntak1 = setOf(HendelseMedUndertype(Hendelsestype.EF_ANNET,
-                                                 Hendelsesundertype.MOTTAKER_DØD),
-                            HendelseMedUndertype(Hendelsestype.EF_ANNET,
-                                                 Hendelsesundertype.IKKE_OMSORG))
-        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NN, unntak1)
+        lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NN)
     }
 
     @SafeVarargs
@@ -159,7 +150,9 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                                 behandling = HbBehandling(),
                                 totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
                                 vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-                                ansvarligBeslutter = "ansvarlig person sin signatur")
+                                ansvarligBeslutter = "ansvarlig person sin signatur",
+                                datoer = HbVedtaksbrevDatoer(opphørsdatoDødSøker = LocalDate.of(2021, 5, 4),
+                                                             opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4)))
 
 
     private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> {

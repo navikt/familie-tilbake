@@ -97,7 +97,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val periode = FaktaFeilutbetalingsperiode(periode = Periode(førstePeriode.periode.fom,
                                                                     andrePeriode.periode.tom),
-                                                  hendelsestype = Hendelsestype.BA_ANNET,
+                                                  hendelsestype = Hendelsestype.ANNET,
                                                   hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,
                                                                  begrunnelse = "fakta begrunnelse",
@@ -119,7 +119,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
         assertTrue { vurdertPeriode.reduserteBeløper.isEmpty() }
         assertAktiviteter(vurdertPeriode.aktiviteter)
@@ -143,7 +143,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val foreldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 1, 31)), foreldetPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, foreldetPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, foreldetPeriode.hendelsestype)
         assertEquals(BigDecimal("10000"), foreldetPeriode.feilutbetaltBeløp)
         assertTrue { foreldetPeriode.foreldet }
         assertTrue { foreldetPeriode.reduserteBeløper.isEmpty() }
@@ -155,7 +155,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
                                 LocalDate.of(2020, 2, 29)), ikkeForeldetPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, ikkeForeldetPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, ikkeForeldetPeriode.hendelsestype)
         assertFalse { ikkeForeldetPeriode.foreldet }
         assertEquals(BigDecimal("10000"), ikkeForeldetPeriode.feilutbetaltBeløp)
         assertEquals(BigDecimal(10000), ikkeForeldetPeriode.aktiviteter[0].beløp)
@@ -180,7 +180,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val førstePeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(periode1, førstePeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, førstePeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, førstePeriode.hendelsestype)
         assertEquals(BigDecimal(10000), førstePeriode.feilutbetaltBeløp)
         assertFalse { førstePeriode.foreldet }
         assertAktiviteter(førstePeriode.aktiviteter)
@@ -191,7 +191,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val andrePeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(periode2, andrePeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, andrePeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, andrePeriode.hendelsestype)
         assertEquals(BigDecimal(10000), andrePeriode.feilutbetaltBeløp)
         assertFalse { andrePeriode.foreldet }
         assertAktiviteter(andrePeriode.aktiviteter)
@@ -236,7 +236,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
         assertAktiviteter(vurdertPeriode.aktiviteter)
         assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
@@ -272,7 +272,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
         assertAktiviteter(vurdertPeriode.aktiviteter)
         assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
@@ -313,7 +313,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
         assertAktiviteter(vurdertPeriode.aktiviteter)
         assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
@@ -365,7 +365,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val ikkeVurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 1, 31)), ikkeVurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, ikkeVurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, ikkeVurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("10000"), ikkeVurdertPeriode.feilutbetaltBeløp)
         assertTrue { ikkeVurdertPeriode.reduserteBeløper.isEmpty() }
         assertAktiviteter(ikkeVurdertPeriode.aktiviteter)
@@ -376,7 +376,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
                                 LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, vurdertPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
         assertEquals(BigDecimal("10000"), vurdertPeriode.feilutbetaltBeløp)
         assertAktiviteter(vurdertPeriode.aktiviteter)
         assertEquals(BigDecimal(10000), vurdertPeriode.aktiviteter[0].beløp)
@@ -427,7 +427,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val førsteForeldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
         assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
                                 LocalDate.of(2020, 1, 31)), førsteForeldetPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, førsteForeldetPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, førsteForeldetPeriode.hendelsestype)
         assertEquals(BigDecimal("10000"), førsteForeldetPeriode.feilutbetaltBeløp)
         assertTrue { førsteForeldetPeriode.reduserteBeløper.isEmpty() }
         assertAktiviteter(førsteForeldetPeriode.aktiviteter)
@@ -438,7 +438,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val andreForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
         assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
                                 LocalDate.of(2020, 2, 29)), andreForeldetPeriode.periode)
-        assertEquals(Hendelsestype.BA_ANNET, andreForeldetPeriode.hendelsestype)
+        assertEquals(Hendelsestype.ANNET, andreForeldetPeriode.hendelsestype)
         assertEquals(BigDecimal("10000"), andreForeldetPeriode.feilutbetaltBeløp)
         assertTrue { andreForeldetPeriode.reduserteBeløper.isEmpty() }
         assertAktiviteter(andreForeldetPeriode.aktiviteter)
