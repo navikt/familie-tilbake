@@ -142,7 +142,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     fun `hentVedtaksoppsummering skal lage oppsummering for perioder med aktsomhet`() {
         lagVilkårMedAktsomhet()
         lagBehandlingVedtak()
-        val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService!!.hentVedtaksoppsummering(behandling.id)
+        val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandling.id)
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
@@ -177,16 +177,16 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         val vedtakPeriode: VedtakPeriode = vedtakPerioder[0]
         assertThat(vedtakPeriode.fom).isEqualTo(periode.fomDato)
         assertThat(vedtakPeriode.tom).isEqualTo(periode.tomDato)
-        assertThat(vedtakPeriode.hendelsestype).isEqualTo("MEDLEMSKAP")
-        assertThat(vedtakPeriode.hendelsesundertype).isEqualTo("IKKE_BOSATT")
+        assertThat(vedtakPeriode.hendelsestype).isEqualTo("BOSATT_I_RIKET")
+        assertThat(vedtakPeriode.hendelsesundertype).isEqualTo("BRUKER_BOR_IKKE_I_NORGE")
         return vedtakPeriode
     }
 
     private fun lagFakta() {
         val faktaFeilutbetalingPeriode =
                 FaktaFeilutbetalingsperiode(periode = periode,
-                                            hendelsestype = Hendelsestype.MEDLEMSKAP,
-                                            hendelsesundertype = Hendelsesundertype.IKKE_BOSATT)
+                                            hendelsestype = Hendelsestype.BOSATT_I_RIKET,
+                                            hendelsesundertype = Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE)
         val faktaFeilutbetaling = FaktaFeilutbetaling(behandlingId = behandling.id,
                                                       perioder = setOf(faktaFeilutbetalingPeriode),
                                                       begrunnelse = "fakta begrunnelse")

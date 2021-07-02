@@ -41,7 +41,7 @@ class AvsnittUtilTest {
                                             sakspartsnavn = "Test",
                                             mottageradresse = Adresseinfo("ident", "bob"),
                                             språkkode = Språkkode.NB,
-                                            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                                            ytelsestype = Ytelsestype.BARNETRYGD,
                                             behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
                                             ansvarligSaksbehandler = "Bob")
 
@@ -79,7 +79,7 @@ class AvsnittUtilTest {
         val perioder =
                 listOf(HbVedtaksbrevsperiode(periode = januar,
                                              kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                                             fakta = HbFakta(Hendelsestype.EF_ANNET, Hendelsesundertype.ANNET_FRITEKST),
+                                             fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat
@@ -102,7 +102,7 @@ class AvsnittUtilTest {
                                                            særligeGrunner =
                                                            HbSærligeGrunner(listOf(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL,
                                                                                    SærligGrunn.STØRRELSE_BELØP))),
-                                             fakta = HbFakta(Hendelsestype.ØKONOMIFEIL, Hendelsesundertype.DOBBELUTBETALING),
+                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER, Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal(3000),
                                                                            riktigBeløp = BigDecimal(3000),
                                                                            utbetaltBeløp = BigDecimal(6000)),

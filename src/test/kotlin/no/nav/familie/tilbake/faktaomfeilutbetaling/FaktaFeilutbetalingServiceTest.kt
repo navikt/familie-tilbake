@@ -70,7 +70,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
         assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                    hendelsestype = Hendelsestype.BA_ANNET,
+                                    hendelsestype = Hendelsestype.ANNET,
                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
     }
 
@@ -87,7 +87,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         assertNull(faktaFeilutbetalingDto.varsletBeløp)
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
         assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                    hendelsestype = Hendelsestype.BA_ANNET,
+                                    hendelsestype = Hendelsestype.ANNET,
                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
     }
 
@@ -105,7 +105,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagFaktaomfeilutbetaling(behandlingId: UUID) {
         val faktaPerioder = FaktaFeilutbetalingsperiode(periode = periode,
-                                                        hendelsestype = Hendelsestype.BA_ANNET,
+                                                        hendelsestype = Hendelsestype.ANNET,
                                                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         val faktaFeilutbetaling = FaktaFeilutbetaling(behandlingId = behandlingId,
                                                       begrunnelse = "Fakta begrunnelse",

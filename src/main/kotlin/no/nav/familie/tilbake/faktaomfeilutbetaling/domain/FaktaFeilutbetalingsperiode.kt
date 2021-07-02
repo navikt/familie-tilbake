@@ -19,28 +19,28 @@ data class FaktaFeilutbetalingsperiode(@Id
                                        val sporbar: Sporbar = Sporbar())
 
 enum class Hendelsestype {
-    BA_ANNET,
-    EF_ANNET,
-    KS_ANNET,
-    ENDRING_STØNADSPERIODEN,
-    ØKONOMIFEIL,
-    MEDLEMSKAP
+    ANNET,
+    BOR_MED_SØKER,
+    BOSATT_I_RIKET,
+    LOVLIG_OPPHOLD,
+    DØDSFALL,
+    DELT_BOSTED,
+    BARNS_ALDER,
 }
 
 enum class Hendelsesundertype {
 
-    MOTTAKER_DØD,
-    BARN_DØD,
-    IKKE_OMSORG,
     ANNET_FRITEKST,
-    IKKE_BOSATT,
-    MEDLEM_I_ANNET_LAND,
-    IKKE_LOVLIG_OPPHOLD,
-    UTVANDRET,
-    DOBBELUTBETALING,
-    FOR_MYE_UTBETALT,
-    ØKONOMI_FEIL_TREKK,
-    ØKONOMI_FEIL_FERIEPENGER
-
+    BOR_IKKE_MED_BARN,
+    BARN_FLYTTET_FRA_NORGE,
+    BRUKER_FLYTTET_FRA_NORGE,
+    BARN_BOR_IKKE_I_NORGE,
+    BRUKER_BOR_IKKE_I_NORGE,
+    UTEN_OPPHOLDSTILLATELSE,
+    BARN_DØD,
+    BRUKER_DØD,
+    ENIGHET_OM_OPPHØR_DELT_BOSTED,
+    UENIGHET_OM_OPPHØR_DELT_BOSTED,
+    BARN_OVER_18_ÅR,
+    BARN_OVER_6_ÅR
 }
-
