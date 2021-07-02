@@ -122,7 +122,7 @@ class AvsnittUtilTest {
         assertThat(resultat[2].underavsnittsliste).hasSize(5)
         assertThat(resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size).isEqualTo(3)
         assertThat(resultat[3].avsnittstype).isEqualTo(Avsnittstype.TILLEGGSINFORMASJON)
-        assertThat(resultat[3].underavsnittsliste).hasSize(12)
+        assertThat(resultat[3].underavsnittsliste).hasSize(11)
         resultat[3].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isFalse() }
     }
 
