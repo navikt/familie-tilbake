@@ -8,11 +8,11 @@
         {{#if totalresultat.totaltRentebeløp}}
             <th>Renter</th>
         {{/if}}
-        {{#if skalIkkeViseSkatt}}
-            <th class="sum">Beløp du skal betale tilbake</th>
-        {{else}}
+        {{#if totalresultat.harSkattetrekk}}
             <th>Beløp før skatt</th>
             <th class="sum">Beløp du skal betale tilbake etter at skatt er trekt frå</th>
+        {{else}}
+            <th class="sum">Beløp du skal betale tilbake</th>
         {{/if}}
         </tr>
         </thead>
@@ -31,7 +31,7 @@
             {{#if totalresultat.totaltRentebeløp}}
             <td class="tall">{{#if resultat.rentebeløp}}{{kroner resultat.rentebeløp}}{{/if}}</td>
             {{/if}}
-            {{#if (not skalIkkeViseSkatt)}}
+            {{#if totalresultat.harSkattetrekk}}
             <td class="tall">{{kroner resultat.tilbakekrevesBeløpMedRenter}}</td>
             {{/if}}
             <td class="tall sum">{{kroner resultat.tilbakekrevesBeløpUtenSkattMedRenter}}</td>
@@ -44,7 +44,7 @@
         {{#if totalresultat.totaltRentebeløp}}
             <td class="tall sumrad"></td>
         {{/if}}
-        {{#if (not skalIkkeViseSkatt)}}
+        {{#if totalresultat.harSkattetrekk}}
             <td class="tall sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}</td>
         {{/if}}
             <td class="tall sum sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}</td>

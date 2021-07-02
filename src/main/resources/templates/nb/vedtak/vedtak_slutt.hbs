@@ -5,15 +5,13 @@ _{{#if hjemmel.lovhjemmelFlertall}}Lovhjemlene{{else}}Lovhjemmelen{{/if}} vi har
 {{/if}}
 Vedtaket er gjort etter {{hjemmel.lovhjemmelVedtak}}.
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
-    {{#if (neq brevmetadata.ytelsestype "ES")}}
+    {{#if skattepliktig}}
 _Skatt
-        {{#if skalIkkeViseSkatt }}
-NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
-        {{else}}
+    {{#if totalresultat.harSkattetrekk }}
 Beløpet du skal betale tilbake etter skatt er trukket fra, er beregnet etter ditt gjennomsnittlige skattetrekk per måned. Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.
 
-NAV gir opplysninger til Skattetaten om skattebeløpet og om beløpet du skal betale tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
-        {{/if}}
+    {{/if}}
+NAV gir opplysninger til Skatteetaten{{#if totalresultat.harSkattetrekk }} om skattebeløpet og om beløpet du skal betale tilbake før skatt er trukket fra{{/if}}. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
     {{/if}}
 _Hvordan betale tilbake pengene du skylder
     {{#if behandling.erRevurdering}}
