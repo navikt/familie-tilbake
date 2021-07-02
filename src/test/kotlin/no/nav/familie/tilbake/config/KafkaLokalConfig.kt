@@ -24,11 +24,10 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker
 
 @Configuration
 @EnableKafka
-@Profile("local", "integrasjonstest")
+@Profile("local")
 class KafkaLokalConfig {
 
     @Bean
-    @Profile("!integrasjonstest")
     fun broker(): EmbeddedKafkaBroker {
         return EmbeddedKafkaBroker(1)
                 .kafkaPorts(8093) // Det bør kjøre på en annen port enn 9092(brukes for historikkinnslag)
