@@ -1,0 +1,88 @@
+version: 2
+registries:
+  maven-repository-maven-pkg-github-com-navikt-fp-felles:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/fp-felles/
+    username: x-access-token
+    password: "${{secrets.MAVEN_REPOSITORY_MAVEN_PKG_GITHUB_COM_NAVIKT_FP_FELLES_PASSWORD}}"
+
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  target-branch: main
+  ignore:
+  - dependency-name: org.jvnet.jaxb2_commons:jaxb2-basics
+    versions:
+    - "> 1.11.1, < 1.12"
+  - dependency-name: no.nav.common:cxf
+    versions:
+    - 2.2021.02.23_11.33-7091f10a35ba
+    - 2.2021.03.03_08.24-3686938439d9
+    - 2.2021.04.19_14.33-1967bc997550
+  - dependency-name: no.nav.familie.felles:sikkerhet
+    versions:
+    - 1.20210223111349_05be6ea
+    - 1.20210416135502_5bf9eff
+    - 1.20210419103325_d044927
+  - dependency-name: no.nav.familie.felles:http-client
+    versions:
+    - 1.20210223111349_05be6ea
+    - 1.20210416135502_5bf9eff
+    - 1.20210419103325_d044927
+  - dependency-name: no.nav.familie.felles:log
+    versions:
+    - 1.20210223111349_05be6ea
+    - 1.20210416135502_5bf9eff
+    - 1.20210419103325_d044927
+  - dependency-name: no.nav.familie.kontrakter:felles
+    versions:
+    - 2.0_20210301132655_04e6a55
+    - 2.0_20210302142256_b10818b
+    - 2.0_20210303203405_aebacea
+    - 2.0_20210304090118_e60086b
+    - 2.0_20210305131536_dd4cd5d
+    - 2.0_20210308102146_90cb778
+    - 2.0_20210311094901_8f7cf3f
+    - 2.0_20210315145940_2152fb0
+    - 2.0_20210316145009_e7d6987
+    - 2.0_20210415153406_ea38051
+  - dependency-name: com.openhtmltopdf:openhtmltopdf-core
+    versions:
+    - 1.0.7
+    - 1.0.8
+  - dependency-name: com.openhtmltopdf:openhtmltopdf-svg-support
+    versions:
+    - 1.0.7
+  - dependency-name: com.openhtmltopdf:openhtmltopdf-slf4j
+    versions:
+    - 1.0.7
+  - dependency-name: com.openhtmltopdf:openhtmltopdf-pdfbox
+    versions:
+    - 1.0.7
+  - dependency-name: org.verapdf:validation-model
+    versions:
+    - 1.18.2
+  - dependency-name: org.springframework.vault:spring-vault-core
+    versions:
+    - 2.3.1
+  - dependency-name: io.mockk:mockk
+    versions:
+    - 1.10.6
+  - dependency-name: org.springframework.boot:spring-boot-starter-parent
+    versions:
+    - 2.4.3
+  - dependency-name: org.postgresql:postgresql
+    versions:
+    - 42.2.19
+  - dependency-name: no.nav.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon
+    versions:
+    - 1.2021.02.22-10.45-4201aaea72fb
+  - dependency-name: no.nav.familie:prosessering-jdbc
+    versions:
+    - 1.20210219072056_4474948
+  registries:
+  - maven-repository-maven-pkg-github-com-navikt-fp-felles
