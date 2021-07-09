@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.integration.familie
 
-import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Fil
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -16,17 +15,18 @@ import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
+import no.nav.familie.webflux.client.AbstractPingableWebClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
+class IntegrasjonerClient(@Qualifier("azureWebClient") restOperations: WebClient,
                           private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+    : AbstractPingableWebClient(restOperations, "familie.integrasjoner") {
 
 
     override val pingUri: URI =
