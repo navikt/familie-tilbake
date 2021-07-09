@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -16,11 +15,11 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
+import no.nav.familie.webflux.sts.StsTokenClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -28,7 +27,7 @@ import kotlin.test.assertNotNull
 internal class IntegrasjonerClientTest {
 
     private val wireMockServer = WireMockServer(wireMockConfig().dynamicPort())
-    private val restOperations: RestOperations = RestTemplateBuilder().build()
+    private val webClient = WebClient.builder().build()
 
     private lateinit var integrasjonerClient: IntegrasjonerClient
     private val arkiverDokumentRequest = ArkiverDokumentRequest("123456789", true, listOf())
@@ -36,9 +35,9 @@ internal class IntegrasjonerClientTest {
     @BeforeEach
     fun setUp() {
         wireMockServer.start()
-        val stsRestClient = mockk<StsRestClient>()
+        val stsRestClient = mockk<StsTokenClient>()
         every { stsRestClient.systemOIDCToken } returns "token"
-        integrasjonerClient = IntegrasjonerClient(restOperations,
+        integrasjonerClient = IntegrasjonerClient(webClient,
                                                   IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"))
     }
 

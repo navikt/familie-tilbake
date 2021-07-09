@@ -7,16 +7,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
+import no.nav.familie.webflux.sts.StsTokenClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.time.LocalDate
 import kotlin.test.assertEquals
@@ -27,7 +26,7 @@ class PdlClientTest {
 
     companion object {
 
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val webClient = WebClient.builder().build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -36,9 +35,9 @@ class PdlClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            val stsRestClient = mockk<StsRestClient>()
+            val stsRestClient = mockk<StsTokenClient>()
             every { stsRestClient.systemOIDCToken } returns "token"
-            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations, stsRestClient)
+            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), webClient, stsRestClient)
 
         }
 

@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.integration.pdl
 
 
-import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -14,19 +12,22 @@ import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.webflux.client.AbstractWebClient
+import no.nav.familie.webflux.sts.StsTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDate
 
 @Service
 class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("sts") val restTemplate: RestOperations,
-                private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
+                @Qualifier("stsWebClient") webClient: WebClient,
+                private val stsTokenClient: StsTokenClient) : AbstractWebClient(webClient,
+                                                                              "pdl.personinfo") {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -70,7 +71,7 @@ class PdlClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
+            add("Nav-Consumer-Token", "Bearer ${stsTokenClient.systemOIDCToken}")
             add("Tema", hentTema(fagsystem).name)
         }
     }
