@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.consumer
 
-import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.config.KafkaConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch
 
 @Service
 @Profile("!integrasjonstest")
-class HentFagsystemsbehandlingResponsConsumer(private val behManuellOpprService: BehandlingManuellOpprettelseService) {
+class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingService: HentFagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -29,7 +29,7 @@ class HentFagsystemsbehandlingResponsConsumer(private val behManuellOpprService:
 
         val requestId = UUID.fromString(consumerRecord.key())
         val data: String = consumerRecord.value()
-        behManuellOpprService.lagreHentFagsystemsbehandlingRespons(requestId, data)
+        fagsystemsbehandlingService.lagreHentFagsystemsbehandlingRespons(requestId, data)
         latch.countDown()
     }
 }

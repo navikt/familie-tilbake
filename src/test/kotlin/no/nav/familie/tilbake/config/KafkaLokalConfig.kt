@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -25,14 +26,19 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker
 @Configuration
 @EnableKafka
 @Profile("local")
-class KafkaLokalConfig {
+class KafkaLokalConfig(@Value("\${LOKAL_BROKER_KAFKA_PORT:8093}") private val brokerKafkaPort: Int,
+                       @Value("\${LOKAL_BROKER_REMOTE_PORT:8094}") private val brokerRemotePort: Int) {
 
     @Bean
     fun broker(): EmbeddedKafkaBroker {
         return EmbeddedKafkaBroker(1)
-                .kafkaPorts(8093) // Det bør kjøre på en annen port enn 9092(brukes for historikkinnslag)
-                .brokerProperty("listeners", "PLAINTEXT://localhost:8093,REMOTE://localhost:8094")
-                .brokerProperty("advertised.listeners", "PLAINTEXT://localhost:8093,REMOTE://localhost:8094")
+                // For å teste historikkinnslag, må EmbeddedKafkaBroker kjøre på port 8093
+                // For å teste opprett behandling manuelt, må EmbeddedKafkaBroker kjøre på port 9092
+                .kafkaPorts(brokerKafkaPort)
+                .brokerProperty("listeners",
+                                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort")
+                .brokerProperty("advertised.listeners",
+                                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort")
                 .brokerProperty("listener.security.protocol.map", "PLAINTEXT:PLAINTEXT,REMOTE:PLAINTEXT")
                 .brokerListProperty("spring.kafka.bootstrap-servers")
     }
