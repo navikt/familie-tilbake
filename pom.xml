@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
+        <version>2.5.3</version>
     </parent>
 
     <properties>
@@ -21,7 +21,7 @@
         <java.version>11</java.version>
         <jvmTarget>11</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.5.20</kotlin.version>
+        <kotlin.version>1.5.21</kotlin.version>
         <felles.version>1.20210707130039_d595df3</felles.version>
         <common-java-modules.version>2.2021.07.01_07.04-4e699536ceb1</common-java-modules.version>
         <kontrakter.version>2.0_20210625133148_3b67468</kontrakter.version>
@@ -42,7 +42,7 @@
         <spring.cloud>3.0.3</spring.cloud>
         <spring.cloud-contract>3.0.3</spring.cloud-contract>
         <spring.vault>2.3.2</spring.vault>
-        <testcontainers.version>1.15.3</testcontainers.version>
+        <testcontainers.version>1.16.0</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
 
@@ -189,7 +189,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.allclient</artifactId>
-            <version>9.2.2.0</version>
+            <version>9.2.3.0</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
@@ -208,7 +208,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.22</version>
+            <version>42.2.23</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -242,7 +242,7 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
-            <version>2.7.3</version>
+            <version>2.7.5</version>
         </dependency>
 
         <!-- NAV interne avhengigheter-->
@@ -394,7 +394,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.29.0</version>
+            <version>2.29.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
