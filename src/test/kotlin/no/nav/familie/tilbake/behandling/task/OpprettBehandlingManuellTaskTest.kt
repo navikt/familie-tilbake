@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.behandling
+package no.nav.familie.tilbake.behandling.task
 
 import io.mockk.every
 import io.mockk.mockk
@@ -15,8 +15,14 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsystemUtil
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -63,6 +69,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     private val mockKafkaTemplate: KafkaTemplate<String, String> = mockk()
     private lateinit var spyKafkaProducer: KafkaProducer
 
+    private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var behandlingManuellOpprettelseService: BehandlingManuellOpprettelseService
     private lateinit var opprettBehandlingManueltTask: OpprettBehandlingManueltTask
 
@@ -77,10 +84,10 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         spyKafkaProducer = spyk(KafkaProducer(mockKafkaTemplate))
-        behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(requestSendtRepository,
-                                                                                  spyKafkaProducer,
-                                                                                  behandlingService)
-        opprettBehandlingManueltTask = OpprettBehandlingManueltTask((behandlingManuellOpprettelseService))
+        hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
+        behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
+        opprettBehandlingManueltTask = OpprettBehandlingManueltTask(hentFagsystemsbehandlingService,
+                                                                    behandlingManuellOpprettelseService)
 
         val future = SettableListenableFuture<SendResult<String, String>>()
         every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()) }.returns(future)

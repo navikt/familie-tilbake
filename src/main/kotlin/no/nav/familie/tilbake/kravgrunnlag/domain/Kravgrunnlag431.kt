@@ -37,7 +37,7 @@ data class Kravgrunnlag431(@Id
                            val behandlingsenhet: String,
                            val kontrollfelt: String,
                            val saksbehandlerId: String,
-                           val referanse: String? = null,
+                           val referanse: String,
                            val eksternKravgrunnlagId: BigInteger,
                            @MappedCollection(idColumn = "kravgrunnlag431_id")
                            val perioder: Set<Kravgrunnlagsperiode432> = setOf(),

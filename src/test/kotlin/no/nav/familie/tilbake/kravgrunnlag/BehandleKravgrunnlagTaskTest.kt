@@ -1,10 +1,13 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
@@ -13,8 +16,12 @@ import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -29,12 +36,15 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -81,12 +91,30 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var foreldelseRepository: VurdertForeldelseRepository
 
     @Autowired
+    private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
+
+    @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
     @Autowired
     private lateinit var stegService: StegService
 
     @Autowired
+    private lateinit var mottattXmlService: ØkonomiXmlMottattService
+
+    @Autowired
+    private lateinit var taskService: TaskService
+
+    @Autowired
+    private lateinit var historikkTaskService: HistorikkTaskService
+
+    @Autowired
+    private lateinit var endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+
+    private val kafkaProducer: KafkaProducer = mockk()
+
+    private lateinit var kravgrunnlagService: KravgrunnlagService
+    private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
     private val fagsak = Testdata.fagsak
@@ -94,6 +122,21 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
+        hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
+        kravgrunnlagService = KravgrunnlagService(
+                kravgrunnlagRepository,
+                behandlingRepository,
+                mottattXmlService,
+                stegService,
+                behandlingskontrollService,
+                taskService,
+                historikkTaskService,
+                hentFagsystemsbehandlingService,
+                endretKravgrunnlagEventPublisher)
+        behandleKravgrunnlagTask = BehandleKravgrunnlagTask(kravgrunnlagService)
+
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
@@ -204,6 +247,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
     }
 
     @Test
@@ -272,6 +316,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+
+        assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
     }
 
     @Test
@@ -416,7 +462,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val mottattKravgrunnlagListe = mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(BigInteger.ZERO,
                                                                                                    BigInteger.ZERO)
-        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT)
+        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0")
 
         assertTrue { mottattXmlArkivRepository.findAll().toList().isEmpty() }
     }
@@ -434,8 +480,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val mottattKravgrunnlagListe = mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(BigInteger.ZERO,
                                                                                                    BigInteger.ZERO)
-        assertOkoXmlMottattData(mottattKravgrunnlagListe,
-                                endretKravgrunnlagXml, Kravstatuskode.ENDRET)
+        assertOkoXmlMottattData(mottattKravgrunnlagListe, endretKravgrunnlagXml, Kravstatuskode.ENDRET, "1")
 
         assertTrue { mottattXmlArkivRepository.findAll().toList().isNotEmpty() }
     }
@@ -452,13 +497,14 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private fun assertOkoXmlMottattData(mottattKravgrunnlagListe: List<ØkonomiXmlMottatt>,
                                         kravgrunnlagXml: String,
-                                        kravstatuskode: Kravstatuskode) {
+                                        kravstatuskode: Kravstatuskode,
+                                        referanse: String) {
         assertTrue { mottattKravgrunnlagListe.isNotEmpty() }
         assertEquals(1, mottattKravgrunnlagListe.size)
         val mottattKravgrunnlag = mottattKravgrunnlagListe[0]
         assertEquals(kravstatuskode, mottattKravgrunnlag.kravstatuskode)
         assertEquals(fagsak.eksternFagsakId, mottattKravgrunnlag.eksternFagsakId)
-        assertEquals("0", mottattKravgrunnlag.referanse)
+        assertEquals(referanse, mottattKravgrunnlag.referanse)
         assertEquals("2021-03-02-18.50.15.236315", mottattKravgrunnlag.kontrollfelt)
         assertEquals(kravgrunnlagXml, mottattKravgrunnlag.melding)
         assertEquals(BigInteger.ZERO, mottattKravgrunnlag.eksternKravgrunnlagId)
@@ -508,6 +554,17 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktor"] &&
                 behandling.id.toString() == it.payload
+            }
+        }
+    }
+
+    private fun assertOppdaterFaktainfoTask(referanse: String) {
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                OppdaterFaktainfoTask.TYPE == it.type &&
+                fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
+                fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
+                referanse == it.metadata["eksternId"]
             }
         }
     }

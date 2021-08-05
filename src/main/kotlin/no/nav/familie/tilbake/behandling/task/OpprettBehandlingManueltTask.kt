@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service
                      beskrivelse = "oppretter behandling manuelt",
                      maxAntallFeil = 10,
                      triggerTidVedFeilISekunder = 5)
-class OpprettBehandlingManueltTask(private val behManuellOpprService: BehandlingManuellOpprettelseService) : AsyncTaskStep {
+class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
+                                   private val behManuellOpprService: BehandlingManuellOpprettelseService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -22,7 +24,7 @@ class OpprettBehandlingManueltTask(private val behManuellOpprService: Behandling
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
-        behManuellOpprService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
+        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
     }
 
     override fun doTask(task: Task) {
@@ -31,9 +33,9 @@ class OpprettBehandlingManueltTask(private val behManuellOpprService: Behandling
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
 
-        val requestSendt = requireNotNull(behManuellOpprService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId,
-                                                                                                     ytelsestype,
-                                                                                                     eksternId))
+        val requestSendt = requireNotNull(hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId,
+                                                                                                               ytelsestype,
+                                                                                                               eksternId))
         // kaster exception inntil respons-en har mottatt
         val respons = requireNotNull(requestSendt.respons) {
             "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +

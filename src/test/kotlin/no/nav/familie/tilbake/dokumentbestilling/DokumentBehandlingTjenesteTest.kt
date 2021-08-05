@@ -150,6 +150,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                                               behandlingsenhet = "enhet",
                                               kontrollfelt = "132323",
                                               saksbehandlerId = "23454334",
+                                              referanse = "testverdi",
                                               perioder = setOf(periode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
         return kravgrunnlag431.behandlingId

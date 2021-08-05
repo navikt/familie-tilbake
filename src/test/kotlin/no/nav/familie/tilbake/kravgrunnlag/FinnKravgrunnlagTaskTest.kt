@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -7,16 +9,25 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
+import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,12 +53,42 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
+    private lateinit var stegService: StegService
+
+    @Autowired
+    private lateinit var mottattXmlService: ØkonomiXmlMottattService
+
+    @Autowired
+    private lateinit var taskService: TaskService
+
+    @Autowired
+    private lateinit var historikkTaskService: HistorikkTaskService
+
+    @Autowired
+    private lateinit var kravvedtakstatusService: KravvedtakstatusService
+
+    @Autowired
+    private lateinit var endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+
+    private val kafkaProducer: KafkaProducer = mockk()
+
+    private lateinit var kravgrunnlagService: KravgrunnlagService
+    private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var finnKravgrunnlagTask: FinnKravgrunnlagTask
 
     private lateinit var behandling: Behandling
@@ -57,6 +98,27 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
+        hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
+        kravgrunnlagService = KravgrunnlagService(
+                kravgrunnlagRepository,
+                behandlingRepository,
+                mottattXmlService,
+                stegService,
+                behandlingskontrollService,
+                taskService,
+                historikkTaskService,
+                hentFagsystemsbehandlingService,
+                endretKravgrunnlagEventPublisher)
+
+        finnKravgrunnlagTask = FinnKravgrunnlagTask(behandlingRepository,
+                                                    fagsakRepository,
+                                                    økonomiXmlMottattRepository,
+                                                    kravgrunnlagRepository,
+                                                    kravgrunnlagService,
+                                                    kravvedtakstatusService)
+
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+
         behandling = opprettBehandling()
         behandlingId = behandling.id
     }

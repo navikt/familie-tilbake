@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -20,6 +21,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILB
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -219,6 +222,27 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
+    }
+
+    @Transactional
+    fun oppdaterFaktainfo(eksternFagsakId: String,
+                          ytelsestype: Ytelsestype,
+                          eksternId: String,
+                          respons: HentFagsystemsbehandlingRespons) {
+        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
+                         ?: throw Feil("Det finnes ikke en åpen behandling for " +
+                                       "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype")
+        val faktainfo = respons.faktainfo
+        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
+        val gammelFagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(aktiv = false)
+        val nyFagsystemsbehandling = Fagsystemsbehandling(eksternId = eksternId,
+                                                          årsak = faktainfo.revurderingsårsak,
+                                                          resultat = faktainfo.revurderingsresultat,
+                                                          tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
+                                                          revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
+                                                          konsekvenser = fagsystemskonsekvenser)
+        behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(gammelFagsystemsbehandling,
+                                                                                 nyFagsystemsbehandling)))
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
