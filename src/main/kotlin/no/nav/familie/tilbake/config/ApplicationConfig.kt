@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.config
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.webflux.builder.AzureWebClientConfig
+import no.nav.familie.webflux.builder.RestTemplateBuilderBean
 import no.nav.familie.webflux.builder.StsWebClientConfig
 import no.nav.familie.webflux.sts.StsTokenClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -20,7 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(StsWebClientConfig::class, AzureWebClientConfig::class, StsTokenClient::class)
+@Import(StsWebClientConfig::class, AzureWebClientConfig::class, StsTokenClient::class, RestTemplateBuilderBean::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling //brukes av prosessering(Tasks)
 @ConfigurationPropertiesScan
