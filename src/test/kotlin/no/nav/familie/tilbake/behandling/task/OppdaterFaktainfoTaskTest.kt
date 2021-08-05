@@ -89,9 +89,9 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                                                                            eksternId = "1",
                                                                            ytelsestype = fagsak.ytelsestype))
         val exception = assertFailsWith<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
-        assertEquals("HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
+        assertEquals("HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
                      "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
-                     "Task-en kan kjøre på nytt manuelt når respons-en er mottatt", exception.message)
+                     "Task kan kjøre på nytt manuelt når respons er mottatt.", exception.message)
     }
 
     private fun lagRespons(): HentFagsystemsbehandlingRespons {

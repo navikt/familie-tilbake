@@ -32,9 +32,9 @@ class OppdaterFaktainfoTask(private val hentFagsystemsbehandlingService: HentFag
                                                                                                                eksternId))
         // kaster exception inntil respons-en har mottatt
         val hentFagsystemsbehandlingRespons = requireNotNull(requestSendt.respons) {
-            "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
+            "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
             "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
-            "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
+            "Task kan kjøre på nytt manuelt når respons er mottatt."
         }
 
         val respons = objectMapper.readValue(hentFagsystemsbehandlingRespons, HentFagsystemsbehandlingRespons::class.java)

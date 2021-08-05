@@ -230,9 +230,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                           eksternId: String,
                           respons: HentFagsystemsbehandlingRespons) {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-        if (behandling == null) {
-            throw Feil("Det finnes ikke en åpen behandling for eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype")
-        }
+                         ?: throw Feil("Det finnes ikke en åpen behandling for " +
+                                       "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype")
         val faktainfo = respons.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val gammelFagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(aktiv = false)
