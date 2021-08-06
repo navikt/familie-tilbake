@@ -61,25 +61,25 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/dvh_sak_topic.yaml
+          RESOURCE: kafka/prod/dvh_sak_topic_prod.yaml
       - name: Deploy dvh_vedtak_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/dvh_vedtak_topic.yaml
+          RESOURCE: kafka/prod/dvh_vedtak_topic_prod.yaml
       - name: Deploy hentfagsystemsbehandling_request_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/hentfagsystemsbehandling_request_topic.yaml
+          RESOURCE: kafka/prod/hentfagsystemsbehandling_request_topic_prod.yaml
       - name: Deploy hentfagsystemsbehandling_respons_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/hentfagsystemsbehandling_respons_topic.yaml
+          RESOURCE: kafka/prod/hentfagsystemsbehandling_respons_topic_prod.yaml
       - name: Kjør sonar på main
         env:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
