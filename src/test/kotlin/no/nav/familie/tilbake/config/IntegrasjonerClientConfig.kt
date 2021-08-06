@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
@@ -48,6 +49,11 @@ class IntegrasjonerClientConfig {
         }
 
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
+
+        every { integrasjonerClient.hentNavkontor(any()) } returns NavKontorEnhet(enhetId = 4806,
+                                                                                  navn = "Mock NAV Drammen",
+                                                                                  enhetNr = "mock",
+                                                                                  status = "mock")
 
         return integrasjonerClient
     }

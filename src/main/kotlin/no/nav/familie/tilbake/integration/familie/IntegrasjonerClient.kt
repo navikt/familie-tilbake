@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -67,6 +68,13 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                     .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT)
                     .pathSegment(journalpostId)
                     .path(dokumentInfoId)
+                    .build()
+                    .toUri()
+
+    private fun hentNavkontorUri(enhetsId: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR)
+                    .path(enhetsId)
                     .build()
                     .toUri()
 
@@ -149,6 +157,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
         patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8())
 
+    }
+
+    fun hentNavkontor(enhetsId: String): NavKontorEnhet {
+        return getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
     }
 }
 

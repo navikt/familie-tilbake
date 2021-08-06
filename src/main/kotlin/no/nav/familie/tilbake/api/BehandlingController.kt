@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -107,6 +108,17 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
                           @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String> {
         behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
+        return Ressurs.success("OK")
+    }
+
+    @PutMapping(path = ["{behandlingId}/bytt-enhet/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                        handling = "Saksbehandler bytter enhet på behandling",
+                        henteParam = "behandlingId")
+    fun byttEnhet(@PathVariable("behandlingId") behandlingId: UUID,
+                  @Valid @RequestBody byttEnhetDto: ByttEnhetDto): Ressurs<String> {
+        behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto);
         return Ressurs.success("OK")
     }
 }

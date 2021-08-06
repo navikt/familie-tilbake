@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
+import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -39,6 +40,7 @@ import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -69,7 +71,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val historikkTaskService: HistorikkTaskService,
                         private val rolleConfig: RolleConfig,
                         @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
-                        private val opprettelseDagerBegrensning: Long) {
+                        private val opprettelseDagerBegrensning: Long,
+                        private val integrasjonerClient: IntegrasjonerClient) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -243,6 +246,30 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                           konsekvenser = fagsystemskonsekvenser)
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(gammelFagsystemsbehandling,
                                                                                  nyFagsystemsbehandling)))
+    }
+
+    @Transactional
+    fun byttBehandlendeEnhet(behandlingId: UUID, byttEnhetDto: ByttEnhetDto) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingAlleredeErAvsluttet(behandling)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        if (fagsak.fagsystem != Fagsystem.BA) throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
+                                                         frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
+
+        val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
+
+        behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
+        oppdaterAnsvarligSaksbehandler(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+                                              aktør = Aktør.SAKSBEHANDLER,
+                                              begrunnelse = byttEnhetDto.begrunnelse);
+
+        oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
+                                                    oppgavetype = Oppgavetype.BehandleSak,
+                                                    beskrivelse = "Endret tildelt enhet: $enhet.enhetId",
+                                                    enhetId = byttEnhetDto.enhet)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {

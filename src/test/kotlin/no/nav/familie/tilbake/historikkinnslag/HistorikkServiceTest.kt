@@ -331,6 +331,29 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                       type = Historikkinnslagstype.HENDELSE)
     }
 
+    @Test
+    fun `lagHistorikkinnslag skal lage historikkinnslag når man bytter enhet på behandling`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(behandlendeEnhet = "3434"))
+
+        historikkService.lagHistorikkinnslag(behandlingId,
+                                             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+                                             Aktør.SAKSBEHANDLER,
+                                             opprettetTidspunkt,
+                                             "begrunnelse for endring")
+
+        verify {
+            spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
+                                                  capture(keySlot),
+                                                  capture(historikkinnslagRecordSlot))
+        }
+        assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
+                                      aktørIdent = requireNotNull(behandling.ansvarligSaksbehandler),
+                                      tittel = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET.tittel,
+                                      tekst = "Ny enhet: 3434, Begrunnelse: begrunnelse for endring",
+                                      type = Historikkinnslagstype.HENDELSE)
+    }
+
 
     private fun assertHistorikkinnslagRequest(aktør: Aktør, aktørIdent: String,
                                               tittel: String, type: Historikkinnslagstype,
