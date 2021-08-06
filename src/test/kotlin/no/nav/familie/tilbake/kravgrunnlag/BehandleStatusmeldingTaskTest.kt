@@ -173,7 +173,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.VENTER)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -206,7 +207,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -237,7 +239,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -281,7 +284,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
     }
 
@@ -318,7 +322,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
     }
 
@@ -354,7 +359,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,"")
     }
 
     private fun settBehandlingTilForeslåVedtakSteg() {
@@ -434,12 +439,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
                                         payload = xml))
     }
 
-    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype) {
+    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                    beskrivelse: String? = null) {
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 Aktør.VEDTAKSLØSNING.name == it.metadata["aktor"] &&
+                beskrivelse == it.metadata["beskrivelse"] &&
                 behandling.id.toString() == it.payload
             }
         }

@@ -74,7 +74,6 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         historikkService = HistorikkService(behandlingRepository,
                                             fagsakRepository,
                                             brevsporingRepository,
-                                            behandlingskontrollService,
                                             spyKafkaProducer)
         val future = SettableListenableFuture<SendResult<String, String>>()
         every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()) }.returns(future)
@@ -104,7 +103,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                              Aktør.VEDTAKSLØSNING,
-                                             opprettetTidspunkt)
+                                             opprettetTidspunkt,
+                                             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
@@ -126,7 +126,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                              Aktør.SAKSBEHANDLER,
-                                             opprettetTidspunkt)
+                                             opprettetTidspunkt,
+                                             Venteårsak.AVVENTER_DOKUMENTASJON.beskrivelse)
         verify {
             spyKafkaProducer.sendHistorikkinnslag(capture(behandlingIdSlot),
                                                   capture(keySlot),
