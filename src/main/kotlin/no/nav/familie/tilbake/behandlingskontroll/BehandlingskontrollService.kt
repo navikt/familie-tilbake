@@ -49,8 +49,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 historikkTaskService
                         .lagHistorikkTask(behandlingId = behandlingId,
                                           historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                          aktør = Aktør.VEDTAKSLØSNING
-                        )
+                                          aktør = Aktør.VEDTAKSLØSNING,
+                                          beskrivelse = nesteStegMetaData.venteårsak?.beskrivelse)
             }
             behandlingTilstandService.opprettSendingAvNyttSteg(behandlingId, nesteStegMetaData)
         } else {
@@ -106,9 +106,10 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                              Aktør.SAKSBEHANDLER)
+        historikkTaskService.lagHistorikkTask(behandlingId=behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              aktør = Aktør.SAKSBEHANDLER,
+                                              beskrivelse = venteårsak.beskrivelse)
     }
 
     @Transactional

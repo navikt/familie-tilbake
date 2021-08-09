@@ -35,7 +35,6 @@ import java.util.UUID
 class HistorikkService(private val behandlingRepository: BehandlingRepository,
                        private val fagsakRepository: FagsakRepository,
                        private val brevsporingRepository: BrevsporingRepository,
-                       private val behandlingskontrollService: BehandlingskontrollService,
                        private val kafkaProducer: KafkaProducer) {
 
     @Transactional
@@ -43,12 +42,12 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                             historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                             aktør: Aktør,
                             opprettetTidspunkt: LocalDateTime,
-                            begrunnelse: String? = null) {
+                            beskrivelse: String? = null) {
         val request = lagHistorikkinnslagRequest(behandlingId = behandlingId,
                                                  aktør = aktør,
                                                  historikkinnslagstype = historikkinnslagstype,
                                                  opprettetTidspunkt = opprettetTidspunkt,
-                                                 begrunnelse = begrunnelse)
+                                                 beskrivelse = beskrivelse)
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
 
@@ -56,8 +55,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                            aktør: Aktør,
                                            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                                            opprettetTidspunkt: LocalDateTime,
-                                           begrunnelse: String?)
-            : OpprettHistorikkinnslagRequest {
+                                           beskrivelse: String?): OpprettHistorikkinnslagRequest {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -73,19 +71,17 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                               opprettetTidspunkt = opprettetTidspunkt,
                                               steg = historikkinnslagstype.steg?.name,
                                               tittel = historikkinnslagstype.tittel,
-                                              tekst = lagTekst(behandling, historikkinnslagstype, begrunnelse),
+                                              tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
                                               journalpostId = brevdata?.journalpostId,
                                               dokumentId = brevdata?.dokumentId)
     }
 
     private fun lagTekst(behandling: Behandling,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                         begrunnelse: String?): String? {
+                         beskrivelse: String?): String? {
         return when (historikkinnslagstype) {
             BEHANDLING_PÅ_VENT -> {
-                val stegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
-                val beskrivelse: String? = stegstilstand?.venteårsak?.beskrivelse
-                beskrivelse.let { historikkinnslagstype.tekst + beskrivelse }
+                historikkinnslagstype.tekst + beskrivelse
             }
             VEDTAK_FATTET -> {
                 val resultatstype: Behandlingsresultatstype? = behandling.sisteResultat?.type
@@ -97,7 +93,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                     Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> historikkinnslagstype.tekst + resultatstype.navn
                     else -> {
-                        historikkinnslagstype.tekst + resultatstype.navn + ", " + "Begrunnelse: " + begrunnelse
+                        historikkinnslagstype.tekst + resultatstype.navn + ", " + "Begrunnelse: " + beskrivelse
                     }
                 }
             }

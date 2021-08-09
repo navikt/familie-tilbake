@@ -208,7 +208,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = aktør,
-                                              begrunnelse = henleggelsesbrevFritekstDto.begrunnelse)
+                                              beskrivelse = henleggelsesbrevFritekstDto.begrunnelse)
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
             taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, henleggelsesbrevFritekstDto.fritekst))
