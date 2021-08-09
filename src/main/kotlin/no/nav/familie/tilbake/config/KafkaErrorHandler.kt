@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicLong
 @Component
 class KafkaErrorHandler : ContainerStoppingErrorHandler() {
 
-    val LOGGER: Logger = LoggerFactory.getLogger(KafkaErrorHandler::class.java)
-    val SECURE_LOGGER: Logger = LoggerFactory.getLogger("secureLogger")
+    val logger: Logger = LoggerFactory.getLogger(KafkaErrorHandler::class.java)
+    val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     private val executor: Executor
-    private val counter = AtomicInteger(0)
-    private val lastError = AtomicLong(0)
+    private val teller = AtomicInteger(0)
+    private val sisteFeil = AtomicLong(0)
     override fun handle(e: Exception,
                         records: List<ConsumerRecord<*, *>>?,
                         consumer: Consumer<*, *>,
@@ -29,7 +29,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
         Thread.sleep(1000)
 
         if (records.isNullOrEmpty()) {
-            LOGGER.error("Feil ved konsumering av melding. Ingen records. ${consumer.subscription()}", e)
+            logger.error("Feil ved konsumering av melding. Ingen records. ${consumer.subscription()}", e)
             scheduleRestart(e,
                             records,
                             consumer,
@@ -37,9 +37,9 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
                             "Ukjent topic")
         } else {
             records.first().run {
-                LOGGER.error("Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
+                logger.error("Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
                              "offset: ${this.offset()}, partition: ${this.partition()}")
-                SECURE_LOGGER.error("${this.topic()} - Problemer med prosessering av $records", e)
+                secureLogger.error("${this.topic()} - Problemer med prosessering av $records", e)
                 scheduleRestart(e,
                                 records,
                                 consumer,
@@ -55,31 +55,30 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
                                 container: MessageListenerContainer,
                                 topic: String) {
         val now = System.currentTimeMillis()
-        if (now - lastError.getAndSet(now) > COUNTER_RESET_TIME) {
-            counter.set(0)
+        if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TIME) {
+            teller.set(0)
         }
-        val numErrors = counter.incrementAndGet()
+        val numErrors = teller.incrementAndGet()
         val stopTime =
-                if (numErrors > SLOW_ERROR_COUNT) LONG else SHORT * numErrors
+                if (numErrors > MAKS_ANTALL_FEIL) MAKS_STOP_TID else MIN_STOP_TID * numErrors
         executor.execute {
             try {
                 Thread.sleep(stopTime)
-                LOGGER.warn("Starter kafka container for {}", topic)
+                logger.warn("Starter kafka container for $topic")
                 container.start()
             } catch (exception: Exception) {
-                LOGGER.error("Feil oppstod ved venting og oppstart av kafka container", exception)
+                logger.error("Feil oppstod ved venting og oppstart av kafka container", exception)
             }
         }
-        LOGGER.warn("Stopper kafka container for {} i {}", topic, Duration.ofMillis(stopTime).toString())
+        logger.warn("Stopper kafka container for $topic i ${Duration.ofMillis(stopTime)}")
         super.handle(e, records, consumer, container)
     }
 
     companion object {
-        private val LONG = Duration.ofHours(3).toMillis()
-        private val SHORT = Duration.ofSeconds(20).toMillis()
-        private const val SLOW_ERROR_COUNT = 10
-        private val COUNTER_RESET_TIME =
-                SHORT * SLOW_ERROR_COUNT * 2
+        private val MAKS_STOP_TID = Duration.ofHours(3).toMillis()
+        private val MIN_STOP_TID = Duration.ofSeconds(20).toMillis()
+        private const val MAKS_ANTALL_FEIL = 10
+        private val COUNTER_RESET_TIME = MIN_STOP_TID * MAKS_ANTALL_FEIL * 2
     }
 
     init {
