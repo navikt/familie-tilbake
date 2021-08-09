@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.config
 
 import io.mockk.MockKAnnotations
-import io.mockk.clearAllMocks
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import org.apache.kafka.clients.consumer.Consumer
@@ -27,7 +26,6 @@ class KafkaErrorHandlerTest {
     @BeforeEach
     internal fun setUp() {
         MockKAnnotations.init(this)
-        clearAllMocks()
     }
 
     @Test
