@@ -55,7 +55,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
                                 container: MessageListenerContainer,
                                 topic: String) {
         val now = System.currentTimeMillis()
-        if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TIME) {
+        if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TID) {
             teller.set(0)
         }
         val numErrors = teller.incrementAndGet()
@@ -78,7 +78,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
         private val MAKS_STOP_TID = Duration.ofHours(3).toMillis()
         private val MIN_STOP_TID = Duration.ofSeconds(20).toMillis()
         private const val MAKS_ANTALL_FEIL = 10
-        private val COUNTER_RESET_TIME = MIN_STOP_TID * MAKS_ANTALL_FEIL * 2
+        private val COUNTER_RESET_TID = MIN_STOP_TID * MAKS_ANTALL_FEIL * 2
     }
 
     init {
