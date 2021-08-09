@@ -2,10 +2,13 @@ package no.nav.familie.tilbake.behandling
 
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -46,6 +49,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -62,6 +66,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -100,6 +105,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Bean fun integrasjonerClient(): IntegrasjonerClient = mockk()
+
+    @Autowired
+    private lateinit var client: IntegrasjonerClient
 
     private val fom: LocalDate = LocalDate.now().minusMonths(1)
     private val tom: LocalDate = LocalDate.now()
@@ -777,6 +787,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave`() {
+        every { client.finnOppgaver(any()) }.returns(FinnOppgaveResponseDto(1,
+                                                                            oppgaver = listOf(Oppgave(oppgavetype = Oppgavetype.BehandleSak.name))))
+
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false,
                                                 finnesVarsel = false,
@@ -791,7 +804,68 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("4806", behandling.behandlendeEnhet)
         assertEquals("Mock NAV Drammen", behandling.behandlendeEnhetsNavn)
 
-        assertTrue { taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == OppdaterEnhetOppgaveTask.TYPE } }
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET)
+                    .any { it.type == OppdaterEnhetOppgaveTask.TYPE && Oppgavetype.BehandleSak.name == it.metadata["oppgavetype"] }
+        }
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+                            Aktør.SAKSBEHANDLER,
+                            "bytter i unittest")
+    }
+
+    @Test
+    fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave på steget Fatte vedtak`() {
+        every { client.finnOppgaver(any()) }.returns(FinnOppgaveResponseDto(1,
+                                                                            oppgaver = listOf(Oppgave(oppgavetype = Oppgavetype.GodkjenneVedtak.name))))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+
+        behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals("4806", behandling.behandlendeEnhet)
+        assertEquals("Mock NAV Drammen", behandling.behandlendeEnhetsNavn)
+
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET)
+                    .any { it.type == OppdaterEnhetOppgaveTask.TYPE && Oppgavetype.GodkjenneVedtak.name == it.metadata["oppgavetype"] }
+        }
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+                            Aktør.SAKSBEHANDLER,
+                            "bytter i unittest")
+    }
+
+    @Test
+    fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave behandling med underkjent vedtak`() {
+        every { client.finnOppgaver(any()) }.returns(FinnOppgaveResponseDto(1,
+                                                                            oppgaver = listOf(Oppgave(oppgavetype = Oppgavetype.BehandleUnderkjentVedtak.name))))
+
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+
+        behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals("4806", behandling.behandlendeEnhet)
+        assertEquals("Mock NAV Drammen", behandling.behandlendeEnhetsNavn)
+
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET)
+                    .any { it.type == OppdaterEnhetOppgaveTask.TYPE && Oppgavetype.BehandleUnderkjentVedtak.name == it.metadata["oppgavetype"] }
+        }
         assertHistorikkTask(behandling.id,
                             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                             Aktør.SAKSBEHANDLER,

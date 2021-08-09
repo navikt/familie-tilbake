@@ -1,7 +1,10 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
@@ -266,10 +269,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                               aktør = Aktør.SAKSBEHANDLER,
                                               begrunnelse = byttEnhetDto.begrunnelse);
 
-        oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
-                                                    oppgavetype = Oppgavetype.BehandleSak,
-                                                    beskrivelse = "Endret tildelt enhet: $enhet.enhetId",
-                                                    enhetId = byttEnhetDto.enhet)
+        val finnOppgaveResponse =
+                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
+                                                                    saksreferanse = behandling.eksternBrukId.toString(),
+                                                                    tema = fagsak.ytelsestype.tilTema()))
+        if (finnOppgaveResponse.oppgaver.size > 1) {
+            logger.error("er mer enn en åpen oppgave for behandlingen")
+        }
+        finnOppgaveResponse.oppgaver[0].oppgavetype?.let {
+            Oppgavetype.valueOf(it).let { oppgavetype ->
+                oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
+                                                            oppgavetype = oppgavetype,
+                                                            beskrivelse = "Endret tildelt enhet: $enhet.enhetId",
+                                                            enhetId = byttEnhetDto.enhet)
+            }
+        }
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -427,4 +441,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
+    private fun Ytelsestype.tilTema(): Tema {
+        return when (this) {
+            Ytelsestype.BARNETRYGD -> Tema.BAR
+            Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.SKOLEPENGER -> Tema.ENF
+            Ytelsestype.KONTANTSTØTTE -> Tema.KON
+        }
+    }
 }
