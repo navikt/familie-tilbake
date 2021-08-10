@@ -125,9 +125,10 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                                  venteårsak = venteårsak,
                                                                  tidsfrist = LocalDate.now()
                                                                          .plusWeeks(venteårsak.defaultVenteTidIUker)))
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                              aktør = Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                              aktør = Aktør.VEDTAKSLØSNING,
+                                              beskrivelse = venteårsak.beskrivelse)
     }
 
 }

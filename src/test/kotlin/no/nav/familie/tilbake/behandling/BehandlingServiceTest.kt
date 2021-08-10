@@ -534,7 +534,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         }
         assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
         assertAnsvarligSaksbehandler(behandling)
-        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                            Aktør.SAKSBEHANDLER,
+                            Venteårsak.ENDRE_TILKJENT_YTELSE.beskrivelse)
         assertOppgaveTask(behandling.id,
                           OppdaterOppgaveTask.TYPE,
                           "Frist er oppdatert av saksbehandler Z0000",
@@ -1049,7 +1052,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktor"] &&
                 behandlingId.toString() == it.payload &&
-                tekst == it.metadata["begrunnelse"]
+                tekst == it.metadata["beskrivelse"]
             }
         }
     }
