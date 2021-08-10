@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigInteger
 import java.util.UUID
 
 @Repository
@@ -23,5 +24,7 @@ interface KravgrunnlagRepository : RepositoryInterface<Kravgrunnlag431, UUID>,
     fun existsByBehandlingIdAndAktivTrueAndSperretTrue(behandlingId: UUID): Boolean
 
     fun findByBehandlingId(behandlingId: UUID): List<Kravgrunnlag431>
+
+    fun findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431?
 
 }
