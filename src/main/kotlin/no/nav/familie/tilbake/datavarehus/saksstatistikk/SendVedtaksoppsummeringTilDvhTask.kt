@@ -1,10 +1,12 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 import javax.validation.Validation
@@ -15,14 +17,18 @@ import javax.validation.Validation
 class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: VedtaksoppsummeringService,
                                         private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
 
+    private val log = LoggerFactory.getLogger(this::class.java)
     private val validator = Validation.buildDefaultValidatorFactory().validator
 
 
     override fun doTask(task: Task) {
-
+        log.info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)
+
+        log.info("Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
+                 "for behandling $behandlingId")
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering)
     }
 
