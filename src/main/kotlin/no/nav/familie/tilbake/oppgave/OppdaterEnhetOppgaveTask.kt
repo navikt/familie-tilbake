@@ -30,26 +30,28 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService,
 
     override fun doTask(task: Task) {
         log.info("OppdaterEnhetOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-        val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         val enhetId = task.metadata.getProperty("enhetId")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val behandlingId = UUID.fromString(task.payload)
-
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         val finnOppgaveResponse =
                 integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
-                                                                    oppgavetype = oppgavetype,
                                                                     saksreferanse = behandling.eksternBrukId.toString(),
                                                                     tema = fagsak.ytelsestype.tilTema()))
         if (finnOppgaveResponse.oppgaver.size > 1) {
             log.error("er mer enn en åpen oppgave for behandlingen")
         }
 
-        val nyBeskrivelse = beskrivelse + "/n" + finnOppgaveResponse.oppgaver[0].beskrivelse
-        oppgaveService.patchOppgave(finnOppgaveResponse.oppgaver[0].copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse))
+        finnOppgaveResponse.oppgaver[0].oppgavetype?.let {
+            Oppgavetype.valueOf(it).let { oppgavetype ->
+                val nyBeskrivelse = beskrivelse + "/n" + finnOppgaveResponse.oppgaver[0].beskrivelse
+                oppgaveService.patchOppgave(finnOppgaveResponse.oppgaver[0].copy(tildeltEnhetsnr = enhetId,
+                                                                                 beskrivelse = nyBeskrivelse))
+            }
+        }
     }
 
     companion object {

@@ -256,8 +256,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        if (fagsak.fagsystem != Fagsystem.BA) throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
-                                                         frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
+        if (fagsak.fagsystem != Fagsystem.BA) {
+            throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
+                       frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
+        }
 
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
 
@@ -267,23 +269,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              beskrivelse = byttEnhetDto.begrunnelse);
+                                              beskrivelse = byttEnhetDto.begrunnelse)
 
-        val finnOppgaveResponse =
-                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
-                                                                    saksreferanse = behandling.eksternBrukId.toString(),
-                                                                    tema = fagsak.ytelsestype.tilTema()))
-        if (finnOppgaveResponse.oppgaver.size > 1) {
-            logger.error("er mer enn en åpen oppgave for behandlingen")
-        }
-        finnOppgaveResponse.oppgaver[0].oppgavetype?.let {
-            Oppgavetype.valueOf(it).let { oppgavetype ->
-                oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
-                                                            oppgavetype = oppgavetype,
-                                                            beskrivelse = "Endret tildelt enhet: $enhet.enhetId",
-                                                            enhetId = byttEnhetDto.enhet)
-            }
-        }
+        oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
+                                                    beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
+                                                    enhetId = byttEnhetDto.enhet)
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -438,14 +428,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Behandlerrolle.SAKSBEHANDLER -> (Behandlingsstatus.UTREDES == behandling.status)
             Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
             else -> false
-        }
-    }
-
-    private fun Ytelsestype.tilTema(): Tema {
-        return when (this) {
-            Ytelsestype.BARNETRYGD -> Tema.BAR
-            Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.SKOLEPENGER -> Tema.ENF
-            Ytelsestype.KONTANTSTØTTE -> Tema.KON
         }
     }
 }

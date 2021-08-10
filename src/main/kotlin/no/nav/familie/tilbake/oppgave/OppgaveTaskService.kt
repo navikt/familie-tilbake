@@ -47,11 +47,9 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
     fun oppdaterEnhetOppgaveTask(behandlingId: UUID,
-                                 oppgavetype: Oppgavetype,
                                  beskrivelse: String,
                                  enhetId: String) {
         val properties = Properties().apply {
-            setProperty("oppgavetype", oppgavetype.name)
             setProperty("beskrivelse", beskrivelse)
             setProperty("enhetId", enhetId)
         }
