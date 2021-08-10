@@ -18,6 +18,7 @@ class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: 
                                         private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val validator = Validation.buildDefaultValidatorFactory().validator
 
 
@@ -27,7 +28,7 @@ class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: 
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)
 
-        log.info("Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
+        secureLogger.info("Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
                  "for behandling $behandlingId")
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering)
     }
