@@ -116,7 +116,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                                                                       Brevtype.KORRIGERT_VARSEL))
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
-        val kanRevurderingOpprettes:Boolean = kanRevurderingOpprettes(behandling)
+        val kanRevurderingOpprettes: Boolean = kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
@@ -403,13 +403,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
-        var kanRevurderingOpprettes = false
-        if (behandling.erAvsluttet &&
-            kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
-            behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null) {
-            kanRevurderingOpprettes = true
-        }
-        return kanRevurderingOpprettes
+        return behandling.erAvsluttet &&
+               kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
+               behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
 }
