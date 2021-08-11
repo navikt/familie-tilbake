@@ -59,6 +59,8 @@ data class Behandling(@Id
 
     val sisteResultat get() = resultater.maxByOrNull { it.sporbar.endret.endretTid }
 
+    val sisteÅrsak get() = årsaker.firstOrNull()
+
     val opprettetTidspunkt: LocalDateTime
         get() = sporbar.opprettetTid
 
