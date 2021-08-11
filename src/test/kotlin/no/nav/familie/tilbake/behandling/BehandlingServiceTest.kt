@@ -788,7 +788,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
-        behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+        behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806",
+                                                                           "bytter i unittest" +
+                                                                           "\n\nmed linjeskift" +
+                                                                           "\n\nto til og med"))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals("4806", behandling.behandlendeEnhet)
@@ -804,7 +807,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(behandling.id,
                             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                             Aktør.SAKSBEHANDLER,
-                            "bytter i unittest")
+                            "bytter i unittest  med linjeskift  to til og med")
     }
 
     @Test

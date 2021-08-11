@@ -1,10 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
@@ -214,7 +211,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = aktør,
-                                              beskrivelse = henleggelsesbrevFritekstDto.begrunnelse)
+                                              beskrivelse = fjernNewlinesFraString(henleggelsesbrevFritekstDto.begrunnelse))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
             taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, henleggelsesbrevFritekstDto.fritekst))
@@ -269,7 +266,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              beskrivelse = byttEnhetDto.begrunnelse)
+                                              beskrivelse = fjernNewlinesFraString(byttEnhetDto.begrunnelse))
 
         oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
                                                     beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
@@ -429,5 +426,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
             else -> false
         }
+    }
+
+    private fun fjernNewlinesFraString(tekst: String): String {
+        return tekst
+                .replace("\r", "")
+                .replace("\n", " ")
     }
 }
