@@ -62,7 +62,7 @@ import java.util.UUID
 
 object Testdata {
 
-    val avstemmingsfil = Avstemmingsfil(fil = Fil("File.txt", ByteArray(100 ){1}))
+    val avstemmingsfil = Avstemmingsfil(fil = Fil("File.txt", ByteArray(100) { 1 }))
 
     private val bruker = Bruker(ident = "321321321")
 
@@ -112,8 +112,23 @@ object Testdata {
                                 verger = setOf(verge),
                                 eksternBrukId = UUID.randomUUID())
 
+    val revurdering = Behandling(fagsakId = fagsak.id,
+                                 årsaker = setOf(Behandlingsårsak(originalBehandlingId = behandling.id,
+                                                                  type = Behandlingsårsakstype.REVURDERING_KLAGE_KA)),
+                                 type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+                                 opprettetDato = LocalDate.now(),
+                                 ansvarligSaksbehandler = "saksbehandler",
+                                 behandlendeEnhet = "testverdi",
+                                 behandlendeEnhetsNavn = "testverdi",
+                                 manueltOpprettet = false,
+                                 fagsystemsbehandling = setOf(fagsystemsbehandling.copy(id = UUID.randomUUID())),
+                                 resultater = emptySet(),
+                                 varsler = emptySet(),
+                                 verger = setOf(verge.copy(id = UUID.randomUUID())),
+                                 eksternBrukId = UUID.randomUUID())
+
     val behandlingsårsak = Behandlingsårsak(type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                                            originalBehandlingId = null)
+                                            originalBehandlingId = behandling.id)
 
     val behandlingsstegstilstand = Behandlingsstegstilstand(behandlingId = behandling.id,
                                                             behandlingssteg = Behandlingssteg.FAKTA,

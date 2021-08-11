@@ -2,13 +2,16 @@ package no.nav.familie.tilbake.integration.økonomi
 
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingPortType
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.math.BigInteger
 import java.util.UUID
 import javax.xml.ws.soap.SOAPFaultException
 
@@ -35,6 +38,27 @@ class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
             logger.error("tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
                          "Feiler med ${exception.message}")
             throw IntegrasjonException(msg = "Fikk feil fra økonomi ved iverksetting av behandling=$behandlingId",
+                                       throwable = exception)
+        }
+    }
+
+    fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
+            : DetaljertKravgrunnlagDto {
+        logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
+        try {
+            val respons = økonomiService.kravgrunnlagHentDetalj(hentKravgrunnlagRequest)
+            if (!erResponsOk(respons.mmel)) {
+                logger.error("Fikk feil respons:${lagRespons(respons.mmel)} fra økonomi ved henting av kravgrunnlag " +
+                             "for kravgrunnlagId=$kravgrunnlagId.")
+                throw IntegrasjonException(msg = "Fikk feil respons:${lagRespons(respons.mmel)} fra økonomi " +
+                                                 "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.")
+            }
+            logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
+            return respons.detaljertkravgrunnlag
+        } catch (exception: SOAPFaultException) {
+            logger.error("Kravgrunnlag kan ikke hentes fra økonomi for behandling=$kravgrunnlagId. " +
+                         "Feiler med ${exception.message}")
+            throw IntegrasjonException(msg = "Kravgrunnlag kan ikke hentes fra økonomi for kravgrunnlagId=$kravgrunnlagId",
                                        throwable = exception)
         }
     }

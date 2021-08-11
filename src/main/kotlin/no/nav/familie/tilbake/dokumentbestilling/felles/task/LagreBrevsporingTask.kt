@@ -53,7 +53,8 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         }
 
         // Behandling bør avsluttes etter å sende vedtaksbrev
-        if (brevtype == Brevtype.VEDTAK) {
+        // AvsluttBehandlingTask må kalles kun en gang selv om behandling har verge
+        if (brevtype == Brevtype.VEDTAK && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload))
         }
     }

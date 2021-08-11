@@ -119,11 +119,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                                                                       Brevtype.KORRIGERT_VARSEL))
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
+        val kanRevurderingOpprettes: Boolean = kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
                                            kanBehandlingHenlegges,
                                            kanEndres,
+                                           kanRevurderingOpprettes,
                                            behandlingsstegsinfoer,
                                            varselSendt)
     }
@@ -426,6 +428,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
             else -> false
         }
+    }
+
+    private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
+        return behandling.erAvsluttet &&
+               kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
+               behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
     private fun fjernNewlinesFraString(tekst: String): String {

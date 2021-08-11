@@ -475,6 +475,62 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentBehandling kan ikke opprette revurdering når tilbakekreving ikke har kravgrunnlag`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        assertFalse { behandlingDto.kanRevurderingOpprettes }
+    }
+
+    @Test
+    fun `hentBehandling kan opprette revurdering når tilbakekreving er avsluttet med kravgrunnlag`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        assertTrue { behandlingDto.kanRevurderingOpprettes }
+    }
+
+    @Test
+    fun `hentBehandling kan ikke opprette revurdering når tilbakekreving har en åpen revurdering`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        behandlingRepository.insert(Testdata.revurdering)
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        assertFalse { behandlingDto.kanRevurderingOpprettes }
+    }
+
+    @Test
+    fun `hentBehandling kan opprette revurdering når tilbakekreving har en avsluttet revurdering`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        var revurdering = behandlingRepository.insert(Testdata.revurdering)
+        revurdering = behandlingRepository.findByIdOrThrow(revurdering.id)
+        behandlingRepository.update(revurdering.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        assertTrue { behandlingDto.kanRevurderingOpprettes }
+    }
+
+    @Test
     fun `settBehandlingPåVent skal ikke sett behandling på vent hvis fristdato er mindre enn i dag`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = true,
@@ -859,6 +915,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertNull(behandlingDto.resultatstype)
         assertEquals("Z0000", behandlingDto.ansvarligSaksbehandler)
         assertNull(behandlingDto.ansvarligBeslutter)
+        assertFalse(behandlingDto.kanRevurderingOpprettes)
     }
 
     private fun assertBehandlingsstegsinfo(behandlingDto: BehandlingDto,
