@@ -44,14 +44,9 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService,
         if (finnOppgaveResponse.oppgaver.size > 1) {
             log.error("er mer enn en åpen oppgave for behandlingen")
         }
-
-        finnOppgaveResponse.oppgaver[0].oppgavetype?.let {
-            Oppgavetype.valueOf(it).let { oppgavetype ->
-                val nyBeskrivelse = beskrivelse + "/n" + finnOppgaveResponse.oppgaver[0].beskrivelse
-                oppgaveService.patchOppgave(finnOppgaveResponse.oppgaver[0].copy(tildeltEnhetsnr = enhetId,
-                                                                                 beskrivelse = nyBeskrivelse))
-            }
-        }
+        val nyBeskrivelse = beskrivelse + "/n" + finnOppgaveResponse.oppgaver[0].beskrivelse
+        oppgaveService.patchOppgave(finnOppgaveResponse.oppgaver[0].copy(tildeltEnhetsnr = enhetId,
+                                                                         beskrivelse = nyBeskrivelse))
     }
 
     companion object {
