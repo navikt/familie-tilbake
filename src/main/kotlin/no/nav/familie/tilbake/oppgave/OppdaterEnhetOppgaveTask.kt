@@ -1,10 +1,7 @@
 package no.nav.familie.tilbake.oppgave
 
 import no.nav.familie.kontrakter.felles.Behandlingstema
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -52,13 +49,5 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService,
     companion object {
 
         const val TYPE = "oppdaterEnhetOppgave"
-    }
-}
-
-private fun Ytelsestype.tilTema(): Tema {
-    return when (this) {
-        Ytelsestype.BARNETRYGD -> Tema.BAR
-        Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.SKOLEPENGER -> Tema.ENF
-        Ytelsestype.KONTANTSTØTTE -> Tema.KON
     }
 }
