@@ -16,7 +16,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETILSYN
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -24,6 +24,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
+import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -50,6 +51,7 @@ import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppdaterEnhetOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
@@ -828,6 +830,73 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                        henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
                                                behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                                                begrunnelse = "testverdi"))
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+
+        behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806",
+                                                                           "bytter i unittest" +
+                                                                           "\n\nmed linjeskift" +
+                                                                           "\n\nto til og med"))
+
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals("4806", behandling.behandlendeEnhet)
+        assertEquals("Mock NAV Drammen", behandling.behandlendeEnhetsNavn)
+
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                it.type == OppdaterEnhetOppgaveTask.TYPE &&
+                "Endret tildelt enhet: 4806" == it.metadata["beskrivelse"] &&
+                "4806" == it.metadata["enhetId"]
+            }
+        }
+        assertHistorikkTask(behandling.id,
+                            TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+                            Aktør.SAKSBEHANDLER,
+                            "bytter i unittest  med linjeskift  to til og med")
+    }
+
+    @Test
+    fun `byttBehandlendeEnhet skal ikke kunne bytte på behandling med fagsystem EF`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+                        .copy(fagsystem = Fagsystem.EF,
+                              ytelsestype = BARNETILSYN)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
+        }
+        assertEquals("Ikke implementert for fagsystem EF", exception.message)
+    }
+
+    @Test
+    fun `byttBehandlendeEnhet skal ikke kunne bytte på avsluttet behandling`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = false,
+                                                finnesVarsel = false,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.byttBehandlendeEnhet(behandling.id, ByttEnhetDto("4806", "bytter i unittest"))
         }
         assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
     }

@@ -17,6 +17,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjo
         const val PATH_DISTRIBUER = "api/dist/v1"
         const val PATH_SFTP = "api/adramatch/avstemming"
         const val PATH_OPPGAVE = "/api/oppgave"
+        const val PATH_NAVKONTOR = "/api/arbeidsfordeling/nav-kontor"
 
         const val PATH_HENTDOKUMENT = "api/journalpost/hentdokument"
     }

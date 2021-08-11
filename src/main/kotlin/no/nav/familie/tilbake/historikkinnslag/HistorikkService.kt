@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT_TIL_VERGE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
@@ -93,9 +94,12 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                     Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> historikkinnslagstype.tekst + resultatstype.navn
                     else -> {
-                        historikkinnslagstype.tekst + resultatstype.navn + ", " + "Begrunnelse: " + beskrivelse
+                        historikkinnslagstype.tekst + resultatstype.navn + ", Begrunnelse: " + beskrivelse
                     }
                 }
+            }
+            ENDRET_ENHET -> {
+                historikkinnslagstype.tekst + behandling.behandlendeEnhet + ", Begrunnelse: " + beskrivelse
             }
             else -> historikkinnslagstype.tekst
         }
