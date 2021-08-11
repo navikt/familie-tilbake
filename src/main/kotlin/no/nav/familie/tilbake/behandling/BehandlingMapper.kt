@@ -7,7 +7,8 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype
+.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_KA
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_NFP
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
@@ -66,6 +67,7 @@ object BehandlingMapper {
                    erBehandlingPåVent: Boolean,
                    kanHenleggeBehandling: Boolean,
                    kanEndres: Boolean,
+                   kanRevurderingOpprettes: Boolean,
                    behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
                    varselSendt: Boolean): BehandlingDto {
 
@@ -89,6 +91,7 @@ object BehandlingMapper {
                              endretTidspunkt = behandling.endretTidspunkt,
                              harVerge = behandling.harVerge,
                              kanHenleggeBehandling = kanHenleggeBehandling,
+                             kanRevurderingOpprettes = kanRevurderingOpprettes,
                              erBehandlingPåVent = erBehandlingPåVent,
                              kanEndres = kanEndres,
                              varselSendt = varselSendt,
@@ -161,7 +164,8 @@ object BehandlingMapper {
             Behandlingsstatus.AVSLUTTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.AVSLUTTET
             Behandlingsstatus.UTREDES -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.UTREDES
             Behandlingsstatus.FATTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.FATTER_VEDTAK
-            Behandlingsstatus.IVERKSETTER_VEDTAK -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
+            Behandlingsstatus.IVERKSETTER_VEDTAK ->
+                no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.IVERKSETTER_VEDTAK
             Behandlingsstatus.OPPRETTET -> no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus.OPPRETTET
         }
     }
@@ -173,12 +177,14 @@ object BehandlingMapper {
             Behandlingsårsakstype.REVURDERING_KLAGE_NFP -> REVURDERING_KLAGE_NFP
             Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> REVURDERING_OPPLYSNINGER_OM_VILKÅR
             Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> REVURDERING_OPPLYSNINGER_OM_FORELDELSE
-            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT -> REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT ->
+                REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
             else -> null
         }
     }
 
-    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
+    private fun mapResultat(resultat: Behandlingsresultat?)
+            : no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
         return when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
