@@ -45,6 +45,8 @@ spec:
       rules:
         - application: familie-ba-sak
           namespace: teamfamilie
+        - application: familie-ba-mottak
+          namespace: teamfamilie
         - application: familie-ef-sak
           namespace: default
         - application: familie-ks-sak
