@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
@@ -29,6 +30,7 @@ import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -196,6 +198,45 @@ object BehandlingMapper {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> HENLAGT
             else -> null
+        }
+    }
+
+    fun tilDomeneBehandlingRevurdering(originalBehandling: Behandling,
+                                       behandlingsårsakstype: Behandlingsårsakstype): Behandling {
+        val verger: Set<Verge> = kopiVerge(originalBehandling)?.let { setOf(it) } ?: emptySet()
+        return Behandling(fagsakId = originalBehandling.fagsakId,
+                          type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+                          ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+                          behandlendeEnhet = originalBehandling.behandlendeEnhet,
+                          behandlendeEnhetsNavn = originalBehandling.behandlendeEnhetsNavn,
+                          manueltOpprettet = false,
+                          årsaker = setOf(Behandlingsårsak(type = behandlingsårsakstype,
+                                                           originalBehandlingId = originalBehandling.id)),
+                          fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
+                          verger = verger)
+    }
+
+    private fun kopiFagsystemsbehandling(originalBehandling: Behandling): Fagsystemsbehandling {
+        val fagsystemsbehandling = originalBehandling.aktivFagsystemsbehandling
+        return Fagsystemsbehandling(eksternId = fagsystemsbehandling.eksternId,
+                                    årsak = fagsystemsbehandling.årsak,
+                                    resultat = fagsystemsbehandling.resultat,
+                                    tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
+                                    revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
+                                    konsekvenser = fagsystemsbehandling.konsekvenser)
+    }
+
+    private fun kopiVerge(originalBehandling: Behandling): Verge? {
+        val verge = originalBehandling.aktivVerge
+        return verge?.let {
+            Verge(type = it.type,
+                  ident = it.ident,
+                  orgNr = it.orgNr,
+                  navn = it.navn,
+                  gyldigFom = it.gyldigFom,
+                  gyldigTom = it.gyldigTom,
+                  begrunnelse = it.begrunnelse,
+                  kilde = it.kilde)
         }
     }
 }

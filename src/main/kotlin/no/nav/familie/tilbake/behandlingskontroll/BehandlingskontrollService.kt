@@ -106,7 +106,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
 
-        historikkTaskService.lagHistorikkTask(behandlingId=behandlingId,
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.SAKSBEHANDLER,
                                               beskrivelse = venteårsak.beskrivelse)
@@ -277,7 +277,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {
         return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg
-               && !behandling.manueltOpprettet
+               && !behandling.manueltOpprettet && !behandling.erRevurdering
     }
 
     private fun harAktivtGrunnlag(behandling: Behandling): Boolean {

@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
+import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -43,6 +44,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -106,6 +108,36 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE,
                                  properties = properties,
                                  payload = ""))
+    }
+
+    @Transactional
+    fun opprettRevurdering(opprettRevurderingDto: OpprettRevurderingDto): Behandling {
+        val originalBehandlingId = opprettRevurderingDto.originalBehandlingId
+        logger.info("Oppretter revurdering for behandling $originalBehandlingId")
+        val originalBehandling = behandlingRepository.findByIdOrThrow(originalBehandlingId)
+        if (!kanRevurderingOpprettes(originalBehandling)) {
+            val feilmelding = "Revurdering kan ikke opprettes for behandling $originalBehandlingId. " +
+                              "Enten behandlingen er ikke avsluttet med kravgrunnlag eller " +
+                              "det finnes allerede en åpen revurdering"
+            throw Feil(message = feilmelding, frontendFeilmelding = feilmelding)
+        }
+        val revurdering = BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype)
+        behandlingRepository.insert(revurdering)
+
+        historikkTaskService.lagHistorikkTask(revurdering.id,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+                                              Aktør.SAKSBEHANDLER)
+
+        behandlingskontrollService.fortsettBehandling(revurdering.id)
+        stegService.håndterSteg(revurdering.id)
+
+        // kjør HentKravgrunnlagTask for å hente kravgrunnlag på nytt fra økonomi
+        taskRepository.save(Task(type = HentKravgrunnlagTask.TYPE, payload = revurdering.id.toString()))
+
+        //Lag oppgave for behandling
+        oppgaveTaskService.opprettOppgaveTask(revurdering.id, Oppgavetype.BehandleSak)
+
+        return revurdering
     }
 
     @Transactional(readOnly = true)

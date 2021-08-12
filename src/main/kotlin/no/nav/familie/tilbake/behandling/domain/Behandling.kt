@@ -61,6 +61,8 @@ data class Behandling(@Id
 
     val sisteÅrsak get() = årsaker.firstOrNull()
 
+    val erRevurdering get() = type == Behandlingstype.REVURDERING_TILBAKEKREVING
+
     val opprettetTidspunkt: LocalDateTime
         get() = sporbar.opprettetTid
 
@@ -163,7 +165,6 @@ enum class Behandlingsårsakstype(val navn: String) {
     REVURDERING_OPPLYSNINGER_OM_VILKÅR("Nye opplysninger om vilkårsvurdering"),
     REVURDERING_OPPLYSNINGER_OM_FORELDELSE("Nye opplysninger om foreldelse"),
     REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt"),
-    UDEFINERT("Ikke Definert")
 }
 
 enum class Behandlingsstatus(val kode: String) {

@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
+import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -52,6 +53,15 @@ class BehandlingController(private val behandlingService: BehandlingService,
                                      opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest): Ressurs<String> {
         behandlingService.opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest)
         return Ressurs.success("Manuell opprettelse av tilbakekreving er startet")
+    }
+
+    @PostMapping(path = ["/revurdering/v1"],
+                 consumes = [MediaType.APPLICATION_JSON_VALUE],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekrevingsrevurdering")
+    fun opprettRevurdering(@Valid @RequestBody opprettRevurderingDto: OpprettRevurderingDto): Ressurs<String> {
+        val behandling = behandlingService.opprettRevurdering(opprettRevurderingDto)
+        return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Revurdering er opprettet.")
     }
 
 
@@ -118,7 +128,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                         henteParam = "behandlingId")
     fun byttEnhet(@PathVariable("behandlingId") behandlingId: UUID,
                   @Valid @RequestBody byttEnhetDto: ByttEnhetDto): Ressurs<String> {
-        behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto);
+        behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
         return Ressurs.success("OK")
     }
 }

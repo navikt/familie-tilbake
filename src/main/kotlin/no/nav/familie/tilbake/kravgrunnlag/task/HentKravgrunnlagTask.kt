@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -19,7 +20,8 @@ import java.util.UUID
                      beskrivelse = "Henter kravgrunnlag fra økonomi",
                      triggerTidVedFeilISekunder = 60 * 5)
 class HentKravgrunnlagTask(private val behandlingRepository: BehandlingRepository,
-                           private val hentKravgrunnlagService: HentKravgrunnlagService) : AsyncTaskStep {
+                           private val hentKravgrunnlagService: HentKravgrunnlagService,
+                           private val stegService: StegService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -39,6 +41,8 @@ class HentKravgrunnlagTask(private val behandlingRepository: BehandlingRepositor
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
         hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId)
+
+        stegService.håndterSteg(behandlingId)
     }
 
     companion object {
