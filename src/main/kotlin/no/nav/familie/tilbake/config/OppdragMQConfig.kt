@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory
 import org.springframework.jms.config.JmsListenerContainerFactory
@@ -21,6 +22,7 @@ import javax.jms.JMSException
 private const val UTF_8_WITH_PUA = 1208
 
 @Configuration
+@Profile("!integrasjonstest")
 class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
                       @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,
                       @Value("\${oppdrag.mq.channel}") val channel: String,

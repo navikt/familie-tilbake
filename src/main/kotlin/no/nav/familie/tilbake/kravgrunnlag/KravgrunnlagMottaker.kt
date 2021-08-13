@@ -16,7 +16,7 @@ import javax.jms.TextMessage
 
 
 @Service
-@Profile("!e2e")
+@Profile("!e2e & !integrasjonstest")
 class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
