@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -39,7 +39,7 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         val finnOppgaveResponse =
-                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstema = Behandlingstema.Tilbakebetaling,
+                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
                                                                     oppgavetype = oppgavetype,
                                                                     saksreferanse = behandling.eksternBrukId.toString(),
                                                                     tema = fagsak.ytelsestype.tilTema()))
