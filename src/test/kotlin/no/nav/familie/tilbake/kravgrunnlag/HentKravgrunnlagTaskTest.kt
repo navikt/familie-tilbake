@@ -22,7 +22,9 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
+import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiConsumer
 import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
@@ -71,10 +73,10 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
-        kafkaProducer = spyk(KafkaProducer(kafkaTemplate))
+        kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
         historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevsporingRepository, kafkaProducer)
         val økonomiService = ØkonomiConsumerLokalConfig.ØkonomiMockService(kravgrunnlagRepository)
-        økonomiConsumer = ØkonomiConsumer(økonomiService)
+        økonomiConsumer = DefaultØkonomiConsumer(økonomiService)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiConsumer, historikkService)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService)
 

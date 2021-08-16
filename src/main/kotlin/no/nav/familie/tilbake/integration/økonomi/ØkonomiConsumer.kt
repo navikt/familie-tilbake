@@ -10,17 +10,27 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.util.UUID
 import javax.xml.ws.soap.SOAPFaultException
 
-@Service
-class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
-
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+interface ØkonomiConsumer {
 
     fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
+            : TilbakekrevingsvedtakResponse
+    fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
+            : DetaljertKravgrunnlagDto
+}
+
+@Service
+@Profile("!e2e")
+class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortType): ØkonomiConsumer {
+
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
@@ -42,7 +52,7 @@ class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
         }
     }
 
-    fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
             : DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
@@ -69,5 +79,30 @@ class ØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) {
 
     private fun lagRespons(mmelDto: MmelDto): String {
         return objectMapper.writeValueAsString(mmelDto)
+    }
+}
+
+@Service
+@Profile("e2e")
+class MockØkonomiConsumer : ØkonomiConsumer {
+
+    override fun iverksettVedtak(behandlingId: UUID,
+                                 tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
+        logger.info("Skipper arkivering av dokument i e2e-profil")
+        val mmelDto = MmelDto()
+        mmelDto.alvorlighetsgrad = "00"
+        val response = TilbakekrevingsvedtakResponse()
+        response.mmel = mmelDto
+        return response
+    }
+
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger,
+                                  hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest): DetaljertKravgrunnlagDto {
+        TODO("Not yet implemented")
+    }
+
+    companion object {
+
+        private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

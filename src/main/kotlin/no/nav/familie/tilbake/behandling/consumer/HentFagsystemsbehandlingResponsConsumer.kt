@@ -12,7 +12,7 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 
 @Service
-@Profile("!integrasjonstest")
+@Profile("!integrasjonstest & !e2e")
 class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingService: HentFagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

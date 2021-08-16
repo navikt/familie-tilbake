@@ -38,8 +38,8 @@ internal class IntegrasjonerClientTest {
         wireMockServer.start()
         val stsRestClient = mockk<StsRestClient>()
         every { stsRestClient.systemOIDCToken } returns "token"
-        integrasjonerClient = IntegrasjonerClient(restOperations,
-                                                  IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"))
+        integrasjonerClient = DefaultIntegrasjonerClient(restOperations,
+                                                         IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"))
     }
 
     @AfterEach

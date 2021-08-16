@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.BeforeEach
@@ -70,7 +71,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 
-        spyKafkaProducer = spyk(KafkaProducer(mockKafkaTemplate))
+        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
         historikkService = HistorikkService(behandlingRepository,
                                             fagsakRepository,
                                             brevsporingRepository,
