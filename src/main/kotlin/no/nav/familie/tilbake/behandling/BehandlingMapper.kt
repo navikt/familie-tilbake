@@ -98,7 +98,8 @@ object BehandlingMapper {
                              kanEndres = kanEndres,
                              varselSendt = varselSendt,
                              behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
-                             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId)
+                             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
+                             behandlingsårsakstype = behandling.sisteÅrsak?.type)
 
     }
 
