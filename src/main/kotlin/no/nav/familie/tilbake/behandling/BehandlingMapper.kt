@@ -223,7 +223,11 @@ object BehandlingMapper {
                                     resultat = fagsystemsbehandling.resultat,
                                     tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
                                     revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
-                                    konsekvenser = fagsystemsbehandling.konsekvenser)
+                                    konsekvenser = kopiFagsystemskonsekvenser(fagsystemsbehandling.konsekvenser))
+    }
+
+    private fun kopiFagsystemskonsekvenser(originalKonsekvenser: Set<Fagsystemskonsekvens>): Set<Fagsystemskonsekvens> {
+        return originalKonsekvenser.map { Fagsystemskonsekvens(konsekvens = it.konsekvens) }.toSet()
     }
 
     private fun kopiVerge(originalBehandling: Behandling): Verge? {
