@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api.dto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -31,7 +32,8 @@ data class BehandlingDto(val eksternBrukId: UUID,
                          val kanEndres: Boolean,
                          val varselSendt: Boolean,
                          val behandlingsstegsinfo: List<BehandlingsstegsinfoDto>,
-                         val fagsystemsbehandlingId: String)
+                         val fagsystemsbehandlingId: String,
+                         val behandlingsårsakstype: Behandlingsårsakstype? = null)
 
 data class BehandlingsstegsinfoDto(val behandlingssteg: Behandlingssteg,
                                    val behandlingsstegstatus: Behandlingsstegstatus,

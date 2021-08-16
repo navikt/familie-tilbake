@@ -15,9 +15,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class MottattGrunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                           private val behandlingskontrollService: BehandlingskontrollService,
-                           private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                    private val behandlingskontrollService: BehandlingskontrollService,
+                    private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

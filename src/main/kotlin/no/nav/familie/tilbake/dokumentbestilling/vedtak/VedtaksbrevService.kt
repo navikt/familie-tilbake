@@ -250,8 +250,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
 
     private fun utledEffektForBruker(behandling: Behandling,
                                      hbVedtaksResultatBeløp: HbVedtaksResultatBeløp): VedtakHjemmel.EffektForBruker {
-        val erRevurdering: Boolean = Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type
-        return if (erRevurdering) hentEffektForBruker(behandling, hbVedtaksResultatBeløp.totaltTilbakekrevesMedRenter)
+        return if (behandling.erRevurdering) hentEffektForBruker(behandling, hbVedtaksResultatBeløp.totaltTilbakekrevesMedRenter)
         else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
     }
 
@@ -265,11 +264,10 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagHbBehandling(behandling: Behandling): HbBehandling {
-        val erRevurdering: Boolean = Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type
-        val erRevurderingEtterKlage: Boolean = behandling.årsaker
+        val erRevurderingEtterKlage: Boolean = behandling.erRevurdering && behandling.årsaker
                 .any { it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP) }
-        val originalBehandlingVedtaksdato = if (erRevurdering) finnOriginalBehandlingVedtaksdato(behandling) else null
-        return HbBehandling(erRevurdering = erRevurdering,
+        val originalBehandlingVedtaksdato = if (behandling.erRevurdering) finnOriginalBehandlingVedtaksdato(behandling) else null
+        return HbBehandling(erRevurdering = behandling.erRevurdering,
                             erRevurderingEtterKlage = erRevurderingEtterKlage,
                             originalBehandlingsdatoFagsakvedtak = originalBehandlingVedtaksdato)
     }
@@ -291,7 +289,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     private fun hentEffektForBruker(behandling: Behandling,
                                     totaltTilbakekrevesMedRenter: BigDecimal): VedtakHjemmel.EffektForBruker {
         val behandlingÅrsak: Behandlingsårsak = behandling.årsaker.first()
-        val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.id)
+        val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.originalBehandlingId!!)
         val originalBeregningsresultatsperioder = originaltBeregnetResultat.beregningsresultatsperioder
 
         val originalBehandlingTotaltMedRenter: BigDecimal = originalBeregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp }

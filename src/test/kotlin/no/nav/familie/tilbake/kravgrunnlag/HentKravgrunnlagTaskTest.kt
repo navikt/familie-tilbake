@@ -16,6 +16,12 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.ØkonomiConsumerLokalConfig
 import no.nav.familie.tilbake.data.Testdata
@@ -49,6 +55,12 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
 
+    @Autowired
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var stegService: StegService
+
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
     private lateinit var økonomiConsumer: ØkonomiConsumer
@@ -76,7 +88,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val økonomiService = ØkonomiConsumerLokalConfig.ØkonomiMockService(kravgrunnlagRepository)
         økonomiConsumer = ØkonomiConsumer(økonomiService)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiConsumer, historikkService)
-        hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService)
+        hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)
 
         every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
@@ -84,6 +96,12 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal hente kravgrunnlag for revurderingstilbakekreving`() {
         val revurdering = behandlingRepository.insert(Testdata.revurdering)
+        behandlingsstegstilstandRepository
+                .insert(Behandlingsstegstilstand(behandlingId = revurdering.id,
+                                                 behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                                                 venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                                                 tidsfrist = LocalDate.now().plusWeeks(3)))
 
         assertDoesNotThrow { hentKravgrunnlagTask.doTask(lagTask(revurdering.id)) }
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id) }
@@ -100,6 +118,21 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertEquals(Applikasjon.FAMILIE_TILBAKE, historikkinnslagRequest.applikasjon)
         assertEquals(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel, historikkinnslagRequest.tittel)
         assertEquals(LocalDate.now(), historikkinnslagRequest.opprettetTidspunkt.toLocalDate())
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
+        assertTrue {
+            behandlingsstegstilstand.any {
+                Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
+                Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
+            }
+        }
+
+        assertTrue {
+            behandlingsstegstilstand.any {
+                Behandlingssteg.FAKTA == it.behandlingssteg &&
+                Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
+            }
+        }
     }
 
     private fun lagTask(behandlingId: UUID): Task {
