@@ -313,7 +313,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettRevurdering skal opprette revurdering for gitt avluttet tilbakekrevingsbehandling`() {
+    fun `opprettRevurdering skal opprette revurdering for gitt avsluttet tilbakekrevingsbehandling`() {
         fagsakRepository.insert(Testdata.fagsak)
         var behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
