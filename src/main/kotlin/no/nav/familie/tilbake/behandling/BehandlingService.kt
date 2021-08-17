@@ -258,7 +258,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val gammelSaksbehandler = behandling.ansvarligSaksbehandler
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
+
+        //oppdater saksbehandler på oppgaven også hvis det er ny saksbehandler som behandler saken
+        if (!gammelSaksbehandler.equals(ContextService.hentSaksbehandler())) {
+            oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+        }
     }
 
     @Transactional
