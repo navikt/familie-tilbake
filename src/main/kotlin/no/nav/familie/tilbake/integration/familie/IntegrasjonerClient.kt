@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 
 import org.springframework.beans.factory.annotation.Qualifier
@@ -56,6 +57,11 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                     .build()
                     .toUri()
 
+    private fun hentTilgangssjekkUri() =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
+                    .build()
+                    .toUri()
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
                     .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
@@ -162,6 +168,16 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     fun hentNavkontor(enhetsId: String): NavKontorEnhet {
         return getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
     }
+
+
+    /*
+     * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle
+     * slike personer.
+     */
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
+        return postForEntity(hentTilgangssjekkUri(), personIdenter)
+    }
+
 }
 
 fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {

@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
@@ -27,7 +28,8 @@ import java.util.UUID
 @Configuration
 class TilgangAdvice(val rolleConfig: RolleConfig,
                     val behandlingRepository: BehandlingRepository,
-                    val fagsakRepository: FagsakRepository) {
+                    val fagsakRepository: FagsakRepository,
+                    val integrasjonerClient: IntegrasjonerClient) {
 
     private val behandlingIdParam = "behandlingId"
     private val ytelsestypeParam = "ytelsestype"
@@ -72,12 +74,14 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
             behandlingIdParam -> {
                 val behandlingId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
+                val personerIBehandlingen = hentPersonerIBehandlingen(behandlingId)
                 var behandlerRolle = minimumBehandlerRolle
                 if (requestBody.size > 1) {
                     behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody[1], minimumBehandlerRolle)
                 }
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = behandlerRolle,
+                         personerIBehandlingen = personerIBehandlingen,
                          handling = handling)
 
             }
@@ -86,20 +90,22 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(),handling = handling)
             }
             fagsystemParam -> {
                 val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.first().toString())
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
             }
             eksternBrukIdParam -> {
                 val eksternBrukId = requestBody.first() as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
+                val personerIBehandlingen = hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = personerIBehandlingen,
+                         handling = handling)
             }
             else -> {
                 kastTilgangssjekkException(handling)
@@ -122,24 +128,30 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(),
+                         handling = handling)
             }
             behandlingIdFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = behandlingIdParam, requestBody = requestBody)
                 val behandlingId: UUID = felt.get(requestBody) as UUID
                 val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
+                val personerIBehandlingen = hentPersonerIBehandlingen(behandlingId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle,
+                         personerIBehandlingen = personerIBehandlingen,
                          handling = handling)
             }
             eksternBrukIdFinnesIRequest -> {
                 val felt = hentFelt(feltNavn = eksternBrukIdParam, requestBody = requestBody)
                 val eksternBrukId: UUID = felt.get(requestBody) as UUID
                 val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
+                val personerIBehandlingen = hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         personerIBehandlingen = personerIBehandlingen,
+                         handling = handling)
             }
             else -> {
                 kastTilgangssjekkException(handling)
@@ -159,6 +171,19 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
     }
 
+    private fun hentPersonerIBehandlingen(behandlingId: UUID): List<String> {
+        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
+                         ?: throw Feil(message = "Behandling finnes ikke for $behandlingId", httpStatus = HttpStatus.BAD_REQUEST)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        return listOf(fagsak.bruker.ident)
+    }
+
+    private fun hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId: UUID): List<String> {
+        val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        return listOf(fagsak.bruker.ident)
+    }
+
     private fun hentFagsystemAvEksternBrukId(eksternBrukId: UUID): Tilgangskontrollsfagsystem {
         val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
         return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
@@ -167,6 +192,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     private fun validate(fagsystem: Tilgangskontrollsfagsystem,
                          brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                          minimumBehandlerRolle: Behandlerrolle,
+                         personerIBehandlingen: List<String>,
                          handling: String) {
         // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) {
@@ -179,6 +205,20 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         validateRolle(brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(fagsystem),
                       minimumBehandlerRolle = minimumBehandlerRolle,
                       handling = handling)
+
+        validateEgenAnsattKode6Kode7(personerIBehandlingen = personerIBehandlingen,
+                                     handling = handling)
+    }
+
+    private fun validateEgenAnsattKode6Kode7(personerIBehandlingen: List<String>,
+                                             handling: String) {
+
+        val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
+        if (tilganger.any{ !it.harTilgang }) {
+            throw Feil(message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",
+                       frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til person i $handling",
+                       httpStatus = HttpStatus.FORBIDDEN)
+        }
     }
 
     private fun validateFagsystem(fagsystem: Tilgangskontrollsfagsystem,
