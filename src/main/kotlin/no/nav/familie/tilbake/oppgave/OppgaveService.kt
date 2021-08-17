@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -10,7 +9,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -30,9 +28,26 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                      private val integrasjonerClient: IntegrasjonerClient,
                      private val personService: PersonService) {
 
+    private val log = LoggerFactory.getLogger(this::class.java)
 
     private val antallOppgaveTyper = Oppgavetype.values().associateWith {
         Metrics.counter("oppgave.opprettet", "type", it.name)
+    }
+
+    fun finnOppgaveForBehandling(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsakId = behandling.fagsakId
+        val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+
+        val finnOppgaveResponse =
+                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
+                                                                    oppgavetype = oppgavetype,
+                                                                    saksreferanse = behandling.eksternBrukId.toString(),
+                                                                    tema = fagsak.ytelsestype.tilTema()))
+        if (finnOppgaveResponse.oppgaver.size > 1) {
+            log.error("er mer enn en åpen oppgave for behandlingen")
+        }
+        return finnOppgaveResponse.oppgaver.first()
     }
 
     fun opprettOppgave(behandlingId: UUID,
@@ -118,13 +133,5 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         private val LOG = LoggerFactory.getLogger(this::class.java)
         val SECURELOG: Logger = LoggerFactory.getLogger("secureLogger")
-    }
-}
-
-private fun Ytelsestype.tilTema(): Tema {
-    return when (this) {
-        Ytelsestype.BARNETRYGD -> Tema.BAR
-        Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.SKOLEPENGER -> Tema.ENF
-        Ytelsestype.KONTANTSTØTTE -> Tema.KON
     }
 }

@@ -1,14 +1,11 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -35,20 +32,10 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
         val behandlingId = UUID.fromString(task.payload)
 
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+       val oppgave = oppgaveService.finnOppgaveForBehandling(behandlingId, oppgavetype)
 
-        val finnOppgaveResponse =
-                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
-                                                                    oppgavetype = oppgavetype,
-                                                                    saksreferanse = behandling.eksternBrukId.toString(),
-                                                                    tema = fagsak.ytelsestype.tilTema()))
-        if (finnOppgaveResponse.oppgaver.size > 1) {
-            log.error("er mer enn en åpen oppgave for behandlingen")
-        }
-
-        val nyBeskrivelse = beskrivelse + "/n" + finnOppgaveResponse.oppgaver[0].beskrivelse
-        oppgaveService.patchOppgave(finnOppgaveResponse.oppgaver[0].copy(fristFerdigstillelse = frist,
+        val nyBeskrivelse = beskrivelse + "/n" + oppgave.beskrivelse
+        oppgaveService.patchOppgave(oppgave.copy(fristFerdigstillelse = frist,
                                                                          beskrivelse = nyBeskrivelse))
     }
 

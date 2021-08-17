@@ -57,4 +57,14 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
                                  payload = behandlingId.toString(),
                                  properties = properties))
     }
+
+    @Transactional
+    fun oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId: UUID) {
+        val properties = Properties().apply {
+            setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
+        }
+        taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
+                                 payload = behandlingId.toString(),
+                                 properties = properties))
+    }
 }
