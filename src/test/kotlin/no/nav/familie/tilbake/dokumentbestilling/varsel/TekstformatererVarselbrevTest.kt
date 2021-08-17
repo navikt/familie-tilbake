@@ -27,7 +27,7 @@ class TekstformatererVarselbrevTest {
                                 beløp = 595959L,
                                 feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
                                 fristdatoForTilbakemelding = LocalDate.of(2020, 4, 4),
-                                endringsdato = LocalDate.of(2019, 12, 18),
+                                revurderingsvedtaksdato = LocalDate.of(2019, 12, 18),
                                 brevmetadata = metadata)
 
 

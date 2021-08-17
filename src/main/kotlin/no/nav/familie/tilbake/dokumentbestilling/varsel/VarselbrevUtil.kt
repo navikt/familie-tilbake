@@ -8,13 +8,13 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -39,14 +39,14 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                                       fagsak,
                                                       vergenavn,
                                                       false)
+
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = varsel?.varselbeløp ?: 0L,
-                                   endringsdato = LocalDate.now(),
+                                   revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
                                    fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
                                    varseltekstFraSaksbehandler = varsel?.varseltekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel))
 
-        // TODO revurderingVedtakDato = grunninformasjon.vedtakDato
     }
 
     fun sammenstillInfoForForhåndvisningVarselbrev(adresseinfo: Adresseinfo,
@@ -72,7 +72,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
 
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = request.feilutbetaltePerioderDto.sumFeilutbetaling,
-                                   endringsdato = request.vedtaksdato ?: LocalDate.now(),
+                                   revurderingsvedtaksdato = request.vedtaksdato ?: LocalDate.now(),
                                    fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
                                    varseltekstFraSaksbehandler = request.varseltekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto))
@@ -109,7 +109,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
 
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
-                                   endringsdato = feilutbetalingsfakta.revurderingsvedtaksdato,
+                                   revurderingsvedtaksdato = feilutbetalingsfakta.revurderingsvedtaksdato,
                                    fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
                                    varseltekstFraSaksbehandler = fritekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingsfakta),
