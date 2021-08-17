@@ -32,8 +32,9 @@ object VedtakHjemmel {
         val hjemler: MutableList<Hjemler> = ArrayList()
         if (vilkårsperioder.isNotEmpty()) {
             when {
+                barnetrygd && ignorerteSmåbeløp ->  hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15_SJETTE))
                 ignorerteSmåbeløp -> hjemler.add(Hjemler.FOLKETRYGD_22_15_SJETTE)
-                barnetrygd -> hjemler.add(Hjemler.BARNETRYGD_13_OG_FOLKETRYGD_22_15)
+                barnetrygd -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15))
                 kontantstøtte -> hjemler.add(Hjemler.KONTANTSTØTTE_11)
                 renter -> hjemler.add(Hjemler.FOLKETRYGD_22_15_OG_22_17_A)
                 else -> hjemler.add(Hjemler.FOLKETRYGD_22_15)
@@ -106,8 +107,7 @@ object VedtakHjemmel {
         FORVALTNING_35_A("forvaltningsloven § 35 a)", "forvaltningslova § 35 a)"),
         FORVALTNING_35_C("forvaltningsloven § 35 c)", "forvaltningslova § 35 c)"),
         KONTANTSTØTTE_11("kontantstøtteloven § 11", "kontantstøttelova § 11"),
-        BARNETRYGD_13_OG_FOLKETRYGD_22_15("barnetrygdloven § 13 og folketrygdloven § 22-15",
-                                          "barnetrygdlova § 13 og folketrygdlova § 22-15");
+        BARNETRYGD_13("barnetrygdloven § 13", "barnetrygdlova § 13");
 
         private val hjemmelTekster = mapOf(Språkkode.NB to bokmål,
                                            Språkkode.NN to nynorsk)
