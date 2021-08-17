@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
@@ -26,9 +25,12 @@ import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegsinfoDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
+import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -48,6 +50,7 @@ import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
@@ -309,6 +312,59 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("Z0000", task.metadata["ansvarligSaksbehandler"])
     }
 
+    @Test
+    fun `opprettRevurdering skal opprette revurdering for gitt avsluttet tilbakekrevingsbehandling`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        var revurdering = behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
+        revurdering = behandlingRepository.findByIdOrThrow(revurdering.id)
+        assertEquals(Behandlingstype.REVURDERING_TILBAKEKREVING, revurdering.type)
+        assertEquals(Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR, revurdering.sisteÅrsak?.type)
+        assertEquals(Behandlingsstatus.UTREDES, revurdering.status)
+        assertEquals(behandling.behandlendeEnhet, revurdering.behandlendeEnhet)
+        assertEquals(behandling.behandlendeEnhetsNavn, revurdering.behandlendeEnhetsNavn)
+        assertFalse { behandling.manueltOpprettet }
+
+        val aktivFagsystemsbehandling = revurdering.aktivFagsystemsbehandling
+        assertEquals(behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg, aktivFagsystemsbehandling.tilbakekrevingsvalg)
+        assertEquals(behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
+                     aktivFagsystemsbehandling.revurderingsvedtaksdato)
+        assertEquals(behandling.aktivFagsystemsbehandling.eksternId, aktivFagsystemsbehandling.eksternId)
+        assertEquals(behandling.aktivFagsystemsbehandling.årsak, aktivFagsystemsbehandling.årsak)
+        assertEquals(behandling.aktivFagsystemsbehandling.resultat, aktivFagsystemsbehandling.resultat)
+        assertHistorikkTask(revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, Aktør.VEDTAKSLØSNING,
+                            "Venter på kravgrunnlag fra økonomi")
+        assertTrue {
+            taskRepository.findByStatus(Status.UBEHANDLET).any {
+                HentKravgrunnlagTask.TYPE == it.type &&
+                revurdering.id.toString() == it.payload
+            }
+        }
+        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(revurdering.id)
+        assertNotNull(behandlingsstegstilstand)
+        assertEquals(Behandlingssteg.GRUNNLAG, behandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.VENTER, behandlingsstegstilstand.behandlingsstegsstatus)
+    }
+
+    @Test
+    fun `opprettRevurdering skal ikke opprette revurdering for tilbakekreving som er avsluttet uten kravgrunnlag`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        var behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            behandlingService.opprettRevurdering(lagOpprettRevurderingDto(behandling.id))
+        }
+        assertEquals("Revurdering kan ikke opprettes for behandling ${behandling.id}. " +
+                     "Enten behandlingen er ikke avsluttet med kravgrunnlag eller " +
+                     "det finnes allerede en åpen revurdering", exception.message)
+    }
 
     @Test
     fun `hentBehandling skal hente behandling som opprettet uten varsel`() {
@@ -905,7 +961,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                               behandling: Behandling) {
         assertEquals(behandling.eksternBrukId, behandlingDto.eksternBrukId)
         assertFalse { behandlingDto.erBehandlingHenlagt }
-        assertEquals(Behandlingstype.TILBAKEKREVING.name, behandlingDto.type.name)
+        assertEquals(Behandlingstype.TILBAKEKREVING, behandlingDto.type)
         assertEquals(Behandlingsstatus.UTREDES, behandlingDto.status)
         assertEquals(behandling.opprettetDato, behandlingDto.opprettetDato)
         assertNull(behandlingDto.avsluttetDato)
@@ -1026,6 +1082,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                             verge = verge,
                                             faktainfo = faktainfo,
                                             saksbehandlerIdent = "Z0000")
+    }
+
+    private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto {
+        return OpprettRevurderingDto(BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
     }
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
