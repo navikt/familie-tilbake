@@ -84,7 +84,7 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
 
 @Service
 @Profile("e2e")
-class MockØkonomiConsumer : ØkonomiConsumer {
+class E2EØkonomiConsumer : ØkonomiConsumer {
 
     override fun iverksettVedtak(behandlingId: UUID,
                                  tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {

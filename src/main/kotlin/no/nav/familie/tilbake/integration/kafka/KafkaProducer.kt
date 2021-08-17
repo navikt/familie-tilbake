@@ -63,7 +63,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 
 @Service
 @Profile("e2e")
-class MockKafkaProducer : KafkaProducer {
+class E2EKafkaProducer : KafkaProducer {
 
     override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
         logger.info("Skipper sending av historikkinnslag for behandling ${behandlingId} fordi kafka ikke er enablet")
@@ -83,6 +83,6 @@ class MockKafkaProducer : KafkaProducer {
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(MockKafkaProducer::class.java)
+        private val logger = LoggerFactory.getLogger(E2EKafkaProducer::class.java)
     }
 }
