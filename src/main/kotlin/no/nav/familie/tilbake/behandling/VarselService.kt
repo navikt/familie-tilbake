@@ -10,7 +10,9 @@ class VarselService(val behandlingRepository: BehandlingRepository) {
 
     fun lagre(behandlingId: UUID, varseltekst: String, varselbeløp: Long) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val copy = behandling.copy(varsler = behandling.varsler + Varsel(varseltekst = varseltekst, varselbeløp = varselbeløp))
+        val varsler = behandling.varsler.map { it.copy(aktiv = false) } +
+                      Varsel(varseltekst = varseltekst, varselbeløp = varselbeløp)
+        val copy = behandling.copy(varsler = varsler.toSet())
         behandlingRepository.update(copy)
     }
 }
