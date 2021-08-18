@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
                                val beløp: Long,
-                               val endringsdato: LocalDate,
+                               val revurderingsvedtaksdato: LocalDate,
                                val feilutbetaltePerioder: List<Handlebarsperiode>,
                                val varseltekstFraSaksbehandler: String? = null,
                                val fristdatoForTilbakemelding: LocalDate,
