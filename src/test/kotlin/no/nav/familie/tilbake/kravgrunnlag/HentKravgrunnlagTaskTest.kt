@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.ØkonomiConsumerLokalConfig
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -116,7 +117,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertEquals(revurdering.eksternBrukId.toString(), historikkinnslagRequest.behandlingId)
         assertEquals(fagsak.eksternFagsakId, historikkinnslagRequest.eksternFagsakId)
         assertEquals(Aktør.VEDTAKSLØSNING, historikkinnslagRequest.aktør)
-        assertEquals("VL", historikkinnslagRequest.aktørIdent)
+        assertEquals(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, historikkinnslagRequest.aktørIdent)
         assertEquals(Applikasjon.FAMILIE_TILBAKE, historikkinnslagRequest.applikasjon)
         assertEquals(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel, historikkinnslagRequest.tittel)
         assertEquals(LocalDate.now(), historikkinnslagRequest.opprettetTidspunkt.toLocalDate())

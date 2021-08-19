@@ -22,5 +22,7 @@ object Constants {
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
+    const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
+    
 }
 

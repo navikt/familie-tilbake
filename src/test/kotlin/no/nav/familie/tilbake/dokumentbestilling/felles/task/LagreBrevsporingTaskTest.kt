@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -128,7 +129,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT, Aktør.VEDTAKSLØSNING)
     }
 
-    private fun opprettTask(behandlingId: UUID, brevtype: Brevtype, ansvarligSaksbehandler: String? = "VL"): Task {
+    private fun opprettTask(behandlingId: UUID, brevtype: Brevtype, ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN): Task {
         return Task(type = LagreBrevsporingTask.TYPE,
                     payload = behandlingId.toString(),
                     properties = Properties().apply {

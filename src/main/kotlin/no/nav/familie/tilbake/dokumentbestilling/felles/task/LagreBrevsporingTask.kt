@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.BrevsporingService
@@ -83,7 +84,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         return when {
             brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
             brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
-            ansvarligSaksbehandler != null && ansvarligSaksbehandler != "VL" -> Aktør.SAKSBEHANDLER
+            ansvarligSaksbehandler != null && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN -> Aktør.SAKSBEHANDLER
             else -> Aktør.VEDTAKSLØSNING
         }
     }

@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -164,7 +165,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val behandling = Behandling(fagsakId = fagsak.id,
                                     type = Behandlingstype.TILBAKEKREVING,
-                                    ansvarligSaksbehandler = "VL",
+                                    ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                     behandlendeEnhet = "8020",
                                     behandlendeEnhetsNavn = "Oslo",
                                     manueltOpprettet = false)
