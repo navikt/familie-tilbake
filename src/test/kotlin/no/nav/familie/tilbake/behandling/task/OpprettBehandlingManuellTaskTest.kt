@@ -25,6 +25,7 @@ import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -83,7 +84,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        spyKafkaProducer = spyk(KafkaProducer(mockKafkaTemplate))
+        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
         opprettBehandlingManueltTask = OpprettBehandlingManueltTask(hentFagsystemsbehandlingService,

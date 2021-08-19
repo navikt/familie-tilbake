@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiConsumer
 import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -80,7 +81,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private lateinit var iverksettelseService: IverksettelseService
 
     private val mockØkonomiService: TilbakekrevingPortType = mockk()
-    private val økonomiConsumer = ØkonomiConsumer(mockØkonomiService)
+    private val økonomiConsumer = DefaultØkonomiConsumer(mockØkonomiService)
 
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling

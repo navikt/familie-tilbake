@@ -153,8 +153,6 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         return postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri,
                                                               finnOppgaveRequest,
                                                               HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
-
-
     }
 
     fun ferdigstillOppgave(oppgaveId: Long) {
