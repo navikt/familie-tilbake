@@ -90,7 +90,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun distribuerJournalpost(journalpostId: String,
-                                       fagsystem: Fagsystem): String {
+                              fagsystem: Fagsystem): String {
         val request = DistribuerJournalpostRequest(journalpostId,
                                                    fagsystem,
                                                    integrasjonerConfig.applicationName)
