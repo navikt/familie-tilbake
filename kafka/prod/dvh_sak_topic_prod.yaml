@@ -18,3 +18,6 @@ spec:
     - team: teamfamilie
       application: familie-tilbake #owner
       access: readwrite   # readwrite
+    - team: ptsak
+      application: pt-sak-famtilbake
+      access: read
