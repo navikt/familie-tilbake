@@ -43,6 +43,7 @@ spec:
       rules:
         - application: familie-ba-sak
           namespace: teamfamilie
+          cluster: prod-fss
         - application: familie-ef-sak
           namespace: default
         - application: familie-ks-sak
