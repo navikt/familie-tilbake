@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -107,7 +107,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
 
     private fun hentAktørIdent(behandling: Behandling, aktør: Aktør): String {
         return when (aktør) {
-            Aktør.VEDTAKSLØSNING -> "VL"
+            Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
             Aktør.BESLUTTER -> behandling.ansvarligBeslutter!!
         }

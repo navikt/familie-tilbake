@@ -41,6 +41,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
@@ -503,7 +504,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
-                                                          ansvarligSaksbehandler = "VL"))
+                                                          ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN))
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
 
@@ -751,7 +752,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
-        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
+        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                                                       opprettetTid = LocalDateTime.now().minusDays(10))))
         // sender varselsbrev
         brevsporingRepository.insert(Brevsporing(behandlingId = behandling.id,
@@ -798,7 +799,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
-        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = "VL",
+        behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                                                       opprettetTid = LocalDateTime.now().minusDays(10))))
 
         behandlingService

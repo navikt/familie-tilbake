@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.common
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.InnloggetBrukertilgang
@@ -11,14 +12,13 @@ import org.springframework.jca.context.SpringContextResourceAdapter
 
 object ContextService {
 
-    private const val SYSTEM_FORKORTELSE = "VL"
 
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
+                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: Constants.BRUKER_ID_VEDTAKSLØSNINGEN
                 },
-                      onFailure = { SYSTEM_FORKORTELSE })
+                      onFailure = { Constants.BRUKER_ID_VEDTAKSLØSNINGEN })
     }
 
     private fun hentGrupper(): List<String> {
@@ -34,7 +34,7 @@ object ContextService {
                                                                handling: String): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
         val brukerTilganger = mutableMapOf<Tilgangskontrollsfagsystem, Behandlerrolle>()
-        if (saksbehandler == SYSTEM_FORKORTELSE) {
+        if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             brukerTilganger[Tilgangskontrollsfagsystem.SYSTEM_TILGANG] = Behandlerrolle.SYSTEM
         }
         val grupper = hentGrupper()

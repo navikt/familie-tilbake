@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
@@ -91,7 +92,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(keySlot),
                                                   capture(historikkinnslagRecordSlot))
         }
-        assertHistorikkinnslagRequest(Aktør.VEDTAKSLØSNING, "VL", TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
+        assertHistorikkinnslagRequest(Aktør.VEDTAKSLØSNING, Constants.BRUKER_ID_VEDTAKSLØSNINGEN, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
                                       Historikkinnslagstype.HENDELSE)
     }
 
@@ -112,7 +113,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
                                       tekst = "Årsak: Venter på tilbakemelding fra bruker",
                                       type = Historikkinnslagstype.HENDELSE)
@@ -170,7 +171,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT.tittel,
                                       type = Historikkinnslagstype.HENDELSE)
     }
@@ -191,7 +192,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tittel,
                                       tekst = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tekst,
                                       type = Historikkinnslagstype.BREV,
@@ -217,7 +218,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
                                       tekst = "Årsak: Kravgrunnlaget er nullstilt",
                                       type = Historikkinnslagstype.HENDELSE)
@@ -242,7 +243,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
                                       tekst = "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
                                       type = Historikkinnslagstype.HENDELSE)
@@ -264,7 +265,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = "VL",
+                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                       tittel = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tittel,
                                       tekst = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst,
                                       type = Historikkinnslagstype.BREV,
