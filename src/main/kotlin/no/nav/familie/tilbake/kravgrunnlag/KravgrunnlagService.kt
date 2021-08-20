@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -18,6 +19,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Properties
@@ -32,6 +34,8 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                           private val historikkTaskService: HistorikkTaskService,
                           private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                           private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
+
+    private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
@@ -58,9 +62,23 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                               Aktør.VEDTAKSLØSNING)
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
+            log.info("Mottatt ENDR kravgrunnlag. Fjerner eksisterende data for behandling ${behandling.id}")
             endretKravgrunnlagEventPublisher.fireEvent(behandlingId = behandling.id)
-            // flytter behandlingssteg tilbake til fakta
-            behandlingskontrollService.behandleStegPåNytt(behandlingId = behandling.id, Behandlingssteg.FAKTA)
+            val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+            // flytter behandlingssteg tilbake til fakta,
+            // behandling har allerede fått SPER melding og venter på kravgrunnlag
+            when (aktivBehandlingsstegstilstand?.behandlingsstegsstatus) {
+                Behandlingsstegstatus.VENTER -> {
+                    log.info("Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
+                             "Flytter behandlingen til fakta steg")
+                    behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id)
+                }
+                else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
+                    log.info("Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
+                             "Flytter behandlingen til fakta steg")
+                    behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA)
+                }
+            }
         }
         stegService.håndterSteg(behandling.id)
     }
