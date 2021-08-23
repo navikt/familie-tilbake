@@ -76,7 +76,7 @@ jobs:
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         uses: actions/checkout@v2
         with:
-          ref: "master"
+          ref: "main"
           repository: navikt/familie-tilbake-e2e
           token: ${{ steps.get-token.outputs.token }}
           path: tilbake-e2e
