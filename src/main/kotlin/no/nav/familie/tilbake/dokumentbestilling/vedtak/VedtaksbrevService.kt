@@ -161,6 +161,13 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         vedtaksbrevsperioder.forEach { vedtaksbrevsperiodeRepository.insert(it) }
     }
 
+    @Transactional
+    fun deaktiverEksisterendeVedtaksbrevdata(behandlingId: UUID) {
+        vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
+                ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
+        vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId).forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
+    }
+
     private fun getBrevmottager(behandlingId: Behandling): Brevmottager {
         return if (behandlingId.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
     }
