@@ -11,8 +11,8 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(taskStepType = HåndterGammelKravgrunnlagTask.TYPE,
                      beskrivelse = "Håndter frakoblet gammel kravgrunnlag som er eldre enn en bestemt dato",
-                     maxAntallFeil = 10,
-                     triggerTidVedFeilISekunder = 5)
+                     maxAntallFeil = 3,
+                     triggerTidVedFeilISekunder = 60 * 5)
 class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
                                     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService)
     : AsyncTaskStep {
