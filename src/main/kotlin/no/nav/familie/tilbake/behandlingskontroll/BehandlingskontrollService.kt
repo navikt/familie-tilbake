@@ -78,6 +78,17 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     @Transactional
+    fun tilbakeførBehandledeSteg(behandlingId: UUID) {
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        val alleIkkeVentendeSteg = behandlingsstegstilstand.filter { it.behandlingsstegsstatus != VENTER }
+                .filter { it.behandlingssteg != Behandlingssteg.VARSEL }
+        alleIkkeVentendeSteg.forEach {
+            log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
+            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
+        }
+    }
+
+    @Transactional
     fun behandleStegPåNytt(behandlingId: UUID, behandledeSteg: Behandlingssteg) {
         val aktivtBehandlingssteg = finnAktivtSteg(behandlingId)
                                     ?: throw Feil("Behandling med id=$behandlingId har ikke noe aktivt steg")

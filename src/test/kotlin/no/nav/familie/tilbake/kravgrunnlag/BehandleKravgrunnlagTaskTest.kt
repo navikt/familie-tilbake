@@ -11,15 +11,19 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
+import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
+import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
-import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -31,6 +35,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
@@ -46,6 +51,9 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -91,6 +99,12 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var foreldelseRepository: VurdertForeldelseRepository
 
     @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository
+
+    @Autowired
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
 
     @Autowired
@@ -110,6 +124,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+
+    @Autowired
+    private lateinit var behandleStatusmeldingTask: BehandleStatusmeldingTask
 
     private val kafkaProducer: KafkaProducer = mockk()
 
@@ -312,6 +329,107 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         assertNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
         assertNull(foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
+
+        assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
+    }
+
+    @Test
+    fun `doTask skal lagre mottatt ENDR kravgrunnlag og slette behandlet data når behandling er på fatte vedtak steg`() {
+        lagGrunnlagssteg()
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
+
+        val periode = PeriodeDto(YearMonth.of(2018, 1), YearMonth.of(2018, 2))
+        // Håndter fakta steg
+        stegService.håndterSteg(behandling.id,
+                                BehandlingsstegFaktaDto(listOf(FaktaFeilutbetalingsperiodeDto(periode,
+                                                                                              Hendelsestype.BARNS_ALDER,
+                                                                                              Hendelsesundertype.BARN_DØD)),
+                                                        "Fakta begrunnelse"))
+        // Håndter foreldelse steg
+        stegService.håndterSteg(behandling.id,
+                                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(periode,
+                                                                                          "Foreldelse begrunnelse",
+                                                                                          Foreldelsesvurderingstype
+                                                                                                  .IKKE_FORELDET))))
+
+        // Håndter Vilkårsvurdering steg
+        stegService.håndterSteg(behandling.id,
+                                BehandlingsstegVilkårsvurderingDto(listOf(
+                                        VilkårsvurderingsperiodeDto(periode,
+                                                                    Vilkårsvurderingsresultat.GOD_TRO,
+                                                                    "Vilkårs begrunnelse",
+                                                                    GodTroDto(begrunnelse = "god tro", beløpErIBehold = false)))))
+
+        // Håndter Foreslå Vedtak steg
+        stegService.håndterSteg(behandling.id,
+                                BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto("oppsummeringstekst",
+                                                                                        emptyList())))
+
+        assertNotNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNotNull(foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNotNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNotNull(vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id))
+
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
+        behandleStatusmeldingTask.doTask(Task(type = BehandleStatusmeldingTask.TYPE, payload = statusmeldingXml))
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.AVBRUTT)
+
+        val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        assertDoesNotThrow { behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml)) }
+
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        assertNotNull(kravgrunnlag)
+        assertEquals(Kravstatuskode.ENDRET, kravgrunnlag.kravstatuskode)
+        assertEquals(fagsak.eksternFagsakId, kravgrunnlag.fagsystemId)
+        assertEquals(Ytelsestype.BARNETRYGD, KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name))
+
+        assertPerioder(kravgrunnlag)
+        assertBeløp(kravgrunnlag)
+
+        assertTrue {
+            mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(kravgrunnlag.eksternKravgrunnlagId,
+                                                                        kravgrunnlag.vedtakId).isEmpty()
+        }
+        assertTrue { mottattXmlArkivRepository.findAll().toList().isNotEmpty() }
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.VILKÅRSVURDERING,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.FORESLÅ_VEDTAK,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.FATTE_VEDTAK,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
+
+        assertNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNull(foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNull(vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id))
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
