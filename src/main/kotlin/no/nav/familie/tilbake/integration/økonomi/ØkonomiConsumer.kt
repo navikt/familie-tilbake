@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.integration.økonomi
 
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
+import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingPortType
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -57,12 +58,7 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
             val respons = økonomiService.kravgrunnlagHentDetalj(hentKravgrunnlagRequest)
-            if (!erResponsOk(respons.mmel)) {
-                logger.error("Fikk feil respons:${lagRespons(respons.mmel)} fra økonomi ved henting av kravgrunnlag " +
-                             "for kravgrunnlagId=$kravgrunnlagId.")
-                throw IntegrasjonException(msg = "Fikk feil respons:${lagRespons(respons.mmel)} fra økonomi " +
-                                                 "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.")
-            }
+            validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
             return respons.detaljertkravgrunnlag
         } catch (exception: SOAPFaultException) {
@@ -73,12 +69,38 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
         }
     }
 
+    private fun validerHentKravgrunnlagRespons(mmelDto: MmelDto, kravgrunnlagId: BigInteger) {
+        if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
+            logger.error("Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
+                         "for kravgrunnlagId=$kravgrunnlagId.")
+            throw IntegrasjonException(msg = "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi " +
+                                             "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.")
+        } else if (erKravgrunnlagSperret(mmelDto)) {
+            logger.warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+            throw SperretKravgrunnlagFeil(melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+        }
+    }
+
     private fun erResponsOk(mmelDto: MmelDto): Boolean {
         return mmelDto.alvorlighetsgrad in setOf("00", "04")
     }
 
+    private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean {
+        return KODE_MELDING_SPERRET_KRAVGRUNNLAG.equals(mmelDto.kodeMelding)
+    }
+
+    private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean {
+        return KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES.equals(mmelDto.kodeMelding)
+    }
+
     private fun lagRespons(mmelDto: MmelDto): String {
         return objectMapper.writeValueAsString(mmelDto)
+    }
+
+    companion object {
+
+        const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
+        const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
     }
 }
 

@@ -205,11 +205,6 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         return behandlingService.opprettBehandling(request)
     }
 
-    private fun readXml(fileName: String): String {
-        val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
-        return url.readText()
-    }
-
     private fun lagreMottattKravgrunnlag(kravgrunnlagXml: String,
                                          sperret: Boolean = false) {
         økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = kravgrunnlagXml,

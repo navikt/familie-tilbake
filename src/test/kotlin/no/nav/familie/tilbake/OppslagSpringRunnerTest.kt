@@ -71,6 +71,11 @@ abstract class OppslagSpringRunnerTest {
         resetWiremockServers()
     }
 
+    fun readXml(fileName: String): String {
+        val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
+        return url.readText()
+    }
+
     private fun resetWiremockServers() {
         applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
     }
