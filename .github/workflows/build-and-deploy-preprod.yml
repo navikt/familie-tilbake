@@ -127,7 +127,7 @@ jobs:
     if: github.event.pull_request.draft == false
     name: Deploy til dev-fss
     runs-on: ubuntu-latest
-    needs: run-e2e
+    needs: build-jar-docker
     steps:
       - uses: actions/checkout@v2
         with:
