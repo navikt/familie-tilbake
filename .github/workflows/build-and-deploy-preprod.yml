@@ -17,6 +17,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
       - name: Bygg (dependabot)
