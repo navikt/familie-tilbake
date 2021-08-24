@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -19,6 +20,7 @@ class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagServic
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional
     override fun preCondition(task: Task) {
         logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
@@ -30,6 +32,7 @@ class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagServic
                                                                             eksternId = mottattXml.referanse)
     }
 
+    @Transactional
     override fun doTask(task: Task) {
         logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
