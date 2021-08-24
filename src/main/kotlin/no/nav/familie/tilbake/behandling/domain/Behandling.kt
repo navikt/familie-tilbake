@@ -137,8 +137,6 @@ data class Verge(@Id
                  val id: UUID = UUID.randomUUID(),
                  val ident: String? = null,
                  val orgNr: String? = null,
-                 val gyldigFom: LocalDate,
-                 val gyldigTom: LocalDate,
                  val aktiv: Boolean = true,
                  val type: Vergetype,
                  val navn: String,

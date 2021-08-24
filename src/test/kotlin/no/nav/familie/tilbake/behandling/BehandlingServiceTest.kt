@@ -1045,8 +1045,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(1, behandling.verger.size)
         val verge = behandling.verger.toList().first()
         assertEquals(opprettTilbakekrevingRequest.verge?.vergetype?.navn, verge.type.navn)
-        assertEquals(opprettTilbakekrevingRequest.verge?.gyldigFom, verge.gyldigFom)
-        assertEquals(opprettTilbakekrevingRequest.verge?.gyldigTom, verge.gyldigTom)
         assertEquals(opprettTilbakekrevingRequest.verge?.navn, verge.navn)
         assertEquals(opprettTilbakekrevingRequest.verge?.organisasjonsnummer, verge.orgNr)
         assertEquals(opprettTilbakekrevingRequest.verge?.personIdent, verge.ident)

@@ -85,8 +85,6 @@ object Testdata {
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
     val verge = Verge(ident = "testverdi",
-                      gyldigFom = LocalDate.now(),
-                      gyldigTom = LocalDate.now(),
                       type = Vergetype.VERGE_FOR_BARN,
                       orgNr = "testverdi",
                       navn = "testverdi",

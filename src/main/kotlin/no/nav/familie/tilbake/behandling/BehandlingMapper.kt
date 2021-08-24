@@ -131,8 +131,6 @@ object BehandlingMapper {
             } else {
                 return setOf(Verge(type = it.vergetype,
                                    kilde = fagsystem.name,
-                                   gyldigFom = it.gyldigFom,
-                                   gyldigTom = it.gyldigTom,
                                    navn = it.navn,
                                    orgNr = it.organisasjonsnummer,
                                    ident = it.personIdent))
@@ -238,8 +236,6 @@ object BehandlingMapper {
                   ident = it.ident,
                   orgNr = it.orgNr,
                   navn = it.navn,
-                  gyldigFom = it.gyldigFom,
-                  gyldigTom = it.gyldigTom,
                   begrunnelse = it.begrunnelse,
                   kilde = it.kilde)
         }
