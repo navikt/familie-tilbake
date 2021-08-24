@@ -76,9 +76,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var kafkaProducer: KafkaProducer
-
-    @Autowired
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
@@ -114,9 +111,12 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                           økonomiXmlMottattService,
                                                                           mockHentKravgrunnlagService,
                                                                           stegService)
+        val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
                 HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
+
+        every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
     }
 
     @AfterEach
