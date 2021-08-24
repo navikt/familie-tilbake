@@ -34,7 +34,7 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
                 it.contains("integrasjonstest")
             } -> {
                 logger.info("Starter HåndterGamleKravgrunnlagBatch..")
-                logger.info("Henter gamle kravgrunnlag som er gamle enn $ALDERSGRENSE_I_UKER")
+                logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
                 val mottattXmlIds: List<UUID> =
                         mottattXmlService.hentFrakobletGamleMottattXmlIds(barnetrygdBestemtDato = beregnBestemtDato(BARNETRYGD),
                                                                           barnetilsynBestemtDato = beregnBestemtDato(BARNETILSYN),
@@ -46,11 +46,11 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
 
                 when {
                     mottattXmlIds.isEmpty() -> {
-                        logger.info("Det finnes ingen gamle kravgrunnlag som er gamle enn $ALDERSGRENSE_I_UKER fra dagens dato")
+                        logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
                     }
                     else -> {
-                        logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er gamle enn " +
-                                    "$ALDERSGRENSE_I_UKER fra dagens dato")
+                        logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er eldre enn " +
+                                    "$ALDERSGRENSE_I_UKER uker fra dagens dato")
                         logger.info("Oppretter tasker for å håndtere enkel kravgrunnlag")
                         mottattXmlIds.forEach {
                             taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = it.toString()))
