@@ -151,7 +151,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                                                                       Brevtype.KORRIGERT_VARSEL))
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
-        val kanRevurderingOpprettes: Boolean = kanRevurderingOpprettes(behandling)
+        val kanRevurderingOpprettes: Boolean = kanOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
@@ -451,14 +451,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
             return false
         }
-        val inloggetBrukerstilgang = ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
-
-        val tilganger = inloggetBrukerstilgang.tilganger
-
-        val behandlerRolle =
-                if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
-                else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
+        val behandlerRolle = finnBehandlerrolle(fagsystem)
 
         return when (behandlerRolle) {
             Behandlerrolle.VEILEDER -> false
@@ -472,6 +465,22 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling.erAvsluttet &&
                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
                behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
+    }
+
+    private fun kanOppretteRevurdering(fagsystem: Fagsystem): Boolean {
+        return finnBehandlerrolle(fagsystem) != Behandlerrolle.VEILEDER;
+    }
+
+    private fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
+        val inloggetBrukerstilgang = ContextService
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+
+        val tilganger = inloggetBrukerstilgang.tilganger
+
+        val behandlerRolle =
+                if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
+                else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
+        return behandlerRolle
     }
 
     private fun fjernNewlinesFraString(tekst: String): String {
