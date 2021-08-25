@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.TILBAKEFØRT
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -52,7 +53,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                           aktør = Aktør.VEDTAKSLØSNING,
                                           beskrivelse = nesteStegMetaData.venteårsak?.beskrivelse)
             }
-            behandlingTilstandService.opprettSendingAvNyttSteg(behandlingId, nesteStegMetaData)
         } else {
             log.info("Behandling har allerede et aktivt steg=${aktivtStegstilstand.behandlingssteg} " +
                      "med status=${aktivtStegstilstand.behandlingsstegsstatus}")
@@ -171,7 +171,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     @Transactional
     fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet) {
+        if (behandling.erAvsluttet && (behandlingsstegsinfo.behandlingssteg != Behandlingssteg.AVSLUTTET
+                                       && behandlingsstegsinfo.behandlingsstegstatus != UTFØRT)) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres")
         }
@@ -190,27 +191,21 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, behandlingsstegsinfo.behandlingssteg)
-
-        if (behandlingsstegstilstand.behandlingsstegsstatus != behandlingsstegsinfo.behandlingsstegstatus) {
-            behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId,
-                                                                            behandlingsstegstilstand,
-                                                                            behandlingsstegsinfo)
-        }
+        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, behandlingsstegsinfo)
     }
 
     private fun opprettBehandlingsstegOgStatus(behandlingId: UUID,
                                                nesteStegMedStatus: Behandlingsstegsinfo) {
         // startet nytt behandlingssteg
-        val nybehandlingstegstilstand =
-                behandlingsstegstilstandRepository
-                        .insert(Behandlingsstegstilstand(behandlingId = behandlingId,
-                                                         behandlingssteg = nesteStegMedStatus.behandlingssteg,
-                                                         venteårsak = nesteStegMedStatus.venteårsak,
-                                                         tidsfrist = nesteStegMedStatus.tidsfrist,
-                                                         behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
+        behandlingsstegstilstandRepository
+                .insert(Behandlingsstegstilstand(behandlingId = behandlingId,
+                                                 behandlingssteg = nesteStegMedStatus.behandlingssteg,
+                                                 venteårsak = nesteStegMedStatus.venteårsak,
+                                                 tidsfrist = nesteStegMedStatus.tidsfrist,
+                                                 behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
         //oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, nesteStegMedStatus.behandlingssteg)
-        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nybehandlingstegstilstand)
+        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus)
     }
 
     private fun persisterBehandlingsstegOgStatus(behandlingId: UUID,

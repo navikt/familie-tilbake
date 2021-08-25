@@ -23,26 +23,16 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
+@Transactional
 class BehandlingTilstandService(private val behandlingRepository: BehandlingRepository,
                                 private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
                                 private val fagsakRepository: FagsakRepository,
                                 private val taskService: TaskService) {
 
 
-    @Transactional
-    fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID,
-                                              tilstandFør: Behandlingsstegstilstand,
-                                              tilstandEtter: Behandlingsstegsinfo) {
-        val hendelsesbeskrivelse = "Endring fra ${tilstandFør.behandlingssteg}:${tilstandFør.behandlingsstegsstatus} " +
-                                   "til ${tilstandEtter.behandlingssteg} : ${tilstandEtter.behandlingsstegstatus} " +
-                                   "for behandling $behandlingId"
-
-        val tilstand = hentBehandlingensTilstand(behandlingId)
-        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
-    }
-
-    fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, tilstandFør: Behandlingsstegstilstand) {
-        val hendelsesbeskrivelse = "Oppretter ${tilstandFør.behandlingssteg}:${tilstandFør.behandlingsstegsstatus} " +
+    fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, info: Behandlingsstegsinfo) {
+        val hendelsesbeskrivelse = "Ny behandlingsstegstilstand " +
+                                   "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
                                    "for behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
@@ -55,15 +45,6 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         val tilstand = hentBehandlingensTilstand(behandlingId)
         opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
     }
-
-    fun opprettSendingAvNyttSteg(behandlingId: UUID, tilstandEtter: Behandlingsstegsinfo) {
-        val hendelsesbeskrivelse = "Nytt steg ${tilstandEtter.behandlingssteg} : ${tilstandEtter.behandlingsstegstatus} " +
-                                   "for behandling $behandlingId"
-
-        val tilstand = hentBehandlingensTilstand(behandlingId)
-        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
-    }
-
 
     private fun opprettProsessTask(behandlingId: UUID, behandlingstilstand: Behandlingstilstand, hendelsesbeskrivelse: String) {
         val task = Task(SendSakshendelseTilDvhTask.TASK_TYPE,
