@@ -429,11 +429,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun readXml(fileName: String): String {
-        val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
-        return url.readText()
-    }
-
     private fun opprettTask(xml: String, taskType: String): Task {
         return taskRepository.save(Task(type = taskType,
                                         payload = xml))

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
@@ -9,6 +10,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import java.math.BigInteger
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -44,6 +46,22 @@ class ØkonomiXmlMottattService(private val mottattXmlRepository: ØkonomiXmlMot
                                  "ytelsestype=$ytelsestype")
         }
         return kravgrunnlagXmlListe
+    }
+
+    fun hentFrakobletGamleMottattXmlIds(barnetrygdBestemtDato: LocalDate,
+                                        barnetilsynBestemtDato: LocalDate,
+                                        overgangsstønadBestemtDato: LocalDate,
+                                        skolePengerBestemtDato: LocalDate,
+                                        kontantStøtteBestemtDato: LocalDate): List<UUID> {
+        return mottattXmlRepository.hentFrakobletGamleMottattXmlIds(barnetrygdBestemtDato = barnetrygdBestemtDato,
+                                                                    barnetilsynBestemtDato = barnetilsynBestemtDato,
+                                                                    overgangsstonadbestemtdato = overgangsstønadBestemtDato,
+                                                                    skolePengerBestemtDato = skolePengerBestemtDato,
+                                                                    kontantstottebestemtdato = kontantStøtteBestemtDato)
+    }
+
+    fun hentMottattKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
+        return mottattXmlRepository.findByIdOrThrow(mottattXmlId)
     }
 
     fun oppdaterMottattXml(mottattXml: ØkonomiXmlMottatt) {

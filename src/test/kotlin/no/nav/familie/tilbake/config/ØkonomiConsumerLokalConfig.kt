@@ -2,11 +2,15 @@ package no.nav.familie.tilbake.config
 
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerResponse
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
@@ -32,19 +36,23 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Configuration
 @ComponentScan(value = ["no.nav.familie.tilbake.kravgrunnlag"])
 @Profile("mock-økonomi")
-class ØkonomiConsumerLokalConfig(private val kravgrunnlagRepository: KravgrunnlagRepository) {
+class ØkonomiConsumerLokalConfig(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                                 private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository) {
 
     @Bean
     @Primary
     fun økonomiService(): TilbakekrevingPortType {
-        return ØkonomiMockService(kravgrunnlagRepository)
+        return ØkonomiMockService(kravgrunnlagRepository, økonomiXmlMottattRepository)
     }
 
-    internal class ØkonomiMockService(private val kravgrunnlagRepository: KravgrunnlagRepository) : TilbakekrevingPortType {
+    internal class ØkonomiMockService(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                                      private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository)
+        : TilbakekrevingPortType {
 
         override fun tilbakekrevingsvedtak(request: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
             val respons = TilbakekrevingsvedtakResponse()
@@ -62,7 +70,10 @@ class ØkonomiConsumerLokalConfig(private val kravgrunnlagRepository: Kravgrunnl
         override fun kravgrunnlagHentDetalj(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
             val hentKravgrunnlagRequest = request.hentkravgrunnlag
             val eksisterendeKravgrunnlag = kravgrunnlagRepository
-                    .findByEksternKravgrunnlagIdAndAktivIsTrue(hentKravgrunnlagRequest.kravgrunnlagId)
+                                                   .findByEksternKravgrunnlagIdAndAktivIsTrue(hentKravgrunnlagRequest
+                                                                                                      .kravgrunnlagId)
+                                           ?: hentMottattKravgrunnlag(hentKravgrunnlagRequest.kravgrunnlagId)
+
             val respons = KravgrunnlagHentDetaljResponse()
             respons.mmel = lagMmelDto()
 
@@ -126,6 +137,15 @@ class ØkonomiConsumerLokalConfig(private val kravgrunnlagRepository: Kravgrunnl
                     belopTilbakekreves = it.tilbakekrevesBeløp
                     skattProsent = it.skatteprosent
                 }
+            }
+        }
+
+        private fun hentMottattKravgrunnlag(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431? {
+            val mottattXml = økonomiXmlMottattRepository
+                    .findByEksternKravgrunnlagId(eksternKravgrunnlagId)?.melding
+            return mottattXml?.let {
+                KravgrunnlagMapper.tilKravgrunnlag431(KravgrunnlagUtil.unmarshalKravgrunnlag(it),
+                                                      UUID.randomUUID())
             }
         }
     }

@@ -56,6 +56,9 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
+    private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
+
+    @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
 
     @Autowired
@@ -88,7 +91,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
         kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
         historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevsporingRepository, kafkaProducer)
-        val økonomiService = ØkonomiConsumerLokalConfig.ØkonomiMockService(kravgrunnlagRepository)
+        val økonomiService = ØkonomiConsumerLokalConfig.ØkonomiMockService(kravgrunnlagRepository, mottattXmlRepository)
         økonomiConsumer = DefaultØkonomiConsumer(økonomiService)
         hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiConsumer, historikkService)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)

@@ -603,11 +603,6 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertTrue { mottattXmlArkivRepository.findAll().toList().isNotEmpty() }
     }
 
-    private fun readXml(fileName: String): String {
-        val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
-        return url.readText()
-    }
-
     private fun opprettTask(kravgrunnlagXml: String): Task {
         return taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                         payload = kravgrunnlagXml))
