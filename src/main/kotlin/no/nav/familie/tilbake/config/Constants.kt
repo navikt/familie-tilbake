@@ -8,7 +8,7 @@ object Constants {
 
     private val rettsgebyrForDato = listOf(Datobeløp(LocalDate.of(2021, 1, 1), 1199))
 
-    private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2020, 5, 1), 101351))
+    private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2021, 5, 1), 106399))
 
     val brukersSvarfrist: Period = Period.ofWeeks(3)
 
