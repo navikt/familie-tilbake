@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -18,10 +19,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.Properties
 
 @Service
@@ -31,6 +34,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                           private val stegService: StegService,
                           private val behandlingskontrollService: BehandlingskontrollService,
                           private val taskService: TaskService,
+                          private val oppgaveTaskService: OppgaveTaskService,
                           private val historikkTaskService: HistorikkTaskService,
                           private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                           private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
@@ -60,6 +64,12 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
                                               Aktør.VEDTAKSLØSNING)
+
+        //oppdater frist på oppgave
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                               oppgavetype = Oppgavetype.BehandleSak,
+                                               beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
+                                               frist = LocalDate.now())
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
             log.info("Mottatt ENDR kravgrunnlag. Fjerner eksisterende data for behandling ${behandling.id}")
