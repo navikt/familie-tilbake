@@ -151,7 +151,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakPeriode.bruttoTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(1100))
         assertThat(vedtakPeriode.aktsomhet).isEqualTo(Aktsomhet.SIMPEL_UAKTSOMHET)
         assertThat(vedtakPeriode.vilkårsresultat).isEqualByComparingTo(UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT)
-        assertThat(vedtakPeriode.harBruktSjetteLedd).isTrue()
+        assertThat(vedtakPeriode.harBruktSjetteLedd).isFalse()
         assertThat(vedtakPeriode.særligeGrunner).isNotNull()
         assertThat(vedtakPeriode.særligeGrunner?.erSærligeGrunnerTilReduksjon).isFalse()
         assertThat(vedtakPeriode.særligeGrunner?.særligeGrunner).isNotEmpty()
