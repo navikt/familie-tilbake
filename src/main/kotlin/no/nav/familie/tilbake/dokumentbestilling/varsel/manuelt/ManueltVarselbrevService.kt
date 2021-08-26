@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -19,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.TekstformatererVarselbrev
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -38,7 +38,7 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                                           brevmottager,
                                                           false,
                                                           behandling.aktivtVarsel)
-        val data = lagManueltVarselBrev(varselbrevsdokument)
+        val data = lagKorrigertVarselbrev(varselbrevsdokument)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
