@@ -586,7 +586,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val vergeData = BehandlingsstegVergeDto(verge = VergeDto(ident = "testverdi",
                                                                  type = Vergetype.VERGE_FOR_BARN,
-                                                                 kilde = "familie-tilbake",
                                                                  navn = "testverdi",
                                                                  begrunnelse = "testverdi"))
         stegService.håndterSteg(behandlingId, vergeData)

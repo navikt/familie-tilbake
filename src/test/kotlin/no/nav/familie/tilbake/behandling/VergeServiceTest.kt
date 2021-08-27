@@ -25,6 +25,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -49,7 +50,6 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private val vergeDto = VergeDto(orgNr = "987654321",
                                     type = Vergetype.ADVOKAT,
                                     navn = "Stor Herlig Straff",
-                                    kilde = "",
                                     begrunnelse = "Det var nødvendig")
 
     @BeforeEach
@@ -102,7 +102,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     fun `fjernVerge skal deaktivere verge i basen hvis det finnes aktiv verge`() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge!!
+
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         vergeService.fjernVerge(Testdata.behandling.id)
 
@@ -112,41 +116,57 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         assertThat(deaktivertVerge.aktiv).isEqualTo(false)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
     @Test
-    fun `fjernVerge skal kalle historikkTaskService for å opprette historikkTask hvis verge har blitt deaktivert`() {
+    fun `fjernVerge skal tilbakeføre verge steg når behandling er på vilkårsvurdering steg og verge fjernet`() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge
         assertThat(gammelVerge).isNotNull
+
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         vergeService.fjernVerge(Testdata.behandling.id)
 
+        assertFalse { behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge }
         verify {
             historikkTaskService.lagHistorikkTask(behandlingFørOppdatering.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
                                                   Aktør.SAKSBEHANDLER)
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
     }
 
     @Test
-    fun `fjernVerge skal ikke gjøre noe hvis det finnes aktiv verge`() {
-        val behandlingUtenVerge = behandlingRepository.insert(Testdata.behandling.copy(id = UUID.randomUUID(),
-                                                                                       eksternBrukId = UUID.randomUUID(),
-                                                                                       resultater = setOf(),
-                                                                                       varsler = setOf(),
-                                                                                       fagsystemsbehandling = setOf(),
-                                                                                       verger = setOf()))
+    fun `fjernVerge skal tilbakeføre verge steg og fortsette til fakta når behandling er på verge steg og verge fjernet`() {
+        val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
+        val behandlingUtenVerge = behandlingRepository.update(behandlingFørOppdatering.copy(verger = emptySet()))
+
+        lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
 
         vergeService.fjernVerge(behandlingUtenVerge.id)
 
-        val behandlingEtterUtførtKall = behandlingRepository.findByIdOrThrow(behandlingUtenVerge.id)
-        assertThat(behandlingUtenVerge).isEqualTo(behandlingEtterUtførtKall)
+        assertFalse { behandlingUtenVerge.harVerge }
         verify(exactly = 0) { historikkTaskService.lagHistorikkTask(any(), any(), any()) }
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingUtenVerge.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
     @Test
@@ -196,7 +216,6 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         assertEquals(aktivVerge.begrunnelse, respons.begrunnelse)
         assertEquals(aktivVerge.type, respons.type)
         assertEquals(aktivVerge.ident, respons.ident)
-        assertEquals(aktivVerge.kilde, respons.kilde)
         assertEquals(aktivVerge.navn, respons.navn)
         assertEquals(aktivVerge.orgNr, respons.orgNr)
     }

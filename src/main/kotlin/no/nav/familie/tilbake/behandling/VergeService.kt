@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.Applikasjon
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -45,7 +46,7 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun fjernVerge(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val finnesAktivVerge = behandling.verger.any { it.aktiv }
+        val finnesAktivVerge = behandling.harVerge
 
         if (finnesAktivVerge) {
             val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet())
@@ -53,10 +54,11 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
             historikkTaskService.lagHistorikkTask(behandling.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
                                                   Aktør.SAKSBEHANDLER)
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(Behandlingssteg.VERGE,
-                                                                                          Behandlingsstegstatus.TILBAKEFØRT))
         }
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.VERGE,
+                                                                                      Behandlingsstegstatus.TILBAKEFØRT))
+        behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     @Transactional(readOnly = true)
@@ -84,7 +86,7 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
                      aktiv = true,
                      type = vergeDto.type,
                      navn = vergeDto.navn,
-                     kilde = vergeDto.kilde,
+                     kilde = Applikasjon.FAMILIE_TILBAKE.name,
                      begrunnelse = vergeDto.begrunnelse)
     }
 
@@ -93,7 +95,6 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
                         orgNr = verge.orgNr,
                         type = verge.type,
                         navn = verge.navn,
-                        kilde = verge.kilde,
                         begrunnelse = verge.begrunnelse)
     }
 }

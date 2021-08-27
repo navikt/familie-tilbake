@@ -47,7 +47,6 @@ data class VergeDto(val ident: String? = null,
                     val orgNr: String? = null,
                     val type: Vergetype,
                     val navn: String,
-                    val kilde: String,
                     val begrunnelse: String?)
 
 @JsonTypeName(BehandlingsstegFaktaDto.STEGNAVN)
