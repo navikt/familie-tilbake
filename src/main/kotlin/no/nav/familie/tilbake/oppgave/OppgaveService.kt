@@ -50,6 +50,21 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         return finnOppgaveResponse.oppgaver.first()
     }
 
+    fun finnOppgaveForBehandlingUtenOppgaveType(behandlingId: UUID): Oppgave {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsakId = behandling.fagsakId
+        val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
+
+        val finnOppgaveResponse =
+                integrasjonerClient.finnOppgaver(FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
+                                                                    saksreferanse = behandling.eksternBrukId.toString(),
+                                                                    tema = fagsak.ytelsestype.tilTema()))
+        if (finnOppgaveResponse.oppgaver.size > 1) {
+            log.error("er mer enn en åpen oppgave for behandlingen")
+        }
+        return finnOppgaveResponse.oppgaver.first()
+    }
+
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
                        beskrivelse: String?,
