@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -139,6 +140,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         assertFinnKravgrunnlagTask(behandling.id)
         assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.VARSEL,
+                                       Behandlingsstegstatus.VENTER,
+                                       Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
     }
 
     @Test
@@ -159,6 +166,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         assertFinnKravgrunnlagTask(behandling.id)
         assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.VARSEL,
+                                       Behandlingsstegstatus.VENTER,
+                                       Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
     }
 
     @Test
@@ -179,6 +192,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         assertFinnKravgrunnlagTask(behandling.id)
         assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.GRUNNLAG,
+                                       Behandlingsstegstatus.VENTER,
+                                       Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
     }
 
     @Test
@@ -247,6 +266,12 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         assertFinnKravgrunnlagTask(behandling.id)
         assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.VARSEL,
+                                       Behandlingsstegstatus.VENTER,
+                                       Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
     }
 
     @Test
@@ -287,14 +312,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertFinnKravgrunnlagTask(behandling.id)
         assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
 
-        val behandlingssteg = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertTrue {
-            behandlingssteg.any {
-                Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
-                Behandlingsstegstatus.VENTER == it.behandlingsstegsstatus &&
-                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG == it.venteårsak
-            }
-        }
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand,
+                                       Behandlingssteg.GRUNNLAG,
+                                       Behandlingsstegstatus.VENTER,
+                                       Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
     }
 
     @Test
@@ -987,6 +1009,19 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals(venteårsak, behandlingsstegsinfo[0].venteårsak)
         assertEquals(behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker),
                      behandlingsstegsinfo[0].tidsfrist)
+    }
+
+    private fun assertBehandlingsstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+                                               behandlingssteg: Behandlingssteg,
+                                               behandlingsstegstatus: Behandlingsstegstatus,
+                                               venteårsak: Venteårsak? = null) {
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == behandlingssteg &&
+                it.behandlingsstegsstatus == behandlingsstegstatus
+                it.venteårsak == venteårsak
+            }
+        }
     }
 
     private fun assertFagsak(behandling: Behandling,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
@@ -18,7 +19,8 @@ import javax.validation.constraints.Size
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
+@JsonSubTypes(JsonSubTypes.Type(value = BehandlingsstegVergeDto::class),
+              JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
               JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
               JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
               JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class),
@@ -27,6 +29,26 @@ abstract class BehandlingsstegDto protected constructor() {
 
     abstract fun getSteg(): String
 }
+
+@JsonTypeName(BehandlingsstegVergeDto.STEGNAVN)
+data class BehandlingsstegVergeDto(val verge: VergeDto) : BehandlingsstegDto() {
+
+    override fun getSteg(): String {
+        return STEGNAVN
+    }
+
+    companion object {
+
+        const val STEGNAVN = "VERGE"
+    }
+}
+
+data class VergeDto(val ident: String? = null,
+                    val orgNr: String? = null,
+                    val type: Vergetype,
+                    val navn: String,
+                    val kilde: String,
+                    val begrunnelse: String?)
 
 @JsonTypeName(BehandlingsstegFaktaDto.STEGNAVN)
 data class BehandlingsstegFaktaDto(val feilutbetaltePerioder: List<FaktaFeilutbetalingsperiodeDto>,

@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
+import no.nav.familie.tilbake.api.dto.BehandlingsstegVergeDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
@@ -19,10 +21,12 @@ import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
+import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.VergeService
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
@@ -99,6 +103,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private lateinit var foreldelseService: ForeldelseService
 
     @Autowired
+    private lateinit var vergeService: VergeService
+
+    @Autowired
     private lateinit var stegService: StegService
 
     private val fagsak = Testdata.fagsak
@@ -117,6 +124,36 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @AfterEach
     fun tearDown() {
         clearMocks(ContextService)
+    }
+
+    @Test
+    fun `håndterSteg skal utføre grunnlagssteg og fortsette til Fakta steg når behandling ikke har verge og har fått grunnlag`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(verger = emptySet()))
+
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId) }
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+    }
+
+    @Test
+    fun `håndterSteg skal utføre grunnlagssteg,autoutføre verge steg og fortsette til Fakta steg når behandling har verge`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
+        assertDoesNotThrow { stegService.håndterSteg(behandlingId) }
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
     @Test
@@ -531,9 +568,39 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals("ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler", exception.message)
     }
 
+    @Test
+    fun `håndterSteg skal opprette og utføre verge steg når behandling er på foreslå vedtak`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+
+        vergeService.opprettVergeSteg(behandlingId)
+
+        var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
+
+        val vergeData = BehandlingsstegVergeDto(verge = VergeDto(ident = "testverdi",
+                                                                 type = Vergetype.VERGE_FOR_BARN,
+                                                                 kilde = "familie-tilbake",
+                                                                 navn = "testverdi",
+                                                                 begrunnelse = "testverdi"))
+        stegService.håndterSteg(behandlingId, vergeData)
+        behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
+    }
+
 
     @Test
-    fun `gjenopptaSteg skal gjenoppta behandling når behandling er i varselssteg`() {
+    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til grunnlag når behandling er i varselssteg uten grunnlag`() {
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
                                     Behandlingsstegstatus.VENTER,
                                     Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
@@ -550,6 +617,27 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals(LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
                      aktivtBehandlingsstegstilstand.tidsfrist)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+    }
+
+    @Test
+    fun `gjenopptaSteg skal gjenoppta behandling og fortsette til fakta når behandling er i varselssteg med grunnlag`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
+                                    Behandlingsstegstatus.VENTER,
+                                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
+        stegService.gjenopptaSteg(behandlingId)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        val aktivtBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        assertNotNull(aktivtBehandlingsstegstilstand)
+        assertEquals(Behandlingssteg.FAKTA, aktivtBehandlingsstegstilstand.behandlingssteg)
+        assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
+        assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
+
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
     }
 
     @Test
@@ -585,6 +673,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals(Behandlingsstegstatus.KLAR, aktivtBehandlingsstegstilstand.behandlingsstegsstatus)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
     }
 
     @Test

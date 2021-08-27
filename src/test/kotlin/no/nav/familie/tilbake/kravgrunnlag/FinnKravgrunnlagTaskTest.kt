@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -36,6 +37,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
@@ -118,15 +120,15 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                     kravvedtakstatusService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
-
-        behandling = opprettBehandling()
-        behandlingId = behandling.id
     }
 
     @Test
     fun `doTask skal finne og koble grunnlag med behandling`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml)
+
+        behandling = opprettBehandling(finnesVerge = true)
+        behandlingId = behandling.id
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
@@ -138,6 +140,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
@@ -145,6 +148,9 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal finne og koble grunnlag med behandling når grunnlag er sperret`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml, true)
+
+        behandling = opprettBehandling(finnesVerge = true)
+        behandlingId = behandling.id
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
@@ -156,6 +162,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VERGE, Behandlingsstegstatus.AUTOUTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.AVBRUTT)
     }
 
@@ -163,6 +170,9 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal finne og koble grunnlag med behandling når det finnes et NY og et ENDR grunnlag`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         lagreMottattKravgrunnlag(kravgrunnlagXml, true)
+
+        behandling = opprettBehandling(finnesVerge = false)
+        behandlingId = behandling.id
 
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
         lagreMottattKravgrunnlag(endretKravgrunnlagXml)
@@ -182,12 +192,20 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        assertFalse { behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.VERGE } }
     }
 
-    private fun opprettBehandling(): Behandling {
+    private fun opprettBehandling(finnesVerge: Boolean): Behandling {
         val faktainfo = Faktainfo(revurderingsårsak = "testverdi",
                                   revurderingsresultat = "testresultat",
                                   tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
+
+        val verge = if (finnesVerge) no.nav.familie.kontrakter.felles.tilbakekreving.Verge(vergetype = Vergetype.VERGE_FOR_BARN,
+                                                                                           gyldigFom = LocalDate.now(),
+                                                                                           gyldigTom = LocalDate.now()
+                                                                                                   .plusDays(100),
+                                                                                           navn = "Andy",
+                                                                                           personIdent = "321321321") else null
 
         val request = OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,
                                                    fagsystem = Fagsystem.BA,
@@ -199,6 +217,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                    enhetId = "8020",
                                                    enhetsnavn = "Oslo",
                                                    varsel = null,
+                                                   verge = verge,
                                                    revurderingsvedtaksdato = LocalDate.now(),
                                                    faktainfo = faktainfo,
                                                    saksbehandlerIdent = "Z0000")
