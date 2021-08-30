@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.Applikasjon
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -69,7 +70,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         assertThat(verge.orgNr).isEqualTo("987654321")
         assertThat(verge.type).isEqualTo(Vergetype.ADVOKAT)
         assertThat(verge.navn).isEqualTo("Stor Herlig Straff")
-        assertThat(verge.kilde).isEqualTo("")
+        assertThat(verge.kilde).isEqualTo(Applikasjon.FAMILIE_TILBAKE.name)
         assertThat(verge.begrunnelse).isEqualTo("Det var nødvendig")
     }
 
