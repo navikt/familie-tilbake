@@ -86,7 +86,7 @@ class VedtaksoppsummeringService(private val behandlingRepository: BehandlingRep
                           tom = periode.periode.tomDato,
                           hendelsestype = faktaperiode.hendelsestype.name,
                           hendelsesundertype = faktaperiode.hendelsesundertype.name,
-                          harBruktSjetteLedd = periode.aktsomhet?.tilbakekrevSmåbeløp ?: false,
+                          harBruktSjetteLedd = periode.aktsomhet?.tilbakekrevSmåbeløp == false,
                           aktsomhet = periode.aktsomhet?.aktsomhet,
                           vilkårsresultat = UtvidetVilkårsresultat.valueOf(periode.vilkårsvurderingsresultat.name),
                           særligeGrunner = hentSærligGrunner(periode),
