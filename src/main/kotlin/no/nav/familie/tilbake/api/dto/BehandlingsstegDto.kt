@@ -47,6 +47,7 @@ data class VergeDto(val ident: String? = null,
                     val orgNr: String? = null,
                     val type: Vergetype,
                     val navn: String,
+                    @Size(max = 4000, message = "Begrunnelse er for lang")
                     val begrunnelse: String?)
 
 @JsonTypeName(BehandlingsstegFaktaDto.STEGNAVN)
