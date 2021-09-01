@@ -142,4 +142,24 @@ interface StatistikkRepository : CrudRepository<Behandling, UUID> {
               GROUP BY ytelsestype, dato""")
     fun finnSendteInnhentDokumentasjonsbrev(): List<ForekomsterPerDato>
 
+    // language=PostgreSQL
+    @Query("""SELECT ytelsestype, b.brevtype, b.opprettet_tid::DATE AS dato, COUNT(*) AS antall
+              FROM fagsak
+              JOIN behandling ON fagsak.id = behandling.fagsak_id
+              JOIN brevsporing b ON behandling.id = b.behandling_id
+              GROUP BY ytelsestype, b.brevtype, dato""")
+    fun finnSendteBrev(): List<BrevPerDato>
+
+    // language=PostgreSQL
+    @Query("""SELECT ytelsestype, behandlingsresultat.type as vedtakstype, vedtaksdato as dato, COUNT(*) AS antall
+              FROM fagsak
+              JOIN behandling ON fagsak.id = behandling.fagsak_id
+              JOIN behandlingsresultat ON behandling.id = behandlingsresultat.behandling_id
+              JOIN behandlingsvedtak ON behandlingsresultat.id = behandlingsvedtak.behandlingsresultat_id
+              AND behandlingsvedtak.iverksettingsstatus = 'IVERKSATT'
+              WHERE status = 'AVSLUTTET'
+              GROUP BY ytelsestype, vedtakstype, vedtaksdato""")
+    fun finnVedtak(): List<VedtakPerDato>
+
+
 }

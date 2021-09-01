@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.micrometer
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.tilbake.micrometer.domain.StatistikkRepository
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -25,19 +26,17 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
     val sendteVedtaksbrevGauge = MultiGauge.builder("SendteVedtaksbrev").register(Metrics.globalRegistry)
     val sendteHenleggelsesbrevGauge = MultiGauge.builder("SendteHenleggelsesbrev").register(Metrics.globalRegistry)
     val sendInnhentDokumentasjonsbrevGauge = MultiGauge.builder("SendInnhentDokumentasjonsbrev").register(Metrics.globalRegistry)
+    val sendteBrevGauge = MultiGauge.builder("SendteBrev").register(Metrics.globalRegistry)
+    val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
 
 
-    /**
-     * åpne behandlinger, sum og aldersfordelt, fordelt på ytelse - dette gir til enhver tid overblikk over hele saksmassen i
-     * applikasjonen. Viser i en periode også tilgangen på nye behandlinger (før saksbehandlerne tar tak i behandlingen).
-     * Er et øyeblikksbilde som må friskes opp med jevne mellomrom.
-     **/
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
     fun åpneBehandlinger() {
+        if (LeaderClient.isLeader() != true) return
         val behandlinger = statistikkRepository.finnÅpneBehandlinger()
 
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -45,16 +44,13 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
         åpneBehandlingerGauge.register(rows, true)
     }
 
-    /**
-    behandlinger som kan saksbehandles og hvor de er i prosessen - dette gir ytterligere innsikt i de åpne behandlingene.
-    hvilke er klare for å saksbehandles eller er under saksbehandling. Er et øyeblikksbilde som må friskes opp med jevne mellomrom.
-     **/
     @Scheduled(initialDelay = 11000, fixedDelay = 30000)
     fun behandlingerKlarTilSaksbehandling() {
+        if (LeaderClient.isLeader() != true) return
         val behandlinger = statistikkRepository.finnKlarTilBehandling()
 
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "steg", it.behandlingssteg.name),
                               it.antall)
         }
@@ -62,16 +58,13 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
         klarTilBehandlingGauge.register(rows, true)
     }
 
-    /**
-    behandlinger som ikke kan saksbehandles med årsak til at de ligger på vent -  gir tilsvarende innsikt i behandlinger som
-    venter av ulike årsaker. Er et øyeblikksbilde som må friskes opp med jevne mellomrom.
-     **/
     @Scheduled(initialDelay = 12000, fixedDelay = 30000)
     fun behandlingerPåVent() {
+        if (LeaderClient.isLeader() != true) return
         val behandlinger = statistikkRepository.finnVentendeBehandlinger()
 
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "steg", it.behandlingssteg.name),
                               it.antall)
         }
@@ -81,10 +74,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 13000, fixedDelay = 30000)
     fun vedtakDelvisTilbakebetaling() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnVedtakDelvisTilbakebetaling()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -93,10 +87,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 14000, fixedDelay = 30000)
     fun vedtakFullTilbakebetaling() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnVedtakFullTilbakebetaling()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -105,10 +100,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 15000, fixedDelay = 30000)
     fun vedtakIngenTilbakebetaling() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnVedtakIngenTilbakebetaling()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -117,10 +113,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 16000, fixedDelay = 30000)
     fun vedtakHenlagte() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnVedtakHenlagte()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -132,7 +129,7 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
         val data = statistikkRepository.finnKobledeKravgrunnlag()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -141,10 +138,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 18000, fixedDelay = 30000)
     fun ukobledeKravgrunnlag() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnUkobledeKravgrunnlag()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -153,10 +151,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 19000, fixedDelay = 30000)
     fun sendteVarselbrev() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnSendteVarselbrev()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -165,10 +164,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 20000, fixedDelay = 30000)
     fun sendteKorrigerteVarselbrev() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnSendteKorrigerteVarselbrev()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -177,10 +177,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 21000, fixedDelay = 30000)
     fun sendteVedtaksbrev() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnSendteVedtaksbrev()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -189,10 +190,11 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 22000, fixedDelay = 30000)
     fun sendteHenleggelsesbrev() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnSendteHenleggelsesbrev()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
@@ -201,13 +203,42 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 23000, fixedDelay = 30000)
     fun sendInnhentDokumentasjonsbrev() {
+        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnSendteInnhentDokumentasjonsbrev()
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("Ytelse", it.ytelsestype.kode,
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "dato", it.dato.toString()),
                               it.antall)
         }
         sendInnhentDokumentasjonsbrevGauge.register(rows)
     }
+
+    @Scheduled(initialDelay = 23000, fixedDelay = 30000)
+    fun sendteBrev() {
+        if (LeaderClient.isLeader() != true) return
+        val data = statistikkRepository.finnSendteBrev()
+
+        val rows = data.map {
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
+                                      "brevtype", it.brevtype.name,
+                                      "dato", it.dato.toString()), it.antall)
+        }
+        sendteBrevGauge.register(rows)
+    }
+
+    @Scheduled(initialDelay = 16000, fixedDelay = 30000)
+    fun vedtak() {
+        if (LeaderClient.isLeader() != true) return
+        val data = statistikkRepository.finnVedtak()
+
+        val rows = data.map {
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
+                                      "vedtakstype", it.vedtakstype.name,
+                                      "dato", it.dato.toString()),
+                              it.antall)
+        }
+        vedtakGauge.register(rows)
+    }
+
 }
