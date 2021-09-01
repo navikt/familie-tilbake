@@ -13,6 +13,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
@@ -24,6 +25,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
@@ -48,7 +50,13 @@ import kotlin.test.assertTrue
 internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var brevSporingRepository: BrevsporingRepository
 
     @Autowired
     private lateinit var xmlMottattRepository: ØkonomiXmlMottattRepository
@@ -75,13 +83,11 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattService: ØkonomiXmlMottattService
 
     @Autowired
-    private lateinit var historikkService: HistorikkService
-
-    @Autowired
     private lateinit var stegService: StegService
 
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
+    private lateinit var historikkService: HistorikkService
     private lateinit var håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var håndterGammelKravgrunnlagTask: HåndterGammelKravgrunnlagTask
@@ -97,6 +103,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
+        val kafkaProducer: KafkaProducer = mockk()
+        historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevSporingRepository, kafkaProducer)
         håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(behandlingRepository,
                                                                           kravgrunnlagRepository,
                                                                           behandlingService,
@@ -104,12 +112,12 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                           mockHentKravgrunnlagService,
                                                                           stegService,
                                                                           historikkService)
-        val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
                 HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+        every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
 
     @AfterEach
