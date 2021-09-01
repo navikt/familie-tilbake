@@ -2,21 +2,17 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.spyk
-import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
@@ -27,8 +23,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
-import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
@@ -50,9 +46,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -82,6 +75,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattService: ØkonomiXmlMottattService
 
     @Autowired
+    private lateinit var historikkService: HistorikkService
+
+    @Autowired
     private lateinit var stegService: StegService
 
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
@@ -95,10 +91,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXmlId: UUID
 
 
-    private val eksternFagsakIdSlot = slot<String>()
-    private val ytelsestypeSlot = slot<Ytelsestype>()
-    private val eksternIdSlot = slot<String>()
-
     @BeforeEach
     fun init() {
         mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
@@ -110,7 +102,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                           behandlingService,
                                                                           økonomiXmlMottattService,
                                                                           mockHentKravgrunnlagService,
-                                                                          stegService)
+                                                                          stegService,
+                                                                          historikkService)
         val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
@@ -122,33 +115,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @AfterEach
     fun tearDown() {
         requestSendtRepository.deleteAll()
-    }
-
-    @Test
-    fun `preCondition skal kaste exception når det allerede finnes en behandling på samme fagsak`() {
-        fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
-        behandlingRepository.insert(Testdata.behandling)
-
-        val exception = assertFailsWith<UgyldigKravgrunnlagFeil> { håndterGammelKravgrunnlagTask.preCondition(lagTask()) }
-        assertEquals("Kravgrunnlag med $mottattXmlId er ugyldig." +
-                     "Det finnes allerede en åpen behandling for " +
-                     "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
-                     "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                     "ved å bruke forvaltningsrutine etter feilundersøkelse.", exception.message)
-    }
-
-    @Test
-    fun `preCondition skal sende hentFagsystemsbehandling request når det ikke finnes en behandling på samme fagsak`() {
-        assertDoesNotThrow { håndterGammelKravgrunnlagTask.preCondition(lagTask()) }
-
-        verify {
-            hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(capture(eksternFagsakIdSlot),
-                                                                                capture(ytelsestypeSlot),
-                                                                                capture(eksternIdSlot))
-        }
-        assertEquals(xmlMottatt.eksternFagsakId, eksternFagsakIdSlot.captured)
-        assertEquals(xmlMottatt.ytelsestype, ytelsestypeSlot.captured)
-        assertEquals(xmlMottatt.referanse, eksternIdSlot.captured)
     }
 
     @Test

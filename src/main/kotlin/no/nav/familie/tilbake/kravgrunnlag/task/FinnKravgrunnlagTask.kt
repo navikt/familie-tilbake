@@ -43,6 +43,10 @@ class FinnKravgrunnlagTask(private val behandlingRepository: BehandlingRepositor
                 val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
                 kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId, kravgrunnlag)
             }
+            // Fjern mottatt xml om det koblet med behandlingen
+            if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)){
+                økonomiXmlMottattRepository.deleteById(mottattKravgrunnlag.id)
+            }
         }
     }
 
