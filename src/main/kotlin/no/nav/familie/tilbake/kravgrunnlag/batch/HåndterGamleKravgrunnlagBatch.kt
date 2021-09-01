@@ -52,8 +52,20 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
                         logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er eldre enn " +
                                     "$ALDERSGRENSE_I_UKER uker fra dagens dato")
                         logger.info("Oppretter tasker for å håndtere enkel kravgrunnlag")
-                        mottattXmlIds.forEach {
-                            taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = it.toString()))
+                        val alleFeiledeTasker = taskService.finnAlleFeiledeTasks()
+                        mottattXmlIds.forEach { mottattXmlId ->
+                            val finnesTask = alleFeiledeTasker.any {
+                                it.payload == mottattXmlId.toString() &&
+                                it.type == HåndterGammelKravgrunnlagTask.TYPE
+                            }
+                            if (!finnesTask) {
+                                taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE,
+                                                      payload = mottattXmlId.toString()))
+                            } else {
+                                logger.info("Det finnes allerede en HåndterGammelKravgrunnlagTask " +
+                                            "på det samme kravgrunnlag med id $mottattXmlId")
+                            }
+
                         }
                     }
                 }

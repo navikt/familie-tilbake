@@ -81,7 +81,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     fun tilbakeførBehandledeSteg(behandlingId: UUID) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         val alleIkkeVentendeSteg = behandlingsstegstilstand.filter { it.behandlingsstegsstatus != VENTER }
-                .filter { it.behandlingssteg != Behandlingssteg.VARSEL }
+                .filter { it.behandlingssteg !in listOf(Behandlingssteg.VARSEL, Behandlingssteg.GRUNNLAG) }
         alleIkkeVentendeSteg.forEach {
             log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
             oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
@@ -100,6 +100,23 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
             }
             oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
         }
+    }
+
+    @Transactional
+    fun behandleVergeSteg(behandlingId: UUID) {
+        tilbakeførBehandledeSteg(behandlingId)
+        log.info("Oppretter verge steg for behandling med id=$behandlingId")
+        val eksisterendeVergeSteg = behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandlingId,
+                                                                                                            Behandlingssteg.VERGE)
+        when {
+            eksisterendeVergeSteg != null -> {
+                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+            }
+            else -> {
+                opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+            }
+        }
+
     }
 
     @Transactional
@@ -258,7 +275,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         if (Behandlingssteg.VARSEL == sisteUtførteSteg) {
             return håndterOmSisteUtførteStegErVarsel(behandling)
         }
-        return lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg), KLAR)
+        return lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(sisteUtførteSteg,
+                                                                                                  behandling.harVerge), KLAR)
     }
 
     private fun håndterOmSisteUtførteStegErVarsel(behandling: Behandling): Behandlingsstegsinfo {
@@ -275,8 +293,11 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                 .toLocalDate())
             }
             harAktivtGrunnlag(behandling) -> {
-                lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.FAKTA,
-                                        behandlingsstegstatus = KLAR)
+                if (behandling.harVerge) {
+                    lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.VERGE, behandlingsstegstatus = KLAR)
+                } else {
+                    lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.FAKTA, behandlingsstegstatus = KLAR)
+                }
             }
             // setter tidsfristen fra opprettelse dato
             else -> lagBehandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,

@@ -23,7 +23,6 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -84,7 +83,7 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun arkiverKravgrunnlag(mottattXmlId: UUID) {
         val mottattXml = hentFrakobletKravgrunnlag(mottattXmlId)
         økonomiXmlMottattService.arkiverMottattXml(mottattXml.melding, mottattXml.eksternFagsakId, mottattXml.ytelsestype)

@@ -164,6 +164,9 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal fortsette til fakta steg når varselsrespons ble mottatt med aktivt kravgrunnlag`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.update(behandling.copy(verger = emptySet()))
+
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
         val kravgrunnlag = Testdata.kravgrunnlag431
         kravgrunnlagRepository.insert(kravgrunnlag)

@@ -41,10 +41,10 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
 
     companion object {
 
-        fun finnNesteBehandlingssteg(behandlingssteg: Behandlingssteg): Behandlingssteg {
+        fun finnNesteBehandlingssteg(behandlingssteg: Behandlingssteg, harVerge: Boolean): Behandlingssteg {
             val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1)
-            if (nesteBehandlingssteg == VERGE) {
-                // VERGE kan ikke opprettes automatisk, hopper til neste steg.
+            if (nesteBehandlingssteg == VERGE && !harVerge) {
+                // Hvis behandling opprettes ikke med verge, kan behandlingen flyttes til neste steg
                 return fraSekvens(nesteBehandlingssteg.sekvens + 1)
             }
             return nesteBehandlingssteg
@@ -68,7 +68,6 @@ enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
 }
 
 enum class Behandlingsstegstatus(private val beskrivelse: String) {
-    STARTET("Startet å utføre steg, en midlertidig status"),
     VENTER("Steget er satt på vent, f.eks. venter på brukertilbakemelding eller kravgrunnlag"),
     KLAR("Klar til saksbehandling"),
     UTFØRT("Steget er ferdig utført"),

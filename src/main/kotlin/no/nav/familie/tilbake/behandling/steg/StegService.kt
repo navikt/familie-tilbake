@@ -17,9 +17,15 @@ class StegService(val steg: List<IBehandlingssteg>,
                   val behandlingskontrollService: BehandlingskontrollService) {
 
     fun håndterSteg(behandlingId: UUID) {
-        val aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
         hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+
+        // Autoutfør verge steg om verge informasjon er kopiert fra fagsystem
+        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        if (aktivtBehandlingssteg == Behandlingssteg.VERGE) {
+            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        }
     }
 
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
@@ -52,16 +58,22 @@ class StegService(val steg: List<IBehandlingssteg>,
 
         //sjekk om aktivtBehandlingssteg kan autoutføres
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg == Behandlingssteg.FORELDELSE ||
-            aktivtBehandlingssteg == Behandlingssteg.VILKÅRSVURDERING) {
+        if (aktivtBehandlingssteg in listOf(Behandlingssteg.FORELDELSE,
+                                            Behandlingssteg.VILKÅRSVURDERING)) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
         }
     }
 
     fun gjenopptaSteg(behandlingId: UUID) {
-        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
         hentStegInstans(aktivtBehandlingssteg).gjenopptaSteg(behandlingId)
+
+        // Autoutfør verge steg om verge informasjon er kopiert fra fagsystem
+        aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        if (aktivtBehandlingssteg == Behandlingssteg.VERGE) {
+            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        }
     }
 
     private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
@@ -70,6 +82,7 @@ class StegService(val steg: List<IBehandlingssteg>,
                                                    frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg")
         if (aktivtBehandlingssteg !in setOf(Behandlingssteg.VARSEL,
                                             Behandlingssteg.GRUNNLAG,
+                                            Behandlingssteg.VERGE,
                                             Behandlingssteg.FAKTA,
                                             Behandlingssteg.FORELDELSE,
                                             Behandlingssteg.VILKÅRSVURDERING,
