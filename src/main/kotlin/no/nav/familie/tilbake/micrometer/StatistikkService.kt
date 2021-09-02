@@ -28,6 +28,7 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
     val sendInnhentDokumentasjonsbrevGauge = MultiGauge.builder("SendInnhentDokumentasjonsbrev").register(Metrics.globalRegistry)
     val sendteBrevGauge = MultiGauge.builder("SendteBrev").register(Metrics.globalRegistry)
     val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
+    val vedtakTidGauge = MultiGauge.builder("VedtakTid").register(Metrics.globalRegistry)
 
 
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
@@ -240,5 +241,20 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
         }
         vedtakGauge.register(rows)
     }
+
+    @Scheduled(initialDelay = 18000, fixedDelay = 30000)
+    fun vedtakMedTid() {
+        if (LeaderClient.isLeader() != true) return
+        val data = statistikkRepository.finnVedtak()
+
+        val rows = data.map {
+            MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
+                                      "vedtakstype", it.vedtakstype.name,
+                                      "Time", it.dato.atStartOfDay().toString()),
+                              it.antall)
+        }
+        vedtakTidGauge.register(rows)
+    }
+
 
 }
