@@ -8,6 +8,8 @@ import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @TaskStepBeskrivelse(taskStepType = OpprettBehandlingManueltTask.TYPE,
@@ -19,6 +21,7 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun preCondition(task: Task) {
         log.info("Henter fagsystemsbehandling for OpprettBehandlingManueltTask med id ${task.id} og metadata ${task.metadata}")
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
@@ -27,6 +30,7 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
     }
 
+    @Transactional
     override fun doTask(task: Task) {
         log.info("OpprettBehandlingManueltTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")

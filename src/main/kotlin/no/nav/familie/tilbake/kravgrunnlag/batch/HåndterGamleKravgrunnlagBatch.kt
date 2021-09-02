@@ -7,11 +7,13 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.KONTANTSTØTT
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.SKOLEPENGER
 import no.nav.familie.leader.LeaderClient
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
+import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -51,19 +53,21 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
                     else -> {
                         logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er eldre enn " +
                                     "$ALDERSGRENSE_I_UKER uker fra dagens dato")
-                        logger.info("Oppretter tasker for å håndtere enkel kravgrunnlag")
-                        val alleFeiledeTasker = taskService.finnAlleFeiledeTasks()
+
+                        val alleFeiledeTasker = taskService.finnTasksMedStatus(listOf(Status.FEILET,
+                                                                                      Status.KLAR_TIL_PLUKK), Pageable.unpaged())
                         mottattXmlIds.forEach { mottattXmlId ->
                             val finnesTask = alleFeiledeTasker.any {
                                 it.payload == mottattXmlId.toString() &&
-                                it.type == HåndterGammelKravgrunnlagTask.TYPE
+                                (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
                             }
                             if (!finnesTask) {
-                                taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE,
+                                taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE,
                                                       payload = mottattXmlId.toString()))
                             } else {
-                                logger.info("Det finnes allerede en HåndterGammelKravgrunnlagTask " +
-                                            "på det samme kravgrunnlag med id $mottattXmlId")
+                                logger.info("Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
+                                            "eller HentFagsystemsbehandlingTask " +
+                                            "på det samme kravgrunnlaget med id $mottattXmlId")
                             }
 
                         }

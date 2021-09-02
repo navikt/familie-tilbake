@@ -21,18 +21,6 @@ class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagServic
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun preCondition(task: Task) {
-        logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-        val mottattXmlId = UUID.fromString(task.payload)
-        val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
-
-        håndterGamleKravgrunnlagService.sjekkOmDetFinnesEnAktivBehandling(mottattXml)
-        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId = mottattXml.eksternFagsakId,
-                                                                            ytelsestype = mottattXml.ytelsestype,
-                                                                            eksternId = mottattXml.referanse)
-    }
-
-    @Transactional
     override fun doTask(task: Task) {
         logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)

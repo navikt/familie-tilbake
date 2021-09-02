@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
@@ -12,6 +13,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -24,6 +27,7 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -32,7 +36,8 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
                                       private val behandlingService: BehandlingService,
                                       private val økonomiXmlMottattService: ØkonomiXmlMottattService,
                                       private val hentKravgrunnlagService: HentKravgrunnlagService,
-                                      private val stegService: StegService) {
+                                      private val stegService: StegService,
+                                      private val historikkService: HistorikkService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -75,6 +80,11 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
                         "til behandling=$behandlingId")
             val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
             kravgrunnlagRepository.insert(kravgrunnlag)
+
+            historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
+                                                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
+                                                 aktør = Aktør.VEDTAKSLØSNING,
+                                                 opprettetTidspunkt = LocalDateTime.now())
 
             stegService.håndterSteg(behandlingId)
         } else {
