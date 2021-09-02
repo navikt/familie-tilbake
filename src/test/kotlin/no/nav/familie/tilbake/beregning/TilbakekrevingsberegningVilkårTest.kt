@@ -128,7 +128,7 @@ class TilbakekrevingsberegningVilkårTest {
     }
 
     @Test
-    fun `beregn skalikke kreve noe når sjette ledd benyttes for å_ikke gjøre innkreving av småbeløp`() {
+    fun `beregn skalikke kreve noe når sjette ledd benyttes for å ikke gjøre innkreving av småbeløp`() {
         vurdering = vurdering.copy(aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                                          begrunnelse = "foo",
                                                                          særligeGrunnerTilReduksjon = false,
