@@ -11,6 +11,11 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -27,6 +32,7 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -34,6 +40,7 @@ import java.util.UUID
 class HåndterGamleKravgrunnlagService(private val behandlingRepository: BehandlingRepository,
                                       private val kravgrunnlagRepository: KravgrunnlagRepository,
                                       private val behandlingService: BehandlingService,
+                                      private val behandlingskontrollService: BehandlingskontrollService,
                                       private val økonomiXmlMottattService: ØkonomiXmlMottattService,
                                       private val hentKravgrunnlagService: HentKravgrunnlagService,
                                       private val stegService: StegService,
@@ -70,26 +77,27 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
         arkiverKravgrunnlag(mottattXml.id)
         val behandling = opprettBehandling(hentetKravgrunnlag, respons)
         val behandlingId = behandling.id
-        if (!erSperret) {
-            val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
-            val diffs = KravgrunnlagUtil.sammenlignKravgrunnlag(mottattKravgrunnlag, hentetKravgrunnlag)
-            if (diffs.isNotEmpty()) {
-                logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag. Avvikene er $diffs")
-            }
-            logger.info("Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                        "til behandling=$behandlingId")
-            val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
-            kravgrunnlagRepository.insert(kravgrunnlag)
 
-            historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
-                                                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
-                                                 aktør = Aktør.VEDTAKSLØSNING,
-                                                 opprettetTidspunkt = LocalDateTime.now())
+        val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
+        val diffs = KravgrunnlagUtil.sammenlignKravgrunnlag(mottattKravgrunnlag, hentetKravgrunnlag)
+        if (diffs.isNotEmpty()) {
+            logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag. Avvikene er $diffs")
+        }
+        logger.info("Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
+                    "til behandling=$behandlingId")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
+        kravgrunnlagRepository.insert(kravgrunnlag)
 
-            stegService.håndterSteg(behandlingId)
-        } else {
+        historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
+                                             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
+                                             aktør = Aktør.VEDTAKSLØSNING,
+                                             opprettetTidspunkt = LocalDateTime.now())
+
+        stegService.håndterSteg(behandlingId)
+        if (erSperret) {
             logger.info("Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
                         "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi")
+            sperKravgrunnlag(behandlingId)
         }
     }
 
@@ -143,5 +151,23 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
                                             faktainfo = fagsystemsbehandlingData.faktainfo,
                                             verge = fagsystemsbehandlingData.verge,
                                             varsel = null)
+    }
+
+    private fun sperKravgrunnlag(behandlingId: UUID) {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        kravgrunnlagRepository.update(kravgrunnlag.copy(sperret = true))
+        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        behandlingskontrollService
+                .tilbakehoppBehandlingssteg(behandlingId,
+                                            Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                                 behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                                                                 venteårsak = venteårsak,
+                                                                 tidsfrist = LocalDate.now()
+                                                                         .plusWeeks(venteårsak.defaultVenteTidIUker)))
+        historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
+                                             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+                                             aktør = Aktør.VEDTAKSLØSNING,
+                                             beskrivelse = venteårsak.beskrivelse,
+                                             opprettetTidspunkt = LocalDateTime.now())
     }
 }

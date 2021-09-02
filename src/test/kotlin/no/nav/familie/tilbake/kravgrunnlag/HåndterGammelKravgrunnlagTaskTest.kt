@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRep
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -42,7 +43,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -80,6 +80,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
     private lateinit var økonomiXmlMottattService: ØkonomiXmlMottattService
 
     @Autowired
@@ -108,6 +111,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(behandlingRepository,
                                                                           kravgrunnlagRepository,
                                                                           behandlingService,
+                                                                          behandlingskontrollService,
                                                                           økonomiXmlMottattService,
                                                                           mockHentKravgrunnlagService,
                                                                           stegService,
@@ -185,7 +189,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(xmlMottatt.ytelsestype,
                                                                                 hentetKravgrunnlag.fagsystemId)
         assertNotNull(behandling)
-        assertFalse { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id) }
 
         val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
