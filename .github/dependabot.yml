@@ -1,10 +1,16 @@
 version: 2
 registries:
-  familie-felles:
+  familie-kontrakter:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/familie-kontrakter
     username: x-access-token
     password: "${{secrets.NAV_READ_PACKAGES}}"
+  familie-felles:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/familie-felles
+    username: x-access-token
+    password: "${{secrets.NAV_READ_PACKAGES}}"
+
 
 updates:
 - package-ecosystem: maven
@@ -16,6 +22,7 @@ updates:
   target-branch: main
   registries:
     - familie-kontrakter
+    - familie-felles
   ignore:
     - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
       versions:
