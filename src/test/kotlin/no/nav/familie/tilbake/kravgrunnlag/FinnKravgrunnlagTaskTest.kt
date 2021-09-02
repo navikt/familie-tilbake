@@ -30,6 +30,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,6 +74,9 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var stegService: StegService
 
     @Autowired
+    private lateinit var oppgaveTaskService: OppgaveTaskService
+
+    @Autowired
     private lateinit var mottattXmlService: ØkonomiXmlMottattService
 
     @Autowired
@@ -108,6 +112,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 stegService,
                 behandlingskontrollService,
                 taskService,
+                oppgaveTaskService,
                 historikkTaskService,
                 hentFagsystemsbehandlingService,
                 endretKravgrunnlagEventPublisher)
@@ -136,6 +141,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                                                Ytelsestype.BARNETRYGD)
         assertTrue { arkivXmlene.isNotEmpty() }
 
+        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
+
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -157,6 +164,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId,
                                                                                                Ytelsestype.BARNETRYGD)
         assertTrue { arkivXmlene.isNotEmpty() }
+
+        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
 
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandlingId) }
 
@@ -183,6 +192,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                                                Ytelsestype.BARNETRYGD)
         assertTrue { arkivXmlene.isNotEmpty() }
         assertEquals(2, arkivXmlene.size)
+
+        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
 
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) }
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandlingId)

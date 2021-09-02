@@ -6,15 +6,15 @@ import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestS
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+
 
 @Service
 class HentFagsystemsbehandlingService(private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
                                       private val kafkaProducer: KafkaProducer) {
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun sendHentFagsystemsbehandlingRequest(eksternFagsakId: String,
                                             ytelsestype: Ytelsestype,
                                             eksternId: String) {

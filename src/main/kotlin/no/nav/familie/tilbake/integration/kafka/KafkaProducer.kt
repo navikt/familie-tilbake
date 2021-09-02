@@ -66,15 +66,15 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 class E2EKafkaProducer : KafkaProducer {
 
     override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
-        logger.info("Skipper sending av historikkinnslag for behandling ${behandlingId} fordi kafka ikke er enablet")
+        logger.info("Skipper sending av historikkinnslag for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand) {
-        logger.info("Skipper sending av saksstatistikk for behandling ${behandlingId} fordi kafka ikke er enablet")
+        logger.info("Skipper sending av saksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering) {
-        logger.info("Skipper sending av vedtaksstatistikk for behandling ${behandlingId} fordi kafka ikke er enablet")
+        logger.info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest) {

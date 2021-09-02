@@ -320,6 +320,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         val erManueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet
+
+        val ansvarligsaksbehandler = integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
+
         logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                     "og eksternId=$eksternId")
         secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
@@ -331,7 +334,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val eksisterendeFagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
         val fagsak = eksisterendeFagsak ?: opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
-        val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak)
+        val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
         behandlingRepository.insert(behandling)
 
         historikkTaskService.lagHistorikkTask(behandling.id,

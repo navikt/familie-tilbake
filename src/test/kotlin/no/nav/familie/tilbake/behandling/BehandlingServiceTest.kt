@@ -992,7 +992,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         assertEquals("8020", behandlingDto.enhetskode)
         assertEquals("Oslo", behandlingDto.enhetsnavn)
         assertNull(behandlingDto.resultatstype)
-        assertEquals("Z0000", behandlingDto.ansvarligSaksbehandler)
+        assertEquals("bb1234", behandlingDto.ansvarligSaksbehandler)
         assertNull(behandlingDto.ansvarligBeslutter)
         assertFalse(behandlingDto.kanRevurderingOpprettes)
     }

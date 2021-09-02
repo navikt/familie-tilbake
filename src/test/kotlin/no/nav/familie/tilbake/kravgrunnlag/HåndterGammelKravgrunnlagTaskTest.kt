@@ -2,15 +2,12 @@ package no.nav.familie.tilbake.kravgrunnlag
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.spyk
-import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -27,8 +24,9 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
-import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
@@ -56,6 +54,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var brevSporingRepository: BrevsporingRepository
 
     @Autowired
     private lateinit var xmlMottattRepository: ØkonomiXmlMottattRepository
@@ -86,6 +87,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
+    private lateinit var historikkService: HistorikkService
     private lateinit var håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var håndterGammelKravgrunnlagTask: HåndterGammelKravgrunnlagTask
@@ -95,60 +97,32 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXmlId: UUID
 
 
-    private val eksternFagsakIdSlot = slot<String>()
-    private val ytelsestypeSlot = slot<Ytelsestype>()
-    private val eksternIdSlot = slot<String>()
-
     @BeforeEach
     fun init() {
         mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
+        val kafkaProducer: KafkaProducer = mockk()
+        historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevSporingRepository, kafkaProducer)
         håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(behandlingRepository,
                                                                           kravgrunnlagRepository,
                                                                           behandlingService,
                                                                           økonomiXmlMottattService,
                                                                           mockHentKravgrunnlagService,
-                                                                          stegService)
-        val kafkaProducer: KafkaProducer = mockk()
+                                                                          stegService,
+                                                                          historikkService)
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
                 HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
+        every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
 
     @AfterEach
     fun tearDown() {
         requestSendtRepository.deleteAll()
-    }
-
-    @Test
-    fun `preCondition skal kaste exception når det allerede finnes en behandling på samme fagsak`() {
-        fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
-        behandlingRepository.insert(Testdata.behandling)
-
-        val exception = assertFailsWith<UgyldigKravgrunnlagFeil> { håndterGammelKravgrunnlagTask.preCondition(lagTask()) }
-        assertEquals("Kravgrunnlag med $mottattXmlId er ugyldig." +
-                     "Det finnes allerede en åpen behandling for " +
-                     "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
-                     "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                     "ved å bruke forvaltningsrutine etter feilundersøkelse.", exception.message)
-    }
-
-    @Test
-    fun `preCondition skal sende hentFagsystemsbehandling request når det ikke finnes en behandling på samme fagsak`() {
-        assertDoesNotThrow { håndterGammelKravgrunnlagTask.preCondition(lagTask()) }
-
-        verify {
-            hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(capture(eksternFagsakIdSlot),
-                                                                                capture(ytelsestypeSlot),
-                                                                                capture(eksternIdSlot))
-        }
-        assertEquals(xmlMottatt.eksternFagsakId, eksternFagsakIdSlot.captured)
-        assertEquals(xmlMottatt.ytelsestype, ytelsestypeSlot.captured)
-        assertEquals(xmlMottatt.referanse, eksternIdSlot.captured)
     }
 
     @Test

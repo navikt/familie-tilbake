@@ -39,14 +39,15 @@ class AvsluttBehandlingTask(private val behandlingRepository: BehandlingReposito
         if (!behandling.erUnderIverksettelse) {
             throw Feil(message = "Behandling med id=$behandlingId kan ikke avsluttes")
         }
-        behandlingskontrollService
-                .oppdaterBehandlingsstegsstaus(behandlingId,
-                                               Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.AVSLUTTET,
-                                                                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT))
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
+
+        behandlingskontrollService
+                .oppdaterBehandlingsstegsstaus(behandlingId,
+                                               Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.AVSLUTTET,
+                                                                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT))
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
