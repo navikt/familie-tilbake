@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -35,7 +36,9 @@ class HentFagsystemsbehandlingTask(private val håndterGamleKravgrunnlagService:
     @Transactional
     override fun onCompletion(task: Task) {
         logger.info("Oppretter HåndterGammelKravgrunnlagTask for mottattXmlId=${task.payload}")
-        taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = task.payload))
+        taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE,
+                              payload = task.payload,
+                              triggerTid = LocalDateTime.now().plusSeconds(60)))
     }
 
 
