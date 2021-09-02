@@ -52,6 +52,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
@@ -123,6 +124,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var historikkTaskService: HistorikkTaskService
 
     @Autowired
+    private lateinit var oppgaveTaskService: OppgaveTaskService
+
+    @Autowired
     private lateinit var endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
 
     @Autowired
@@ -147,6 +151,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 stegService,
                 behandlingskontrollService,
                 taskService,
+                oppgaveTaskService,
                 historikkTaskService,
                 hentFagsystemsbehandlingService,
                 endretKravgrunnlagEventPublisher)
