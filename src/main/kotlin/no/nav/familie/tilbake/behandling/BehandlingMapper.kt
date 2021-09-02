@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.HENLAGT
@@ -41,7 +42,8 @@ object BehandlingMapper {
 
     fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
                             fagsystem: Fagsystem,
-                            fagsak: Fagsak): Behandling {
+                            fagsak: Fagsak,
+                            ansvarligSaksbehandler: Saksbehandler): Behandling {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling =
@@ -56,7 +58,7 @@ object BehandlingMapper {
 
         return Behandling(fagsakId = fagsak.id,
                           type = Behandlingstype.TILBAKEKREVING,
-                          ansvarligSaksbehandler = opprettTilbakekrevingRequest.saksbehandlerIdent,
+                          ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
                           behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,

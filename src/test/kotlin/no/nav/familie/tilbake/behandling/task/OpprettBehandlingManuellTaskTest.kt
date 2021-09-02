@@ -181,7 +181,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         assertEquals(respons.faktainfo.revurderingsårsak, behandling.aktivFagsystemsbehandling.årsak)
         assertEquals(respons.enhetId, behandling.behandlendeEnhet)
         assertEquals(respons.enhetsnavn, behandling.behandlendeEnhetsNavn)
-        assertEquals("Z0000", behandling.ansvarligSaksbehandler)
+        assertEquals("bb1234", behandling.ansvarligSaksbehandler)
         assertNull(behandling.ansvarligBeslutter)
         assertEquals(Behandlingsstatus.UTREDES, behandling.status)
 
