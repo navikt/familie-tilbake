@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -177,17 +178,20 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         assertNull(behandling.aktivtVarsel)
         assertNull(behandling.aktivVerge)
         assertEquals(eksternId, behandling.aktivFagsystemsbehandling.eksternId)
-        assertEquals(respons.faktainfo.revurderingsresultat, behandling.aktivFagsystemsbehandling.resultat)
-        assertEquals(respons.faktainfo.revurderingsårsak, behandling.aktivFagsystemsbehandling.årsak)
-        assertEquals(respons.enhetId, behandling.behandlendeEnhet)
-        assertEquals(respons.enhetsnavn, behandling.behandlendeEnhetsNavn)
+
+        val fagsystemsbehandling = respons.hentFagsystemsbehandling
+        assertNotNull(fagsystemsbehandling)
+        assertEquals(fagsystemsbehandling.faktainfo.revurderingsresultat, behandling.aktivFagsystemsbehandling.resultat)
+        assertEquals(fagsystemsbehandling.faktainfo.revurderingsårsak, behandling.aktivFagsystemsbehandling.årsak)
+        assertEquals(fagsystemsbehandling.enhetId, behandling.behandlendeEnhet)
+        assertEquals(fagsystemsbehandling.enhetsnavn, behandling.behandlendeEnhetsNavn)
         assertEquals("bb1234", behandling.ansvarligSaksbehandler)
         assertNull(behandling.ansvarligBeslutter)
         assertEquals(Behandlingsstatus.UTREDES, behandling.status)
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        assertEquals(respons.språkkode, fagsak.bruker.språkkode)
-        assertEquals(FagsystemUtil.hentFagsystemFraYtelsestype(respons.ytelsestype), fagsak.fagsystem)
+        assertEquals(fagsystemsbehandling.språkkode, fagsak.bruker.språkkode)
+        assertEquals(FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype), fagsak.fagsystem)
 
     }
 
@@ -203,17 +207,18 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagHentFagsystemsbehandlingRespons(): HentFagsystemsbehandlingRespons {
-        return HentFagsystemsbehandlingRespons(eksternFagsakId = eksternFagsakId,
-                                               ytelsestype = ytelsestype,
-                                               eksternId = eksternId,
-                                               personIdent = "testverdi",
-                                               språkkode = Språkkode.NB,
-                                               enhetId = "8020",
-                                               enhetsnavn = "testverdi",
-                                               revurderingsvedtaksdato = LocalDate.now(),
-                                               faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                     revurderingsresultat = "OPPHØR",
-                                                                     tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                             .IGNORER_TILBAKEKREVING))
+        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
+                                                            ytelsestype = ytelsestype,
+                                                            eksternId = eksternId,
+                                                            personIdent = "testverdi",
+                                                            språkkode = Språkkode.NB,
+                                                            enhetId = "8020",
+                                                            enhetsnavn = "testverdi",
+                                                            revurderingsvedtaksdato = LocalDate.now(),
+                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                                                  revurderingsresultat = "OPPHØR",
+                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                          .IGNORER_TILBAKEKREVING))
+        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling)
     }
 }

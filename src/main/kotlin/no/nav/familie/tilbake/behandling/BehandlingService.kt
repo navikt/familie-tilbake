@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -271,7 +271,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun oppdaterFaktainfo(eksternFagsakId: String,
                           ytelsestype: Ytelsestype,
                           eksternId: String,
-                          respons: HentFagsystemsbehandlingRespons) {
+                          respons: HentFagsystemsbehandling) {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
                          ?: throw Feil("Det finnes ikke en åpen behandling for " +
                                        "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype")

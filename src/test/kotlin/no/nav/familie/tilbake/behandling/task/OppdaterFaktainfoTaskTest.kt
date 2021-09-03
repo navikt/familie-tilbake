@@ -1,10 +1,9 @@
 package no.nav.familie.tilbake.behandling.task
 
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
@@ -22,9 +21,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.Properties
 import kotlin.test.assertEquals
@@ -95,18 +92,19 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagRespons(): HentFagsystemsbehandlingRespons {
-        return HentFagsystemsbehandlingRespons(eksternFagsakId = fagsak.eksternFagsakId,
-                                               eksternId = "1",
-                                               ytelsestype = fagsak.ytelsestype,
-                                               personIdent = fagsak.bruker.ident,
-                                               språkkode = fagsak.bruker.språkkode,
-                                               enhetId = behandling.behandlendeEnhet,
-                                               enhetsnavn = behandling.behandlendeEnhetsNavn,
-                                               revurderingsvedtaksdato = LocalDate.now(),
-                                               faktainfo = Faktainfo(revurderingsårsak = "testårsak",
-                                                                     revurderingsresultat = "testresultat",
-                                                                     tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                             .IGNORER_TILBAKEKREVING))
+        val hentFagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = fagsak.eksternFagsakId,
+                                                                eksternId = "1",
+                                                                ytelsestype = fagsak.ytelsestype,
+                                                                personIdent = fagsak.bruker.ident,
+                                                                språkkode = fagsak.bruker.språkkode,
+                                                                enhetId = behandling.behandlendeEnhet,
+                                                                enhetsnavn = behandling.behandlendeEnhetsNavn,
+                                                                revurderingsvedtaksdato = LocalDate.now(),
+                                                                faktainfo = Faktainfo(revurderingsårsak = "testårsak",
+                                                                                      revurderingsresultat = "testresultat",
+                                                                                      tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                              .IGNORER_TILBAKEKREVING))
+        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
     private fun lagTask(): Task {

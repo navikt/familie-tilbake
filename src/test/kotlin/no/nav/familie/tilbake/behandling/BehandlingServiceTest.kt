@@ -1093,8 +1093,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                               sumFeilutbetaling = BigDecimal.valueOf(1500L),
                                               perioder = listOf(Periode(fom, tom))) else null
         val verge = if (finnesVerge) Verge(vergetype = Vergetype.VERGE_FOR_BARN,
-                                           gyldigFom = fom,
-                                           gyldigTom = tom.plusDays(100),
                                            navn = "Andy",
                                            personIdent = "321321321") else null
 

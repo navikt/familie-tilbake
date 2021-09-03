@@ -8,8 +8,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.INGEN_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype
-.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_KA
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_KLAGE_NFP
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
@@ -34,7 +32,6 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 object BehandlingMapper {
 
@@ -128,15 +125,11 @@ object BehandlingMapper {
 
     private fun tilDomeneVerge(fagsystem: Fagsystem, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
         opprettTilbakekrevingRequest.verge?.let {
-            if (it.gyldigTom < LocalDate.now()) {
-                logger.info("Vergeinformasjon er utløpt.Så kopierer ikke fra fagsystem=$fagsystem")
-            } else {
-                return setOf(Verge(type = it.vergetype,
-                                   kilde = fagsystem.name,
-                                   navn = it.navn,
-                                   orgNr = it.organisasjonsnummer,
-                                   ident = it.personIdent))
-            }
+            return setOf(Verge(type = it.vergetype,
+                               kilde = fagsystem.name,
+                               navn = it.navn,
+                               orgNr = it.organisasjonsnummer,
+                               ident = it.personIdent))
         }
         return emptySet()
     }

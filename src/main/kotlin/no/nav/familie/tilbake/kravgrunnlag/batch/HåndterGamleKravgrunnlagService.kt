@@ -1,9 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
-import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -68,14 +67,14 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
     }
 
     @Transactional
-    fun håndter(respons: String, mottattXml: ØkonomiXmlMottatt) {
+    fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
         val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> = hentKravgrunnlagFraØkonomi(mottattXml)
         val hentetKravgrunnlag = hentetData.first
         val erSperret = hentetData.second
 
         arkiverKravgrunnlag(mottattXml.id)
-        val behandling = opprettBehandling(hentetKravgrunnlag, respons)
+        val behandling = opprettBehandling(hentetKravgrunnlag, fagsystemsbehandlingData)
         val behandlingId = behandling.id
 
         val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
@@ -119,9 +118,7 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
     }
 
     private fun opprettBehandling(hentetKravgrunnlag: DetaljertKravgrunnlagDto,
-                                  hentFagsystemsbehandlingRespons: String): Behandling {
-        val fagsystemsbehandlingData = objectMapper.readValue(hentFagsystemsbehandlingRespons,
-                                                              HentFagsystemsbehandlingRespons::class.java)
+                                  fagsystemsbehandlingData: HentFagsystemsbehandling): Behandling {
         val opprettTilbakekrevingRequest =
                 lagOpprettBehandlingsrequest(eksternFagsakId = hentetKravgrunnlag.fagsystemId,
                                              ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
@@ -134,7 +131,7 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
     private fun lagOpprettBehandlingsrequest(eksternFagsakId: String,
                                              ytelsestype: Ytelsestype,
                                              eksternId: String,
-                                             fagsystemsbehandlingData: HentFagsystemsbehandlingRespons)
+                                             fagsystemsbehandlingData: HentFagsystemsbehandling)
             : OpprettTilbakekrevingRequest {
         return OpprettTilbakekrevingRequest(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                                             ytelsestype = ytelsestype,
