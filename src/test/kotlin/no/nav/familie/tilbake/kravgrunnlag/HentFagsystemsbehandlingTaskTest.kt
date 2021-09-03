@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -71,6 +72,9 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var historikkService: HistorikkService
 
+    @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
     private lateinit var håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService
@@ -95,6 +99,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(behandlingRepository,
                                                                           kravgrunnlagRepository,
                                                                           behandlingService,
+                                                                          behandlingskontrollService,
                                                                           økonomiXmlMottattService,
                                                                           mockHentKravgrunnlagService,
                                                                           stegService,
