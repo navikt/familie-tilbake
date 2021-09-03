@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.micrometer
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.tilbake.micrometer.domain.StatistikkRepository
 import org.springframework.scheduling.annotation.Scheduled
@@ -29,7 +30,6 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
     val sendteBrevGauge = MultiGauge.builder("SendteBrev").register(Metrics.globalRegistry)
     val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
     val vedtakTidGauge = MultiGauge.builder("VedtakTid").register(Metrics.globalRegistry)
-
 
 
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
@@ -245,13 +245,24 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
     @Scheduled(initialDelay = 18000, fixedDelay = 30000)
     fun vedtakMedTid() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val data = statistikkRepository.finnVedtak()
 
         val rows = data.map {
+
+            val antallIngenTilbakebetaling = if (it.vedtakstype == Behandlingsresultatstype.INGEN_TILBAKEBETALING) it.antall else 0
+            val antallDelvisTilbakebetaling = if (it.vedtakstype == Behandlingsresultatstype.DELVIS_TILBAKEBETALING) it.antall else 0
+            val antallFullTilbakebetaling = if (it.vedtakstype == Behandlingsresultatstype.FULL_TILBAKEBETALING) it.antall else 0
+            val antallHenlagt = if (it.vedtakstype == Behandlingsresultatstype.HENLAGT) it.antall else 0
+
+            Behandlingsresultatstype.DELVIS_TILBAKEBETALING
+
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
-                                      it.vedtakstype.name, it.antall.toString(),
-                                      "Time", it.dato.atStartOfDay().toString()),
+                                      Behandlingsresultatstype.INGEN_TILBAKEBETALING.name, antallIngenTilbakebetaling.toString(),
+                                      Behandlingsresultatstype.DELVIS_TILBAKEBETALING.name, antallDelvisTilbakebetaling.toString(),
+                                      Behandlingsresultatstype.FULL_TILBAKEBETALING.name, antallFullTilbakebetaling.toString(),
+                                      Behandlingsresultatstype.HENLAGT.name, antallHenlagt.toString(),
+                                      "dato", it.dato.atStartOfDay().toString()),
                               it.antall)
         }
         vedtakTidGauge.register(rows)
