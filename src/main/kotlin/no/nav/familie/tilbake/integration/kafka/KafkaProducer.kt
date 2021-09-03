@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandling
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -24,8 +23,7 @@ interface KafkaProducer {
 }
 
 @Service
-@ConditionalOnProperty(name = ["kafka.producer.enabled"])
-@Profile("!e2e & !integrasjonstest")
+@Profile("!integrasjonstest & !e2e")
 class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) : KafkaProducer {
 
     private val log = LoggerFactory.getLogger(this::class.java)
