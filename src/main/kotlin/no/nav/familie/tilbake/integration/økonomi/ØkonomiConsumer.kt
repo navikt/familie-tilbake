@@ -136,13 +136,12 @@ class E2EØkonomiConsumer(private val kravgrunnlagRepository: KravgrunnlagReposi
     override fun hentKravgrunnlag(kravgrunnlagId: BigInteger,
                                   hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
-        val respons = kravgrunnlagHentDetalj(hentKravgrunnlagRequest)
-        validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
+        val respons = lagKravgrunnlagRespons(hentKravgrunnlagRequest)
         logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
         return respons.detaljertkravgrunnlag
     }
 
-    fun kravgrunnlagHentDetalj(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
+    fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
         val hentKravgrunnlagRequest = request.hentkravgrunnlag
         val eksisterendeKravgrunnlag =
                 kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(hentKravgrunnlagRequest.kravgrunnlagId)
@@ -206,30 +205,6 @@ class E2EØkonomiConsumer(private val kravgrunnlagRepository: KravgrunnlagReposi
                 skattProsent = it.skatteprosent
             }
         }
-    }
-
-    private fun validerHentKravgrunnlagRespons(mmelDto: MmelDto, kravgrunnlagId: BigInteger) {
-        if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
-            logger.error("Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
-                         "for kravgrunnlagId=$kravgrunnlagId.")
-            throw IntegrasjonException(msg = "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi " +
-                                             "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.")
-        } else if (erKravgrunnlagSperret(mmelDto)) {
-            logger.warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
-            throw SperretKravgrunnlagFeil(melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
-        }
-    }
-
-    private fun erResponsOk(mmelDto: MmelDto): Boolean {
-        return mmelDto.alvorlighetsgrad in setOf("00", "04")
-    }
-
-    private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean {
-        return DefaultØkonomiConsumer.KODE_MELDING_SPERRET_KRAVGRUNNLAG.equals(mmelDto.kodeMelding)
-    }
-
-    private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean {
-        return DefaultØkonomiConsumer.KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES.equals(mmelDto.kodeMelding)
     }
 
     private fun lagRespons(mmelDto: MmelDto): String {
