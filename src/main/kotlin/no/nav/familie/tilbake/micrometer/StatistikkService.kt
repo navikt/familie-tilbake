@@ -31,6 +31,7 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
     val vedtakTidGauge = MultiGauge.builder("VedtakTid").register(Metrics.globalRegistry)
 
 
+
     @Scheduled(initialDelay = 10000, fixedDelay = 30000)
     fun åpneBehandlinger() {
         if (LeaderClient.isLeader() != true) return
@@ -249,7 +250,7 @@ class StatistikkService(private val statistikkRepository: StatistikkRepository) 
 
         val rows = data.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
-                                      "vedtakstype", it.vedtakstype.name,
+                                      it.vedtakstype.name, it.antall.toString(),
                                       "Time", it.dato.atStartOfDay().toString()),
                               it.antall)
         }
