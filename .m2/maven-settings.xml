@@ -7,7 +7,7 @@
         <server>
             <id>github</id>
             <username>${GITHUB_USERNAME}</username>
-            <password>${GITHUB_TOKEN}</password>
+            <password>${NAV_PACKAGES_PAT}</password>
         </server>
     </servers>
 
