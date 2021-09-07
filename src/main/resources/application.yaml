@@ -94,6 +94,7 @@ AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
+PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 FORELDELSE_ANTALL_MÅNED: 30
 TILBAKEKREVING_V1_URL: https://cics-q1.adeo.no/oppdrag/K231CW80
