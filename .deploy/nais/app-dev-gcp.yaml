@@ -70,6 +70,7 @@ spec:
       external:
         - host: unleash.nais.io
         - host: familie-integrasjoner-q1.dev-fss-pub.nais.io
+        - host: b27apvl220.preprod.local
   replicas:
     min: 2
     max: 4
