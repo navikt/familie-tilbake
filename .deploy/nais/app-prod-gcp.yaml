@@ -63,7 +63,12 @@ spec:
         - application: familie-prosessering
           namespace: teamfamilie
           cluster: prod-gcp
-    outbound
+    outbound:
+      rules:
+        - application: familie-historikk
+      external:
+        - host: unleash.nais.io
+        - host: familie-integrasjoner.prod-fss-pub.nais.io
   replicas:
     min: 2
     max: 4
