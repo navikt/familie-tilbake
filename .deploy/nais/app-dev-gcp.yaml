@@ -87,6 +87,6 @@ spec:
     enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: preprod-gcp
+      value: dev
   kafka:
     pool: nav-dev
