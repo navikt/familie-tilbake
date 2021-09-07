@@ -2,7 +2,9 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://A01DBVL022.adeo.no:5432/familie-tilbake
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-tilbake
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
 no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
