@@ -41,24 +41,12 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud>3.0.3</spring.cloud>
         <spring.cloud-contract>3.0.3</spring.cloud-contract>
-        <spring.vault>2.3.2</spring.vault>
         <testcontainers.version>1.16.0</testcontainers.version>
         <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
         <swagger.version>3.0.0</swagger.version>
 
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-vault-dependencies</artifactId>
-                <version>${spring.cloud}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot -->
@@ -215,18 +203,9 @@
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.vault</groupId>
-            <artifactId>spring-vault-core</artifactId>
-            <version>${spring.vault}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <version>${spring.cloud}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-config-databases</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
