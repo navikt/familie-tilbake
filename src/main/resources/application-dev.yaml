@@ -5,7 +5,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
   queuemanager: MQLS02
