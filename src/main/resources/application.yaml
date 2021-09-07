@@ -95,6 +95,7 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
 SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/ # brukes kun av integrasjonstester
+STS_URL: https://security-token-service.dev.adeo.no/security-token-service/rest/v1/sts/token?grant_type=client_credentials&scope=openid # brukes kun av integrasjonstester
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
 FORELDELSE_ANTALL_MÅNED: 30
