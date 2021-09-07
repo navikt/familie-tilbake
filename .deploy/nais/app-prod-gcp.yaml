@@ -87,5 +87,7 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
+  envFrom:
+    - secret: familie-tilbake
   kafka:
     pool: nav-prod
