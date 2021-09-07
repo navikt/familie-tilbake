@@ -32,7 +32,7 @@ rolle:
 
 
 
-FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev.adeo.no
+FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://security-token-service.dev.adeo.no/SecurityTokenServiceProvider/
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
