@@ -8,7 +8,7 @@ env:
   IMAGE_LATEST: ghcr.io/navikt/familie-tilbake:latest
 jobs:
   deploy-to-prod:
-    name: Bygg app/image, push til github, deploy til prod-fss og dev-fss
+    name: Bygg app/image, push til github, deploy til prod-gcp og dev-gcp
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,42 +39,42 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
-      - name: Deploy til dev-fss
+      - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.yaml
-      - name: Deploy til prod-fss
+          CLUSTER: dev-gcp
+          RESOURCE: .deploy/nais/app-dev-gcp.yaml
+      - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: app-prod.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/app-prod-gcp.yaml
       - name: Deploy dvh_sak_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/prod/dvh_sak_topic_prod.yaml
+          RESOURCE: .deploy/nais/kafka/prod/dvh_sak_topic_prod.yaml
       - name: Deploy dvh_vedtak_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/prod/dvh_vedtak_topic_prod.yaml
+          RESOURCE: .deploy/nais/kafka/prod/dvh_vedtak_topic_prod.yaml
       - name: Deploy hentfagsystemsbehandling_request_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/prod/hentfagsystemsbehandling_request_topic_prod.yaml
+          RESOURCE: .deploy/nais/kafka/prod/hentfagsystemsbehandling_request_topic_prod.yaml
       - name: Deploy hentfagsystemsbehandling_respons_topic
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/prod/hentfagsystemsbehandling_respons_topic_prod.yaml
+          RESOURCE: .deploy/nais/kafka/prod/hentfagsystemsbehandling_respons_topic_prod.yaml
       - name: Kjør sonar på main
         env:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
