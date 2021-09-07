@@ -24,7 +24,7 @@ spec:
     enabled: false
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_13
+      - type: POSTGRES_12
         name: familie-tilbake
         diskAutoresize: true
         highAvailability: true
