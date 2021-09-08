@@ -74,6 +74,7 @@ spec:
         - host: b27apvl220.preprod.local
         - host: pdl-api-q1.dev-fss-pub.nais.io
         - host: cics-q1.adeo.no
+        - host: login.microsoftonline.com
   replicas:
     min: 2
     max: 4
