@@ -12,8 +12,8 @@ oppdrag.mq:
   channel: Q1_FAMILIE_TILBAKE
   hostname: b27apvl220.preprod.local
   port: 1413
-  user: c3J2ZmFtaWxpZS10aWxiYWtl
-  password: MUtKeE5GeVF5QjlmMDE5ckhDQlJiWg==
+  user: srvfamilie-tilbake
+  password: 1KJxNFyQyB9f019rHCBRbZ
   enabled: true
 
 rolle:
