@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.config.RestTemplateAzure
-import no.nav.familie.http.config.RestTemplateSts
 import no.nav.familie.log.filter.LogFilter
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
@@ -29,7 +28,7 @@ import java.time.temporal.ChronoUnit
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateSts::class, RestTemplateAzure::class)
+@Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling //brukes av prosessering(Tasks)
 @ConfigurationPropertiesScan
