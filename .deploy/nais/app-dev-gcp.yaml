@@ -7,6 +7,8 @@ metadata:
     team: teamfamilie
 
 spec:
+  envFrom:
+    - secret: familie-tilbake
   image: {{ image }}
   port: 8030
   liveness:
@@ -93,7 +95,5 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
-  envFrom:
-    - secret: familie-tilbake
   kafka:
     pool: nav-dev
