@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.integration.pdl
 
 
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,8 +24,7 @@ import java.time.LocalDate
 
 @Service
 class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("sts") val restTemplate: RestOperations,
-                private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
+                @Qualifier("sts") val restTemplate: RestOperations) : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -70,7 +68,6 @@ class PdlClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             add("Tema", hentTema(fagsystem).name)
         }
     }

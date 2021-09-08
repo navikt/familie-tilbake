@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.config.RestTemplateSts
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.log.filter.LogFilter
+import no.nav.security.token.support.client.core.http.OAuth2HttpClient
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
+import no.nav.security.token.support.client.spring.oauth2.DefaultOAuth2HttpClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.SpringBootConfiguration
@@ -27,7 +29,7 @@ import java.time.temporal.ChronoUnit
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger"])
-@Import(RestTemplateSts::class, RestTemplateAzure::class, StsRestClient::class)
+@Import(RestTemplateSts::class, RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling //brukes av prosessering(Tasks)
 @ConfigurationPropertiesScan
@@ -58,7 +60,24 @@ class ApplicationConfig {
     @Bean
     @Primary
     fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
+        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
         return RestTemplateBuilder()
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
+    }
+
+    /**
+     * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
+     * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+     * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
+     */
+    @Bean
+    @Primary
+    fun oAuth2HttpClient(): OAuth2HttpClient {
+        return DefaultOAuth2HttpClient(RestTemplateBuilder()
+                                               .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                                               .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
     }
 
     companion object {
