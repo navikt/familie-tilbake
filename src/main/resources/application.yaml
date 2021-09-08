@@ -92,6 +92,7 @@ rolle:
 
 AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
 SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/ # brukes kun av integrasjonstester
