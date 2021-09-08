@@ -18,6 +18,8 @@ spec:
       - id: 01166863-22f1-4e16-9785-d7a05a22df74 # 0000-GA-Enslig-Forsorger-Beslutter
       - id: 19dcbfde-4cdb-4c64-a1ea-ac9802b03339 # 0000-GA-Enslig-Forsorger-Veileder
       - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # 0000-GA-STDAPPS - tilgang til prosessering
+      - id: 0ba009c4-d148-4a51-b501-4b1cf906889d # 0000-GA-SU-UFOR-saksbehandler
+      - id: d75164fa-39e6-4149-956e-8404bc9080b6 # 0000-GA-SU-UFOR-attestant
   preAuthorizedApplications:
     - application: familie-tilbake-frontend-lokal
       cluster: dev-gcp
