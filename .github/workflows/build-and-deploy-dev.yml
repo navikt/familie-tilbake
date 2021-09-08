@@ -145,7 +145,7 @@ jobs:
     if: github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
     name: Deploy til dev-gcp
     runs-on: ubuntu-latest
-    needs: [build-jar-docker, run-junit]
+    needs: [build-jar-docker]
     steps:
       - uses: actions/checkout@v2
         with:
