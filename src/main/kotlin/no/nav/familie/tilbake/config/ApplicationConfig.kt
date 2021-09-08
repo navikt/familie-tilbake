@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.config.RestTemplateSts
@@ -9,13 +10,19 @@ import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.web.client.RestTemplate
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
 @ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
@@ -44,6 +51,15 @@ class ApplicationConfig {
 
     @Bean
     fun kotlinModule(): KotlinModule = KotlinModule()
+
+    /**
+     * Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
+     */
+    @Bean
+    @Primary
+    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
+        return RestTemplateBuilder()
+    }
 
     companion object {
 
