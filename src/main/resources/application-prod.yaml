@@ -31,8 +31,6 @@ rolle:
     saksbehandler: "e40090eb-c2fb-400e-b412-e9084019a73b"
     beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
 STS_URL: https://security-token-service.nais.adeo.no/security-token-service/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io

@@ -35,8 +35,6 @@ rolle:
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 STS_URL: https://api-gw-q1.oera.no/security-token-service/rest/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
