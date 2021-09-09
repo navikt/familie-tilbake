@@ -12,8 +12,6 @@ oppdrag.mq:
   channel: Q1_FAMILIE_TILBAKE
   hostname: b27apvl220.preprod.local
   port: 1413
-  user: ${CREDENTIAL_USERNAME}
-  password: ${CREDENTIAL_PASSWORD}
   enabled: true
 
 rolle:
@@ -35,7 +33,6 @@ rolle:
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
-STS_URL: https://api-gw-q1.oera.no/security-token-service/rest/rest/v1/sts/token?grant_type=client_credentials&scope=openid
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 FORELDELSE_ANTALL_MÅNED: 3

@@ -69,6 +69,7 @@ spec:
       external:
         - host: unleash.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
   replicas:
     min: 2
     max: 4

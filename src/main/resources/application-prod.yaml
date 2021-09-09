@@ -13,8 +13,6 @@ oppdrag.mq:
   channel: P_FAMILIE_TILBAKE
   hostname: a01apvl269.adeo.no
   port: 1414
-  user: ${CREDENTIAL_USERNAME}
-  password: ${CREDENTIAL_PASSWORD}
   enabled: false
 
 rolle:
@@ -32,7 +30,7 @@ rolle:
     beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
-STS_URL: https://security-token-service.nais.adeo.no/security-token-service/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
