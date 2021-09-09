@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -11,7 +12,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
@@ -80,22 +80,23 @@ class AutotestController(private val taskRepository: TaskRepository,
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val respons = HentFagsystemsbehandlingRespons(eksternFagsakId = eksternFagsakId,
-                                                      ytelsestype = ytelsestype,
-                                                      eksternId = eksternId,
-                                                      personIdent = "testverdi",
-                                                      språkkode = Språkkode.NB,
-                                                      enhetId = "8020",
-                                                      enhetsnavn = "testverdi",
-                                                      revurderingsvedtaksdato = LocalDate.now(),
-                                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                            revurderingsresultat = "OPPHØR",
-                                                                            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                    .IGNORER_TILBAKEKREVING))
+        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
+                                                            ytelsestype = ytelsestype,
+                                                            eksternId = eksternId,
+                                                            personIdent = "testverdi",
+                                                            språkkode = Språkkode.NB,
+                                                            enhetId = "8020",
+                                                            enhetsnavn = "testverdi",
+                                                            revurderingsvedtaksdato = LocalDate.now(),
+                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                                                  revurderingsresultat = "OPPHØR",
+                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                          .IGNORER_TILBAKEKREVING))
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                                   ytelsestype,
                                                                                                   eksternId)
-        val melding = objectMapper.writeValueAsString(respons)
+        val melding =
+                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
         val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
                                             requestSendt?.id.toString(),
                                             melding)

@@ -212,9 +212,6 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                   tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
 
         val verge = if (finnesVerge) no.nav.familie.kontrakter.felles.tilbakekreving.Verge(vergetype = Vergetype.VERGE_FOR_BARN,
-                                                                                           gyldigFom = LocalDate.now(),
-                                                                                           gyldigTom = LocalDate.now()
-                                                                                                   .plusDays(100),
                                                                                            navn = "Andy",
                                                                                            personIdent = "321321321") else null
 
