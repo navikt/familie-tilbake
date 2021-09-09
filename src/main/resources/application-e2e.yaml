@@ -42,6 +42,24 @@ no.nav.security.jwt:
           client-id: ${TILBAKE_CLIENT_ID}
           client-secret: ${TILBAKE_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      pdl:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${PDL_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${PDL_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 logging:
   config: "classpath:logback-e2e.xml"
@@ -59,6 +77,7 @@ spring:
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/
+PDL_SCOPE: api://dummy/.default
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner:8085
