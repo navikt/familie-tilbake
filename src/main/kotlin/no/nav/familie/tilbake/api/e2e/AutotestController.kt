@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,7 +42,8 @@ import javax.validation.Valid
 class AutotestController(private val taskRepository: TaskRepository,
                          private val behandlingRepository: BehandlingRepository,
                          private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-                         private val kafkaTemplate: KafkaTemplate<String, String>) {
+                         private val kafkaTemplate: KafkaTemplate<String, String>,
+                         private val environment: Environment) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
@@ -81,26 +83,30 @@ class AutotestController(private val taskRepository: TaskRepository,
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
         val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
-                                                            ytelsestype = ytelsestype,
-                                                            eksternId = eksternId,
-                                                            personIdent = "testverdi",
-                                                            språkkode = Språkkode.NB,
-                                                            enhetId = "8020",
-                                                            enhetsnavn = "testverdi",
-                                                            revurderingsvedtaksdato = LocalDate.now(),
-                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                                  revurderingsresultat = "OPPHØR",
-                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                          .IGNORER_TILBAKEKREVING))
+                                                      ytelsestype = ytelsestype,
+                                                      eksternId = eksternId,
+                                                      personIdent = "12345678901",
+                                                      språkkode = Språkkode.NB,
+                                                      enhetId = "8020",
+                                                      enhetsnavn = "testverdi",
+                                                      revurderingsvedtaksdato = LocalDate.now(),
+                                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                                            revurderingsresultat = "OPPHØR",
+                                                                            tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                    .IGNORER_TILBAKEKREVING))
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                                   ytelsestype,
                                                                                                   eksternId)
         val melding =
                 objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
-        val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                                            requestSendt?.id.toString(),
-                                            melding)
-        kafkaTemplate.send(producerRecord)
+        if (environment.activeProfiles.any { it.contains("e2e") }) {
+            requestSendtRepository.update(requestSendt!!.copy(respons = melding))
+        } else {
+            val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
+                                                requestSendt?.id.toString(),
+                                                melding)
+            kafkaTemplate.send(producerRecord)
+        }
         return Ressurs.success("OK")
     }
 }
