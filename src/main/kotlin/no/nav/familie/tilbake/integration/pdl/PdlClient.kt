@@ -1,8 +1,7 @@
 package no.nav.familie.tilbake.integration.pdl
 
 
-import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
+import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -21,12 +20,13 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
+import java.net.URI
 import java.time.LocalDate
 
 @Service
 class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("sts") val restTemplate: RestOperations,
-                private val stsRestClient: StsRestClient) : AbstractRestClient(restTemplate, "pdl.personinfo") {
+                @Qualifier("azureClientCredential") restTemplate: RestOperations)
+    : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -70,13 +70,19 @@ class PdlClient(val pdlConfig: PdlConfig,
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             add("Tema", hentTema(fagsystem).name)
         }
     }
 
     private fun hentTema(fagsystem: Fagsystem): Tema {
         return Tema.valueOf(fagsystem.tema)
+    }
+
+    override val pingUri: URI
+        get() = pdlConfig.pdlUri
+
+    override fun ping() {
+        operations.optionsForAllow(pingUri)
     }
 }
 

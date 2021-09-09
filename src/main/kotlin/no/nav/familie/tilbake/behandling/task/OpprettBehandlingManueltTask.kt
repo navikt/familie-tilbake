@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -47,6 +48,13 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
             "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
         }
 
+        val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
+        val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
+        if (feilMelding != null) {
+            throw Feil("Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
+                       "Feiler med $feilMelding")
+        }
+
         // opprett behandling
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
         log.info("Oppretter manuell tilbakekrevingsbehandling request for " +
@@ -55,7 +63,8 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
                                                        ytelsestype = ytelsestype,
                                                        eksternId = eksternId,
                                                        ansvarligSaksbehandler = ansvarligSaksbehandler,
-                                                       hentFagsystemsbehandlingRespons = respons)
+                                                       fagsystemsbehandlingData = hentFagsystemsbehandlingRespons
+                                                               .hentFagsystemsbehandling!!)
     }
 
     companion object {

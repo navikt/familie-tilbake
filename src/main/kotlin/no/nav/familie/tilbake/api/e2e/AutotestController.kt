@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -96,8 +97,8 @@ class AutotestController(private val taskRepository: TaskRepository,
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                                   ytelsestype,
                                                                                                   eksternId)
-        val melding = objectMapper.writeValueAsString(respons)
-        if (environment.activeProfiles.any { it.contains("e2e") }) {
+        val melding =
+                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))        if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
             val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,

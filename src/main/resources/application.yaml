@@ -30,14 +30,14 @@ spring:
 
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: ${AZUREAD_DISCOVERY_URL}
+    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -46,9 +46,27 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      pdl:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${PDL_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+        grant-type: client_credentials
+        scope: ${PDL_SCOPE}
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -90,16 +108,14 @@ rolle:
     saksbehandler: ""
     beslutter: ""
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
+SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/ # brukes kun av integrasjonstester
+STS_URL: https://security-token-service.dev.adeo.no/security-token-service/rest/v1/sts/token?grant_type=client_credentials&scope=openid # brukes kun av integrasjonstester
+PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 FAMILIE_TILBAKE_FRONTEND_CLIENT_ID: "dummy"
-STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token?grant_type=client_credentials&scope=openid
-PDL_URL: http://pdl-api
 FORELDELSE_ANTALL_MÅNED: 30
 TILBAKEKREVING_V1_URL: https://cics-q1.adeo.no/oppdrag/K231CW80
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 PROXY_URL: http://webproxy-nais.nav.no:8088
-SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 0 7 ? * MON-FRI

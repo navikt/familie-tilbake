@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,11 +37,16 @@ class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagServic
         val respons = requireNotNull(requestSendt.respons) {
             "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
             "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
-            "Task-en kan kjøre på nytt manuelt når respons-en er mottatt. Hvis data ikke finnes i fagsystem, " +
-            "må kravgrunnlaget arkiveres manuelt ved å bruke forvaltningsrutine etter feilundersøkelse."
+            "Task-en kan kjøre på nytt manuelt når respons-en er mottatt."
         }
 
-        håndterGamleKravgrunnlagService.håndter(respons, mottattXml)
+        val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
+        val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
+        if (feilMelding != null) {
+            throw UkjentravgrunnlagFeil("Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
+                                        "Feiler med $feilMelding")
+        }
+        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
     }
 
 

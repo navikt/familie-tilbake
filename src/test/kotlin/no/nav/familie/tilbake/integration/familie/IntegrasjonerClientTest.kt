@@ -6,9 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -36,8 +33,6 @@ internal class IntegrasjonerClientTest {
     @BeforeEach
     fun setUp() {
         wireMockServer.start()
-        val stsRestClient = mockk<StsRestClient>()
-        every { stsRestClient.systemOIDCToken } returns "token"
         integrasjonerClient = IntegrasjonerClient(restOperations,
                                                   IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"))
     }

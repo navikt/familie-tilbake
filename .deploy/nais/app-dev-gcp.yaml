@@ -7,9 +7,10 @@ metadata:
     team: teamfamilie
 
 spec:
+  envFrom:
+    - secret: familie-tilbake
   image: {{ image }}
   port: 8030
-  leaderElection: true
   liveness:
     path: /internal/status/isAlive
     initialDelay: 30
@@ -22,10 +23,15 @@ spec:
     enabled: true
     path: /internal/prometheus
   vault:
-    enabled: true
-    paths:
-      - kvPath: /serviceuser/data/dev/srvfamilie-tilbake
-        mountPath: /secret/serviceuser
+    enabled: false
+  gcp: # Database
+    sqlInstances:
+      - type: POSTGRES_12
+        name: familie-tilbake
+        autoBackupTime: "03:00"
+        databases:
+          - name: familie-tilbake
+            envVarPrefix: DB
   azure:
     application:
       claims:
@@ -46,8 +52,9 @@ spec:
       rules:
         - application: familie-ba-sak
           namespace: teamfamilie
+          cluster: dev-fss
         - application: familie-ef-sak
-          namespace: default
+          namespace: teamfamilie
         - application: familie-ks-sak
           namespace: default
         - application: familie-tilbake-frontend
@@ -59,6 +66,13 @@ spec:
         - application: familie-prosessering
           namespace: teamfamilie
           cluster: dev-gcp
+    outbound:
+      rules:
+        - application: familie-historikk
+      external:
+        - host: unleash.nais.io
+        - host: familie-integrasjoner-q1.dev-fss-pub.nais.io
+        - host: pdl-api-q1.dev-fss-pub.nais.io
   replicas:
     min: 2
     max: 4
@@ -71,14 +85,11 @@ spec:
       memory: 512Mi
       cpu: 500m
   ingresses:
-    - https://familie-tilbake.dev.adeo.no
-    - https://familie-tilbake.dev-fss.nais.io
     - https://familie-tilbake.dev.intern.nav.no
-    - https://familie-tilbake.dev-fss-pub.nais.io
   secureLogs:
     enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: preprod
+      value: dev
   kafka:
     pool: nav-dev
