@@ -82,7 +82,7 @@ class AutotestController(private val taskRepository: TaskRepository,
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val respons = HentFagsystemsbehandlingRespons(eksternFagsakId = eksternFagsakId,
+        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
                                                       ytelsestype = ytelsestype,
                                                       eksternId = eksternId,
                                                       personIdent = "12345678901",
@@ -98,7 +98,8 @@ class AutotestController(private val taskRepository: TaskRepository,
                                                                                                   ytelsestype,
                                                                                                   eksternId)
         val melding =
-                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))        if (environment.activeProfiles.any { it.contains("e2e") }) {
+                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
+        if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
             val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
