@@ -1,13 +1,12 @@
 package no.nav.familie.tilbake.behandling.task
 
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -37,8 +36,13 @@ class OppdaterFaktainfoTask(private val hentFagsystemsbehandlingService: HentFag
             "Task kan kjøre på nytt manuelt når respons er mottatt."
         }
 
-        val respons = objectMapper.readValue(hentFagsystemsbehandlingRespons, HentFagsystemsbehandlingRespons::class.java)
-        behandlingService.oppdaterFaktainfo(eksternFagsakId, ytelsestype, eksternId, respons)
+        val respons = hentFagsystemsbehandlingService.lesRespons(hentFagsystemsbehandlingRespons)
+        val feilMelding = respons.feilMelding
+        if (feilMelding != null) {
+            throw Feil("Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
+                       "Feiler med $feilMelding")
+        }
+        behandlingService.oppdaterFaktainfo(eksternFagsakId, ytelsestype, eksternId, respons.hentFagsystemsbehandling!!)
     }
 
     companion object {

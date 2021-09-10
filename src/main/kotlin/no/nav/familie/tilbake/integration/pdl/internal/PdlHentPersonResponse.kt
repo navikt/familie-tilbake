@@ -26,23 +26,9 @@ data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: Strin
 
 
 data class PdlError(val message: String,
-                    val locations: List<PdlErrorLocation>,
-                    val path: List<String>?,
-                    val extensions: PdlErrorExtension)
+                    val extensions: PdlExtensions?)
 
-
-data class PdlErrorLocation(val line: Int?,
-                            val column: Int?)
-
-
-data class PdlErrorExtension(val code: String?,
-                             val details: PdlErrorDetails,
-                             val classification: String)
-
-
-data class PdlErrorDetails(val type: String,
-                           val cause: String,
-                           val policy: String)
+data class PdlExtensions(val code: String?)
 
 
 data class PdlNavn(val fornavn: String,

@@ -1,9 +1,10 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://b27dbvl023.preprod.local:5432/familie-tilbake
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-tilbake
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
-no.nav.security.jwt.issuer.azuread.proxyurl: http://webproxy-nais.nav.no:8088
 
 oppdrag.mq:
   queuemanager: MQLS02
@@ -11,8 +12,6 @@ oppdrag.mq:
   channel: Q1_FAMILIE_TILBAKE
   hostname: b27apvl220.preprod.local
   port: 1413
-  user: ${CREDENTIAL_USERNAME}
-  password: ${CREDENTIAL_PASSWORD}
   enabled: true
 
 rolle:
@@ -31,12 +30,11 @@ rolle:
 
 
 
-FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner-q1.teamfamilie
-SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
+FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
+SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
-AZUREAD_DISCOVERY_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-PDL_URL: http://pdl-api-q1.pdl
+PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
+PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 FORELDELSE_ANTALL_MÅNED: 3
 OPPRETTELSE_DAGER_BEGRENSNING: 1
 TILBAKEKREVING_V1_URL: https://cics-q1.adeo.no/oppdrag/K231CW80

@@ -23,7 +23,7 @@ interface KafkaProducer {
 }
 
 @Service
-@Profile("!e2e")
+@Profile("!integrasjonstest & !e2e")
 class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) : KafkaProducer {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -62,7 +62,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 }
 
 @Service
-@Profile("e2e")
+@Profile("e2e","integrasjonstest")
 class E2EKafkaProducer : KafkaProducer {
 
     override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {

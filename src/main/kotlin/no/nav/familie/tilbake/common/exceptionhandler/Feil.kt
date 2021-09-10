@@ -17,6 +17,8 @@ class ManglerTilgang(val melding: String) : RuntimeException(melding)
 
 class UgyldigKravgrunnlagFeil(val melding: String) : RuntimeException(melding)
 
+class UkjentravgrunnlagFeil(val melding: String) : RuntimeException(melding)
+
 class UgyldigStatusmeldingFeil(val melding: String) : RuntimeException(melding)
 
 class SperretKravgrunnlagFeil(val melding: String) : IntegrasjonException(melding)

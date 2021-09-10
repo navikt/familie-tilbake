@@ -5,6 +5,7 @@ import com.ibm.mq.jms.MQQueueConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.common.CommonConstants
 import org.apache.activemq.jms.pool.PooledConnectionFactory
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer
@@ -27,10 +28,11 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
                       @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,
                       @Value("\${oppdrag.mq.channel}") val channel: String,
                       @Value("\${oppdrag.mq.port}") val port: Int,
-                      @Value("\${oppdrag.mq.user}") val user: String,
-                      @Value("\${oppdrag.mq.password}") val password: String,
+                      @Value("\${CREDENTIAL_USERNAME}") val user: String,
+                      @Value("\${CREDENTIAL_PASSWORD}") val password: String,
                       val environment: Environment) {
 
+    private val logger = LoggerFactory.getLogger(OppdragMQConfig::class.java)
     @Bean
     @Throws(JMSException::class)
     fun mqQueueConnectionFactory(): PooledConnectionFactory {
@@ -54,6 +56,8 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         pooledFactory.connectionFactory = cf
         pooledFactory.maxConnections = 10
         pooledFactory.maximumActiveSessionPerConnection = 10
+
+        logger.info("MQ bruker $user")
 
         return pooledFactory
     }

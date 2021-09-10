@@ -45,7 +45,6 @@ class KafkaErrorHandlerTest {
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil hvor liste med records er null`() {
-        val consumerRecord = ConsumerRecord("topic", 1, 1, 1, "record")
         assertThatThrownBy { errorHandler.handle(RuntimeException("Feil i test"), null, consumer, container) }
                 .hasMessageContaining("Feil i test")
                 .hasCauseExactlyInstanceOf(RuntimeException::class.java)

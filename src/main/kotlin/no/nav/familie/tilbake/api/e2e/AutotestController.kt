@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -11,7 +12,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.KafkaConfig
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,7 +42,8 @@ import javax.validation.Valid
 class AutotestController(private val taskRepository: TaskRepository,
                          private val behandlingRepository: BehandlingRepository,
                          private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-                         private val kafkaTemplate: KafkaTemplate<String, String>) {
+                         private val kafkaTemplate: KafkaTemplate<String, String>,
+                         private val environment: Environment) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
@@ -80,10 +82,10 @@ class AutotestController(private val taskRepository: TaskRepository,
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val respons = HentFagsystemsbehandlingRespons(eksternFagsakId = eksternFagsakId,
+        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
                                                       ytelsestype = ytelsestype,
                                                       eksternId = eksternId,
-                                                      personIdent = "testverdi",
+                                                      personIdent = "12345678901",
                                                       språkkode = Språkkode.NB,
                                                       enhetId = "8020",
                                                       enhetsnavn = "testverdi",
@@ -95,11 +97,16 @@ class AutotestController(private val taskRepository: TaskRepository,
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                                   ytelsestype,
                                                                                                   eksternId)
-        val melding = objectMapper.writeValueAsString(respons)
-        val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                                            requestSendt?.id.toString(),
-                                            melding)
-        kafkaTemplate.send(producerRecord)
+        val melding =
+                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
+        if (environment.activeProfiles.any { it.contains("e2e") }) {
+            requestSendtRepository.update(requestSendt!!.copy(respons = melding))
+        } else {
+            val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
+                                                requestSendt?.id.toString(),
+                                                melding)
+            kafkaTemplate.send(producerRecord)
+        }
         return Ressurs.success("OK")
     }
 }

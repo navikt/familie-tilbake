@@ -6,6 +6,7 @@ import io.mockk.spyk
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
@@ -137,9 +138,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val exception = assertThrows<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
         assertEquals("HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
                      "eksternFagsakId=${xmlMottatt.eksternFagsakId},ytelsestype=${xmlMottatt.ytelsestype}," +
-                     "eksternId=${xmlMottatt.referanse}.Task-en kan kjøre på nytt manuelt når respons-en er mottatt. " +
-                     "Hvis data ikke finnes i fagsystem, " +
-                     "må kravgrunnlaget arkiveres manuelt ved å bruke forvaltningsrutine etter feilundersøkelse.",
+                     "eksternId=${xmlMottatt.referanse}.Task-en kan kjøre på nytt manuelt når respons-en er mottatt.",
                      exception.message)
     }
 
@@ -221,20 +220,20 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {
-        val respons = HentFagsystemsbehandlingRespons(eksternFagsakId = xmlMottatt.eksternFagsakId,
-                                                      ytelsestype = xmlMottatt.ytelsestype,
-                                                      eksternId = xmlMottatt.referanse,
-                                                      personIdent = "testverdi",
-                                                      språkkode = Språkkode.NB,
-                                                      enhetId = "8020",
-                                                      enhetsnavn = "testverdi",
-                                                      revurderingsvedtaksdato = LocalDate.now(),
-                                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                            revurderingsresultat = "OPPHØR",
-                                                                            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                    .IGNORER_TILBAKEKREVING))
+        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = xmlMottatt.eksternFagsakId,
+                                                            ytelsestype = xmlMottatt.ytelsestype,
+                                                            eksternId = xmlMottatt.referanse,
+                                                            personIdent = "testverdi",
+                                                            språkkode = Språkkode.NB,
+                                                            enhetId = "8020",
+                                                            enhetsnavn = "testverdi",
+                                                            revurderingsvedtaksdato = LocalDate.now(),
+                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                                                  revurderingsresultat = "OPPHØR",
+                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                          .IGNORER_TILBAKEKREVING))
 
-        return objectMapper.writeValueAsString(respons)
+        return objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
     }
 
     private fun assertSteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,

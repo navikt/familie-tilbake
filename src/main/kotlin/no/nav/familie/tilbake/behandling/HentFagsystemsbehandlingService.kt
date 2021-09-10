@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -44,6 +46,10 @@ class HentFagsystemsbehandlingService(private val requestSendtRepository: HentFa
         return requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                       ytelsestype,
                                                                                       eksternId)
+    }
+
+    fun lesRespons(respons: String): HentFagsystemsbehandlingRespons {
+        return objectMapper.readValue(respons, HentFagsystemsbehandlingRespons::class.java)
     }
 
 }
