@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,6 +31,7 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                               private val behandlingRepository: BehandlingRepository,
                               private val mottattXmlService: ØkonomiXmlMottattService,
                               private val stegService: StegService,
+                              private val tellerService: TellerService,
                               private val behandlingskontrollService: BehandlingskontrollService,
                               private val behandlingService: BehandlingService,
                               private val historikkTaskService: HistorikkTaskService) {
@@ -52,11 +54,13 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                              vedtakId = vedtakId)
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
             mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+            tellerService.tellUkobletStatusmelding(ytelsestype)
             return
         }
         val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling)
         mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+        tellerService.tellKobletStatusmelding(ytelsestype)
     }
 
     private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {

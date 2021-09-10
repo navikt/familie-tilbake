@@ -30,6 +30,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
+import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -89,6 +90,9 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravvedtakstatusService: KravvedtakstatusService
 
     @Autowired
+    private lateinit var tellerService: TellerService
+
+    @Autowired
     private lateinit var endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
 
     private val kafkaProducer: KafkaProducer = mockk()
@@ -112,6 +116,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 stegService,
                 behandlingskontrollService,
                 taskService,
+                tellerService,
                 oppgaveTaskService,
                 historikkTaskService,
                 hentFagsystemsbehandlingService,
