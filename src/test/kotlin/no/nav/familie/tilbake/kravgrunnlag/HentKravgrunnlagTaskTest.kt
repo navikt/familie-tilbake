@@ -30,8 +30,8 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.integration.økonomi.MockØkonomiClient
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiClient
+import no.nav.familie.tilbake.integration.økonomi.MockOppdragClient
+import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,7 +68,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
-    private lateinit var økonomiClient: ØkonomiClient
+    private lateinit var oppdragClient: OppdragClient
     private lateinit var hentKravgrunnlagService: HentKravgrunnlagService
     private lateinit var hentKravgrunnlagTask: HentKravgrunnlagTask
 
@@ -90,8 +90,8 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
         kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
         historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevsporingRepository, kafkaProducer)
-        økonomiClient = MockØkonomiClient(kravgrunnlagRepository, mottattXmlRepository)
-        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiClient, historikkService)
+        oppdragClient = MockOppdragClient(kravgrunnlagRepository, mottattXmlRepository)
+        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, oppdragClient, historikkService)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)
 
         every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit

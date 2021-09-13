@@ -62,7 +62,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-oppdrag:
         resource-url: ${FAMILIE_OPPDRAG_URL}
-        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:
@@ -71,7 +71,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-oppdrag-clientcredentials:
         resource-url: ${FAMILIE_OPPDRAG_URL}
-        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
         grant-type: client_credentials
         scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:

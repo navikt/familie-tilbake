@@ -19,8 +19,8 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiClient
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiClient
+import no.nav.familie.tilbake.integration.økonomi.DefaultOppdragClient
+import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
@@ -83,7 +83,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingVedtakService: BehandlingsvedtakService
 
     private lateinit var iverksettelseService: IverksettelseService
-    private lateinit var økonomiClient: ØkonomiClient
+    private lateinit var oppdragClient: OppdragClient
 
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
@@ -106,14 +106,14 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         behandlingVedtakService.opprettBehandlingsvedtak(behandlingId)
 
         wireMockServer.start()
-        økonomiClient = DefaultØkonomiClient(restOperations, URI.create(wireMockServer.baseUrl()))
+        oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))
 
         iverksettelseService = IverksettelseService(behandlingRepository,
                                                     kravgrunnlagRepository,
                                                     økonomiXmlSendtRepository,
                                                     tilbakekrevingsvedtakBeregningService,
                                                     behandlingVedtakService,
-                                                    økonomiClient)
+                                                    oppdragClient)
     }
 
     @AfterEach
@@ -124,7 +124,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultØkonomiClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("00",
                                                                                               "OK")).toJson())))
 
@@ -143,7 +143,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultØkonomiClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("10",
                                                                                               "feil")).toJson())))
 

@@ -41,7 +41,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-interface ØkonomiClient {
+interface OppdragClient {
 
     fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse
@@ -52,9 +52,9 @@ interface ØkonomiClient {
 
 @Service
 @Profile("!e2e & !mock-økonomi")
-class DefaultØkonomiClient(@Qualifier("azure") restOperations: RestOperations,
+class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
                            @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI)
-    : AbstractPingableRestClient(restOperations, "familie.oppdrag"), ØkonomiClient {
+    : AbstractPingableRestClient(restOperations, "familie.oppdrag"), OppdragClient {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -149,8 +149,8 @@ class DefaultØkonomiClient(@Qualifier("azure") restOperations: RestOperations,
 
 @Service
 @Profile("e2e", "mock-økonomi")
-class MockØkonomiClient(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                        private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository) : ØkonomiClient {
+class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                        private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository) : OppdragClient {
 
     override fun iverksettVedtak(behandlingId: UUID,
                                  tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
