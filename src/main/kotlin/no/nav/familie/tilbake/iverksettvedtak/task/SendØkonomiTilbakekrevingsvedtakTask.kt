@@ -19,7 +19,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Sender tilbakekrevingsvedtak til økonomi",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 300L)
 class SendØkonomiTilbakekrevingsvedtakTask(private val iverksettelseService: IverksettelseService,
                                            private val taskService: TaskService,
                                            private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {

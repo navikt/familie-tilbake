@@ -1,16 +1,22 @@
 package no.nav.familie.tilbake.integration.økonomi
 
+import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingPortType
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
@@ -22,16 +28,20 @@ import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestOperations
+import org.springframework.web.util.UriComponentsBuilder
 import java.math.BigInteger
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import javax.xml.ws.soap.SOAPFaultException
 
-interface ØkonomiConsumer {
+interface ØkonomiClient {
 
     fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse
@@ -41,16 +51,29 @@ interface ØkonomiConsumer {
 }
 
 @Service
-@Profile("!e2e")
-class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortType) : ØkonomiConsumer {
+@Profile("!e2e & !mock-økonomi")
+class DefaultØkonomiClient(@Qualifier("azure") restOperations: RestOperations,
+                           @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI)
+    : AbstractPingableRestClient(restOperations, "familie.oppdrag"), ØkonomiClient {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    override val pingUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .path(PING_URI).build().toUri()
+
+    private val iverksettelseUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .path(IVERKSETTELSE_URI).build().toUri()
+
+    private val hentKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .path(HENT_KRAVGRUNNLAG_URI).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
-            val respons = økonomiService.tilbakekrevingsvedtak(tilbakekrevingsvedtakRequest)
+            val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = iverksettelseUri,
+                                                                                payload = tilbakekrevingsvedtakRequest)
+                    .getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
                 logger.error("Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
                              "Mottatt respons:${lagRespons(respons.mmel)}")
@@ -60,10 +83,10 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
             return respons
 
-        } catch (exception: SOAPFaultException) {
+        } catch (exception: Exception) {
             logger.error("tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
-                         "Feiler med ${exception.message}")
-            throw IntegrasjonException(msg = "Fikk feil fra økonomi ved iverksetting av behandling=$behandlingId",
+                         "Feiler med ${exception.message}.")
+            throw IntegrasjonException(msg = "Noe gikk galt ved iverksetting av behandling=$behandlingId",
                                        throwable = exception)
         }
     }
@@ -72,14 +95,16 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
             : DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
-            val respons = økonomiService.kravgrunnlagHentDetalj(hentKravgrunnlagRequest)
+            val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = hentKravgrunnlagUri,
+                                                                                 payload = hentKravgrunnlagRequest)
+                    .getDataOrThrow()
             validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
             return respons.detaljertkravgrunnlag
-        } catch (exception: SOAPFaultException) {
+        } catch (exception: Exception) {
             logger.error("Kravgrunnlag kan ikke hentes fra økonomi for behandling=$kravgrunnlagId. " +
                          "Feiler med ${exception.message}")
-            throw IntegrasjonException(msg = "Kravgrunnlag kan ikke hentes fra økonomi for kravgrunnlagId=$kravgrunnlagId",
+            throw IntegrasjonException(msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId",
                                        throwable = exception)
         }
     }
@@ -116,12 +141,16 @@ class DefaultØkonomiConsumer(private val økonomiService: TilbakekrevingPortTyp
 
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
+        const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett"
+        const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag"
+        const val PING_URI = "/internal/status/alive"
     }
 }
 
 @Service
-@Profile("e2e")
-class E2EØkonomiConsumer(private val kravgrunnlagRepository: KravgrunnlagRepository) : ØkonomiConsumer {
+@Profile("e2e", "mock-økonomi")
+class MockØkonomiClient(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                        private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository) : ØkonomiClient {
 
     override fun iverksettVedtak(behandlingId: UUID,
                                  tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
@@ -143,8 +172,10 @@ class E2EØkonomiConsumer(private val kravgrunnlagRepository: KravgrunnlagReposi
 
     fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
         val hentKravgrunnlagRequest = request.hentkravgrunnlag
-        val eksisterendeKravgrunnlag =
-                kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(hentKravgrunnlagRequest.kravgrunnlagId)
+        val eksisterendeKravgrunnlag = kravgrunnlagRepository
+                                               .findByEksternKravgrunnlagIdAndAktivIsTrue(hentKravgrunnlagRequest
+                                                                                                  .kravgrunnlagId)
+                                       ?: hentMottattKravgrunnlag(hentKravgrunnlagRequest.kravgrunnlagId)
 
         val respons = KravgrunnlagHentDetaljResponse()
         respons.mmel = lagMmelDto()
@@ -209,6 +240,15 @@ class E2EØkonomiConsumer(private val kravgrunnlagRepository: KravgrunnlagReposi
 
     private fun lagRespons(mmelDto: MmelDto): String {
         return objectMapper.writeValueAsString(mmelDto)
+    }
+
+    private fun hentMottattKravgrunnlag(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431? {
+        val mottattXml = økonomiXmlMottattRepository
+                .findByEksternKravgrunnlagId(eksternKravgrunnlagId)?.melding
+        return mottattXml?.let {
+            KravgrunnlagMapper.tilKravgrunnlag431(KravgrunnlagUtil.unmarshalKravgrunnlag(it),
+                                                  UUID.randomUUID())
+        }
     }
 
     companion object {

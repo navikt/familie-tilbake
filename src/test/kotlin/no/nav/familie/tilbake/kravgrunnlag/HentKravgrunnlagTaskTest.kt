@@ -24,15 +24,14 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.ØkonomiConsumerLokalConfig
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiConsumer
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
+import no.nav.familie.tilbake.integration.økonomi.MockØkonomiClient
+import no.nav.familie.tilbake.integration.økonomi.ØkonomiClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,7 +68,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     private lateinit var kafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
-    private lateinit var økonomiConsumer: ØkonomiConsumer
+    private lateinit var økonomiClient: ØkonomiClient
     private lateinit var hentKravgrunnlagService: HentKravgrunnlagService
     private lateinit var hentKravgrunnlagTask: HentKravgrunnlagTask
 
@@ -91,9 +90,8 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kafkaTemplate: KafkaTemplate<String, String> = mockk()
         kafkaProducer = spyk(DefaultKafkaProducer(kafkaTemplate))
         historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevsporingRepository, kafkaProducer)
-        val økonomiService = ØkonomiConsumerLokalConfig.ØkonomiMockService(kravgrunnlagRepository, mottattXmlRepository)
-        økonomiConsumer = DefaultØkonomiConsumer(økonomiService)
-        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiConsumer, historikkService)
+        økonomiClient = MockØkonomiClient(kravgrunnlagRepository, mottattXmlRepository)
+        hentKravgrunnlagService = HentKravgrunnlagService(kravgrunnlagRepository, økonomiClient, historikkService)
         hentKravgrunnlagTask = HentKravgrunnlagTask(behandlingRepository, hentKravgrunnlagService, stegService)
 
         every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit

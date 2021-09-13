@@ -31,11 +31,11 @@ rolle:
 
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
+FAMILIE_OPPDRAG_URL:https://familie-oppdrag.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 FORELDELSE_ANTALL_MÅNED: 3
 OPPRETTELSE_DAGER_BEGRENSNING: 1
-TILBAKEKREVING_V1_URL: https://cics-q1.adeo.no/oppdrag/K231CW80
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 10 * ? * MON-FRI

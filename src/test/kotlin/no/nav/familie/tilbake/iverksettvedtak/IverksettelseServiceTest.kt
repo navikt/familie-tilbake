@@ -1,8 +1,9 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
@@ -18,8 +19,8 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiConsumer
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
+import no.nav.familie.tilbake.integration.økonomi.DefaultØkonomiClient
+import no.nav.familie.tilbake.integration.økonomi.ØkonomiClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
@@ -35,17 +36,20 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingPortType
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
+import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.MmelDto
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.web.client.RestOperations
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.net.URI
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -79,9 +83,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingVedtakService: BehandlingsvedtakService
 
     private lateinit var iverksettelseService: IverksettelseService
+    private lateinit var økonomiClient: ØkonomiClient
 
-    private val mockØkonomiService: TilbakekrevingPortType = mockk()
-    private val økonomiConsumer = DefaultØkonomiConsumer(mockØkonomiService)
+    private val restOperations: RestOperations = RestTemplateBuilder().build()
+    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
@@ -89,8 +94,6 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val perioder = listOf(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
                                   Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)))
     private lateinit var kravgrunnlag431: Kravgrunnlag431
-
-    private val requestSlot = slot<TilbakekrevingsvedtakRequest>()
 
     @BeforeEach
     fun init() {
@@ -102,18 +105,28 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         behandlingVedtakService.opprettBehandlingsvedtak(behandlingId)
 
+        wireMockServer.start()
+        økonomiClient = DefaultØkonomiClient(restOperations, URI.create(wireMockServer.baseUrl()))
+
         iverksettelseService = IverksettelseService(behandlingRepository,
                                                     kravgrunnlagRepository,
                                                     økonomiXmlSendtRepository,
                                                     tilbakekrevingsvedtakBeregningService,
                                                     behandlingVedtakService,
-                                                    økonomiConsumer)
+                                                    økonomiClient)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        wireMockServer.resetAll()
+        wireMockServer.stop()
     }
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        every { mockØkonomiService.tilbakekrevingsvedtak(capture(requestSlot)) }
-                .answers { lagRespons(requestSlot.captured, "00", "OK") }
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultØkonomiClient.IVERKSETTELSE_URI))
+                                       .willReturn(WireMock.okJson(Ressurs.success(lagRespons("00",
+                                                                                              "OK")).toJson())))
 
         assertDoesNotThrow { iverksettelseService.sendIverksettVedtak(behandlingId) }
 
@@ -130,14 +143,16 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        every { mockØkonomiService.tilbakekrevingsvedtak(capture(requestSlot)) }
-                .answers { lagRespons(requestSlot.captured, "10", "feil") }
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultØkonomiClient.IVERKSETTELSE_URI))
+                                       .willReturn(WireMock.okJson(Ressurs.success(lagRespons("10",
+                                                                                              "feil")).toJson())))
 
         val exception = assertFailsWith<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
         assertTrue { exception is IntegrasjonException }
+        assertEquals("Noe gikk galt ved iverksetting av behandling=$behandlingId", exception.message)
         assertEquals("Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
                      "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}",
-                     exception.message)
+                     exception.cause!!.message)
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         assertNotNull(økonomiXmlSendt)
@@ -214,14 +229,13 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
-    private fun lagRespons(request: TilbakekrevingsvedtakRequest,
-                           alvorlighetsgrad: String,
+    private fun lagRespons(alvorlighetsgrad: String,
                            kodeMelding: String): TilbakekrevingsvedtakResponse {
         val mmelDto = lagMmmelDto(alvorlighetsgrad, kodeMelding)
 
         val respons = TilbakekrevingsvedtakResponse()
         respons.mmel = mmelDto
-        respons.tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
+        respons.tilbakekrevingsvedtak = TilbakekrevingsvedtakDto()
 
         return respons
     }

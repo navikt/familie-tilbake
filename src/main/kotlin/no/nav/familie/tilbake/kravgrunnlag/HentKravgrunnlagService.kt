@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
+import no.nav.familie.tilbake.integration.økonomi.ØkonomiClient
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
@@ -19,14 +19,14 @@ import java.util.UUID
 
 @Service
 class HentKravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                              private val økonomiConsumer: ØkonomiConsumer,
+                              private val økonomiClient: ØkonomiClient,
                               private val historikkService: HistorikkService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     fun hentKravgrunnlagFraØkonomi(kravgrunnlagId: BigInteger, kodeAksjon: KodeAksjon): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag for kravgrunnlagId=$kravgrunnlagId for kodeAksjon=$kodeAksjon")
-        return økonomiConsumer.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon))
+        return økonomiClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon))
     }
 
     fun hentTilbakekrevingskravgrunnlag(behandlingId: UUID): Kravgrunnlag431 {
