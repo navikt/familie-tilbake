@@ -84,7 +84,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         val rows = data.map {
 
             val vedtakstype = if (it.vedtakstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
-                Behandlingsresultatstype.HENLAGT.navn else it.vedtakstype.navn
+                Behandlingsresultatstype.HENLAGT.name else it.vedtakstype.name
 
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "vedtakstype", vedtakstype,

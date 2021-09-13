@@ -53,7 +53,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     fun tellVedtak(behandlingsresultatstype: Behandlingsresultatstype, behandling: Behandling) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtakstype = if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
-            Behandlingsresultatstype.HENLAGT.navn else behandlingsresultatstype.navn
+            Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
 
         Metrics.counter("Vedtaksteller",
                         Tags.of("ytelse", fagsak.ytelsestype.kode,
