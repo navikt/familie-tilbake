@@ -31,7 +31,7 @@ rolle:
 
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
-FAMILIE_OPPDRAG_URL:https://familie-oppdrag.dev-fss-pub.nais.io
+FAMILIE_OPPDRAG_URL: https://familie-oppdrag.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
