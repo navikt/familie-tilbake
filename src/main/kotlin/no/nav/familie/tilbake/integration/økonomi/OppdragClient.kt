@@ -71,7 +71,8 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
             : TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
-            val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = iverksettelseUri,
+            val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = URI.create(iverksettelseUri.toString() +
+                                                                                                 behandlingId.toString()),
                                                                                 payload = tilbakekrevingsvedtakRequest)
                     .getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
@@ -95,7 +96,8 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
             : DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
-            val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = hentKravgrunnlagUri,
+            val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = URI.create(hentKravgrunnlagUri.toString() +
+                                                                                                  kravgrunnlagId.toString()),
                                                                                  payload = hentKravgrunnlagRequest)
                     .getDataOrThrow()
             validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
@@ -141,8 +143,8 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
 
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
-        const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett"
-        const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag"
+        const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett/"
+        const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag/"
         const val PING_URI = "/internal/status/alive"
     }
 }
