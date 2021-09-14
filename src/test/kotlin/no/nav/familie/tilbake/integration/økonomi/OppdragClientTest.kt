@@ -84,14 +84,14 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagIverksettelseRespons()).toJson())))
         assertDoesNotThrow { oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest) }
     }
 
     @Test
     fun `iverksettVedtak skal ikke sende iverksettelse request til oppdrag når oppdrag har nedetid`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.status(HttpStatus.REQUEST_TIMEOUT_408)))
 
         val exception = assertFailsWith<RuntimeException> {
@@ -105,7 +105,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal ikke iverksette behandling til oppdrag når økonomi ikke svarer`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
 
         val exception = assertFailsWith<RuntimeException> {
@@ -121,7 +121,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal hente kravgrunnlag fra oppdrag`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+                                                                 kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "OK"))
                                                                            .toJson())))
@@ -131,7 +132,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag ikke finnes i økonomi`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+                                                                 kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420010I"))
                                                                            .toJson())))
@@ -150,7 +152,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag er sperret i økonomi`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+                                                                 kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420012I"))
                                                                            .toJson())))
@@ -165,7 +168,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når økonomi ikke svarer`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+                                                                 kravgrunnlagId))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
         val exception = assertFailsWith<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)

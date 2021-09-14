@@ -124,7 +124,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandlingId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("00",
                                                                                               "OK")).toJson())))
 
@@ -143,7 +143,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandlingId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("10",
                                                                                               "feil")).toJson())))
 
