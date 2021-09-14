@@ -12,12 +12,15 @@ import java.util.UUID
 interface MålerRepository : CrudRepository<Behandling, UUID> {
 
     // language=PostgreSQL
-    @Query("""SELECT ytelsestype, behandling.opprettet_dato as dato, COUNT(*) AS antall
+    @Query("""SELECT ytelsestype, 
+                     extract(ISOYEAR from behandling.opprettet_dato) as år,  
+                     extract(WEEK from behandling.opprettet_dato) as uke,
+                     COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status <> 'AVSLUTTET'
-              GROUP BY ytelsestype, behandling.opprettet_dato, opprettet_dato""")
-    fun finnÅpneBehandlinger(): List<ForekomsterPerDato>
+              GROUP BY ytelsestype, år, uke""")
+    fun finnÅpneBehandlinger(): List<ForekomsterPerUke>
 
     // language=PostgreSQL
     @Query("""SELECT ytelsestype, behandlingssteg, COUNT(*) AS antall
@@ -40,21 +43,29 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
     fun finnVentendeBehandlinger(): List<BehandlingerPerSteg>
 
     // language=PostgreSQL
-    @Query("""SELECT ytelsestype, b.brevtype, b.opprettet_tid::DATE AS dato, COUNT(*) AS antall
+    @Query("""SELECT ytelsestype, 
+                     b.brevtype, 
+                     extract(ISOYEAR from b.opprettet_tid) as år,  
+                     extract(WEEK from b.opprettet_tid) as uke,
+                     COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               JOIN brevsporing b ON behandling.id = b.behandling_id
-              GROUP BY ytelsestype, b.brevtype, dato""")
-    fun finnSendteBrev(): List<BrevPerDato>
+              GROUP BY ytelsestype, b.brevtype, år, uke""")
+    fun finnSendteBrev(): List<BrevPerUke>
 
     // language=PostgreSQL
-    @Query("""SELECT ytelsestype, behandlingsresultat.type as vedtakstype, avsluttet_dato as dato, COUNT(*) AS antall
+    @Query("""SELECT ytelsestype, 
+                     behandlingsresultat.type as vedtakstype, 
+                     extract(ISOYEAR from avsluttet_dato) as år,
+                     extract(WEEK from avsluttet_dato) as uke,
+                     COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               JOIN behandlingsresultat ON behandling.id = behandlingsresultat.behandling_id
               WHERE status = 'AVSLUTTET'
-              GROUP BY ytelsestype, vedtakstype, avsluttet_dato""")
-    fun finnVedtak(): List<VedtakPerDato>
+              GROUP BY ytelsestype, vedtakstype, år, uke""")
+    fun finnVedtak(): List<VedtakPerUke>
 
 
 }

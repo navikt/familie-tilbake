@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.micrometer
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.micrometer.domain.MålerRepository
@@ -20,15 +19,15 @@ class MålerService(private val målerRepository: MålerRepository) {
     val sendteBrevGauge = MultiGauge.builder("SendteBrev").register(Metrics.globalRegistry)
     val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
 
-    
+
     @Scheduled(initialDelay = 10000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnÅpneBehandlinger()
 
         val rows = behandlinger.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
-                                      "dato", it.dato.toString()),
+                                      "dato", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
                               it.antall)
         }
 
@@ -37,7 +36,7 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 15000, fixedDelay = OPPDATERINGSFREKVENS)
     fun behandlingerKlarTilSaksbehandling() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnKlarTilBehandling()
 
         val rows = behandlinger.map {
@@ -51,7 +50,7 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     @Scheduled(initialDelay = 20000, fixedDelay = OPPDATERINGSFREKVENS)
     fun behandlingerPåVent() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnVentendeBehandlinger()
 
         val rows = behandlinger.map {
@@ -63,22 +62,23 @@ class MålerService(private val målerRepository: MålerRepository) {
         ventendeBehandlingGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 25000, fixedDelay =  OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 25000, fixedDelay = OPPDATERINGSFREKVENS)
     fun sendteBrev() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnSendteBrev()
 
         val rows = data.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "brevtype", it.brevtype.name,
-                                      "dato", it.dato.toString()), it.antall)
+                                      "dato", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
+                              it.antall)
         }
         sendteBrevGauge.register(rows)
     }
 
     @Scheduled(initialDelay = 30000, fixedDelay = OPPDATERINGSFREKVENS)
     fun vedtak() {
-        if (LeaderClient.isLeader() != true) return
+//        if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnVedtak()
 
         val rows = data.map {
@@ -88,15 +88,16 @@ class MålerService(private val målerRepository: MålerRepository) {
 
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "vedtakstype", vedtakstype,
-                                      "dato", it.dato.toString()),
+                                      "dato", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
                               it.antall)
         }
         vedtakGauge.register(rows)
     }
 
     companion object {
+
         const val OPPDATERINGSFREKVENS = 1800 * 1000L
     }
-    
-    
+
+
 }
