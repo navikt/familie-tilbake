@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -11,6 +13,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -23,9 +26,9 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
                                    private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandlingId = UUID.fromString(task.payload)
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fritekst: String = task.metadata.getProperty("fritekst")
+        val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
+        val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
+        val fritekst: String = taskdata.fritekst
         if (behandling.harVerge) {
             innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
         }
@@ -42,8 +45,15 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
     }
 
     companion object {
+        fun opprettTask(behandlingId: UUID,
+                        fritekst: String): Task =
+                Task(type = TYPE,
+                     payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
+                     triggerTid = LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "brev.sendInnhentDokumentasjon"
     }
-
 }
+
+data class InnhentDokumentasjonbrevTaskdata(val behandlingId: UUID,
+                                            val fritekst: String)

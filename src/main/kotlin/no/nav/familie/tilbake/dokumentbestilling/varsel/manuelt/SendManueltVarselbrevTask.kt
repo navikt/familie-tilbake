@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -24,10 +26,10 @@ class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
                                 val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandlingId = UUID.fromString(task.payload)
-        val maltype = Dokumentmalstype.valueOf(task.metadata.getProperty("maltype"))
-        val fritekst = task.metadata.getProperty("fritekst")
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val taskdata: SendManueltVarselbrevTaskdata = objectMapper.readValue(task.payload)
+        val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
+        val maltype = taskdata.maltype
+        val fritekst = taskdata.fritekst
         // sjekk om behandlingen har verge
 
         if (Dokumentmalstype.VARSEL == maltype) {
@@ -54,6 +56,16 @@ class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
 
     companion object {
 
+        fun opprettTask(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): Task =
+                Task(type = TYPE,
+                     payload = objectMapper.writeValueAsString(SendManueltVarselbrevTaskdata(behandlingId = behandlingId,
+                                                                                             maltype = maltype,
+                                                                                             fritekst = fritekst)))
+
         const val TYPE = "brev.sendManueltVarsel"
     }
 }
+
+data class SendManueltVarselbrevTaskdata(val behandlingId: UUID,
+                                         val maltype: Dokumentmalstype,
+                                         val fritekst: String)
