@@ -7,6 +7,7 @@ import no.nav.familie.leader.LeaderClient
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.micrometer.domain.MålerRepository
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
@@ -20,12 +21,13 @@ class MålerService(private val målerRepository: MålerRepository) {
     val sendteBrevGauge = MultiGauge.builder("SendteBrev").register(Metrics.globalRegistry)
     val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(initialDelay = 10000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnÅpneBehandlinger()
-
+        logger.info("Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} fordelt på ${behandlinger.size} uker.")
         val rows = behandlinger.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
@@ -39,7 +41,8 @@ class MålerService(private val målerRepository: MålerRepository) {
     fun behandlingerKlarTilSaksbehandling() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnKlarTilBehandling()
-
+        logger.info("Behandlinger klar til saksbehandling returnerte ${behandlinger.sumOf { it.antall }} " +
+                    "fordelt på ${behandlinger.size} steg.")
         val rows = behandlinger.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
                                       "steg", it.behandlingssteg.name),
@@ -53,6 +56,8 @@ class MålerService(private val målerRepository: MålerRepository) {
     fun behandlingerPåVent() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnVentendeBehandlinger()
+        logger.info("Behandlinger på vent returnerte ${behandlinger.sumOf { it.antall }} " +
+                    "fordelt på ${behandlinger.size} steg.")
 
         val rows = behandlinger.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
@@ -67,6 +72,7 @@ class MålerService(private val målerRepository: MålerRepository) {
     fun sendteBrev() {
         if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnSendteBrev()
+        logger.info("Sendte brev returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
 
         val rows = data.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.ytelsestype.kode,
@@ -81,6 +87,7 @@ class MålerService(private val målerRepository: MålerRepository) {
     fun vedtak() {
         if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnVedtak()
+        logger.info("Vedtak returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
 
         val rows = data.map {
 
