@@ -4,10 +4,12 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
+import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
@@ -16,6 +18,7 @@ import java.util.Properties
 
 @Service
 class PdfBrevService(private val journalføringService: JournalføringService,
+                     private val tellerService: TellerService,
                      private val taskService: TaskService) {
 
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
@@ -34,6 +37,9 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                  fritekst: String? = null) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
+        if (data.mottager == Brevmottager.BRUKER) { // Ikke tell kopier sendt til verge
+            tellerService.tellBrevSendt(fagsak, brevtype)
+        }
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
     }
 
@@ -74,6 +80,8 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                                                            data.metadata,
                                                            data.mottager,
                                                            pdf)
+
+
     }
 
     private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {

@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
@@ -34,6 +35,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                           private val stegService: StegService,
                           private val behandlingskontrollService: BehandlingskontrollService,
                           private val taskService: TaskService,
+                          private val tellerService: TellerService,
                           private val oppgaveTaskService: OppgaveTaskService,
                           private val historikkTaskService: HistorikkTaskService,
                           private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
@@ -54,6 +56,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         if (behandling == null) {
             arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
+            tellerService.tellUkobletKravgrunnlag(ytelsestype)
             return
         }
         // mapper grunnlag til Kravgrunnlag431
@@ -91,6 +94,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             }
         }
         stegService.håndterSteg(behandling.id)
+        tellerService.tellKobletKravgrunnlag(ytelsestype)
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,

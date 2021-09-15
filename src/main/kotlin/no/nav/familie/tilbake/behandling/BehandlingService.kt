@@ -46,6 +46,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
@@ -68,6 +69,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
                         private val behandlingTilstandService: BehandlingTilstandService,
+                        private val tellerService: TellerService,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
                         private val historikkTaskService: HistorikkTaskService,
@@ -253,6 +255,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         // Ferdigstill oppgave
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.BehandleSak)
+        tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 
     @Transactional
