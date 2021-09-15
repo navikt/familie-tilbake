@@ -11,6 +11,7 @@ spec:
     - secret: familie-tilbake
   image: {{ image }}
   port: 8030
+  leaderElection: true
   liveness:
     path: /internal/status/isAlive
     initialDelay: 30
