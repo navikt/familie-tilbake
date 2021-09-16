@@ -7,7 +7,7 @@ no.nav.security.jwt:
   client:
     registration:
       familie-integrasjoner:
-        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}
         token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
@@ -16,7 +16,7 @@ no.nav.security.jwt:
           client-secret: ${TILBAKE_CLIENT_SECRET}
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
-        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        resource-url: ${FAMILIE_INTEGRASJONER_URL}
         token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
@@ -43,8 +43,7 @@ STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 
-FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
+FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner:8085/api
 
 CREDENTIAL_USERNAME: srvfamilie-tilbake
 CREDENTIAL_PASSWORD:
-OPPDRAG_SERVICE_URL: #Mockes ut lokalt

@@ -35,5 +35,5 @@ PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.prod-fss-pub.nais.io
-TILBAKEKREVING_V1_URL: https://cics.adeo.no/oppdrag/K231CW80
+FAMILIE_OPPDRAG_URL: https://familie-oppdrag.prod-fss-pub.nais.io
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 0 7 ? * MON-FRI

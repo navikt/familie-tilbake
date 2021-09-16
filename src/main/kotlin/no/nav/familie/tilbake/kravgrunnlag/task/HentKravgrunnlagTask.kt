@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(taskStepType = HentKravgrunnlagTask.TYPE,
                      beskrivelse = "Henter kravgrunnlag fra økonomi",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 300L)
 class HentKravgrunnlagTask(private val behandlingRepository: BehandlingRepository,
                            private val hentKravgrunnlagService: HentKravgrunnlagService,
                            private val stegService: StegService) : AsyncTaskStep {

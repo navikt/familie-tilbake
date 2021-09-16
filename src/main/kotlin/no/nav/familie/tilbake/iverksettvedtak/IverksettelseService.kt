@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.integration.økonomi.ØkonomiConsumer
+import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
@@ -30,7 +30,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
                            private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
                            private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
                            private val behandlingVedtakService: BehandlingsvedtakService,
-                           private val økonomiConsumer: ØkonomiConsumer) {
+                           private val oppdragClient: OppdragClient) {
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
@@ -45,7 +45,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
-        val respons = økonomiConsumer.iverksettVedtak(behandlingId, request)
+        val respons = oppdragClient.iverksettVedtak(behandlingId, request)
 
         //oppdater respons
         økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)

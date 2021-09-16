@@ -28,11 +28,10 @@ prosessering:
 AZURE_APP_WELL_KNOWN_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085
-OPPDRAG_SERVICE_URL: #Mockes ut lokalt
+FAMILIE_OPPDRAG_URL: #Mockes ut lokalt
 SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvider/
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 PDL_URL: #Mockes ut lokalt
-TILBAKEKREVING_V1_URL: #Mockes ut lokalt
 OPPRETTELSE_DAGER_BEGRENSNING: 1
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 0/5 * ? * MON-FRI
