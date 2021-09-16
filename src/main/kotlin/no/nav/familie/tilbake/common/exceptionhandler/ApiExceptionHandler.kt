@@ -56,7 +56,7 @@ class ApiExceptionHandler {
         secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Ressurs.failure(frontendFeilmelding = feil.message))
+                .body(Ressurs.failure(frontendFeilmelding = feil.message, error = feil.cause))
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
