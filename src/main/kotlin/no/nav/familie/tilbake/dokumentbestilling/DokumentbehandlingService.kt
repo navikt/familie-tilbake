@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling
 
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -18,7 +17,6 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -59,12 +57,8 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
-        val sendVarselbrev = Task(type = SendManueltVarselbrevTask.TYPE,
-                                  payload = behandling.id.toString(),
-                                  properties = Properties().apply {
-                                      setProperty("maltype", maltype.name)
-                                      setProperty("fritekst", fritekst)
-                                  })
+        val sendVarselbrev =
+                SendManueltVarselbrevTask.opprettTask(behandlingId = behandling.id, maltype = maltype, fritekst = fritekst)
         taskService.save(sendVarselbrev)
         settPåVent(behandling)
     }
@@ -81,9 +75,8 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
-        val sendInnhentDokumentasjonBrev = Task(InnhentDokumentasjonbrevTask.TYPE,
-                                                behandling.id.toString(),
-                                                Properties().apply { setProperty("fritekst", fritekst) })
+        val sendInnhentDokumentasjonBrev =
+                InnhentDokumentasjonbrevTask.opprettTask(behandlingId = behandling.id, fritekst = fritekst)
         taskService.save(sendInnhentDokumentasjonBrev)
         settPåVent(behandling)
     }
