@@ -2,8 +2,10 @@ package no.nav.familie.tilbake.kravgrunnlag.batch
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -145,7 +147,7 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
                                             enhetId = fagsystemsbehandlingData.enhetId,
                                             enhetsnavn = fagsystemsbehandlingData.enhetsnavn,
                                             revurderingsvedtaksdato = fagsystemsbehandlingData.revurderingsvedtaksdato,
-                                            faktainfo = fagsystemsbehandlingData.faktainfo,
+                                            faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
                                             verge = fagsystemsbehandlingData.verge,
                                             varsel = null)
     }
@@ -166,5 +168,12 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
                                              aktør = Aktør.VEDTAKSLØSNING,
                                              beskrivelse = venteårsak.beskrivelse,
                                              opprettetTidspunkt = LocalDateTime.now())
+    }
+
+    private fun setFaktainfo(faktainfo: Faktainfo): Faktainfo {
+        return Faktainfo(revurderingsresultat = faktainfo.revurderingsresultat,
+                         revurderingsårsak = faktainfo.revurderingsårsak,
+                         tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                         konsekvensForYtelser = faktainfo.konsekvensForYtelser)
     }
 }

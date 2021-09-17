@@ -284,7 +284,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val nyFagsystemsbehandling = Fagsystemsbehandling(eksternId = eksternId,
                                                           årsak = faktainfo.revurderingsårsak,
                                                           resultat = faktainfo.revurderingsresultat,
-                                                          tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
+                                                          // kopier gammel tilbakekrevingsvalg om det ikke finnes i fagsystem
+                                                          tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
+                                                                                ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
                                                           revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
                                                           konsekvenser = fagsystemskonsekvenser)
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(gammelFagsystemsbehandling,
@@ -337,7 +339,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val eksisterendeFagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
         val fagsak = eksisterendeFagsak ?: opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
-        val behandling = BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
+        val behandling =
+                BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
         behandlingRepository.insert(behandling)
 
         historikkTaskService.lagHistorikkTask(behandling.id,
