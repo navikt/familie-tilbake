@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.api
+package no.nav.familie.tilbake.api.forvaltning
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.util.UUID
+
+// Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
 
 @RestController
 @RequestMapping("/api/forvaltning/")
