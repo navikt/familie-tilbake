@@ -25,8 +25,8 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
                         henteParam = "behandlingId")
-    fun korrigerKravgrunnlag(@PathVariable("behandlingId") behandlingId: UUID,
-                             @PathVariable("kravgrunnlagId") kravgrunnlagId: BigInteger): Ressurs<String> {
+    fun korrigerKravgrunnlag(@PathVariable behandlingId: UUID,
+                             @PathVariable kravgrunnlagId: BigInteger): Ressurs<String> {
         forvaltningService.korrigerKravgrunnlag(behandlingId, kravgrunnlagId)
         return Ressurs.success("OK")
     }
@@ -36,7 +36,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Arkiverer mottatt kravgrunnlag",
                         henteParam = "behandlingId")
-    fun arkiverMottattKravgrunnlag(@PathVariable("mottattXmlId") mottattXmlId: UUID): Ressurs<String> {
+    fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")
     }
