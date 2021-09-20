@@ -8,6 +8,8 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -62,10 +64,17 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                     .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
                     .build()
                     .toUri()
+
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
                     .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
                     .pathSegment(organisasjonsnummer)
+                    .build()
+                    .toUri()
+
+    private fun hentJournalpostUri() =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
                     .build()
                     .toUri()
 
@@ -174,6 +183,13 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
      */
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(hentTilgangssjekkUri(), personIdenter)
+    }
+
+    fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
+        secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
+                          "og data ${journalposterForBrukerRequest}")
+
+        return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
 
 }
