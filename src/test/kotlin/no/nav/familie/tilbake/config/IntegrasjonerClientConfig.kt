@@ -47,7 +47,8 @@ class IntegrasjonerClientConfig {
                 journalposttype = Journalposttype.I,
                 journalstatus = Journalstatus.FERDIGSTILT,
                 tittel = "Journalførte dokumenter 1",
-                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(7), datotype = "DATO_REGISTRERT")),
+                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(7), datotype = "DATO_REGISTRERT"),
+                                         RelevantDato(dato = LocalDateTime.now().minusDays(7), datotype = "DATO_JOURNALFOERT")),
                 dokumenter = listOf(no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
                         dokumentInfoId = "dokId1",
                         tittel = "Dokument 1.1"
@@ -60,7 +61,8 @@ class IntegrasjonerClientConfig {
                 journalposttype = Journalposttype.U,
                 journalstatus = Journalstatus.FERDIGSTILT,
                 tittel = "Journalførte dokumenter 2",
-                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(4), datotype = "DATO_REGISTRERT")),
+                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(4), datotype = "DATO_EKSPEDERT"),
+                                         RelevantDato(dato = LocalDateTime.now().minusDays(4), datotype = "DATO_JOURNALFOERT")),
                 dokumenter = listOf(no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
                         dokumentInfoId = "dokId1",
                         tittel = "Dokument 2.1"
@@ -73,13 +75,33 @@ class IntegrasjonerClientConfig {
                 journalposttype = Journalposttype.N,
                 journalstatus = Journalstatus.FERDIGSTILT,
                 tittel = "Journalførte dokumenter 3",
-                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(2), datotype = "DATO_REGISTRERT")),
+                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(2), datotype = "DATO_JOURNALFOERT")),
                 dokumenter = listOf(no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
                         dokumentInfoId = "dokId1",
                         tittel = "Dokument 3.1"
                 ), no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
                         dokumentInfoId = "dokId2",
                         tittel = "Dokument 3.2"
+                ))
+        ), Journalpost(
+                journalpostId = "jpId4",
+                journalposttype = Journalposttype.I,
+                journalstatus = Journalstatus.FERDIGSTILT,
+                tittel = "Journalførte dokumenter 4",
+                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(3), datotype = "DATO_JOURNALFOERT")),
+                dokumenter = listOf(no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
+                        dokumentInfoId = "dokId1",
+                        tittel = "Dokument 4.1"
+                ))
+        ), Journalpost(
+                journalpostId = "jpId5",
+                journalposttype = Journalposttype.U,
+                journalstatus = Journalstatus.FERDIGSTILT,
+                tittel = "Journalførte dokumenter 5",
+                relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(1), datotype = "DATO_JOURNALFOERT")),
+                dokumenter = listOf(no.nav.familie.kontrakter.felles.journalpost.DokumentInfo(
+                        dokumentInfoId = "dokId1",
+                        tittel = "Dokument 5.1"
                 ))
         ))
 
