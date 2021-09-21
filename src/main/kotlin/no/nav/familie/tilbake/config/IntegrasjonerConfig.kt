@@ -20,6 +20,7 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjo
         const val PATH_OPPGAVE = "/api/oppgave"
         const val PATH_NAVKONTOR = "/api/arbeidsfordeling/nav-kontor"
 
+        const val PATH_JOURNALPOST = "api/journalpost"
         const val PATH_HENTDOKUMENT = "api/journalpost/hentdokument"
     }
 }
