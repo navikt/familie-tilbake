@@ -22,7 +22,7 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(initialDelay = 10000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 60000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnÅpneBehandlinger()
@@ -36,7 +36,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         åpneBehandlingerGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 15000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 90000, fixedDelay = OPPDATERINGSFREKVENS)
     fun behandlingerKlarTilSaksbehandling() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnKlarTilBehandling()
@@ -51,7 +51,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         klarTilBehandlingGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 20000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 120000, fixedDelay = OPPDATERINGSFREKVENS)
     fun behandlingerPåVent() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = målerRepository.finnVentendeBehandlinger()
@@ -67,7 +67,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         ventendeBehandlingGauge.register(rows, true)
     }
 
-    @Scheduled(initialDelay = 25000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 150000, fixedDelay = OPPDATERINGSFREKVENS)
     fun sendteBrev() {
         if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnSendteBrev()
@@ -82,7 +82,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         sendteBrevGauge.register(rows)
     }
 
-    @Scheduled(initialDelay = 30000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 180000, fixedDelay = OPPDATERINGSFREKVENS)
     fun vedtak() {
         if (LeaderClient.isLeader() != true) return
         val data = målerRepository.finnVedtak()
