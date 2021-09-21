@@ -6,7 +6,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -81,7 +82,11 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
                                                                               brevmottager,
                                                                               behandling.aktivVerge,
                                                                               fagsak.fagsystem)
-        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+        val ansvarligSaksbehandler = if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+            SIGNATUR_AUTOMATISK_HENLEGGELSESBREV
+        } else {
+            eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+        }
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val metadata = Brevmetadata(behandlendeEnhetId = behandling.behandlendeEnhet,
                                     behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
@@ -117,5 +122,8 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
     companion object {
 
         private const val TITTEL_HENLEGGELSESBREV = "Informasjon om at tilbakekrevingssaken er henlagt"
+        private const val SIGNATUR_AUTOMATISK_HENLEGGELSESBREV = """
+                
+Henleggelsen er gjort automatisk. Brevet er derfor ikke underskrevet av saksbehandler."""
     }
 }
