@@ -4,11 +4,13 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -20,6 +22,7 @@ import java.util.UUID
 
 @Service
 class Fattevedtakssteg(private val behandlingskontrollService: BehandlingskontrollService,
+                       private val behandlingRepository: BehandlingRepository,
                        private val totrinnService: TotrinnService,
                        private val oppgaveTaskService: OppgaveTaskService,
                        private val historikkTaskService: HistorikkTaskService,
@@ -53,7 +56,10 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                                                   Aktør.BESLUTTER)
-            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.BehandleUnderkjentVedtak)
+            val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+            oppgaveTaskService.opprettOppgaveTask(behandlingId,
+                                                  Oppgavetype.BehandleUnderkjentVedtak,
+                                                  behandling.ansvarligSaksbehandler)
         } else {
             behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                      Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,

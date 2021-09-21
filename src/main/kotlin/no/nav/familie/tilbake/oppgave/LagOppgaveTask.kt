@@ -5,7 +5,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
-import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -24,15 +23,17 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService,
     override fun doTask(task: Task) {
         log.info("LagOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
+        val saksbehandler = task.metadata.getProperty("saksbehandler")
         val behandlingId = UUID.fromString(task.payload)
 
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
         val beskrivelse = behandlingsstegstilstand?.venteårsak?.beskrivelse
-        oppgaveService.opprettOppgave(behandlingId = UUID.fromString(task.payload),
-                                      oppgavetype = oppgavetype,
-                                      beskrivelse = beskrivelse,
-                                      fristForFerdigstillelse = LocalDate.now().plusWeeks(fristeUker))
+        oppgaveService.opprettOppgave(UUID.fromString(task.payload),
+                                      oppgavetype,
+                                      beskrivelse,
+                                      LocalDate.now().plusWeeks(fristeUker),
+                                      saksbehandler)
     }
 
     companion object {
