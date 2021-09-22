@@ -248,9 +248,9 @@ class AvsnittUtilTest {
     fun `parseTekst skal utlede underavsnittstype fra fritekstmarkering slik at det er mulig å skille mellom særlige grunner`() {
         val avsnitt = Avsnitt(overskrift = "Hovedoverskrift")
         val tekst = "_underoverskrift 1\n" +
-                    Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGE_GRUNNER) +
+                    Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGEGRUNNER) +
                     "\n_underoverskrift 2\n" +
-                    "brødtekst ${Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)}" +
+                    "brødtekst ${Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGEGRUNNER_ANNET)}" +
                     "\n_underoverskrift 3"
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
@@ -258,11 +258,11 @@ class AvsnittUtilTest {
         assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
         assertThat(underavsnitt).hasSize(3)
-        assertThat(underavsnitt[0].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER)
-        assertThat(underavsnitt[1].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)
+        assertThat(underavsnitt[0].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER)
+        assertThat(underavsnitt[1].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
         assertThat(underavsnitt[1].brødtekst).isEqualTo("brødtekst ")
         assertThat(underavsnitt[1].fritekstTillatt).isTrue
-        assertThat(underavsnitt[2].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)
+        assertThat(underavsnitt[2].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
         assertThat(underavsnitt[2].fritekstTillatt).isFalse
     }
 }

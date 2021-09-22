@@ -25,11 +25,11 @@ object Vedtaksbrevsfritekst {
                                                                    Underavsnittstype.VILKÅR),
                                   særligeGrunner = periode.vurderinger.særligeGrunner
                                           ?.copy(fritekst = markerValgfriFritekst(periode.vurderinger.særligeGrunner.fritekst,
-                                                                                  Underavsnittstype.SÆRLIGE_GRUNNER),
+                                                                                  Underavsnittstype.SÆRLIGEGRUNNER),
                                                  fritekstAnnet = markerPåkrevetFritekst(periode.vurderinger
                                                                                                 .særligeGrunner
                                                                                                 .fritekstAnnet,
-                                                                                        Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)))
+                                                                                        Underavsnittstype.SÆRLIGEGRUNNER_ANNET)))
             periode.copy(fakta = fakta,
                          vurderinger = vurderinger)
         }

@@ -66,7 +66,7 @@ internal object AvsnittUtil {
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
         avsnitt = parseTekst(vilkårstekst, avsnitt, Underavsnittstype.VILKÅR)
-        avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGE_GRUNNER)
+        avsnitt = parseTekst(særligeGrunnerstekst, avsnitt, Underavsnittstype.SÆRLIGEGRUNNER)
         avsnitt = parseTekst(avsluttendeTekst, avsnitt, null)
         return avsnitt
     }
