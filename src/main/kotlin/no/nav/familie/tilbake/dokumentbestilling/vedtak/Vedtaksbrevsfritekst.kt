@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 
 object Vedtaksbrevsfritekst {
 
@@ -25,11 +25,11 @@ object Vedtaksbrevsfritekst {
                                                                    Underavsnittstype.VILKÅR),
                                   særligeGrunner = periode.vurderinger.særligeGrunner
                                           ?.copy(fritekst = markerValgfriFritekst(periode.vurderinger.særligeGrunner.fritekst,
-                                                                                  Underavsnittstype.SÆRLIGEGRUNNER),
+                                                                                  Underavsnittstype.SÆRLIGE_GRUNNER),
                                                  fritekstAnnet = markerPåkrevetFritekst(periode.vurderinger
                                                                                                 .særligeGrunner
                                                                                                 .fritekstAnnet,
-                                                                                        Underavsnittstype.SÆRLIGEGRUNNER_ANNET)))
+                                                                                        Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)))
             periode.copy(fakta = fakta,
                          vurderinger = vurderinger)
         }

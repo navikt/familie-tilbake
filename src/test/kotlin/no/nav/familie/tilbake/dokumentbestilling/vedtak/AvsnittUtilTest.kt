@@ -3,9 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
@@ -24,6 +21,9 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -248,9 +248,9 @@ class AvsnittUtilTest {
     fun `parseTekst skal utlede underavsnittstype fra fritekstmarkering slik at det er mulig å skille mellom særlige grunner`() {
         val avsnitt = Avsnitt(overskrift = "Hovedoverskrift")
         val tekst = "_underoverskrift 1\n" +
-                    Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGEGRUNNER) +
+                    Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGE_GRUNNER) +
                     "\n_underoverskrift 2\n" +
-                    "brødtekst ${Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGEGRUNNER_ANNET)}" +
+                    "brødtekst ${Vedtaksbrevsfritekst.markerValgfriFritekst(null, Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)}" +
                     "\n_underoverskrift 3"
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
@@ -258,11 +258,11 @@ class AvsnittUtilTest {
         assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
         assertThat(underavsnitt).hasSize(3)
-        assertThat(underavsnitt[0].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER)
-        assertThat(underavsnitt[1].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
+        assertThat(underavsnitt[0].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER)
+        assertThat(underavsnitt[1].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)
         assertThat(underavsnitt[1].brødtekst).isEqualTo("brødtekst ")
         assertThat(underavsnitt[1].fritekstTillatt).isTrue
-        assertThat(underavsnitt[2].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
+        assertThat(underavsnitt[2].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGE_GRUNNER_ANNET)
         assertThat(underavsnitt[2].fritekstTillatt).isFalse
     }
 }

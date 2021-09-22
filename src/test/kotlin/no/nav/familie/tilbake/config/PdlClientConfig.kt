@@ -31,10 +31,8 @@ class PdlClientConfig {
                        kjønn = Kjønn.MANN)
         }
         every { pdlClient.hentIdenter(any(), any()) } answers {
-            PdlHentIdenterResponse(
-                    data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
-                    errors = listOf()
-            )
+            PdlHentIdenterResponse(data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
+                                   errors = listOf())
         }
         return pdlClient
     }

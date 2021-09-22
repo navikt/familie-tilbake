@@ -45,7 +45,8 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
     }
 
     @Bean
-    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler)
+            : ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL

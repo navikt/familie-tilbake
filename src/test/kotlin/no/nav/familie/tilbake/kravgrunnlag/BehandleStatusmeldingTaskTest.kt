@@ -359,7 +359,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,"")
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT, "")
     }
 
     private fun settBehandlingTilForeslåVedtakSteg() {
@@ -440,7 +440,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                Aktør.VEDTAKSLØSNING.name == it.metadata["aktor"] &&
+                Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
                 beskrivelse == it.metadata["beskrivelse"] &&
                 behandling.id.toString() == it.payload
             }

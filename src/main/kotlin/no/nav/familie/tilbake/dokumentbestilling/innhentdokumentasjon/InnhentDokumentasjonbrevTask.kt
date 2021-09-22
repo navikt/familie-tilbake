@@ -45,6 +45,7 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
     }
 
     companion object {
+
         fun opprettTask(behandlingId: UUID,
                         fritekst: String): Task =
                 Task(type = TYPE,

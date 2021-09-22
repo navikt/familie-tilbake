@@ -784,9 +784,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
 
         behandlingService.henleggBehandling(behandlingId = behandling.id,
-                                            henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
-                                                    behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                                                    begrunnelse = "testverdi"))
+                                            henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                                                                                                      begrunnelse = "testverdi"))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
@@ -826,9 +825,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingService
                 .henleggBehandling(behandlingId = behandling.id,
-                                   henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
-                                           behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                           begrunnelse = "testverdi"))
+                                   henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                                                                                             begrunnelse = "testverdi"))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
@@ -864,9 +862,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             behandlingService
                     .henleggBehandling(behandlingId = behandling.id,
-                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
-                                               behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                               begrunnelse = "testverdi"))
+                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                                                                                                 begrunnelse = "testverdi"))
         }
         assertEquals("Behandling med behandlingId=${behandling.id} kan ikke henlegges.", exception.message)
     }
@@ -885,9 +882,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             behandlingService
                     .henleggBehandling(behandlingId = behandling.id,
-                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
-                                               behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                               begrunnelse = "testverdi"))
+                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                                                                                                 begrunnelse = "testverdi"))
         }
         assertEquals("Behandling med behandlingId=${behandling.id} kan ikke henlegges.", exception.message)
     }
@@ -906,9 +902,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val exception = assertFailsWith<RuntimeException> {
             behandlingService
                     .henleggBehandling(behandlingId = behandling.id,
-                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(
-                                               behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                               begrunnelse = "testverdi"))
+                                       henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                                                                                                 begrunnelse = "testverdi"))
         }
         assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
     }
@@ -1134,7 +1129,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktor"] &&
+                aktør.name == it.metadata["aktør"] &&
                 behandlingId.toString() == it.payload &&
                 tekst == it.metadata["beskrivelse"]
             }

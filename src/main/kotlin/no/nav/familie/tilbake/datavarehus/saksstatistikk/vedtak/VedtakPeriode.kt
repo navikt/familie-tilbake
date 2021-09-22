@@ -14,5 +14,4 @@ class VedtakPeriode(var fom: LocalDate,
                     var rentebeløp: BigDecimal,
                     var harBruktSjetteLedd: Boolean = false,
                     var aktsomhet: Aktsomhet? = null,
-                    var særligeGrunner: SærligeGrunner? = null
-)
+                    var særligeGrunner: SærligeGrunner? = null)

@@ -19,7 +19,7 @@ interface KafkaProducer {
     fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest)
     fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand)
     fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering)
-    fun sendHentFagsystemsbehandlingRequest(requestId:UUID, request: HentFagsystemsbehandlingRequest)
+    fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest)
 }
 
 @Service
@@ -40,7 +40,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
         sendKafkamelding(behandlingId, KafkaConfig.VEDTAK_TOPIC, request.behandlingUuid.toString(), request)
     }
 
-    override fun sendHentFagsystemsbehandlingRequest(requestId:UUID, request: HentFagsystemsbehandlingRequest) {
+    override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest) {
         sendKafkamelding(requestId, KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC, requestId.toString(), request)
     }
 
@@ -62,7 +62,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 }
 
 @Service
-@Profile("e2e","integrasjonstest")
+@Profile("e2e", "integrasjonstest")
 class E2EKafkaProducer : KafkaProducer {
 
     override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {

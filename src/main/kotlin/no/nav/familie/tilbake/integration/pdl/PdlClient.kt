@@ -66,7 +66,6 @@ class PdlClient(val pdlConfig: PdlConfig,
     }
 
 
-
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {

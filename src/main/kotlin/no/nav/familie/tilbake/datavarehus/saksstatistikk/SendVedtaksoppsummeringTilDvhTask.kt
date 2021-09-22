@@ -29,7 +29,7 @@ class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: 
         validate(vedtaksoppsummering)
 
         secureLogger.info("Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
-                 "for behandling $behandlingId")
+                          "for behandling $behandlingId")
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering)
     }
 

@@ -33,7 +33,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -49,7 +48,7 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.Tilgangskontrollsfagsystem
+import no.nav.familie.tilbake.sikkerhet.TilgangService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -73,7 +72,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val stegService: StegService,
                         private val oppgaveTaskService: OppgaveTaskService,
                         private val historikkTaskService: HistorikkTaskService,
-                        private val rolleConfig: RolleConfig,
+                        private val tilgangService: TilgangService,
                         @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
                         private val opprettelseDagerBegrensning: Long,
                         private val integrasjonerClient: IntegrasjonerClient) {
@@ -153,7 +152,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                                                                       Brevtype.KORRIGERT_VARSEL))
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
-        val kanRevurderingOpprettes: Boolean = kanOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
+        val kanRevurderingOpprettes: Boolean =
+                tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
@@ -265,7 +265,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
 
         //oppdater saksbehandler på oppgaven også hvis det er ny saksbehandler som behandler saken
-        if (!gammelSaksbehandler.equals(ContextService.hentSaksbehandler())) {
+        if (gammelSaksbehandler != ContextService.hentSaksbehandler()) {
             oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         }
     }
@@ -284,7 +284,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val nyFagsystemsbehandling = Fagsystemsbehandling(eksternId = eksternId,
                                                           årsak = faktainfo.revurderingsårsak,
                                                           resultat = faktainfo.revurderingsresultat,
-                                                          // kopier gammel tilbakekrevingsvalg om det ikke finnes i fagsystem
+                // kopier gammel tilbakekrevingsvalg om det ikke finnes i fagsystem
                                                           tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
                                                                                 ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
                                                           revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
@@ -420,28 +420,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
                                                behandling.opprettetTidspunkt < LocalDate.now()
                                                        .atStartOfDay()
-                                                       .minusDays(opprettelseDagerBegrensning)
-                                              )
+                                                       .minusDays(opprettelseDagerBegrensning))
                    && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
     }
 
     private fun kanSendeHenleggelsesbrev(behandling: Behandling, behandlingsresultatstype: Behandlingsresultatstype): Boolean {
-        when (behandling.type) {
-            TILBAKEKREVING -> {
-                if (brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandling.id,
-                                                                            setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))) {
-                    return true
-                }
-            }
-            REVURDERING_TILBAKEKREVING -> {
-                if (Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype) {
-                    return true
-                }
-            }
+        return when (behandling.type) {
+            TILBAKEKREVING -> brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandling.id,
+                                                                                      setOf(Brevtype.VARSEL,
+                                                                                            Brevtype.KORRIGERT_VARSEL))
+            REVURDERING_TILBAKEKREVING -> Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype
         }
-        return false
     }
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
@@ -460,10 +451,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
             return false
         }
-        val behandlerRolle = finnBehandlerrolle(fagsystem)
 
-        return when (behandlerRolle) {
-            Behandlerrolle.VEILEDER -> false
+        return when (tilgangService.finnBehandlerrolle(fagsystem)) {
             Behandlerrolle.SAKSBEHANDLER -> (Behandlingsstatus.UTREDES == behandling.status)
             Behandlerrolle.BESLUTTER, Behandlerrolle.SYSTEM -> true
             else -> false
@@ -476,21 +465,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
-    private fun kanOppretteRevurdering(fagsystem: Fagsystem): Boolean {
-        return finnBehandlerrolle(fagsystem) != Behandlerrolle.VEILEDER;
-    }
-
-    private fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
-        val inloggetBrukerstilgang = ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
-
-        val tilganger = inloggetBrukerstilgang.tilganger
-
-        val behandlerRolle =
-                if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
-                else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
-        return behandlerRolle
-    }
 
     private fun fjernNewlinesFraString(tekst: String): String {
         return tekst

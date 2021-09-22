@@ -332,7 +332,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                            fritekstPåkrevet = false)
 
         val særligGrunnerUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
+                .firstOrNull { Underavsnittstype.SÆRLIGE_GRUNNER == it.underavsnittstype }
         assertNotNull(særligGrunnerUnderavsnitt)
         assertUnderavsnitt(underavsnitt = særligGrunnerUnderavsnitt,
                            fritekst = "særliggrunner fritekst",
@@ -340,7 +340,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                            fritekstPåkrevet = false)
 
         val særligGrunnerAnnetUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
+                .firstOrNull { Underavsnittstype.SÆRLIGE_GRUNNER_ANNET == it.underavsnittstype }
         assertNotNull(særligGrunnerAnnetUnderavsnitt)
         assertUnderavsnitt(underavsnitt = særligGrunnerAnnetUnderavsnitt,
                            fritekst = "særliggrunner annet fritekst",

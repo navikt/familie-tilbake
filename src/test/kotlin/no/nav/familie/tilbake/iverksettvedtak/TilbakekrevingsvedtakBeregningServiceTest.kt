@@ -670,16 +670,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val vilkårsperioder = perioder.map {
             VilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
                                         begrunnelse = "testverdi",
-                                        aktsomhetDto = AktsomhetDto(
-                                                aktsomhet = aktsomhet,
-                                                andelTilbakekreves = andelTilbakreves,
-                                                beløpTilbakekreves = beløpTilbakekreves,
-                                                begrunnelse = "testverdi",
-                                                særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
-                                                tilbakekrevSmåbeløp = true,
-                                                særligeGrunnerBegrunnelse = "testverdi",
-                                                særligeGrunner = listOf(SærligGrunnDto(særligGrunn = SærligGrunn.ANNET,
-                                                                                       begrunnelse = "testverdi"))),
+                                        aktsomhetDto = AktsomhetDto(aktsomhet = aktsomhet,
+                                                                    andelTilbakekreves = andelTilbakreves,
+                                                                    beløpTilbakekreves = beløpTilbakekreves,
+                                                                    begrunnelse = "testverdi",
+                                                                    særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
+                                                                    tilbakekrevSmåbeløp = true,
+                                                                    særligeGrunnerBegrunnelse = "testverdi",
+                                                                    særligeGrunner = listOf(SærligGrunnDto(særligGrunn = SærligGrunn.ANNET,
+                                                                                                           begrunnelse = "testverdi"))),
                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT)
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
@@ -692,10 +691,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val vilkårsperioder = perioder.map {
             VilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
                                         begrunnelse = "testverdi",
-                                        godTroDto = GodTroDto(
-                                                begrunnelse = "testverdi",
-                                                beløpErIBehold = beløpErIBehold,
-                                                beløpTilbakekreves = beløpTilbakekreves),
+                                        godTroDto = GodTroDto(begrunnelse = "testverdi",
+                                                              beløpErIBehold = beløpErIBehold,
+                                                              beløpTilbakekreves = beløpTilbakekreves),
                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO)
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
@@ -704,24 +702,23 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     private fun lagKravgrunnlag(perioder: List<Periode>,
                                 månedligSkattBeløp: BigDecimal,
                                 kravgrunnlagsbeløpene: List<Kravgrunnlagsbeløp>): Kravgrunnlag431 {
-        return Kravgrunnlag431(
-                behandlingId = behandling.id,
-                vedtakId = BigInteger.ZERO,
-                kravstatuskode = Kravstatuskode.NYTT,
-                fagområdekode = Fagområdekode.BA,
-                fagsystemId = fagsak.eksternFagsakId,
-                gjelderVedtakId = "testverdi",
-                gjelderType = GjelderType.PERSON,
-                utbetalesTilId = "testverdi",
-                utbetIdType = GjelderType.PERSON,
-                ansvarligEnhet = "testverdi",
-                bostedsenhet = "testverdi",
-                behandlingsenhet = "testverdi",
-                kontrollfelt = "testverdi",
-                referanse = behandling.aktivFagsystemsbehandling.eksternId,
-                eksternKravgrunnlagId = BigInteger.ZERO,
-                saksbehandlerId = "testverdi",
-                perioder = lagKravgrunnlagsperiode(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene))
+        return Kravgrunnlag431(behandlingId = behandling.id,
+                               vedtakId = BigInteger.ZERO,
+                               kravstatuskode = Kravstatuskode.NYTT,
+                               fagområdekode = Fagområdekode.BA,
+                               fagsystemId = fagsak.eksternFagsakId,
+                               gjelderVedtakId = "testverdi",
+                               gjelderType = GjelderType.PERSON,
+                               utbetalesTilId = "testverdi",
+                               utbetIdType = GjelderType.PERSON,
+                               ansvarligEnhet = "testverdi",
+                               bostedsenhet = "testverdi",
+                               behandlingsenhet = "testverdi",
+                               kontrollfelt = "testverdi",
+                               referanse = behandling.aktivFagsystemsbehandling.eksternId,
+                               eksternKravgrunnlagId = BigInteger.ZERO,
+                               saksbehandlerId = "testverdi",
+                               perioder = lagKravgrunnlagsperiode(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene))
     }
 
     private fun lagKravgrunnlagsperiode(perioder: List<Periode>,

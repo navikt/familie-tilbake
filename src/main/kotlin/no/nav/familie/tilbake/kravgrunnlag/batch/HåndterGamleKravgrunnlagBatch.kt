@@ -18,7 +18,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.UUID
 
 @Service
 class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlMottattService,
@@ -30,53 +29,45 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
     @Scheduled(cron = "\${CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG}")
     @Transactional
     fun utfør() {
-        when {
-            LeaderClient.isLeader() == true || environment.activeProfiles.any {
-                it.contains("local") ||
-                it.contains("integrasjonstest")
-            } -> {
-                logger.info("Starter HåndterGamleKravgrunnlagBatch..")
-                logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
-                val mottattXmlIds: List<UUID> =
-                        mottattXmlService.hentFrakobletGamleMottattXmlIds(barnetrygdBestemtDato = beregnBestemtDato(BARNETRYGD),
-                                                                          barnetilsynBestemtDato = beregnBestemtDato(BARNETILSYN),
-                                                                          overgangsstønadBestemtDato = beregnBestemtDato(
-                                                                                  OVERGANGSSTØNAD),
-                                                                          skolePengerBestemtDato = beregnBestemtDato(SKOLEPENGER),
-                                                                          kontantStøtteBestemtDato = beregnBestemtDato(
-                                                                                  KONTANTSTØTTE))
-
-                when {
-                    mottattXmlIds.isEmpty() -> {
-                        logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
-                    }
-                    else -> {
-                        logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er eldre enn " +
-                                    "$ALDERSGRENSE_I_UKER uker fra dagens dato")
-
-                        val alleFeiledeTasker = taskService.finnTasksMedStatus(listOf(Status.FEILET,
-                                                                                      Status.KLAR_TIL_PLUKK), Pageable.unpaged())
-                        mottattXmlIds.forEach { mottattXmlId ->
-                            val finnesTask = alleFeiledeTasker.any {
-                                it.payload == mottattXmlId.toString() &&
-                                (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
-                            }
-                            if (!finnesTask) {
-                                taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE,
-                                                      payload = mottattXmlId.toString()))
-                            } else {
-                                logger.info("Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
-                                            "eller HentFagsystemsbehandlingTask " +
-                                            "på det samme kravgrunnlaget med id $mottattXmlId")
-                            }
-
-                        }
-                    }
-                }
-                logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
-            }
-            false -> logger.info("Poden er ikke satt opp som leader - kjører ikke HåndterGamleKravgrunnlagBatch")
+        if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
+                    it.contains("local") ||
+                    it.contains("integrasjonstest")
+                }) {
+            return
         }
+
+        logger.info("Starter HåndterGamleKravgrunnlagBatch..")
+        logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
+        val mottattXmlIds = mottattXmlService.hentFrakobletGamleMottattXmlIds(beregnBestemtDato(BARNETRYGD),
+                                                                              beregnBestemtDato(BARNETILSYN),
+                                                                              beregnBestemtDato(OVERGANGSSTØNAD),
+                                                                              beregnBestemtDato(SKOLEPENGER),
+                                                                              beregnBestemtDato(KONTANTSTØTTE))
+
+        if (mottattXmlIds.isNotEmpty()) {
+            logger.info("Det finnes ${mottattXmlIds.size} kravgrunnlag som er eldre enn " +
+                        "$ALDERSGRENSE_I_UKER uker fra dagens dato")
+
+            val alleFeiledeTasker = taskService.finnTasksMedStatus(listOf(Status.FEILET,
+                                                                          Status.KLAR_TIL_PLUKK), Pageable.unpaged())
+            mottattXmlIds.forEach { mottattXmlId ->
+                val finnesTask = alleFeiledeTasker.any {
+                    it.payload == mottattXmlId.toString() &&
+                    (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
+                }
+                if (!finnesTask) {
+                    taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE,
+                                          payload = mottattXmlId.toString()))
+                } else {
+                    logger.info("Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
+                                "eller HentFagsystemsbehandlingTask " +
+                                "på det samme kravgrunnlaget med id $mottattXmlId")
+                }
+            }
+        } else {
+            logger.info("Det finnes ingen kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker fra dagens dato")
+        }
+        logger.info("Stopper HåndterGamleKravgrunnlagBatch..")
     }
 
     private fun beregnBestemtDato(ytelsestype: Ytelsestype): LocalDate {

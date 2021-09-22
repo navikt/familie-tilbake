@@ -19,7 +19,7 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
     fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelseDto {
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        // fakta perioder kan ikke deles. Så logiske periode er samme som fakta periode
+        // Faktaperioder kan ikke deles. Så logisk periode er samme som faktaperiode
         val feilutbetaltePerioder = LogiskPeriodeUtil
                 .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
 
@@ -38,7 +38,7 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
 
     @Transactional
     fun lagreVurdertForeldelse(behandlingId: UUID, behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto) {
-        // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
+        // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned
         KravgrunnlagsberegningService.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
         deaktiverEksisterendeVurdertForeldelse(behandlingId)
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId,

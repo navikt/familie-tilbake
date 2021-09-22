@@ -72,7 +72,7 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
     open class MySerializerProvider {
 
-        var myProvider: SerializerProvider? = null
+        private var myProvider: SerializerProvider? = null
 
         fun setProvider(provider: SerializerProvider?) {
             myProvider = provider
@@ -118,13 +118,13 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         private var workInProgressStack: MutableList<WorkInProgress?> = mutableListOf()
 
         fun pushWorkInProgress() {
-            workInProgressStack.add(workInProgressStack.count(), workInProgress)
+            workInProgressStack.add(workInProgressStack.size, workInProgress)
             workInProgress = null
         }
 
 
         fun popworkInProgress() {
-            val item = workInProgressStack.count() - 1
+            val item = workInProgressStack.size - 1
             workInProgress = workInProgressStack.removeAt(item)
         }
 
@@ -144,7 +144,7 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             // new one - must build it
             var retryCount = 0
             var shortRef = clazz.simpleName
-            var longRef = "#/definitions/" + shortRef
+            var longRef = "#/definitions/$shortRef"
             while (class2Ref.values.contains(longRef)) {
                 retryCount += 1
                 shortRef = clazz.simpleName + "_" + retryCount
@@ -189,10 +189,10 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                                                    private val propertiesNode: ObjectNode) : JsonObjectFormatVisitor,
                                                                                              MySerializerProvider() {
 
-            fun myPropertyHandler(propertyName: String,
-                                  propertyType: JavaType,
-                                  prop: BeanProperty?,
-                                  jsonPropertyRequired: Boolean) {
+            private fun myPropertyHandler(propertyName: String,
+                                          propertyType: JavaType,
+                                          prop: BeanProperty?,
+                                          jsonPropertyRequired: Boolean) {
 
                 if (propertiesNode.get(propertyName) != null) {
                     return
@@ -256,13 +256,11 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         fun createChild(childNode: ObjectNode, currentProperty: BeanProperty?): MyJsonFormatVisitorWrapper {
-            return MyJsonFormatVisitorWrapper(
-                    objectMapper,
-                    level + 1,
-                    node = childNode,
-                    definitionsHandler = definitionsHandler,
-                    currentProperty = currentProperty
-            )
+            return MyJsonFormatVisitorWrapper(objectMapper,
+                                              level + 1,
+                                              node = childNode,
+                                              definitionsHandler = definitionsHandler,
+                                              currentProperty = currentProperty)
         }
 
         override fun expectStringFormat(type: JavaType?): JsonStringFormatVisitor {
@@ -309,10 +307,8 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             return object : JsonArrayFormatVisitor, MySerializerProvider() {
 
                 override fun itemsFormat(handler: JsonFormatVisitable?, elementType: JavaType?) {
-                    objectMapper.acceptJsonFormatVisitor(
-                            preferredElementType ?: elementType,
-                            createChild(itemsNode, currentProperty = null)
-                    )
+                    objectMapper.acceptJsonFormatVisitor(preferredElementType ?: elementType,
+                                                         createChild(itemsNode, currentProperty = null))
                 }
 
                 override fun itemsFormat(format: JsonFormatTypes?) {
@@ -517,7 +513,7 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     extractPolymorphismInfo(_type)?.let {
                         val pi = it
 
-                        // This class is a child in a polymorphism config..
+                        // This class is a child in a polymorphism config.
                         // Set the title = subTypeName
                         thisObjectNode.put("title", pi.subTypeName)
 

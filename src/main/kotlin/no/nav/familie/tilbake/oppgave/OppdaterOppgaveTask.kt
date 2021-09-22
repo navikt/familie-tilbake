@@ -32,11 +32,11 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
         val behandlingId = UUID.fromString(task.payload)
 
 
-       val oppgave = oppgaveService.finnOppgaveForBehandling(behandlingId, oppgavetype)
+        val oppgave = oppgaveService.finnOppgaveForBehandling(behandlingId, oppgavetype)
 
         val nyBeskrivelse = beskrivelse + "/n" + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(fristFerdigstillelse = frist,
-                                                                         beskrivelse = nyBeskrivelse))
+                                                 beskrivelse = nyBeskrivelse))
     }
 
     companion object {

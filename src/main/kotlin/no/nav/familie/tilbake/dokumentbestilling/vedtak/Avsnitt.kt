@@ -32,6 +32,6 @@ enum class Underavsnittstype {
     FAKTA,
     FORELDELSE,
     VILKÅR,
-    SÆRLIGEGRUNNER,
-    SÆRLIGEGRUNNER_ANNET
+    SÆRLIGE_GRUNNER,
+    SÆRLIGE_GRUNNER_ANNET
 }

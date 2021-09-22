@@ -128,11 +128,11 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean {
-        return KODE_MELDING_SPERRET_KRAVGRUNNLAG.equals(mmelDto.kodeMelding)
+        return KODE_MELDING_SPERRET_KRAVGRUNNLAG == mmelDto.kodeMelding
     }
 
     private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean {
-        return KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES.equals(mmelDto.kodeMelding)
+        return KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES == mmelDto.kodeMelding
     }
 
     private fun lagRespons(mmelDto: MmelDto): String {

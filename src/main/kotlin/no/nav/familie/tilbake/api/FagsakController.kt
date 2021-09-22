@@ -65,6 +65,6 @@ class FagsakController(private val fagsakService: FagsakService) {
     fun hentBehandlingerForFagsystem(@PathVariable("fagsystem") fagsystem: Fagsystem,
                                      @PathVariable("fagsak")
                                      eksternFagsakId: String): Ressurs<List<Behandling>> {
-        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId));
+        return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
     }
 }

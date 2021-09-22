@@ -19,7 +19,7 @@ class HistorikkTaskService(private val taskRepository: TaskRepository) {
 
         val properties = Properties()
         properties.setProperty("historikkinnslagstype", historikkinnslagstype.name)
-        properties.setProperty("aktor", aktør.name)
+        properties.setProperty("aktør", aktør.name)
         properties.setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
         beskrivelse?.let { properties.setProperty("beskrivelse", beskrivelse) }
 

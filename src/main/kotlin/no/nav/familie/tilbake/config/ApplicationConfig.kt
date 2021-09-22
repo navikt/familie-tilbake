@@ -54,7 +54,7 @@ class ApplicationConfig {
     fun kotlinModule(): KotlinModule = KotlinModule()
 
     /**
-     * Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
+     * Overskriver felles sin som bruker proxy, som ikke skal brukes på gcp.
      */
     @Bean
     @Primary
@@ -67,8 +67,8 @@ class ApplicationConfig {
     }
 
     /**
-     * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
-     * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+     * Overskriver OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
+     * pga. .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
      * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
      */
     @Bean

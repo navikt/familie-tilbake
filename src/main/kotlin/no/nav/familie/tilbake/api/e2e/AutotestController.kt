@@ -83,17 +83,17 @@ class AutotestController(private val taskRepository: TaskRepository,
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
         val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
-                                                      ytelsestype = ytelsestype,
-                                                      eksternId = eksternId,
-                                                      personIdent = "12345678901",
-                                                      språkkode = Språkkode.NB,
-                                                      enhetId = "8020",
-                                                      enhetsnavn = "testverdi",
-                                                      revurderingsvedtaksdato = LocalDate.now(),
-                                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                            revurderingsresultat = "OPPHØR",
-                                                                            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                    .IGNORER_TILBAKEKREVING))
+                                                            ytelsestype = ytelsestype,
+                                                            eksternId = eksternId,
+                                                            personIdent = "12345678901",
+                                                            språkkode = Språkkode.NB,
+                                                            enhetId = "8020",
+                                                            enhetsnavn = "testverdi",
+                                                            revurderingsvedtaksdato = LocalDate.now(),
+                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
+                                                                                  revurderingsresultat = "OPPHØR",
+                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                                          .IGNORER_TILBAKEKREVING))
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                                   ytelsestype,
                                                                                                   eksternId)

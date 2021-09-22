@@ -7,10 +7,9 @@ import java.math.BigDecimal
 
 /* Brukes bare for iverksettelse */
 
-data class Tilbakekrevingsperiode(
-        val periode: Periode,
-        val renter: BigDecimal = BigDecimal.ZERO,
-        val beløp: List<Tilbakekrevingsbeløp> = listOf())
+data class Tilbakekrevingsperiode(val periode: Periode,
+                                  val renter: BigDecimal = BigDecimal.ZERO,
+                                  val beløp: List<Tilbakekrevingsbeløp> = listOf())
 
 data class Tilbakekrevingsbeløp(val klassetype: Klassetype,
                                 val klassekode: Klassekode,

@@ -65,7 +65,7 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
-        logger.info("Behandling $behandlingId gjenopptar på ${VILKÅRSVURDERING} steg")
+        logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(VILKÅRSVURDERING,
                                                                                       Behandlingsstegstatus.KLAR))

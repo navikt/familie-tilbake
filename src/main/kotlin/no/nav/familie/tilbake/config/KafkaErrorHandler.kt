@@ -75,6 +75,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
     }
 
     companion object {
+
         private val MAKS_STOP_TID = Duration.ofHours(3).toMillis()
         private val MIN_STOP_TID = Duration.ofSeconds(20).toMillis()
         private const val MAKS_ANTALL_FEIL = 10
