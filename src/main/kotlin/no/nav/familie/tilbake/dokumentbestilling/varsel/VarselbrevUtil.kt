@@ -43,7 +43,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = varsel?.varselbeløp ?: 0L,
                                    revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
-                                   fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
+                                   fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
                                    varseltekstFraSaksbehandler = varsel?.varseltekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel))
 
@@ -73,7 +73,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = request.feilutbetaltePerioderDto.sumFeilutbetaling,
                                    revurderingsvedtaksdato = request.vedtaksdato ?: LocalDate.now(),
-                                   fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
+                                   fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
                                    varseltekstFraSaksbehandler = request.varseltekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto))
     }
@@ -110,7 +110,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
         return Varselbrevsdokument(brevmetadata = metadata,
                                    beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
                                    revurderingsvedtaksdato = feilutbetalingsfakta.revurderingsvedtaksdato,
-                                   fristdatoForTilbakemelding = LocalDate.now().plus(Constants.brukersSvarfrist),
+                                   fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
                                    varseltekstFraSaksbehandler = fritekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingsfakta),
                                    erKorrigert = varsel != null,

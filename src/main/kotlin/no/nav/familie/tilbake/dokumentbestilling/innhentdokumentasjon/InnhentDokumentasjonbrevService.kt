@@ -90,7 +90,7 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
                                         ytelsestype = fagsak.ytelsestype,
                                         tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB])
         return InnhentDokumentasjonsbrevsdokument(brevmetadata = brevmetadata,
-                                                  fristdato = LocalDate.now().plus(Constants.brukersSvarfrist),
+                                                  fristdato = Constants.brukersSvarfrist(),
                                                   fritekstFraSaksbehandler = fritekst)
     }
 
