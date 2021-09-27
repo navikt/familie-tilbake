@@ -10,7 +10,11 @@ object Constants {
 
     private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2021, 5, 1), 106399))
 
-    val brukersSvarfrist: Period = Period.ofWeeks(3)
+    private val brukersSvarfrist: Period = Period.ofWeeks(3)
+
+    fun brukersSvarfrist() = LocalDate.now().plus(brukersSvarfrist)
+
+    fun saksbehandlersTidsfrist() = brukersSvarfrist().plusDays(1)
 
     const val kravgrunnlagXmlRootElement: String = "urn:detaljertKravgrunnlagMelding"
 
@@ -23,6 +27,6 @@ object Constants {
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
-    
+
 }
 

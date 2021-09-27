@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -64,7 +63,7 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
     }
 
     private fun settPåVent(behandling: Behandling) {
-        val tidsfrist = LocalDate.now().plus(Constants.brukersSvarfrist).plusDays(1)
+        val tidsfrist = Constants.saksbehandlersTidsfrist()
         behandlingskontrollService.settBehandlingPåVent(behandling.id,
                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                         tidsfrist)

@@ -34,7 +34,7 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
 
        val oppgave = oppgaveService.finnOppgaveForBehandling(behandlingId, oppgavetype)
 
-        val nyBeskrivelse = beskrivelse + "/n" + oppgave.beskrivelse
+        val nyBeskrivelse = beskrivelse + "\n" + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(fristFerdigstillelse = frist,
                                                                          beskrivelse = nyBeskrivelse))
     }
