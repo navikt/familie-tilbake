@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -19,7 +20,8 @@ import java.util.UUID
 class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                          private val kravgrunnlagRepository: KravgrunnlagRepository,
                          private val hentKravgrunnlagService: HentKravgrunnlagService,
-                         private val økonomiXmlMottattService: ØkonomiXmlMottattService) {
+                         private val økonomiXmlMottattService: ØkonomiXmlMottattService,
+                         private val stegService: StegService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -40,6 +42,8 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
             kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
         }
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+
+        stegService.håndterSteg(behandlingId)
     }
 
     @Transactional
