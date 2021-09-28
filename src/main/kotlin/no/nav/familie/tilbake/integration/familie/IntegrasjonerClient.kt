@@ -72,6 +72,14 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                     .build()
                     .toUri()
 
+    private fun validerOrganisasjonUri(organisasjonsnummer: String) =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
+                    .pathSegment(organisasjonsnummer)
+                    .pathSegment("valider")
+                    .build()
+                    .toUri()
+
     private fun hentJournalpostUri() =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
                     .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
@@ -119,6 +127,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
         return getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
+    }
+
+    fun validerOrganisasjon(organisasjonsnummer: String): Boolean {
+        return getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
     }
 
     fun hentSaksbehandler(id: String): Saksbehandler {

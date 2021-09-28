@@ -20,7 +20,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class IntegrasjonerClientTest {
 
@@ -86,19 +88,37 @@ internal class IntegrasjonerClientTest {
     fun `hentOrganisasjon skal gi vellykket respons hvis integrasjoner gir gyldig svar`() {
         // Gitt
         wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321"))
-                                       .willReturn(okJson(success(Organisasjon("Bob AS", "987654321")).toJson())))
+                                       .willReturn(okJson(success(Organisasjon("Bob AS", "987654321"))
+                                                                  .toJson())))
         // Vil gi resultat
         assertNotNull(integrasjonerClient.hentOrganisasjon("987654321"))
     }
 
     @Test
-    fun `hentOrganisasjon skal kaste feil hvis hvis integrasjoner gir ugyldig svar`() {
+    fun `hentOrganisasjon skal kaste feil hvis integrasjoner gir ugyldig svar`() {
         wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321"))
                                        .willReturn(okJson(failure<Any>("error").toJson())))
 
         assertFailsWith(IllegalStateException::class) {
             integrasjonerClient.hentOrganisasjon("987654321")
         }
+    }
+
+    @Test
+    fun `validerOrganisasjon skal gi vellykket respons hvis organisasjonnr er gyldig`() {
+        // Gitt
+        wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
+                                       .willReturn(okJson(success(true).toJson())))
+        // Vil gi resultat
+        assertTrue { integrasjonerClient.validerOrganisasjon("987654321") }
+    }
+
+    @Test
+    fun `validerOrganisasjon skal kaste feil hvis organisasjonnr er ugyldig`() {
+        wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
+                                       .willReturn(okJson(success(false).toJson())))
+
+        assertFalse { integrasjonerClient.validerOrganisasjon("987654321") }
     }
 
 }
