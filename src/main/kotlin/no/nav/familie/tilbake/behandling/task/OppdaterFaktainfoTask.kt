@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(taskStepType = OppdaterFaktainfoTask.TYPE,
                      beskrivelse = "oppdaterer fakta info når kravgrunnlag mottas av ny referanse",
                      maxAntallFeil = 10,
-                     triggerTidVedFeilISekunder = 5)
+                     triggerTidVedFeilISekunder = 5L)
 class OppdaterFaktainfoTask(private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                             private val behandlingService: BehandlingService) : AsyncTaskStep {
 

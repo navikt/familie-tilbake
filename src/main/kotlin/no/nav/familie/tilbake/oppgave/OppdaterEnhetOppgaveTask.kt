@@ -17,7 +17,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = OppdaterEnhetOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Oppdaterer enhet på oppgave",
-                     triggerTidVedFeilISekunder = 300)
+                     triggerTidVedFeilISekunder = 300L)
 class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService,
                                private val integrasjonerClient: IntegrasjonerClient,
                                private val fagsakRepository: FagsakRepository,

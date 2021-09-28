@@ -16,7 +16,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = SendVedtaksbrevTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Sender vedtaksbrev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository,
                           private val vedtaksbrevService: VedtaksbrevService,
                           private val taskService: TaskService) : AsyncTaskStep {

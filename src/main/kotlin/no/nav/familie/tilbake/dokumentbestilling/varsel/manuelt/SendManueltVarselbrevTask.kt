@@ -22,7 +22,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = SendManueltVarselbrevTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Sender manuelt varselbrev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class SendManueltVarselbrevTask(val behandlingRepository: BehandlingRepository,
                                 val manueltVarselBrevService: ManueltVarselbrevService,
                                 val behandlingskontrollService: BehandlingskontrollService,

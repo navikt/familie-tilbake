@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @TaskStepBeskrivelse(taskStepType = OpprettBehandlingManueltTask.TYPE,
                      beskrivelse = "oppretter behandling manuelt",
                      maxAntallFeil = 10,
-                     triggerTidVedFeilISekunder = 5)
+                     triggerTidVedFeilISekunder = 5L)
 class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                                    private val behManuellOpprService: BehandlingManuellOpprettelseService) : AsyncTaskStep {
 

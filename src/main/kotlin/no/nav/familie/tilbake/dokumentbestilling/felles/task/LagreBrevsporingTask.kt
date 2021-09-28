@@ -20,7 +20,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = LagreBrevsporingTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer brev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
                            private val taskService: TaskService,
                            private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {

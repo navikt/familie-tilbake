@@ -15,7 +15,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = HentFagsystemsbehandlingTask.TYPE,
                      beskrivelse = "Sender kafka request til fagsystem for å hente behandling data",
                      maxAntallFeil = 3,
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class HentFagsystemsbehandlingTask(private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
                                    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                                    private val taskService: TaskService) : AsyncTaskStep {

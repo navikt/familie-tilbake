@@ -14,7 +14,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = LagOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Lager oppgave for nye behandlinger",
-                     triggerTidVedFeilISekunder = 300)
+                     triggerTidVedFeilISekunder = 300L)
 class LagOppgaveTask(private val oppgaveService: OppgaveService,
                      private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
 
