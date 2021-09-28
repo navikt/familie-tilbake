@@ -319,10 +319,10 @@ class TilbakekrevingsberegningVilkårTest {
         assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(9000))
     }
 
-    fun beregn(vilkårVurdering: Vilkårsvurderingsperiode,
-               feilutbetalt: BigDecimal,
-               perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-               beregnRenter: Boolean): Beregningsresultatsperiode {
+    private fun beregn(vilkårVurdering: Vilkårsvurderingsperiode,
+                       feilutbetalt: BigDecimal,
+                       perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
+                       beregnRenter: Boolean): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter)
     }

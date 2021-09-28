@@ -12,7 +12,7 @@ data class HentFagsystemsbehandlingRequestSendt(@Id
                                                 val eksternFagsakId: String,
                                                 val ytelsestype: Ytelsestype,
                                                 val eksternId: String,
-                                                val respons: String?= null,
+                                                val respons: String? = null,
                                                 @Version
                                                 val versjon: Long = 0,
                                                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

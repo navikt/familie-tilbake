@@ -9,10 +9,10 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype.ORDINÆR
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.springframework.http.HttpStatus

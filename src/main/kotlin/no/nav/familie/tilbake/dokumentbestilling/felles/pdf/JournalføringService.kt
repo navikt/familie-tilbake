@@ -17,11 +17,11 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -37,15 +37,14 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
         return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
     }
 
-    fun hentJournalposter(behandlingId: UUID) : List<Journalpost> {
+    fun hentJournalposter(behandlingId: UUID): List<Journalpost> {
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
         val fagsak = behandling.let { fagsakRepository.findById(it.fagsakId).orElseThrow() }
         val journalposter = fagsak.let {
-            integrasjonerClient.hentJournalposterForBruker(JournalposterForBrukerRequest(
-                    antall = 1000,
-                    brukerId = Bruker(id = fagsak.bruker.ident, type = BrukerIdType.FNR),
-                    tema = listOf(hentTema(fagsystem = fagsak.fagsystem))
-            ))
+            integrasjonerClient.hentJournalposterForBruker(JournalposterForBrukerRequest(antall = 1000,
+                                                                                         brukerId = Bruker(id = fagsak.bruker.ident,
+                                                                                                           type = BrukerIdType.FNR),
+                                                                                         tema = listOf(hentTema(fagsystem = fagsak.fagsystem))))
         }
         return journalposter.filter { it.sak?.fagsakId == fagsak.eksternFagsakId }
     }

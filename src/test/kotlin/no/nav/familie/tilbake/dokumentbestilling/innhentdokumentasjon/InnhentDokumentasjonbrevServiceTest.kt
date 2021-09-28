@@ -9,10 +9,10 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

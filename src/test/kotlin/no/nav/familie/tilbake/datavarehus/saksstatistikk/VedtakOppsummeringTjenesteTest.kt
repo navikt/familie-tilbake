@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -206,9 +205,9 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagVilkårMedAktsomhet() {
-        val særligGrunn = VilkårsvurderingSærligGrunn(
-                særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
-                begrunnelse = "særlig grunner begrunnelse")
+        val særligGrunn =
+                VilkårsvurderingSærligGrunn(særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
+                                            begrunnelse = "særlig grunner begrunnelse")
         val vilkårVurderingAktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                                                                  ileggRenter = true,
                                                                  særligeGrunnerTilReduksjon = false,
@@ -277,7 +276,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                                               gjelderType = GjelderType.PERSON,
                                               kontrollfelt = "2020",
                                               saksbehandlerId = ANSVARLIG_SAKSBEHANDLER,
-                                              fagsystemId = saksnummer.toString() + "100",
+                                              fagsystemId = saksnummer + "100",
                                               referanse = "1",
                                               perioder = setOf(kravgrunnlagPeriode432))
         kravgrunnlagRepository.insert(kravgrunnlag431)

@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
 import java.io.IOException
 import java.nio.charset.StandardCharsets
+import java.util.Locale
 
 object FellesTekstformaterer {
 
@@ -103,6 +104,6 @@ object FellesTekstformaterer {
     }
 
     private fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {
-        return String.format("%s/%s", språkkode.name.toLowerCase(), filsti)
+        return String.format("%s/%s", språkkode.name.lowercase(Locale.getDefault()), filsti)
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.kafka.listener.MessageListenerContainer
 class KafkaErrorHandlerTest {
 
     @MockK(relaxed = true)
-    lateinit var container: MessageListenerContainer;
+    lateinit var container: MessageListenerContainer
 
     @MockK(relaxed = true)
     lateinit var consumer: Consumer<*, *>

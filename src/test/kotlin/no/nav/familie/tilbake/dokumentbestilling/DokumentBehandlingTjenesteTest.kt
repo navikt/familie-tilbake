@@ -12,6 +12,11 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
+import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
+import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
+import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
+import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -21,11 +26,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
-import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevTask
-import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.ManueltVarselbrevService
-import no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt.SendManueltVarselbrevTask
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -72,11 +72,11 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.insert(Testdata.behandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
         dokumentBehandlingService = DokumentbehandlingService(behandlingRepository,
-                                                               behandlingskontrollService,
-                                                               kravgrunnlagRepository,
-                                                               taskService,
-                                                               mockManueltVarselBrevService,
-                                                               mockInnhentDokumentasjonbrevService)
+                                                              behandlingskontrollService,
+                                                              kravgrunnlagRepository,
+                                                              taskService,
+                                                              mockManueltVarselBrevService,
+                                                              mockInnhentDokumentasjonbrevService)
 
     }
 
@@ -102,8 +102,8 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
         dokumentBehandlingService.bestillBrev(behandlingId,
-                                               Dokumentmalstype.INNHENT_DOKUMENTASJON,
-                                               "Bestilt innhent dokumentasjon")
+                                              Dokumentmalstype.INNHENT_DOKUMENTASJON,
+                                              "Bestilt innhent dokumentasjon")
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
         assertThat(tasks.first().type).isEqualTo(InnhentDokumentasjonbrevTask.TYPE)
@@ -114,8 +114,8 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     fun `bestillBrev skal ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
         Assertions.assertThatThrownBy {
             dokumentBehandlingService.bestillBrev(behandling.id,
-                                                   Dokumentmalstype.INNHENT_DOKUMENTASJON,
-                                                   "Bestilt innhent dokumentasjon")
+                                                  Dokumentmalstype.INNHENT_DOKUMENTASJON,
+                                                  "Bestilt innhent dokumentasjon")
         }.hasMessage("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
     }
 

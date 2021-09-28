@@ -319,11 +319,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         // Håndter Vilkårsvurdering steg
         stegService.håndterSteg(behandling.id,
-                                BehandlingsstegVilkårsvurderingDto(listOf(
-                                        VilkårsvurderingsperiodeDto(periode,
-                                                                    Vilkårsvurderingsresultat.GOD_TRO,
-                                                                    "Vilkårs begrunnelse",
-                                                                    GodTroDto(begrunnelse = "god tro", beløpErIBehold = false)))))
+                                BehandlingsstegVilkårsvurderingDto(listOf(VilkårsvurderingsperiodeDto(periode,
+                                                                                                      Vilkårsvurderingsresultat.GOD_TRO,
+                                                                                                      "Vilkårs begrunnelse",
+                                                                                                      GodTroDto(begrunnelse = "god tro",
+                                                                                                                beløpErIBehold = false)))))
 
         // Håndter Foreslå Vedtak steg
         stegService.håndterSteg(behandling.id,
@@ -625,7 +625,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             taskRepository.findByStatusIn(listOf(Status.UBEHANDLET, Status.KLAR_TIL_PLUKK), Pageable.unpaged()).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktor"] &&
+                aktør.name == it.metadata["aktør"] &&
                 behandling.id.toString() == it.payload
             }
         }

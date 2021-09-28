@@ -92,7 +92,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(keySlot),
                                                   capture(historikkinnslagRecordSlot))
         }
-        assertHistorikkinnslagRequest(Aktør.VEDTAKSLØSNING, Constants.BRUKER_ID_VEDTAKSLØSNINGEN, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
+        assertHistorikkinnslagRequest(Aktør.VEDTAKSLØSNING,
+                                      Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                      TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
                                       Historikkinnslagstype.HENDELSE)
     }
 
@@ -203,9 +205,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er automatisk henlagt`() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(
-                behandling.copy(resultater =
-                                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
+        behandlingRepository.update(behandling.copy(resultater =
+                                                    setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                              Aktør.VEDTAKSLØSNING,
@@ -227,9 +228,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er manuelt henlagt`() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(
-                behandling.copy(resultater =
-                                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET))))
+        behandlingRepository.update(behandling.copy(resultater =
+                                                    setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                              Aktør.VEDTAKSLØSNING,
@@ -312,12 +312,11 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagHistorikkinnslag skal lage historikkinnslag når behandling er fattet`() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(
-                behandling.copy(resultater =
-                                setOf(Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
-                                                          behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
-                                                                                                iverksettingsstatus =
-                                                                                                Iverksettingsstatus.IVERKSATT)))))
+        behandlingRepository.update(behandling.copy(resultater =
+                                                    setOf(Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
+                                                                              behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
+                                                                                                                    iverksettingsstatus =
+                                                                                                                    Iverksettingsstatus.IVERKSATT)))))
         historikkService.lagHistorikkinnslag(behandlingId,
                                              TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
                                              Aktør.BESLUTTER,

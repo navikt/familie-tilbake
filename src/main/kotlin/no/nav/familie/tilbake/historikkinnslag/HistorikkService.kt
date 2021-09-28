@@ -81,26 +81,16 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                          beskrivelse: String?): String? {
         return when (historikkinnslagstype) {
-            BEHANDLING_PÅ_VENT -> {
-                historikkinnslagstype.tekst + beskrivelse
-            }
-            VEDTAK_FATTET -> {
-                val resultatstype: Behandlingsresultatstype? = behandling.sisteResultat?.type
-                resultatstype?.let { historikkinnslagstype.tekst + it.navn }
-            }
+            BEHANDLING_PÅ_VENT -> historikkinnslagstype.tekst + beskrivelse
+            VEDTAK_FATTET -> behandling.sisteResultat?.type?.let { historikkinnslagstype.tekst + it.navn }
             BEHANDLING_HENLAGT -> {
-                val resultatstype: Behandlingsresultatstype = requireNotNull(behandling.sisteResultat?.type)
-                when (resultatstype) {
+                when (val resultatstype = requireNotNull(behandling.sisteResultat?.type)) {
                     Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> historikkinnslagstype.tekst + resultatstype.navn
-                    else -> {
-                        historikkinnslagstype.tekst + resultatstype.navn + ", Begrunnelse: " + beskrivelse
-                    }
+                    else -> historikkinnslagstype.tekst + resultatstype.navn + ", Begrunnelse: " + beskrivelse
                 }
             }
-            ENDRET_ENHET -> {
-                historikkinnslagstype.tekst + behandling.behandlendeEnhet + ", Begrunnelse: " + beskrivelse
-            }
+            ENDRET_ENHET -> historikkinnslagstype.tekst + behandling.behandlendeEnhet + ", Begrunnelse: " + beskrivelse
             else -> historikkinnslagstype.tekst
         }
     }

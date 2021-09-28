@@ -216,14 +216,13 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         val vilkårsperioder = perioder.map {
             VilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
                                         begrunnelse = "testverdi",
-                                        aktsomhetDto = AktsomhetDto(
-                                                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                                                begrunnelse = "testverdi",
-                                                særligeGrunnerTilReduksjon = false,
-                                                tilbakekrevSmåbeløp = true,
-                                                særligeGrunnerBegrunnelse = "testverdi",
-                                                særligeGrunner = listOf(SærligGrunnDto(særligGrunn = SærligGrunn.ANNET,
-                                                                                       begrunnelse = "testverdi"))),
+                                        aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                                                                    begrunnelse = "testverdi",
+                                                                    særligeGrunnerTilReduksjon = false,
+                                                                    tilbakekrevSmåbeløp = true,
+                                                                    særligeGrunnerBegrunnelse = "testverdi",
+                                                                    særligeGrunner = listOf(SærligGrunnDto(særligGrunn = SærligGrunn.ANNET,
+                                                                                                           begrunnelse = "testverdi"))),
                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))

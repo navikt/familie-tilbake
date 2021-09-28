@@ -101,15 +101,14 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {
         val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        val økonomiXmlMottatt = økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = mottattXml,
-                                                                                     kravstatuskode = Kravstatuskode.NYTT,
-                                                                                     eksternFagsakId = "0",
-                                                                                     ytelsestype = Ytelsestype.BARNETRYGD,
-                                                                                     referanse = "0",
-                                                                                     eksternKravgrunnlagId = BigInteger.ZERO,
-                                                                                     vedtakId = BigInteger.ZERO,
-                                                                                     kontrollfelt = "2021-03-02-18.50.15.236315",
-                                                                                     sperret = false))
-        return økonomiXmlMottatt
+        return økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = mottattXml,
+                                                                    kravstatuskode = Kravstatuskode.NYTT,
+                                                                    eksternFagsakId = "0",
+                                                                    ytelsestype = Ytelsestype.BARNETRYGD,
+                                                                    referanse = "0",
+                                                                    eksternKravgrunnlagId = BigInteger.ZERO,
+                                                                    vedtakId = BigInteger.ZERO,
+                                                                    kontrollfelt = "2021-03-02-18.50.15.236315",
+                                                                    sperret = false))
     }
 }

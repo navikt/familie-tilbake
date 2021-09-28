@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -18,6 +17,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID

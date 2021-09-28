@@ -9,7 +9,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbr
 internal object AvsnittUtil {
 
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
-    const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
+    private const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
 
