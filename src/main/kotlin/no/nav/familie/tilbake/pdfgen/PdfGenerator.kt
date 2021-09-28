@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.Locale
 
 class PdfGenerator {
 
@@ -110,6 +111,6 @@ class PdfGenerator {
     }
 
     private fun hentCss(format: DocFormat): String {
-        return FileStructureUtil.readResourceAsString("formats/" + format.name.toLowerCase() + "/style.css")
+        return FileStructureUtil.readResourceAsString("formats/" + format.name.lowercase(Locale.getDefault()) + "/style.css")
     }
 }

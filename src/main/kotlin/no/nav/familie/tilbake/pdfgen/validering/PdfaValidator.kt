@@ -12,7 +12,7 @@ import java.io.IOException
 import java.io.InputStream
 
 /**
- * bruker VeraPDF for å validere at produsert pdf er gyldig PDFA og dermed egnet for arkivering
+ * Bruker VeraPDF for å validere at produsert pdf er gyldig PDFA og dermed egnet for arkivering
  *
  *
  * For dokumentasjon, se https://docs.verapdf.org/develop/

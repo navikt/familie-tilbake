@@ -77,7 +77,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     }
 
 
-
     private lateinit var tilgangAdvice: TilgangAdvice
 
     @Autowired
@@ -85,6 +84,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -96,7 +96,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        tilgangAdvice = TilgangAdvice(rolleConfig, behandlingRepository,fagsakRepository, mockIntegrasjonerClient)
+        tilgangAdvice = TilgangAdvice(rolleConfig, behandlingRepository, fagsakRepository, mockIntegrasjonerClient)
 
     }
 

@@ -54,6 +54,7 @@ class FilMapperTest {
     companion object {
 
         private const val FORVENTET_HEADER =
-                "avsender;vedtakId;fnr;vedtaksdato;fagsakYtelseType;tilbakekrevesBruttoUtenRenter;skatt;tilbakekrevesNettoUtenRenter;renter;erOmgjøringTilIngenTilbakekreving\n"
+                "avsender;vedtakId;fnr;vedtaksdato;fagsakYtelseType;tilbakekrevesBruttoUtenRenter;skatt;" +
+                "tilbakekrevesNettoUtenRenter;renter;erOmgjøringTilIngenTilbakekreving\n"
     }
 }

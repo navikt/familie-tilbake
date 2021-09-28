@@ -94,9 +94,10 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
         if (harAlledeMottattForespørselen) {
             return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
-                                                                  "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom " +
-                                                                  "den ikke dukker opp, ta kontakt brukerstøtte for å rapportere feilen.")
+                                                        melding = "Det finnes allerede en forespørsel om å opprette " +
+                                                                  "tilbakekrevingsbehandling. Behandlingen vil snart bli " +
+                                                                  "tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
+                                                                  "ta kontakt med brukerstøtte for å rapportere feilen.")
         }
         return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true,
                                                     kravgrunnlagsreferanse = kravgrunnlagsreferanse,

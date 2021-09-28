@@ -35,6 +35,6 @@ class JournalpostController(private val journalføringService: JournalføringSer
                         handling = "Henter journalført dokument",
                         henteParam = "behandlingId")
     fun hentJournalposter(@PathVariable behandlingId: UUID): Ressurs<List<Journalpost>> {
-        return Ressurs.success(journalføringService.hentJournalposter(behandlingId));
+        return Ressurs.success(journalføringService.hentJournalposter(behandlingId))
     }
 }

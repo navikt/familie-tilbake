@@ -24,7 +24,7 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
         val behandlingId: UUID = UUID.fromString(task.payload)
         val historikkinnslagstype =
                 TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
-        val aktør = Aktør.valueOf(task.metadata.getProperty("aktor"))
+        val aktør = Aktør.valueOf(task.metadata.getProperty("aktør"))
         val opprettetTidspunkt = LocalDateTime.parse(task.metadata.getProperty("opprettetTidspunkt"))
         val beskrivelse = task.metadata.getProperty("beskrivelse")
 

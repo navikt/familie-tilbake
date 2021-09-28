@@ -74,7 +74,7 @@ class TilbakekrevingsberegningService(private val kravgrunnlagRepository: Kravgr
     }
 
     fun beregnBeløp(behandlingId: UUID, perioder: List<PeriodeDto>): BeregnetPerioderDto {
-        // alle familie ytelsene er månedsytelser. Så periode som skal lagres bør innenfor en måned
+        // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned.
         KravgrunnlagsberegningService.validatePerioder(perioder)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 

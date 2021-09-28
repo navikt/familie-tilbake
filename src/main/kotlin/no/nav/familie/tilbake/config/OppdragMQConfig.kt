@@ -33,6 +33,7 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
                       val environment: Environment) {
 
     private val logger = LoggerFactory.getLogger(OppdragMQConfig::class.java)
+
     @Bean
     @Throws(JMSException::class)
     fun mqQueueConnectionFactory(): PooledConnectionFactory {

@@ -124,7 +124,7 @@ class VedtaksoppsummeringService(private val behandlingRepository: BehandlingRep
     }
 
     private fun hentSærligGrunner(periodeEntitet: Vilkårsvurderingsperiode): SærligeGrunner? {
-        if (periodeEntitet.aktsomhet?.vilkårsvurderingSærligeGrunner?.isNullOrEmpty() == false) {
+        if (periodeEntitet.aktsomhet?.vilkårsvurderingSærligeGrunner?.isEmpty() == false) {
             val særligeGrunner =
                     periodeEntitet.aktsomhet.vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
             return SærligeGrunner(periodeEntitet.aktsomhet.særligeGrunnerTilReduksjon, særligeGrunner)

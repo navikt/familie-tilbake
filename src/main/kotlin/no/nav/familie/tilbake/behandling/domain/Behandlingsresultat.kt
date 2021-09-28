@@ -53,8 +53,7 @@ data class Behandlingsvedtak(@Id
 enum class Iverksettingsstatus {
     IKKE_IVERKSATT,
     UNDER_IVERKSETTING,
-    IVERKSATT,
-    UDEFINERT
+    IVERKSATT
 }
 
 

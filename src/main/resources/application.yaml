@@ -17,6 +17,8 @@ spring:
     allow-bean-definition-overriding: true
   flyway:
     enabled: true
+    placeholders:
+      ignoreIfProd:
   datasource:
     hikari:
       maximum-pool-size: 2

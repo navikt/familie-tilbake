@@ -72,7 +72,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         assertEquals(LagHistorikkinnslagTask.TYPE, historikkTask.type)
         assertEquals(behandlingId.toString(), historikkTask.payload)
         val taskProperty = historikkTask.metadata
-        assertEquals(Aktør.VEDTAKSLØSNING.name, taskProperty["aktor"])
+        assertEquals(Aktør.VEDTAKSLØSNING.name, taskProperty["aktør"])
         assertEquals(TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name, taskProperty["historikkinnslagstype"])
     }
 }

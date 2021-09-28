@@ -187,7 +187,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
-                          "og data ${journalposterForBrukerRequest}")
+                          "og data $journalposterForBrukerRequest")
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }

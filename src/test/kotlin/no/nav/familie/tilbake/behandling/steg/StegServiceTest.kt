@@ -795,7 +795,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktor"] &&
+                aktør.name == it.metadata["aktør"] &&
                 behandlingId.toString() == it.payload
             }
         }

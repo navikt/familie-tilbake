@@ -9,11 +9,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -129,7 +129,9 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT, Aktør.VEDTAKSLØSNING)
     }
 
-    private fun opprettTask(behandlingId: UUID, brevtype: Brevtype, ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN): Task {
+    private fun opprettTask(behandlingId: UUID,
+                            brevtype: Brevtype,
+                            ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN): Task {
         return Task(type = LagreBrevsporingTask.TYPE,
                     payload = behandlingId.toString(),
                     properties = Properties().apply {
@@ -149,15 +151,13 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertEquals(journalpostId, brevsporing.journalpostId)
     }
 
-    private fun assertHistorikkTask(
-            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-            aktør: Aktør,
-    ) {
+    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+                                    aktør: Aktør) {
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktor"] &&
+                aktør.name == it.metadata["aktør"] &&
                 behandlingId.toString() == it.payload
             }
         }

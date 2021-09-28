@@ -39,6 +39,7 @@ data class HbVedtaksbrevFelles(val brevmetadata: Brevmetadata,
 
     @Suppress("unused") // Handlebars
     val skattepliktig = Ytelsestype.OVERGANGSSTØNAD == brevmetadata.ytelsestype
+
     @Suppress("unused") // Handlebars
     val isSkalIkkeViseSkatt = Ytelsestype.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
 

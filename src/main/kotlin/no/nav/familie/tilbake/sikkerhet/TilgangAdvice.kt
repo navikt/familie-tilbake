@@ -90,7 +90,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
 
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(),handling = handling)
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
             }
             fagsystemParam -> {
                 val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.first().toString())
@@ -214,7 +214,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                              handling: String) {
 
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
-        if (tilganger.any{ !it.harTilgang }) {
+        if (tilganger.any { !it.harTilgang }) {
             throw Feil(message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",
                        frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til person i $handling",
                        httpStatus = HttpStatus.FORBIDDEN)

@@ -22,7 +22,7 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
-    val datoerHvisSammenhengendePeriode: Handlebarsperiode? = if (feilutbetaltePerioder.size == 1) {
+    private val datoerHvisSammenhengendePeriode: Handlebarsperiode? = if (feilutbetaltePerioder.size == 1) {
         Handlebarsperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
     } else null
 

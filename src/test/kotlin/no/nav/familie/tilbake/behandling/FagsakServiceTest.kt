@@ -140,8 +140,9 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
         assertFalse { respons.kanBehandlingOpprettes }
         assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. Behandlingen vil snart " +
-                     "bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, ta kontakt brukerstøtte for å rapportere feilen.",
+        assertEquals("Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
+                     "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
+                     "ta kontakt med brukerstøtte for å rapportere feilen.",
                      respons.melding)
     }
 

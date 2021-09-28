@@ -150,7 +150,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `onCompletion skal opprette task for å håndtere gammel kravgrunnlag`() {
-        assertDoesNotThrow { hentFagsystemsbehandlingTask.onCompletion( lagTask()) }
+        assertDoesNotThrow { hentFagsystemsbehandlingTask.onCompletion(lagTask()) }
 
         assertTrue {
             taskRepository.findByStatus(Status.UBEHANDLET).any {
