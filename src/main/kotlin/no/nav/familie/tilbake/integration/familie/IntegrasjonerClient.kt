@@ -133,6 +133,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         return try {
             getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).data == true
         } catch (e: Exception) {
+            log.error("Organisasjonsnummeret $organisasjonsnummer er ikke gyldig. Feiler med ${e.message}")
             false
         }
     }
