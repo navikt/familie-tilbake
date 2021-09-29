@@ -94,7 +94,10 @@ class IntegrasjonerClientConfig {
                                             dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
                                                                              tittel = "Dokument 5.1")))))
 
-        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321", "Bobs Burgers")
+        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321",
+                                                                                   "Bobs Burgers")
+
+        every { integrasjonerClient.validerOrganisasjon(any()) } returns true
 
         every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(),
                                                                                      "bb1234",

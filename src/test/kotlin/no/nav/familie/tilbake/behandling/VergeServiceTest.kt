@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Applikasjon
@@ -14,10 +15,13 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.integration.pdl.PdlClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,9 +48,16 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
+    @Autowired
+    private lateinit var integrasjonerClient: IntegrasjonerClient
+
+    @Autowired
+    private lateinit var pdlClient: PdlClient
+
     private lateinit var vergeService: VergeService
 
     private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
+
 
     private val vergeDto = VergeDto(orgNr = "987654321",
                                     type = Vergetype.ADVOKAT,
@@ -57,7 +68,12 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     fun setUp() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        vergeService = VergeService(behandlingRepository, historikkTaskService, behandlingskontrollService)
+        vergeService = VergeService(behandlingRepository,
+                                    fagsakRepository,
+                                    historikkTaskService,
+                                    behandlingskontrollService,
+                                    integrasjonerClient,
+                                    pdlClient)
     }
 
     @Test
@@ -97,6 +113,53 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
                                                   Aktør.SAKSBEHANDLER)
         }
+    }
+
+    @Test
+    fun `lagreVerge skal ikke lagre verge når organisasjonen er tom`() {
+        val vergeDto = vergeDto.copy(orgNr = null, ident = "123")
+        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        assertEquals("orgNr kan ikke være null for ${Vergetype.ADVOKAT}", exception.message)
+    }
+
+    @Test
+    fun `lagreVerge skal ikke lagre verge når organisasjonen ikke er gyldig`() {
+        val mockIntegrasjonerClient = mockk<IntegrasjonerClient>()
+        val vergeService = VergeService(behandlingRepository,
+                                        fagsakRepository,
+                                        historikkTaskService,
+                                        behandlingskontrollService,
+                                        mockIntegrasjonerClient,
+                                        pdlClient)
+
+        every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
+
+        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        assertEquals("Organisasjon ${vergeDto.orgNr} er ikke gyldig", exception.message)
+    }
+
+    @Test
+    fun `lagreVerge skal ikke lagre verge når ident er tom`() {
+        val vergeDto = vergeDto.copy(type = Vergetype.VERGE_FOR_BARN)
+        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        assertEquals("ident kan ikke være null for ${vergeDto.type}", exception.message)
+    }
+
+    @Test
+    fun `lagreVerge skal ikke lagre verge når personen ikke finnes i PDL`() {
+        val mockPdlClient = mockk<PdlClient>()
+        val vergeService = VergeService(behandlingRepository,
+                                        fagsakRepository,
+                                        historikkTaskService,
+                                        behandlingskontrollService,
+                                        integrasjonerClient,
+                                        mockPdlClient)
+
+        every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
+
+        val vergeDto = VergeDto(ident = "123", type = Vergetype.VERGE_FOR_BARN, navn = "testverdi", begrunnelse = "testverdi")
+        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        assertEquals("Feil ved oppslag på person", exception.message)
     }
 
     @Test
