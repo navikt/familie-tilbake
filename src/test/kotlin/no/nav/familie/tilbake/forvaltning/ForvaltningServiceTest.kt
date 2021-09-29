@@ -5,6 +5,11 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -17,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
+import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -40,6 +46,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository
 
     @Autowired
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
     private lateinit var forvaltningService: ForvaltningService
 
     private val behandling = Testdata.behandling
@@ -48,6 +57,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
+        behandlingsstegstilstandRepository
+                .insert(Behandlingsstegstilstand(behandlingId = behandling.id,
+                                                 behandlingssteg = Behandlingssteg.GRUNNLAG,
+                                                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                                                 tidsfrist = LocalDate.now().plusWeeks(3),
+                                                 venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG))
     }
 
     @Test
@@ -74,6 +89,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
         assertEquals(2, kravgrunnlagene.size)
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
     @Test
@@ -84,6 +103,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
         assertEquals(1, kravgrunnlagene.size)
         assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
 
@@ -110,5 +133,16 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                                                                     vedtakId = BigInteger.ZERO,
                                                                     kontrollfelt = "2021-03-02-18.50.15.236315",
                                                                     sperret = false))
+    }
+
+    private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+                                      behandlingssteg: Behandlingssteg,
+                                      behandlingsstegstatus: Behandlingsstegstatus) {
+        assertTrue {
+            behandlingsstegstilstand.any {
+                behandlingssteg == it.behandlingssteg &&
+                behandlingsstegstatus == it.behandlingsstegsstatus
+            }
+        }
     }
 }
