@@ -12,7 +12,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = FerdigstillOppgaveTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Ferdigstiller oppgave for behandling",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)

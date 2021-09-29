@@ -12,7 +12,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = LagreVarselbrevsporingTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer varselbrev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class LagreVarselbrevsporingTask(private val varselService: VarselService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)

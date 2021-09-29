@@ -13,7 +13,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = SendVarselbrevTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Sender varselbrev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 

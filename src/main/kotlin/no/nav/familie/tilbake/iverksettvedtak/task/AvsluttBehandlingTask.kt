@@ -23,7 +23,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(taskStepType = AvsluttBehandlingTask.TYPE,
                      beskrivelse = "Avslutter behandling",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class AvsluttBehandlingTask(private val behandlingRepository: BehandlingRepository,
                             private val behandlingskontrollService: BehandlingskontrollService,
                             private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {

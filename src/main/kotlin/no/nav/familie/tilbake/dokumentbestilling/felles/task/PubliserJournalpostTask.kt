@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(taskStepType = PubliserJournalpostTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Publiserer journalpost",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClient,
                               private val taskService: TaskService) : AsyncTaskStep {
 

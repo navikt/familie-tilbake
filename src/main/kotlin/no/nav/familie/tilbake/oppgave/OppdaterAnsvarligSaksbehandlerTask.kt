@@ -13,7 +13,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = OppdaterAnsvarligSaksbehandlerTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Oppdaterer saksbehandler på oppgave",
-                     triggerTidVedFeilISekunder = 300)
+                     triggerTidVedFeilISekunder = 300L)
 class OppdaterAnsvarligSaksbehandlerTask(private val oppgaveService: OppgaveService,
                                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 

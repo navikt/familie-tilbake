@@ -22,7 +22,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(taskStepType = InnhentDokumentasjonbrevTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Sender innhent dokumentasjonsbrev",
-                     triggerTidVedFeilISekunder = 60 * 5)
+                     triggerTidVedFeilISekunder = 60 * 5L)
 class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingRepository,
                                    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
                                    private val behandlingskontrollService: BehandlingskontrollService,
