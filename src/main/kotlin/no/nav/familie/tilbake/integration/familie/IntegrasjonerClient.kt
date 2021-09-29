@@ -130,7 +130,11 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun validerOrganisasjon(organisasjonsnummer: String): Boolean {
-        return getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
+        return try {
+            getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).data == true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun hentSaksbehandler(id: String): Saksbehandler {
