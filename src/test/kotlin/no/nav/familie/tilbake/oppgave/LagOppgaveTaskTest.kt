@@ -53,7 +53,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     private val beskrivelseSlot = slot<String>()
     private val fristForFerdigstillelse = slot<LocalDate>()
 
-    private val dagensdato = LocalDate.now()
+    private val dagensDato = LocalDate.now()
 
     @BeforeEach
     fun init() {
@@ -75,12 +75,13 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
             spykOppgaveService.opprettOppgave(capture(behandlingSlot),
                                               capture(oppgavetypeSlot),
                                               capture(beskrivelseSlot),
-                                              capture(fristForFerdigstillelse))
+                                              capture(fristForFerdigstillelse),
+                                              isNull())
         }
         assertEquals(behandling.id, behandlingSlot.captured)
         assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
         assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse, beskrivelseSlot.captured)
-        assertEquals(dagensdato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker),
+        assertEquals(dagensDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker),
                      fristForFerdigstillelse.captured)
     }
 
@@ -96,12 +97,13 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
             spykOppgaveService.opprettOppgave(capture(behandlingSlot),
                                               capture(oppgavetypeSlot),
                                               capture(beskrivelseSlot),
-                                              capture(fristForFerdigstillelse))
+                                              capture(fristForFerdigstillelse),
+                                              isNull())
         }
         assertEquals(behandling.id, behandlingSlot.captured)
         assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
         assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse, beskrivelseSlot.captured)
-        assertEquals(dagensdato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
+        assertEquals(dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
                      fristForFerdigstillelse.captured)
     }
 
@@ -115,11 +117,12 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
             spykOppgaveService.opprettOppgave(capture(behandlingSlot),
                                               capture(oppgavetypeSlot),
                                               isNull(),
-                                              capture(fristForFerdigstillelse))
+                                              capture(fristForFerdigstillelse),
+                                              isNull())
         }
         assertEquals(behandling.id, behandlingSlot.captured)
         assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
-        assertEquals(dagensdato, fristForFerdigstillelse.captured)
+        assertEquals(dagensDato, fristForFerdigstillelse.captured)
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
@@ -130,7 +133,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                                                                            behandlingsstegsstatus = behandlingsstegsstatus,
                                                                            venteårsak = venteårsak,
                                                                            tidsfrist = venteårsak?.let {
-                                                                               dagensdato.plusWeeks(it.defaultVenteTidIUker)
+                                                                               dagensDato.plusWeeks(it.defaultVenteTidIUker)
                                                                            }))
     }
 

@@ -68,7 +68,8 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
                        beskrivelse: String?,
-                       fristForFerdigstillelse: LocalDate): OppgaveResponse {
+                       fristForFerdigstillelse: LocalDate,
+                       saksbehandler: String?): OppgaveResponse {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
@@ -88,6 +89,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                                                                                  fagsak.fagsystem.name,
                                                                                  beskrivelse),
                                                    enhetsnummer = behandling.behandlendeEnhet,
+                                                   tilordnetRessurs = saksbehandler,
                                                    behandlingstype = Behandlingstype.Tilbakekreving.value,
                                                    behandlingstema = null)
 
