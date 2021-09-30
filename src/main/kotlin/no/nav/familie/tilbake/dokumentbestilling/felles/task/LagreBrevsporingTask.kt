@@ -84,7 +84,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         return when {
             brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
             brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
-            ansvarligSaksbehandler != null && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
+            !ansvarligSaksbehandler.isNullOrEmpty() && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
                 Aktør.SAKSBEHANDLER
             else -> Aktør.VEDTAKSLØSNING
         }
