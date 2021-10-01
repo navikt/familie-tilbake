@@ -159,18 +159,6 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
                                                         HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 
-    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): OppgaveResponse {
-        val baseUri = URI.create(integrasjonerConfig.integrasjonUri.toString()
-                                 + "${IntegrasjonerConfig.PATH_OPPGAVE}/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null)
-            baseUri
-        else
-            UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
-
-        return postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
-
-    }
-
     fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
 
         val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()

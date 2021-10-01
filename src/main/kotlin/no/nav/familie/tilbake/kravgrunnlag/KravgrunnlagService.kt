@@ -70,7 +70,6 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
 
         //oppdater frist på oppgave
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               oppgavetype = Oppgavetype.BehandleSak,
                                                beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
                                                frist = LocalDate.now())
 

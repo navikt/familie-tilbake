@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -427,8 +426,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.FATTER_VEDTAK)
         assertFaktadata(behandlingsstegFaktaDto)
 
-        assertOppgave(Oppgavetype.BehandleSak, FerdigstillOppgaveTask.TYPE)
-        assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
+        assertOppgave(LagOppgaveTask.TYPE)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TIL_BESLUTTER, Aktør.SAKSBEHANDLER)
@@ -451,7 +450,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                 faktaAvsnitt = "fakta tekst")))
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
+        assertOppgave(LagOppgaveTask.TYPE)
+
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = false))
+
+        assertOppgave(FerdigstillOppgaveTask.TYPE, 2)
+        assertOppgave(LagOppgaveTask.TYPE, 2)
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -459,8 +464,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
-        assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, FerdigstillOppgaveTask.TYPE)
-        assertOppgave(Oppgavetype.GodkjenneVedtak, LagOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE, 3)
+        assertOppgave(LagOppgaveTask.TYPE, 3)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER, Aktør.BESLUTTER)
     }
@@ -491,7 +496,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent } }
 
-        assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -528,8 +533,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent } }
         assertTrue { totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent } }
 
-        assertOppgave(Oppgavetype.GodkjenneVedtak, FerdigstillOppgaveTask.TYPE)
-        assertOppgave(Oppgavetype.BehandleUnderkjentVedtak, LagOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
+        assertOppgave(LagOppgaveTask.TYPE)
     }
 
     @Test
@@ -778,15 +783,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertEquals("Z0000", behandling.ansvarligBeslutter)
     }
 
-    private fun assertOppgave(oppgavetype: Oppgavetype, tasktype: String) {
+    private fun assertOppgave(tasktype: String, forventet: Int = 1) {
         val taskene = taskRepository.findByStatusIn(status = listOf(Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
                                                                     Status.BEHANDLER, Status.FERDIG), page = Pageable.unpaged())
-        assertTrue {
-            taskene.any {
-                oppgavetype.name == it.metadata.getProperty("oppgavetype") &&
-                tasktype == it.type
-            }
-        }
+                .filter { tasktype == it.type }
+
+        assertEquals(forventet, taskene.size)
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
