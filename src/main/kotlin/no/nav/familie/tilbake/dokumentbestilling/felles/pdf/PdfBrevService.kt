@@ -58,7 +58,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
             setProperty("dokumentId", dokumentreferanse.dokumentId)
             setProperty("mottager", brevdata.mottager.name)
             setProperty("brevtype", brevtype.name)
-            setProperty("ansvarligSaksbehandler", brevdata.metadata.ansvarligSaksbehandler)
+            setProperty("ansvarligSaksbehandler", behandling.ansvarligSaksbehandler)
             varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
             fritekst?.also { setProperty("fritekst", fritekst) }
             brevdata.tittel?.also { setProperty("tittel", it) }
