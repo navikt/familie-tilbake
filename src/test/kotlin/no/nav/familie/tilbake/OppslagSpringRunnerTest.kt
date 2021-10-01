@@ -4,12 +4,18 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskLogg
+import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
+import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
+import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.database.DbContainerInitializer
@@ -32,6 +38,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,15 +58,24 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
+@EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
     private val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
 
-    @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
-    @Autowired private lateinit var applicationContext: ApplicationContext
-    @Autowired private lateinit var cacheManager: CacheManager
+    @Autowired
+    private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+
+    @Autowired
+    private lateinit var applicationContext: ApplicationContext
+
+    @Autowired
+    private lateinit var cacheManager: CacheManager
+
+    @Autowired
+    private lateinit var server: MockOAuth2Server
 
     @LocalServerPort
     private var port: Int? = 0
@@ -92,6 +109,8 @@ abstract class OppslagSpringRunnerTest {
                Fagsystemsbehandling::class,
                Fagsystemskonsekvens::class,
                Behandlingsstegstilstand::class,
+               Behandlingsresultat::class,
+               Behandlingsvedtak::class,
                Totrinnsvurdering::class,
                VurdertForeldelse::class,
                Foreldelsesperiode::class,
@@ -110,10 +129,14 @@ abstract class OppslagSpringRunnerTest {
                Vedtaksbrevsperiode::class,
                ØkonomiXmlSendt::class,
                Varsel::class,
+               Varselsperiode::class,
                Brevsporing::class,
                ØkonomiXmlMottattArkiv::class,
                Verge::class,
-               Task::class)
+               Avstemmingsfil::class,
+               HentFagsystemsbehandlingRequestSendt::class,
+               Task::class,
+               TaskLogg::class)
                 .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
