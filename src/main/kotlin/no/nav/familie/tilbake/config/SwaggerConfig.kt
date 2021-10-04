@@ -21,12 +21,12 @@ class SwaggerConfig {
     @Bean
     fun oppdragApi(): Docket {
         return Docket(DocumentationType.SWAGGER_2)
-                .securitySchemes(securitySchemes())
-                .securityContexts(securityContext())
-                .apiInfo(apiInfo()).select()
-                .apis(RequestHandlerSelectors.basePackage("no.nav.familie.tilbake"))
-                .paths(PathSelectors.any())
-                .build()
+            .securitySchemes(securitySchemes())
+            .securityContexts(securityContext())
+            .apiInfo(apiInfo()).select()
+            .apis(RequestHandlerSelectors.basePackage("no.nav.familie.tilbake"))
+            .paths(PathSelectors.any())
+            .build()
     }
 
     private fun securitySchemes(): List<ApiKey> {
@@ -35,9 +35,11 @@ class SwaggerConfig {
 
     private fun securityContext(): List<SecurityContext> {
         return listOf(SecurityContext.builder()
-                              .securityReferences(defaultAuth())
-                              .forPaths(PathSelectors.regex("/api.*"))
-                              .build())
+                          .securityReferences(defaultAuth())
+                          .operationSelector {
+                              it.requestMappingPattern().startsWith("/api")
+                          }
+                          .build())
     }
 
     private fun defaultAuth(): List<SecurityReference> {
