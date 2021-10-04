@@ -84,7 +84,7 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
         oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
     }
 

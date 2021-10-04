@@ -46,7 +46,7 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
 
         // step3: lukk Godkjenne vedtak oppgaver
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
 
         // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }

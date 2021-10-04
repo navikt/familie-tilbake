@@ -185,10 +185,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG -> "Ny frist satt på bakgrunn av mottatt kravgrunnlag fra økonomi"
             else -> "Frist er oppdatert av saksbehandler ${ContextService.hentSaksbehandler()}"
         }
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
-                                               Oppgavetype.BehandleSak,
-                                               beskrivelse,
-                                               behandlingPåVentDto.tidsfrist)
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, beskrivelse, behandlingPåVentDto.tidsfrist)
     }
 
     @Transactional
@@ -209,10 +206,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         stegService.gjenopptaSteg(behandlingId)
 
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
-                                               Oppgavetype.BehandleSak,
-                                               "Behandling er tatt av vent",
-                                               LocalDate.now())
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
     }
 
     @Transactional
@@ -254,7 +248,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         // Ferdigstill oppgave
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.BehandleSak)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 

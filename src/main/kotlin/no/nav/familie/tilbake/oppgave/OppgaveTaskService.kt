@@ -23,21 +23,19 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
     }
 
     @Transactional
-    fun ferdigstilleOppgaveTask(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    fun ferdigstilleOppgaveTask(behandlingId: UUID, oppgavetype: String? = null) {
         val properties = Properties()
-        properties.setProperty("oppgavetype", oppgavetype.name)
+        if (!oppgavetype.isNullOrEmpty()) {
+            properties.setProperty("oppgavetype", oppgavetype)
+        }
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
     }
 
     @Transactional
-    fun oppdaterOppgaveTask(behandlingId: UUID,
-                            oppgavetype: Oppgavetype,
-                            beskrivelse: String,
-                            frist: LocalDate) {
+    fun oppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate) {
         val properties = Properties().apply {
-            setProperty("oppgavetype", oppgavetype.name)
             setProperty("beskrivelse", beskrivelse)
             setProperty("frist", frist.toString())
         }
@@ -61,9 +59,7 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
     fun oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId: UUID) {
-        val properties = Properties().apply {
-            setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
-        }
+        val properties = Properties()
         taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
