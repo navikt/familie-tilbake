@@ -5,9 +5,11 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -26,6 +28,12 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
+            log.info("Behandlingen $behandlingId ble saksbehandlet automatisk, sender ikke vedtaksbrev")
+            taskService.save(Task(type = AvsluttBehandlingTask.TYPE,
+                                  payload = task.payload))
+            return
+        }
         if (behandling.harVerge) {
             vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
         }

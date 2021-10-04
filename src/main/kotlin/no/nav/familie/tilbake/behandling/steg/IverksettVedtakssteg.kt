@@ -31,6 +31,11 @@ class IverksettVedtakssteg(private val behandlingsvedtakService: Behandlingsvedt
 
     }
 
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.IVERKSETT_VEDTAK} steg og behandler automatisk..")
+        utførSteg(behandlingId)
+    }
+
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.IVERKSETT_VEDTAK
     }

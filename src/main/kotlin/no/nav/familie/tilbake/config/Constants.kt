@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period
 
@@ -27,6 +29,18 @@ object Constants {
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
+
+    val MAKS_FEILUTBETALTBELØP_PER_YTELSE =
+            mapOf<Ytelsestype, BigDecimal>(Ytelsestype.BARNETRYGD to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
+                                           Ytelsestype.BARNETILSYN to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
+                                           Ytelsestype.OVERGANGSSTØNAD to BigDecimal.valueOf(rettsgebyr)
+                                                   .multiply(BigDecimal(0.5)),
+                                           Ytelsestype.SKOLEPENGER to BigDecimal.valueOf(rettsgebyr)
+                                                   .multiply(BigDecimal(0.5)),
+                                           Ytelsestype.KONTANTSTØTTE to BigDecimal.valueOf(rettsgebyr)
+                                                   .multiply(BigDecimal(0.5)))
+
+    const val AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE = "Automatisk satt verdi"
 
 }
 

@@ -15,4 +15,6 @@ interface BrevsporingRepository : RepositoryInterface<Brevsporing, UUID>, Insert
     fun findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, brevtype: Brevtype): Brevsporing?
 
     fun existsByBehandlingIdAndBrevtypeIn(behandlingId: UUID, brevtype: Set<Brevtype>): Boolean
+
+    fun existsByBehandlingId(behandlingId: UUID): Boolean
 }

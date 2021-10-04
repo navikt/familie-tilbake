@@ -199,7 +199,7 @@ class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagReposito
             utbetalesTilId = eksisterendeKravgrunnlag?.utbetalesTilId ?: "1234"
             typeUtbetId = TypeGjelderDto.PERSON
             kontrollfelt = eksisterendeKravgrunnlag?.kontrollfelt ?: LocalDateTime.now()
-                    .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSS"))
+                    .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS"))
             referanse = eksisterendeKravgrunnlag?.referanse ?: "0"
             tilbakekrevingsPeriode.addAll(mapPeriode(eksisterendeKravgrunnlag?.perioder!!))
         }

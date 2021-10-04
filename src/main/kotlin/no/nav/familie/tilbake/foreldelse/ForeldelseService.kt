@@ -1,10 +1,13 @@
 package no.nav.familie.tilbake.foreldelse
 
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
+import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
@@ -43,6 +46,16 @@ class ForeldelseService(val foreldelseRepository: VurdertForeldelseRepository,
         deaktiverEksisterendeVurdertForeldelse(behandlingId)
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId,
                                                                behandlingsstegForeldelseDto.foreldetPerioder))
+    }
+
+    @Transactional
+    fun lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId: UUID) {
+        val foreldetPerioder = hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
+            ForeldelsesperiodeDto(periode = it.periode,
+                                  begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                                  foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET)
+        }
+        foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId, foreldetPerioder))
     }
 
     @Transactional

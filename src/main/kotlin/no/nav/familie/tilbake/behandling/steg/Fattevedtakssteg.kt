@@ -74,6 +74,22 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
     }
 
     @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg og behandler automatisk..")
+        totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
+        totrinnService.lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId)
+
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
+                                                                                      Behandlingsstegstatus.UTFØRT))
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
+                                              Aktør.BESLUTTER)
+        behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
+        behandlingskontrollService.fortsettBehandling(behandlingId)
+    }
+
+    @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,

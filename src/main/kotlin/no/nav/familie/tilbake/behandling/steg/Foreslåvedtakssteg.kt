@@ -59,6 +59,24 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
     }
 
     @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
+                                              Aktør.VEDTAKSLØSNING)
+        flyttBehandlingVidere(behandlingId)
+
+        // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
+        håndterOppgave(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
+                                              aktør = Aktør.VEDTAKSLØSNING,
+                                              triggerTid = LocalDateTime.now().plusSeconds(2))
+    }
+
+    @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,

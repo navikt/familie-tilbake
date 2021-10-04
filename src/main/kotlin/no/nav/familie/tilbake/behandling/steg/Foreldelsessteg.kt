@@ -57,6 +57,22 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     }
 
     @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
+        if (!harGrunnlagForeldetPeriode(behandlingId)) {
+            utførSteg(behandlingId)
+            return
+        }
+        foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
+        lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FORELDELSE,
+                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.fortsettBehandling(behandlingId)
+    }
+
+    @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
