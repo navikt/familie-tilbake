@@ -22,8 +22,6 @@ class AutomatiskSaksbehandlingTask(private val automatiskSaksbehandlingService: 
         automatiskSaksbehandlingService.oppdaterBehandling(behandlingId)
 
         automatiskSaksbehandlingService.behandleAutomatisk(behandlingId)
-
-        automatiskSaksbehandlingService.ferdigStilleOppgave(behandlingId)
     }
 
     companion object {

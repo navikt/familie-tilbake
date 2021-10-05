@@ -55,11 +55,6 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
         stegService.håndterStegAutomatisk(behandlingId)
     }
 
-    @Transactional
-    fun ferdigStilleOppgave(behandlingId: UUID) {
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
-    }
-
     companion object {
 
         val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 1,

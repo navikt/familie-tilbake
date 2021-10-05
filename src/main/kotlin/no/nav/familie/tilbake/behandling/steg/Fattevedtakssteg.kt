@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -45,8 +46,11 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         val fatteVedtaksstegDto = behandlingsstegDto as BehandlingsstegFatteVedtaksstegDto
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
 
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // step3: lukk Godkjenne vedtak oppgaver
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+        }
 
         // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
@@ -56,7 +60,6 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                                                   Aktør.BESLUTTER)
-            val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
             oppgaveTaskService.opprettOppgaveTask(behandlingId,
                                                   Oppgavetype.BehandleUnderkjentVedtak,
                                                   behandling.ansvarligSaksbehandler)
