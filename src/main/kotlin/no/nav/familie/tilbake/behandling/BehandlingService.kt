@@ -33,6 +33,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -259,7 +260,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
 
         //oppdater saksbehandler på oppgaven også hvis det er ny saksbehandler som behandler saken
-        if (gammelSaksbehandler != ContextService.hentSaksbehandler()) {
+        if (gammelSaksbehandler != ContextService.hentSaksbehandler()
+            && ContextService.hentSaksbehandler() != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         }
     }
