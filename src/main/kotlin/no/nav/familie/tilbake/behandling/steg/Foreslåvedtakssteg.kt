@@ -4,10 +4,13 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -22,7 +25,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollService,
+class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
+                         val behandlingskontrollService: BehandlingskontrollService,
                          val vedtaksbrevService: VedtaksbrevService,
                          val oppgaveTaskService: OppgaveTaskService,
                          val totrinnService: TotrinnService,
@@ -59,6 +63,24 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
     }
 
     @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
+                                              Aktør.VEDTAKSLØSNING)
+        flyttBehandlingVidere(behandlingId)
+
+        // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
+        håndterOppgave(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
+                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
+                                              aktør = Aktør.VEDTAKSLØSNING,
+                                              triggerTid = LocalDateTime.now().plusSeconds(2))
+    }
+
+    @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
@@ -85,7 +107,11 @@ class Foreslåvedtakssteg(val behandlingskontrollService: BehandlingskontrollSer
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
-        oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR){
+            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+        }
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

@@ -15,6 +15,10 @@ interface IBehandlingssteg {
         throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
     }
 
+    fun utførStegAutomatisk(behandlingId: UUID) {
+        throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
+    }
+
     fun gjenopptaSteg(behandlingId: UUID) {
         throw Feil(message = "Implementasjon mangler, er i default method implementasjon for $behandlingId")
     }

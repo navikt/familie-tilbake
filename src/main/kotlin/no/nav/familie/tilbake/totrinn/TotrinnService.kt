@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -45,6 +46,18 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
                                                                          godkjent = it.godkjent,
                                                                          begrunnelse = it.begrunnelse))
                 }
+    }
+
+    @Transactional
+    fun lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId: UUID) {
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        val totrinnsvurderinger = behandlingsstegstilstand.filter { it.behandlingssteg.kanBesluttes }.map {
+            Totrinnsvurdering(behandlingId = behandlingId,
+                              behandlingssteg = it.behandlingssteg,
+                              godkjent = true,
+                              begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE)
+        }
+        totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }
     }
 
     fun validerAnsvarligBeslutter(behandlingId: UUID) {

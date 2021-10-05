@@ -5,8 +5,11 @@ import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,6 +46,18 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
         faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandlingId,
                                                                  perioder = feilutbetaltePerioder,
                                                                  begrunnelse = behandlingsstegFaktaDto.begrunnelse))
+    }
+
+    @Transactional
+    fun lagreFastFaktaForAutomatiskSaksbehandling(behandlingId: UUID) {
+        val feilutbetaltePerioder = hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
+            FaktaFeilutbetalingsperiode(periode = Periode(it.periode),
+                                        hendelsestype = Hendelsestype.ANNET,
+                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+        }.toSet()
+        faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandlingId,
+                                                                 perioder = feilutbetaltePerioder,
+                                                                 begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE))
     }
 
     fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {

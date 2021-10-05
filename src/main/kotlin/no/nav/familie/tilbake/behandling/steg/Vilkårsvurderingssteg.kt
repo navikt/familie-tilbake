@@ -64,6 +64,22 @@ class Vilkårsvurderingssteg(val behandlingskontrollService: Behandlingskontroll
     }
 
     @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg og behandler automatisk..")
+        if (harAllePerioderForeldet(behandlingId)) {
+            utførSteg(behandlingId)
+            return
+        }
+
+        vilkårsvurderingService.lagreFastVilkårForAutomatiskSaksbehandling(behandlingId)
+        lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
+        behandlingskontrollService.fortsettBehandling(behandlingId)
+    }
+
+    @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,

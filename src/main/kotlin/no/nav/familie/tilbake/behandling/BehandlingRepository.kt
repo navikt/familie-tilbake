@@ -51,4 +51,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
+
+    // language=PostgreSQL
+    @Query("""
+            SELECT beh.* FROM behandling beh JOIN behandlingsstegstilstand tilstand ON tilstand.behandling_id = beh.id
+            WHERE beh.type='TILBAKEKREVING' AND beh.status='UTREDES' AND
+            tilstand.behandlingssteg='FAKTA' AND tilstand.behandlingsstegsstatus='KLAR'
+    """)
+    fun finnAlleBehandlingerKlarForSaksbehandling(): List<Behandling>
 }
