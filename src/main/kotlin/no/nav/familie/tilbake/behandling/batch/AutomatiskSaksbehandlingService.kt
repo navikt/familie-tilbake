@@ -62,7 +62,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
 
     companion object {
 
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 8,
+        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 1,
                                                            Ytelsestype.BARNETILSYN to 6,
                                                            Ytelsestype.OVERGANGSSTØNAD to 6,
                                                            Ytelsestype.SKOLEPENGER to 6,

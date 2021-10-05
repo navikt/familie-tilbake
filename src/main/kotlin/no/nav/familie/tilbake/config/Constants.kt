@@ -31,7 +31,7 @@ object Constants {
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
 
     val MAKS_FEILUTBETALTBELØP_PER_YTELSE =
-            mapOf<Ytelsestype, BigDecimal>(Ytelsestype.BARNETRYGD to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
+            mapOf<Ytelsestype, BigDecimal>(Ytelsestype.BARNETRYGD to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(1.5)),
                                            Ytelsestype.BARNETILSYN to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
                                            Ytelsestype.OVERGANGSSTØNAD to BigDecimal.valueOf(rettsgebyr)
                                                    .multiply(BigDecimal(0.5)),
