@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -22,8 +21,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       private val fagsakRepository: FagsakRepository,
                                       private val kravgrunnlagRepository: KravgrunnlagRepository,
                                       private val brevsporingRepository: BrevsporingRepository,
-                                      private val stegService: StegService,
-                                      private val oppgaveTaskService: OppgaveTaskService) {
+                                      private val stegService: StegService) {
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<UUID> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
@@ -57,7 +55,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
 
     companion object {
 
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 1,
+        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 8,
                                                            Ytelsestype.BARNETILSYN to 6,
                                                            Ytelsestype.OVERGANGSSTØNAD to 6,
                                                            Ytelsestype.SKOLEPENGER to 6,
