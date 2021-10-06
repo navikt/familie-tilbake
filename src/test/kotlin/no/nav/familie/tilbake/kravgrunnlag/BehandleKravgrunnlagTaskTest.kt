@@ -50,7 +50,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -318,12 +317,12 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                                                                   .IKKE_FORELDET))))
 
         // Håndter Vilkårsvurdering steg
+        val periodeMedGodTro = VilkårsvurderingsperiodeDto(periode,
+                                                           Vilkårsvurderingsresultat.GOD_TRO,
+                                                           "Vilkårs begrunnelse",
+                                                           GodTroDto(begrunnelse = "god tro", beløpErIBehold = false))
         stegService.håndterSteg(behandling.id,
-                                BehandlingsstegVilkårsvurderingDto(listOf(VilkårsvurderingsperiodeDto(periode,
-                                                                                                      Vilkårsvurderingsresultat.GOD_TRO,
-                                                                                                      "Vilkårs begrunnelse",
-                                                                                                      GodTroDto(begrunnelse = "god tro",
-                                                                                                                beløpErIBehold = false)))))
+                                BehandlingsstegVilkårsvurderingDto(listOf(periodeMedGodTro)))
 
         // Håndter Foreslå Vedtak steg
         stegService.håndterSteg(behandling.id,
@@ -622,7 +621,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                                     aktør: Aktør) {
         assertTrue {
-            taskRepository.findByStatusIn(listOf(Status.UBEHANDLET, Status.KLAR_TIL_PLUKK), Pageable.unpaged()).any {
+            taskRepository.findAll().any {
                 LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&
