@@ -114,7 +114,7 @@ internal object TilbakekrevingsberegningVilkår {
     private fun finnAndelForAktsomhet(aktsomhet: VilkårsvurderingAktsomhet): BigDecimal? {
         return if (Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet.aktsomhet && !aktsomhet.tilbakekrevSmåbeløp) {
             BigDecimal.ZERO
-        }else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
+        } else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
             HUNDRE_PROSENT
         } else aktsomhet.andelTilbakekreves
     }
