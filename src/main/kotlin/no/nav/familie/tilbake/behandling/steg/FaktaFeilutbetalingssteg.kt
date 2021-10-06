@@ -39,11 +39,20 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
                                               Aktør.SAKSBEHANDLER)
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(Behandlingssteg.FAKTA,
-                                                                                          Behandlingsstegstatus.UTFØRT))
-            behandlingskontrollService.fortsettBehandling(behandlingId)
+            flyttBehandlingVidere(behandlingId)
         }
+    }
+
+    @Transactional
+    override fun utførStegAutomatisk(behandlingId: UUID) {
+        logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg og behandler automatisk..")
+        faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+                                              Aktør.VEDTAKSLØSNING)
+
+        flyttBehandlingVidere(behandlingId)
     }
 
     @Transactional
@@ -61,5 +70,12 @@ class FaktaFeilutbetalingssteg(val behandlingskontrollService: Behandlingskontro
     @EventListener
     fun deaktiverEksisterendeFaktaOmFeilutbetaling(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
         faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId = endretKravgrunnlagEvent.behandlingId)
+    }
+
+    private fun flyttBehandlingVidere(behandlingId: UUID) {
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
+                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
+                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 }

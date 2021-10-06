@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -62,6 +63,30 @@ class StegService(val steg: List<IBehandlingssteg>,
                                             Behandlingssteg.VILKÅRSVURDERING)) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
         }
+    }
+
+    fun håndterStegAutomatisk(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.erSaksbehandlingAvsluttet) {
+            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
+        }
+        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        val behandledeSteg = aktivtBehandlingssteg.name
+        if (behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
+            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg")
+        }
+        if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
+            throw Feil(message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
+                                 "Kan ikke saksbehandle den automatisk")
+        }
+         while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
+             hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
+             if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
+                 break
+             }
+             aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+         }
+
     }
 
     fun gjenopptaSteg(behandlingId: UUID) {
