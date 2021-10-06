@@ -312,6 +312,7 @@
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring-test</artifactId>
             <version>${nav.security.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.mockk</groupId>
