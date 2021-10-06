@@ -59,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 @EnableMockOAuth2Server
-@Transactional
 abstract class OppslagSpringRunnerTest {
 
     private val listAppender = initLoggingEventListAppender()
@@ -79,6 +78,7 @@ abstract class OppslagSpringRunnerTest {
     private var port: Int? = 0
 
     @AfterEach
+    @Transactional
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
