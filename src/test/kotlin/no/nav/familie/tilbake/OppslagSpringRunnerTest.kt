@@ -38,7 +38,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -52,6 +51,7 @@ import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.transaction.annotation.Transactional
 
 
 @ExtendWith(SpringExtension::class)
@@ -74,13 +74,11 @@ abstract class OppslagSpringRunnerTest {
     @Autowired
     private lateinit var cacheManager: CacheManager
 
-    @Autowired
-    private lateinit var server: MockOAuth2Server
-
     @LocalServerPort
     private var port: Int? = 0
 
     @AfterEach
+    @Transactional
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
