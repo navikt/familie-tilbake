@@ -42,4 +42,14 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")
     }
+
+    @PutMapping(path = ["/behandling/{behandlingId}/tving-henleggelse/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Tving henlegger behandling",
+                        henteParam = "behandlingId")
+    fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
+        forvaltningService.tvingHenleggBehandling(behandlingId)
+        return Ressurs.success("OK")
+    }
 }

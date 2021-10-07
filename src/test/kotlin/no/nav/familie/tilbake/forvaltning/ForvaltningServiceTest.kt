@@ -1,22 +1,30 @@
 package no.nav.familie.tilbake.forvaltning
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendSakshendelseTilDvhTask
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -44,6 +52,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository
+
+    @Autowired
+    private lateinit var taskRepository: TaskRepository
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -120,6 +131,62 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(økonomiXmlMottatt.eksternFagsakId,
                                                                                  økonomiXmlMottatt.ytelsestype).isNotEmpty()
         }
+    }
+
+    @Test
+    fun `tvingHenleggBehandling skal ikke henlegge behandling når behandling er avsluttet`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            forvaltningService.tvingHenleggBehandling(behandling.id)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `tvingHenleggBehandling skal henlegge behandling når behandling ikke er avsluttet`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        forvaltningService.korrigerKravgrunnlag(behandling.id, Testdata.kravgrunnlag431.eksternKravgrunnlagId)
+
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        assertDoesNotThrow { forvaltningService.tvingHenleggBehandling(behandling.id) }
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.AVBRUTT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.AVBRUTT)
+
+        val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertTrue { oppdatertBehandling.erAvsluttet }
+        assertEquals(ContextService.hentSaksbehandler(), oppdatertBehandling.ansvarligSaksbehandler)
+        assertEquals(LocalDate.now(), oppdatertBehandling.avsluttetDato)
+        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, oppdatertBehandling.sisteResultat!!.type)
+
+        val tasker = taskRepository.findAll()
+        assertTrue {
+            tasker.any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload &&
+                Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
+            }
+        }
+        assertTrue {
+            tasker.any {
+                SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
+                behandling.id.toString() == it.payload
+            }
+        }
+        assertTrue {
+            tasker.any {
+                FerdigstillOppgaveTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload
+            }
+        }
+
     }
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {
