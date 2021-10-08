@@ -2,6 +2,8 @@ package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -31,6 +33,7 @@ import java.util.UUID
 
 @Service
 class ForvaltningService(private val behandlingRepository: BehandlingRepository,
+                         private val fagsakRepository: FagsakRepository,
                          private val kravgrunnlagRepository: KravgrunnlagRepository,
                          private val hentKravgrunnlagService: HentKravgrunnlagService,
                          private val økonomiXmlMottattService: ØkonomiXmlMottattService,
@@ -39,7 +42,8 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                          private val behandlingTilstandService: BehandlingTilstandService,
                          private val historikkTaskService: HistorikkTaskService,
                          private val oppgaveTaskService: OppgaveTaskService,
-                         private val tellerService: TellerService) {
+                         private val tellerService: TellerService,
+                         private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -92,6 +96,25 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                                               beskrivelse = "")
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
+    }
+
+    @Transactional
+    fun hentFagsystemsbehandling(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val aktivFagsystemsbehandling = behandling.aktivFagsystemsbehandling
+        val sendtRequest =
+                hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(fagsak.eksternFagsakId,
+                                                                                     fagsak.ytelsestype,
+                                                                                     aktivFagsystemsbehandling.eksternId)
+        // fjern eksisterende sendte request slik at ny request kan sendes
+        if (sendtRequest != null) {
+            hentFagsystemsbehandlingService.fjernHentFagsystemsbehandlingRequest(sendtRequest.id)
+        }
+        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(fagsak.eksternFagsakId,
+                                                                            fagsak.ytelsestype,
+                                                                            aktivFagsystemsbehandling.eksternId)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {

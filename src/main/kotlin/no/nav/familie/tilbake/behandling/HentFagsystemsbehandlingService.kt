@@ -48,8 +48,12 @@ class HentFagsystemsbehandlingService(private val requestSendtRepository: HentFa
                                                                                       eksternId)
     }
 
+    @Transactional
+    fun fjernHentFagsystemsbehandlingRequest(requestId: UUID){
+        requestSendtRepository.deleteById(requestId)
+    }
+
     fun lesRespons(respons: String): HentFagsystemsbehandlingRespons {
         return objectMapper.readValue(respons, HentFagsystemsbehandlingRespons::class.java)
     }
-
 }

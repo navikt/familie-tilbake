@@ -6,8 +6,10 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -29,11 +31,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import java.math.BigInteger
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
@@ -58,6 +63,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
 
     @Autowired
     private lateinit var forvaltningService: ForvaltningService
@@ -186,7 +194,33 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 behandling.id.toString() == it.payload
             }
         }
+    }
 
+    @Test
+    fun `hentFagsystemsbehandling skal ikke hente fagsystemsbehandling når behandling er avsluttet`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            forvaltningService.hentFagsystemsbehandling(behandling.id)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `hentFagsystemsbehandling skal sende request til fagsystem for å hente fagsystemsbehandling`() {
+        val eksternFagsakId = Testdata.fagsak.eksternFagsakId
+        val ytelsestype = Testdata.fagsak.ytelsestype
+        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
+        // finnes en eksisterende request
+        val requestSendt = requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = eksternFagsakId,
+                                                                                              ytelsestype = ytelsestype,
+                                                                                              eksternId = eksternId))
+        assertDoesNotThrow { forvaltningService.hentFagsystemsbehandling(behandling.id) }
+        assertNull(requestSendtRepository.findByIdOrNull(requestSendt.id))
+        assertNotNull(requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
+                                                                                             ytelsestype,
+                                                                                             eksternId))
     }
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {

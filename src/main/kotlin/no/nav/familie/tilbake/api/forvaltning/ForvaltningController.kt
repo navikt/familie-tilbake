@@ -8,6 +8,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -50,6 +51,16 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                         henteParam = "behandlingId")
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.tvingHenleggBehandling(behandlingId)
+        return Ressurs.success("OK")
+    }
+
+    @PostMapping(path = ["/behandling/{behandlingId}/fagsystemsbehandling/v1"],
+                     produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Henter fagsystemsbehandling på nytt",
+                        henteParam = "behandlingId")
+    fun hentFagsystemsbehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
+        forvaltningService.hentFagsystemsbehandling(behandlingId)
         return Ressurs.success("OK")
     }
 }
