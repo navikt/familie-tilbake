@@ -17,34 +17,17 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
+import no.nav.familie.tilbake.dokumentbestilling.felles.*
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbTotalresultat
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevDatoer
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.*
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.*
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
@@ -61,7 +44,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
@@ -71,22 +54,22 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                          private val fagsakRepository: FagsakRepository,
                          private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
                          private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
-                         private val brevSporingRepository: BrevsporingRepository,
+                         private val brevsporingService: BrevsporingService,
                          private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
                          private val eksterneDataForBrevService: EksterneDataForBrevService,
                          private val pdfBrevService: PdfBrevService) {
 
     fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val vedtaksbrevData = hentDataForVedtaksbrev(behandling, fagsak, brevmottager)
-        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(behandling, fagsak, brevmottager)
+        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
                                      TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
-                                     vedtaksbrevData.metadata)
-        val vedleggHtml = if (vedtaksbrevData.vedtaksbrevsdata.felles.harVedlegg) {
-            TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevData.vedtaksbrevsdata)
+                                     vedtaksbrevsdata.metadata)
+        val vedleggHtml = if (vedtaksbrevsdata.vedtaksbrevsdata.felles.harVedlegg) {
+            TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
         } else ""
-        val brevData = Brevdata(mottager = brevmottager,
+        val brevdata = Brevdata(mottager = brevmottager,
                                 metadata = data.brevmetadata,
                                 overskrift = data.overskrift,
                                 brevtekst = data.brevtekst,
@@ -94,37 +77,37 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
                                 Brevtype.VEDTAK,
-                                brevData)
+                                brevdata)
     }
 
     fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(dto.behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val vedtaksbrevData = hentDataForVedtaksbrev(behandling,
-                                                     fagsak,
-                                                     dto.oppsummeringstekst,
-                                                     dto.perioderMedTekst,
-                                                     getBrevmottager(behandling))
-        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(behandling,
+                                                      fagsak,
+                                                      dto.oppsummeringstekst,
+                                                      dto.perioderMedTekst,
+                                                      getBrevmottager(behandling))
+        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
         val vedleggHtml = if (hbVedtaksbrevsdata.felles.harVedlegg) {
-            TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevData.vedtaksbrevsdata)
+            TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
         } else ""
 
-        val brevData =
+        val brevdata =
                 Brevdata(mottager = getBrevmottager(behandling),
-                         metadata = vedtaksbrevData.metadata,
+                         metadata = vedtaksbrevsdata.metadata,
                          overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
                          brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
                          vedleggHtml = vedleggHtml)
-        return pdfBrevService.genererForhåndsvisning(brevData)
+        return pdfBrevService.genererForhåndsvisning(brevdata)
     }
 
     fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val vedtaksbrevData = hentDataForVedtaksbrev(behandling, fagsak, getBrevmottager(behandling))
-        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevData.vedtaksbrevsdata
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(behandling, fagsak, getBrevmottager(behandling))
+        val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
     }
@@ -191,23 +174,23 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                                                    personinfo,
                                                                    beregnetResultat.vedtaksresultat,
                                                                    brevmottager)
-        val data: HbVedtaksbrevsdata = lagHbVedtaksbrevData(behandling,
-                                                            fagsak,
-                                                            personinfo,
-                                                            beregnetResultat,
-                                                            oppsummeringFritekst,
-                                                            perioderFritekst,
-                                                            brevMetadata)
+        val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(behandling,
+                                                             fagsak,
+                                                             personinfo,
+                                                             beregnetResultat,
+                                                             oppsummeringFritekst,
+                                                             perioderFritekst,
+                                                             brevMetadata)
         return Vedtaksbrevsdata(data, brevMetadata)
     }
 
-    private fun lagHbVedtaksbrevData(behandling: Behandling,
-                                     fagsak: Fagsak,
-                                     personinfo: Personinfo,
-                                     beregnetResultat: Beregningsresultat,
-                                     oppsummeringFritekst: String?,
-                                     perioderFritekst: List<PeriodeMedTekstDto>,
-                                     brevmetadata: Brevmetadata): HbVedtaksbrevsdata {
+    private fun lagHbVedtaksbrevsdata(behandling: Behandling,
+                                      fagsak: Fagsak,
+                                      personinfo: Personinfo,
+                                      beregnetResultat: Beregningsresultat,
+                                      oppsummeringFritekst: String?,
+                                      perioderFritekst: List<PeriodeMedTekstDto>,
+                                      brevmetadata: Brevmetadata): HbVedtaksbrevsdata {
         val resulatPerioder = beregnetResultat.beregningsresultatsperioder
         val vedtakResultatType = beregnetResultat.vedtaksresultat
         val vilkårPerioder = finnVilkårsvurderingsperioder(behandling.id)
@@ -328,10 +311,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun finnVarsletDato(behandlingId: UUID): LocalDate? {
-        val varselbrevData = brevSporingRepository
-                .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.VARSEL)
-
-        return varselbrevData?.sporbar?.opprettetTid?.toLocalDate()
+        return brevsporingService.finnSisteVarsel(behandlingId)?.sporbar?.opprettetTid?.toLocalDate()
     }
 
     private fun finnVarsletBeløp(behandling: Behandling): BigDecimal? {
