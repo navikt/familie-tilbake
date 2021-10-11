@@ -20,10 +20,10 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -83,7 +83,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository
 
     @Autowired
-    private lateinit var brevSporingRepository: BrevsporingRepository
+    private lateinit var brevsporingService: BrevsporingService
 
     @Autowired
     private lateinit var tilbakekrevingBeregningService: TilbakekrevingsberegningService
@@ -119,7 +119,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                                 fagsakRepository,
                                                 vedtaksbrevsoppsummeringRepository,
                                                 vedtaksbrevsperiodeRepository,
-                                                brevSporingRepository,
+                                                brevsporingService,
                                                 tilbakekrevingBeregningService,
                                                 eksterneDataForBrevService,
                                                 spyPdfBrevService)
@@ -127,7 +127,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering.copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering
+                                                  .copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")

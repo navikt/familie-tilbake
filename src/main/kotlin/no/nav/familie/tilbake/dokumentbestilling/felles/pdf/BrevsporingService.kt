@@ -22,8 +22,11 @@ class BrevsporingService(private val brevsporingRepository: BrevsporingRepositor
     }
 
     fun finnSisteVarsel(behandlingId: UUID): Brevsporing? {
-        return brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId,
-                                                                                                      Brevtype.VARSEL)
+        val varselbrev = brevsporingRepository
+                .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.VARSEL)
+        val korrigertVarselbrev = brevsporingRepository
+                .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.KORRIGERT_VARSEL)
 
+        return korrigertVarselbrev ?: varselbrev
     }
 }
