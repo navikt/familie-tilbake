@@ -63,4 +63,14 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         forvaltningService.hentFagsystemsbehandling(behandlingId)
         return Ressurs.success("OK")
     }
+
+    @PutMapping(path = ["/behandling/{behandlingId}/flytt-behandling/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+                        handling = "Flytter behandling tilbake til Fakta",
+                        henteParam = "behandlingId")
+    fun flyttBehandlingTilFakta(@PathVariable behandlingId: UUID): Ressurs<String> {
+        forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
+        return Ressurs.success("OK")
+    }
 }

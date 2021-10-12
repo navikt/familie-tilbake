@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -19,6 +20,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
+import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -43,7 +45,8 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                          private val historikkTaskService: HistorikkTaskService,
                          private val oppgaveTaskService: OppgaveTaskService,
                          private val tellerService: TellerService,
-                         private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService) {
+                         private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
+                         private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -115,6 +118,20 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(fagsak.eksternFagsakId,
                                                                             fagsak.ytelsestype,
                                                                             aktivFagsystemsbehandling.eksternId)
+    }
+
+    @Transactional
+    fun flyttBehandlingsstegTilbakeTilFakta(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling)
+
+        // fjerner eksisterende saksbehandlet data
+        endretKravgrunnlagEventPublisher.fireEvent(behandlingId)
+        behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FAKTA)
+
+        historikkTaskService.lagHistorikkTask(behandlingId,
+                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
+                                              Aktør.SAKSBEHANDLER)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
