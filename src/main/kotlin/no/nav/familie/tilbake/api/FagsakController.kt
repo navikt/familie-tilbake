@@ -3,10 +3,10 @@ package no.nav.familie.tilbake.api
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
+import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FagsakDto
-import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
@@ -41,7 +41,7 @@ class FagsakController(private val fagsakService: FagsakService) {
                         henteParam = "fagsystem")
     fun finnesÅpenTilbakekrevingsbehandling(@PathVariable("fagsystem") fagsystem: Fagsystem,
                                             @PathVariable("fagsak")
-                                            eksternFagsakId: String): Ressurs<FinnesBehandlingsresponsDto> {
+                                            eksternFagsakId: String): Ressurs<FinnesBehandlingResponse> {
         return Ressurs.success(fagsakService.finnesÅpenTilbakekrevingsbehandling(fagsystem = fagsystem,
                                                                                  eksternFagsakId = eksternFagsakId))
     }
