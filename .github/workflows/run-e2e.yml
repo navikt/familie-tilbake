@@ -40,17 +40,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
-      - uses: navikt/github-app-token-generator@v1.1
-        id: get-token
-        with:
-          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
-          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - name: Checkout e2e tests
         uses: actions/checkout@v2
         with:
           ref: "main"
           repository: navikt/familie-tilbake-e2e
-          token: ${{ steps.get-token.outputs.token }}
+          token: ${{ secrets.READER_TOKEN }}
           path: tilbake-e2e
       - name: Setter riktig familie-tilbake versjon i e2e tester
         run: sed -i 's/familie-tilbake:latest/familie-tilbake:'$GITHUB_SHA'/g' tilbake-e2e/e2e/docker-compose.yml
