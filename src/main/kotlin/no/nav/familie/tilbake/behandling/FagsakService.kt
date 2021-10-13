@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
-import no.nav.familie.tilbake.api.dto.FinnesBehandlingsresponsDto
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -40,7 +40,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     @Transactional(readOnly = true)
-    fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingsresponsDto {
+    fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingResponse {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
                                                                         eksternFagsakId = eksternFagsakId)
         var finnesÅpenBehandling = false
@@ -49,7 +49,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
                                                                            eksternFagsakId = eksternFagsakId) != null
         }
-        return FinnesBehandlingsresponsDto(finnesÅpenBehandling = finnesÅpenBehandling)
+        return FinnesBehandlingResponse(finnesÅpenBehandling = finnesÅpenBehandling)
     }
 
     @Transactional(readOnly = true)
