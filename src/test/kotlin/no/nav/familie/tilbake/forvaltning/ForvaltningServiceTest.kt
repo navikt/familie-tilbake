@@ -1,31 +1,48 @@
 package no.nav.familie.tilbake.forvaltning
 
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendSakshendelseTilDvhTask
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
+import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import java.math.BigInteger
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
@@ -46,7 +63,25 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository
 
     @Autowired
+    private lateinit var taskRepository: TaskRepository
+
+    @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
+
+    @Autowired
+    private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository
+
+    @Autowired
+    private lateinit var totrinnRepository: TotrinnsvurderingRepository
 
     @Autowired
     private lateinit var forvaltningService: ForvaltningService
@@ -122,6 +157,151 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    fun `tvingHenleggBehandling skal ikke henlegge behandling når behandling er avsluttet`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            forvaltningService.tvingHenleggBehandling(behandling.id)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `tvingHenleggBehandling skal henlegge behandling når behandling ikke er avsluttet`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        forvaltningService.korrigerKravgrunnlag(behandling.id, Testdata.kravgrunnlag431.eksternKravgrunnlagId)
+
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        assertDoesNotThrow { forvaltningService.tvingHenleggBehandling(behandling.id) }
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.AVBRUTT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.AVBRUTT)
+
+        val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertTrue { oppdatertBehandling.erAvsluttet }
+        assertEquals(ContextService.hentSaksbehandler(), oppdatertBehandling.ansvarligSaksbehandler)
+        assertEquals(LocalDate.now(), oppdatertBehandling.avsluttetDato)
+        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, oppdatertBehandling.sisteResultat!!.type)
+
+        val tasker = taskRepository.findAll()
+        assertTrue {
+            tasker.any {
+                LagHistorikkinnslagTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload &&
+                Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
+            }
+        }
+        assertTrue {
+            tasker.any {
+                SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
+                behandling.id.toString() == it.payload
+            }
+        }
+        assertTrue {
+            tasker.any {
+                FerdigstillOppgaveTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload
+            }
+        }
+    }
+
+    @Test
+    fun `hentFagsystemsbehandling skal ikke hente fagsystemsbehandling når behandling er avsluttet`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            forvaltningService.hentFagsystemsbehandling(behandling.id)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `hentFagsystemsbehandling skal sende request til fagsystem for å hente fagsystemsbehandling`() {
+        val eksternFagsakId = Testdata.fagsak.eksternFagsakId
+        val ytelsestype = Testdata.fagsak.ytelsestype
+        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
+        // finnes en eksisterende request
+        val requestSendt = requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = eksternFagsakId,
+                                                                                              ytelsestype = ytelsestype,
+                                                                                              eksternId = eksternId))
+        assertDoesNotThrow { forvaltningService.hentFagsystemsbehandling(behandling.id) }
+        assertNull(requestSendtRepository.findByIdOrNull(requestSendt.id))
+        assertNotNull(requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
+                                                                                             ytelsestype,
+                                                                                             eksternId))
+    }
+
+    @Test
+    fun `flyttBehandlingsstegTilbakeTilFakta skal ikke flytte behandlingssteg når behandling er avsluttet`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = assertFailsWith<RuntimeException> {
+            forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
+        }
+        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+    }
+
+    @Test
+    fun `flyttBehandlingsstegTilbakeTilFakta skal flytte behandlingssteg til FAKTA når behandling er i IVERKSETT_VEDTAK steg`() {
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK))
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandlingsstegstilstandRepository
+                .update(behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandling.id,
+                                                                                                Behandlingssteg.GRUNNLAG)!!
+                                .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
+
+        faktaFeilutbetalingRepository.insert(Testdata.faktaFeilutbetaling)
+        lagBehandlingssteg(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingssteg(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
+        lagBehandlingssteg(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+
+        vedtaksbrevsoppsummeringRepository.insert(Testdata.vedtaksbrevsoppsummering)
+        lagBehandlingssteg(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+
+        totrinnRepository.insert(Testdata.totrinnsvurdering)
+        lagBehandlingssteg(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingssteg(Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        assertDoesNotThrow { forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id) }
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        assertEquals(Behandlingsstatus.UTREDES, behandling.status)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+
+        assertNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        assertNull(vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id))
+
+        assertTrue {
+            taskRepository.findAll().any {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                it.payload == behandling.id.toString() &&
+                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
+                        .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
+                it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
+            }
+        }
+    }
+
     private fun lagMottattXml(): ØkonomiXmlMottatt {
         val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         return økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = mottattXml,
@@ -144,5 +324,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 behandlingsstegstatus == it.behandlingsstegsstatus
             }
         }
+    }
+
+    private fun lagBehandlingssteg(behandlingssteg: Behandlingssteg,
+                                   behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
+                                                                           behandlingssteg = behandlingssteg,
+                                                                           behandlingsstegsstatus = behandlingsstegstatus))
     }
 }

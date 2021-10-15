@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
@@ -35,7 +36,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
 
         assertDoesNotThrow { håndterGamleKravgrunnlagBatch.utfør() }
-        assertTrue { (taskRepository.findAll() as List<*>).isEmpty() }
+        assertTrue { (taskRepository.findAll().filter { it.type != AvstemmingTask.TYPE }).isEmpty() }
     }
 
     @Test
