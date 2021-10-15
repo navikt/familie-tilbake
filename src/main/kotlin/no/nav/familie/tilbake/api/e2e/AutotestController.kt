@@ -46,8 +46,6 @@ class AutotestController(private val taskRepository: TaskRepository,
                          private val environment: Environment) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                        handling = "oppretter kravgrunnlag")
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
         taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                  payload = kravgrunnlag,
@@ -58,8 +56,6 @@ class AutotestController(private val taskRepository: TaskRepository,
     }
 
     @PostMapping(path = ["/opprett/statusmelding/"])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                        handling = "oppretter statusmelding")
     fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
         taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
                                  payload = statusmelding,
@@ -81,8 +77,6 @@ class AutotestController(private val taskRepository: TaskRepository,
     }
 
     @PostMapping(path = ["/publiser/fagsystemsbehandling"])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                        handling = "publish fagsystemsbehandling på KAFKA")
     fun publishFagsystemsbehandlingsdata(@Valid @RequestBody opprettManueltTilbakekrevingRequest
                                          : OpprettManueltTilbakekrevingRequest): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
