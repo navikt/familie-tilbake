@@ -56,6 +56,10 @@ spec:
           cluster: dev-fss
         - application: familie-ef-sak
           namespace: teamfamilie
+          cluster: dev-gcp
+        - application: familie-ef-iverksett
+          namespace: teamfamilie
+          cluster: dev-gcp
         - application: familie-ks-sak
           namespace: default
         - application: familie-tilbake-frontend

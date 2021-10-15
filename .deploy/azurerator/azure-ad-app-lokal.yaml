@@ -25,6 +25,12 @@ spec:
     - application: familie-ba-sak
       cluster: dev-fss
       namespace: teamfamilie
+    - application: familie-ef-sak
+      cluster: dev-gcp
+      namespace: teamfamilie
+    - application: familie-ef-iverksett
+      cluster: dev-gcp
+      namespace: teamfamilie
     - application: ida
       cluster: prod-fss
       namespace: default
