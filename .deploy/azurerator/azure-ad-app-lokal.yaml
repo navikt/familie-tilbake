@@ -34,7 +34,7 @@ spec:
       namespace: teamfamilie
     - application: ida
       cluster: prod-fss
-      namespace: default
+      namespace: traktor
   logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal

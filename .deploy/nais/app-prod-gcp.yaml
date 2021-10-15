@@ -64,6 +64,9 @@ spec:
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: prod-gcp
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
         - application: familie-prosessering
           namespace: teamfamilie
           cluster: prod-gcp
