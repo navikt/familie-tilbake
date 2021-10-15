@@ -25,7 +25,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @PutMapping(path = ["/behandling/{behandlingId}/kravgrunnlag/{kravgrunnlagId}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
                         henteParam = "behandlingId")
     fun korrigerKravgrunnlag(@PathVariable behandlingId: UUID,
@@ -36,7 +36,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @PutMapping(path = ["/arkiver/kravgrunnlag/{mottattXmlId}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Arkiverer mottatt kravgrunnlag",
                         henteParam = "behandlingId")
     fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
@@ -46,7 +46,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @PutMapping(path = ["/behandling/{behandlingId}/tving-henleggelse/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Tving henlegger behandling",
                         henteParam = "behandlingId")
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
@@ -56,7 +56,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @PostMapping(path = ["/behandling/{behandlingId}/fagsystemsbehandling/v1"],
                      produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Henter fagsystemsbehandling på nytt",
                         henteParam = "behandlingId")
     fun hentFagsystemsbehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
@@ -66,7 +66,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @PutMapping(path = ["/behandling/{behandlingId}/flytt-behandling/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Flytter behandling tilbake til Fakta",
                         henteParam = "behandlingId")
     fun flyttBehandlingTilFakta(@PathVariable behandlingId: UUID): Ressurs<String> {

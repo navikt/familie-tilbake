@@ -28,6 +28,8 @@ rolle:
     veileder: "54cd86b8-2e23-48b2-8852-b05b5827bb0f"
     saksbehandler: "e40090eb-c2fb-400e-b412-e9084019a73b"
     beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
+  teamfamilie:
+    forvalter: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b" #må endre til PROD objektId
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
 

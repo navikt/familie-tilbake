@@ -127,6 +127,8 @@ rolle:
     veileder: ""
     saksbehandler: ""
     beslutter: ""
+  teamfamilie:
+    forvalter: ""
 
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""

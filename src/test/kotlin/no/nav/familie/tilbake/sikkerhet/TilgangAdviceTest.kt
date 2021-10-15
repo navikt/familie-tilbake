@@ -53,7 +53,8 @@ import kotlin.test.assertFailsWith
     "rolle.enslig.veileder=ev123",
     "rolle.kontantstøtte.beslutter = kb123",
     "rolle.kontantstøtte.saksbehandler = ks123",
-    "rolle.kontantstøtte.veileder = kv123"])
+    "rolle.kontantstøtte.veileder = kv123",
+    "rolle.teamfamilie.forvalter = familie123"])
 internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     companion object {
@@ -69,6 +70,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         const val KONTANTSTØTTE_BESLUTTER_ROLLE = "kb123"
         const val KONTANTSTØTTE_SAKSBEHANDLER_ROLLE = "ks123"
         const val KONTANTSTØTTE_VEILEDER_ROLLE = "kv123"
+
+        const val TEAMFAMILIE_FORVALTER_ROLLE = "familie123"
     }
 
     @AfterEach
@@ -335,6 +338,44 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                                                          tidsfrist = LocalDate.now().plusWeeks(2)))
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
         every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal beslutter ikke ha tilgang til forvaltningstjenester`(){
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
+
+        // POST request uten body
+        opprettRequest("/api/forvaltning//behandling/$behandlingId/tving-henleggelse/v1", HttpMethod.PUT, token)
+
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
+        every { mockJoinpoint.args } returns arrayOf(behandling.id)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
+        every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        assertEquals("abc med rolle BESLUTTER har ikke tilgang til å Tving henlegger behandling." +
+                     " Krever FORVALTER.", exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`(){
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+
+        // POST request uten body
+        opprettRequest("/api/forvaltning//behandling/$behandlingId/tving-henleggelse/v1", HttpMethod.PUT, token)
+
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
+        every { mockJoinpoint.args } returns arrayOf(behandling.id)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
+        every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
