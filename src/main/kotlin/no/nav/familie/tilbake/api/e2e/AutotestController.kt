@@ -67,7 +67,7 @@ class AutotestController(private val taskRepository: TaskRepository,
 
     @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "endre ansvarlig saksbehandler")
     fun endreAnsvarligSaksbehandler(@PathVariable behandlingId: UUID,
                                     @PathVariable nyAnsvarligSaksbehandler: String): Ressurs<String> {
