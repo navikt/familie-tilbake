@@ -19,7 +19,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun tellKobletKravgrunnlag(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av koblet kravgrunnlag.")
+        logger.info("Teller mottak av koblet kravgrunnlag for $ytelsestype.")
         Metrics.counter("xmlTeller",
                         Tags.of("ytelse", ytelsestype.kode,
                                 "type", "kravgrunnlag",
@@ -27,7 +27,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     }
 
     fun tellUkobletKravgrunnlag(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av ukoblet kravgrunnlag.")
+        logger.info("Teller mottak av ukoblet kravgrunnlag for $ytelsestype.")
         Metrics.counter("xmlTeller",
                         Tags.of("ytelse", ytelsestype.kode,
                                 "type", "kravgrunnlag",
@@ -35,7 +35,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     }
 
     fun tellKobletStatusmelding(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av koblet statusmelding.")
+        logger.info("Teller mottak av koblet statusmelding for $ytelsestype.")
         Metrics.counter("xmlTeller",
                         Tags.of("ytelse", ytelsestype.kode,
                                 "type", "statusmelding",
@@ -43,7 +43,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     }
 
     fun tellUkobletStatusmelding(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av ukoblet statusmelding.")
+        logger.info("Teller mottak av ukoblet statusmelding for $ytelsestype.")
         Metrics.counter("xmlTeller",
                         Tags.of("ytelse", ytelsestype.kode,
                                 "type", "statusmelding",
@@ -51,7 +51,7 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     }
 
     fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
-        logger.info("Teller sending av brev.")
+        logger.info("Teller sending av $brevtype for ${fagsak.ytelsestype}.")
         Metrics.counter("Brevteller",
                         Tags.of("ytelse", fagsak.ytelsestype.kode,
                                 "brevtype", brevtype.name)).increment()
@@ -59,10 +59,10 @@ class TellerService(private val fagsakRepository: FagsakRepository) {
     }
 
     fun tellVedtak(behandlingsresultatstype: Behandlingsresultatstype, behandling: Behandling) {
-        logger.info("Teller vedtak fattet.")
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtakstype = if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
             Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
+        logger.info("Teller vedtak fattet med resultat $behandlingsresultatstype for ${fagsak.ytelsestype}.")
 
         Metrics.counter("Vedtaksteller",
                         Tags.of("ytelse", fagsak.ytelsestype.kode,
