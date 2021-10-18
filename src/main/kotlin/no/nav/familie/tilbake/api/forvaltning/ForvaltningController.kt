@@ -18,7 +18,7 @@ import java.util.UUID
 // Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
 
 @RestController
-@RequestMapping("/api/forvaltning/")
+@RequestMapping("/api/forvaltning")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class ForvaltningController(private val forvaltningService: ForvaltningService) {
