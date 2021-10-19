@@ -38,7 +38,7 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    @Before("execution(* no.nav.familie.tilbake.api.*.*(..)) && @annotation(rolletilgangssjekk) ")
+    @Before("@annotation(rolletilgangssjekk) ")
     fun sjekkTilgang(joinpoint: JoinPoint, rolletilgangssjekk: Rolletilgangssjekk) {
         val minimumBehandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
         val handling = rolletilgangssjekk.handling

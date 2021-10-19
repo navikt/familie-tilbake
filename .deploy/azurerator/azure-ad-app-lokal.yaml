@@ -17,6 +17,7 @@ spec:
       - id: ee5e0b5e-454c-4612-b931-1fe363df7c2c # 0000-GA-Enslig-Forsorger-Saksbehandler
       - id: 01166863-22f1-4e16-9785-d7a05a22df74 # 0000-GA-Enslig-Forsorger-Beslutter
       - id: 19dcbfde-4cdb-4c64-a1ea-ac9802b03339 # 0000-GA-Enslig-Forsorger-Veileder
+      - id: c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b # teamfamilie-forvaltning
       - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # 0000-GA-STDAPPS - tilgang til prosessering
   preAuthorizedApplications:
     - application: familie-tilbake-frontend-lokal
@@ -33,7 +34,7 @@ spec:
       namespace: teamfamilie
     - application: ida
       cluster: prod-fss
-      namespace: default
+      namespace: traktor
   logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal

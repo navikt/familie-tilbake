@@ -83,6 +83,12 @@ object ContextService {
                                                        behandlerrolle = Behandlerrolle.VEILEDER,
                                                        brukerTilganger = brukerTilganger))
         }
+        // forvalter har system tilgang
+        if (grupper.contains(rolleConfig.forvalterRolleTeamfamilie)) {
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.SYSTEM_TILGANG,
+                                                       behandlerrolle = Behandlerrolle.FORVALTER,
+                                                       brukerTilganger = brukerTilganger))
+        }
         if (brukerTilganger.isEmpty()) {
             throw Feil(message = "Bruker har mangler tilgang til $handling",
                        frontendFeilmelding = "Bruker har mangler tilgang til $handling",

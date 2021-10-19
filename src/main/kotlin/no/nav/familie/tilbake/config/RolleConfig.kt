@@ -21,4 +21,6 @@ class RolleConfig(@Value("\${rolle.barnetrygd.beslutter}")
                   @Value("\${rolle.kontantstøtte.saksbehandler}")
                   val saksbehandlerRolleKontantStøtte: String,
                   @Value("\${rolle.kontantstøtte.veileder}")
-                  val veilederRolleKontantStøtte: String)
+                  val veilederRolleKontantStøtte: String,
+                  @Value("\${rolle.teamfamilie.forvalter}")
+                  val forvalterRolleTeamfamilie: String)
