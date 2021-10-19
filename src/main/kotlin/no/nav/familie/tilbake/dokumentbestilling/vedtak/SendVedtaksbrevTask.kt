@@ -5,6 +5,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
@@ -34,6 +36,13 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
                                   payload = task.payload))
             return
         }
+        if (behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING
+            && behandling.sisteÅrsak?.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+                                                    Behandlingsårsakstype.REVURDERING_KLAGE_NFP)) {
+            log.info("Sender ikke vedtaksbrev etter revurdering som følge av klage for behandling: {}", behandlingId)
+            return
+        }
+
         if (behandling.harVerge) {
             vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
         }
