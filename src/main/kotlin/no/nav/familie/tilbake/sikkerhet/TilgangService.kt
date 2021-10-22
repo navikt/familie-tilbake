@@ -19,6 +19,7 @@ class TilgangService(private val rolleConfig: RolleConfig) {
         val tilganger = inloggetBrukerstilgang.tilganger
 
         return if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
+        else if (tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) Behandlerrolle.FORVALTER
         else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
     }
 

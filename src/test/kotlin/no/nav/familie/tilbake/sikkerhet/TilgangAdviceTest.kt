@@ -344,23 +344,23 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `sjekkTilgang skal beslutter ikke ha tilgang til forvaltningstjenester`(){
+    fun `sjekkTilgang skal forvalter ikke ha tilgang til vanlig tjenester`(){
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
-        val token = opprettToken("abc", listOf(BARNETRYGD_BESLUTTER_ROLLE))
-
-        // POST request uten body
-        opprettRequest("/api/forvaltning//behandling/$behandlingId/tving-henleggelse/v1", HttpMethod.PUT, token)
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequest("/api/behandling/$behandlingId/vent/v1/", HttpMethod.PUT, token)
 
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
-        every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
-        every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
+        every { mockJoinpoint.args } returns arrayOf(behandling.id,
+                                                     BehandlingPåVentDto(venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                                         tidsfrist = LocalDate.now().plusWeeks(2)))
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
         val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
-        assertEquals("abc med rolle BESLUTTER har ikke tilgang til å Tving henlegger behandling." +
-                     " Krever FORVALTER.", exception.message)
+        assertEquals("abc med rolle FORVALTER har ikke tilgang til å Setter behandling på vent." +
+                     " Krever SAKSBEHANDLER.", exception.message)
     }
 
     @Test
