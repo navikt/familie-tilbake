@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Base64
 import java.util.Properties
 
 @Service
@@ -60,7 +61,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
             setProperty("brevtype", brevtype.name)
             setProperty("ansvarligSaksbehandler", behandling.ansvarligSaksbehandler)
             varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
-            fritekst?.also { setProperty("fritekst", fritekst) }
+            fritekst?.also { setProperty("fritekst", Base64.getEncoder().encodeToString(fritekst.toByteArray())) }
             brevdata.tittel?.also { setProperty("tittel", it) }
         }
         logger.info("Oppretter task for publisering av brev for behandlingId=${behandling.id}]")
