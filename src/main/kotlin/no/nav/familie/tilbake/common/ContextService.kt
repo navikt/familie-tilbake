@@ -85,7 +85,7 @@ object ContextService {
         }
         // forvalter har system tilgang
         if (grupper.contains(rolleConfig.forvalterRolleTeamfamilie)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.SYSTEM_TILGANG,
+            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.FORVALTER_TILGANG,
                                                        behandlerrolle = Behandlerrolle.FORVALTER,
                                                        brukerTilganger = brukerTilganger))
         }

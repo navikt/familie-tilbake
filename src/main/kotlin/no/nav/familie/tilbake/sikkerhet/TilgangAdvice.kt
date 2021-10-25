@@ -198,6 +198,13 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) {
             return
         }
+        // når behandler har forvaltningstilgang, blir rollen bare validert
+        if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
+            validateRolle(brukersrolleTilFagsystemet = Behandlerrolle.FORVALTER,
+                          minimumBehandlerRolle = minimumBehandlerRolle,
+                          handling = handling)
+            return
+        }
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
         validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
 
