@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class TilgangService(private val rolleConfig: RolleConfig) {
 
     fun tilgangTilÅOppretteRevurdering(fagsystem: Fagsystem): Boolean {
-        return finnBehandlerrolle(fagsystem) != Behandlerrolle.VEILEDER
+        return finnBehandlerrolle(fagsystem) !in listOf(Behandlerrolle.VEILEDER, Behandlerrolle.FORVALTER)
     }
 
     fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
@@ -17,11 +17,17 @@ class TilgangService(private val rolleConfig: RolleConfig) {
                 .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
 
         val tilganger = inloggetBrukerstilgang.tilganger
-
-        return if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) Behandlerrolle.SYSTEM
-        else if (tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) Behandlerrolle.FORVALTER
-        else tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
+        var behandlerrolle: Behandlerrolle? = Behandlerrolle.VEILEDER
+        if (tilganger.containsKey(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) {
+            behandlerrolle = Behandlerrolle.SYSTEM
+        }
+        if (tilganger.containsKey(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
+            behandlerrolle = Behandlerrolle.FORVALTER
+        }
+        if (tilganger.containsKey(Tilgangskontrollsfagsystem.fraFagsystem(fagsystem))) {
+            behandlerrolle = tilganger[Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)]
+        }
+        return behandlerrolle
     }
-
 
 }
