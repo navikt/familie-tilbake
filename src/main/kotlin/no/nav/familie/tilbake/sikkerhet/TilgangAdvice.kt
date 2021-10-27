@@ -200,9 +200,9 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         }
         // når behandler har forvaltningstilgang, blir rollen bare validert
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.FORVALTER_TILGANG)) {
-            validateRolle(brukersrolleTilFagsystemet = Behandlerrolle.FORVALTER,
-                          minimumBehandlerRolle = minimumBehandlerRolle,
-                          handling = handling)
+            validateForvaltingsrolle(brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                                     minimumBehandlerRolle = minimumBehandlerRolle,
+                                     handling = handling)
             return
         }
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
@@ -241,9 +241,28 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     private fun validateRolle(brukersrolleTilFagsystemet: Behandlerrolle,
                               minimumBehandlerRolle: Behandlerrolle,
                               handling: String) {
-
+        if (minimumBehandlerRolle == Behandlerrolle.FORVALTER) {
+            throw Feil(message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                                 "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
+                       frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                       httpStatus = HttpStatus.FORBIDDEN)
+        }
         if (minimumBehandlerRolle.nivå > brukersrolleTilFagsystemet.nivå) {
             throw Feil(message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                                 "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                       frontendFeilmelding = "Du har ikke tilgang til å $handling.",
+                       httpStatus = HttpStatus.FORBIDDEN)
+        }
+    }
+
+    private fun validateForvaltingsrolle(brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
+                                         minimumBehandlerRolle: Behandlerrolle,
+                                         handling: String) {
+        val tilganger = brukerRolleOgFagsystemstilgang.tilganger
+        // Forvalter kan kun kalle forvaltningstjenestene og tjenestene som kan kalles av Veileder
+        if (minimumBehandlerRolle.nivå > Behandlerrolle.FORVALTER.nivå &&
+            tilganger.all { it.value == Behandlerrolle.FORVALTER }) {
+            throw Feil(message = "${ContextService.hentSaksbehandler()} med rolle FORVALTER " +
                                  "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
                        frontendFeilmelding = "Du har ikke tilgang til å $handling.",
                        httpStatus = HttpStatus.FORBIDDEN)

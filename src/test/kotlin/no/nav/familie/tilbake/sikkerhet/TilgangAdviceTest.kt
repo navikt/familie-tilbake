@@ -364,6 +364,58 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `sjekkTilgang skal saksbehandler ikke ha tilgang til forvaltningstjenester`(){
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequest("/api/forvaltning//behandling/$behandlingId/tving-henleggelse/v1", HttpMethod.PUT, token)
+
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
+        every { mockJoinpoint.args } returns arrayOf(behandling.id)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
+        every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        assertEquals("abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste " +
+                     "Tving henlegger behandling. Krever FORVALTER.", exception.message)
+    }
+
+    @Test
+    fun `sjekkTilgang skal saksbehandler ha tilgang til forvaltningstjenester hvis saksbehandler har forvalter rolle også`(){
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequest("/api/forvaltning//behandling/$behandlingId/tving-henleggelse/v1", HttpMethod.PUT, token)
+
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
+        every { mockJoinpoint.args } returns arrayOf(behandling.id)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
+        every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal saksbehandler ha tilgang til vanlig tjenester selv om saksbehandler har forvalter rolle også`(){
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
+        val behandlingId = behandling.id
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
+        opprettRequest("/api/behandling/$behandlingId/vent/v1/", HttpMethod.PUT, token)
+
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
+        every { mockJoinpoint.args } returns arrayOf(behandling.id,
+                                                     BehandlingPåVentDto(venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                                                                         tidsfrist = LocalDate.now().plusWeeks(2)))
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.SAKSBEHANDLER
+        every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
+        every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
     fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`(){
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
