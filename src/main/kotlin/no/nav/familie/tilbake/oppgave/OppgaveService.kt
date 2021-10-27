@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,7 +28,8 @@ import java.util.UUID
 class OppgaveService(private val behandlingRepository: BehandlingRepository,
                      private val fagsakRepository: FagsakRepository,
                      private val integrasjonerClient: IntegrasjonerClient,
-                     private val personService: PersonService) {
+                     private val personService: PersonService,
+                     private val environment: Environment) {
 
     private val antallOppgaveTyper = Oppgavetype.values().associateWith {
         Metrics.counter("oppgave.opprettet", "type", it.name)
@@ -132,8 +134,16 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         } else {
             ""
         } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://familie-tilbake-frontend.dev.intern.nav.no/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/" +
+               "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/" +
                eksternbrukBehandlingID
+    }
+
+    private fun lagFamilieTilbakeFrontendUrl(): String {
+        return if (environment.activeProfiles.contains("prod")) {
+            "familietilbakekreving.intern.nav.no"
+        } else {
+            "familie-tilbake-frontend.dev.intern.nav.no"
+        }
     }
 
     companion object {
