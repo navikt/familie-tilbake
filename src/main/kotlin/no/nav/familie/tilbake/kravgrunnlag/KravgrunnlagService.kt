@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -68,15 +68,17 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
                                               Aktør.VEDTAKSLØSNING)
 
-        //oppdater frist på oppgave
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
-                                               frist = LocalDate.now())
+        //oppdater frist på oppgave når behandling venter på grunnlag
+        val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+        if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                   beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
+                                                   frist = LocalDate.now())
+        }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
             log.info("Mottatt ENDR kravgrunnlag. Fjerner eksisterende data for behandling ${behandling.id}")
             endretKravgrunnlagEventPublisher.fireEvent(behandlingId = behandling.id)
-            val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
             // flytter behandlingssteg tilbake til fakta,
             // behandling har allerede fått SPER melding og venter på kravgrunnlag
             when (aktivBehandlingsstegstilstand?.behandlingsstegsstatus) {
