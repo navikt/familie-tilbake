@@ -29,6 +29,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -206,8 +207,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                               Aktør.SAKSBEHANDLER)
 
         stegService.gjenopptaSteg(behandlingId)
-
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
+
+        // oppdaterer oppgave hvis saken er fortsatt på vent
+        val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
+                                                   aktivStegstilstand.venteårsak!!.beskrivelse,
+                                                   aktivStegstilstand.tidsfrist!!)
+        }
     }
 
     @Transactional
