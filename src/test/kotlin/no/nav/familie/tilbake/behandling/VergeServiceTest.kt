@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -74,6 +75,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                                     behandlingskontrollService,
                                     integrasjonerClient,
                                     pdlClient)
+        clearAllMocks(answers = false)
     }
 
     @Test
