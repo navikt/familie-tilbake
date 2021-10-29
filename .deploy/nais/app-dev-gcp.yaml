@@ -35,6 +35,7 @@ spec:
             envVarPrefix: DB
   replyUrls:
     - url: "https://familie-tilbake.dev.intern.nav.no/swagger-ui/oauth2-redirect.html"
+  singlePageApplication: true
   azure:
     application:
       claims:
