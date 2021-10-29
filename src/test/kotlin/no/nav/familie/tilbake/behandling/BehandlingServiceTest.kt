@@ -800,6 +800,53 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `taBehandlingAvvent skal gjenoppta behandling og venter på GRUNNLAG steg når behandling venter på bruker`() {
+        val opprettTilbakekrevingRequest =
+                lagOpprettTilbakekrevingRequest(finnesVerge = true,
+                                                finnesVarsel = true,
+                                                manueltOpprettet = false,
+                                                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER &&
+                it.venteårsak == Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
+            }
+        }
+
+        behandlingService.taBehandlingAvvent(behandling.id)
+
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.VARSEL &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.UTFØRT
+            }
+        }
+        assertTrue {
+            behandlingsstegstilstand.any {
+                it.behandlingssteg == Behandlingssteg.GRUNNLAG &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.VENTER
+            }
+        }
+
+        assertTrue { behandlingskontrollService.erBehandlingPåVent(behandling.id) }
+        assertAnsvarligSaksbehandler(behandling)
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT, Aktør.SAKSBEHANDLER)
+        assertOppgaveTask(behandling.id,
+                          OppdaterOppgaveTask.TYPE,
+                          "Behandling er tatt av vent",
+                          LocalDate.now())
+        assertOppgaveTask(behandling.id,
+                          OppdaterOppgaveTask.TYPE,
+                          Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+                          LocalDate.now().plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker))
+    }
+
+    @Test
     fun `henleggBehandling skal henlegge behandling og sende henleggelsesbrev`() {
         val opprettTilbakekrevingRequest =
                 lagOpprettTilbakekrevingRequest(finnesVerge = false,
@@ -818,9 +865,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                  brevtype = Brevtype.VARSEL))
         behandlingService.taBehandlingAvvent(behandlingId = behandling.id)
 
-        behandlingService.henleggBehandling(behandlingId = behandling.id,
-                                            henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                                                                                                      begrunnelse = "testverdi"))
+        behandlingService
+                .henleggBehandling(behandlingId = behandling.id,
+                                   henleggelsesbrevFritekstDto =
+                                   HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype
+                                           .HENLAGT_FEILOPPRETTET, begrunnelse = "testverdi"))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
@@ -860,8 +909,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingService
                 .henleggBehandling(behandlingId = behandling.id,
-                                   henleggelsesbrevFritekstDto = HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                                                                                             begrunnelse = "testverdi"))
+                                   henleggelsesbrevFritekstDto =
+                                   HenleggelsesbrevFritekstDto(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                                                               begrunnelse = "testverdi"))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
@@ -1184,7 +1234,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                   beskrivelse: String? = null,
                                   frist: LocalDate? = null) {
         assertTrue {
-            taskRepository.findByStatus(Status.UBEHANDLET).any {
+            taskRepository.findAll().any {
                 it.type == taskType &&
                 behandlingId.toString() == it.payload &&
                 Oppgavetype.BehandleSak.value == it.metadata["oppgavetype"]
