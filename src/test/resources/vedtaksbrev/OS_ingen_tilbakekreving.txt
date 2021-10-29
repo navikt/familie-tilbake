@@ -4,7 +4,7 @@ Vi har fått melding om at Søker Søkersen døde. Overgangsstønaden skulle væ
 
 Overgangsstønaden er utbetalt etter denne datoen. Det er derfor utbetalt 1 000 kroner kroner for mye.
 _Hvordan har vi kommet fram til at du ikke må betale tilbake?
-Vi har ikke gitt deg den informasjonen du trengte for å forstå at beløpet du fikk utbetalt var feil. Du må ikke betale tilbake fordi vi har opplysninger om at du ikke har noe igjen av pengene.
+Vi har ikke gitt deg den informasjonen du trengte for å forstå at beløpet du fikk utbetalt var feil. Du må ikke betale tilbake fordi vi ikke har opplysninger om at du fortsatt har noe igjen av pengene.
 
 Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Du har rett til å klage
@@ -18,5 +18,6 @@ Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
 Med vennlig hilsen
 NAV Familie- og pensjonsytelser Skien
 {venstrejustert}Ansvarlig Saksbehandler{høyrejustert}Ansvarlig Beslutter
+
 
 Vedlegg: Resultatet av tilbakebetalingssaken

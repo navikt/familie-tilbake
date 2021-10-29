@@ -50,6 +50,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import java.io.File
+import java.nio.file.Files
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.test.assertEquals
@@ -178,6 +180,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
 
+        File("test.pdf").writeBytes(bytes)
         PdfaValidator.validatePdf(bytes)
     }
 
