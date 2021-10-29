@@ -33,6 +33,8 @@ spec:
         databases:
           - name: familie-tilbake
             envVarPrefix: DB
+  replyUrls:
+    - url: "https://familie-tilbake.dev.intern.nav.no/swagger-ui/oauth2-redirect.html"
   azure:
     application:
       claims:
