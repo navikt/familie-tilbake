@@ -1,15 +1,16 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -36,10 +37,10 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
 
-        assertThat(lagretVedtaksbrevsperiode).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(vedtaksbrevsperiode)
-        assertEquals(1, lagretVedtaksbrevsperiode.versjon)
+        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(vedtaksbrevsperiode,
+                                                                       Vedtaksbrevsperiode::sporbar,
+                                                                       Vedtaksbrevsperiode::versjon)
+        lagretVedtaksbrevsperiode.versjon shouldBe 1
     }
 
     @Test
@@ -51,10 +52,10 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         vedtaksbrevsperiodeRepository.update(oppdatertVedtaksbrevsperiode)
 
         lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
-        assertThat(lagretVedtaksbrevsperiode).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertVedtaksbrevsperiode)
-        assertEquals(2, lagretVedtaksbrevsperiode.versjon)
+        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(oppdatertVedtaksbrevsperiode,
+                                                                       Vedtaksbrevsperiode::sporbar,
+                                                                       Vedtaksbrevsperiode::versjon)
+        lagretVedtaksbrevsperiode.versjon shouldBe 2
     }
 
 }

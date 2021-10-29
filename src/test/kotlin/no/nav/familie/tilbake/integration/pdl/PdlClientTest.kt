@@ -5,6 +5,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.config.PdlConfig
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
@@ -16,9 +19,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 
 class PdlClientTest {
 
@@ -57,10 +57,10 @@ class PdlClientTest {
 
         val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
 
-        assertNotNull(respons)
-        assertEquals("ENGASJERT FYR", respons.navn)
-        assertEquals(Kjønn.MANN, respons.kjønn)
-        assertEquals(LocalDate.of(1955, 9, 13), respons.fødselsdato)
+        respons.shouldNotBeNull()
+        respons.navn shouldBe "ENGASJERT FYR"
+        respons.kjønn shouldBe Kjønn.MANN
+        respons.fødselsdato shouldBe LocalDate.of(1955, 9, 13)
     }
 
     @Test
@@ -69,9 +69,9 @@ class PdlClientTest {
                                            .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
 
 
-        val exception = assertFailsWith<RuntimeException>(block =
-                                                          { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
-        assertEquals("Feil ved oppslag på person: Person ikke funnet", exception.message)
+        val exception = shouldThrow<RuntimeException>(block =
+                                                      { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
+        exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }
 
 

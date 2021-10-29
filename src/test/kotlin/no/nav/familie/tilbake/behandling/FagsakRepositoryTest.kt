@@ -1,12 +1,13 @@
 package no.nav.familie.tilbake.behandling
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -20,8 +21,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
 
         val lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        assertThat(lagretFagsak).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(fagsak)
-        assertEquals(1, lagretFagsak.versjon)
+        lagretFagsak.shouldBeEqualToComparingFieldsExcept(fagsak, Fagsak::sporbar, Fagsak::versjon)
+        lagretFagsak.versjon shouldBe 1
     }
 
     @Test
@@ -33,8 +34,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsakRepository.update(oppdatertFagsak)
 
         lagretFagsak = fagsakRepository.findByIdOrThrow(fagsak.id)
-        assertThat(lagretFagsak).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertFagsak)
-        assertEquals(2, lagretFagsak.versjon)
+        lagretFagsak.shouldBeEqualToComparingFieldsExcept(oppdatertFagsak, Fagsak::sporbar, Fagsak::versjon)
+        lagretFagsak.versjon shouldBe 2
     }
 
 }

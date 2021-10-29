@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
@@ -21,9 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
@@ -64,14 +64,14 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = behandling.id)
 
-        assertEquals("Fakta begrunnelse", faktaFeilutbetalingDto.begrunnelse)
+        faktaFeilutbetalingDto.begrunnelse shouldBe "Fakta begrunnelse"
         val varsletData = behandling.aktivtVarsel
-        assertEquals(varsletData?.varselbeløp, faktaFeilutbetalingDto.varsletBeløp)
+        faktaFeilutbetalingDto.varsletBeløp shouldBe varsletData?.varselbeløp
 
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
         assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                    hendelsestype = Hendelsestype.ANNET,
-                                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+                                     hendelsestype = Hendelsestype.ANNET,
+                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
     }
 
     @Test
@@ -83,24 +83,24 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = oppdatertBehandling.id)
 
-        assertEquals("Fakta begrunnelse", faktaFeilutbetalingDto.begrunnelse)
-        assertNull(faktaFeilutbetalingDto.varsletBeløp)
+        faktaFeilutbetalingDto.begrunnelse shouldBe "Fakta begrunnelse"
+        faktaFeilutbetalingDto.varsletBeløp.shouldBeNull()
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
         assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                    hendelsestype = Hendelsestype.ANNET,
-                                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+                                     hendelsestype = Hendelsestype.ANNET,
+                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
     }
 
     @Test
     fun `hentFaktaomfeilutbetaling skal hente fakta om feilutbetaling første gang for en gitt behandling`() {
         val faktaFeilutbetalingDto = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId = behandling.id)
 
-        assertEquals("", faktaFeilutbetalingDto.begrunnelse)
-        assertEquals(behandling.aktivtVarsel?.varselbeløp, faktaFeilutbetalingDto.varsletBeløp)
+        faktaFeilutbetalingDto.begrunnelse shouldBe ""
+        faktaFeilutbetalingDto.varsletBeløp shouldBe behandling.aktivtVarsel?.varselbeløp
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
         assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                    hendelsestype = null,
-                                    hendelsesundertype = null)
+                                     hendelsestype = null,
+                                     hendelsesundertype = null)
     }
 
     private fun lagFaktaomfeilutbetaling(behandlingId: UUID) {
@@ -114,27 +114,27 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertFagsystemsbehandling(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
-                                           behandling: Behandling) {
+                                            behandling: Behandling) {
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
         val faktainfo = faktaFeilutbetalingDto.faktainfo
-        assertEquals(fagsystemsbehandling.tilbakekrevingsvalg, faktainfo.tilbakekrevingsvalg)
-        assertEquals(fagsystemsbehandling.revurderingsvedtaksdato, faktaFeilutbetalingDto.revurderingsvedtaksdato)
-        assertEquals(fagsystemsbehandling.resultat, faktainfo.revurderingsresultat)
-        assertEquals(fagsystemsbehandling.årsak, faktainfo.revurderingsårsak)
-        assertTrue { faktainfo.konsekvensForYtelser.isEmpty() }
+        faktainfo.tilbakekrevingsvalg shouldBe fagsystemsbehandling.tilbakekrevingsvalg
+        faktaFeilutbetalingDto.revurderingsvedtaksdato shouldBe fagsystemsbehandling.revurderingsvedtaksdato
+        faktainfo.revurderingsresultat shouldBe fagsystemsbehandling.resultat
+        faktainfo.revurderingsårsak shouldBe fagsystemsbehandling.årsak
+        faktainfo.konsekvensForYtelser.shouldBeEmpty()
     }
 
     private fun assertFeilutbetaltePerioder(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
-                                            hendelsestype: Hendelsestype?,
-                                            hendelsesundertype: Hendelsesundertype?) {
-        assertEquals(PeriodeDto(periode), faktaFeilutbetalingDto.totalFeilutbetaltPeriode)
-        assertEquals(BigDecimal.valueOf(1000000, 2), faktaFeilutbetalingDto.totaltFeilutbetaltBeløp)
+                                             hendelsestype: Hendelsestype?,
+                                             hendelsesundertype: Hendelsesundertype?) {
+        faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe PeriodeDto(periode)
+        faktaFeilutbetalingDto.totaltFeilutbetaltBeløp shouldBe BigDecimal.valueOf(1000000, 2)
 
-        assertEquals(1, faktaFeilutbetalingDto.feilutbetaltePerioder.size)
+        faktaFeilutbetalingDto.feilutbetaltePerioder.size shouldBe 1
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()
-        assertEquals(hendelsestype, feilutbetaltePeriode.hendelsestype)
-        assertEquals(hendelsesundertype, feilutbetaltePeriode.hendelsesundertype)
-        assertEquals(PeriodeDto(periode), feilutbetaltePeriode.periode)
+        feilutbetaltePeriode.hendelsestype shouldBe hendelsestype
+        feilutbetaltePeriode.hendelsesundertype shouldBe hendelsesundertype
+        feilutbetaltePeriode.periode shouldBe PeriodeDto(periode)
     }
 
 }

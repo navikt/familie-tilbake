@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.common.Periode
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
-import kotlin.test.assertEquals
 
 internal class LogiskPeriodeUtilTest {
 
@@ -22,10 +22,10 @@ internal class LogiskPeriodeUtilTest {
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
                                                                   periode2 to BigDecimal.valueOf(200)).toSortedMap())
 
-        assertEquals(1, resultat.size)
-        assertEquals(januar, resultat[0].fom)
-        assertEquals(mai, resultat[0].tom)
-        assertEquals(BigDecimal.valueOf(300), resultat[0].feilutbetaltBeløp)
+        resultat.size shouldBe 1
+        resultat[0].fom shouldBe januar
+        resultat[0].tom shouldBe mai
+        resultat[0].feilutbetaltBeløp shouldBe BigDecimal.valueOf(300)
     }
 
     @Test
@@ -36,13 +36,13 @@ internal class LogiskPeriodeUtilTest {
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
                                                                   periode2 to BigDecimal.valueOf(200)).toSortedMap())
 
-        assertEquals(2, resultat.size)
-        assertEquals(januar, resultat[0].fom)
-        assertEquals(februar, resultat[0].tom)
-        assertEquals(BigDecimal.valueOf(100), resultat[0].feilutbetaltBeløp)
+        resultat.size shouldBe 2
+        resultat[0].fom shouldBe januar
+        resultat[0].tom shouldBe februar
+        resultat[0].feilutbetaltBeløp shouldBe BigDecimal.valueOf(100)
 
-        assertEquals(april, resultat[1].fom)
-        assertEquals(mai, resultat[1].tom)
-        assertEquals(BigDecimal.valueOf(200), resultat[1].feilutbetaltBeløp)
+        resultat[1].fom shouldBe april
+        resultat[1].tom shouldBe mai
+        resultat[1].feilutbetaltBeløp shouldBe BigDecimal.valueOf(200)
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.behandling.batch
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldHaveSingleElement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -22,14 +24,11 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
@@ -87,12 +86,10 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandleAutomatisk skal opprette tasker når det finnes en behandling klar for automatisk saksbehandling`() {
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertTrue {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().shouldHaveSingleElement {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
         }
     }
 
@@ -104,13 +101,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
         brevsporingRepository.insert(Testdata.brevsporing)
 
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertFalse {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            }
-        }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
+        }.shouldBeFalse()
     }
 
     @Test
@@ -119,13 +114,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                                                         Venteårsak.AVVENTER_DOKUMENTASJON,
                                                         LocalDate.now().plusWeeks(2))
 
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertFalse {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            }
-        }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
+        }.shouldBeFalse()
     }
 
     @Test
@@ -134,13 +127,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                                               .copy(kontrollfelt = LocalDateTime.now()
                                                       .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS"))))
 
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertFalse {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            }
-        }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
+        }.shouldBeFalse()
     }
 
     @Test
@@ -148,13 +139,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
                                               .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432)))
 
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertFalse {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-            }
-        }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
+        }.shouldBeFalse()
     }
 
     @Test
@@ -162,14 +151,12 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         val task = taskRepository.save(Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString()))
         taskRepository.save(taskRepository.findById(task.id).get().copy(status = Status.FEILET))
 
-        assertDoesNotThrow { automatiskSaksbehandlingBatch.behandleAutomatisk() }
-        assertFalse {
-            taskRepository.findAll().any {
-                it.type == AutomatiskSaksbehandlingTask.TYPE &&
-                it.payload == behandling.id.toString()
-                it.status != Status.FEILET
-            }
-        }
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskRepository.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+            it.payload == behandling.id.toString()
+            it.status != Status.FEILET
+        }.shouldBeFalse()
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,

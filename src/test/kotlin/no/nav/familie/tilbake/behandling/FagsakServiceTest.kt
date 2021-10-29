@@ -1,5 +1,10 @@
 package no.nav.familie.tilbake.behandling
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -22,11 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
@@ -52,38 +52,37 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
 
-        assertEquals(eksternFagsakId, fagsakDto.eksternFagsakId)
-        assertEquals(Språkkode.NB, fagsakDto.språkkode)
-        assertEquals(Ytelsestype.BARNETRYGD, fagsakDto.ytelsestype)
-        assertEquals(Fagsystem.BA, fagsakDto.fagsystem)
+        fagsakDto.eksternFagsakId shouldBe eksternFagsakId
+        fagsakDto.språkkode shouldBe Språkkode.NB
+        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        fagsakDto.fagsystem shouldBe Fagsystem.BA
 
         val brukerDto = fagsakDto.bruker
-        assertEquals("123", brukerDto.personIdent)
-        assertEquals("testverdi", brukerDto.navn)
-        assertEquals(Kjønn.MANN, brukerDto.kjønn)
-        assertEquals(LocalDate.now().minusYears(20), brukerDto.fødselsdato)
+        brukerDto.personIdent shouldBe "123"
+        brukerDto.navn shouldBe "testverdi"
+        brukerDto.kjønn shouldBe Kjønn.MANN
+        brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
 
         val behandlinger = fagsakDto.behandlinger
-        assertEquals(1, behandlinger.size)
+        behandlinger.size shouldBe 1
         val behandlingsoppsummeringtDto = behandlinger.toList()[0]
-        assertEquals(behandling.id, behandlingsoppsummeringtDto.behandlingId)
-        assertEquals(behandling.eksternBrukId, behandlingsoppsummeringtDto.eksternBrukId)
-        assertEquals(behandling.status, behandlingsoppsummeringtDto.status)
-        assertEquals(behandling.type, behandlingsoppsummeringtDto.type)
+        behandlingsoppsummeringtDto.behandlingId shouldBe behandling.id
+        behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
+        behandlingsoppsummeringtDto.status shouldBe behandling.status
+        behandlingsoppsummeringtDto.type shouldBe behandling.type
     }
 
     @Test
     fun `hentFagsak skal ikke hente fagsak for barnetrygd når det ikke finnes`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        val exception = assertFailsWith<RuntimeException>(block =
-                                                          { fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId) })
-        assertEquals("Fagsak finnes ikke for Barnetrygd og $eksternFagsakId", exception.message)
+        val exception = shouldThrow<RuntimeException> { fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId) }
+        exception.message shouldBe "Fagsak finnes ikke for Barnetrygd og $eksternFagsakId"
     }
 
     @Test
     fun `finnesÅpenTilbakekrevingsbehandling skal returnere false om fagsak ikke finnes`() {
         val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, UUID.randomUUID().toString())
-        assertFalse { finnesBehandling.finnesÅpenBehandling }
+        finnesBehandling.finnesÅpenBehandling.shouldBeFalse()
     }
 
     @Test
@@ -94,7 +93,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
         val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
-        assertFalse { finnesBehandling.finnesÅpenBehandling }
+        finnesBehandling.finnesÅpenBehandling.shouldBeFalse()
     }
 
     @Test
@@ -103,7 +102,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
         val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
-        assertTrue { finnesBehandling.finnesÅpenBehandling }
+        finnesBehandling.finnesÅpenBehandling.shouldBeTrue()
     }
 
     @Test
@@ -112,18 +111,17 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, Ytelsestype.BARNETRYGD)
-        assertFalse { respons.kanBehandlingOpprettes }
-        assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes allerede en åpen tilbakekrevingsbehandling. Den ligger i saksoversikten.", respons.melding)
+        respons.kanBehandlingOpprettes.shouldBeFalse()
+        respons.kravgrunnlagsreferanse.shouldBeNull()
+        respons.melding shouldBe "Det finnes allerede en åpen tilbakekrevingsbehandling. Den ligger i saksoversikten."
     }
 
     @Test
     fun `kanBehandlingOpprettesManuelt skal returnere false når det ikke finnes et frakoblet kravgrunnlag`() {
         val respons = fagsakService.kanBehandlingOpprettesManuelt(UUID.randomUUID().toString(), Ytelsestype.BARNETRYGD)
-        assertFalse { respons.kanBehandlingOpprettes }
-        assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes ingen feilutbetaling på saken, så du kan ikke opprette tilbakekrevingsbehandling.",
-                     respons.melding)
+        respons.kanBehandlingOpprettes.shouldBeFalse()
+        respons.kravgrunnlagsreferanse.shouldBeNull()
+        respons.melding shouldBe "Det finnes ingen feilutbetaling på saken, så du kan ikke opprette tilbakekrevingsbehandling."
     }
 
     @Test
@@ -138,12 +136,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""))
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
-        assertFalse { respons.kanBehandlingOpprettes }
-        assertNull(respons.kravgrunnlagsreferanse)
-        assertEquals("Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
-                     "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
-                     "ta kontakt med brukerstøtte for å rapportere feilen.",
-                     respons.melding)
+        respons.kanBehandlingOpprettes.shouldBeFalse()
+        respons.kravgrunnlagsreferanse.shouldBeNull()
+        respons.melding shouldBe "Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
+                "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
+                "ta kontakt med brukerstøtte for å rapportere feilen."
+
     }
 
     @Test
@@ -152,9 +150,9 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.insert(mottattXml)
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
-        assertTrue { respons.kanBehandlingOpprettes }
-        assertEquals(mottattXml.referanse, respons.kravgrunnlagsreferanse)
-        assertEquals("Det er mulig å opprette behandling manuelt.", respons.melding)
+        respons.kanBehandlingOpprettes.shouldBeTrue()
+        respons.kravgrunnlagsreferanse shouldBe mottattXml.referanse
+        respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
     private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {

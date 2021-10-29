@@ -1,12 +1,13 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -21,10 +22,10 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
 
         val lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
 
-        assertThat(lagretØkonomiXmlMottattArkiv).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(økonomiXmlMottattArkiv)
-        assertEquals(1, lagretØkonomiXmlMottattArkiv.versjon)
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(økonomiXmlMottattArkiv,
+                                                                          ØkonomiXmlMottattArkiv::sporbar,
+                                                                          ØkonomiXmlMottattArkiv::versjon)
+        lagretØkonomiXmlMottattArkiv.versjon shouldBe 1
     }
 
     @Test
@@ -36,9 +37,10 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
         økonomiXmlMottattArkivRepository.update(oppdatertØkonomiXmlMottattArkiv)
 
         lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
-        assertThat(lagretØkonomiXmlMottattArkiv)
-                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertØkonomiXmlMottattArkiv)
-        assertEquals(2, lagretØkonomiXmlMottattArkiv.versjon)
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(oppdatertØkonomiXmlMottattArkiv,
+                                                                          ØkonomiXmlMottattArkiv::sporbar,
+                                                                          ØkonomiXmlMottattArkiv::versjon)
+        lagretØkonomiXmlMottattArkiv.versjon shouldBe 2
     }
 
 }

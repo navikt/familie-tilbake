@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -11,7 +12,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -32,8 +32,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -48,8 +48,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NN,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -66,8 +66,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -85,8 +85,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
@@ -104,8 +104,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  false)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -122,8 +122,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 sjette ledd")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 sjette ledd"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -140,8 +140,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NN,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdlova § 22-15 sjette ledd")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isFalse()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15 sjette ledd"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
     @Test
@@ -160,8 +160,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("foreldelsesloven §§ 2 og 3")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "foreldelsesloven §§ 2 og 3"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
 
     }
 
@@ -183,8 +183,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
 
     }
 
@@ -205,8 +205,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
@@ -228,8 +228,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
@@ -252,8 +252,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
@@ -268,8 +268,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak).isEqualTo("folketrygdloven § 22-15 og forvaltningsloven § 35 c)")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og forvaltningsloven § 35 c)"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
@@ -291,9 +291,8 @@ class VedtakHjemmelTest {
                                                  Språkkode.NB,
                                                  true)
 
-        assertThat(hbHjemmel.lovhjemmelVedtak)
-                .isEqualTo("folketrygdloven §§ 22-15 og 22-17 a, foreldelsesloven §§ 2, 3 og 10 og forvaltningsloven § 35 a)")
-        assertThat(hbHjemmel.lovhjemmelFlertall).isTrue()
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a, foreldelsesloven §§ 2, 3 og 10 og forvaltningsloven § 35 a)"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     private fun lagForeldelseperiode(periode: Periode,

@@ -1,5 +1,10 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -38,9 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
@@ -143,11 +145,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId,
                                                                                                Ytelsestype.BARNETRYGD)
-        assertTrue { arkivXmlene.isNotEmpty() }
+        arkivXmlene.shouldNotBeEmpty()
 
-        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
+        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
 
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) }
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -167,11 +169,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId,
                                                                                                Ytelsestype.BARNETRYGD)
-        assertTrue { arkivXmlene.isNotEmpty() }
+        arkivXmlene.shouldNotBeEmpty()
 
-        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
+        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
 
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandlingId) }
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandlingId).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
@@ -194,20 +196,20 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId,
                                                                                                Ytelsestype.BARNETRYGD)
-        assertTrue { arkivXmlene.isNotEmpty() }
-        assertEquals(2, arkivXmlene.size)
+        arkivXmlene.shouldNotBeEmpty()
+        arkivXmlene.size shouldBe 2
 
-        assertTrue { (økonomiXmlMottattRepository.findAll() as List<*>).isEmpty() }
+        (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
 
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) }
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId).shouldBeTrue()
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandlingId)
-        assertTrue { kravgrunnlagene.any { it.aktiv && it.kravstatuskode == Kravstatuskode.ENDRET } }
-        assertTrue { kravgrunnlagene.any { !it.aktiv && it.sperret && it.kravstatuskode == Kravstatuskode.NYTT } }
+        kravgrunnlagene.any { it.aktiv && it.kravstatuskode == Kravstatuskode.ENDRET }.shouldBeTrue()
+        kravgrunnlagene.any { !it.aktiv && it.sperret && it.kravstatuskode == Kravstatuskode.NYTT }.shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        assertFalse { behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.VERGE } }
+        behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.VERGE }.shouldBeFalse()
     }
 
     private fun opprettBehandling(finnesVerge: Boolean): Behandling {
@@ -250,13 +252,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingsstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                               behandlingssteg: Behandlingssteg,
-                                               behandlingsstegstatus: Behandlingsstegstatus) {
-        assertTrue {
-            behandlingsstegstilstand.any {
-                it.behandlingssteg == behandlingssteg &&
-                it.behandlingsstegsstatus == behandlingsstegstatus
-            }
-        }
+                                                behandlingssteg: Behandlingssteg,
+                                                behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstand.any {
+            it.behandlingssteg == behandlingssteg &&
+            it.behandlingsstegsstatus == behandlingsstegstatus
+        }.shouldBeTrue()
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -28,7 +29,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.math.BigDecimal
@@ -57,7 +57,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(data)
 
         val fasit = les("/vedtaksbrev/vedlegg/vedlegg_uten_renter.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -67,7 +67,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(data)
 
         val fasit = les("/vedtaksbrev/vedlegg/vedlegg_uten_renter_nn.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -77,7 +77,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(data)
 
         val fasit = les("/vedtaksbrev/vedlegg/vedlegg_uten_skatt.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     private fun getVedtaksbrevData(språkkode: Språkkode): HbVedtaksbrevsdata {
@@ -214,7 +214,7 @@ class TekstformatererVedtaksbrevVedleggTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(data)
 
         val fasit = les("/vedtaksbrev/vedlegg/vedlegg_med_og_uten_renter.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
 

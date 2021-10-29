@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -19,9 +22,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.Properties
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
 
@@ -146,20 +146,18 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     private fun assertBrevsporing(brevtype: Brevtype) {
         val brevsporing = brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId,
                                                                                                                  brevtype)
-        assertNotNull(brevsporing)
-        assertEquals(dokumentId, brevsporing.dokumentId)
-        assertEquals(journalpostId, brevsporing.journalpostId)
+        brevsporing.shouldNotBeNull()
+        brevsporing.dokumentId shouldBe dokumentId
+        brevsporing.journalpostId shouldBe journalpostId
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                    aktør: Aktør) {
-        assertTrue {
-            taskRepository.findByStatus(Status.UBEHANDLET).any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktør"] &&
-                behandlingId.toString() == it.payload
-            }
+                                     aktør: Aktør) {
+        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+            LagHistorikkinnslagTask.TYPE == it.type &&
+            historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+            aktør.name == it.metadata["aktør"] &&
+            behandlingId.toString() == it.payload
         }
     }
 }

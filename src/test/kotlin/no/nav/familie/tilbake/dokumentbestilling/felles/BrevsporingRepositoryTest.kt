@@ -1,19 +1,20 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertEquals
 
 internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -40,8 +41,8 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
 
-        assertThat(lagretBrevsporing).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(brevsporing)
-        assertEquals(1, lagretBrevsporing.versjon)
+        lagretBrevsporing.shouldBeEqualToComparingFieldsExcept(brevsporing, Brevsporing::sporbar, Brevsporing::versjon)
+        lagretBrevsporing.versjon shouldBe 1
     }
 
     @Test
@@ -53,10 +54,8 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
         brevsporingRepository.update(oppdatertBrevsporing)
 
         lagretBrevsporing = brevsporingRepository.findByIdOrThrow(brevsporing.id)
-        assertThat(lagretBrevsporing).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertBrevsporing)
-        assertEquals(2, lagretBrevsporing.versjon)
+        lagretBrevsporing.shouldBeEqualToComparingFieldsExcept(oppdatertBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
+        lagretBrevsporing.versjon shouldBe 2
     }
 
     @Test
@@ -70,7 +69,7 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
                 brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(Testdata.behandling.id,
                                                                                                        Brevtype.VARSEL)
 
-        assertThat(funnetBrevsporing).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(nyesteBrevsporing)
+        funnetBrevsporing?.shouldBeEqualToComparingFieldsExcept(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
 
     }
 

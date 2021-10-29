@@ -1,5 +1,10 @@
 package no.nav.familie.tilbake.behandling.task
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -34,7 +39,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
@@ -42,11 +46,6 @@ import org.springframework.util.concurrent.SettableListenableFuture
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
@@ -113,29 +112,29 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 .findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                  ytelsestype,
                                                                  eksternId)
-        assertNotNull(requestSendt)
-        assertEquals(requestId, requestSendt.id)
-        assertEquals(eksternFagsakId, requestSendt.eksternFagsakId)
-        assertEquals(ytelsestype, requestSendt.ytelsestype)
-        assertEquals(eksternId, requestSendt.eksternId)
-        assertNull(requestSendt.respons)
+        requestSendt.shouldNotBeNull()
+        requestSendt.id shouldBe requestId
+        requestSendt.eksternFagsakId shouldBe eksternFagsakId
+        requestSendt.ytelsestype shouldBe ytelsestype
+        requestSendt.eksternId shouldBe eksternId
+        requestSendt.respons.shouldBeNull()
     }
 
     @Test
     fun `doTask skal ikke opprette behandling når responsen ikke har mottatt fra fagsystem`() {
         opprettBehandlingManueltTask.preCondition(lagTask())
 
-        val exception = assertFailsWith<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
-        assertEquals("HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
-                     "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype," +
-                     "eksternId=$eksternId." +
-                     "Task-en kan kjøre på nytt manuelt når respons-en er mottatt", exception.message)
+        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
+        exception.message shouldBe "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
+                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype," +
+                "eksternId=$eksternId." +
+                "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
 
         val requestSendt = requestSendtRepository
                 .findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                  ytelsestype,
                                                                  eksternId)
-        assertNotNull(requestSendt)
+        requestSendt.shouldNotBeNull()
     }
 
     @Test
@@ -149,9 +148,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
-        val exception = assertFailsWith<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
-        assertEquals("Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                     "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt.", exception.message)
+        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(lagTask()) }
+        exception.message shouldBe "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+                "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
     }
 
     @Test
@@ -168,30 +167,30 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
         økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
 
-        assertDoesNotThrow { opprettBehandlingManueltTask.doTask(lagTask()) }
+        opprettBehandlingManueltTask.doTask(lagTask())
 
-        assertTrue { taskRepository.findAll().any { FinnKravgrunnlagTask.TYPE == it.type } }
+        taskRepository.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
 
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-        assertNotNull(behandling)
-        assertTrue { behandling.manueltOpprettet }
-        assertNull(behandling.aktivtVarsel)
-        assertNull(behandling.aktivVerge)
-        assertEquals(eksternId, behandling.aktivFagsystemsbehandling.eksternId)
+        behandling.shouldNotBeNull()
+        behandling.manueltOpprettet.shouldBeTrue()
+        behandling.aktivtVarsel.shouldBeNull()
+        behandling.aktivVerge.shouldBeNull()
+        behandling.aktivFagsystemsbehandling.eksternId shouldBe eksternId
 
         val fagsystemsbehandling = respons.hentFagsystemsbehandling
-        assertNotNull(fagsystemsbehandling)
-        assertEquals(fagsystemsbehandling.faktainfo.revurderingsresultat, behandling.aktivFagsystemsbehandling.resultat)
-        assertEquals(fagsystemsbehandling.faktainfo.revurderingsårsak, behandling.aktivFagsystemsbehandling.årsak)
-        assertEquals(fagsystemsbehandling.enhetId, behandling.behandlendeEnhet)
-        assertEquals(fagsystemsbehandling.enhetsnavn, behandling.behandlendeEnhetsNavn)
-        assertEquals("bb1234", behandling.ansvarligSaksbehandler)
-        assertNull(behandling.ansvarligBeslutter)
-        assertEquals(Behandlingsstatus.UTREDES, behandling.status)
+        fagsystemsbehandling.shouldNotBeNull()
+        behandling.aktivFagsystemsbehandling.resultat shouldBe fagsystemsbehandling.faktainfo.revurderingsresultat
+        behandling.aktivFagsystemsbehandling.årsak shouldBe fagsystemsbehandling.faktainfo.revurderingsårsak
+        behandling.behandlendeEnhet shouldBe fagsystemsbehandling.enhetId
+        behandling.behandlendeEnhetsNavn shouldBe fagsystemsbehandling.enhetsnavn
+        behandling.ansvarligSaksbehandler shouldBe "bb1234"
+        behandling.ansvarligBeslutter.shouldBeNull()
+        behandling.status shouldBe Behandlingsstatus.UTREDES
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        assertEquals(fagsystemsbehandling.språkkode, fagsak.bruker.språkkode)
-        assertEquals(FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype), fagsak.fagsystem)
+        fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
+        fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
 
     }
 

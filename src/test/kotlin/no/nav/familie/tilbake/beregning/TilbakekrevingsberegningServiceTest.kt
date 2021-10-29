@@ -1,5 +1,10 @@
 package no.nav.familie.tilbake.beregning
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.bigdecimal.shouldBeZero
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -24,7 +29,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,8 +36,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
@@ -71,16 +73,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.periode).isEqualTo(periode)
-        assertThat(r.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(r.vurdering).isEqualTo(Aktsomhet.FORSETT)
-        assertThat(r.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
-        assertThat(r.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(r.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(r.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.FULL_TILBAKEBETALING)
+        r.periode shouldBe periode
+        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+        r.vurdering shouldBe Aktsomhet.FORSETT
+        r.renteprosent shouldBe BigDecimal.valueOf(10)
+        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        r.manueltSattTilbakekrevingsbeløp shouldBe null
+        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -91,15 +93,15 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
 
         val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
-        assertEquals(1, beregningsresultat.beregningsresultatsperioder.size)
+        beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
-        assertThat(beregningsresultatsperiode.periode).isEqualTo(PeriodeDto(periode))
-        assertThat(beregningsresultatsperiode.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(beregningsresultatsperiode.vurdering).isEqualTo(Aktsomhet.FORSETT)
-        assertThat(beregningsresultatsperiode.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
-        assertThat(beregningsresultatsperiode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(beregningsresultatsperiode.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.FULL_TILBAKEBETALING)
+        beregningsresultatsperiode.periode shouldBe PeriodeDto(periode)
+        beregningsresultatsperiode.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+        beregningsresultatsperiode.vurdering shouldBe Aktsomhet.FORSETT
+        beregningsresultatsperiode.renteprosent shouldBe BigDecimal.valueOf(10)
+        beregningsresultatsperiode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        beregningsresultatsperiode.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -109,18 +111,18 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.periode).isEqualTo(periode)
-        assertThat(r.tilbakekrevingsbeløp).isZero()
-        assertThat(r.vurdering).isEqualTo(AnnenVurdering.FORELDET)
-        assertThat(r.renteprosent).isNull()
-        assertThat(r.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(r.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(r.andelAvBeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(r.rentebeløp).isZero()
-        assertThat(r.tilbakekrevingsbeløpUtenRenter).isZero()
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.INGEN_TILBAKEBETALING)
+        r.periode shouldBe periode
+        r.tilbakekrevingsbeløp.shouldBeZero()
+        r.vurdering shouldBe AnnenVurdering.FORELDET
+        r.renteprosent shouldBe null
+        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        r.manueltSattTilbakekrevingsbeløp shouldBe null
+        r.andelAvBeløp shouldBe BigDecimal.ZERO
+        r.rentebeløp.shouldBeZero()
+        r.tilbakekrevingsbeløpUtenRenter.shouldBeZero()
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.INGEN_TILBAKEBETALING
     }
 
     @Test
@@ -130,15 +132,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
 
         val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
-        assertEquals(1, beregningsresultat.beregningsresultatsperioder.size)
+        beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
-        assertThat(beregningsresultatsperiode.periode).isEqualTo(PeriodeDto(periode))
-        assertThat(beregningsresultatsperiode.tilbakekrevingsbeløp).isZero()
-        assertThat(beregningsresultatsperiode.vurdering).isEqualTo(AnnenVurdering.FORELDET)
-        assertThat(beregningsresultatsperiode.renteprosent).isNull()
-        assertThat(beregningsresultatsperiode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(beregningsresultatsperiode.andelAvBeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.INGEN_TILBAKEBETALING)
+        beregningsresultatsperiode.periode shouldBe PeriodeDto(periode)
+        beregningsresultatsperiode.tilbakekrevingsbeløp.shouldNotBeNull()
+        beregningsresultatsperiode.tilbakekrevingsbeløp!!.shouldBeZero()
+        beregningsresultatsperiode.vurdering shouldBe AnnenVurdering.FORELDET
+        beregningsresultatsperiode.renteprosent shouldBe null
+        beregningsresultatsperiode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        beregningsresultatsperiode.andelAvBeløp shouldBe BigDecimal.ZERO
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.INGEN_TILBAKEBETALING
     }
 
     @Test
@@ -149,18 +152,18 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.periode).isEqualTo(periode)
-        assertThat(r.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(r.vurdering).isEqualTo(Aktsomhet.FORSETT)
-        assertThat(r.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
-        assertThat(r.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(r.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(r.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(r.skattebeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(r.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.FULL_TILBAKEBETALING)
+        r.periode shouldBe periode
+        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+        r.vurdering shouldBe Aktsomhet.FORSETT
+        r.renteprosent shouldBe BigDecimal.valueOf(10)
+        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        r.manueltSattTilbakekrevingsbeløp shouldBe null
+        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+        r.skattebeløp shouldBe BigDecimal.valueOf(1000)
+        r.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -171,16 +174,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
 
         val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
-        assertEquals(1, beregningsresultat.beregningsresultatsperioder.size)
+        beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
-        assertThat(beregningsresultatsperiode.periode).isEqualTo(PeriodeDto(periode))
-        assertThat(beregningsresultatsperiode.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(11000))
-        assertThat(beregningsresultatsperiode.vurdering).isEqualTo(Aktsomhet.FORSETT)
-        assertThat(beregningsresultatsperiode.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
-        assertThat(beregningsresultatsperiode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(beregningsresultatsperiode.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(beregningsresultatsperiode.tilbakekrevesBeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.FULL_TILBAKEBETALING)
+        beregningsresultatsperiode.periode shouldBe PeriodeDto(periode)
+        beregningsresultatsperiode.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
+        beregningsresultatsperiode.vurdering shouldBe Aktsomhet.FORSETT
+        beregningsresultatsperiode.renteprosent shouldBe BigDecimal.valueOf(10)
+        beregningsresultatsperiode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
+        beregningsresultatsperiode.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+        beregningsresultatsperiode.tilbakekrevesBeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -191,10 +194,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.utbetaltYtelsesbeløp).isEqualByComparingTo(BigDecimal.valueOf(10000))
-        assertThat(r.riktigYtelsesbeløp).isEqualByComparingTo(BigDecimal.ZERO)
+        r.utbetaltYtelsesbeløp shouldBe BigDecimal.valueOf(10000)
+        r.riktigYtelsesbeløp shouldBe BigDecimal.ZERO
     }
 
     @Test
@@ -221,11 +224,11 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderingMedForsett(Testdata.behandling.id, logiskPeriode)
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.periode).isEqualTo(logiskPeriode)
-        assertThat(r.utbetaltYtelsesbeløp).isEqualByComparingTo(utbetalt1.add(utbetalt2))
-        assertThat(r.riktigYtelsesbeløp).isEqualByComparingTo(nyttBeløp1.add(nyttBeløp2))
+        r.periode shouldBe logiskPeriode
+        r.utbetaltYtelsesbeløp shouldBe utbetalt1.add(utbetalt2)
+        r.riktigYtelsesbeløp shouldBe nyttBeløp1.add(nyttBeløp2)
     }
 
     @Test
@@ -248,18 +251,18 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
         val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
-        assertThat(resultat).hasSize(1)
+        resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
-        assertThat(r.periode).isEqualTo(logiskPeriode)
-        assertThat(r.tilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(22000))
-        assertThat(r.vurdering).isEqualTo(Aktsomhet.FORSETT)
-        assertThat(r.renteprosent).isEqualByComparingTo(BigDecimal.valueOf(10))
-        assertThat(r.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(20000))
-        assertThat(r.manueltSattTilbakekrevingsbeløp).isNull()
-        assertThat(r.andelAvBeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(r.skattebeløp).isEqualByComparingTo(BigDecimal.valueOf(2000))
-        assertThat(r.tilbakekrevingsbeløpEtterSkatt).isEqualByComparingTo(BigDecimal.valueOf(20000))
-        assertThat(beregningsresultat.vedtaksresultat).isEqualByComparingTo(Vedtaksresultat.FULL_TILBAKEBETALING)
+        r.periode shouldBe logiskPeriode
+        r.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(22000)
+        r.vurdering shouldBe Aktsomhet.FORSETT
+        r.renteprosent shouldBe BigDecimal.valueOf(10)
+        r.feilutbetaltBeløp shouldBe BigDecimal.valueOf(20000)
+        r.manueltSattTilbakekrevingsbeløp shouldBe null
+        r.andelAvBeløp shouldBe BigDecimal.valueOf(100)
+        r.skattebeløp shouldBe BigDecimal.valueOf(2000)
+        r.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(20000)
+        beregningsresultat.vedtaksresultat shouldBe Vedtaksresultat.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -292,43 +295,41 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                                                                                                            LocalDate.of(2017,
                                                                                                                         2,
                                                                                                                         28))))
-        assertEquals(2, beregnetPerioderDto.beregnetPerioder.size)
-        assertEquals(PeriodeDto(LocalDate.of(2017, 1, 1),
-                                LocalDate.of(2017, 1, 31)), beregnetPerioderDto.beregnetPerioder[0].periode)
-        assertEquals(BigDecimal("10000"), beregnetPerioderDto.beregnetPerioder[0].feilutbetaltBeløp)
-        assertEquals(PeriodeDto(LocalDate.of(2017, 2, 1),
-                                LocalDate.of(2017, 2, 28)), beregnetPerioderDto.beregnetPerioder[1].periode)
-        assertEquals(BigDecimal("10000"), beregnetPerioderDto.beregnetPerioder[1].feilutbetaltBeløp)
+        beregnetPerioderDto.beregnetPerioder.size shouldBe 2
+        beregnetPerioderDto.beregnetPerioder[0].periode shouldBe PeriodeDto(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 1, 31))
+        beregnetPerioderDto.beregnetPerioder[0].feilutbetaltBeløp shouldBe BigDecimal("10000")
+        beregnetPerioderDto.beregnetPerioder[1].periode shouldBe PeriodeDto(LocalDate.of(2017, 2, 1), LocalDate.of(2017, 2, 28))
+        beregnetPerioderDto.beregnetPerioder[1].feilutbetaltBeløp shouldBe BigDecimal("10000")
     }
 
     @Test
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke starter første dato`() {
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
                                                         perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
                                                                                      LocalDate.of(2017, 1, 31)),
                                                                           PeriodeDto(LocalDate.of(2017, 2, 16),
                                                                                      LocalDate.of(2017, 2, 28))))
         }
-        assertEquals("Periode med ${
+        exception.message shouldBe "Periode med ${
             PeriodeDto(LocalDate.of(2017, 2, 16),
                        LocalDate.of(2017, 2, 28))
-        } er ikke i hele måneder", exception.message)
+        } er ikke i hele måneder"
     }
 
     @Test
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke slutter siste dato`() {
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             tilbakekrevingsberegningService.beregnBeløp(behandlingId = Testdata.behandling.id,
                                                         perioder = listOf(PeriodeDto(LocalDate.of(2017, 1, 1),
                                                                                      LocalDate.of(2017, 1, 27)),
                                                                           PeriodeDto(LocalDate.of(2017, 2, 1),
                                                                                      LocalDate.of(2017, 2, 28))))
         }
-        assertEquals("Periode med ${
+        exception.message shouldBe "Periode med ${
             PeriodeDto(LocalDate.of(2017, 1, 1),
                        LocalDate.of(2017, 1, 27))
-        } er ikke i hele måneder", exception.message)
+        } er ikke i hele måneder"
     }
 
     private fun lagVilkårsvurderingMedForsett(behandlingId: UUID, vararg perioder: Periode) {

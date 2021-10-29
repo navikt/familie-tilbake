@@ -1,5 +1,9 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -27,7 +31,6 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -111,19 +114,19 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(data, "Du må betale tilbake overgangsstønaden")
 
-        assertThat(resultat).hasSize(4)
-        assertThat(resultat[0].avsnittstype).isEqualTo(Avsnittstype.OPPSUMMERING)
-        assertThat(resultat[0].underavsnittsliste).hasSize(1)
-        assertThat(resultat[0].underavsnittsliste[0].fritekstTillatt).isTrue()
-        assertThat(resultat[1].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
-        assertThat(resultat[1].underavsnittsliste).hasSize(6)
-        assertThat(resultat[1].underavsnittsliste.filter { it.fritekstTillatt }.size).isEqualTo(4)
-        assertThat(resultat[2].avsnittstype).isEqualTo(Avsnittstype.PERIODE)
-        assertThat(resultat[2].underavsnittsliste).hasSize(5)
-        assertThat(resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size).isEqualTo(3)
-        assertThat(resultat[3].avsnittstype).isEqualTo(Avsnittstype.TILLEGGSINFORMASJON)
-        assertThat(resultat[3].underavsnittsliste).hasSize(11)
-        resultat[3].underavsnittsliste.forEach { assertThat(it.fritekstTillatt).isFalse() }
+        resultat.shouldHaveSize(4)
+        resultat[0].avsnittstype shouldBe Avsnittstype.OPPSUMMERING
+        resultat[0].underavsnittsliste.shouldHaveSize(1)
+        resultat[0].underavsnittsliste[0].fritekstTillatt shouldBe true
+        resultat[1].avsnittstype shouldBe Avsnittstype.PERIODE
+        resultat[1].underavsnittsliste.shouldHaveSize(6)
+        resultat[1].underavsnittsliste.filter { it.fritekstTillatt }.size shouldBe 4
+        resultat[2].avsnittstype shouldBe Avsnittstype.PERIODE
+        resultat[2].underavsnittsliste.shouldHaveSize(5)
+        resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size shouldBe 3
+        resultat[3].avsnittstype shouldBe Avsnittstype.TILLEGGSINFORMASJON
+        resultat[3].underavsnittsliste.shouldHaveSize(11)
+        resultat[3].underavsnittsliste.forEach { it.fritekstTillatt shouldBe false }
     }
 
 
@@ -138,21 +141,21 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, Avsnitt(), null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift i brevet")
+        resultat.overskrift shouldBe "Hovedoverskrift i brevet"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        assertThat(underavsnitt).hasSize(4)
-        assertThat(underavsnitt[0].overskrift).isNull()
-        assertThat(underavsnitt[0].brødtekst).isEqualTo("Brødtekst første avsnitt")
-        assertThat(underavsnitt[0].fritekstTillatt).isFalse
-        assertThat(underavsnitt[1].overskrift).isNull()
-        assertThat(underavsnitt[1].brødtekst).isEqualTo("Brødtekst andre avsnitt")
-        assertThat(underavsnitt[1].fritekstTillatt).isFalse
-        assertThat(underavsnitt[2].overskrift).isEqualTo("underoverskrift")
-        assertThat(underavsnitt[2].brødtekst).isEqualTo("Brødtekst tredje avsnitt")
-        assertThat(underavsnitt[2].fritekstTillatt).isFalse
-        assertThat(underavsnitt[3].overskrift).isEqualTo("Avsluttende overskrift uten etterfølgende tekst")
-        assertThat(underavsnitt[3].brødtekst).isNull()
-        assertThat(underavsnitt[3].fritekstTillatt).isTrue
+        underavsnitt.shouldHaveSize(4)
+        underavsnitt[0].overskrift shouldBe null
+        underavsnitt[0].brødtekst shouldBe "Brødtekst første avsnitt"
+        underavsnitt[0].fritekstTillatt.shouldBeFalse()
+        underavsnitt[1].overskrift shouldBe null
+        underavsnitt[1].brødtekst shouldBe "Brødtekst andre avsnitt"
+        underavsnitt[1].fritekstTillatt.shouldBeFalse()
+        underavsnitt[2].overskrift shouldBe "underoverskrift"
+        underavsnitt[2].brødtekst shouldBe "Brødtekst tredje avsnitt"
+        underavsnitt[2].fritekstTillatt.shouldBeFalse()
+        underavsnitt[3].overskrift shouldBe "Avsluttende overskrift uten etterfølgende tekst"
+        underavsnitt[3].brødtekst shouldBe null
+        underavsnitt[3].fritekstTillatt.shouldBeTrue()
     }
 
     @Test
@@ -166,18 +169,18 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, Avsnitt(), null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift i brevet")
+        resultat.overskrift shouldBe "Hovedoverskrift i brevet"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        assertThat(underavsnitt).hasSize(3)
-        assertThat(underavsnitt[0].overskrift).isNull()
-        assertThat(underavsnitt[0].brødtekst).isEqualTo("Brødtekst første avsnitt")
-        assertThat(underavsnitt[0].fritekstTillatt).isTrue
-        assertThat(underavsnitt[1].overskrift).isEqualTo("underoverskrift")
-        assertThat(underavsnitt[1].brødtekst).isEqualTo("Brødtekst andre avsnitt")
-        assertThat(underavsnitt[1].fritekstTillatt).isFalse
-        assertThat(underavsnitt[2].overskrift).isEqualTo("Avsluttende overskrift uten etterfølgende tekst")
-        assertThat(underavsnitt[2].brødtekst).isNull()
-        assertThat(underavsnitt[2].fritekstTillatt).isFalse
+        underavsnitt.shouldHaveSize(3)
+        underavsnitt[0].overskrift shouldBe null
+        underavsnitt[0].brødtekst shouldBe "Brødtekst første avsnitt"
+        underavsnitt[0].fritekstTillatt.shouldBeTrue()
+        underavsnitt[1].overskrift shouldBe "underoverskrift"
+        underavsnitt[1].brødtekst shouldBe "Brødtekst andre avsnitt"
+        underavsnitt[1].fritekstTillatt.shouldBeFalse()
+        underavsnitt[2].overskrift shouldBe "Avsluttende overskrift uten etterfølgende tekst"
+        underavsnitt[2].brødtekst shouldBe null
+        underavsnitt[2].fritekstTillatt.shouldBeFalse()
     }
 
     @Test
@@ -191,18 +194,18 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
+        resultat.overskrift shouldBe "Hovedoverskrift"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        assertThat(underavsnitt).hasSize(3)
-        assertThat(underavsnitt[0].overskrift).isEqualTo("underoverskrift 1")
-        assertThat(underavsnitt[0].brødtekst).isNull()
-        assertThat(underavsnitt[0].fritekstTillatt).isTrue
-        assertThat(underavsnitt[1].overskrift).isNull()
-        assertThat(underavsnitt[1].brødtekst).isEqualTo("Brødtekst første avsnitt")
-        assertThat(underavsnitt[1].fritekstTillatt).isFalse
-        assertThat(underavsnitt[2].overskrift).isEqualTo("underoverskrift 2")
-        assertThat(underavsnitt[2].brødtekst).isEqualTo("Brødtekst andre avsnitt")
-        assertThat(underavsnitt[2].fritekstTillatt).isFalse
+        underavsnitt.shouldHaveSize(3)
+        underavsnitt[0].overskrift shouldBe "underoverskrift 1"
+        underavsnitt[0].brødtekst shouldBe null
+        underavsnitt[0].fritekstTillatt.shouldBeTrue()
+        underavsnitt[1].overskrift shouldBe null
+        underavsnitt[1].brødtekst shouldBe "Brødtekst første avsnitt"
+        underavsnitt[1].fritekstTillatt.shouldBeFalse()
+        underavsnitt[2].overskrift shouldBe "underoverskrift 2"
+        underavsnitt[2].brødtekst shouldBe "Brødtekst andre avsnitt"
+        underavsnitt[2].fritekstTillatt.shouldBeFalse()
     }
 
     @Test
@@ -212,13 +215,13 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
+        resultat.overskrift shouldBe "Hovedoverskrift"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        //assertThat(underavsnitt).hasSize(1);
-        assertThat(underavsnitt[0].overskrift).isEqualTo("underoverskrift 1")
-        assertThat(underavsnitt[0].brødtekst).isNull()
-        assertThat(underavsnitt[0].fritekstTillatt).isTrue
-        assertThat(underavsnitt[0].fritekst).isEqualTo("fritekst linje 1\nfritekst linje2")
+        //underavsnitt.shouldHaveSize(1);
+        underavsnitt[0].overskrift shouldBe "underoverskrift 1"
+        underavsnitt[0].brødtekst shouldBe null
+        underavsnitt[0].fritekstTillatt.shouldBeTrue()
+        underavsnitt[0].fritekst shouldBe "fritekst linje 1\nfritekst linje2"
     }
 
     @Test
@@ -229,19 +232,19 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
+        resultat.overskrift shouldBe "Hovedoverskrift"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        assertThat(underavsnitt).hasSize(2)
-        assertThat(underavsnitt[0].overskrift).isEqualTo("underoverskrift 1")
-        assertThat(underavsnitt[0].brødtekst).isNull()
-        assertThat(underavsnitt[0].fritekstTillatt).isTrue
-        assertThat(underavsnitt[0].fritekstPåkrevet).isTrue
-        assertThat(underavsnitt[0].fritekst).isEqualTo("")
-        assertThat(underavsnitt[1].overskrift).isEqualTo("underoverskrift 2")
-        assertThat(underavsnitt[1].brødtekst).isNull()
-        assertThat(underavsnitt[1].fritekstTillatt).isTrue
-        assertThat(underavsnitt[1].fritekstPåkrevet).isFalse
-        assertThat(underavsnitt[1].fritekst).isEqualTo("")
+        underavsnitt.shouldHaveSize(2)
+        underavsnitt[0].overskrift shouldBe "underoverskrift 1"
+        underavsnitt[0].brødtekst shouldBe null
+        underavsnitt[0].fritekstTillatt.shouldBeTrue()
+        underavsnitt[0].fritekstPåkrevet.shouldBeTrue()
+        underavsnitt[0].fritekst shouldBe ""
+        underavsnitt[1].overskrift shouldBe "underoverskrift 2"
+        underavsnitt[1].brødtekst shouldBe null
+        underavsnitt[1].fritekstTillatt.shouldBeTrue()
+        underavsnitt[1].fritekstPåkrevet.shouldBeFalse()
+        underavsnitt[1].fritekst shouldBe ""
     }
 
     @Test
@@ -255,14 +258,14 @@ class AvsnittUtilTest {
 
         val resultat = AvsnittUtil.parseTekst(tekst, avsnitt, null)
 
-        assertThat(resultat.overskrift).isEqualTo("Hovedoverskrift")
+        resultat.overskrift shouldBe "Hovedoverskrift"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        assertThat(underavsnitt).hasSize(3)
-        assertThat(underavsnitt[0].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER)
-        assertThat(underavsnitt[1].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
-        assertThat(underavsnitt[1].brødtekst).isEqualTo("brødtekst ")
-        assertThat(underavsnitt[1].fritekstTillatt).isTrue
-        assertThat(underavsnitt[2].underavsnittstype).isEqualTo(Underavsnittstype.SÆRLIGEGRUNNER_ANNET)
-        assertThat(underavsnitt[2].fritekstTillatt).isFalse
+        underavsnitt.shouldHaveSize(3)
+        underavsnitt[0].underavsnittstype shouldBe Underavsnittstype.SÆRLIGEGRUNNER
+        underavsnitt[1].underavsnittstype shouldBe Underavsnittstype.SÆRLIGEGRUNNER_ANNET
+        underavsnitt[1].brødtekst shouldBe "brødtekst "
+        underavsnitt[1].fritekstTillatt.shouldBeTrue()
+        underavsnitt[2].underavsnittstype shouldBe Underavsnittstype.SÆRLIGEGRUNNER_ANNET
+        underavsnitt[2].fritekstTillatt.shouldBeFalse()
     }
 }

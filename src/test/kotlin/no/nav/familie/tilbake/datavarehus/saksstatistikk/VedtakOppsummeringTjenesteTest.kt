@@ -1,5 +1,9 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeEmpty
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -42,7 +46,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -109,13 +112,13 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
-        assertThat(vedtakPeriode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(vedtakPeriode.rentebeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(vedtakPeriode.bruttoTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(vedtakPeriode.aktsomhet).isNull()
-        assertThat(vedtakPeriode.vilkårsresultat).isEqualByComparingTo(UtvidetVilkårsresultat.FORELDET)
-        assertThat(vedtakPeriode.harBruktSjetteLedd).isFalse()
-        assertThat(vedtakPeriode.særligeGrunner).isNull()
+        vedtakPeriode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(1000)
+        vedtakPeriode.rentebeløp shouldBe BigDecimal.ZERO
+        vedtakPeriode.bruttoTilbakekrevingsbeløp shouldBe BigDecimal.ZERO
+        vedtakPeriode.aktsomhet shouldBe null
+        vedtakPeriode.vilkårsresultat shouldBe UtvidetVilkårsresultat.FORELDET
+        vedtakPeriode.harBruktSjetteLedd shouldBe false
+        vedtakPeriode.særligeGrunner shouldBe null
     }
 
     @Test
@@ -128,13 +131,13 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
-        assertThat(vedtakPeriode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(vedtakPeriode.rentebeløp).isEqualByComparingTo(BigDecimal.ZERO)
-        assertThat(vedtakPeriode.bruttoTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(vedtakPeriode.aktsomhet).isNull()
-        assertThat(vedtakPeriode.vilkårsresultat).isEqualByComparingTo(UtvidetVilkårsresultat.GOD_TRO)
-        assertThat(vedtakPeriode.harBruktSjetteLedd).isFalse()
-        assertThat(vedtakPeriode.særligeGrunner).isNull()
+        vedtakPeriode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(1000)
+        vedtakPeriode.rentebeløp shouldBe BigDecimal.ZERO
+        vedtakPeriode.bruttoTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(1000)
+        vedtakPeriode.aktsomhet shouldBe null
+        vedtakPeriode.vilkårsresultat shouldBe UtvidetVilkårsresultat.GOD_TRO
+        vedtakPeriode.harBruktSjetteLedd shouldBe false
+        vedtakPeriode.særligeGrunner shouldBe null
     }
 
     @Test
@@ -145,39 +148,40 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         fellesAssertVedtaksoppsummering(vedtaksoppsummering)
         val vedtakPerioder: List<VedtakPeriode> = vedtaksoppsummering.perioder
         val vedtakPeriode: VedtakPeriode = fellesAssertVedtakPeriode(vedtakPerioder)
-        assertThat(vedtakPeriode.feilutbetaltBeløp).isEqualByComparingTo(BigDecimal.valueOf(1000))
-        assertThat(vedtakPeriode.rentebeløp).isEqualByComparingTo(BigDecimal.valueOf(100))
-        assertThat(vedtakPeriode.bruttoTilbakekrevingsbeløp).isEqualByComparingTo(BigDecimal.valueOf(1100))
-        assertThat(vedtakPeriode.aktsomhet).isEqualTo(Aktsomhet.SIMPEL_UAKTSOMHET)
-        assertThat(vedtakPeriode.vilkårsresultat).isEqualByComparingTo(UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT)
-        assertThat(vedtakPeriode.harBruktSjetteLedd).isFalse()
-        assertThat(vedtakPeriode.særligeGrunner).isNotNull()
-        assertThat(vedtakPeriode.særligeGrunner?.erSærligeGrunnerTilReduksjon).isFalse()
-        assertThat(vedtakPeriode.særligeGrunner?.særligeGrunner).isNotEmpty()
+        vedtakPeriode.feilutbetaltBeløp shouldBe BigDecimal.valueOf(1000)
+        vedtakPeriode.rentebeløp shouldBe BigDecimal.valueOf(100)
+        vedtakPeriode.bruttoTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(1100)
+        vedtakPeriode.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        vedtakPeriode.vilkårsresultat shouldBe UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT
+        vedtakPeriode.harBruktSjetteLedd shouldBe false
+        vedtakPeriode.særligeGrunner.shouldNotBeNull()
+        vedtakPeriode.særligeGrunner?.erSærligeGrunnerTilReduksjon shouldBe false
+        vedtakPeriode.særligeGrunner?.særligeGrunner.shouldNotBeEmpty()
     }
 
     private fun fellesAssertVedtaksoppsummering(vedtaksoppsummering: Vedtaksoppsummering) {
-        assertThat(vedtaksoppsummering.behandlingUuid).isNotNull()
-        assertThat(vedtaksoppsummering.ansvarligBeslutter).isEqualTo(ANSVARLIG_BESLUTTER)
-        assertThat(vedtaksoppsummering.ansvarligSaksbehandler).isEqualTo(ANSVARLIG_SAKSBEHANDLER)
-        assertThat(vedtaksoppsummering.behandlendeEnhet).isNotEmpty()
-        assertThat(vedtaksoppsummering.behandlingOpprettetTidspunkt).isNotNull()
-        assertThat(vedtaksoppsummering.behandlingstype).isEqualByComparingTo(Behandlingstype.TILBAKEKREVING)
-        assertThat(vedtaksoppsummering.erBehandlingManueltOpprettet).isFalse()
-        assertThat(vedtaksoppsummering.referertFagsaksbehandling).isNotNull()
-        assertThat(vedtaksoppsummering.saksnummer).isEqualTo(saksnummer)
-        assertThat(vedtaksoppsummering.vedtakFattetTidspunkt).isNotNull()
-        assertThat(vedtaksoppsummering.ytelsestype).isEqualByComparingTo(Ytelsestype.OVERGANGSSTØNAD)
-        assertThat(vedtaksoppsummering.forrigeBehandling).isNull()
+        vedtaksoppsummering.behandlingUuid.shouldNotBeNull()
+        vedtaksoppsummering.ansvarligBeslutter shouldBe ANSVARLIG_BESLUTTER
+        vedtaksoppsummering.ansvarligSaksbehandler shouldBe ANSVARLIG_SAKSBEHANDLER
+        vedtaksoppsummering.behandlendeEnhet.shouldNotBeEmpty()
+        vedtaksoppsummering.behandlingOpprettetTidspunkt.shouldNotBeNull()
+        vedtaksoppsummering.behandlingOpprettetTidspunkt
+        vedtaksoppsummering.behandlingstype shouldBe Behandlingstype.TILBAKEKREVING
+        vedtaksoppsummering.erBehandlingManueltOpprettet shouldBe false
+        vedtaksoppsummering.referertFagsaksbehandling.shouldNotBeNull()
+        vedtaksoppsummering.saksnummer shouldBe saksnummer
+        vedtaksoppsummering.vedtakFattetTidspunkt.shouldNotBeNull()
+        vedtaksoppsummering.ytelsestype shouldBe Ytelsestype.OVERGANGSSTØNAD
+        vedtaksoppsummering.forrigeBehandling shouldBe null
     }
 
     private fun fellesAssertVedtakPeriode(vedtakPerioder: List<VedtakPeriode>): VedtakPeriode {
-        assertThat(vedtakPerioder.size).isEqualTo(1)
+        vedtakPerioder.size shouldBe 1
         val vedtakPeriode: VedtakPeriode = vedtakPerioder[0]
-        assertThat(vedtakPeriode.fom).isEqualTo(periode.fomDato)
-        assertThat(vedtakPeriode.tom).isEqualTo(periode.tomDato)
-        assertThat(vedtakPeriode.hendelsestype).isEqualTo("BOSATT_I_RIKET")
-        assertThat(vedtakPeriode.hendelsesundertype).isEqualTo("BRUKER_BOR_IKKE_I_NORGE")
+        vedtakPeriode.fom shouldBe periode.fomDato
+        vedtakPeriode.tom shouldBe periode.tomDato
+        vedtakPeriode.hendelsestype shouldBe "BOSATT_I_RIKET"
+        vedtakPeriode.hendelsesundertype shouldBe "BRUKER_BOR_IKKE_I_NORGE"
         return vedtakPeriode
     }
 

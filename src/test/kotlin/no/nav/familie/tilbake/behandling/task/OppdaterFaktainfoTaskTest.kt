@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.behandling.task
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -20,12 +22,9 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
 
@@ -70,14 +69,13 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                                                              ytelsestype = fagsak.ytelsestype,
                                                              respons = objectMapper.writeValueAsString(lagRespons())))
 
-        assertDoesNotThrow { oppdaterFaktainfoTask.doTask(lagTask()) }
+        oppdaterFaktainfoTask.doTask(lagTask())
 
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertEquals("1", oppdatertBehandling.aktivFagsystemsbehandling.eksternId)
-        assertEquals("testresultat", oppdatertBehandling.aktivFagsystemsbehandling.resultat)
-        assertEquals("testårsak", oppdatertBehandling.aktivFagsystemsbehandling.årsak)
-        assertEquals(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                     oppdatertBehandling.aktivFagsystemsbehandling.tilbakekrevingsvalg)
+        oppdatertBehandling.aktivFagsystemsbehandling.eksternId shouldBe "1"
+        oppdatertBehandling.aktivFagsystemsbehandling.resultat shouldBe "testresultat"
+        oppdatertBehandling.aktivFagsystemsbehandling.årsak shouldBe "testårsak"
+        oppdatertBehandling.aktivFagsystemsbehandling.tilbakekrevingsvalg shouldBe Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
     }
 
     @Test
@@ -85,10 +83,10 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = fagsak.eksternFagsakId,
                                                                            eksternId = "1",
                                                                            ytelsestype = fagsak.ytelsestype))
-        val exception = assertFailsWith<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
-        assertEquals("HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
-                     "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
-                     "Task kan kjøre på nytt manuelt når respons er mottatt.", exception.message)
+        val exception = shouldThrow<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
+        exception.message shouldBe "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
+                "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
+                "Task kan kjøre på nytt manuelt når respons er mottatt."
     }
 
     private fun lagRespons(): HentFagsystemsbehandlingRespons {

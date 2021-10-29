@@ -1,16 +1,19 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import kotlin.test.assertEquals
 
 internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -37,10 +40,10 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
 
-        assertThat(lagretØkonomiXmlSendt).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(økonomiXmlSendt)
-        assertEquals(1, lagretØkonomiXmlSendt.versjon)
+        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(økonomiXmlSendt,
+                                                                   ØkonomiXmlSendt::sporbar,
+                                                                   ØkonomiXmlSendt::versjon)
+        lagretØkonomiXmlSendt.versjon shouldBe 1
     }
 
 
@@ -52,7 +55,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
                 økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now())
 
 
-        assertThat(lagretØkonomiXmlSendt).isNotEmpty
+        lagretØkonomiXmlSendt.shouldNotBeEmpty()
     }
 
     @Test
@@ -62,8 +65,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         val lagretØkonomiXmlSendt =
                 økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now().plusDays(1))
 
-
-        assertThat(lagretØkonomiXmlSendt).isEmpty()
+        lagretØkonomiXmlSendt.shouldBeEmpty()
     }
 
 
@@ -76,10 +78,10 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.update(oppdatertØkonomiXmlSendt)
 
         lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        assertThat(lagretØkonomiXmlSendt).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertØkonomiXmlSendt)
-        assertEquals(2, lagretØkonomiXmlSendt.versjon)
+        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(oppdatertØkonomiXmlSendt,
+                                                                   ØkonomiXmlSendt::sporbar,
+                                                                   ØkonomiXmlSendt::versjon)
+        lagretØkonomiXmlSendt.versjon shouldBe 2
     }
 
 }

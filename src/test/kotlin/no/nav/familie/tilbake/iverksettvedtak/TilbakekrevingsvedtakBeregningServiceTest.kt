@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
@@ -36,8 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.YearMonth
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTest() {
 
@@ -90,33 +90,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                      andelTilbakreves = BigDecimal(50), særligeGrunnerTilReduksjon = true)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
 
@@ -128,33 +128,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                      andelTilbakreves = BigDecimal(33), særligeGrunnerTilReduksjon = true)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(1650),
-                    uinnkrevdBeløp = BigDecimal(3350),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(1650),
+                     uinnkrevdBeløp = BigDecimal(3350),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(1650),
-                    uinnkrevdBeløp = BigDecimal(3350),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(1650),
+                     uinnkrevdBeløp = BigDecimal(3350),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
 
@@ -165,33 +165,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                      aktsomhet = Aktsomhet.FORSETT)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal.ZERO,
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal.ZERO,
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
     }
 
@@ -201,33 +201,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                                             YearMonth.of(2021, 2))))
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(5000),
+                     kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(5000),
+                     kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
 
     }
 
@@ -238,33 +238,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                   beløpErIBehold = true, beløpTilbakekreves = BigDecimal(3000))
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(1500),
-                    uinnkrevdBeløp = BigDecimal(3500),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(1500),
+                     uinnkrevdBeløp = BigDecimal(3500),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(1500),
-                    uinnkrevdBeløp = BigDecimal(3500),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(1500),
+                     uinnkrevdBeløp = BigDecimal(3500),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
 
@@ -275,33 +275,33 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                   beløpErIBehold = true, beløpTilbakekreves = BigDecimal(1999))
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(999),
-                    uinnkrevdBeløp = BigDecimal(4001),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(999),
+                     uinnkrevdBeløp = BigDecimal(4001),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(1000),
-                    uinnkrevdBeløp = BigDecimal(4000),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(1000),
+                     uinnkrevdBeløp = BigDecimal(4000),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
     }
 
     @Test
@@ -326,35 +326,35 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                      andelTilbakreves = BigDecimal(50), særligeGrunnerTilReduksjon = true)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    skattBeløp = BigDecimal(250),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     skattBeløp = BigDecimal(250),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    skattBeløp = BigDecimal(250),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     skattBeløp = BigDecimal(250),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
 
@@ -380,35 +380,35 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                      andelTilbakreves = BigDecimal(50), særligeGrunnerTilReduksjon = true)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    skattBeløp = BigDecimal(646),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     skattBeløp = BigDecimal(646),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(2500),
-                    uinnkrevdBeløp = BigDecimal(2500),
-                    skattBeløp = BigDecimal(645),
-                    kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(2500),
+                     uinnkrevdBeløp = BigDecimal(2500),
+                     skattBeløp = BigDecimal(645),
+                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
 
@@ -419,35 +419,35 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         lagAktsomhetVilkårsvurdering(listOf(perioder[1]), Aktsomhet.GROV_UAKTSOMHET)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(2, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 2
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FORELDET)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(0),
-                    uinnkrevdBeløp = BigDecimal(5000),
-                    skattBeløp = BigDecimal(0),
-                    kodeResultat = KodeResultat.FORELDET)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(0),
+                     uinnkrevdBeløp = BigDecimal(5000),
+                     skattBeløp = BigDecimal(0),
+                     kodeResultat = KodeResultat.FORELDET)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal(0),
-                    skattBeløp = BigDecimal(0),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal(0),
+                     skattBeløp = BigDecimal(0),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
     }
 
@@ -474,48 +474,48 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         lagAktsomhetVilkårsvurdering(listOf(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))), Aktsomhet.GROV_UAKTSOMHET)
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(3, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 3
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal(0),
-                    skattBeløp = BigDecimal(750),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal(0),
+                     skattBeløp = BigDecimal(750),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal(0),
-                    skattBeløp = BigDecimal(750),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal(0),
+                     skattBeløp = BigDecimal(750),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val tredjePeriode = tilbakekrevingsperioder[2]
-        assertEquals(Periode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)), tredjePeriode.periode)
-        assertEquals(BigDecimal.ZERO, tredjePeriode.renter)
+        tredjePeriode.periode shouldBe Periode(YearMonth.of(2021, 3), YearMonth.of(2021, 3))
+        tredjePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(5000), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    uinnkrevdBeløp = BigDecimal(0),
-                    skattBeløp = BigDecimal(750),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     uinnkrevdBeløp = BigDecimal(0),
+                     skattBeløp = BigDecimal(750),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
     }
 
@@ -562,93 +562,93 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                                                                          aktsomhetPerioder))
 
         var tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-        assertNotNull(tilbakekrevingsperioder)
-        assertEquals(7, tilbakekrevingsperioder.size)
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 7
         tilbakekrevingsperioder = tilbakekrevingsperioder.sortedBy { it.periode.fom }
 
         val førstePeriode = tilbakekrevingsperioder[0]
-        assertEquals(Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)), førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.renter)
+        førstePeriode.periode shouldBe Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
+        førstePeriode.renter shouldBe BigDecimal.ZERO
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FORELDET)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(952),
-                    kodeResultat = KodeResultat.FORELDET)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(952),
+                     kodeResultat = KodeResultat.FORELDET)
 
         val andrePeriode = tilbakekrevingsperioder[1]
-        assertEquals(Periode(YearMonth.of(2020, 3), YearMonth.of(2020, 3)), andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.renter)
+        andrePeriode.periode shouldBe Periode(YearMonth.of(2020, 3), YearMonth.of(2020, 3))
+        andrePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FORELDET)
         ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(952),
-                    kodeResultat = KodeResultat.FORELDET)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(952),
+                     kodeResultat = KodeResultat.FORELDET)
 
         val tredjePeriode = tilbakekrevingsperioder[2]
-        assertEquals(Periode(YearMonth.of(2020, 5), YearMonth.of(2020, 5)), tredjePeriode.periode)
-        assertEquals(BigDecimal.ZERO, tredjePeriode.renter)
+        tredjePeriode.periode shouldBe Periode(YearMonth.of(2020, 5), YearMonth.of(2020, 5))
+        tredjePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(952),
-                    kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(952),
+                     kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
 
         val fjerdePeriode = tilbakekrevingsperioder[3]
-        assertEquals(Periode(YearMonth.of(2020, 7), YearMonth.of(2020, 7)), fjerdePeriode.periode)
-        assertEquals(BigDecimal.ZERO, fjerdePeriode.renter)
+        fjerdePeriode.periode shouldBe Periode(YearMonth.of(2020, 7), YearMonth.of(2020, 7))
+        fjerdePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
         ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal(952),
-                    kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                     uinnkrevdBeløp = BigDecimal(952),
+                     kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
 
         val femtePeriode = tilbakekrevingsperioder[4]
-        assertEquals(Periode(YearMonth.of(2020, 9), YearMonth.of(2020, 9)), femtePeriode.periode)
-        assertEquals(BigDecimal.ZERO, femtePeriode.renter)
+        femtePeriode.periode shouldBe Periode(YearMonth.of(2020, 9), YearMonth.of(2020, 9))
+        femtePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = femtePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = femtePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal(952),
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal(952),
+                     uinnkrevdBeløp = BigDecimal.ZERO,
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val sjettePeriode = tilbakekrevingsperioder[5]
-        assertEquals(Periode(YearMonth.of(2020, 11), YearMonth.of(2020, 11)), sjettePeriode.periode)
-        assertEquals(BigDecimal.ZERO, sjettePeriode.renter)
+        sjettePeriode.periode shouldBe Periode(YearMonth.of(2020, 11), YearMonth.of(2020, 11))
+        sjettePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = sjettePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = sjettePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal(952),
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal(952),
+                     uinnkrevdBeløp = BigDecimal.ZERO,
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val sjuendePeriode = tilbakekrevingsperioder[6]
-        assertEquals(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)), sjuendePeriode.periode)
-        assertEquals(BigDecimal.ZERO, sjuendePeriode.renter)
+        sjuendePeriode.periode shouldBe Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
+        sjuendePeriode.renter shouldBe BigDecimal.ZERO
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(952), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
         assertBeløp(beløp = ytelsePostering,
-                    utbetaltBeløp = BigDecimal(952),
-                    tilbakekrevesBeløp = BigDecimal(952),
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     utbetaltBeløp = BigDecimal(952),
+                     tilbakekrevesBeløp = BigDecimal(952),
+                     uinnkrevdBeløp = BigDecimal.ZERO,
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
     }
 
     private fun lagForeldelse(perioder: List<Periode>) {
@@ -744,19 +744,19 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     }
 
     private fun assertBeløp(beløp: Tilbakekrevingsbeløp,
-                            nyttBeløp: BigDecimal = BigDecimal.ZERO,
-                            utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-                            tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
-                            uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
-                            skattBeløp: BigDecimal = BigDecimal.ZERO,
-                            kodeResultat: KodeResultat) {
-        assertEquals(nyttBeløp, beløp.nyttBeløp)
-        assertEquals(utbetaltBeløp, beløp.utbetaltBeløp)
-        assertEquals(utbetaltBeløp, beløp.utbetaltBeløp)
-        assertEquals(tilbakekrevesBeløp, beløp.tilbakekrevesBeløp)
-        assertEquals(uinnkrevdBeløp, beløp.uinnkrevdBeløp)
-        assertEquals(skattBeløp, beløp.skattBeløp)
-        assertEquals(kodeResultat, beløp.kodeResultat)
+                             nyttBeløp: BigDecimal = BigDecimal.ZERO,
+                             utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
+                             tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
+                             uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
+                             skattBeløp: BigDecimal = BigDecimal.ZERO,
+                             kodeResultat: KodeResultat) {
+        beløp.nyttBeløp shouldBe nyttBeløp
+        beløp.utbetaltBeløp shouldBe utbetaltBeløp
+        beløp.utbetaltBeløp shouldBe utbetaltBeløp
+        beløp.tilbakekrevesBeløp shouldBe tilbakekrevesBeløp
+        beløp.uinnkrevdBeløp shouldBe uinnkrevdBeløp
+        beløp.skattBeløp shouldBe skattBeløp
+        beløp.kodeResultat shouldBe kodeResultat
     }
 
     internal data class Kravgrunnlagsbeløp(val klassetype: Klassetype,

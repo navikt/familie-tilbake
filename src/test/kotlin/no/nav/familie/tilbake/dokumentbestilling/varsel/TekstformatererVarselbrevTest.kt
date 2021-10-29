@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -38,7 +38,7 @@ class TekstformatererVarselbrevTest {
                                                            feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/OS_flere_perioder.txt")
-        assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -46,7 +46,7 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/OS_en_periode.txt")
-        assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -56,14 +56,14 @@ class TekstformatererVarselbrevTest {
                                                            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
         val fasit = les("/varselbrev/BA_en_periode.txt")
-        assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift`() {
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
-        assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -71,14 +71,14 @@ class TekstformatererVarselbrevTest {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
-        assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
     fun `lagKorrigertVarselbrevsoverskrift skal generere korrigert varselbrevsoverskrift`() {
         val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(metadata)
         val fasit = "Korrigert varsel om feilutbetalt overgangsstønad"
-        assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -86,7 +86,7 @@ class TekstformatererVarselbrevTest {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(brevMetadata)
         val fasit = "Korrigert varsel om feilutbetalt overgangsstønad"
-        assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -98,7 +98,7 @@ class TekstformatererVarselbrevTest {
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevSamletInfo)
         val fasit = les("/varselbrev/OS_en_periode.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
-        assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
+        generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }
 
     private fun lagFeilutbetalingerMedFlerePerioder(): List<Handlebarsperiode> {

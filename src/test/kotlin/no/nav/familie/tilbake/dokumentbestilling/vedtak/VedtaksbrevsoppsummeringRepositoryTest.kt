@@ -1,15 +1,16 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -35,10 +36,10 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         vedtaksbrevsoppsummeringRepository.insert(vedtaksbrevsoppsummering)
 
         val lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        assertThat(lagretVedtaksbrevsoppsummering).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(vedtaksbrevsoppsummering)
-        assertEquals(1, lagretVedtaksbrevsoppsummering.versjon)
+        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(vedtaksbrevsoppsummering,
+                                                                            Vedtaksbrevsoppsummering::sporbar,
+                                                                            Vedtaksbrevsoppsummering::versjon)
+        lagretVedtaksbrevsoppsummering.versjon shouldBe 1
     }
 
     @Test
@@ -50,9 +51,10 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         vedtaksbrevsoppsummeringRepository.update(oppdatertVedtaksbrevsoppsummering)
 
         lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        assertThat(lagretVedtaksbrevsoppsummering)
-                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertVedtaksbrevsoppsummering)
-        assertEquals(2, lagretVedtaksbrevsoppsummering.versjon)
+        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(oppdatertVedtaksbrevsoppsummering,
+                                                                            Vedtaksbrevsoppsummering::sporbar,
+                                                                            Vedtaksbrevsoppsummering::versjon)
+        lagretVedtaksbrevsoppsummering.versjon shouldBe 2
     }
 
 }

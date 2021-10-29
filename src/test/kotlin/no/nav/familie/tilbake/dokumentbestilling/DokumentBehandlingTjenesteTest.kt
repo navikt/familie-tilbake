@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
@@ -26,8 +28,6 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -87,14 +87,14 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         dokumentBehandlingService.bestillBrev(behandlingId, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
-        assertThat(tasks.first().type).isEqualTo(SendManueltVarselbrevTask.TYPE)
+        tasks.first().type shouldBe SendManueltVarselbrevTask.TYPE
     }
 
     @Test
     fun `bestillBrev skal ikke kunne bestille varselbrev når grunnlag ikke finnes`() {
-        Assertions.assertThatThrownBy {
+        shouldThrow<IllegalStateException> {
             dokumentBehandlingService.bestillBrev(behandling.id, Dokumentmalstype.VARSEL, "Bestilt varselbrev")
-        }.hasMessage("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
+        }.message shouldBe "Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}"
     }
 
     @Test
@@ -106,17 +106,18 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                                               "Bestilt innhent dokumentasjon")
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
-        assertThat(tasks.first().type).isEqualTo(InnhentDokumentasjonbrevTask.TYPE)
+        tasks.first().type shouldBe InnhentDokumentasjonbrevTask.TYPE
 
     }
 
     @Test
     fun `bestillBrev skal ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
-        Assertions.assertThatThrownBy {
+        shouldThrow<java.lang.IllegalStateException> {
             dokumentBehandlingService.bestillBrev(behandling.id,
                                                   Dokumentmalstype.INNHENT_DOKUMENTASJON,
                                                   "Bestilt innhent dokumentasjon")
-        }.hasMessage("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
+        }.message shouldBe "Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = " +
+                "${behandling.id}"
     }
 
     private fun opprettOgLagreKravgrunnlagPåBehandling(): UUID {

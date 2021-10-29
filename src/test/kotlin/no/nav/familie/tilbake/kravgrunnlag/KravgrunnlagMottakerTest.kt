@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.longs.shouldBeGreaterThan
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -18,7 +18,7 @@ internal class KravgrunnlagMottakerTest : OppslagSpringRunnerTest() {
     fun `verifiser at det er mulig å lagre en task`() {
         taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
                                  payload = "kravgrunnlagFraOppdrag"))
-        Assertions.assertThat(taskRepository.count()).isGreaterThan(0)
+        taskRepository.count() shouldBeGreaterThan 0
     }
 
 

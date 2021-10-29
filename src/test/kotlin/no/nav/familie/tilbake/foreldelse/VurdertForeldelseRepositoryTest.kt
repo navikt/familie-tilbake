@@ -1,15 +1,16 @@
 package no.nav.familie.tilbake.foreldelse
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -36,10 +37,10 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
 
-        assertThat(lagretVurdertForeldelse).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(vurdertForeldelse)
-        assertEquals(1, lagretVurdertForeldelse.versjon)
+        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(vurdertForeldelse,
+                                                                     VurdertForeldelse::sporbar,
+                                                                     VurdertForeldelse::versjon)
+        lagretVurdertForeldelse.versjon shouldBe 1
     }
 
     @Test
@@ -51,10 +52,10 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         vurdertForeldelseRepository.update(oppdatertVurdertForeldelse)
 
         lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
-        assertThat(lagretVurdertForeldelse).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertVurdertForeldelse)
-        assertEquals(2, lagretVurdertForeldelse.versjon)
+        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(oppdatertVurdertForeldelse,
+                                                                     VurdertForeldelse::sporbar,
+                                                                     VurdertForeldelse::versjon)
+        lagretVurdertForeldelse.versjon shouldBe 2
     }
 
 }

@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.common
 
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import kotlin.test.assertTrue
 
 internal class PeriodeTest {
 
@@ -13,7 +13,7 @@ internal class PeriodeTest {
         val periode2 = Periode(YearMonth.of(2019, 1), YearMonth.of(2019, 5))
         val snitt = periode1.snitt(periode2)
 
-        assertThat(snitt).isEqualTo(periode1)
+        snitt shouldBe periode1
     }
 
     @Test
@@ -22,7 +22,7 @@ internal class PeriodeTest {
         val periode2 = Periode(YearMonth.of(2018, 1), YearMonth.of(2018, 12))
         val snitt = periode1.snitt(periode2)
 
-        assertThat(snitt).isNull()
+        snitt shouldBe null
     }
 
     @Test
@@ -32,8 +32,8 @@ internal class PeriodeTest {
         val snitt1til2 = periode1.snitt(periode2)
         val snitt2til1 = periode2.snitt(periode1)
 
-        assertThat(snitt1til2).isEqualTo(snitt2til1)
-        assertThat(snitt1til2).isEqualTo(Periode(YearMonth.of(2019, 3), YearMonth.of(2019, 5)))
+        snitt1til2 shouldBe snitt2til1
+        snitt1til2 shouldBe Periode(YearMonth.of(2019, 3), YearMonth.of(2019, 5))
     }
 
     @Test
@@ -41,7 +41,7 @@ internal class PeriodeTest {
         val periode1 = Periode(YearMonth.of(2019, 1), YearMonth.of(2019, 3))
         val periode2 = Periode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
-        assertTrue { periode1.omslutter(periode2) }
+        periode1.omslutter(periode2).shouldBeTrue()
     }
 
 }

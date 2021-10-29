@@ -1,5 +1,9 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -12,12 +16,9 @@ import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagBatch
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
 
@@ -35,8 +36,8 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     fun `utfør skal ikke opprette tasker når det ikke finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
 
-        assertDoesNotThrow { håndterGamleKravgrunnlagBatch.utfør() }
-        assertTrue { (taskRepository.findAll().filter { it.type != AvstemmingTask.TYPE }).isEmpty() }
+        håndterGamleKravgrunnlagBatch.utfør()
+        (taskRepository.findAll().filter { it.type != AvstemmingTask.TYPE }).shouldBeEmpty()
     }
 
     @Test
@@ -45,8 +46,8 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         val task = taskRepository.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
         taskRepository.save(taskRepository.findById(task.id).get().copy(status = Status.FEILET))
 
-        assertDoesNotThrow { håndterGamleKravgrunnlagBatch.utfør() }
-        assertFalse { taskRepository.findAll().any { it.type == HentFagsystemsbehandlingTask.TYPE } }
+        håndterGamleKravgrunnlagBatch.utfør()
+        taskRepository.findAll().any { it.type == HentFagsystemsbehandlingTask.TYPE }.shouldBeFalse()
     }
 
     @Test
@@ -63,8 +64,8 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         val tredjeXml = Testdata.økonomiXmlMottatt
         mottattXmlRepository.insert(tredjeXml)
 
-        assertDoesNotThrow { håndterGamleKravgrunnlagBatch.utfør() }
-        assertTrue { (taskRepository.findAll() as List<*>).isNotEmpty() }
-        assertTrue { taskRepository.findAll().count { it.type == HentFagsystemsbehandlingTask.TYPE } == 2 }
+        håndterGamleKravgrunnlagBatch.utfør()
+        (taskRepository.findAll() as List<*>).shouldNotBeEmpty()
+        taskRepository.findAll().count { it.type == HentFagsystemsbehandlingTask.TYPE } shouldBe 2
     }
 }
