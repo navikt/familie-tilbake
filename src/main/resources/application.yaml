@@ -29,9 +29,15 @@ spring:
   aop:
     auto: true
     proxy-target-class: true
+
 springdoc:
   packages-to-scan: "no.nav.familie.tilbake"
   paths-to-match: "/api/**"
+  swagger-ui:
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${AZURE_APP_CLIENT_ID}
+      scope-separator: ","
 
 no.nav.security.jwt:
   issuer.azuread:
