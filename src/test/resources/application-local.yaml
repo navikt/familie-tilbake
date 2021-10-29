@@ -5,6 +5,15 @@ spring:
     url: jdbc:postgresql://localhost:5432/familie-tilbake
     driver-class-name: org.postgresql.Driver
 
+springdoc:
+  packages-to-scan: "no.nav.familie.tilbake"
+  paths-to-match: "/api/**"
+  swagger-ui:
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: "d7d22abc-9619-428e-86df-872a60a03a98"
+    oauth2-redirect-url: "http://localhost:8030/swagger-ui/oauth2-redirect.html"
+
 rolle:
   barnetrygd:
     veileder: "93a26831-9866-4410-927b-74ff51a9107c"
@@ -38,3 +47,4 @@ PDL_URL: #Mockes ut lokalt
 OPPRETTELSE_DAGER_BEGRENSNING: 1
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 0/5 * ? * MON-FRI
 CRON_AUTOMATISK_SAKSBEHANDLING: 0 0/3 * ? * MON-FRI
+API_SCOPE: api://dd201057-70b9-4641-b358-1668207826be/.default
