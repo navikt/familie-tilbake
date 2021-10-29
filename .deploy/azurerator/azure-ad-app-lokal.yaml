@@ -40,3 +40,4 @@ spec:
   logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal
+  singlePageApplication: true
