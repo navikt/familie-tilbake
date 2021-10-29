@@ -33,9 +33,6 @@ spec:
         databases:
           - name: familie-tilbake
             envVarPrefix: DB
-  replyUrls:
-    - url: "https://familie-tilbake.dev.intern.nav.no/swagger-ui/oauth2-redirect.html"
-  singlePageApplication: true
   azure:
     application:
       claims:
@@ -52,6 +49,9 @@ spec:
           - id: 928636f4-fd0d-4149-978e-a6fb68bb19de # 0000-GA-STDAPPS - tilgang til prosessering
       enabled: true
       tenant: trygdeetaten.no
+    replyURLs:
+      - "https://familie-tilbake.dev.intern.nav.no/swagger-ui/oauth2-redirect.html"
+    singlePageApplication: true
   accessPolicy:
     inbound:
       rules:
