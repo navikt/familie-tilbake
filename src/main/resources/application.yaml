@@ -38,6 +38,7 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
       client-id: ${AZURE_APP_CLIENT_ID}
       scope-separator: ","
+    disable-swagger-default-url: true
 
 no.nav.security.jwt:
   issuer.azuread:
