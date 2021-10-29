@@ -85,6 +85,7 @@ AZUREAD_TOKEN_ENDPOINT_URL: http://mock-oauth2-server:1111/v2.0/token
 
 CREDENTIAL_USERNAME: srvfamilie-tilbake
 CREDENTIAL_PASSWORD:
+API_SCOPE:
 
 prosessering:
   fixedDelayString:
