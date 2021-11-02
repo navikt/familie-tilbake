@@ -285,7 +285,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
-        assertOppgaveTask("Behandling er tatt av vent", LocalDate.now())
+        assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
 
     @Test
@@ -322,7 +322,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
-        assertOppgaveTask("Behandling er tatt av vent", LocalDate.now())
+        assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
 
     @Test

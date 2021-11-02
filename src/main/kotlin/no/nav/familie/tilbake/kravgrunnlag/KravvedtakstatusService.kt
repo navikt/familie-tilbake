@@ -107,7 +107,9 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
-                oppgaveTaskService.oppdaterOppgaveTask(behandling.id, "Behandling er tatt av vent", LocalDate.now())
+                oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                       beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
+                                                       frist = LocalDate.now())
             }
             Kravstatuskode.AVSLUTTET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
