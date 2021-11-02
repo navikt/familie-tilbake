@@ -15,3 +15,4 @@ FAMILIE_OPPDRAG_URL: http://localhost:8087
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 API_SCOPE: dummy
+AUTHORIZATION_URL: testverdi
