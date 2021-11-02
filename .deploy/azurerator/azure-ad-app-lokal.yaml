@@ -35,6 +35,9 @@ spec:
     - application: ida
       cluster: prod-fss
       namespace: traktor
+  replyUrls:
+    - url: "http://localhost:8030/swagger-ui/oauth2-redirect.html"
   logoutUrl: "https://familie-tilbake.dev.intern.nav.no"
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal
+  singlePageApplication: true

@@ -50,6 +50,9 @@ spec:
           - id: 6406aba2-b930-41d3-a85b-dd13731bc974 # 0000-GA-Enslig-Forsorger-Saksbehandler
           - id: 5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54 # 0000-GA-Enslig-Forsorger-Beslutter
       enabled: true
+      replyURLs:
+        - "https://familie-tilbake.intern.nav.no/swagger-ui/oauth2-redirect.html"
+      singlePageApplication: true
   accessPolicy:
     inbound:
       rules:
