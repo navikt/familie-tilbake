@@ -82,12 +82,10 @@ SECURITYTOKENSERVICE_URL: https://localhost:8063/soap/SecurityTokenServiceProvid
 FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner:8085
 FAMILIE_OPPDRAG_URL: http://dummy/
 AZUREAD_TOKEN_ENDPOINT_URL: http://mock-oauth2-server:1111/v2.0/token
-AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://mock-oauth2-server:1111/v2.0/token
 
 CREDENTIAL_USERNAME: srvfamilie-tilbake
 CREDENTIAL_PASSWORD:
 API_SCOPE: api://${TILBAKE_CLIENT_ID}/.default
-AUTHORIZATION_URL: http://mock-oauth2-server:1111/v2.0/authorize
 
 prosessering:
   fixedDelayString:

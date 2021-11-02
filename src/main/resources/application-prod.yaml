@@ -39,3 +39,5 @@ PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.prod-fss-pub.nais.io
 FAMILIE_OPPDRAG_URL: https://familie-oppdrag.prod-fss-pub.nais.io
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 0 7 ? * MON-FRI
+AUTHORIZATION_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/authorize
+TOKEN_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
