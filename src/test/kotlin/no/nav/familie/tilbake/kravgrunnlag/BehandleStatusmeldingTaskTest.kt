@@ -37,6 +37,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -173,9 +174,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.VENTER)
 
+        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
+        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
     }
 
     @Test
@@ -205,9 +207,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
 
+        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
+        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
     }
 
     @Test
@@ -234,9 +237,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
+        val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
+        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
     }
 
     @Test
@@ -279,8 +283,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
+        assertOppgaveTask("Behandling er tatt av vent", LocalDate.now())
     }
 
     @Test
@@ -315,8 +320,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
+        assertOppgaveTask("Behandling er tatt av vent", LocalDate.now())
     }
 
     @Test
@@ -390,8 +396,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                               behandlingssteg: Behandlingssteg,
-                                               behandlingsstegstatus: Behandlingsstegstatus) {
+                                              behandlingssteg: Behandlingssteg,
+                                              behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
             behandlingsstegstatus == it.behandlingsstegsstatus
@@ -399,8 +405,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertArkivertXml(size: Int,
-                                   finnesKravgrunnlag: Boolean,
-                                   vararg statusmeldingKravstatuskode: Kravstatuskode) {
+                                  finnesKravgrunnlag: Boolean,
+                                  vararg statusmeldingKravstatuskode: Kravstatuskode) {
         val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId,
                                                                                              fagsak.ytelsestype)
         arkivertXmlListe.size shouldBe size
@@ -422,13 +428,22 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                     beskrivelse: String? = null) {
+                                    beskrivelse: String? = null) {
         taskRepository.findByStatus(Status.UBEHANDLET).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
             historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
             Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
             beskrivelse == it.metadata["beskrivelse"] &&
             behandling.id.toString() == it.payload
+        }.shouldBeTrue()
+    }
+
+    private fun assertOppgaveTask(beskrivelse: String, fristTid: LocalDate) {
+        taskRepository.findAll().any {
+            it.type == OppdaterOppgaveTask.TYPE &&
+            it.payload == behandling.id.toString() &&
+            it.metadata["beskrivelse"] == beskrivelse &&
+            it.metadata["frist"] == fristTid.toString()
         }.shouldBeTrue()
     }
 }
