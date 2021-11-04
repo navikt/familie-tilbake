@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api.forvaltning
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -23,6 +24,7 @@ import java.util.UUID
 @Validated
 class ForvaltningController(private val forvaltningService: ForvaltningService) {
 
+    @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(path = ["/behandling/{behandlingId}/kravgrunnlag/{kravgrunnlagId}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
@@ -34,6 +36,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Arkiver mottatt kravgrunnlag")
     @PutMapping(path = ["/arkiver/kravgrunnlag/{mottattXmlId}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
@@ -44,6 +47,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Tvinghenlegg behandling")
     @PutMapping(path = ["/behandling/{behandlingId}/tving-henleggelse/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
@@ -54,6 +58,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Hent fagsysytemsbehandlingsinformasjon på nytt via Kafka")
     @PostMapping(path = ["/behandling/{behandlingId}/fagsystemsbehandling/v1"],
                      produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
@@ -64,6 +69,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Flytt behandling tilbake til fakta")
     @PutMapping(path = ["/behandling/{behandlingId}/flytt-behandling/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,

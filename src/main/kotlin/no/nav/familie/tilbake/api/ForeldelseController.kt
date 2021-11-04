@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
@@ -20,6 +21,7 @@ import java.util.UUID
 @Validated
 class ForeldelseController(val foreldelseService: ForeldelseService) {
 
+    @Operation(summary = "Hent foreldelsesinformasjon")
     @GetMapping(path = ["{behandlingId}/foreldelse/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

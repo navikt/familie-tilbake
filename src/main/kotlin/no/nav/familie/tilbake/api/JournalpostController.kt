@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
@@ -19,6 +20,7 @@ import java.util.UUID
 @Validated
 class JournalpostController(private val journalføringService: JournalføringService) {
 
+    @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter journalført dokument",
@@ -30,6 +32,7 @@ class JournalpostController(private val journalføringService: JournalføringSer
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
     }
 
+    @Operation(summary = "Hent journalpost informasjon")
     @GetMapping("/{behandlingId}/journalposter")
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter journalført dokument",

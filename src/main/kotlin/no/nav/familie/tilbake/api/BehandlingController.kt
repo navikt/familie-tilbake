@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
@@ -34,7 +35,7 @@ import javax.validation.Valid
 class BehandlingController(private val behandlingService: BehandlingService,
                            private val stegService: StegService) {
 
-
+    @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(path = ["/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -45,6 +46,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
     }
 
+    @Operation(summary = "Opprett tilbakekrevingsbehandling manuelt")
     @PostMapping(path = ["/manuelt/task/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -55,6 +57,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success("Manuell opprettelse av tilbakekreving er startet")
     }
 
+    @Operation(summary = "Opprett tilbakekrevingsrevurdering")
     @PostMapping(path = ["/revurdering/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -65,6 +68,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     }
 
 
+    @Operation(summary = "Hent behandling")
     @GetMapping(path = ["/v1/{behandlingId}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -74,6 +78,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
     }
 
+    @Operation(summary = "Utfør behandlingssteg og fortsett behandling til neste steg")
     @PostMapping(path = ["{behandlingId}/steg/v1"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     // Rollen blir endret til BESLUTTER i Tilgangskontroll for FatteVedtak steg
@@ -89,6 +94,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Sett behandling på vent")
     @PutMapping(path = ["{behandlingId}/vent/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -100,6 +106,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Ta behandling av vent")
     @PutMapping(path = ["{behandlingId}/gjenoppta/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -110,6 +117,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Henlegg behandling")
     @PutMapping(path = ["{behandlingId}/henlegg/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -121,6 +129,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Bytt enhet")
     @PutMapping(path = ["{behandlingId}/bytt-enhet/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
