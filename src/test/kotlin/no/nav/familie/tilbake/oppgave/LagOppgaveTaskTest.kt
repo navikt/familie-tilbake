@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
+import io.kotest.matchers.shouldBe
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
-import kotlin.test.assertEquals
 
 internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
@@ -78,11 +78,10 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                                               capture(fristForFerdigstillelse),
                                               isNull())
         }
-        assertEquals(behandling.id, behandlingSlot.captured)
-        assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
-        assertEquals(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse, beskrivelseSlot.captured)
-        assertEquals(dagensDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker),
-                     fristForFerdigstillelse.captured)
+        behandlingSlot.captured shouldBe behandling.id
+        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
+        beskrivelseSlot.captured shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse
+        fristForFerdigstillelse.captured shouldBe dagensDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
     }
 
     @Test
@@ -100,11 +99,10 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                                               capture(fristForFerdigstillelse),
                                               isNull())
         }
-        assertEquals(behandling.id, behandlingSlot.captured)
-        assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
-        assertEquals(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse, beskrivelseSlot.captured)
-        assertEquals(dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker),
-                     fristForFerdigstillelse.captured)
+        behandlingSlot.captured shouldBe behandling.id
+        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
+        beskrivelseSlot.captured shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+        fristForFerdigstillelse.captured shouldBe dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
     }
 
     @Test
@@ -120,9 +118,9 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                                               capture(fristForFerdigstillelse),
                                               isNull())
         }
-        assertEquals(behandling.id, behandlingSlot.captured)
-        assertEquals(Oppgavetype.BehandleSak, oppgavetypeSlot.captured)
-        assertEquals(dagensDato, fristForFerdigstillelse.captured)
+        behandlingSlot.captured shouldBe behandling.id
+        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
+        fristForFerdigstillelse.captured shouldBe dagensDato
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,

@@ -1,5 +1,10 @@
 package no.nav.familie.tilbake.behandling
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -23,17 +28,11 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
@@ -84,12 +83,12 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val verge = behandling.aktivVerge!!
-        assertThat(verge.aktiv).isEqualTo(true)
-        assertThat(verge.orgNr).isEqualTo("987654321")
-        assertThat(verge.type).isEqualTo(Vergetype.ADVOKAT)
-        assertThat(verge.navn).isEqualTo("Stor Herlig Straff")
-        assertThat(verge.kilde).isEqualTo(Applikasjon.FAMILIE_TILBAKE.name)
-        assertThat(verge.begrunnelse).isEqualTo("Det var nødvendig")
+        verge.aktiv shouldBe true
+        verge.orgNr shouldBe "987654321"
+        verge.type shouldBe Vergetype.ADVOKAT
+        verge.navn shouldBe "Stor Herlig Straff"
+        verge.kilde shouldBe Applikasjon.FAMILIE_TILBAKE.name
+        verge.begrunnelse shouldBe "Det var nødvendig"
     }
 
     @Test
@@ -101,7 +100,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val deaktivertVerge = behandling.verger.first { !it.aktiv }
-        assertThat(deaktivertVerge.id).isEqualTo(gammelVerge.id)
+        deaktivertVerge.id shouldBe gammelVerge.id
     }
 
     @Test
@@ -120,8 +119,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVerge skal ikke lagre verge når organisasjonen er tom`() {
         val vergeDto = vergeDto.copy(orgNr = null, ident = "123")
-        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
-        assertEquals("orgNr kan ikke være null for ${Vergetype.ADVOKAT}", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        exception.message shouldBe "orgNr kan ikke være null for ${Vergetype.ADVOKAT}"
     }
 
     @Test
@@ -136,15 +135,15 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
 
-        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
-        assertEquals("Organisasjon ${vergeDto.orgNr} er ikke gyldig", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        exception.message shouldBe "Organisasjon ${vergeDto.orgNr} er ikke gyldig"
     }
 
     @Test
     fun `lagreVerge skal ikke lagre verge når ident er tom`() {
         val vergeDto = vergeDto.copy(type = Vergetype.VERGE_FOR_BARN)
-        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
-        assertEquals("ident kan ikke være null for ${vergeDto.type}", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        exception.message shouldBe "ident kan ikke være null for ${vergeDto.type}"
     }
 
     @Test
@@ -160,8 +159,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
 
         val vergeDto = VergeDto(ident = "123", type = Vergetype.VERGE_FOR_BARN, navn = "testverdi", begrunnelse = "testverdi")
-        val exception = assertFailsWith<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
-        assertEquals("Feil ved oppslag på person", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(Testdata.behandling.id, vergeDto) }
+        exception.message shouldBe "Feil ved oppslag på person"
     }
 
     @Test
@@ -178,8 +177,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val deaktivertVerge = behandling.verger.first()
-        assertThat(deaktivertVerge.id).isEqualTo(gammelVerge.id)
-        assertThat(deaktivertVerge.aktiv).isEqualTo(false)
+        deaktivertVerge.id shouldBe gammelVerge.id
+        deaktivertVerge.aktiv shouldBe false
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
@@ -192,7 +191,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     fun `fjernVerge skal tilbakeføre verge steg når behandling er på vilkårsvurdering steg og verge fjernet`() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge
-        assertThat(gammelVerge).isNotNull
+        gammelVerge.shouldNotBeNull()
 
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
@@ -201,7 +200,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         vergeService.fjernVerge(Testdata.behandling.id)
 
-        assertFalse { behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge }
+        behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge.shouldBeFalse()
         verify {
             historikkTaskService.lagHistorikkTask(behandlingFørOppdatering.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
@@ -225,7 +224,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         vergeService.fjernVerge(behandlingUtenVerge.id)
 
-        assertFalse { behandlingUtenVerge.harVerge }
+        behandlingUtenVerge.harVerge.shouldBeFalse()
         verify(exactly = 0) { historikkTaskService.lagHistorikkTask(any(), any(), any()) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingUtenVerge.id)
@@ -255,8 +254,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception = assertFailsWith<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
@@ -267,23 +266,23 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                                                         Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
                                                         LocalDate.now().plusWeeks(4))
 
-        val exception = assertFailsWith<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
-        assertEquals("Behandling med id=${behandling.id} er på vent.", exception.message)
+        val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er på vent."
     }
 
     @Test
     fun `hentVerge skal returnere lagret verge data`() {
         val aktivVerge = Testdata.behandling.aktivVerge
-        assertNotNull(aktivVerge)
+        aktivVerge.shouldNotBeNull()
 
         val respons = vergeService.hentVerge(Testdata.behandling.id)
 
-        assertNotNull(respons)
-        assertEquals(aktivVerge.begrunnelse, respons.begrunnelse)
-        assertEquals(aktivVerge.type, respons.type)
-        assertEquals(aktivVerge.ident, respons.ident)
-        assertEquals(aktivVerge.navn, respons.navn)
-        assertEquals(aktivVerge.orgNr, respons.orgNr)
+        respons.shouldNotBeNull()
+        respons.begrunnelse shouldBe aktivVerge.begrunnelse
+        respons.type shouldBe aktivVerge.type
+        respons.ident shouldBe aktivVerge.ident
+        respons.navn shouldBe aktivVerge.navn
+        respons.orgNr shouldBe aktivVerge.orgNr
     }
 
     private fun lagBehandlingsstegstilstand(behandlingId: UUID,
@@ -295,14 +294,12 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                      behandlingssteg: Behandlingssteg,
-                                      behandlingsstegstatus: Behandlingsstegstatus) {
+                                       behandlingssteg: Behandlingssteg,
+                                       behandlingsstegstatus: Behandlingsstegstatus) {
 
-        assertTrue {
-            behandlingsstegstilstand.any {
-                behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-            }
+        behandlingsstegstilstand.shouldHaveSingleElement {
+            behandlingssteg == it.behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
 

@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotBeEmpty
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -32,7 +35,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
@@ -102,7 +104,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_ingen_tilbakekreving.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -139,7 +141,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_ingen_tilbakekreving_med_verge.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit")
+        generertBrev shouldBe "$fasit"
     }
 
     @Test
@@ -229,7 +231,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_fritekst_overalt.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -260,7 +262,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_forsett.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -295,7 +297,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/KS_forsett.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -341,7 +343,7 @@ class TekstformatererVedtaksbrevTest {
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
         val fasit = les("/vedtaksbrev/OS_delvis_foreldelse_uten_varsel.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -375,7 +377,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_ikke_tilbakekreves_pga_lavt_beløp.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -411,7 +413,7 @@ class TekstformatererVedtaksbrevTest {
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
         val fasit = les("/vedtaksbrev/OS_ikke_tilbakekreves_med_korrigert_beløp.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -422,7 +424,7 @@ class TekstformatererVedtaksbrevTest {
         val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
 
         val fasit = "Du må betale tilbake overgangsstønaden"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -434,7 +436,7 @@ class TekstformatererVedtaksbrevTest {
         val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
 
         val fasit = "Du må betale tilbake kontantstøtta"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -445,7 +447,7 @@ class TekstformatererVedtaksbrevTest {
         val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
 
         val fasit = "Du må ikke betale tilbake overgangsstønaden"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -455,9 +457,9 @@ class TekstformatererVedtaksbrevTest {
 
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(fritekstVedtaksbrevsdata)
 
-        Assertions.assertThat(generertBrev).isNotEmpty
+        generertBrev.shouldNotBeEmpty()
         val fasit = les("/vedtaksbrev/Fritekst_Vedtaksbrev_OS_full_tilbakebetaling.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -467,9 +469,9 @@ class TekstformatererVedtaksbrevTest {
 
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(fritekstVedtaksbrevsdata)
 
-        Assertions.assertThat(generertBrev).isNotEmpty
+        generertBrev.shouldNotBeEmpty()
         val fasit = les("/vedtaksbrev/Fritekst_Vedtaksbrev_KS_ingen_tilbakebetaling.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -503,11 +505,10 @@ class TekstformatererVedtaksbrevTest {
         val generertTekst: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevPeriodeOgFelles(felles, periode),
                                                                       AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
 
-        Assertions.assertThat(generertTekst)
-                .contains("Vi har lagt vekt på at du ikkje har gitt oss alle nødvendige opplysningar tidsnok til at vi" +
-                          " kunne unngå feilutbetalinga. Vi vurderer likevel at aktløysa di har vore så lita at vi har " +
-                          "redusert beløpet du må betale tilbake.")
-                .contains("Du må betale 500 kroner")
+        generertTekst shouldContain "Vi har lagt vekt på at du ikkje har gitt oss alle nødvendige opplysningar tidsnok til at " +
+                "vi kunne unngå feilutbetalinga. Vi vurderer likevel at aktløysa di har vore så lita at vi har " +
+                "redusert beløpet du må betale tilbake."
+        generertTekst shouldContain "Du må betale 500 kroner"
     }
 
     @Test
@@ -542,7 +543,7 @@ class TekstformatererVedtaksbrevTest {
 
         val fasit = "Du har fått overgangsstønad for barn som ikke bor fast hos deg. Du har derfor fått 30 001 kroner " +
                     "kroner for mye utbetalt i denne perioden."
-        Assertions.assertThat(generertTekst).isEqualToNormalizingNewlines(fasit)
+        generertTekst shouldBe fasit
     }
 
     @Test
@@ -569,7 +570,7 @@ class TekstformatererVedtaksbrevTest {
 
         val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_VILKÅR)
 
-        Assertions.assertThat(generertTekst).contains("_Hvordan har vi kommet fram til at du ikke må betale tilbake?")
+        generertTekst shouldContain "_Hvordan har vi kommet fram til at du ikke må betale tilbake?"
     }
 
     @Test
@@ -599,10 +600,9 @@ class TekstformatererVedtaksbrevTest {
 
         val generertTekst: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevPeriodeOgFelles(felles, periode),
                                                                       AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
-        Assertions.assertThat(generertTekst)
-                .contains("Vi har vurdert om det er grunner til å redusere beløpet. Vi har lagt vekt på at du ikke har " +
-                          "gitt oss alle nødvendige opplysninger tidsnok til at vi kunne unngå feilutbetalingen. Derfor må du" +
-                          " betale tilbake hele beløpet.")
+        generertTekst shouldContain "Vi har vurdert om det er grunner til å redusere beløpet. Vi har lagt vekt på at du ikke " +
+                "har gitt oss alle nødvendige opplysninger tidsnok til at vi kunne unngå feilutbetalingen. Derfor må du" +
+                " betale tilbake hele beløpet."
     }
 
 

@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
+import io.kotest.matchers.date.shouldBeBetween
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -16,7 +18,6 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,21 +62,22 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
-        assertThat(tilstand.ytelsestype).isEqualTo(Ytelsestype.BARNETRYGD)
-        assertThat(tilstand.saksnummer).isEqualTo(Testdata.fagsak.eksternFagsakId)
-        assertThat(tilstand.behandlingUuid).isEqualTo(behandling.eksternBrukId)
-        assertThat(tilstand.referertFagsaksbehandling).isEqualTo(behandling.aktivFagsystemsbehandling.eksternId)
-        assertThat(tilstand.behandlingstype).isEqualTo(Behandlingstype.TILBAKEKREVING)
-        assertThat(tilstand.behandlingsstatus).isEqualTo(Behandlingsstatus.OPPRETTET)
-        assertThat(tilstand.behandlingsresultat).isEqualTo(Behandlingsresultatstype.IKKE_FASTSATT)
-        assertThat(tilstand.venterPåBruker).isFalse()
-        assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.behandlingErManueltOpprettet).isFalse()
-        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
-        assertThat(tilstand.tekniskTidspunkt).isNull()
-        assertThat(tilstand.ansvarligBeslutter).isEqualTo(behandling.ansvarligBeslutter)
-        assertThat(tilstand.ansvarligSaksbehandler).isEqualTo(behandling.ansvarligSaksbehandler)
-        assertThat(tilstand.ansvarligEnhet).isEqualTo(behandling.behandlendeEnhet)
+        tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
+        tilstand.behandlingUuid shouldBe behandling.eksternBrukId
+        tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
+        tilstand.behandlingstype shouldBe Behandlingstype.TILBAKEKREVING
+        tilstand.behandlingsstatus shouldBe Behandlingsstatus.OPPRETTET
+        tilstand.behandlingsresultat shouldBe Behandlingsresultatstype.IKKE_FASTSATT
+
+        tilstand.venterPåBruker shouldBe false
+        tilstand.venterPåØkonomi shouldBe false
+        tilstand.behandlingErManueltOpprettet shouldBe false
+        tilstand.funksjoneltTidspunkt.shouldBeBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now().plusSeconds(1))
+        tilstand.tekniskTidspunkt shouldBe null
+        tilstand.ansvarligBeslutter shouldBe behandling.ansvarligBeslutter
+        tilstand.ansvarligSaksbehandler shouldBe behandling.ansvarligSaksbehandler
+        tilstand.ansvarligEnhet shouldBe behandling.behandlendeEnhet
     }
 
     @Test
@@ -89,21 +91,21 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
-        assertThat(tilstand.ytelsestype).isEqualTo(Ytelsestype.BARNETRYGD)
-        assertThat(tilstand.saksnummer).isEqualTo(Testdata.fagsak.eksternFagsakId)
-        assertThat(tilstand.behandlingUuid).isEqualTo(behandling.eksternBrukId)
-        assertThat(tilstand.referertFagsaksbehandling).isEqualTo(behandling.aktivFagsystemsbehandling.eksternId)
-        assertThat(tilstand.behandlingstype).isEqualTo(behandling.type)
-        assertThat(tilstand.behandlingsstatus).isEqualTo(behandling.status)
-        assertThat(tilstand.behandlingsresultat).isEqualTo(behandlingsresultat.type)
-        assertThat(tilstand.venterPåBruker).isFalse()
-        assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.behandlingErManueltOpprettet).isFalse()
-        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
-        assertThat(tilstand.tekniskTidspunkt).isNull()
-        assertThat(tilstand.ansvarligBeslutter).isEqualTo("Z111112")
-        assertThat(tilstand.ansvarligSaksbehandler).isEqualTo("Z111111")
-        assertThat(tilstand.ansvarligEnhet).isEqualTo("1234")
+        tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
+        tilstand.behandlingUuid shouldBe behandling.eksternBrukId
+        tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
+        tilstand.behandlingstype shouldBe behandling.type
+        tilstand.behandlingsstatus shouldBe behandling.status
+        tilstand.behandlingsresultat shouldBe behandlingsresultat.type
+        tilstand.venterPåBruker shouldBe false
+        tilstand.venterPåØkonomi shouldBe false
+        tilstand.behandlingErManueltOpprettet shouldBe false
+        tilstand.funksjoneltTidspunkt.shouldBeBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now().plusSeconds(1))
+        tilstand.tekniskTidspunkt shouldBe null
+        tilstand.ansvarligBeslutter shouldBe "Z111112"
+        tilstand.ansvarligSaksbehandler shouldBe "Z111111"
+        tilstand.ansvarligEnhet shouldBe "1234"
     }
 
     @Test
@@ -116,16 +118,16 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
-        assertThat(tilstand.ytelsestype).isEqualTo(Ytelsestype.BARNETRYGD)
-        assertThat(tilstand.saksnummer).isEqualTo(Testdata.fagsak.eksternFagsakId)
-        assertThat(tilstand.behandlingUuid).isEqualTo(behandling.eksternBrukId)
-        assertThat(tilstand.referertFagsaksbehandling).isEqualTo(behandling.aktivFagsystemsbehandling.eksternId)
-        assertThat(tilstand.behandlingstype).isEqualTo(behandling.type)
-        assertThat(tilstand.behandlingsstatus).isEqualTo(behandling.status)
-        assertThat(tilstand.behandlingsresultat).isEqualTo(Testdata.behandlingsresultat.type)
-        assertThat(tilstand.venterPåBruker).isTrue()
-        assertThat(tilstand.venterPåØkonomi).isFalse()
-        assertThat(tilstand.funksjoneltTidspunkt).isBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now())
+        tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        tilstand.saksnummer shouldBe Testdata.fagsak.eksternFagsakId
+        tilstand.behandlingUuid shouldBe behandling.eksternBrukId
+        tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
+        tilstand.behandlingstype shouldBe behandling.type
+        tilstand.behandlingsstatus shouldBe behandling.status
+        tilstand.behandlingsresultat shouldBe Testdata.behandlingsresultat.type
+        tilstand.venterPåBruker shouldBe true
+        tilstand.venterPåØkonomi shouldBe false
+        tilstand.funksjoneltTidspunkt.shouldBeBetween(OffsetDateTime.now().minusMinutes(1), OffsetDateTime.now().plusSeconds(1))
     }
 
 }

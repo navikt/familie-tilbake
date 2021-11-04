@@ -1,5 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -44,21 +50,14 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
@@ -160,10 +159,10 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                        capture(brevtypeSlot),
                                        capture(brevdataSlot))
         }
-        assertThat(behandlingSlot.captured).isEqualTo(Testdata.behandling)
-        assertThat(fagsakSlot.captured).isEqualTo(fagsak)
-        assertThat(brevtypeSlot.captured).isEqualTo(Brevtype.VEDTAK)
-        assertThat(brevdataSlot.captured.overskrift).isEqualTo("Du må betale tilbake barnetrygden")
+        behandlingSlot.captured shouldBe Testdata.behandling
+        fagsakSlot.captured shouldBe fagsak
+        brevtypeSlot.captured shouldBe Brevtype.VEDTAK
+        brevdataSlot.captured.overskrift shouldBe "Du må betale tilbake barnetrygden"
     }
 
     @Test
@@ -204,8 +203,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val avsnitt = vedtaksbrevService.hentVedtaksbrevSomTekst(Testdata.behandling.id)
 
-        assertThat(avsnitt).hasSize(3)
-        assertThat(avsnitt.first().overskrift).isEqualTo("Du må betale tilbake barnetrygden")
+        avsnitt.shouldHaveSize(3)
+        avsnitt.first().overskrift shouldBe "Du må betale tilbake barnetrygden"
     }
 
     @Test
@@ -220,44 +219,44 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
                                                     perioderMedTekst = perioderMedTekst)
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
                                                                fritekstAvsnittDto)
         }
-        assertEquals("Periode 2021-10-01-2021-10-31 er ugyldig for behandling ${behandling.id}", exception.message)
+        exception.message shouldBe "Periode 2021-10-01-2021-10-31 er ugyldig for behandling ${behandling.id}"
     }
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når oppsummeringstekst er for lang`() {
         lagFakta()
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
                                                                lagFritekstAvsnittDto("fakta",
                                                                                      RandomStringUtils.random(5000)))
         }
-        assertEquals("Oppsummeringstekst er for lang for behandling ${behandling.id}", exception.message)
+        exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
     }
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
         lagFakta()
         lagVilkårsvurdering()
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
                                                                lagFritekstAvsnittDto("fakta", "fakta data"))
         }
-        assertEquals("Mangler ANNET Særliggrunner fritekst for " +
-                     "${Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}", exception.message)
+        exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
+                "${Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
     }
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for alle fakta perioder`() {
         lagFakta()
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
                                                                lagFritekstAvsnittDto())
         }
-        assertEquals("Mangler fakta fritekst for alle fakta perioder", exception.message)
+        exception.message shouldBe "Mangler fakta fritekst for alle fakta perioder"
     }
 
     @Test
@@ -274,12 +273,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
                                                     perioderMedTekst = perioderMedTekst)
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
                                                                fritekstavsnittDto = fritekstAvsnittDto)
         }
-        assertEquals("Mangler fakta fritekst for ${LocalDate.of(2021, 3, 1)}-" +
-                     "${LocalDate.of(2021, 3, 31)}", exception.message)
+        exception.message shouldBe "Mangler fakta fritekst for ${LocalDate.of(2021, 3, 1)}-" +
+                "${LocalDate.of(2021, 3, 31)}"
     }
 
     @Test
@@ -291,68 +290,66 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                                        oppsummeringstekst = "oppsummering fritekst",
                                                        særligGrunnerAnnetFritekst = "særliggrunner annet fritekst")
 
-        assertDoesNotThrow {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               fritekstavsnittDto = fritekstAvsnittDto)
-        }
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
+                                                           fritekstavsnittDto = fritekstAvsnittDto)
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
-        assertTrue { avsnittene.isNotEmpty() }
-        assertEquals(3, avsnittene.size)
+        avsnittene.shouldNotBeEmpty()
+        avsnittene.size shouldBe 3
 
         val oppsummeringsavsnitt = avsnittene.firstOrNull { Avsnittstype.OPPSUMMERING == it.avsnittstype }
-        assertNotNull(oppsummeringsavsnitt)
-        assertEquals(1, oppsummeringsavsnitt.underavsnittsliste.size)
+        oppsummeringsavsnitt.shouldNotBeNull()
+        oppsummeringsavsnitt.underavsnittsliste.size shouldBe 1
         val oppsummeringsunderavsnitt = oppsummeringsavsnitt.underavsnittsliste[0]
         assertUnderavsnitt(underavsnitt = oppsummeringsunderavsnitt,
-                           fritekst = "oppsummering fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+                            fritekst = "oppsummering fritekst",
+                            fritekstTillatt = true,
+                            fritekstPåkrevet = false)
 
         val periodeAvsnitter = avsnittene.firstOrNull { Avsnittstype.PERIODE == it.avsnittstype }
-        assertNotNull(periodeAvsnitter)
-        assertEquals(LocalDate.of(2021, 1, 1), periodeAvsnitter.fom)
-        assertEquals(LocalDate.of(2021, 3, 31), periodeAvsnitter.tom)
+        periodeAvsnitter.shouldNotBeNull()
+        periodeAvsnitter.fom shouldBe LocalDate.of(2021, 1, 1)
+        periodeAvsnitter.tom shouldBe LocalDate.of(2021, 3, 31)
 
-        assertEquals(6, periodeAvsnitter.underavsnittsliste.size)
+        periodeAvsnitter.underavsnittsliste.size shouldBe 6
         val faktaUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
-        assertNotNull(faktaUnderavsnitt)
+        faktaUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = faktaUnderavsnitt,
-                           fritekst = "fakta fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = true)
+                            fritekst = "fakta fritekst",
+                            fritekstTillatt = true,
+                            fritekstPåkrevet = true)
 
         val foreldelseUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.FORELDELSE == it.underavsnittstype }
-        assertNull(foreldelseUnderavsnitt) // periodene er ikke foreldet
+        foreldelseUnderavsnitt.shouldBeNull() // periodene er ikke foreldet
 
         val vilkårUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.VILKÅR == it.underavsnittstype }
-        assertNotNull(vilkårUnderavsnitt)
+        vilkårUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = vilkårUnderavsnitt,
-                           fritekst = "vilkår fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+                            fritekst = "vilkår fritekst",
+                            fritekstTillatt = true,
+                            fritekstPåkrevet = false)
 
         val særligGrunnerUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
-        assertNotNull(særligGrunnerUnderavsnitt)
+        særligGrunnerUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = særligGrunnerUnderavsnitt,
-                           fritekst = "særliggrunner fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+                            fritekst = "særliggrunner fritekst",
+                            fritekstTillatt = true,
+                            fritekstPåkrevet = false)
 
         val særligGrunnerAnnetUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
-        assertNotNull(særligGrunnerAnnetUnderavsnitt)
+        særligGrunnerAnnetUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = særligGrunnerAnnetUnderavsnitt,
-                           fritekst = "særliggrunner annet fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = true)
+                            fritekst = "særliggrunner annet fritekst",
+                            fritekstTillatt = true,
+                            fritekstPåkrevet = true)
 
         val tilleggsavsnitt = avsnittene.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
-        assertNotNull(tilleggsavsnitt)
+        tilleggsavsnitt.shouldNotBeNull()
     }
 
     private fun lagFritekstAvsnittDto(faktaFritekst: String? = null,
@@ -400,11 +397,11 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertUnderavsnitt(underavsnitt: Underavsnitt,
-                                   fritekst: String,
-                                   fritekstTillatt: Boolean,
-                                   fritekstPåkrevet: Boolean) {
-        assertEquals(fritekst, underavsnitt.fritekst)
-        assertEquals(fritekstTillatt, underavsnitt.fritekstTillatt)
-        assertEquals(fritekstPåkrevet, underavsnitt.fritekstPåkrevet)
+                                    fritekst: String,
+                                    fritekstTillatt: Boolean,
+                                    fritekstPåkrevet: Boolean) {
+        underavsnitt.fritekst shouldBe fritekst
+        underavsnitt.fritekstTillatt shouldBe fritekstTillatt
+        underavsnitt.fritekstPåkrevet shouldBe fritekstPåkrevet
     }
 }

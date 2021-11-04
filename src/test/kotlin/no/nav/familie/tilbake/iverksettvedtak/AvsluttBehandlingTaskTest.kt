@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -20,7 +21,6 @@ import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
 
@@ -60,19 +60,19 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         avsluttBehandlingTask.doTask(Task(type = AvsluttBehandlingTask.TYPE, payload = behandlingId.toString()))
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+        behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         val stegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        assertEquals(1, stegstilstand.size)
-        assertEquals(Behandlingssteg.AVSLUTTET, stegstilstand[0].behandlingssteg)
-        assertEquals(Behandlingsstegstatus.UTFØRT, stegstilstand[0].behandlingsstegsstatus)
+        stegstilstand.size shouldBe 1
+        stegstilstand[0].behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
+        stegstilstand[0].behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
 
         val tasker = taskRepository.findByStatus(Status.UBEHANDLET)
         val historikkTask = tasker.first { it.type == LagHistorikkinnslagTask.TYPE }
-        assertEquals(LagHistorikkinnslagTask.TYPE, historikkTask.type)
-        assertEquals(behandlingId.toString(), historikkTask.payload)
+        historikkTask.type shouldBe LagHistorikkinnslagTask.TYPE
+        historikkTask.payload shouldBe behandlingId.toString()
         val taskProperty = historikkTask.metadata
-        assertEquals(Aktør.VEDTAKSLØSNING.name, taskProperty["aktør"])
-        assertEquals(TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name, taskProperty["historikkinnslagstype"])
+        taskProperty["aktør"] shouldBe Aktør.VEDTAKSLØSNING.name
+        taskProperty["historikkinnslagstype"] shouldBe TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET.name
     }
 }

@@ -1,13 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
+import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.mockk
-import io.mockk.runs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.domene.ITask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -17,13 +15,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.micrometer.TellerService
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.postgresql.util.Base64
-import java.util.UUID
 
 internal class PdfBrevServiceTest {
 
@@ -56,6 +49,6 @@ internal class PdfBrevServiceTest {
         pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.VARSEL, brevdata, 5L, fritekst)
 
         val base64fritekst = slot.captured.metadata.getProperty("fritekst")
-        assertThat(Base64.decode(base64fritekst).decodeToString()).isEqualTo(fritekst)
+        Base64.decode(base64fritekst).decodeToString() shouldBe fritekst
     }
 }

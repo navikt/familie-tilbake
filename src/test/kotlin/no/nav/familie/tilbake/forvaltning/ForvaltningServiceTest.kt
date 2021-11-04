@@ -1,5 +1,13 @@
 package no.nav.familie.tilbake.forvaltning
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -33,17 +41,10 @@ import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigInteger
 import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
@@ -105,25 +106,23 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
                                             .copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             forvaltningService.korrigerKravgrunnlag(behandling.id,
                                                     BigInteger.ZERO)
         }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
     fun `korrigerKravgrunnlag skal hente korrigert kravgrunnlag når behandling allerede har et kravgrunnlag`() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
-        assertDoesNotThrow {
-            forvaltningService.korrigerKravgrunnlag(behandling.id,
-                                                    Testdata.kravgrunnlag431.eksternKravgrunnlagId)
-        }
+        forvaltningService.korrigerKravgrunnlag(behandling.id,
+                                                Testdata.kravgrunnlag431.eksternKravgrunnlagId)
 
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
-        assertEquals(2, kravgrunnlagene.size)
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+        kravgrunnlagene.size shouldBe 2
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -133,11 +132,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `korrigerKravgrunnlag skal hente korrigert kravgrunnlag når behandling ikke har et kravgrunnlag`() {
         lagMottattXml()
-        assertDoesNotThrow { forvaltningService.korrigerKravgrunnlag(behandling.id, BigInteger.ZERO) }
+        forvaltningService.korrigerKravgrunnlag(behandling.id, BigInteger.ZERO)
 
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
-        assertEquals(1, kravgrunnlagene.size)
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+        kravgrunnlagene.size shouldBe 1
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -148,13 +147,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `arkiverMottattKravgrunnlag skal arkivere mottatt xml`() {
         val økonomiXmlMottatt = lagMottattXml()
-        assertDoesNotThrow { forvaltningService.arkiverMottattKravgrunnlag(økonomiXmlMottatt.id) }
+        forvaltningService.arkiverMottattKravgrunnlag(økonomiXmlMottatt.id)
 
-        assertFalse { økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id) }
-        assertTrue {
-            økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(økonomiXmlMottatt.eksternFagsakId,
-                                                                                 økonomiXmlMottatt.ytelsestype).isNotEmpty()
-        }
+        økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id).shouldBeFalse()
+        økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(økonomiXmlMottatt.eksternFagsakId,
+                                                                             økonomiXmlMottatt.ytelsestype).shouldNotBeEmpty()
     }
 
     @Test
@@ -162,10 +159,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
                                             .copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             forvaltningService.tvingHenleggBehandling(behandling.id)
         }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
@@ -177,38 +174,32 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        assertDoesNotThrow { forvaltningService.tvingHenleggBehandling(behandling.id) }
+        forvaltningService.tvingHenleggBehandling(behandling.id)
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.AVBRUTT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.AVBRUTT)
 
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertTrue { oppdatertBehandling.erAvsluttet }
-        assertEquals(ContextService.hentSaksbehandler(), oppdatertBehandling.ansvarligSaksbehandler)
-        assertEquals(LocalDate.now(), oppdatertBehandling.avsluttetDato)
-        assertEquals(Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD, oppdatertBehandling.sisteResultat!!.type)
+        oppdatertBehandling.erAvsluttet.shouldBeTrue()
+        oppdatertBehandling.ansvarligSaksbehandler shouldBe ContextService.hentSaksbehandler()
+        oppdatertBehandling.avsluttetDato shouldBe LocalDate.now()
+        oppdatertBehandling.sisteResultat!!.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 
         val tasker = taskRepository.findAll()
-        assertTrue {
-            tasker.any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload &&
-                Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
-                TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
-            }
+        tasker.shouldHaveSingleElement {
+            LagHistorikkinnslagTask.TYPE == it.type &&
+            behandling.id.toString() == it.payload &&
+            Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
         }
-        assertTrue {
-            tasker.any {
-                SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
-                behandling.id.toString() == it.payload
-            }
-        }
-        assertTrue {
-            tasker.any {
-                FerdigstillOppgaveTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
-            }
+        tasker.any {
+            SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
+            behandling.id.toString() == it.payload
+        }.shouldBeTrue()
+        tasker.shouldHaveSingleElement {
+            FerdigstillOppgaveTask.TYPE == it.type &&
+            behandling.id.toString() == it.payload
         }
     }
 
@@ -217,10 +208,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
                                             .copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             forvaltningService.hentFagsystemsbehandling(behandling.id)
         }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
@@ -232,11 +223,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val requestSendt = requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = eksternFagsakId,
                                                                                               ytelsestype = ytelsestype,
                                                                                               eksternId = eksternId))
-        assertDoesNotThrow { forvaltningService.hentFagsystemsbehandling(behandling.id) }
-        assertNull(requestSendtRepository.findByIdOrNull(requestSendt.id))
-        assertNotNull(requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
-                                                                                             ytelsestype,
-                                                                                             eksternId))
+        forvaltningService.hentFagsystemsbehandling(behandling.id)
+        requestSendtRepository.findByIdOrNull(requestSendt.id).shouldBeNull()
+        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
+                                                                               ytelsestype,
+                                                                               eksternId).shouldNotBeNull()
     }
 
     @Test
@@ -244,10 +235,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
                                             .copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
         }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet.", exception.message)
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
     @Test
@@ -274,9 +265,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingssteg(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingssteg(Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        assertDoesNotThrow { forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id) }
+        forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertEquals(Behandlingsstatus.UTREDES, behandling.status)
+        behandling.status shouldBe Behandlingsstatus.UTREDES
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -287,18 +278,16 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
 
-        assertNull(faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
-        assertNull(vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
-        assertNull(vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id))
+        faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+        vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
 
-        assertTrue {
-            taskRepository.findAll().any {
-                it.type == LagHistorikkinnslagTask.TYPE &&
-                it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
-                        .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
-                it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
-            }
+        taskRepository.findAll().shouldHaveSingleElement {
+            it.type == LagHistorikkinnslagTask.TYPE &&
+            it.payload == behandling.id.toString() &&
+            it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
+                    .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
+            it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
         }
     }
 
@@ -316,14 +305,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                      behandlingssteg: Behandlingssteg,
-                                      behandlingsstegstatus: Behandlingsstegstatus) {
-        assertTrue {
-            behandlingsstegstilstand.any {
-                behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-            }
-        }
+                                       behandlingssteg: Behandlingssteg,
+                                       behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstand.any {
+            behandlingssteg == it.behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
+        }.shouldBeTrue()
     }
 
     private fun lagBehandlingssteg(behandlingssteg: Behandlingssteg,

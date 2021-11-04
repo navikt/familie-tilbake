@@ -3,6 +3,11 @@ package no.nav.familie.tilbake.integration.økonomi
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -23,17 +28,12 @@ import org.eclipse.jetty.http.HttpStatus
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.math.BigInteger
 import java.net.URI
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
@@ -86,7 +86,9 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagIverksettelseRespons()).toJson())))
-        assertDoesNotThrow { oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest) }
+        val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
+
+        iverksettVedtak shouldNotBe null
     }
 
     @Test
@@ -94,13 +96,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.status(HttpStatus.REQUEST_TIMEOUT_408)))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             oppdragClient.iverksettVedtak(behandling.id,
                                           tilbakekrevingsvedtakRequest)
         }
-        assertNotNull(exception)
-        assertTrue { exception is IntegrasjonException }
-        assertEquals("Noe gikk galt ved iverksetting av behandling=${behandling.id}", exception.message)
+        exception.shouldNotBeNull()
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=${behandling.id}"
     }
 
     @Test
@@ -108,14 +110,14 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             oppdragClient.iverksettVedtak(behandling.id,
                                           tilbakekrevingsvedtakRequest)
         }
-        assertNotNull(exception)
-        assertTrue { exception is IntegrasjonException }
-        assertEquals("Noe gikk galt ved iverksetting av behandling=${behandling.id}", exception.message)
-        assertEquals("503 Couldn't send message: [no body]", exception.cause?.message)
+        exception.shouldNotBeNull()
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=${behandling.id}"
+        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
     }
 
     @Test
@@ -126,7 +128,9 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "OK"))
                                                                            .toJson())))
-        assertDoesNotThrow { oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest) }
+        val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+
+        hentKravgrunnlag shouldNotBe null
     }
 
     @Test
@@ -137,16 +141,16 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420010I"))
                                                                            .toJson())))
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
-        assertNotNull(exception)
-        assertTrue { exception is IntegrasjonException }
-        assertEquals("Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId", exception.message)
-        assertEquals("Fikk feil respons:{\"systemId\":null,\"kodeMelding\":\"B420010I\",\"alvorlighetsgrad\":\"00\"," +
-                     "\"beskrMelding\":null,\"sqlKode\":null,\"sqlState\":null,\"sqlMelding\":null,\"mqCompletionKode\":null," +
-                     "\"mqReasonKode\":null,\"programId\":null,\"sectionNavn\":null} fra økonomi ved henting av kravgrunnlag " +
-                     "for kravgrunnlagId=$kravgrunnlagId.", exception.cause?.message)
+        exception.shouldNotBeNull()
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
+        exception.cause?.message shouldBe "Fikk feil respons:{\"systemId\":null,\"kodeMelding\":\"B420010I\"," +
+                "\"alvorlighetsgrad\":\"00\",\"beskrMelding\":null,\"sqlKode\":null,\"sqlState\":null,\"sqlMelding\":null," +
+                "\"mqCompletionKode\":null,\"mqReasonKode\":null,\"programId\":null,\"sectionNavn\":null} fra økonomi " +
+                "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId."
     }
 
     @Test
@@ -157,12 +161,12 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420012I"))
                                                                            .toJson())))
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
-        assertNotNull(exception)
-        assertEquals("Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId", exception.message)
-        assertEquals("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret", exception.cause?.message)
+        exception.shouldNotBeNull()
+        exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
+        exception.cause?.message shouldBe "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret"
     }
 
     @Test
@@ -171,13 +175,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
                                                                  kravgrunnlagId))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
-        assertNotNull(exception)
-        assertTrue { exception is IntegrasjonException }
-        assertEquals("Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId", exception.message)
-        assertEquals("503 Couldn't send message: [no body]", exception.cause?.message)
+        exception.shouldNotBeNull()
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
+        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
     }
 
     private fun lagIverksettelseRespons(): TilbakekrevingsvedtakResponse {

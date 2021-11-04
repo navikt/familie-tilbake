@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -20,8 +22,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -103,13 +103,13 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
                                                                                                    Brevtype.VARSEL)
         } returns (null)
 
-        val e = Assertions.assertThrows(IllegalStateException::class.java) {
+        val e = shouldThrow<IllegalStateException> {
             henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
                                                         null,
                                                         Brevmottager.BRUKER)
         }
 
-        assertThat(e.message).contains("varsel ikke er sendt")
+        e.message shouldContain "varsel ikke er sendt"
     }
 
     @Test
@@ -117,13 +117,13 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
                 .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
-        val e = Assertions.assertThrows(IllegalStateException::class.java) {
+        val e = shouldThrow<IllegalStateException> {
             henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
                                                         null,
                                                         Brevmottager.BRUKER)
         }
 
-        assertThat(e.message).contains("henleggelsesbrev uten fritekst")
+        e.message shouldContain "henleggelsesbrev uten fritekst"
     }
 
     companion object {

@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -33,7 +33,7 @@ class TekstformatererHenleggelsesbrevTest {
     fun `lagFritekst skal generere henleggelsesbrev`() {
         val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -41,7 +41,7 @@ class TekstformatererHenleggelsesbrevTest {
         val generertBrev: String =
                 TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -51,7 +51,7 @@ class TekstformatererHenleggelsesbrevTest {
         val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
+        generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }
 
     @Test
@@ -62,7 +62,8 @@ class TekstformatererHenleggelsesbrevTest {
                 TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
+
+        generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }
 
     @Test
@@ -71,7 +72,7 @@ class TekstformatererHenleggelsesbrevTest {
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_nn.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -81,14 +82,14 @@ class TekstformatererHenleggelsesbrevTest {
         val generertBrev: String =
                 TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering_nn.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift`() {
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avsluttet saken din om tilbakebetaling"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -96,7 +97,7 @@ class TekstformatererHenleggelsesbrevTest {
         val overskrift: String =
                 TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(brevmetadata)
         val fasit = "Tilbakebetaling stønad til barnetilsyn"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -104,7 +105,7 @@ class TekstformatererHenleggelsesbrevTest {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avslutta saka di om tilbakebetaling"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     private fun les(filnavn: String): String? {

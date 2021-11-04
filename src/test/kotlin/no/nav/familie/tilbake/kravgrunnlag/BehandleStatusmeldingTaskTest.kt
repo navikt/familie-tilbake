@@ -1,5 +1,13 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -19,6 +27,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.VILKÅR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
@@ -29,13 +39,8 @@ import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertFails
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
@@ -79,10 +84,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        val exception = assertFails { behandleStatusmeldingTask.doTask(task) }
-        assertEquals("Det finnes intet kravgrunnlag for fagsystemId=${fagsak.eksternFagsakId} " +
-                     "og ytelsestype=${fagsak.ytelsestype}",
-                     exception.message)
+        val exception = shouldThrow<Feil> { behandleStatusmeldingTask.doTask(task) }
+        exception.message shouldBe "Det finnes intet kravgrunnlag for fagsystemId=${fagsak.eksternFagsakId} " +
+                "og ytelsestype=${fagsak.ytelsestype}"
     }
 
     @Test
@@ -90,9 +94,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_ugyldig.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        val exception = assertFails { behandleStatusmeldingTask.doTask(task) }
-        assertEquals("Ugyldig statusmelding for vedtakId=0, Mangler referanse.",
-                     exception.message)
+        val exception = shouldThrow<UgyldigStatusmeldingFeil> { behandleStatusmeldingTask.doTask(task) }
+        exception.message shouldBe "Ugyldig statusmelding for vedtakId=0, Mangler referanse."
     }
 
     @Test
@@ -102,14 +105,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findAll().toList().isEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
 
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-        assertEquals(1, mottattXmlListe.size)
+        mottattXmlListe.size shouldBe 1
         val mottattXml = mottattXmlListe[0]
-        assertTrue { mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement) }
-        assertTrue { mottattXml.sperret }
+        mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement).shouldBeTrue()
+        mottattXml.sperret.shouldBeTrue()
 
         assertArkivertXml(1, false, Kravstatuskode.SPERRET)
     }
@@ -125,14 +128,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findAll().toList().isEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
 
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-        assertEquals(1, mottattXmlListe.size)
+        mottattXmlListe.size shouldBe 1
         val mottattXml = mottattXmlListe[0]
-        assertTrue { mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement) }
-        assertFalse { mottattXml.sperret }
+        mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement).shouldBeTrue()
+        mottattXml.sperret.shouldBeFalse()
 
         assertArkivertXml(2, false, Kravstatuskode.SPERRET, Kravstatuskode.ENDRET)
     }
@@ -144,12 +147,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findAll().toList().isEmpty() }
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
+
 
         assertArkivertXml(2, true, Kravstatuskode.AVSLUTTET)
     }
@@ -164,17 +165,17 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertTrue { kravgrunnlag.sperret }
+        kravgrunnlag.sperret.shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.VENTER)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -190,10 +191,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertTrue { kravgrunnlag.sperret }
+        kravgrunnlag.sperret.shouldBeTrue()
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.AVBRUTT)
@@ -201,14 +202,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
+
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -219,10 +218,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertTrue { kravgrunnlag.sperret }
+        kravgrunnlag.sperret.shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -233,14 +232,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, FORESLÅ_VEDTAK, Behandlingsstegstatus.AVBRUTT)
 
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
     }
 
     @Test
@@ -266,10 +262,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertFalse { kravgrunnlag.sperret }
+        kravgrunnlag.sperret.shouldBeFalse()
 
         behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.KLAR)
@@ -278,14 +274,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         assertArkivertXml(3, true, Kravstatuskode.SPERRET, Kravstatuskode.ENDRET)
 
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
+
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
     }
 
@@ -301,10 +295,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_ENDR_BA.xml")
         task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertFalse { kravgrunnlag.sperret }
+        kravgrunnlag.sperret.shouldBeFalse()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -316,14 +310,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         assertArkivertXml(3, true, Kravstatuskode.SPERRET, Kravstatuskode.ENDRET)
 
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
+
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
     }
 
@@ -335,26 +327,25 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
-        assertDoesNotThrow { behandleStatusmeldingTask.doTask(task) }
-        assertTrue { kravgrunnlagRepository.findByBehandlingId(behandling.id).isNotEmpty() }
+        behandleStatusmeldingTask.doTask(task)
+        kravgrunnlagRepository.findByBehandlingId(behandling.id).shouldNotBeEmpty()
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertFalse { kravgrunnlag.sperret }
-        assertTrue { kravgrunnlag.avsluttet }
+        kravgrunnlag.sperret.shouldBeFalse()
+        kravgrunnlag.avsluttet.shouldBeTrue()
 
         assertArkivertXml(2, true, Kravstatuskode.AVSLUTTET)
 
-        assertTrue {
-            mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                    .isEmpty()
-        }
+        mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
+
 
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+        behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        assertTrue {
-            behandlingsstegstilstand.filter { VARSEL != it.behandlingssteg }
-                    .all { Behandlingsstegstatus.AVBRUTT == it.behandlingsstegsstatus }
+        behandlingsstegstilstand.shouldHaveSingleElement { Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus }
+        behandlingsstegstilstand.shouldHaveSingleElement {
+            Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus
+            && it.behandlingssteg == VARSEL
         }
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
@@ -371,8 +362,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         //oppdater FAKTA steg manuelt til UTFØRT
         val aktivtBehandlingsstegstilstand = behandlingsstegstilstandRepository
                 .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
-        assertTrue { aktivtBehandlingsstegstilstand != null }
-        aktivtBehandlingsstegstilstand?.let {
+        aktivtBehandlingsstegstilstand.shouldNotBeNull()
+        aktivtBehandlingsstegstilstand.let {
             behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
         }
         //sett aktivt behandlingssteg til FORESLÅ_VEDTAK
@@ -399,32 +390,28 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                              behandlingssteg: Behandlingssteg,
-                                              behandlingsstegstatus: Behandlingsstegstatus) {
-        assertTrue {
-            behandlingsstegstilstand.any {
-                behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-            }
+                                               behandlingssteg: Behandlingssteg,
+                                               behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstand.shouldHaveSingleElement {
+            behandlingssteg == it.behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
 
     private fun assertArkivertXml(size: Int,
-                                  finnesKravgrunnlag: Boolean,
-                                  vararg statusmeldingKravstatuskode: Kravstatuskode) {
+                                   finnesKravgrunnlag: Boolean,
+                                   vararg statusmeldingKravstatuskode: Kravstatuskode) {
         val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId,
                                                                                              fagsak.ytelsestype)
-        assertEquals(size, arkivertXmlListe.size)
+        arkivertXmlListe.size shouldBe size
 
         if (finnesKravgrunnlag) {
-            assertTrue { arkivertXmlListe.any { it.melding.contains(Constants.kravgrunnlagXmlRootElement) } }
+            arkivertXmlListe.any { it.melding.contains(Constants.kravgrunnlagXmlRootElement) }.shouldBeTrue()
         }
         statusmeldingKravstatuskode.forEach { kravstatuskode ->
-            assertTrue {
-                arkivertXmlListe.any {
-                    it.melding.contains(Constants.statusmeldingXmlRootElement) &&
-                    it.melding.contains(kravstatuskode.kode)
-                }
+            arkivertXmlListe.shouldHaveSingleElement {
+                it.melding.contains(Constants.statusmeldingXmlRootElement) &&
+                it.melding.contains(kravstatuskode.kode)
             }
         }
     }
@@ -435,15 +422,13 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                    beskrivelse: String? = null) {
-        assertTrue {
-            taskRepository.findByStatus(Status.UBEHANDLET).any {
-                LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
-                beskrivelse == it.metadata["beskrivelse"] &&
-                behandling.id.toString() == it.payload
-            }
-        }
+                                     beskrivelse: String? = null) {
+        taskRepository.findByStatus(Status.UBEHANDLET).any {
+            LagHistorikkinnslagTask.TYPE == it.type &&
+            historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+            Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
+            beskrivelse == it.metadata["beskrivelse"] &&
+            behandling.id.toString() == it.payload
+        }.shouldBeTrue()
     }
 }

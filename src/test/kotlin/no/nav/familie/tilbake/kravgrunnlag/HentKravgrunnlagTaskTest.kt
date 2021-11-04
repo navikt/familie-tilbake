@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -35,13 +37,10 @@ import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
@@ -107,36 +106,32 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                  venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
                                                  tidsfrist = LocalDate.now().plusWeeks(3)))
 
-        assertDoesNotThrow { hentKravgrunnlagTask.doTask(lagTask(revurdering.id)) }
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id) }
+        hentKravgrunnlagTask.doTask(lagTask(revurdering.id))
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id).shouldBeTrue()
 
         verify { kafkaProducer.sendHistorikkinnslag(capture(behandlingSlot), any(), capture(historikkinnslagSlot)) }
-        assertEquals(revurdering.id, behandlingSlot.captured)
+        behandlingSlot.captured shouldBe revurdering.id
 
         val historikkinnslagRequest = historikkinnslagSlot.captured
-        assertEquals(Historikkinnslagstype.HENDELSE, historikkinnslagRequest.type)
-        assertEquals(revurdering.eksternBrukId.toString(), historikkinnslagRequest.behandlingId)
-        assertEquals(fagsak.eksternFagsakId, historikkinnslagRequest.eksternFagsakId)
-        assertEquals(Aktør.VEDTAKSLØSNING, historikkinnslagRequest.aktør)
-        assertEquals(Constants.BRUKER_ID_VEDTAKSLØSNINGEN, historikkinnslagRequest.aktørIdent)
-        assertEquals(Applikasjon.FAMILIE_TILBAKE, historikkinnslagRequest.applikasjon)
-        assertEquals(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel, historikkinnslagRequest.tittel)
-        assertEquals(LocalDate.now(), historikkinnslagRequest.opprettetTidspunkt.toLocalDate())
+        historikkinnslagRequest.type shouldBe Historikkinnslagstype.HENDELSE
+        historikkinnslagRequest.behandlingId shouldBe revurdering.eksternBrukId.toString()
+        historikkinnslagRequest.eksternFagsakId shouldBe fagsak.eksternFagsakId
+        historikkinnslagRequest.aktør shouldBe Aktør.VEDTAKSLØSNING
+        historikkinnslagRequest.aktørIdent shouldBe Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+        historikkinnslagRequest.applikasjon shouldBe Applikasjon.FAMILIE_TILBAKE
+        historikkinnslagRequest.tittel shouldBe TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT.tittel
+        historikkinnslagRequest.opprettetTidspunkt.toLocalDate() shouldBe LocalDate.now()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
-        assertTrue {
-            behandlingsstegstilstand.any {
-                Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
-                Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
-            }
-        }
+        behandlingsstegstilstand.any {
+            Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
+            Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
+        }.shouldBeTrue()
 
-        assertTrue {
-            behandlingsstegstilstand.any {
-                Behandlingssteg.FAKTA == it.behandlingssteg &&
-                Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
-            }
-        }
+        behandlingsstegstilstand.any {
+            Behandlingssteg.FAKTA == it.behandlingssteg &&
+            Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
+        }.shouldBeTrue()
     }
 
     private fun lagTask(behandlingId: UUID): Task {

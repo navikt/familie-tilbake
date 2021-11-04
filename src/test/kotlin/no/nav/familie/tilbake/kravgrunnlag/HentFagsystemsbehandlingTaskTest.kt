@@ -1,5 +1,9 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -29,13 +33,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
@@ -122,41 +121,39 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
         behandlingRepository.insert(Testdata.behandling)
 
-        val exception = assertFailsWith<UgyldigKravgrunnlagFeil> { hentFagsystemsbehandlingTask.doTask(lagTask()) }
-        assertEquals("Kravgrunnlag med $mottattXmlId er ugyldig." +
-                     "Det finnes allerede en åpen behandling for " +
-                     "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
-                     "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                     "ved å bruke forvaltningsrutine etter feilundersøkelse.", exception.message)
+        val exception = shouldThrow<UgyldigKravgrunnlagFeil> { hentFagsystemsbehandlingTask.doTask(lagTask()) }
+        exception.message shouldBe "Kravgrunnlag med $mottattXmlId er ugyldig." +
+                "Det finnes allerede en åpen behandling for " +
+                "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
+                "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
+                "ved å bruke forvaltningsrutine etter feilundersøkelse."
     }
 
     @Test
     fun `doTask skal sende hentFagsystemsbehandling request når det ikke finnes en behandling på samme fagsak`() {
-        assertDoesNotThrow { hentFagsystemsbehandlingTask.doTask(lagTask()) }
+        hentFagsystemsbehandlingTask.doTask(lagTask())
 
         verify {
             hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(capture(eksternFagsakIdSlot),
                                                                                 capture(ytelsestypeSlot),
                                                                                 capture(eksternIdSlot))
         }
-        assertEquals(xmlMottatt.eksternFagsakId, eksternFagsakIdSlot.captured)
-        assertEquals(xmlMottatt.ytelsestype, ytelsestypeSlot.captured)
-        assertEquals(xmlMottatt.referanse, eksternIdSlot.captured)
+        eksternFagsakIdSlot.captured shouldBe xmlMottatt.eksternFagsakId
+        ytelsestypeSlot.captured shouldBe xmlMottatt.ytelsestype
+        eksternIdSlot.captured shouldBe xmlMottatt.referanse
 
-        assertNotNull(requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(xmlMottatt.eksternFagsakId,
-                                                                                             xmlMottatt.ytelsestype,
-                                                                                             xmlMottatt.referanse))
+        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(xmlMottatt.eksternFagsakId,
+                                                                               xmlMottatt.ytelsestype,
+                                                                               xmlMottatt.referanse).shouldNotBeNull()
     }
 
     @Test
     fun `onCompletion skal opprette task for å håndtere gammel kravgrunnlag`() {
-        assertDoesNotThrow { hentFagsystemsbehandlingTask.onCompletion(lagTask()) }
+        hentFagsystemsbehandlingTask.onCompletion(lagTask())
 
-        assertTrue {
-            taskRepository.findByStatus(Status.UBEHANDLET).any {
-                it.type == HåndterGammelKravgrunnlagTask.TYPE &&
-                it.payload == xmlMottatt.id.toString()
-            }
+        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+            it.type == HåndterGammelKravgrunnlagTask.TYPE &&
+            it.payload == xmlMottatt.id.toString()
         }
     }
 

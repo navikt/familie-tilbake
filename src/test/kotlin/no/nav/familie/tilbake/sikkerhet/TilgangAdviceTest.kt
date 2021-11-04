@@ -1,6 +1,9 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import io.jsonwebtoken.Jwts
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -32,7 +35,6 @@ import org.aspectj.lang.JoinPoint
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.mock.web.MockHttpServletRequest
@@ -42,8 +44,6 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.Calendar
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @TestPropertySource(properties = ["rolle.barnetrygd.beslutter=bb123",
     "rolle.barnetrygd.saksbehandler=bs123",
@@ -119,8 +119,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
 
 
-        assertFailsWith<RuntimeException>(message = "abc har ikke tilgang til person i hent behandling",
-                                          block = { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) })
+        shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+                .message shouldBe "abc har ikke tilgang til person i hent behandling"
     }
 
     @Test
@@ -139,7 +139,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
 
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -155,7 +155,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "hent behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -171,15 +171,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "barnetrygd hent behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertFailsWith<RuntimeException>(message = "abc har ikke tilgang til barnetrygd hent behandling",
-                                          block = { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) })
-
-        val exception = assertFailsWith<RuntimeException>(block = {
+        shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+                .message shouldBe "abc har ikke tilgang til barnetrygd hent behandling"
+        val exception = shouldThrow<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("abc har ikke tilgang til ${mockRolleTilgangssjekk.handling}",
-                     exception.message)
+        exception.message shouldBe "abc har ikke tilgang til ${mockRolleTilgangssjekk.handling}"
     }
 
     @Test
@@ -193,13 +191,12 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
         every { mockRolleTilgangssjekk.henteParam } returns ""
 
-        val exception = assertFailsWith<RuntimeException>(block = {
+        val exception = shouldThrow<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
-                     "Krever ${mockRolleTilgangssjekk.minimumBehandlerrolle}.",
-                     exception.message)
+        exception.message shouldBe "abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
+                "Krever ${mockRolleTilgangssjekk.minimumBehandlerrolle}."
     }
 
     @Test
@@ -213,7 +210,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "barnetrygd opprett behandling"
         every { mockRolleTilgangssjekk.henteParam } returns ""
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -229,7 +226,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "hent behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -245,7 +242,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "hent behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -261,12 +258,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "hent behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        val exception = assertFailsWith<RuntimeException>(block = {
+        val exception = shouldThrow<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(mockJoinpoint,
                                        mockRolleTilgangssjekk)
         })
-        assertEquals("Bruker har mangler tilgang til hent behandling",
-                     exception.message)
+        exception.message shouldBe "Bruker har mangler tilgang til hent behandling"
     }
 
     @Test
@@ -284,7 +280,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -302,9 +298,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
-        assertEquals("abc med rolle SAKSBEHANDLER har ikke tilgang til å Håndterer behandlingens aktiv steg og fortsetter" +
-                     " den til neste steg. Krever BESLUTTER.", exception.message)
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å Håndterer behandlingens aktiv " +
+                "steg og fortsetter den til neste steg. Krever BESLUTTER."
     }
 
     @Test
@@ -322,7 +318,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Håndterer behandlingens aktiv steg og fortsetter den til neste steg"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
@@ -340,11 +336,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
-    fun `sjekkTilgang skal forvalter ikke ha tilgang til vanlig tjenester`(){
+    fun `sjekkTilgang skal forvalter ikke ha tilgang til vanlig tjenester`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
@@ -358,13 +354,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
-        assertEquals("abc med rolle FORVALTER har ikke tilgang til å Setter behandling på vent." +
-                     " Krever SAKSBEHANDLER.", exception.message)
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        exception.message shouldBe "abc med rolle FORVALTER har ikke tilgang til å Setter behandling på vent." +
+                " Krever SAKSBEHANDLER."
     }
 
     @Test
-    fun `sjekkTilgang skal saksbehandler ikke ha tilgang til forvaltningstjenester`(){
+    fun `sjekkTilgang skal saksbehandler ikke ha tilgang til forvaltningstjenester`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
@@ -376,13 +372,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        val exception = assertFailsWith<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
-        assertEquals("abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste " +
-                     "Tving henlegger behandling. Krever FORVALTER.", exception.message)
+        val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        exception.message shouldBe "abc med rolle SAKSBEHANDLER har ikke tilgang til å kalle forvaltningstjeneste " +
+                "Tving henlegger behandling. Krever FORVALTER."
     }
 
     @Test
-    fun `sjekkTilgang skal saksbehandler ha tilgang til forvaltningstjenester hvis saksbehandler har forvalter rolle også`(){
+    fun `sjekkTilgang skal saksbehandler ha tilgang til forvaltningstjenester hvis saksbehandler har forvalter rolle også`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
@@ -394,11 +390,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
-    fun `sjekkTilgang skal saksbehandler ha tilgang til vanlig tjenester selv om saksbehandler har forvalter rolle også`(){
+    fun `sjekkTilgang skal saksbehandler ha tilgang til vanlig tjenester selv om saksbehandler har forvalter rolle også`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
@@ -412,11 +408,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Setter behandling på vent"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     @Test
-    fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`(){
+    fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjenester`() {
         val behandling = opprettBehandling(Ytelsestype.BARNETRYGD)
         val behandlingId = behandling.id
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
@@ -430,7 +426,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
 
-        assertDoesNotThrow { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
 
     private fun opprettBehandling(ytelsestype: Ytelsestype): Behandling {

@@ -1,6 +1,10 @@
 package no.nav.familie.tilbake.totrinn
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.Totrinnsstegsinfo
 import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -12,10 +16,6 @@ import no.nav.familie.tilbake.data.Testdata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
 
@@ -53,38 +53,12 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
-        assertTrue { totrinnsvurderingDto.totrinnsstegsinfo.isNotEmpty() }
-        assertEquals(4, totrinnsvurderingDto.totrinnsstegsinfo.size)
 
         val totrinnsstegsinfo = totrinnsvurderingDto.totrinnsstegsinfo
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FAKTA == it.behandlingssteg
-                && it.godkjent == null && it.begrunnelse == null
-            }
-        }
-
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FORELDELSE == it.behandlingssteg
-                && it.godkjent == null && it.begrunnelse == null
-            }
-        }
-
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.VILKÅRSVURDERING == it.behandlingssteg
-                && it.godkjent == null && it.begrunnelse == null
-            }
-        }
-
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FORESLÅ_VEDTAK == it.behandlingssteg
-                && it.godkjent == null && it.begrunnelse == null
-            }
-        }
-
+        totrinnsstegsinfo.shouldContainExactly(Totrinnsstegsinfo(Behandlingssteg.FAKTA, null, null),
+                                               Totrinnsstegsinfo(Behandlingssteg.FORELDELSE, null, null),
+                                               Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, null, null),
+                                               Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, null, null))
     }
 
     @Test
@@ -112,37 +86,11 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                                                                          begrunnelse = "testverdi")))
 
         val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
-        assertTrue { totrinnsvurderingDto.totrinnsstegsinfo.isNotEmpty() }
-        assertEquals(3, totrinnsvurderingDto.totrinnsstegsinfo.size)
 
         val totrinnsstegsinfo = totrinnsvurderingDto.totrinnsstegsinfo
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FAKTA == it.behandlingssteg
-                && it.godkjent == true && it.begrunnelse == "testverdi"
-            }
-        }
-
-        //Autoutførte steg lagres ikke
-        assertFalse {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FORELDELSE == it.behandlingssteg
-            }
-        }
-
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.VILKÅRSVURDERING == it.behandlingssteg
-                && it.godkjent == false && it.begrunnelse == "testverdi"
-            }
-        }
-
-        assertTrue {
-            totrinnsstegsinfo.any {
-                Behandlingssteg.FORESLÅ_VEDTAK == it.behandlingssteg
-                && it.godkjent == false && it.begrunnelse == "testverdi"
-            }
-        }
+        totrinnsstegsinfo.shouldContainExactly(Totrinnsstegsinfo(Behandlingssteg.FAKTA, true, "testverdi"),
+                                               Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
+                                               Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi"))
 
     }
 
@@ -156,7 +104,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             totrinnService.lagreTotrinnsvurderinger(behandlingId,
                                                     listOf(VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
                                                                              godkjent = true,
@@ -166,7 +114,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                                                                              begrunnelse = "testverdi")))
         }
 
-        assertEquals("Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering", exception.message)
+        exception.message shouldBe "Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering"
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,

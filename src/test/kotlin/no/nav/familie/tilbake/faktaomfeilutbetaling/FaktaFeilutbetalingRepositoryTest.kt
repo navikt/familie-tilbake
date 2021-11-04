@@ -1,15 +1,16 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -38,10 +39,9 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
 
-        assertThat(lagretFaktaFeilutbetaling).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(faktaFeilutbetaling)
-        assertEquals(1, lagretFaktaFeilutbetaling.versjon)
+        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(faktaFeilutbetaling,
+                                                                       FaktaFeilutbetaling::sporbar, FaktaFeilutbetaling::versjon)
+        lagretFaktaFeilutbetaling.versjon shouldBe 1
     }
 
     @Test
@@ -53,10 +53,10 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingRepository.update(oppdatertFaktaFeilutbetaling)
 
         lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
-        assertThat(lagretFaktaFeilutbetaling).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertFaktaFeilutbetaling)
-        assertEquals(2, lagretFaktaFeilutbetaling.versjon)
+        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(oppdatertFaktaFeilutbetaling,
+                                                                       FaktaFeilutbetaling::sporbar,
+                                                                       FaktaFeilutbetaling::versjon)
+        lagretFaktaFeilutbetaling.versjon shouldBe 2
     }
 
     @Test
@@ -65,9 +65,9 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        assertThat(findByBehandlingId).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(faktaFeilutbetaling)
+        findByBehandlingId?.shouldBeEqualToComparingFieldsExcept(faktaFeilutbetaling,
+                                                                 FaktaFeilutbetaling::sporbar,
+                                                                 FaktaFeilutbetaling::versjon)
     }
 
 }

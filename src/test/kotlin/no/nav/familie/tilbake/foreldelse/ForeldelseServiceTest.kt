@@ -1,5 +1,9 @@
 package no.nav.familie.tilbake.foreldelse
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
@@ -17,10 +21,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
@@ -67,16 +67,16 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     fun `hentVurdertForeldelse skal returnere foreldelse data som skal vurderes`() {
         val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
 
-        assertEquals(1, vurdertForeldelseDto.foreldetPerioder.size)
+        vurdertForeldelseDto.foreldetPerioder.size shouldBe 1
         val foreldetPeriode = vurdertForeldelseDto.foreldetPerioder[0]
-        assertEquals(LocalDate.of(2017, 1, 1), foreldetPeriode.periode.fom)
-        assertEquals(LocalDate.of(2017, 2, 28), foreldetPeriode.periode.tom)
+        foreldetPeriode.periode.fom shouldBe LocalDate.of(2017, 1, 1)
+        foreldetPeriode.periode.tom shouldBe LocalDate.of(2017, 2, 28)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("20000"), foreldetPeriode.feilutbetaltBeløp)
-        assertNull(foreldetPeriode.foreldelsesvurderingstype)
-        assertNull(foreldetPeriode.begrunnelse)
-        assertNull(foreldetPeriode.foreldelsesfrist)
-        assertNull(foreldetPeriode.oppdagelsesdato)
+        foreldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
+        foreldetPeriode.foreldelsesvurderingstype.shouldBeNull()
+        foreldetPeriode.begrunnelse.shouldBeNull()
+        foreldetPeriode.foreldelsesfrist.shouldBeNull()
+        foreldetPeriode.oppdagelsesdato.shouldBeNull()
     }
 
     @Test
@@ -94,26 +94,26 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
         val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
 
-        assertEquals(2, vurdertForeldelseDto.foreldetPerioder.size)
+        vurdertForeldelseDto.foreldetPerioder.size shouldBe 2
         val førstePeriode = vurdertForeldelseDto.foreldetPerioder[0]
-        assertEquals(LocalDate.of(2017, 1, 1), førstePeriode.periode.fom)
-        assertEquals(LocalDate.of(2017, 1, 31), førstePeriode.periode.tom)
+        førstePeriode.periode.fom shouldBe LocalDate.of(2017, 1, 1)
+        førstePeriode.periode.tom shouldBe LocalDate.of(2017, 1, 31)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("10000"), førstePeriode.feilutbetaltBeløp)
-        assertEquals(Foreldelsesvurderingstype.FORELDET, førstePeriode.foreldelsesvurderingstype)
-        assertEquals("foreldelses begrunnelse", førstePeriode.begrunnelse)
-        assertEquals(LocalDate.of(2017, 2, 28), førstePeriode.foreldelsesfrist)
-        assertNull(førstePeriode.oppdagelsesdato)
+        førstePeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        førstePeriode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.FORELDET
+        førstePeriode.begrunnelse shouldBe "foreldelses begrunnelse"
+        førstePeriode.foreldelsesfrist shouldBe LocalDate.of(2017, 2, 28)
+        førstePeriode.oppdagelsesdato.shouldBeNull()
 
         val andrePeriode = vurdertForeldelseDto.foreldetPerioder[1]
-        assertEquals(LocalDate.of(2017, 2, 1), andrePeriode.periode.fom)
-        assertEquals(LocalDate.of(2017, 2, 28), andrePeriode.periode.tom)
+        andrePeriode.periode.fom shouldBe LocalDate.of(2017, 2, 1)
+        andrePeriode.periode.tom shouldBe LocalDate.of(2017, 2, 28)
         //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
-        assertEquals(BigDecimal("10000"), andrePeriode.feilutbetaltBeløp)
-        assertEquals(Foreldelsesvurderingstype.IKKE_FORELDET, andrePeriode.foreldelsesvurderingstype)
-        assertEquals("foreldelses begrunnelse", andrePeriode.begrunnelse)
-        assertEquals(LocalDate.of(2017, 2, 28), andrePeriode.foreldelsesfrist)
-        assertNull(andrePeriode.oppdagelsesdato)
+        andrePeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        andrePeriode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET
+        andrePeriode.begrunnelse shouldBe "foreldelses begrunnelse"
+        andrePeriode.foreldelsesfrist shouldBe LocalDate.of(2017, 2, 28)
+        andrePeriode.oppdagelsesdato.shouldBeNull()
     }
 
     @Test
@@ -126,14 +126,14 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                                                                                                           .FORELDET))))
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertNotNull(vurdertForeldelse)
-        assertEquals(1, vurdertForeldelse.foreldelsesperioder.size)
+        vurdertForeldelse.shouldNotBeNull()
+        vurdertForeldelse.foreldelsesperioder.size shouldBe 1
         val vurdertForeldelsesperiode = vurdertForeldelse.foreldelsesperioder.toList()[0]
-        assertEquals("foreldelses begrunnelse", vurdertForeldelsesperiode.begrunnelse)
-        assertEquals(Foreldelsesvurderingstype.FORELDET, vurdertForeldelsesperiode.foreldelsesvurderingstype)
-        assertEquals(LocalDate.of(2017, 2, 28), vurdertForeldelsesperiode.foreldelsesfrist)
-        assertNull(vurdertForeldelsesperiode.oppdagelsesdato)
-        assertEquals(Periode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)), vurdertForeldelsesperiode.periode)
+        vurdertForeldelsesperiode.begrunnelse shouldBe "foreldelses begrunnelse"
+        vurdertForeldelsesperiode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.FORELDET
+        vurdertForeldelsesperiode.foreldelsesfrist shouldBe LocalDate.of(2017, 2, 28)
+        vurdertForeldelsesperiode.oppdagelsesdato.shouldBeNull()
+        vurdertForeldelsesperiode.periode shouldBe Periode(YearMonth.of(2017, 1), YearMonth.of(2017, 1))
     }
 
     @Test
@@ -141,12 +141,12 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 10),
                                                        LocalDate.of(2017, 1, 31),
                                                        Foreldelsesvurderingstype.FORELDET)
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
                                             BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)))
         }
-        assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
+        exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
     }
 
     @Test
@@ -154,12 +154,12 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
                                                        LocalDate.of(2017, 1, 27),
                                                        Foreldelsesvurderingstype.FORELDET)
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             foreldelseService
                     .lagreVurdertForeldelse(behandling.id,
                                             BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)))
         }
-        assertEquals("Periode med ${foreldelsesperiode.periode} er ikke i hele måneder", exception.message)
+        exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
     }
 
     private fun lagForeldelsesperiode(fom: LocalDate,

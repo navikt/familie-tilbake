@@ -3,6 +3,13 @@ package no.nav.familie.tilbake.iverksettvedtak
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeEmpty
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -43,7 +50,6 @@ import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
@@ -52,12 +58,6 @@ import java.math.BigInteger
 import java.net.URI
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
@@ -128,17 +128,17 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("00",
                                                                                               "OK")).toJson())))
 
-        assertDoesNotThrow { iverksettelseService.sendIverksettVedtak(behandlingId) }
+        iverksettelseService.sendIverksettVedtak(behandlingId)
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        assertNotNull(økonomiXmlSendt)
+        økonomiXmlSendt.shouldNotBeNull()
         assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
         assertRespons(økonomiXmlSendt.kvittering, "00", "OK")
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val aktivBehandlingsresultat = behandling.sisteResultat
-        assertNotNull(aktivBehandlingsresultat)
-        assertEquals(Behandlingsresultatstype.FULL_TILBAKEBETALING, aktivBehandlingsresultat.type)
+        aktivBehandlingsresultat.shouldNotBeNull()
+        aktivBehandlingsresultat.type shouldBe Behandlingsresultatstype.FULL_TILBAKEBETALING
     }
 
     @Test
@@ -147,17 +147,16 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                                        .willReturn(WireMock.okJson(Ressurs.success(lagRespons("10",
                                                                                               "feil")).toJson())))
 
-        val exception = assertFailsWith<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
-        assertTrue { exception is IntegrasjonException }
-        assertEquals("Noe gikk galt ved iverksetting av behandling=$behandlingId", exception.message)
-        assertEquals("Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
-                     "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}",
-                     exception.cause!!.message)
+        val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
+        exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
+                "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        assertNotNull(økonomiXmlSendt)
+        økonomiXmlSendt.shouldNotBeNull()
         assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
-        assertNull(økonomiXmlSendt.kvittering)
+        økonomiXmlSendt.kvittering.shouldBeNull()
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {
@@ -247,70 +246,68 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertRespons(kvittering: String?,
-                              alvorlighetsgrad: String,
-                              kodeMelding: String) {
-        assertFalse { kvittering.isNullOrEmpty() }
+                               alvorlighetsgrad: String,
+                               kodeMelding: String) {
+        kvittering.shouldNotBeEmpty()
         val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
-        assertEquals(alvorlighetsgrad, mmelDto.alvorlighetsgrad)
-        assertEquals(kodeMelding, mmelDto.kodeMelding)
+        mmelDto.alvorlighetsgrad shouldBe alvorlighetsgrad
+        mmelDto.kodeMelding shouldBe kodeMelding
     }
 
     private fun assertRequestXml(melding: String, behandlingId: UUID, xmlId: UUID) {
         val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId)
-        assertNotNull(request)
+        request.shouldNotBeNull()
 
         val tilbakekrevingsvedtak = request.tilbakekrevingsvedtak
-        assertEquals(KodeAksjon.FATTE_VEDTAK.kode, tilbakekrevingsvedtak.kodeAksjon)
-        assertNotNull(tilbakekrevingsvedtak.datoVedtakFagsystem)
-        assertEquals(BigInteger.ZERO, tilbakekrevingsvedtak.vedtakId)
-        assertEquals("22-15", tilbakekrevingsvedtak.kodeHjemmel)
-        assertEquals(kravgrunnlag431.ansvarligEnhet, tilbakekrevingsvedtak.enhetAnsvarlig)
+        tilbakekrevingsvedtak.kodeAksjon shouldBe KodeAksjon.FATTE_VEDTAK.kode
+        tilbakekrevingsvedtak.datoVedtakFagsystem.shouldNotBeNull()
+        tilbakekrevingsvedtak.vedtakId shouldBe BigInteger.ZERO
+        tilbakekrevingsvedtak.kodeHjemmel shouldBe "22-15"
+        tilbakekrevingsvedtak.enhetAnsvarlig shouldBe kravgrunnlag431.ansvarligEnhet
 
         val førstePeriode = tilbakekrevingsvedtak.tilbakekrevingsperiode[0]
-        assertNotNull(førstePeriode.periode)
-        assertEquals(BigDecimal.ZERO, førstePeriode.belopRenter)
-        assertEquals(2, førstePeriode.tilbakekrevingsbelop.size)
+        førstePeriode.periode.shouldNotBeNull()
+        førstePeriode.belopRenter shouldBe BigDecimal.ZERO
+        førstePeriode.tilbakekrevingsbelop.size shouldBe 2
         assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.KL_KODE_FEIL_BA,
-                    nyttBeløp = BigDecimal(5000))
+                     klassekode = Klassekode.KL_KODE_FEIL_BA,
+                     nyttBeløp = BigDecimal(5000))
         assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.BATR,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     klassekode = Klassekode.BATR,
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsvedtak.tilbakekrevingsperiode[0]
-        assertNotNull(andrePeriode.periode)
-        assertEquals(BigDecimal.ZERO, andrePeriode.belopRenter)
-        assertEquals(2, andrePeriode.tilbakekrevingsbelop.size)
+        andrePeriode.periode.shouldNotBeNull()
+        andrePeriode.belopRenter shouldBe BigDecimal.ZERO
+        andrePeriode.tilbakekrevingsbelop.size shouldBe 2
         assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.KL_KODE_FEIL_BA,
-                    nyttBeløp = BigDecimal(5000))
+                     klassekode = Klassekode.KL_KODE_FEIL_BA,
+                     nyttBeløp = BigDecimal(5000))
         assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.BATR,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                     klassekode = Klassekode.BATR,
+                     utbetaltBeløp = BigDecimal(5000),
+                     tilbakekrevesBeløp = BigDecimal(5000),
+                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
     }
 
     private fun assertBeløp(beløpene: List<TilbakekrevingsbelopDto>,
-                            klassekode: Klassekode,
-                            nyttBeløp: BigDecimal = BigDecimal.ZERO,
-                            utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-                            tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
-                            uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
-                            skattBeløp: BigDecimal = BigDecimal.ZERO,
-                            kodeResultat: KodeResultat? = null) {
-        assertTrue {
-            beløpene.any {
-                klassekode.name == it.kodeKlasse &&
-                nyttBeløp == it.belopNy &&
-                utbetaltBeløp == it.belopOpprUtbet &&
-                tilbakekrevesBeløp == it.belopTilbakekreves &&
-                uinnkrevdBeløp == it.belopUinnkrevd
-                skattBeløp == it.belopSkatt
-            }
-        }
+                             klassekode: Klassekode,
+                             nyttBeløp: BigDecimal = BigDecimal.ZERO,
+                             utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
+                             tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
+                             uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
+                             skattBeløp: BigDecimal = BigDecimal.ZERO,
+                             kodeResultat: KodeResultat? = null) {
+        beløpene.any {
+            klassekode.name == it.kodeKlasse &&
+            nyttBeløp == it.belopNy &&
+            utbetaltBeløp == it.belopOpprUtbet &&
+            tilbakekrevesBeløp == it.belopTilbakekreves &&
+            uinnkrevdBeløp == it.belopUinnkrevd
+            skattBeløp == it.belopSkatt
+        }.shouldBeTrue()
 
         beløpene.any {
             kodeResultat?.kode == it.kodeResultat &&

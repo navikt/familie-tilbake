@@ -1,5 +1,11 @@
 package no.nav.familie.tilbake.behandling.batch
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -36,16 +42,10 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.Properties
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
 
@@ -122,8 +122,8 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id).copy(status = Behandlingsstatus.AVSLUTTET)
         behandlingRepository.update(behandling)
 
-        val exception = assertThrows<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
-        assertEquals("Behandling med id=${behandling.id} er allerede ferdig behandlet", exception.message)
+        val exception = shouldThrow<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet"
     }
 
     @Test
@@ -132,20 +132,20 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                                                         Venteårsak.ENDRE_TILKJENT_YTELSE,
                                                         LocalDate.now().plusWeeks(2))
 
-        val exception = assertThrows<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
-        assertEquals("Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA", exception.message)
+        val exception = shouldThrow<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA"
     }
 
     @Test
     fun `doTask skal behandle behandling automatisk`() {
-        assertDoesNotThrow { automatiskSaksbehandlingTask.doTask(lagTask()) }
+        automatiskSaksbehandlingTask.doTask(lagTask())
         mockTaskExecution()
 
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertEquals(Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP, behandling.saksbehandlingstype)
-        assertEquals("VL", behandling.ansvarligSaksbehandler)
-        assertEquals("VL", behandling.ansvarligBeslutter)
-        assertEquals(Behandlingsstatus.AVSLUTTET, behandling.status)
+        behandling.saksbehandlingstype shouldBe Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP
+        behandling.ansvarligSaksbehandler shouldBe "VL"
+        behandling.ansvarligBeslutter shouldBe "VL"
+        behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -158,29 +158,25 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.AVSLUTTET, Behandlingsstegstatus.UTFØRT)
 
         val faktaFeilutbetaling = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertNotNull(faktaFeilutbetaling)
-        assertEquals(Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE, faktaFeilutbetaling.begrunnelse)
-        assertTrue {
-            faktaFeilutbetaling.perioder.all {
-                Hendelsestype.ANNET == it.hendelsestype &&
-                Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
-            }
+        faktaFeilutbetaling.shouldNotBeNull()
+        faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+        faktaFeilutbetaling.perioder.shouldHaveSingleElement {
+            Hendelsestype.ANNET == it.hendelsestype &&
+            Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
         }
 
-        assertNull(foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id))
+        foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertNotNull(vilkårsvurdering)
-        assertTrue {
-            vilkårsvurdering.perioder.all {
-                Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE == it.begrunnelse &&
-                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
-                it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
-                !it.aktsomhet!!.tilbakekrevSmåbeløp
-            }
+        vilkårsvurdering.shouldNotBeNull()
+        vilkårsvurdering.perioder.shouldHaveSingleElement {
+            Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE == it.begrunnelse &&
+            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
+            it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
+            !it.aktsomhet!!.tilbakekrevSmåbeløp
         }
 
-        assertNull(vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id))
+        vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
@@ -195,14 +191,12 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingsstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                               behandlingssteg: Behandlingssteg,
-                                               behandlingsstegstatus: Behandlingsstegstatus) {
-        assertTrue {
-            behandlingsstegstilstand.any {
-                behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-            }
-        }
+                                                behandlingssteg: Behandlingssteg,
+                                                behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstand.any {
+            behandlingssteg == it.behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
+        }.shouldBeTrue()
     }
 
     private fun mockTaskExecution() {

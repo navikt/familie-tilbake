@@ -1,5 +1,11 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -36,17 +42,10 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
@@ -135,11 +134,10 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = xmlMottatt.eksternFagsakId,
                                                                            ytelsestype = xmlMottatt.ytelsestype,
                                                                            eksternId = xmlMottatt.referanse))
-        val exception = assertThrows<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
-        assertEquals("HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
-                     "eksternFagsakId=${xmlMottatt.eksternFagsakId},ytelsestype=${xmlMottatt.ytelsestype}," +
-                     "eksternId=${xmlMottatt.referanse}.Task-en kan kjøre på nytt manuelt når respons-en er mottatt.",
-                     exception.message)
+        val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        exception.message shouldBe "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
+                "eksternFagsakId=${xmlMottatt.eksternFagsakId},ytelsestype=${xmlMottatt.ytelsestype}," +
+                "eksternId=${xmlMottatt.referanse}.Task-en kan kjøre på nytt manuelt når respons-en er mottatt."
     }
 
     @Test
@@ -155,19 +153,20 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
 
-        assertDoesNotThrow { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        håndterGammelKravgrunnlagTask.doTask(lagTask())
+
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(xmlMottatt.ytelsestype,
                                                                                 hentetKravgrunnlag.fagsystemId)
-        assertNotNull(behandling)
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) }
+        behandling.shouldNotBeNull()
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
-        assertNull(xmlMottattRepository.findByIdOrNull(mottattXmlId))
-        assertNotNull(xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(xmlMottatt.eksternFagsakId,
-                                                                                    xmlMottatt.ytelsestype))
+        xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
+        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(xmlMottatt.eksternFagsakId,
+                                                                      xmlMottatt.ytelsestype).shouldNotBeNull()
     }
 
     @Test
@@ -184,18 +183,18 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
                 SperretKravgrunnlagFeil("Hentet kravgrunnlag er sperret")
 
-        assertDoesNotThrow { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        håndterGammelKravgrunnlagTask.doTask(lagTask())
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(xmlMottatt.ytelsestype,
                                                                                 hentetKravgrunnlag.fagsystemId)
-        assertNotNull(behandling)
-        assertTrue { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id) }
+        behandling.shouldNotBeNull()
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id).shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.VENTER)
 
-        assertNull(xmlMottattRepository.findByIdOrNull(mottattXmlId))
-        assertNotNull(xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(xmlMottatt.eksternFagsakId,
-                                                                                    xmlMottatt.ytelsestype))
+        xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
+        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(xmlMottatt.eksternFagsakId,
+                                                                      xmlMottatt.ytelsestype).shouldNotBeNull()
     }
 
     @Test
@@ -210,8 +209,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
                 IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
 
-        val exception = assertFailsWith<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
-        assertEquals("Kravgrunnlag finnes ikke i økonomi", exception.message)
+        val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
+        exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
     }
 
 
@@ -237,13 +236,11 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertSteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                           behandlingssteg: Behandlingssteg,
-                           behandlingsstegstatus: Behandlingsstegstatus) {
-        assertTrue {
-            behandlingsstegstilstand.any {
-                it.behandlingssteg == behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
-            }
+                            behandlingssteg: Behandlingssteg,
+                            behandlingsstegstatus: Behandlingsstegstatus) {
+        behandlingsstegstilstand.shouldHaveSingleElement {
+            it.behandlingssteg == behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
 

@@ -1,5 +1,13 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktivitetDto
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
@@ -40,12 +48,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
@@ -81,22 +83,19 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         val førstePeriode = Testdata.kravgrunnlagsperiode432
                 .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = YearMonth.of(2020, 1),
-                                        tom = YearMonth.of(2020, 1)),
+                      periode = Periode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
                       beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
         val andrePeriode = Testdata.kravgrunnlagsperiode432
                 .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = YearMonth.of(2020, 2),
-                                        tom = YearMonth.of(2020, 2)),
+                      periode = Periode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
                       beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
 
         val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
 
-        val periode = FaktaFeilutbetalingsperiode(periode = Periode(førstePeriode.periode.fom,
-                                                                    andrePeriode.periode.tom),
+        val periode = FaktaFeilutbetalingsperiode(periode = Periode(førstePeriode.periode.fom, andrePeriode.periode.tom),
                                                   hendelsestype = Hendelsestype.ANNET,
                                                   hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,
@@ -113,20 +112,20 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
-        assertTrue { vurdertPeriode.reduserteBeløper.isEmpty() }
+        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
+        vurdertPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
-        assertFalse { vurdertPeriode.foreldet }
-        assertNull(vurdertPeriode.begrunnelse)
-        assertNull(vurdertPeriode.vilkårsvurderingsresultatInfo)
+        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
+        vurdertPeriode.foreldet.shouldBeFalse()
+        vurdertPeriode.foreldet.shouldBeFalse()
+        vurdertPeriode.begrunnelse.shouldBeNull()
+        vurdertPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
     }
 
     @Test
@@ -136,33 +135,31 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
 
         val foreldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 1, 31)), foreldetPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, foreldetPeriode.hendelsestype)
-        assertEquals(BigDecimal("10000"), foreldetPeriode.feilutbetaltBeløp)
-        assertTrue { foreldetPeriode.foreldet }
-        assertTrue { foreldetPeriode.reduserteBeløper.isEmpty() }
+        foreldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        foreldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        foreldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        foreldetPeriode.foreldet.shouldBeTrue()
+        foreldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(foreldetPeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), foreldetPeriode.aktiviteter[0].beløp)
-        assertEquals("foreldelse begrunnelse 1", foreldetPeriode.begrunnelse)
-        assertNull(foreldetPeriode.vilkårsvurderingsresultatInfo)
+        foreldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        foreldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 1"
+        foreldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
 
         val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
-                                LocalDate.of(2020, 2, 29)), ikkeForeldetPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, ikkeForeldetPeriode.hendelsestype)
-        assertFalse { ikkeForeldetPeriode.foreldet }
-        assertEquals(BigDecimal("10000"), ikkeForeldetPeriode.feilutbetaltBeløp)
-        assertEquals(BigDecimal(10000), ikkeForeldetPeriode.aktiviteter[0].beløp)
-        assertTrue { ikkeForeldetPeriode.reduserteBeløper.isEmpty() }
+        ikkeForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        ikkeForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        ikkeForeldetPeriode.foreldet.shouldBeFalse()
+        ikkeForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        ikkeForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        ikkeForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(ikkeForeldetPeriode.aktiviteter)
-        assertNull(ikkeForeldetPeriode.begrunnelse)
-        assertNull(ikkeForeldetPeriode.vilkårsvurderingsresultatInfo)
+        ikkeForeldetPeriode.begrunnelse.shouldBeNull()
+        ikkeForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
     }
 
     @Test
@@ -174,31 +171,31 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
 
         val førstePeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(periode1, førstePeriode.periode)
-        assertEquals(Hendelsestype.ANNET, førstePeriode.hendelsestype)
-        assertEquals(BigDecimal(10000), førstePeriode.feilutbetaltBeløp)
-        assertFalse { førstePeriode.foreldet }
+        førstePeriode.periode shouldBe periode1
+        førstePeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        førstePeriode.feilutbetaltBeløp shouldBe BigDecimal(10000)
+        førstePeriode.foreldet.shouldBeFalse()
         assertAktiviteter(førstePeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), førstePeriode.aktiviteter[0].beløp)
+        førstePeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         var vilkårsvurderingsresultatDto = førstePeriode.vilkårsvurderingsresultatInfo
-        assertNotNull(vilkårsvurderingsresultatDto)
-        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        vilkårsvurderingsresultatDto.shouldNotBeNull()
+        vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
 
         val andrePeriode = vurdertVilkårsvurderingDto.perioder[1]
-        assertEquals(periode2, andrePeriode.periode)
-        assertEquals(Hendelsestype.ANNET, andrePeriode.hendelsestype)
-        assertEquals(BigDecimal(10000), andrePeriode.feilutbetaltBeløp)
-        assertFalse { andrePeriode.foreldet }
+        andrePeriode.periode shouldBe periode2
+        andrePeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        andrePeriode.feilutbetaltBeløp shouldBe BigDecimal(10000)
+        andrePeriode.foreldet.shouldBeFalse()
         assertAktiviteter(andrePeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), andrePeriode.aktiviteter[0].beløp)
+        andrePeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
         vilkårsvurderingsresultatDto = andrePeriode.vilkårsvurderingsresultatInfo
-        assertNotNull(vilkårsvurderingsresultatDto)
-        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        vilkårsvurderingsresultatDto.shouldNotBeNull()
+        vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
     }
 
     @Test
@@ -230,32 +227,31 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode)))
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
+        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
-        assertFalse { vurdertPeriode.foreldet }
+        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
+        vurdertPeriode.foreldet.shouldBeFalse()
 
-        assertTrue { vurdertPeriode.reduserteBeløper.isNotEmpty() }
-        assertEquals(3, vurdertPeriode.reduserteBeløper.size)
+        vurdertPeriode.reduserteBeløper.shouldNotBeEmpty()
+        vurdertPeriode.reduserteBeløper.size shouldBe 3
         var redusertBeløp = vurdertPeriode.reduserteBeløper[0]
-        assertTrue { redusertBeløp.trekk }
-        assertEquals(BigDecimal("2000.00"), redusertBeløp.beløp)
+        redusertBeløp.trekk.shouldBeTrue()
+        redusertBeløp.beløp shouldBe BigDecimal("2000.00")
         redusertBeløp = vurdertPeriode.reduserteBeløper[1]
-        assertTrue { redusertBeløp.trekk }
-        assertEquals(BigDecimal("2000.00"), redusertBeløp.beløp)
+        redusertBeløp.trekk.shouldBeTrue()
+        redusertBeløp.beløp shouldBe BigDecimal("2000.00")
         redusertBeløp = vurdertPeriode.reduserteBeløper[2]
-        assertFalse { redusertBeløp.trekk }
-        assertEquals(BigDecimal("5000.00"), redusertBeløp.beløp)
+        redusertBeløp.trekk.shouldBeFalse()
+        redusertBeløp.beløp shouldBe BigDecimal("5000.00")
 
-        assertNull(vurdertPeriode.vilkårsvurderingsresultatInfo)
-        assertNull(vurdertPeriode.begrunnelse)
+        vurdertPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
+        vurdertPeriode.begrunnelse.shouldBeNull()
     }
 
     @Test
@@ -266,37 +262,36 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                                                       behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
+        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
-        assertFalse { vurdertPeriode.foreldet }
-        assertEquals("Vilkårsvurdering begrunnelse", vurdertPeriode.begrunnelse)
+        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
+        vurdertPeriode.foreldet.shouldBeFalse()
+        vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         val vilkårsvurderingsresultatDto = vurdertPeriode.vilkårsvurderingsresultatInfo
-        assertNotNull(vilkårsvurderingsresultatDto)
-        assertNull(vilkårsvurderingsresultatDto.godTro)
-        assertEquals(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        vilkårsvurderingsresultatDto.shouldNotBeNull()
+        vilkårsvurderingsresultatDto.godTro.shouldBeNull()
+        vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
         val aktsomhetDto = vilkårsvurderingsresultatDto.aktsomhet
-        assertNotNull(aktsomhetDto)
-        assertEquals(Aktsomhet.SIMPEL_UAKTSOMHET, aktsomhetDto.aktsomhet)
-        assertEquals("Aktsomhet begrunnelse", aktsomhetDto.begrunnelse)
-        assertFalse { aktsomhetDto.tilbakekrevSmåbeløp }
-        assertFalse { aktsomhetDto.særligeGrunnerTilReduksjon }
-        assertNull(aktsomhetDto.andelTilbakekreves)
-        assertNull(aktsomhetDto.ileggRenter)
-        assertNull(aktsomhetDto.beløpTilbakekreves)
-        assertEquals("Særlig grunner begrunnelse", aktsomhetDto.særligeGrunnerBegrunnelse)
+        aktsomhetDto.shouldNotBeNull()
+        aktsomhetDto.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        aktsomhetDto.begrunnelse shouldBe "Aktsomhet begrunnelse"
+        aktsomhetDto.tilbakekrevSmåbeløp.shouldBeFalse()
+        aktsomhetDto.særligeGrunnerTilReduksjon.shouldBeFalse()
+        aktsomhetDto.andelTilbakekreves.shouldBeNull()
+        aktsomhetDto.ileggRenter.shouldBeNull()
+        aktsomhetDto.beløpTilbakekreves.shouldBeNull()
+        aktsomhetDto.særligeGrunnerBegrunnelse shouldBe "Særlig grunner begrunnelse"
         val særligGrunner = aktsomhetDto.særligeGrunner
-        assertNotNull(særligGrunner)
-        assertTrue { særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn } }
-        assertTrue { særligGrunner.all { it.begrunnelse == null } }
+        særligGrunner.shouldNotBeNull()
+        særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
+        særligGrunner.all { it.begrunnelse == null }.shouldBeTrue()
     }
 
     @Test
@@ -307,28 +302,27 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                                                       behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto)
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertEquals(Constants.rettsgebyr, vurdertVilkårsvurderingDto.rettsgebyr)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.size)
+        vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("20000"), vurdertPeriode.feilutbetaltBeløp)
+        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(20000), vurdertPeriode.aktiviteter[0].beløp)
-        assertFalse { vurdertPeriode.foreldet }
-        assertEquals("Vilkårsvurdering begrunnelse", vurdertPeriode.begrunnelse)
+        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(20000)
+        vurdertPeriode.foreldet.shouldBeFalse()
+        vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         val vilkårsvurderingsresultatDto = vurdertPeriode.vilkårsvurderingsresultatInfo
-        assertNotNull(vilkårsvurderingsresultatDto)
-        assertNull(vilkårsvurderingsresultatDto.aktsomhet)
-        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        vilkårsvurderingsresultatDto.shouldNotBeNull()
+        vilkårsvurderingsresultatDto.aktsomhet.shouldBeNull()
+        vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
         val godTroDto = vilkårsvurderingsresultatDto.godTro
-        assertNotNull(godTroDto)
-        assertTrue { godTroDto.beløpErIBehold }
-        assertEquals("God tro begrunnelse", godTroDto.begrunnelse)
-        assertNull(godTroDto.beløpTilbakekreves)
+        godTroDto.shouldNotBeNull()
+        godTroDto.beløpErIBehold.shouldBeTrue()
+        godTroDto.begrunnelse shouldBe "God tro begrunnelse"
+        godTroDto.beløpTilbakekreves.shouldBeNull()
     }
 
     @Test
@@ -339,10 +333,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         var vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
+        vurdertVilkårsvurderingDto.perioder.count { it.foreldet } shouldBe 1
+        vurdertVilkårsvurderingDto.perioder.count { !it.foreldet } shouldBe 1
 
         // behandle vilkårsvurdering
         vilkårsvurderingService
@@ -354,43 +348,42 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         // endret begge perioder til IKKE_FORELDET
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
-        oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.IKKE_FORELDET,
+        oppdaterForeldelsesvurdering(vurdertForeldelse,
+                                     Foreldelsesvurderingstype.IKKE_FORELDET,
                                      Foreldelsesvurderingstype.IKKE_FORELDET)
 
         vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
+        vurdertVilkårsvurderingDto.perioder.count { !it.foreldet } shouldBe 2
 
         val ikkeVurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 1, 31)), ikkeVurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, ikkeVurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("10000"), ikkeVurdertPeriode.feilutbetaltBeløp)
-        assertTrue { ikkeVurdertPeriode.reduserteBeløper.isEmpty() }
+        ikkeVurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        ikkeVurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        ikkeVurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        ikkeVurdertPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(ikkeVurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), ikkeVurdertPeriode.aktiviteter[0].beløp)
-        assertNull(ikkeVurdertPeriode.vilkårsvurderingsresultatInfo)
-        assertNull(ikkeVurdertPeriode.begrunnelse)
+        ikkeVurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        ikkeVurdertPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
+        ikkeVurdertPeriode.begrunnelse.shouldBeNull()
 
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
-                                LocalDate.of(2020, 2, 29)), vurdertPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, vurdertPeriode.hendelsestype)
-        assertEquals(BigDecimal("10000"), vurdertPeriode.feilutbetaltBeløp)
+        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), vurdertPeriode.aktiviteter[0].beløp)
-        assertEquals("Vilkårsvurdering begrunnelse", vurdertPeriode.begrunnelse)
+        vurdertPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         val vilkårsvurderingsresultatDto = vurdertPeriode.vilkårsvurderingsresultatInfo
-        assertNotNull(vilkårsvurderingsresultatDto)
-        assertNull(vilkårsvurderingsresultatDto.aktsomhet)
-        assertEquals(Vilkårsvurderingsresultat.GOD_TRO, vilkårsvurderingsresultatDto.vilkårsvurderingsresultat)
+        vilkårsvurderingsresultatDto.shouldNotBeNull()
+        vilkårsvurderingsresultatDto.aktsomhet.shouldBeNull()
+        vilkårsvurderingsresultatDto.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.GOD_TRO
         val godTroDto = vilkårsvurderingsresultatDto.godTro
-        assertNotNull(godTroDto)
-        assertTrue { godTroDto.beløpErIBehold }
-        assertEquals("God tro begrunnelse", godTroDto.begrunnelse)
-        assertNull(godTroDto.beløpTilbakekreves)
+        godTroDto.shouldNotBeNull()
+        godTroDto.beløpErIBehold.shouldBeTrue()
+        godTroDto.begrunnelse shouldBe "God tro begrunnelse"
+        godTroDto.beløpTilbakekreves.shouldBeNull()
     }
 
     @Test
@@ -401,10 +394,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         var vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
-        assertEquals(1, vurdertVilkårsvurderingDto.perioder.count { !it.foreldet })
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
+        vurdertVilkårsvurderingDto.perioder.count { it.foreldet } shouldBe 1
+        vurdertVilkårsvurderingDto.perioder.count { !it.foreldet } shouldBe 1
 
         // behandle vilkårsvurdering
         vilkårsvurderingService
@@ -416,58 +409,55 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         // endret begge perioder til FORELDET
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
-        oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.FORELDET,
-                                     Foreldelsesvurderingstype.FORELDET)
+        oppdaterForeldelsesvurdering(vurdertForeldelse, Foreldelsesvurderingstype.FORELDET, Foreldelsesvurderingstype.FORELDET)
 
         vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
-        assertTrue { vurdertVilkårsvurderingDto.perioder.isNotEmpty() }
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.size)
-        assertEquals(2, vurdertVilkårsvurderingDto.perioder.count { it.foreldet })
+        vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
+        vurdertVilkårsvurderingDto.perioder.size shouldBe 2
+        vurdertVilkårsvurderingDto.perioder.count { it.foreldet } shouldBe 2
 
         val førsteForeldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 1, 1),
-                                LocalDate.of(2020, 1, 31)), førsteForeldetPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, førsteForeldetPeriode.hendelsestype)
-        assertEquals(BigDecimal("10000"), førsteForeldetPeriode.feilutbetaltBeløp)
-        assertTrue { førsteForeldetPeriode.reduserteBeløper.isEmpty() }
+        førsteForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        førsteForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        førsteForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        førsteForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(førsteForeldetPeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), førsteForeldetPeriode.aktiviteter[0].beløp)
-        assertNull(førsteForeldetPeriode.vilkårsvurderingsresultatInfo)
-        assertEquals("foreldelse begrunnelse 1", førsteForeldetPeriode.begrunnelse)
+        førsteForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        førsteForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
+        førsteForeldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 1"
 
         val andreForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        assertEquals(PeriodeDto(LocalDate.of(2020, 2, 1),
-                                LocalDate.of(2020, 2, 29)), andreForeldetPeriode.periode)
-        assertEquals(Hendelsestype.ANNET, andreForeldetPeriode.hendelsestype)
-        assertEquals(BigDecimal("10000"), andreForeldetPeriode.feilutbetaltBeløp)
-        assertTrue { andreForeldetPeriode.reduserteBeløper.isEmpty() }
+        andreForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        andreForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
+        andreForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
+        andreForeldetPeriode.reduserteBeløper.shouldBeEmpty()
         assertAktiviteter(andreForeldetPeriode.aktiviteter)
-        assertEquals(BigDecimal(10000), andreForeldetPeriode.aktiviteter[0].beløp)
-        assertNull(andreForeldetPeriode.vilkårsvurderingsresultatInfo)
-        assertEquals("foreldelse begrunnelse 2", andreForeldetPeriode.begrunnelse)
+        andreForeldetPeriode.aktiviteter[0].beløp shouldBe BigDecimal(10000)
+        andreForeldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
+        andreForeldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 2"
     }
 
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når andelTilbakekreves er mer enn 100 prosent `() {
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService
                     .lagreVilkårsvurdering(behandling.id,
                                            lagVilkårsvurderingMedSimpelAktsomhet(andelTilbakekreves = BigDecimal(120),
                                                                                  særligGrunn =
                                                                                  SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
         }
-        assertEquals("Andel som skal tilbakekreves kan ikke være mer enn 100 prosent", exception.message)
+        exception.message shouldBe "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent"
     }
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når ANNET særlig grunner mangler ANNET begrunnelse`() {
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService
                     .lagreVilkårsvurdering(behandling.id,
                                            lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.ANNET)))
         }
-        assertEquals("ANNET særlig grunner må ha ANNET begrunnelse", exception.message)
+        exception.message shouldBe "ANNET særlig grunner må ha ANNET begrunnelse"
     }
 
     @Test
@@ -476,67 +466,63 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegVilkårsvurderingDto =
                 lagVilkårsvurderingMedSimpelAktsomhet(manueltSattBeløp = BigDecimal(30000),
                                                       særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
-        val exception = assertFailsWith<RuntimeException> {
-            vilkårsvurderingService.lagreVilkårsvurdering(behandling.id,
-                                                          behandlingsstegVilkårsvurderingDto)
+        val exception = shouldThrow<RuntimeException> {
+            vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
         }
-        assertEquals("Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp", exception.message)
+        exception.message shouldBe "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
     }
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når tilbakekrevesBeløp er mer enn feilutbetalt beløp`() {
         //forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
-        val exception = assertFailsWith<RuntimeException> {
+        val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(behandling.id,
                                                           lagVilkårsvurderingMedGodTro(listOf(PeriodeDto(YearMonth.of(2020, 1),
                                                                                                          YearMonth.of(2020, 2))),
                                                                                        BigDecimal(30000)))
         }
-        assertEquals("Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp", exception.message)
+        exception.message shouldBe "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
     }
 
     @Test
     fun `lagreVilkårsvurdering skal lagre vilkårsvurdering med false ileggRenter for barnetrygd behandling`() {
         //forutsetter at behandling opprettet for barnetrygd fra Testdata
         vilkårsvurderingService
-                .lagreVilkårsvurdering(behandling.id,
-                                       lagVilkårsvurderingMedSimpelAktsomhet(ileggRenter = true,
-                                                                             særligGrunn =
-                                                                             SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
+                .lagreVilkårsvurdering(behandling.id, lagVilkårsvurderingMedSimpelAktsomhet(ileggRenter = true, særligGrunn =
+                SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        assertNotNull(vilkårsvurdering)
+        vilkårsvurdering.shouldNotBeNull()
 
-        assertTrue { vilkårsvurdering.perioder.isNotEmpty() }
-        assertEquals(1, vilkårsvurdering.perioder.size)
+        vilkårsvurdering.perioder.shouldNotBeEmpty()
+        vilkårsvurdering.perioder.size shouldBe 1
         val vurdertPeriode = vilkårsvurdering.perioder.toList()[0]
-        assertEquals(Periode(YearMonth.of(2020, 1),
-                             YearMonth.of(2020, 2)), vurdertPeriode.periode)
-        assertEquals("Vilkårsvurdering begrunnelse", vurdertPeriode.begrunnelse)
+        vurdertPeriode.periode shouldBe Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
+        vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
-        assertNotNull(vurdertPeriode.aktsomhet)
-        assertNull(vurdertPeriode.godTro)
-        assertEquals(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, vurdertPeriode.vilkårsvurderingsresultat)
+        vurdertPeriode.aktsomhet.shouldNotBeNull()
+        vurdertPeriode.godTro.shouldBeNull()
+        vurdertPeriode.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
 
         val aktsomhet = vurdertPeriode.aktsomhet
-        assertNotNull(aktsomhet)
-        assertEquals(Aktsomhet.SIMPEL_UAKTSOMHET, aktsomhet.aktsomhet)
-        assertEquals("Aktsomhet begrunnelse", aktsomhet.begrunnelse)
-        assertFalse { aktsomhet.tilbakekrevSmåbeløp }
-        assertFalse { aktsomhet.særligeGrunnerTilReduksjon }
-        assertNull(aktsomhet.andelTilbakekreves)
-        assertTrue { aktsomhet.ileggRenter != null && aktsomhet.ileggRenter == false }
-        assertNull(aktsomhet.manueltSattBeløp)
-        assertEquals("Særlig grunner begrunnelse", aktsomhet.særligeGrunnerBegrunnelse)
+        aktsomhet.shouldNotBeNull()
+        aktsomhet.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        aktsomhet.begrunnelse shouldBe "Aktsomhet begrunnelse"
+        aktsomhet.tilbakekrevSmåbeløp.shouldBeFalse()
+        aktsomhet.særligeGrunnerTilReduksjon.shouldBeFalse()
+        aktsomhet.andelTilbakekreves.shouldBeNull()
+        aktsomhet.andelTilbakekreves.shouldBeNull()
+        aktsomhet.ileggRenter shouldBe false
+        aktsomhet.manueltSattBeløp.shouldBeNull()
+        aktsomhet.særligeGrunnerBegrunnelse shouldBe "Særlig grunner begrunnelse"
 
         val særligGrunner = aktsomhet.vilkårsvurderingSærligeGrunner
-        assertNotNull(særligGrunner)
-        assertTrue { særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn } }
-        assertTrue { særligGrunner.all { it.begrunnelse == null } }
+        særligGrunner.shouldNotBeNull()
+        særligGrunner.any { SærligGrunn.GRAD_AV_UAKTSOMHET == it.særligGrunn }.shouldBeTrue()
+        særligGrunner.all { it.begrunnelse == null }.shouldBeTrue()
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
-                                            behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg, behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingssteg = behandlingssteg,
                                                                            behandlingsstegsstatus = behandlingsstegstatus,
                                                                            behandlingId = behandling.id))
@@ -559,9 +545,9 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertAktiviteter(aktiviteter: List<AktivitetDto>) {
-        assertTrue { aktiviteter.isNotEmpty() }
-        assertEquals(1, aktiviteter.size)
-        assertEquals(Klassekode.BATR.aktivitet, aktiviteter[0].aktivitet)
+        aktiviteter.shouldNotBeEmpty()
+        aktiviteter.size shouldBe 1
+        aktiviteter[0].aktivitet shouldBe Klassekode.BATR.aktivitet
     }
 
     private fun lagVilkårsvurderingMedSimpelAktsomhet(andelTilbakekreves: BigDecimal? = null,
@@ -569,8 +555,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                                                       ileggRenter: Boolean? = null,
                                                       særligGrunn: SærligGrunnDto)
             : BehandlingsstegVilkårsvurderingDto {
-        val periode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(YearMonth.of(2020, 1),
-                                                                       YearMonth.of(2020, 2)),
+        val periode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
                                                   vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                                                   begrunnelse = "Vilkårsvurdering begrunnelse",
                                                   aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
@@ -605,18 +590,15 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                       Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                                          foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                                          begrunnelse = "foreldelse begrunnelse 2"))
-        foreldelseRepository.insert(VurdertForeldelse(behandlingId = behandling.id,
-                                                      foreldelsesperioder = foreldelsesperioder))
+        foreldelseRepository.insert(VurdertForeldelse(behandlingId = behandling.id, foreldelsesperioder = foreldelsesperioder))
     }
 
     private fun oppdaterForeldelsesvurdering(vurdertForeldelse: VurdertForeldelse,
                                              vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
-        val foreldelsesperioder = setOf(Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 1),
-                                                                             YearMonth.of(2020, 1)),
+        val foreldelsesperioder = setOf(Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                                                            foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
                                                            begrunnelse = "foreldelse begrunnelse 1"),
-                                        Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 2),
-                                                                             YearMonth.of(2020, 2)),
+                                        Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                                                            foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                                                            begrunnelse = "foreldelse begrunnelse 2"))
         foreldelseRepository.update(vurdertForeldelse.copy(foreldelsesperioder = foreldelsesperioder))

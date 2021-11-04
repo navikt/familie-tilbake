@@ -1,16 +1,17 @@
 package no.nav.familie.tilbake.behandlingskontroll
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -37,10 +38,10 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        assertThat(lagretBehandlingsstegstilstand).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(behandlingsstegstilstand)
-        assertEquals(1, lagretBehandlingsstegstilstand.versjon)
+        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(behandlingsstegstilstand,
+                                                                            Behandlingsstegstilstand::sporbar,
+                                                                            Behandlingsstegstilstand::versjon)
+        lagretBehandlingsstegstilstand.versjon shouldBe 1
     }
 
     @Test
@@ -53,9 +54,10 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 
         lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
-        assertThat(lagretBehandlingsstegstilstand)
-                .usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertBehandlingsstegstilstand)
-        assertEquals(2, lagretBehandlingsstegstilstand.versjon)
+        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(oppdatertBehandlingsstegstilstand,
+                                                                            Behandlingsstegstilstand::sporbar,
+                                                                            Behandlingsstegstilstand::versjon)
+        lagretBehandlingsstegstilstand.versjon shouldBe 2
     }
 
 }

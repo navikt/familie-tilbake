@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.historikkinnslag
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -38,7 +39,6 @@ import org.springframework.util.concurrent.SettableListenableFuture
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertEquals
 
 internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
@@ -93,9 +93,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(Aktør.VEDTAKSLØSNING,
-                                      Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
-                                      Historikkinnslagstype.HENDELSE)
+                                       Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
+                                       Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -115,10 +115,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
-                                      tekst = "Årsak: Venter på tilbakemelding fra bruker",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
+                                       tekst = "Årsak: Venter på tilbakemelding fra bruker",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -138,10 +138,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
-                                      aktørIdent = behandling.ansvarligSaksbehandler,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
-                                      tekst = "Årsak: Avventer dokumentasjon",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = behandling.ansvarligSaksbehandler,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
+                                       tekst = "Årsak: Avventer dokumentasjon",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -156,9 +156,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
-                                      aktørIdent = behandling.ansvarligSaksbehandler,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.tittel,
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = behandling.ansvarligSaksbehandler,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.tittel,
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -173,9 +173,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT.tittel,
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT.tittel,
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -194,12 +194,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tittel,
-                                      tekst = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tekst,
-                                      type = Historikkinnslagstype.BREV,
-                                      dokumentId = "testverdi",
-                                      journalpostId = "testverdi")
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tittel,
+                                       tekst = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tekst,
+                                       type = Historikkinnslagstype.BREV,
+                                       dokumentId = "testverdi",
+                                       journalpostId = "testverdi")
     }
 
     @Test
@@ -219,10 +219,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
-                                      tekst = "Årsak: Kravgrunnlaget er nullstilt",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
+                                       tekst = "Årsak: Kravgrunnlaget er nullstilt",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -243,10 +243,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         }
 
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
-                                      tekst = "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
+                                       tekst = "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -265,12 +265,12 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.VEDTAKSLØSNING,
-                                      aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tittel,
-                                      tekst = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst,
-                                      type = Historikkinnslagstype.BREV,
-                                      dokumentId = "testverdi",
-                                      journalpostId = "testverdi")
+                                       aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tittel,
+                                       tekst = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst,
+                                       type = Historikkinnslagstype.BREV,
+                                       dokumentId = "testverdi",
+                                       journalpostId = "testverdi")
     }
 
     @Test
@@ -285,10 +285,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
-                                      aktørIdent = behandling.ansvarligSaksbehandler,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT.tittel,
-                                      type = Historikkinnslagstype.SKJERMLENKE,
-                                      steg = Behandlingssteg.FAKTA.name)
+                                       aktørIdent = behandling.ansvarligSaksbehandler,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT.tittel,
+                                       type = Historikkinnslagstype.SKJERMLENKE,
+                                       steg = Behandlingssteg.FAKTA.name)
     }
 
     @Test
@@ -303,10 +303,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
-                                      aktørIdent = behandling.ansvarligSaksbehandler,
-                                      tittel = TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT.tittel,
-                                      type = Historikkinnslagstype.SKJERMLENKE,
-                                      steg = Behandlingssteg.FORELDELSE.name)
+                                       aktørIdent = behandling.ansvarligSaksbehandler,
+                                       tittel = TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT.tittel,
+                                       type = Historikkinnslagstype.SKJERMLENKE,
+                                       steg = Behandlingssteg.FORELDELSE.name)
     }
 
     @Test
@@ -327,10 +327,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.BESLUTTER,
-                                      aktørIdent = requireNotNull(behandling.ansvarligBeslutter),
-                                      tittel = TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET.tittel,
-                                      tekst = "Resultat: Full tilbakebetaling",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = requireNotNull(behandling.ansvarligBeslutter),
+                                       tittel = TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET.tittel,
+                                       tekst = "Resultat: Full tilbakebetaling",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
     @Test
@@ -350,33 +350,33 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                                   capture(historikkinnslagRecordSlot))
         }
         assertHistorikkinnslagRequest(aktør = Aktør.SAKSBEHANDLER,
-                                      aktørIdent = requireNotNull(behandling.ansvarligSaksbehandler),
-                                      tittel = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET.tittel,
-                                      tekst = "Ny enhet: 3434, Begrunnelse: begrunnelse for endring",
-                                      type = Historikkinnslagstype.HENDELSE)
+                                       aktørIdent = requireNotNull(behandling.ansvarligSaksbehandler),
+                                       tittel = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET.tittel,
+                                       tekst = "Ny enhet: 3434, Begrunnelse: begrunnelse for endring",
+                                       type = Historikkinnslagstype.HENDELSE)
     }
 
 
     private fun assertHistorikkinnslagRequest(aktør: Aktør, aktørIdent: String,
-                                              tittel: String, type: Historikkinnslagstype,
-                                              tekst: String? = null, steg: String? = null,
-                                              dokumentId: String? = null, journalpostId: String? = null) {
-        assertEquals(behandlingId, behandlingIdSlot.captured)
+                                               tittel: String, type: Historikkinnslagstype,
+                                               tekst: String? = null, steg: String? = null,
+                                               dokumentId: String? = null, journalpostId: String? = null) {
+        behandlingIdSlot.captured shouldBe behandlingId
         val request = historikkinnslagRecordSlot.captured
-        assertEquals(request.behandlingId, keySlot.captured)
+        keySlot.captured shouldBe request.behandlingId
 
-        assertEquals(fagsak.eksternFagsakId, request.eksternFagsakId)
-        assertEquals(aktør, request.aktør)
-        assertEquals(aktørIdent, request.aktørIdent)
-        assertEquals(opprettetTidspunkt, request.opprettetTidspunkt)
-        assertEquals(Fagsystem.BA, request.fagsystem)
-        assertEquals(Applikasjon.FAMILIE_TILBAKE, request.applikasjon)
-        assertEquals(tittel, request.tittel)
-        assertEquals(type, request.type)
-        assertEquals(tekst, request.tekst)
-        assertEquals(steg, request.steg)
-        assertEquals(dokumentId, request.dokumentId)
-        assertEquals(journalpostId, request.journalpostId)
+        request.eksternFagsakId shouldBe fagsak.eksternFagsakId
+        request.aktør shouldBe aktør
+        request.aktørIdent shouldBe aktørIdent
+        request.opprettetTidspunkt shouldBe opprettetTidspunkt
+        request.fagsystem shouldBe Fagsystem.BA
+        request.applikasjon shouldBe Applikasjon.FAMILIE_TILBAKE
+        request.tittel shouldBe tittel
+        request.type shouldBe type
+        request.tekst shouldBe tekst
+        request.steg shouldBe steg
+        request.dokumentId shouldBe dokumentId
+        request.journalpostId shouldBe journalpostId
     }
 
 }

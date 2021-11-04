@@ -1,12 +1,13 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -20,8 +21,8 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insert(vilkår)
 
         val lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        assertThat(lagretVilkår).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(vilkår)
-        assertEquals(1, lagretVilkår.versjon)
+        lagretVilkår.shouldBeEqualToComparingFieldsExcept(vilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
+        lagretVilkår.versjon shouldBe 1
     }
 
     @Test
@@ -33,8 +34,8 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.update(oppdatertVilkår)
 
         lagretVilkår = vilkårsvurderingRepository.findByIdOrThrow(vilkår.id)
-        assertThat(lagretVilkår).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(oppdatertVilkår)
-        assertEquals(2, lagretVilkår.versjon)
+        lagretVilkår.shouldBeEqualToComparingFieldsExcept(oppdatertVilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
+        lagretVilkår.versjon shouldBe 2
     }
 
 }

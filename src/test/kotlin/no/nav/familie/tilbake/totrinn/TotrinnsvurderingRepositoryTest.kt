@@ -1,15 +1,16 @@
 package no.nav.familie.tilbake.totrinn
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -36,10 +37,10 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
 
-        assertThat(lagretTotrinnsvurdering).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(totrinnsvurdering)
-        assertEquals(1, lagretTotrinnsvurdering.versjon)
+        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(totrinnsvurdering,
+                                                                     Totrinnsvurdering::sporbar,
+                                                                     Totrinnsvurdering::versjon)
+        lagretTotrinnsvurdering.versjon shouldBe 1
     }
 
     @Test
@@ -51,10 +52,10 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         totrinnsvurderingRepository.update(oppdatertTotrinnsvurdering)
 
         lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
-        assertThat(lagretTotrinnsvurdering).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertTotrinnsvurdering)
-        assertEquals(2, lagretTotrinnsvurdering.versjon)
+        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(oppdatertTotrinnsvurdering,
+                                                                     Totrinnsvurdering::sporbar,
+                                                                     Totrinnsvurdering::versjon)
+        lagretTotrinnsvurdering.versjon shouldBe 2
     }
 
 }

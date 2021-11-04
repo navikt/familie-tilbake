@@ -6,6 +6,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -19,10 +23,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class IntegrasjonerClientTest {
 
@@ -52,7 +52,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${IntegrasjonerConfig.PATH_ARKIVER}"))
                                        .willReturn(okJson(success(arkiverDokumentResponse).toJson())))
 
-        assertNotNull(integrasjonerClient.arkiver(arkiverDokumentRequest))
+        integrasjonerClient.arkiver(arkiverDokumentRequest).shouldNotBeNull()
     }
 
     @Test
@@ -60,7 +60,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${IntegrasjonerConfig.PATH_ARKIVER}"))
                                        .willReturn(okJson(failure<Any>("error").toJson())))
 
-        assertFailsWith(IllegalStateException::class) {
+        shouldThrow<IllegalStateException> {
             integrasjonerClient.arkiver(arkiverDokumentRequest)
         }
     }
@@ -71,7 +71,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${IntegrasjonerConfig.PATH_DISTRIBUER}"))
                                        .willReturn(okJson(success("id").toJson())))
         // Vil gi resultat
-        assertNotNull(integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF))
+        integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF).shouldNotBeNull()
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(post(urlEqualTo("/${IntegrasjonerConfig.PATH_DISTRIBUER}"))
                                        .willReturn(okJson(failure<Any>("error").toJson())))
 
-        assertFailsWith(IllegalStateException::class) {
+        shouldThrow<IllegalStateException> {
             integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF)
         }
     }
@@ -91,7 +91,7 @@ internal class IntegrasjonerClientTest {
                                        .willReturn(okJson(success(Organisasjon("Bob AS", "987654321"))
                                                                   .toJson())))
         // Vil gi resultat
-        assertNotNull(integrasjonerClient.hentOrganisasjon("987654321"))
+        integrasjonerClient.hentOrganisasjon("987654321").shouldNotBeNull()
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321"))
                                        .willReturn(okJson(failure<Any>("error").toJson())))
 
-        assertFailsWith(IllegalStateException::class) {
+        shouldThrow<IllegalStateException> {
             integrasjonerClient.hentOrganisasjon("987654321")
         }
     }
@@ -110,7 +110,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
                                        .willReturn(okJson(success(true).toJson())))
         // Vil gi resultat
-        assertTrue { integrasjonerClient.validerOrganisasjon("987654321") }
+        integrasjonerClient.validerOrganisasjon("987654321").shouldBeTrue()
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.stubFor(get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
                                        .willReturn(okJson(success(false).toJson())))
 
-        assertFalse { integrasjonerClient.validerOrganisasjon("987654321") }
+        integrasjonerClient.validerOrganisasjon("987654321").shouldBeFalse()
     }
 
 }

@@ -1,14 +1,15 @@
 package no.nav.familie.tilbake.behandling
 
+import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
+import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.test.assertEquals
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -30,8 +31,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(lagretBehandling).usingRecursiveComparison().ignoringFields("sporbar", "versjon").isEqualTo(behandling)
-        assertEquals(1, lagretBehandling.versjon)
+        lagretBehandling.shouldBeEqualToComparingFieldsExcept(behandling,
+                                                              Behandling::endretTidspunkt,
+                                                              Behandling::sporbar,
+                                                              Behandling::versjon)
+        lagretBehandling.versjon shouldBe 1
     }
 
     @Test
@@ -43,10 +47,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(oppdatertBehandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        assertThat(lagretBehandling).usingRecursiveComparison()
-                .ignoringFields("sporbar", "versjon")
-                .isEqualTo(oppdatertBehandling)
-        assertEquals(2, lagretBehandling.versjon)
+        lagretBehandling.shouldBeEqualToComparingFieldsExcept(oppdatertBehandling,
+                                                              Behandling::endretTidspunkt,
+                                                              Behandling::sporbar,
+                                                              Behandling::versjon)
+        lagretBehandling.versjon shouldBe 2
     }
 
 }

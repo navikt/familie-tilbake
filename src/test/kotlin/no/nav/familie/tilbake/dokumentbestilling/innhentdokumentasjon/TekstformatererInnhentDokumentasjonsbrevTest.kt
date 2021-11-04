@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 
+import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -35,7 +35,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -47,7 +47,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
+        generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }
 
     @Test
@@ -63,7 +63,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
         val vergeTekst = "Brev med likt innhold er sendt til Test"
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines("$fasit\n\n$vergeTekst")
+        generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }
 
     @Test
@@ -74,7 +74,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn.txt")
-        Assertions.assertThat(generertBrev).isEqualToNormalizingNewlines(fasit)
+        generertBrev shouldBe fasit
     }
 
     @Test
@@ -82,7 +82,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val overskrift = TekstformatererInnhentDokumentasjonsbrev.lagOverskrift(innhentDokumentasjonsbrevsdokument.brevmetadata)
 
         val fasit = "Vi trenger flere opplysninger"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     @Test
@@ -93,7 +93,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
                 .lagOverskrift(brevMetadata)
 
         val fasit = "Vi trenger fleire opplysningar"
-        Assertions.assertThat(overskrift).isEqualToNormalizingNewlines(fasit)
+        overskrift shouldBe fasit
     }
 
     private fun les(filnavn: String): String? {
