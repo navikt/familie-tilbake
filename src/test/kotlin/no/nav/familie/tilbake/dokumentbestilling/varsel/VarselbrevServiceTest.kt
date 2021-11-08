@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.io.File
 import java.time.LocalDate
 
 internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
@@ -59,7 +60,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                                              "1570",
                                              "Bodø",
                                              "321321",
-                                             Språkkode.NB,
+                                             Språkkode.NN,
                                              LocalDate.now(),
                                              FeilutbetaltePerioderDto(157468, listOf(Periode(LocalDate.of(2020, 5, 4),
                                                                                              LocalDate.now()))),
@@ -69,6 +70,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                                              null)
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
+        File("test.pdf").writeBytes(bytes)
 
         PdfaValidator.validatePdf(bytes)
     }

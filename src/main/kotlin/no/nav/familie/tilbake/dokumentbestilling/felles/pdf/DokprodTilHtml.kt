@@ -55,7 +55,13 @@ object DokprodTilHtml {
                         samepageStarted = true
                     }
                     builder.append("<div class=\"samepage\">")
-                    builder.append("<h2>").append(linje.substring(1)).append("</h2>")
+                    val underoverskrift = linje.startsWith("__")
+                    if (underoverskrift) {
+                        builder.append("<h2 style=\"color:#808080;\">").append(linje.substring(2)).append("</h2>")
+                    } else {
+                        builder.append("<h2>").append(linje.substring(1)).append("</h2>")
+                    }
+
                 } else {
                     if (!harAvsnitt) {
                         harAvsnitt = true

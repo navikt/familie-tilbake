@@ -3,7 +3,7 @@ _Gjelder perioden fra og med 1. januar 2019 til og med 31. januar 2019
 Dette er svindel!
 
 Du har fått 10 000 kroner for mye utbetalt.
-_Hvordan har vi kommet fram til at du må betale tilbake?
+__Hvordan har vi kommet fram til at du må betale tilbake?
 Du har fått informasjon om hvor mye du har rett til å få i kontantstøtte og at du må melde fra om endringer til NAV. Informasjonen du har fått forklarer om du har rett til kontantstøtte og hvor mye du har rett til å få utbetalt.
 
 Vi mener at du forstod at beløpet du fikk utbetalt var feil. Du må derfor betale tilbake det du har fått for mye.

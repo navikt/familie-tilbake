@@ -166,6 +166,6 @@ internal object AvsnittUtil {
     }
 
     private fun fjernOverskriftFormattering(tekst: String): String {
-        return tekst.substring(1)
+        return tekst.removePrefix("__").removePrefix("_")
     }
 }
