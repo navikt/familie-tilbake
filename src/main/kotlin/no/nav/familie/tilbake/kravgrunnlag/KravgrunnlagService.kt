@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Properties
 
 @Service
@@ -71,9 +72,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         //oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                                   beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
-                                                   frist = LocalDate.now())
+            håndterOppgave(behandling)
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
@@ -142,6 +141,29 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                   setProperty("ytelsestype", ytelsestype.name)
                                   setProperty("eksternId", kravgrunnlag431.referanse)
                               }))
+    }
+
+    private fun håndterOppgave(behandling: Behandling) {
+        val revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato
+        val interval = ChronoUnit.DAYS.between(revurderingsvedtaksdato, LocalDate.now())
+        if (interval >= FRIST_DATO_GRENSE) {
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                   beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
+                                                   frist = LocalDate.now().plusDays(1))
+        } else {
+            val beskrivelse = "Behandling er tatt av vent, " +
+                              "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
+                              "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
+                              "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                   beskrivelse = beskrivelse,
+                                                   frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE))
+        }
+    }
+
+    companion object {
+
+        const val FRIST_DATO_GRENSE = 10L
     }
 
 }
