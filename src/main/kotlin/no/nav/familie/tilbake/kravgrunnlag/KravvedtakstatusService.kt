@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,7 +35,8 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                               private val tellerService: TellerService,
                               private val behandlingskontrollService: BehandlingskontrollService,
                               private val behandlingService: BehandlingService,
-                              private val historikkTaskService: HistorikkTaskService) {
+                              private val historikkTaskService: HistorikkTaskService,
+                              private val oppgaveTaskService: OppgaveTaskService) {
 
     @Transactional
     fun håndterMottattStatusmelding(statusmeldingXml: String) {
@@ -105,6 +107,9 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             Kravstatuskode.ENDRET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
+                oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                       beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
+                                                       frist = LocalDate.now())
             }
             Kravstatuskode.AVSLUTTET -> {
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(avsluttet = true))
@@ -122,17 +127,18 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                         kravgrunnlag431: Kravgrunnlag431) {
         kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        val tidsfrist = LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker)
         behandlingskontrollService
                 .tilbakehoppBehandlingssteg(behandlingId,
                                             Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
                                                                  behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                                                                  venteårsak = venteårsak,
-                                                                 tidsfrist = LocalDate.now()
-                                                                         .plusWeeks(venteårsak.defaultVenteTidIUker)))
+                                                                 tidsfrist = tidsfrist))
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.VEDTAKSLØSNING,
                                               beskrivelse = venteårsak.beskrivelse)
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, venteårsak.beskrivelse, tidsfrist)
     }
 
 }
