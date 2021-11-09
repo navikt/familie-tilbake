@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.micrometer.TellerService
 import org.junit.jupiter.api.Test
-import org.postgresql.util.Base64
+import java.util.Base64
 
 internal class PdfBrevServiceTest {
 
@@ -49,6 +49,6 @@ internal class PdfBrevServiceTest {
         pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.VARSEL, brevdata, 5L, fritekst)
 
         val base64fritekst = slot.captured.metadata.getProperty("fritekst")
-        Base64.decode(base64fritekst).decodeToString() shouldBe fritekst
+        Base64.getDecoder().decode(base64fritekst).decodeToString() shouldBe fritekst
     }
 }
