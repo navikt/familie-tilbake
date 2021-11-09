@@ -45,13 +45,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
 
             //renter
-            val totalTilbakekrevingsbeløp = beregnTotalTilbakekrevesbeløp(perioder)
-            var renteBeløp = BigDecimal.ZERO
-            if (beregnetPeriode.tilbakekrevingsbeløpUtenRenter != BigDecimal.ZERO) {
-                renteBeløp = beregnetPeriode.rentebeløp.multiply(totalTilbakekrevingsbeløp)
-                        .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
-            }
-            perioder.map { it.copy(renter = renteBeløp) }
+            beregnRenter(beregnetPeriode, perioder)
         }.flatten()
     }
 
@@ -224,6 +218,25 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return perioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
     }
 
+    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode) : BigDecimal {
+        return periode.beløp.sumOf { it.tilbakekrevesBeløp }
+    }
+
     private fun Map<Periode, BigDecimal>.getNotNull(key: Periode) = requireNotNull(this[key])
+
+    private fun beregnRenter(beregnetPeriode: Beregningsresultatsperiode,
+                             perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
+        return perioder.map {
+            val tilbakekrevesbeløp = summerTilbakekrevesbeløp(it)
+            var renteBeløp = BigDecimal.ZERO
+            if (beregnetPeriode.tilbakekrevingsbeløpUtenRenter != BigDecimal.ZERO) {
+                renteBeløp = beregnetPeriode.rentebeløp.multiply(tilbakekrevesbeløp)
+                        .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
+            }
+            it.copy(renter = renteBeløp)
+        }
+    }
+
+
 }
 
