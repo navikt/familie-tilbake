@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class FagsakController(private val fagsakService: FagsakService) {
 
+    @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -34,6 +36,7 @@ class FagsakController(private val fagsakService: FagsakService) {
         return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
     }
 
+    @Operation(summary = "Sjekk om det finnes en åpen tilbakekrevingsbehandling")
     @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/finnesApenBehandling/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -46,6 +49,7 @@ class FagsakController(private val fagsakService: FagsakService) {
                                                                                  eksternFagsakId = eksternFagsakId))
     }
 
+    @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(path = ["/ytelsestype/{ytelsestype}/fagsak/{fagsak}/kanBehandlingOpprettesManuelt/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -57,6 +61,7 @@ class FagsakController(private val fagsakService: FagsakService) {
         return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
     }
 
+    @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{fagsak}/behandlinger/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

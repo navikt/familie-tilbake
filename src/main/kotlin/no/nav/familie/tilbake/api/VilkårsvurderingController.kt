@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -20,6 +21,7 @@ import java.util.UUID
 @Validated
 class VilkårsvurderingController(val vilkårsvurderingService: VilkårsvurderingService) {
 
+    @Operation(summary = "Hent vilkårsvurdering")
     @GetMapping(path = ["{behandlingId}/vilkarsvurdering/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

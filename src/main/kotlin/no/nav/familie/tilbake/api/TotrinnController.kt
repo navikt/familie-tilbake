@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.TotrinnsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -20,6 +21,7 @@ import java.util.UUID
 @Validated
 class TotrinnController(private val totrinnService: TotrinnService) {
 
+    @Operation(summary = "Hent totrinnsvurderinger")
     @GetMapping(path = ["/{behandlingId}/totrinn/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

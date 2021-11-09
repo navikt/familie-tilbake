@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -21,6 +22,7 @@ import javax.validation.constraints.NotNull
 @Validated
 class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
+    @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(path = ["/behandling/{behandlingId}/fakta/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

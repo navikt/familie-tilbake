@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.BestillBrevDto
@@ -32,6 +33,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                          private val henleggelsesbrevService: HenleggelsesbrevService,
                          private val vedtaksbrevService: VedtaksbrevService) {
 
+    @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Sender brev")
     fun bestillBrev(@RequestBody @Valid bestillBrevDto: BestillBrevDto): Ressurs<Any?> {
@@ -40,6 +42,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return Ressurs.success(null)
     }
 
+    @Operation(summary = "Forhåndsvis brev")
     @PostMapping("/forhandsvis")
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
     fun forhåndsvisBrev(@RequestBody @Valid bestillBrevDto: BestillBrevDto): Ressurs<ByteArray> {
@@ -49,6 +52,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return Ressurs.success(dokument)
     }
 
+    @Operation(summary = "Forhåndsvis varselbrev")
     @PostMapping("/forhandsvis-varselbrev",
                  produces = [MediaType.APPLICATION_PDF_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
@@ -56,6 +60,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
+    @Operation(summary = "Forhåndsvis henleggelsesbrev")
     @PostMapping("/forhandsvis-henleggelsesbrev",
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -64,6 +69,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
 
+    @Operation(summary = "Forhåndsvis vedtaksbrev")
     @PostMapping("/forhandsvis-vedtaksbrev",
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Forhåndsviser brev")
@@ -71,6 +77,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
     }
 
+    @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping("/vedtaksbrevtekst/{behandlingId}",
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,

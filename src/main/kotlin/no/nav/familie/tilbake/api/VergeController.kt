@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.VergeService
@@ -22,6 +23,7 @@ import java.util.UUID
 @Validated
 class VergeController(private val vergeService: VergeService) {
 
+    @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Oppretter verge steg på behandling",
@@ -31,6 +33,7 @@ class VergeController(private val vergeService: VergeService) {
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Fjern verge")
     @PutMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Deaktiverer ev. eksisterende verge.",
@@ -40,6 +43,7 @@ class VergeController(private val vergeService: VergeService) {
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Hent verge")
     @GetMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter verge informasjon",

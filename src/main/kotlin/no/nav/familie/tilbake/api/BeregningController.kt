@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
 import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
@@ -25,6 +26,7 @@ import javax.validation.Valid
 @Validated
 class BeregningController(val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
 
+    @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(path = ["{behandlingId}/beregn/v1"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
@@ -35,6 +37,7 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
     }
 
+    @Operation(summary = "Hent beregningsresultat")
     @GetMapping(path = ["{behandlingId}/beregn/resultat/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
