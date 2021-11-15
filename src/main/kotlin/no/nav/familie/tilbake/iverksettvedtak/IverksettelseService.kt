@@ -4,6 +4,8 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
+import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
@@ -29,6 +31,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
                            private val kravgrunnlagRepository: KravgrunnlagRepository,
                            private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
                            private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
+                           private val beregningService: TilbakekrevingsberegningService,
                            private val behandlingVedtakService: BehandlingsvedtakService,
                            private val oppdragClient: OppdragClient) {
 
@@ -38,8 +41,10 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
         val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
-        val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
+        // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
+        validerBeløp(behandlingId, beregnetPerioder)
 
+        val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
         // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
         val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
@@ -107,6 +112,27 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
                     kodeSkyld = "IKKE_FORDELT" // fast verdi
                 }
             }
+        }
+    }
+
+    private fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
+        val beregnetResultat = beregningService.beregn(behandlingId)
+        val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
+
+        // Beløpene beregnes for vedtaksbrev
+        val totalTilbakekrevingsbeløpUtenRenter = beregnetPerioderForVedtaksbrev.sumOf { it.tilbakekrevingsbeløpUtenRenter }
+        val totalRenteBeløp = beregnetPerioderForVedtaksbrev.sumOf { it.rentebeløp }
+        val totalSkatteBeløp = beregnetPerioderForVedtaksbrev.sumOf { it.skattebeløp }
+
+        // Beløpene beregnes for iverksettelse
+        val beregnetTotatlTilbakekrevingsbeløpUtenRenter =
+                beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
+        val beregnetTotalRenteBeløp = beregnetPerioder.sumOf { it.renter }
+        val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
+
+        if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
+            totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp) {
+            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId")
         }
     }
 }

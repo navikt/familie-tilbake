@@ -71,7 +71,10 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
             }
         }
         logger.warn("Stopper kafka container for $topic i ${Duration.ofMillis(stopTime)}")
-        super.handle(e, records, consumer, container)
+        super.handle(Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"),
+                     records,
+                     consumer,
+                     container)
     }
 
     companion object {

@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -82,6 +83,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingVedtakService: BehandlingsvedtakService
 
+    @Autowired
+    private lateinit var beregningService: TilbakekrevingsberegningService
+
     private lateinit var iverksettelseService: IverksettelseService
     private lateinit var oppdragClient: OppdragClient
 
@@ -112,6 +116,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                                                     kravgrunnlagRepository,
                                                     økonomiXmlSendtRepository,
                                                     tilbakekrevingsvedtakBeregningService,
+                                                    beregningService,
                                                     behandlingVedtakService,
                                                     oppdragClient)
     }
