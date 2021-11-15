@@ -70,7 +70,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                                              null)
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
-        File("test.pdf").writeBytes(bytes)
+//        File("test.pdf").writeBytes(bytes)
 
         PdfaValidator.validatePdf(bytes)
     }
