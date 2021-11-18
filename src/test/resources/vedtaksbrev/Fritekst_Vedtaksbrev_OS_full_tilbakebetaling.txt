@@ -5,7 +5,8 @@ Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Skatt
 NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betale tilbake pengene du skylder
-NAV Innkreving vil korrigere beløpet du skal betale tilbake. Du finner mer informasjon på nav.no/innkreving.
+NAV Innkreving vil korrigere beløpet du skal betale tilbake. Du finner mer informasjon på
+nav.no/innkreving.
 _Du har rett til å klage
 Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.
 
