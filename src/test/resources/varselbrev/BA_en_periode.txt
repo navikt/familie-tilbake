@@ -21,8 +21,8 @@ Selv om det er NAV som er skyld i feilutbetalingen, kan vi kreve at du betaler t
 
 Dette går fram av barnetrygdloven §13.
 _Slik uttaler du deg
-Du kan sende uttalelsen din ved å logge deg inn på nav.no/beskjedtilnav og velge «Send beskjed til NAV».
-Du kan også sende uttalelsen din til oss i posten. Adressen finner du på nav.no/ettersendelser.
+Du kan sende uttalelsen din ved å logge deg inn på nav.no/beskjedtilnav og velge «Send beskjed til NAV». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på
+nav.no/ettersendelser.
 _Du har rett til innsyn
 På nav.no/dittnav kan du se dokumentene i saken din.
 _Har du spørsmål?
@@ -31,4 +31,5 @@ Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
 
 Med vennlig hilsen
 NAV Familie- og pensjonsytelser Skien
+
 Bob
