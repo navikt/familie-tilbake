@@ -3,7 +3,9 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 object DokprodTilHtml {
 
     fun dokprodInnholdTilHtml(tekst: String): String {
-        val dokprod: String = sanitize(tekst)
+        val preSanitized = reddUnicodeMarkerFraSanitize(tekst)
+        val sanitized = sanitize(preSanitized)
+        val dokprod = leggTilbakeUnicodeMarker(sanitized)
         val builder = StringBuilder()
         val avsnittene = hentAvsnittene(dokprod)
         var samepageStarted = false
@@ -81,6 +83,14 @@ object DokprodTilHtml {
             }
         }
         return ekstraLinjeskiftFørHilsing(konverterNbsp(builder.toString()))
+    }
+
+    private fun reddUnicodeMarkerFraSanitize(tekst: String): String {
+        return tekst.replace("&#", "ampersandHash")
+    }
+
+    private fun leggTilbakeUnicodeMarker(tekst: String): String {
+        return tekst.replace("ampersandHash", "&#")
     }
 
     private fun sanitize(name: String): String {
