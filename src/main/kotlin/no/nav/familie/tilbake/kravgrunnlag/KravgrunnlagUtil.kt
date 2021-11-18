@@ -73,14 +73,8 @@ object KravgrunnlagUtil {
     }
 
     fun tilYtelsestype(fagområdekode: String): Ytelsestype {
-        return when (fagområdekode) {
-            "BA" -> Ytelsestype.BARNETRYGD
-            "KS" -> Ytelsestype.KONTANTSTØTTE
-            "EFOG" -> Ytelsestype.OVERGANGSSTØNAD
-            "EFBT" -> Ytelsestype.BARNETILSYN
-            "EFSP" -> Ytelsestype.SKOLEPENGER
-            else -> throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
-        }
+        return Ytelsestype.values().firstOrNull { it.kode == fagområdekode }
+               ?: throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
     }
 
     fun sammenlignKravgrunnlag(mottattKravgrunnlag: DetaljertKravgrunnlagDto, hentetKravgrunnlag: DetaljertKravgrunnlagDto)
