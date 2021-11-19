@@ -26,10 +26,10 @@ spec:
     - application: familie-ba-sak
       cluster: dev-fss
       namespace: teamfamilie
-    - application: familie-ef-sak
+    - application: familie-ef-sak-lokal
       cluster: dev-gcp
       namespace: teamfamilie
-    - application: familie-ef-iverksett
+    - application: familie-ef-iverksett-lokal
       cluster: dev-gcp
       namespace: teamfamilie
     - application: ida
