@@ -54,8 +54,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
-import java.io.File
-import java.nio.file.Files
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -136,9 +134,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligSaksbehandler) }
-                .returns("Ansvarlig Saksbehandler")
+                .returns("Ansvarlig O'Saksbehandler")
         every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligBeslutter!!) }
-                .returns("Ansvarlig Beslutter")
+                .returns("Ansvarlig O'Beslutter")
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
@@ -174,10 +172,11 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                                                                                 "Friktekst om fakta",
                                                                                 "Friktekst om foreldelse",
                                                                                 "Friktekst om vilkår",
-                                                                                "Friktekst om særligeGrunner",
+                                                                                """Friktekst & > < ' "særligeGrunner""",
                                                                                 "Friktekst om særligeGrunnerAnnet")))
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+        //   File("test.pdf").writeBytes(bytes)
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -301,9 +300,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         oppsummeringsavsnitt.underavsnittsliste.size shouldBe 1
         val oppsummeringsunderavsnitt = oppsummeringsavsnitt.underavsnittsliste[0]
         assertUnderavsnitt(underavsnitt = oppsummeringsunderavsnitt,
-                            fritekst = "oppsummering fritekst",
-                            fritekstTillatt = true,
-                            fritekstPåkrevet = false)
+                           fritekst = "oppsummering fritekst",
+                           fritekstTillatt = true,
+                           fritekstPåkrevet = false)
 
         val periodeAvsnitter = avsnittene.firstOrNull { Avsnittstype.PERIODE == it.avsnittstype }
         periodeAvsnitter.shouldNotBeNull()
@@ -315,9 +314,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
         faktaUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = faktaUnderavsnitt,
-                            fritekst = "fakta fritekst",
-                            fritekstTillatt = true,
-                            fritekstPåkrevet = true)
+                           fritekst = "fakta fritekst",
+                           fritekstTillatt = true,
+                           fritekstPåkrevet = true)
 
         val foreldelseUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.FORELDELSE == it.underavsnittstype }
@@ -327,25 +326,25 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 .firstOrNull { Underavsnittstype.VILKÅR == it.underavsnittstype }
         vilkårUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = vilkårUnderavsnitt,
-                            fritekst = "vilkår fritekst",
-                            fritekstTillatt = true,
-                            fritekstPåkrevet = false)
+                           fritekst = "vilkår fritekst",
+                           fritekstTillatt = true,
+                           fritekstPåkrevet = false)
 
         val særligGrunnerUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
         særligGrunnerUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = særligGrunnerUnderavsnitt,
-                            fritekst = "særliggrunner fritekst",
-                            fritekstTillatt = true,
-                            fritekstPåkrevet = false)
+                           fritekst = "særliggrunner fritekst",
+                           fritekstTillatt = true,
+                           fritekstPåkrevet = false)
 
         val særligGrunnerAnnetUnderavsnitt = periodeAvsnitter.underavsnittsliste
                 .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
         særligGrunnerAnnetUnderavsnitt.shouldNotBeNull()
         assertUnderavsnitt(underavsnitt = særligGrunnerAnnetUnderavsnitt,
-                            fritekst = "særliggrunner annet fritekst",
-                            fritekstTillatt = true,
-                            fritekstPåkrevet = true)
+                           fritekst = "særliggrunner annet fritekst",
+                           fritekstTillatt = true,
+                           fritekstPåkrevet = true)
 
         val tilleggsavsnitt = avsnittene.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
         tilleggsavsnitt.shouldNotBeNull()
@@ -396,9 +395,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertUnderavsnitt(underavsnitt: Underavsnitt,
-                                    fritekst: String,
-                                    fritekstTillatt: Boolean,
-                                    fritekstPåkrevet: Boolean) {
+                                   fritekst: String,
+                                   fritekstTillatt: Boolean,
+                                   fritekstPåkrevet: Boolean) {
         underavsnitt.fritekst shouldBe fritekst
         underavsnitt.fritekstTillatt shouldBe fritekstTillatt
         underavsnitt.fritekstPåkrevet shouldBe fritekstPåkrevet
