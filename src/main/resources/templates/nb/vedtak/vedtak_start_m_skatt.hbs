@@ -2,18 +2,18 @@
 {{~#* inline "varsel-tekst" ~}}
     {{#switch totalresultat.hovedresultat}}
     {{#case "FULL_TILBAKEBETALING"}}
-Vi varslet deg {{dato varsel.varsletDato}} om at du har fått utbetalt for mye.{{>korrigert-total-beløp}}
+Vi varslet deg {{{dato varsel.varsletDato}}} om at du har fått utbetalt for mye.{{>korrigert-total-beløp}}
     {{/case}}
     {{#case "DELVIS_TILBAKEBETALING"}}
-Vi varslet deg {{dato varsel.varsletDato}} om at du har fått {{kroner varsel.varsletBeløp}} for mye.{{>korrigert-total-beløp}}
+Vi varslet deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.varsletBeløp}}} for mye.{{>korrigert-total-beløp}}
     {{/case}}
     {{#case "INGEN_TILBAKEBETALING"}}
-Vi varslet deg {{dato varsel.varsletDato}} om at du har fått {{kroner varsel.varsletBeløp}} for mye.{{>korrigert-total-beløp}} Vi har behandlet saken din og du må ikke betale tilbake det feilutbetalte beløpet.
+Vi varslet deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.varsletBeløp}}} for mye.{{>korrigert-total-beløp}} Vi har behandlet saken din og du må ikke betale tilbake det feilutbetalte beløpet.
     {{/case}}
     {{/switch}}
 {{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saken din om tilbakebetaling på nytt. Derfor gjelder ikke det tidligere vedtaket av {{dato behandling.originalBehandlingsdatoFagsakvedtak}} om tilbakebetaling av {{ytelsesnavnBestemt}}.
+Vi har vurdert saken din om tilbakebetaling på nytt. Derfor gjelder ikke det tidligere vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnBestemt}}}.
     {{#if varsel.varsletDato }}
 
 {{> varsel-tekst}}
@@ -25,12 +25,12 @@ Du må ikke betale tilbake det feilutbetalte beløpet.
     {{#if varsel.varsletDato }}
 {{> varsel-tekst}}
     {{else}}
-I brev {{dato  fagsaksvedtaksdato}} fikk du melding om at {{ytelsesnavnEiendomsform}} er endret. Endringen gjorde at du har fått utbetalt for mye.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikke betale tilbake det du har fått for mye.{{/if}}
+I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endret. Endringen gjorde at du har fått utbetalt for mye.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikke betale tilbake det du har fått for mye.{{/if}}
     {{/if}}
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
-Beløpet du skylder før skatt er {{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}.
+Beløpet du skylder før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
 {{/if}}
 {{#if fritekstoppsummering}}
 

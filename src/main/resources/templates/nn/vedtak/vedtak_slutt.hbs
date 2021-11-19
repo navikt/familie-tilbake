@@ -3,7 +3,7 @@ _{{#if hjemmel.lovhjemmelFlertall}}Lovhjemler{{else}}Lovhjemmelen{{/if}} vi har 
 {{else}}
 
 {{/if}}
-Vedtaket er gjort etter {{hjemmel.lovhjemmelVedtak}}.
+Vedtaket er gjort etter {{{hjemmel.lovhjemmelVedtak}}}.
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
     {{#if skattepliktig}}
 _Skatt
@@ -22,7 +22,7 @@ Du vil få krav frå NAV Innkrevjing på det beløpet du skal betale tilbake. Du
     {{/if}}
 {{/if}}
 _Du har rett til å klage
-Du kan klage innan {{konfigurasjon.klagefristIUker}} veker frå den datoen du fekk vedtaket. Du finn skjema og informasjon på nav.no/klage.
+Du kan klage innan {{{konfigurasjon.klagefristIUker}}} veker frå den datoen du fekk vedtaket. Du finn skjema og informasjon på nav.no/klage.
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
 Du må som hovudregel begynne å betale beløpet tilbake, sjølv om du klagar på dette vedtaket. Dette følgjer av forvaltningslova § 42. Vi vil betale tilbake pengane du har betalt inn, om du får vedtak om at du ikkje trong å betale tilbake heile eller delar av beløpet du skulda.
@@ -30,16 +30,16 @@ Du må som hovudregel begynne å betale beløpet tilbake, sjølv om du klagar p�
 _Du har rett til innsyn
 På nav.no/dittnav kan du sjå dokumenta i saka di.
 _Har du spørsmål?
-Du finn nyttig informasjon på {{ytelseUrl}}
+Du finn nyttig informasjon på {{{ytelseUrl}}}
 Om du ikkje finn svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
 
 Med vennleg helsing
-{{behandlendeEnhetsNavn}}
+{{{behandlendeEnhetsNavn}}}
 
-{venstrejustert}{{ansvarligSaksbehandler}}{høyrejustert}{{ansvarligBeslutter}}{{#if finnesVerge}}
+{venstrejustert}{{{ansvarligSaksbehandler}}}{høyrejustert}{{{ansvarligBeslutter}}}{{#if finnesVerge}}
 
 
-Brev med likt innhald er sendt til {{annenMottagersNavn}}{{/if}}
+Brev med likt innhald er sendt til {{{annenMottagersNavn}}}{{/if}}
 {{#if harVedlegg}}
 
 

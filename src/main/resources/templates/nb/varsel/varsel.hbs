@@ -1,20 +1,20 @@
 {{#if datoerHvisSammenhengendePeriode.fom}}
-Du har fått {{kroner beløp}} for mye utbetalt i {{ytelsesnavnUbestemt}} fra og med {{dato datoerHvisSammenhengendePeriode.fom }} til og med {{dato datoerHvisSammenhengendePeriode.tom}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
+Du har fått {{{kroner beløp}}} for mye utbetalt i {{{ytelsesnavnUbestemt}}} fra og med {{{dato datoerHvisSammenhengendePeriode.fom }}} til og med {{{dato datoerHvisSammenhengendePeriode.tom}}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
 
 {{else}}
-Du har fått {{kroner beløp}} for mye utbetalt i {{ytelsesnavnUbestemt}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
+Du har fått {{{kroner beløp}}} for mye utbetalt i {{{ytelsesnavnUbestemt}}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
 
 {{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} du har fått for mye utbetalt for, er:
 *-{{#each feilutbetaltePerioder }}
-Fra og med {{dato fom}} til og med {{dato tom}}.{{/each}}-*
+Fra og med {{{dato fom}}} til og med {{{dato tom}}}.{{/each}}-*
 {{/if}}
-Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{dato fristdatoForTilbakemelding}}.
+Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{{dato fristdatoForTilbakemelding}}}.
 {{#if ytelseMedSkatt}}
 
 Hvis du må betale tilbake, reduserer vi beløpet med trukket skatt.
 {{/if}}
 _Dette har skjedd
-{{storForbokstav ytelsesnavnEiendomsform}} ble endret {{dato revurderingsvedtaksdato}}, og endringen har ført til at du har fått utbetalt for mye.
+{{{storForbokstav ytelsesnavnEiendomsform}}} ble endret {{{dato revurderingsvedtaksdato}}}, og endringen har ført til at du har fått utbetalt for mye.
 {{#if varseltekstFraSaksbehandler}}
 
 {{{varseltekstFraSaksbehandler}}}

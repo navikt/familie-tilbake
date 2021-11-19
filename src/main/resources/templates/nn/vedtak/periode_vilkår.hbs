@@ -1,11 +1,11 @@
 {{#* inline "fritekst"}}
 {{#if vurderinger.fritekst}}
 
-{{vurderinger.fritekst}}
+{{{vurderinger.fritekst}}}
 {{/if}}
 {{/inline}}
 {{#* inline "ikke-krev-småbeløp"}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Sjølv om du burde forstått at beløpet var feil, er beløpet lågare enn {{kroner konfigurasjon.fireRettsgebyr}}. Du må derfor ikkje betale tilbake beløpet.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du burde forstått at beløpet var feil, er beløpet lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}. Du må derfor ikkje betale tilbake beløpet.
 {{/inline}}
 {{#if (not vurderinger.harForeldelsesavsnitt) }}
 __Korleis har vi kome fram til at du {{#if resultat.tilbakekrevesBeløp}}{{else}}ikkje {{/if}}må betale tilbake?
@@ -15,14 +15,14 @@ __Korleis har vi kome fram til at du {{#if resultat.tilbakekrevesBeløp}}{{else}
         {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
         {{> ikke-krev-småbeløp}}
         {{else}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du burde forstått at beløpet var feil.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du burde forstått at beløpet var feil.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, burde du etter vår vurdering forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
         {{/if}}
     {{/if}}
     {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du må ha forstått at beløpet var feil.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du må ha forstått at beløpet var feil.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, må du etter vår vurdering ha forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
@@ -33,12 +33,12 @@ Ut frå informasjonen du har fått, må du etter vår vurdering ha forstått at 
         {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
         {{> ikke-krev-småbeløp}}
         {{else}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
         {{/if}}
     {{/if}}
     {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
     {{/if}}
 {{/if}}
@@ -47,25 +47,25 @@ Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har
         {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
         {{> ikke-krev-småbeløp}}
         {{else}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
         {{/if}}
     {{/if}}
     {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
-Du har fått vite om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
     {{/if}}
 {{/if}}
 {{#if (eq vurderinger.vilkårsvurderingsresultat "GOD_TRO")}}
     {{#if vurderinger.beløpIBehold}}
-Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du fekk utbetalt var feil. Du har opplyst at du ikkje har brukt {{kroner vurderinger.beløpIBehold}}. Desse kan vi krevje betale, sjølv om du ikkje forstod at utbetalinga var feil.
+Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du fekk utbetalt var feil. Du har opplyst at du ikkje har brukt {{{kroner vurderinger.beløpIBehold}}}. Desse kan vi krevje betale, sjølv om du ikkje forstod at utbetalinga var feil.
     {{else}}
 Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du fekk utbetalt var feil. Du må ikkje betale tilbake fordi vi ikkje har opplysningar om at du framleis har noko igjen av pengane.
     {{/if}}
 {{> fritekst}}
 {{/if}}
 {{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
-Du har fått informasjon om kor mykje du har rett til å få i {{ytelsesnavnUbestemt}}, og at du må melde frå om endringer til NAV. Informasjonen du har fått forklarer om du har rett til {{ytelsesnavnUbestemt}} og kor mykje du har rett til å få utbetalt.
+Du har fått informasjon om kor mykje du har rett til å få i {{{ytelsesnavnUbestemt}}}, og at du må melde frå om endringer til NAV. Informasjonen du har fått forklarer om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til å få utbetalt.
 {{>fritekst}}
 
     {{#switch vurderinger.vilkårsvurderingsresultat}}

@@ -19,8 +19,8 @@
         <tbody>
     {{#each perioder }}
         <tr>
-            <td class="periode">{{kortdato periode.fom}} – {{kortdato periode.tom}}</td>
-            <td class="tall">{{kroner kravgrunnlag.feilutbetaltBeløp}}</td>
+            <td class="periode">{{{kortdato periode.fom}}} – {{{kortdato periode.tom}}}</td>
+            <td class="tall">{{{kroner kravgrunnlag.feilutbetaltBeløp}}}</td>
             {{#if (not resultat.tilbakekrevesBeløp)}}
             <td>Ingen tilbakebetaling</td>
             {{else if (eq resultat.tilbakekrevesBeløp kravgrunnlag.feilutbetaltBeløp)}}
@@ -29,12 +29,12 @@
             <td>Deler av beløpet</td>
             {{/if}}
             {{#if totalresultat.totaltRentebeløp}}
-            <td class="tall">{{#if resultat.rentebeløp}}{{kroner resultat.rentebeløp}}{{/if}}</td>
+            <td class="tall">{{#if resultat.rentebeløp}}{{{kroner resultat.rentebeløp}}}{{/if}}</td>
             {{/if}}
             {{#if totalresultat.harSkattetrekk}}
-            <td class="tall">{{kroner resultat.tilbakekrevesBeløpMedRenter}}</td>
+            <td class="tall">{{{kroner resultat.tilbakekrevesBeløpMedRenter}}}</td>
             {{/if}}
-            <td class="tall sum">{{kroner resultat.tilbakekrevesBeløpUtenSkattMedRenter}}</td>
+            <td class="tall sum">{{{kroner resultat.tilbakekrevesBeløpUtenSkattMedRenter}}}</td>
         </tr>
     {{/each}}
         <tr>
@@ -45,9 +45,9 @@
             <td class="tall sumrad"></td>
         {{/if}}
         {{#if totalresultat.harSkattetrekk}}
-            <td class="tall sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}</td>
+            <td class="tall sumrad">{{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}</td>
         {{/if}}
-            <td class="tall sum sumrad">{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}</td>
+            <td class="tall sum sumrad">{{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}</td>
         </tr>
         </tbody>
     </table>
