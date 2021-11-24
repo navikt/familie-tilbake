@@ -9,6 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -27,6 +28,7 @@ import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -52,6 +54,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
@@ -61,6 +64,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
@@ -144,6 +148,49 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertOppgaveTask("Behandling er tatt av vent, " +
+                          "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                          "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
+                          "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
+                          behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10))
+    }
+
+    @Test
+    fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 når behandling finnes med revurdering gamle enn 10 dager`() {
+        val fagsystemsbehandling = Fagsystemsbehandling(eksternId = UUID.randomUUID().toString(),
+                                                        tilbakekrevingsvalg = Tilbakekrevingsvalg
+                                                                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                                                        revurderingsvedtaksdato = LocalDate.now().minusDays(10),
+                                                        resultat = "OPPHØR",
+                                                        årsak = "testverdi")
+        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
+                                            .copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
+        lagGrunnlagssteg()
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val task = opprettTask(kravgrunnlagXml)
+
+        behandleKravgrunnlagTask.doTask(task)
+
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        kravgrunnlag.shouldNotBeNull()
+        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
+        kravgrunnlag.fagsystemId shouldBe fagsak.eksternFagsakId
+        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.BARNETRYGD
+
+        assertPerioder(kravgrunnlag)
+        assertBeløp(kravgrunnlag)
+
+        mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(kravgrunnlag.eksternKravgrunnlagId,
+                                                                    kravgrunnlag.vedtakId).shouldBeEmpty()
+        mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        assertOppgaveTask("Behandling er tatt av vent, pga mottatt kravgrunnlag",
+                          LocalDate.now().plusDays(1))
     }
 
     @Test
@@ -178,6 +225,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        taskRepository.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
     }
 
     @Test
@@ -219,6 +267,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
+        assertOppgaveTask("Behandling er tatt av vent, " +
+                          "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                          "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
+                          "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
+                          behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10))
     }
 
     @Test
@@ -248,11 +301,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.FORELDELSE,
-                                        Behandlingsstegstatus.UTFØRT)
+                                       Behandlingssteg.FORELDELSE,
+                                       Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.VILKÅRSVURDERING,
-                                        Behandlingsstegstatus.KLAR)
+                                       Behandlingssteg.VILKÅRSVURDERING,
+                                       Behandlingsstegstatus.KLAR)
 
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
@@ -274,10 +327,10 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.FORELDELSE,
-                                        Behandlingsstegstatus.TILBAKEFØRT)
+                                       Behandlingssteg.FORELDELSE,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING,
-                                        Behandlingsstegstatus.TILBAKEFØRT)
+                                       Behandlingsstegstatus.TILBAKEFØRT)
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
@@ -367,14 +420,14 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.VILKÅRSVURDERING,
-                                        Behandlingsstegstatus.TILBAKEFØRT)
+                                       Behandlingssteg.VILKÅRSVURDERING,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.FORESLÅ_VEDTAK,
-                                        Behandlingsstegstatus.TILBAKEFØRT)
+                                       Behandlingssteg.FORESLÅ_VEDTAK,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand,
-                                        Behandlingssteg.FATTE_VEDTAK,
-                                        Behandlingsstegstatus.TILBAKEFØRT)
+                                       Behandlingssteg.FATTE_VEDTAK,
+                                       Behandlingsstegstatus.TILBAKEFØRT)
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
@@ -549,9 +602,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOkoXmlMottattData(mottattKravgrunnlagListe: List<ØkonomiXmlMottatt>,
-                                         kravgrunnlagXml: String,
-                                         kravstatuskode: Kravstatuskode,
-                                         referanse: String) {
+                                        kravgrunnlagXml: String,
+                                        kravstatuskode: Kravstatuskode,
+                                        referanse: String) {
         mottattKravgrunnlagListe.shouldNotBeEmpty()
         mottattKravgrunnlagListe.size shouldBe 1
         val mottattKravgrunnlag = mottattKravgrunnlagListe[0]
@@ -589,8 +642,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingsstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                                behandlingssteg: Behandlingssteg,
-                                                behandlingsstegstatus: Behandlingsstegstatus) {
+                                               behandlingssteg: Behandlingssteg,
+                                               behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg
             && behandlingsstegstatus == it.behandlingsstegsstatus
@@ -598,7 +651,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                     aktør: Aktør) {
+                                    aktør: Aktør) {
         taskRepository.findAll().any {
             LagHistorikkinnslagTask.TYPE == it.type &&
             historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
@@ -613,6 +666,16 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
             fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
             referanse == it.metadata["eksternId"]
+        }.shouldBeTrue()
+    }
+
+    private fun assertOppgaveTask(beskrivelse: String,
+                                  fristDato: LocalDate) {
+        taskRepository.findByStatus(Status.UBEHANDLET).any {
+            OppdaterOppgaveTask.TYPE == it.type &&
+            behandling.id.toString() == it.payload
+            beskrivelse == it.metadata["beskrivelse"] &&
+            fristDato.toString() == it.metadata["frist"]
         }.shouldBeTrue()
     }
 
