@@ -45,7 +45,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
 
             //renter
-            beregnRenter(beregnetPeriode, perioder)
+            perioder = beregnRenter(beregnetPeriode, perioder)
+            justerAvrundingRenter(beregnetPeriode, perioder)
         }.flatten()
     }
 
@@ -218,7 +219,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return perioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
     }
 
-    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode) : BigDecimal {
+    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode): BigDecimal {
         return periode.beløp.sumOf { it.tilbakekrevesBeløp }
     }
 
@@ -237,6 +238,47 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         }
     }
 
+    private fun justerAvrundingRenter(beregnetPeriode: Beregningsresultatsperiode,
+                                      perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
+        val totalBeregnetRenteBeløp = beregnetPeriode.rentebeløp
+        val totalBeregnetRenterIIverksettelse = perioder.sumOf { it.renter }
+        var differanse = totalBeregnetRenteBeløp.minus(totalBeregnetRenterIIverksettelse)
 
+        return when {
+            differanse.isGreaterThanZero() -> {
+                perioder.map { periode ->
+                    var renteBeløp = periode.renter
+                    while (differanse.isGreaterThanZero()) {
+                        val tilbakekrevesBeløp = periode.beløp.filter { beløp -> beløp.klassetype != Klassetype.FEIL }
+                                .sumOf { it.tilbakekrevesBeløp }
+                        val beregnetRenteBeløp = tilbakekrevesBeløp.multiply(beregnetPeriode.renteprosent)
+                                .divide(BigDecimal(100), 0, RoundingMode.HALF_UP)
+                        if (beregnetRenteBeløp != renteBeløp) {
+                            renteBeløp = renteBeløp.add(BigDecimal.ONE)
+                            differanse = differanse.minus(BigDecimal.ONE)
+                        }else break
+                    }
+                    periode.copy(renter = renteBeløp)
+                }
+            }
+            differanse.isLessThanZero() -> {
+                perioder.map { periode ->
+                    var renteBeløp = periode.renter
+                    while (differanse.isLessThanZero()) {
+                        val tilbakekrevesBeløp = periode.beløp.filter { beløp -> beløp.klassetype != Klassetype.FEIL }
+                                .sumOf { it.tilbakekrevesBeløp }
+                        val beregnetRenteBeløp = tilbakekrevesBeløp.multiply(beregnetPeriode.renteprosent)
+                                .divide(BigDecimal(100), 0, RoundingMode.HALF_UP)
+                        if (beregnetRenteBeløp != renteBeløp) {
+                            renteBeløp = renteBeløp.minus(BigDecimal.ONE)
+                            differanse = differanse.plus(BigDecimal.ONE)
+                        } else break
+                    }
+                    periode.copy(renter = renteBeløp)
+                }
+            }
+            else -> perioder
+        }
+    }
 }
 

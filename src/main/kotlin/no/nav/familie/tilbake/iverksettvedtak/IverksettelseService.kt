@@ -115,7 +115,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         }
     }
 
-    private fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
+    fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
         val beregnetResultat = beregningService.beregn(behandlingId)
         val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
 
