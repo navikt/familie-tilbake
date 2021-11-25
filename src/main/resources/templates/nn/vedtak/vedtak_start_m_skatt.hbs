@@ -2,18 +2,18 @@
 {{~#* inline "varsel-tekst" ~}}
     {{#switch totalresultat.hovedresultat}}
     {{#case "FULL_TILBAKEBETALING"}}
-Vi varsla deg {{dato varsel.varsletDato}} om at du har fått utbetalt for mykje.{{>korrigert-total-beløp}}
+Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått utbetalt for mykje.{{>korrigert-total-beløp}}
     {{/case}}
     {{#case "DELVIS_TILBAKEBETALING"}}
-Vi varsla deg {{dato varsel.varsletDato}} om at du har fått {{kroner varsel.varsletBeløp}} for mykje.{{>korrigert-total-beløp}}
+Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.varsletBeløp}}} for mykje.{{>korrigert-total-beløp}}
     {{/case}}
     {{#case "INGEN_TILBAKEBETALING"}}
-Vi varsla deg {{dato varsel.varsletDato}} om at du har fått {{kroner varsel.varsletBeløp}} for mykje.{{>korrigert-total-beløp}} Vi har behandla saka di, og du må ikkje betale tilbake det feilutbetalte beløpet.
+Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.varsletBeløp}}} for mykje.{{>korrigert-total-beløp}} Vi har behandla saka di, og du må ikkje betale tilbake det feilutbetalte beløpet.
     {{/case}}
     {{/switch}}
 {{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saka di om tilbakebetaling på nytt. Derfor gjeld ikkje det tidlegare vedtaket av {{dato behandling.originalBehandlingsdatoFagsakvedtak}} om tilbakebetaling av {{ytelsesnavnBestemt}}.
+Vi har vurdert saka di om tilbakebetaling på nytt. Derfor gjeld ikkje det tidlegare vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnBestemt}}}.
     {{#if varsel.varsletDato }}
 
 {{> varsel-tekst}}
@@ -25,12 +25,12 @@ Du må ikkje betale tilbake det feilutbetalte beløpet.
     {{#if varsel.varsletDato }}
 {{> varsel-tekst}}
     {{else}}
-I brev {{dato  fagsaksvedtaksdato}} fekk du melding om at {{ytelsesnavnEiendomsform}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikkje betale tilbake det du har fått for mykje.{{/if}}
+I brev {{{dato  fagsaksvedtaksdato}}} fekk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikkje betale tilbake det du har fått for mykje.{{/if}}
     {{/if}}
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
-Beløpet du skuldar før skatt er {{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}heile{{else}}delar av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trekt frå er {{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}.
+Beløpet du skuldar før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}heile{{else}}delar av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trekt frå er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
 {{/if}}
 {{#if fritekstoppsummering}}
 

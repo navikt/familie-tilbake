@@ -2,21 +2,21 @@
     {{#switch fakta.hendelsesundertype}}
         {{#case "BARN_DØD"}}
 Vi har fått melding om at barnet ditt døde. {{storForbokstav
-                    ytelsesnavnBestemt}} skulle vært stanset fra og med {{dato opphørsdatoDødtBarn}}.
+                    ytelsesnavnBestemt}} skulle vært stanset fra og med {{{dato opphørsdatoDødtBarn}}}.
         {{/case}}
         {{#case "BRUKER_DØD"}}
-Vi har fått melding om at {{søker.navn}} døde. {{storForbokstav
-                    ytelsesnavnBestemt}} skulle vært stanset fra og med {{dato opphørsdatoDødSøker}}.
+Vi har fått melding om at {{{søker.navn}}} døde. {{storForbokstav
+                    ytelsesnavnBestemt}} skulle vært stanset fra og med {{{dato opphørsdatoDødSøker}}}.
         {{/case}}
     {{/switch}}
 
-{{storForbokstav ytelsesnavnBestemt}} er utbetalt etter denne datoen. Det er derfor utbetalt {{kroner
+{{{storForbokstav ytelsesnavnBestemt}}} er utbetalt etter denne datoen. Det er derfor utbetalt {{kroner
             kravgrunnlag.feilutbetaltBeløp}} kroner for mye.
 {{/inline}}
 {{#* inline "fakta-bor"}}
     {{#switch fakta.hendelsesundertype}}
         {{#case "BOR_IKKE_MED_BARN"}}
-Du har fått {{ytelsesnavnUbestemt}} for barn som ikke bor fast hos deg. Du har derfor fått {{kroner
+Du har fått {{{ytelsesnavnUbestemt}}} for barn som ikke bor fast hos deg. Du har derfor fått {{kroner
                     kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
         {{/case}}
     {{/switch}}
@@ -24,7 +24,7 @@ Du har fått {{ytelsesnavnUbestemt}} for barn som ikke bor fast hos deg. Du har 
 {{#* inline "fakta-opphold"}}
     {{#switch fakta.hendelsesundertype}}
         {{#case "UTEN_OPPHOLDSTILLATELSE"}}
-Du har fått {{ytelsesnavnUbestemt}} uten at du hadde oppholdstillatelse i Norge. Du har derfor fått {{kroner
+Du har fått {{{ytelsesnavnUbestemt}}} uten at du hadde oppholdstillatelse i Norge. Du har derfor fått {{kroner
                     kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
         {{/case}}
     {{/switch}}
