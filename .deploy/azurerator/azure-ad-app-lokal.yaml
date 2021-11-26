@@ -25,6 +25,8 @@ spec:
       namespace: teamfamilie
     - application: familie-ba-sak
       cluster: dev-fss
+    - application: familie-ba-sak-lokal
+      cluster: dev-fss
       namespace: teamfamilie
     - application: familie-ef-sak-lokal
       cluster: dev-gcp
@@ -41,3 +43,5 @@ spec:
   tenant: trygdeetaten.no
   secretName: azuread-familie-tilbake-lokal
   singlePageApplication: true
+
+# secret kan hentes fra cluster med "kubectl -n teamfamilie get secret azuread-familie-tilbake-lokal -o json | jq '.data | map_values(@base64d)'"
