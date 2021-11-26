@@ -817,7 +817,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val sjuendePeriode = tilbakekrevingsperioder[6]
         sjuendePeriode.periode shouldBe sortedPerioder[6]
-        sjuendePeriode.renter shouldBe BigDecimal(1737)
+        sjuendePeriode.renter shouldBe BigDecimal(1736)
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(17364), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
