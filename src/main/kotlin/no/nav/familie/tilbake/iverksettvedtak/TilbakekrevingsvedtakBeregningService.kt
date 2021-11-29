@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -21,6 +22,8 @@ import java.util.UUID
 
 @Service
 class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun beregnVedtaksperioder(behandlingId: UUID,
                               kravgrunnlag431: Kravgrunnlag431): List<Tilbakekrevingsperiode> {
@@ -242,6 +245,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                                       perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
         val totalBeregnetRenteBeløp = beregnetPeriode.rentebeløp
         val totalBeregnetRenterIIverksettelse = perioder.sumOf { it.renter }
+        logger.info("Total beregnet renteBeløp som sendes i vedtaksbrev er $totalBeregnetRenteBeløp " +
+                    "mens total beregnet renteBeløp under iverksettelse er $totalBeregnetRenterIIverksettelse ")
         var differanse = totalBeregnetRenteBeløp.minus(totalBeregnetRenterIIverksettelse)
 
         return when {
@@ -256,7 +261,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                         if (beregnetRenteBeløp != renteBeløp) {
                             renteBeløp = renteBeløp.add(BigDecimal.ONE)
                             differanse = differanse.minus(BigDecimal.ONE)
-                        }else break
+                        } else break
                     }
                     periode.copy(renter = renteBeløp)
                 }
