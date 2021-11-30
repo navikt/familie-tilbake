@@ -32,6 +32,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
+import no.nav.familie.tilbake.micrometer.domain.Meldingstelling
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
@@ -134,7 +135,8 @@ abstract class OppslagSpringRunnerTest {
                Avstemmingsfil::class,
                HentFagsystemsbehandlingRequestSendt::class,
                Task::class,
-               TaskLogg::class)
+               TaskLogg::class,
+               Meldingstelling::class)
                 .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
