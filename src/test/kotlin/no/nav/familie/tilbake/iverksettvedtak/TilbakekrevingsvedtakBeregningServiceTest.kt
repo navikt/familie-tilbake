@@ -817,7 +817,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val sjuendePeriode = tilbakekrevingsperioder[6]
         sjuendePeriode.periode shouldBe sortedPerioder[6]
-        sjuendePeriode.renter shouldBe BigDecimal(1736)
+        sjuendePeriode.renter shouldBe BigDecimal(1737)
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(17364), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
@@ -860,7 +860,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val førstePeriode = tilbakekrevingsperioder[0]
         førstePeriode.periode shouldBe sortedPerioder[0]
-        førstePeriode.renter shouldBe BigDecimal(21)
+        førstePeriode.renter shouldBe BigDecimal(22)
         var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(209), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
@@ -888,7 +888,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val tredjePeriode = tilbakekrevingsperioder[2]
         tredjePeriode.periode shouldBe sortedPerioder[2]
-        tredjePeriode.renter shouldBe BigDecimal(438)
+        tredjePeriode.renter shouldBe BigDecimal(437)
         feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(4375), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }

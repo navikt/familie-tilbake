@@ -254,14 +254,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                 perioder.map { periode ->
                     var renteBeløp = periode.renter
                     while (differanse.isGreaterThanZero()) {
-                        val tilbakekrevesBeløp = periode.beløp.filter { beløp -> beløp.klassetype != Klassetype.FEIL }
-                                .sumOf { it.tilbakekrevesBeløp }
-                        val beregnetRenteBeløp = tilbakekrevesBeløp.multiply(beregnetPeriode.renteprosent)
-                                .divide(BigDecimal(100), 0, RoundingMode.HALF_UP)
-                        if (beregnetRenteBeløp != renteBeløp) {
-                            renteBeløp = renteBeløp.add(BigDecimal.ONE)
-                            differanse = differanse.minus(BigDecimal.ONE)
-                        } else break
+                        renteBeløp = renteBeløp.add(BigDecimal.ONE)
+                        differanse = differanse.minus(BigDecimal.ONE)
                     }
                     periode.copy(renter = renteBeløp)
                 }
@@ -270,14 +264,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                 perioder.map { periode ->
                     var renteBeløp = periode.renter
                     while (differanse.isLessThanZero()) {
-                        val tilbakekrevesBeløp = periode.beløp.filter { beløp -> beløp.klassetype != Klassetype.FEIL }
-                                .sumOf { it.tilbakekrevesBeløp }
-                        val beregnetRenteBeløp = tilbakekrevesBeløp.multiply(beregnetPeriode.renteprosent)
-                                .divide(BigDecimal(100), 0, RoundingMode.HALF_UP)
-                        if (beregnetRenteBeløp != renteBeløp) {
-                            renteBeløp = renteBeløp.minus(BigDecimal.ONE)
-                            differanse = differanse.plus(BigDecimal.ONE)
-                        } else break
+                        renteBeløp = renteBeløp.minus(BigDecimal.ONE)
+                        differanse = differanse.plus(BigDecimal.ONE)
                     }
                     periode.copy(renter = renteBeløp)
                 }
@@ -285,5 +273,6 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             else -> perioder
         }
     }
+
 }
 

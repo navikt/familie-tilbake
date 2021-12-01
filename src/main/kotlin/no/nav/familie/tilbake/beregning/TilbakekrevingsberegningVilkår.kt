@@ -57,7 +57,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun beregnRentebeløp(beløp: BigDecimal, renter: Boolean): BigDecimal {
-        return if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.DOWN) else BigDecimal.ZERO
+        return if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.HALF_UP) else BigDecimal.ZERO
     }
 
     private fun beregnSkattBeløp(periode: Periode,
