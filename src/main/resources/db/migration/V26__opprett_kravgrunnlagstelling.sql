@@ -7,4 +7,4 @@ CREATE TABLE meldingstelling (
     antall      INT     NOT NULL
 );
 
-CREATE UNIQUE INDEX ON meldingstelling (ytelsestype, type, status, dato);
+CREATE UNIQUE INDEX ON meldingstelling (type, dato, ytelsestype, status);
