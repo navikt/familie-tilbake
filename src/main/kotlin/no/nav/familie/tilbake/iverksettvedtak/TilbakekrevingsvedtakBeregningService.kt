@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -21,6 +22,8 @@ import java.util.UUID
 
 @Service
 class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun beregnVedtaksperioder(behandlingId: UUID,
                               kravgrunnlag431: Kravgrunnlag431): List<Tilbakekrevingsperiode> {
@@ -45,7 +48,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
 
             //renter
-            beregnRenter(beregnetPeriode, perioder)
+            perioder = beregnRenter(beregnetPeriode, perioder)
+            justerAvrundingRenter(beregnetPeriode, perioder)
         }.flatten()
     }
 
@@ -218,7 +222,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return perioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
     }
 
-    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode) : BigDecimal {
+    private fun summerTilbakekrevesbeløp(periode: Tilbakekrevingsperiode): BigDecimal {
         return periode.beløp.sumOf { it.tilbakekrevesBeløp }
     }
 
@@ -237,6 +241,38 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         }
     }
 
+    private fun justerAvrundingRenter(beregnetPeriode: Beregningsresultatsperiode,
+                                      perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
+        val totalBeregnetRenteBeløp = beregnetPeriode.rentebeløp
+        val totalBeregnetRenterIIverksettelse = perioder.sumOf { it.renter }
+        logger.info("Total beregnet renteBeløp som sendes i vedtaksbrev er $totalBeregnetRenteBeløp " +
+                    "mens total beregnet renteBeløp under iverksettelse er $totalBeregnetRenterIIverksettelse ")
+        var differanse = totalBeregnetRenteBeløp.minus(totalBeregnetRenterIIverksettelse)
+
+        return when {
+            differanse.isGreaterThanZero() -> {
+                perioder.map { periode ->
+                    var renteBeløp = periode.renter
+                    while (differanse.isGreaterThanZero()) {
+                        renteBeløp = renteBeløp.add(BigDecimal.ONE)
+                        differanse = differanse.minus(BigDecimal.ONE)
+                    }
+                    periode.copy(renter = renteBeløp)
+                }
+            }
+            differanse.isLessThanZero() -> {
+                perioder.map { periode ->
+                    var renteBeløp = periode.renter
+                    while (differanse.isLessThanZero()) {
+                        renteBeløp = renteBeløp.minus(BigDecimal.ONE)
+                        differanse = differanse.plus(BigDecimal.ONE)
+                    }
+                    periode.copy(renter = renteBeløp)
+                }
+            }
+            else -> perioder
+        }
+    }
 
 }
 

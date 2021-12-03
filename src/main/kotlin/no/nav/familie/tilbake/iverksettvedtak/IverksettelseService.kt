@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsbelo
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -34,6 +35,8 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
                            private val beregningService: TilbakekrevingsberegningService,
                            private val behandlingVedtakService: BehandlingsvedtakService,
                            private val oppdragClient: OppdragClient) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
@@ -115,7 +118,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         }
     }
 
-    private fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
+    fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
         val beregnetResultat = beregningService.beregn(behandlingId)
         val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
 
@@ -129,6 +132,13 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
                 beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
         val beregnetTotalRenteBeløp = beregnetPerioder.sumOf { it.renter }
         val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
+
+        logger.info("TotalTilbakekrevingsbeløpUtenRenter i vedtaksbrev $totalTilbakekrevingsbeløpUtenRenter og " +
+                    "beregnet i iverksettlese $beregnetTotatlTilbakekrevingsbeløpUtenRenter for behandlingId=$behandlingId")
+        logger.info("TotalRenteBeløp i vedtaksbrev $totalRenteBeløp og " +
+                    "beregnet i iverksettlese $beregnetTotalRenteBeløp for behandlingId=$behandlingId")
+        logger.info("TotalSkatteBeløp i vedtaksbrev $totalSkatteBeløp og " +
+                    "beregnet i iverksettlese $beregnetSkattBeløp for behandlingId=$behandlingId")
 
         if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
             totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp) {

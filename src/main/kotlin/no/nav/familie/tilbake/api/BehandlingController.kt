@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
-import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
@@ -88,9 +87,8 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
-        if (behandlingsstegDto !is BehandlingsstegFatteVedtaksstegDto) {
-            behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
-        }
+
+        behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         return Ressurs.success("OK")
     }
 
