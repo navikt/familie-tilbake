@@ -1,15 +1,40 @@
 package no.nav.familie.tilbake.micrometer.domain
 
-import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
+import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
-@Repository
-@Transactional
-interface MålerRepository : CrudRepository<Behandling, UUID> {
+interface MeldingstellingRepository : RepositoryInterface<Meldingstelling, UUID>,
+                                      InsertUpdateRepository<Meldingstelling> {
+
+    fun findByYtelsestypeAndAndTypeAndStatusAndDato(ytelsestype: Ytelsestype,
+                                                    type: Meldingstype,
+                                                    status: Mottaksstatus,
+                                                    dato: LocalDate = LocalDate.now()): Meldingstelling?
+
+    fun findByType(type: Meldingstype): List<Meldingstelling>
+
+    @Query("""SELECT ytelsestype, dato, SUM(antall) as antall FROM meldingstelling
+              WHERE type = :type
+              GROUP BY ytelsestype, dato""")
+    fun summerAntallForType(type: Meldingstype): List<ForekomsterPerDag>
+
+
+    @Modifying
+    @Query("""UPDATE meldingstelling SET antall = antall + 1 
+              WHERE ytelsestype = :ytelsestype
+              AND type = :type
+              AND status = :status
+              AND dato = :dato""")
+    fun oppdaterTeller(ytelsestype: Ytelsestype,
+                       type: Meldingstype,
+                       status: Mottaksstatus,
+                       dato: LocalDate = LocalDate.now())
+
 
     // language=PostgreSQL
     @Query("""SELECT ytelsestype, 
@@ -66,6 +91,5 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               WHERE status = 'AVSLUTTET'
               GROUP BY ytelsestype, vedtakstype, år, uke""")
     fun finnVedtak(): List<VedtakPerUke>
-
 
 }

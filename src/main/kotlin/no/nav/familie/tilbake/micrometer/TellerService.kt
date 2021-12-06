@@ -10,59 +10,56 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import org.slf4j.LoggerFactory
+import no.nav.familie.tilbake.micrometer.domain.Meldingstelling
+import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
+import no.nav.familie.tilbake.micrometer.domain.Meldingstype
+import no.nav.familie.tilbake.micrometer.domain.Mottaksstatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
-class TellerService(private val fagsakRepository: FagsakRepository) {
+@Transactional
+class TellerService(private val fagsakRepository: FagsakRepository,
+                    private val meldingstellingRepository: MeldingstellingRepository) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    fun tellKobletKravgrunnlag(ytelsestype: Ytelsestype) =
+            tellMelding(ytelsestype, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
 
-    fun tellKobletKravgrunnlag(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av koblet kravgrunnlag for $ytelsestype.")
-        Metrics.counter("xmlTeller",
-                        Tags.of("ytelse", ytelsestype.kode,
-                                "type", "kravgrunnlag",
-                                "mottagsstatus", "koblet")).increment()
-    }
+    fun tellUkobletKravgrunnlag(ytelsestype: Ytelsestype) =
+            tellMelding(ytelsestype, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
 
-    fun tellUkobletKravgrunnlag(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av ukoblet kravgrunnlag for $ytelsestype.")
-        Metrics.counter("xmlTeller",
-                        Tags.of("ytelse", ytelsestype.kode,
-                                "type", "kravgrunnlag",
-                                "mottagsstatus", "ukoblet")).increment()
-    }
+    fun tellKobletStatusmelding(ytelsestype: Ytelsestype) =
+            tellMelding(ytelsestype, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
 
-    fun tellKobletStatusmelding(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av koblet statusmelding for $ytelsestype.")
-        Metrics.counter("xmlTeller",
-                        Tags.of("ytelse", ytelsestype.kode,
-                                "type", "statusmelding",
-                                "mottagsstatus", "koblet")).increment()
-    }
+    fun tellUkobletStatusmelding(ytelsestype: Ytelsestype) =
+            tellMelding(ytelsestype, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
 
-    fun tellUkobletStatusmelding(ytelsestype: Ytelsestype) {
-        logger.info("Teller mottak av ukoblet statusmelding for $ytelsestype.")
-        Metrics.counter("xmlTeller",
-                        Tags.of("ytelse", ytelsestype.kode,
-                                "type", "statusmelding",
-                                "mottagsstatus", "ukoblet")).increment()
+    fun tellMelding(ytelsestype: Ytelsestype, type: Meldingstype, status: Mottaksstatus) {
+
+        val meldingstelling = meldingstellingRepository.findByYtelsestypeAndAndTypeAndStatusAndDato(ytelsestype,
+                                                                                                    type,
+                                                                                                    status,
+                                                                                                    LocalDate.now())
+        if (meldingstelling == null) {
+            meldingstellingRepository.insert(Meldingstelling(ytelsestype = ytelsestype,
+                                                             type = type,
+                                                             status = status))
+        } else {
+            meldingstellingRepository.oppdaterTeller(ytelsestype, type, status)
+        }
     }
 
     fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
-        logger.info("Teller sending av $brevtype for ${fagsak.ytelsestype}.")
         Metrics.counter("Brevteller",
                         Tags.of("ytelse", fagsak.ytelsestype.kode,
                                 "brevtype", brevtype.name)).increment()
-
     }
 
     fun tellVedtak(behandlingsresultatstype: Behandlingsresultatstype, behandling: Behandling) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtakstype = if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
             Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
-        logger.info("Teller vedtak fattet med resultat $behandlingsresultatstype for ${fagsak.ytelsestype}.")
 
         Metrics.counter("Vedtaksteller",
                         Tags.of("ytelse", fagsak.ytelsestype.kode,
