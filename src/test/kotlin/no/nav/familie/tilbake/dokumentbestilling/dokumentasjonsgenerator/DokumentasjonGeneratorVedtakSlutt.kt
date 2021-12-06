@@ -38,56 +38,56 @@ import java.time.YearMonth
  * kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * FP/SVP/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * SKOLEPENGER: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
+ * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonGeneratorVedtakSlutt {
 
     @Test
-    fun `list ut vedtak slutt efog nb`() {
+    fun `list ut vedtak slutt EFOG bokmål`() {
         lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING)
         lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING)
     }
 
     @Test
-    fun `list ut vedtak slutt efog nn`() {
+    fun `list ut vedtak slutt EFOG nynorsk`() {
         lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING)
         lagVedtakSluttTekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING)
     }
 
     @Test
-    fun `list ut vedtak slutt efbt nb`() {
+    fun `list ut vedtak slutt EFBT bokmål`() {
         lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
-    fun `list ut vedtak slutt efbt nn`() {
+    fun `list ut vedtak slutt EFBT nynorsk`() {
         lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.BARNETILSYN, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
-    fun `list ut vedtak slutt ba nb`() {
+    fun `list ut vedtak slutt BA bokmål`() {
         lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
-    fun `list ut vedtak slutt ba nn`() {
+    fun `list ut vedtak slutt BA nynorsk`() {
         lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.BARNETRYGD, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
-    fun `list ut vedtak slutt efsp nb`() {
+    fun `list ut vedtak slutt EFSP bokmål`() {
         lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NB, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }
 
     @Test
-    fun `list ut vedtak slutt efsp nn`() {
+    fun `list ut vedtak slutt EFSP nynorsk`() {
         lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.FULL_TILBAKEBETALING, false)
         lagVedtakSluttTekster(Ytelsestype.SKOLEPENGER, Språkkode.NN, Vedtaksresultat.INGEN_TILBAKEBETALING, false)
     }

@@ -24,10 +24,10 @@ import java.time.LocalDate
  * "Insert markup"-macroen kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * FP/SVP/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * SKOLEPENGER: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
+ * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonGeneratorVedtakOppsummering {
 
     companion object {
@@ -42,7 +42,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for fp`() {
+    fun `list ut vedtak start for BA bokmål`() {
         val ytelseType = Ytelsestype.BARNETRYGD
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
@@ -54,7 +54,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for fp nynorsk`() {
+    fun `list ut vedtak start for BA nynorsk`() {
         val ytelseType: Ytelsestype = Ytelsestype.BARNETRYGD
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
@@ -66,7 +66,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for es`() {
+    fun `list ut vedtak start for EFBT bokmål`() {
         val ytelseType: Ytelsestype = Ytelsestype.BARNETILSYN
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
@@ -78,7 +78,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for es nynorsk`() {
+    fun `list ut vedtak start for EFBT nynorsk`() {
         val ytelseType: Ytelsestype = Ytelsestype.BARNETILSYN
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
@@ -90,7 +90,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for svp`() {
+    fun `list ut vedtak start for EFOG bokmål`() {
         val ytelseType: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
@@ -102,7 +102,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for svp nynorsk`() {
+    fun `list ut vedtak start for EFOG nynorsk`() {
         val ytelseType: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
@@ -114,7 +114,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for frisinn`() {
+    fun `list ut vedtak start for EFSP bokmål`() {
         val ytelseType: Ytelsestype = Ytelsestype.SKOLEPENGER
         val nb: Språkkode = Språkkode.NB
         for (resultatType in tilbakekrevingsResultat) {
@@ -126,7 +126,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for frisinn nynorsk`() {
+    fun `list ut vedtak start for frisinn EFSP bokmål`() {
         val ytelseType: Ytelsestype = Ytelsestype.SKOLEPENGER
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {

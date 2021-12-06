@@ -42,49 +42,49 @@ import java.time.YearMonth
  *
  *
  * Confluence:
- * FP/SVP/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * SKOLEPENGER: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
+ * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonGeneratorPeriodeVilkår {
 
     @Test
-    fun `generer vilkår for fp`() {
+    fun `generer vilkår for BA bokmål`() {
         lagVilkårstekster(Ytelsestype.BARNETRYGD, Språkkode.NB)
     }
 
     @Test
-    fun `generer vilkår for fp nynorsk`() {
+    fun `generer vilkår for BA nynorsk`() {
         lagVilkårstekster(Ytelsestype.BARNETRYGD, Språkkode.NN)
     }
 
     @Test
-    fun `generer vilkår for svp`() {
+    fun `generer vilkår for EFOG bokmål`() {
         lagVilkårstekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB)
     }
 
     @Test
-    fun `generer vilkår for svp nynorsk`() {
+    fun `generer vilkår for EFOG nynorsk`() {
         lagVilkårstekster(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN)
     }
 
     @Test
-    fun `generer vilkår for es`() {
+    fun `generer vilkår for EFBT bokmål`() {
         lagVilkårstekster(Ytelsestype.BARNETILSYN, Språkkode.NB)
     }
 
     @Test
-    fun `generer vilkår for es nynorsk`() {
+    fun `generer vilkår for EFBT nynorsk`() {
         lagVilkårstekster(Ytelsestype.BARNETILSYN, Språkkode.NN)
     }
 
     @Test
-    fun `generer vilkår for frisinn`() {
+    fun `generer vilkår for EFSP bokmål`() {
         lagVilkårstekster(Ytelsestype.SKOLEPENGER, Språkkode.NB)
     }
 
     @Test
-    fun `generer vilkår for frisinn nynorsk`() {
+    fun `generer vilkår for EFSP nynorsk`() {
         lagVilkårstekster(Ytelsestype.SKOLEPENGER, Språkkode.NN)
     }
 

@@ -41,10 +41,10 @@ import java.time.YearMonth
  * "Insert markup"-macroen kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * FP/SVP/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * SKOLEPENGER: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
+ * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonGeneratorPeriodeSærligeGrunner {
 
     private val januar = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
@@ -133,9 +133,9 @@ class DokumentasjonGeneratorPeriodeSærligeGrunner {
         val s: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevPeriodeOgFelles(felles, periode),
                                                           AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
         val overskrift = overskrift(sgNav, sgBeløp, sgTid, sgAnnet, reduksjon)
-        val prettyprint = prettyprint(s, overskrift)
+        val prettyPrint = prettyPrint(s, overskrift)
         println()
-        println(prettyprint)
+        println(prettyPrint)
     }
 
     private fun overskrift(sgNav: Boolean, sgBeløp: Boolean, sgTid: Boolean, sgAnnet: Boolean, reduksjon: Boolean): String {
@@ -232,7 +232,7 @@ class DokumentasjonGeneratorPeriodeSærligeGrunner {
     }
 
 
-    private fun prettyprint(s: String, overskrift: String): String {
+    private fun prettyPrint(s: String, overskrift: String): String {
         return s.replace("_Er det særlige grunner til å redusere beløpet?", overskrift)
                 .replace("_Er det særlege grunnar til å redusere beløpet?", overskrift)
                 .replace(" 500\u00A0kroner", " <kravbeløp> kroner")

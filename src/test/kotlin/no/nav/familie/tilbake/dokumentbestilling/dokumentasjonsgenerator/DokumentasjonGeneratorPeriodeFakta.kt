@@ -41,65 +41,65 @@ import java.time.YearMonth
  * kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * FP/SVP/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * SKOLEPENGER: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
+ * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonGeneratorPeriodeFakta {
 
     private val januar = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
     @Test
-    fun `list ut permutasjoner for FP`() {
+    fun `list ut permutasjoner for BA bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETRYGD, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for FP nynorsk`() {
+    fun `list ut permutasjoner for BA nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETRYGD, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for SVP`() {
+    fun `list ut permutasjoner for EFOG bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for SVP nynorsk`() {
+    fun `list ut permutasjoner for EFOG nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for ES`() {
+    fun `list ut permutasjoner for EFBT bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETILSYN, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for ES nynorsk`() {
+    fun `list ut permutasjoner for EFBT nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.BARNETILSYN, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for SKOLEPENGER`() {
+    fun `list ut permutasjoner for EFSP bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.SKOLEPENGER, Språkkode.NB)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
     }
 
     @Test
-    fun `list ut permutasjoner for SKOLEPENGER nynorsk`() {
+    fun `list ut permutasjoner for EFSP nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFelles(Ytelsestype.SKOLEPENGER, Språkkode.NN)
         val resultat: Map<HendelseMedUndertype, String> = lagFaktatekster(felles)
         prettyPrint(resultat)
