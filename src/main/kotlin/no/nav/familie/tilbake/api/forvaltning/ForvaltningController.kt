@@ -41,7 +41,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Arkiverer mottatt kravgrunnlag",
-                        henteParam = "behandlingId")
+                        henteParam = "mottattXmlId")
     fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")

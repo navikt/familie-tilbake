@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
@@ -29,12 +30,14 @@ import java.util.UUID
 class TilgangAdvice(val rolleConfig: RolleConfig,
                     val behandlingRepository: BehandlingRepository,
                     val fagsakRepository: FagsakRepository,
+                    val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                     val integrasjonerClient: IntegrasjonerClient) {
 
     private val behandlingIdParam = "behandlingId"
     private val ytelsestypeParam = "ytelsestype"
     private val fagsystemParam = "fagsystem"
     private val eksternBrukIdParam = "eksternBrukId"
+    private val mottattXmlIdParam = "mottattXmlId"
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -106,6 +109,13 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                 validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                          minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = personerIBehandlingen,
                          handling = handling)
+            }
+            mottattXmlIdParam -> {
+                val mottattXmlId = requestBody.first() as UUID
+                val økonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(mottattXmlId)
+                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(økonomiXmlMottatt.ytelsestype)
+                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
             }
             else -> {
                 kastTilgangssjekkException(handling)
