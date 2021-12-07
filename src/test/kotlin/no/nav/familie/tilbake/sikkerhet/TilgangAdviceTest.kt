@@ -27,7 +27,9 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
+import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
@@ -91,6 +93,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
+    @Autowired
+    private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
+
 
     private val mockJoinpoint: JoinPoint = mockk()
     private val mockRolleTilgangssjekk: Rolletilgangssjekk = mockk()
@@ -99,7 +104,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        tilgangAdvice = TilgangAdvice(rolleConfig, behandlingRepository, fagsakRepository, mockIntegrasjonerClient)
+        tilgangAdvice = TilgangAdvice(rolleConfig,
+                                      behandlingRepository,
+                                      fagsakRepository,
+                                      mottattXmlRepository,
+                                      mockIntegrasjonerClient)
 
     }
 
@@ -425,6 +434,22 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
         every { mockRolleTilgangssjekk.handling } returns "Tving henlegger behandling"
         every { mockRolleTilgangssjekk.henteParam } returns "behandlingId"
+
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste arkiver mottattXml med input som mottattXmlId`() {
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+
+        // PUT request uten body
+        opprettRequest("/arkiver/kravgrunnlag/${økonomiXmlMottatt.id}/v1", HttpMethod.PUT, token)
+
+        every { mockJoinpoint.args } returns arrayOf(økonomiXmlMottatt.id)
+        every { mockRolleTilgangssjekk.minimumBehandlerrolle } returns Behandlerrolle.FORVALTER
+        every { mockRolleTilgangssjekk.handling } returns "Arkiverer mottatt kravgrunnlag"
+        every { mockRolleTilgangssjekk.henteParam } returns "mottattXmlId"
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, mockRolleTilgangssjekk) }
     }
