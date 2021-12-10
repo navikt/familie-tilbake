@@ -23,6 +23,8 @@ import no.nav.familie.tilbake.config.IntegrasjonerConfig
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -186,6 +188,11 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
      * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle
      * slike personer.
      */
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = "5000")
+    )
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(hentTilgangssjekkUri(), personIdenter)
     }
