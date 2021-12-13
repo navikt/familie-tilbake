@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.oppgave
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -9,6 +10,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -71,11 +73,14 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val aktørId = personService.hentAktivAktørId(fagsak.bruker.ident, fagsak.fagsystem)
 
+        val behandlingstema = fagsak.ytelsestype.tilBehandlingsTema()
+
 
         val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId,
                                                                           gruppe = IdentGruppe.AKTOERID),
                                                    saksId = behandling.eksternBrukId.toString(),
                                                    tema = fagsak.ytelsestype.tilTema(),
+                                                   behandlingstema = behandlingstema?.value,
                                                    oppgavetype = oppgavetype,
                                                    behandlesAvApplikasjon = "familie-tilbake",
                                                    fristFerdigstillelse = fristForFerdigstillelse,
@@ -85,8 +90,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                                                                                  beskrivelse),
                                                    enhetsnummer = behandling.behandlendeEnhet,
                                                    tilordnetRessurs = saksbehandler,
-                                                   behandlingstype = Behandlingstype.Tilbakekreving.value,
-                                                   behandlingstema = null)
+                                                   behandlingstype = Behandlingstype.Tilbakekreving.value)
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
@@ -150,5 +154,15 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         private val LOG = LoggerFactory.getLogger(this::class.java)
         val SECURELOG: Logger = LoggerFactory.getLogger("secureLogger")
+    }
+}
+
+private fun Ytelsestype.tilBehandlingsTema(): Behandlingstema? {
+    return when(this) {
+        Ytelsestype.BARNETRYGD -> null
+        Ytelsestype.BARNETILSYN -> Behandlingstema.Barnetilsyn
+        Ytelsestype.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
+        Ytelsestype.SKOLEPENGER -> Behandlingstema.Skolepenger
+        Ytelsestype.KONTANTSTØTTE -> null
     }
 }
