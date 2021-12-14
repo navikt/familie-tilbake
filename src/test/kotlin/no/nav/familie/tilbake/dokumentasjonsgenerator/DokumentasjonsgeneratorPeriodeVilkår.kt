@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.dokumentbestilling.dokumentasjonsgenerator
+package no.nav.familie.tilbake.dokumentasjonsgenerator
 
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -40,13 +40,11 @@ import java.time.YearMonth
  * Brukes for å generere vilkårtekster for perioder. Resultatet er tekster med markup, som med "Insert markup"-macroen
  * kan limes inn i Confluence, og dermed bli formattert tekst.
  *
- *
  * Confluence:
- * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
-class DokumentasjonGeneratorPeriodeVilkår {
+@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+class DokumentasjonsgeneratorPeriodeVilkår {
 
     @Test
     fun `generer vilkår for BA bokmål`() {
@@ -190,7 +188,7 @@ class DokumentasjonGeneratorPeriodeVilkår {
                 HbVurderinger(foreldelsevurdering = foreldelsevurdering,
                               aktsomhetsresultat = vurdering,
                               unntasInnkrevingPgaLavtBeløp = lavtBeløp,
-                              fritekst = if (fritekst) "[fritekst her]" else null,
+                              fritekst = if (fritekst) "[ fritekst her ]" else null,
                               vilkårsvurderingsresultat = vilkårResultat,
                               beløpIBehold = if (AnnenVurdering.GOD_TRO === vurdering) {
                                   if (pengerIBehold) BigDecimal.valueOf(3999) else BigDecimal.ZERO
@@ -200,7 +198,7 @@ class DokumentasjonGeneratorPeriodeVilkår {
                                   FORELDELSESFRIST else null,
                               fritekstForeldelse = if (foreldelsevurdering in setOf(Foreldelsesvurderingstype.FORELDET,
                                                                                     Foreldelsesvurderingstype.TILLEGGSFRIST)
-                                                       && fritekst) "[fritekst her]" else null,
+                                                       && fritekst) "[ fritekst her ]" else null,
                               oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering)
                                   OPPDAGELSES_DATO else null)
 
@@ -273,20 +271,14 @@ class DokumentasjonGeneratorPeriodeVilkår {
 
 
     private fun prettyprint(vilkårTekst: String, overskrift: String): String {
-        return vilkårTekst
-                .replace("_Hvordan har vi kommet fram til at du må betale tilbake?", overskrift)
-                .replace("_Hvordan har vi kommet fram til at du ikke må betale tilbake?", overskrift)
-                .replace("_Korleis har vi kome fram til at du må betale tilbake?", overskrift)
-                .replace("_Korleis har vi kome fram til at du ikkje må betale tilbake?", overskrift)
+        return vilkårTekst.replace("__.+".toRegex(), overskrift)
                 .replace(" 4\u00A0321\u00A0kroner", " <4 rettsgebyr> kroner")
                 .replace(" 2\u00A0999\u00A0kroner", " <foreldet beløp> kroner")
                 .replace(" 3\u00A0999\u00A0kroner", " <beløp i behold> kroner")
                 .replace("1. januar 2019", "<periode start>")
-                .replace("16. januar 2019", "<periode slutt>")
+                .replace("31. januar 2019", "<periode slutt>")
                 .replace("1. mars 2019", "<oppdagelsesdato>")
                 .replace("1. desember 2019", "<foreldelsesfrist>")
-                .replace("\\[", "[ ")
-                .replace("]", " ]")
     }
 
     companion object {

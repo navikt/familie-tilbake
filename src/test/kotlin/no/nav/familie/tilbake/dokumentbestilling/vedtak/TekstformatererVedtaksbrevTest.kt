@@ -126,7 +126,6 @@ class TekstformatererVedtaksbrevTest {
                                                                            sakspartsnavn = "Test",
                                                                            vergenavn = "John Doe",
                                                                            finnesVerge = true),
-                                          finnesVerge = true,
                                           varsel = null,
                                           totalresultat = HbTotalresultat(Vedtaksresultat.INGEN_TILBAKEBETALING,
                                                                           BigDecimal.ZERO,

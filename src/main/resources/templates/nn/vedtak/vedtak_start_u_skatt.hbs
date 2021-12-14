@@ -15,7 +15,6 @@ Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.
 Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.varsletBeløp}}} for mykje.{{>korrigert-total-beløp}} Vi har behandlet saka di og du må ikkje betale tilbake det feilutbetalte beløpet.
     {{/case}}
     {{/switch}}
-
 {{else}}
 {{~#* inline "brev-ytelse-endret" ~}}I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{~/inline~}}
     {{#switch totalresultat.hovedresultat}}
@@ -29,9 +28,7 @@ Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.
 {{>brev-ytelse-endret}} Du må ikkje betale tilbake det du har fått for mykje.
     {{/case}}
     {{/switch}}
-
 {{/if}}
 {{#if fritekstoppsummering}}
 {{{fritekstoppsummering}}}
-
 {{/if}}

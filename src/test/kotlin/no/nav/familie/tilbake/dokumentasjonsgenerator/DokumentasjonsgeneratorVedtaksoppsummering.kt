@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.dokumentbestilling.dokumentasjonsgenerator
+package no.nav.familie.tilbake.dokumentasjonsgenerator
 
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -24,11 +24,10 @@ import java.time.LocalDate
  * "Insert markup"-macroen kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
-class DokumentasjonGeneratorVedtakOppsummering {
+@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+class DokumentasjonsgeneratorVedtaksoppsummering {
 
     companion object {
 
@@ -126,7 +125,7 @@ class DokumentasjonGeneratorVedtakOppsummering {
     }
 
     @Test
-    fun `list ut vedtak start for frisinn EFSP bokmål`() {
+    fun `list ut vedtak start for EFSP nynorsk`() {
         val ytelseType: Ytelsestype = Ytelsestype.SKOLEPENGER
         val språkkode: Språkkode = Språkkode.NN
         for (resultatType in tilbakekrevingsResultat) {
@@ -272,8 +271,6 @@ class DokumentasjonGeneratorVedtakOppsummering {
                 .replace(" 900\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
                 .replace(" 25\u00A0000\u00A0kroner".toRegex(), " <varslet beløp> kroner")
                 .replace("15. januar 2020".toRegex(), if (medVarsel) "<varseldato>" else "<vedtaksdato>")
-                .replace("\\[".toRegex(), "[ ")
-                .replace("]".toRegex(), " ]")
         println(parametrisertTekst)
         println()
     }

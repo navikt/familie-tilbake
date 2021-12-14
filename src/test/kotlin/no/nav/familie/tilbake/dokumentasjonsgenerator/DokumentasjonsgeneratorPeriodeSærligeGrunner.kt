@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.dokumentbestilling.dokumentasjonsgenerator
+package no.nav.familie.tilbake.dokumentasjonsgenerator
 
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -41,58 +41,57 @@ import java.time.YearMonth
  * "Insert markup"-macroen kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
-class DokumentasjonGeneratorPeriodeSærligeGrunner {
+@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+class DokumentasjonsgeneratorPeriodeSærligeGrunner {
 
     private val januar = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
     @Test
-    fun `list ut særlige grunner simpel uaktsomhet forstod`() {
+    fun `list ut særlige grunner forstod burde forstått simpel uaktsomhet bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NB)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, Aktsomhet.SIMPEL_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner simpel uaktsomhet forstod nynorsk`() {
+    fun `list ut særlige grunner forstod burde forstått simpel uaktsomhet nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NN)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, Aktsomhet.SIMPEL_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner grov uaktsomhet forstod`() {
+    fun `list ut særlige grunner forstod burde forstått grov uaktsomhet bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NB)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, Aktsomhet.GROV_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner grov uaktsomhet forstod nynorsk`() {
+    fun `list ut særlige grunner forstod burde forstått grov uaktsomhet nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NN)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, Aktsomhet.GROV_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner simpel uaktsomhet feil mangelfulle opplysninger`() {
+    fun `list ut særlige grunner feilaktig mangelfulle opplysninger simpel uaktsomhet bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NB)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER, Aktsomhet.SIMPEL_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner simpel uaktsomhet feil mangelfulle opplysninger nynorsk`() {
+    fun `list ut særlige grunner feilaktig mangelfulle opplysninger simpel uaktsomhet nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NN)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER, Aktsomhet.SIMPEL_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner grov uaktsomhet feil mangelfulle opplysninger`() {
+    fun `list ut særlige grunner feilaktig mangelfulle opplysninger grov uaktsomhet bokmål`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NB)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER, Aktsomhet.GROV_UAKTSOMHET)
     }
 
     @Test
-    fun `list ut særlige grunner grov uaktsomhet feil mangelfulle opplysninger nynorsk`() {
+    fun `list ut særlige grunner feilaktig mangelfulle opplysninger grov uaktsomhet nynorsk`() {
         val felles: HbVedtaksbrevFelles = lagFellesdel(Språkkode.NN)
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER, Aktsomhet.GROV_UAKTSOMHET)
     }
@@ -156,7 +155,7 @@ class DokumentasjonGeneratorPeriodeSærligeGrunner {
         if (sgAnnet) {
             deler.add("annet")
         }
-        return deler.joinToString(" - ", "*[", "]*")
+        return deler.joinToString(" - ", "*[ ", " ]*")
     }
 
     private fun lagPeriodeDel(vilkårResultat: Vilkårsvurderingsresultat,
@@ -179,7 +178,7 @@ class DokumentasjonGeneratorPeriodeSærligeGrunner {
         if (sgAnnet) {
             sg.add(SærligGrunn.ANNET)
         }
-        val fritekstSærligeGrunnerAnnet = "[fritekst her]"
+        val fritekstSærligeGrunnerAnnet = "[ fritekst her ]"
         return HbVedtaksbrevsperiode(periode = januar,
                                      vurderinger = HbVurderinger(
                                              foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -233,10 +232,8 @@ class DokumentasjonGeneratorPeriodeSærligeGrunner {
 
 
     private fun prettyPrint(s: String, overskrift: String): String {
-        return s.replace("_Er det særlige grunner til å redusere beløpet?", overskrift)
-                .replace("_Er det særlege grunnar til å redusere beløpet?", overskrift)
+        return s.replace("__Er det særlige grunner til å redusere beløpet?", overskrift)
+                .replace("__Er det særlege grunnar til å redusere beløpet?", overskrift)
                 .replace(" 500\u00A0kroner", " <kravbeløp> kroner")
-                .replace("\\[".toRegex(), "[ ")
-                .replace("]".toRegex(), " ]")
     }
 }

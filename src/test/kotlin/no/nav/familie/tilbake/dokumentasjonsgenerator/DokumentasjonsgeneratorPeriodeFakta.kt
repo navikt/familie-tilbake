@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.dokumentbestilling.dokumentasjonsgenerator
+package no.nav.familie.tilbake.dokumentasjonsgenerator
 
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -41,11 +41,10 @@ import java.time.YearMonth
  * kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
-class DokumentasjonGeneratorPeriodeFakta {
+@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+class DokumentasjonsgeneratorPeriodeFakta {
 
     private val januar = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
@@ -115,11 +114,8 @@ class DokumentasjonGeneratorPeriodeFakta {
                     .replace("Søker Søkersen".toRegex(), "<søkers navn>")
                     .replace("2. mars 2018".toRegex(), "<opphørsdato søker døde>")
                     .replace("3. mars 2018".toRegex(), "<opphørsdato barn døde>")
-                    .replace("4. mars 2018".toRegex(), "<opphørsdato ikke lenger gravid>")
-                    .replace("5. mars 2018".toRegex(), "<opphørsdato ikke omsorg>")
+                    .replace("4. mars 2018".toRegex(), "<opphørsdato ikke omsorg>")
                     .replace("ektefellen".toRegex(), "<ektefellen/partneren/samboeren>")
-                    .replace("\\[".toRegex(), "[ ")
-                    .replace("]".toRegex(), " ]")
             println(parametrisertTekst)
             println()
         }

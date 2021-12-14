@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.dokumentbestilling.dokumentasjonsgenerator
+package no.nav.familie.tilbake.dokumentasjonsgenerator
 
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -38,11 +38,10 @@ import java.time.YearMonth
  * kan limes inn i Confluence, og dermed bli formattert tekst.
  *
  * Confluence:
- * BA/EFOG/ES: https://confluence.adeo.no/display/TVF/Generert+dokumentasjon
- * EFSP: https://confluence.adeo.no/display/MODNAV/Generert+dokumentasjon
+ * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
-class DokumentasjonGeneratorVedtakSlutt {
+@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+class DokumentasjonsgeneratorVedtaksslutt {
 
     @Test
     fun `list ut vedtak slutt EFOG bokmål`() {
@@ -174,29 +173,31 @@ class DokumentasjonGeneratorVedtakSlutt {
                                                    totaltRentebeløp = BigDecimal.valueOf(100)),
                                    totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
                                    hjemmel = if (flereLovhjemler)
-                                       HbHjemmel("lovhjemmel1 og lovhjemmel2", true)
-                                   else HbHjemmel("[lovhjemmel]"),
+                                       HbHjemmel("<lovhjemler her>", true)
+                                   else HbHjemmel("<lovhjemmel her>"),
                                    varsel = HbVarsel(varsletBeløp = BigDecimal.valueOf(1000),
                                                      varsletDato = LocalDate.of(2020, 4, 4)),
                                    konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
-                                   søker = HbPerson(navn = "Søker Søkersen"),
+                                   ansvarligBeslutter = "<Beslutters navn>",
+                                   søker = HbPerson(navn = "<Søkers navn>"),
                                    vedtaksbrevstype = if (feilutbetaltBeløpBortfalt)
                                        Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT else Vedtaksbrevstype.ORDINÆR,
                                    behandling = HbBehandling(erRevurdering = erRevurdering,
                                                              originalBehandlingsdatoFagsakvedtak = if (erRevurdering)
-                                                                 PERIODE1.fom else null),
-                                   finnesVerge = medVerge)
+                                                                 PERIODE1.fom else null))
     }
 
     private fun lagMetadata(ytelsestype: Ytelsestype,
                             språkkode: Språkkode,
                             medVerge: Boolean): Brevmetadata {
-        val annenMottagersNavn = if (medVerge) "[annen mottaker]" else null
+        val annenMottagersNavn = if (medVerge) "<annen mottaker>" else null
         return Brevmetadata(sakspartId = "",
-                            sakspartsnavn = "",
-                            mottageradresse = Adresseinfo("01020312345", "Bob", annenMottagersNavn),
-                            behandlendeEnhetsNavn = "Oslo",
-                            ansvarligSaksbehandler = "Bob",
+                            sakspartsnavn = "<Søkers navn>",
+                            finnesVerge = medVerge,
+                            mottageradresse = Adresseinfo("01020312345", "<Søkers navn>", annenMottagersNavn),
+                            behandlendeEnhetsNavn = "<Behandlende enhets navn>",
+                            ansvarligSaksbehandler = "<Saksbehandlers navn>",
+                            vergenavn = "<annen mottaker>",
                             språkkode = språkkode,
                             ytelsestype = ytelsestype)
     }
@@ -239,22 +240,11 @@ class DokumentasjonGeneratorVedtakSlutt {
     }
 
     private fun prettyprint(s: String): String {
-        return s.replace("_Lovhjemlene vi har brukt", "*_Lovhjemlene vi har brukt_*")
-                .replace("_Lovhjemmelen vi har brukt", "*_Lovhjemmelen vi har brukt_*")
-                .replace("_Skatt", "\n*_Skatt_*")
-                .replace("_Hvordan betale tilbake pengene du skylder", "\n*_Hvordan betale tilbake pengene du skylder_*")
-                .replace("_Du har rett til å klage", "\n*_Du har rett til å klage_*")
-                .replace("_Du har rett til innsyn", "\n*_Du har rett til innsyn_*")
-                .replace("_Har du spørsmål?", "\n*_Har du spørsmål?_*")
-                .replace("_Lovhjemler vi har brukt", "*_Lovhjemler vi har brukt_*")
-                .replace("_Korleis betale tilbake pengane du skuldar", "\n*_Korleis betale tilbake pengane du skuldar_*")
-                .replace("lovhjemmel1 og lovhjemmel2", "<lovhjemler her>")
-                .replace("[lovhjemmel]", "<lovhjemmel her>")
-                .replace("[annen mottaker]", "<annen mottaker>")
+        return s.replace("{venstrejustert}", "")
+                .replace("{høyrejustert}", "\t\t")
                 .replace("4 uker", "<klagefrist> uker")
                 .replace("4 veker", "<klagefrist> veker")
-                .replace("\\[".toRegex(), "[ ")
-                .replace("]".toRegex(), " ]")
+                .replace("(_.+)".toRegex(), "\n*$1*")
     }
 
     companion object {
