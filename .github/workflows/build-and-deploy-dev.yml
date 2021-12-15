@@ -1,7 +1,7 @@
 name: Build-Deploy-Preprod
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [ opened, synchronize, reopened, ready_for_review ]
   workflow_dispatch:
 
 env:
@@ -118,6 +118,11 @@ jobs:
           TILBAKE_CLIENT_SECRET: ${{ secrets.TILBAKE_CLIENT_SECRET }}
           HISTORIKK_CLIENT_ID: ${{ secrets.HISTORIKK_CLIENT_ID }}
           HISTORIKK_CLIENT_SECRET: ${{ secrets.HISTORIKK_CLIENT_SECRET }}
+        - uses: actions/setup-java@v2
+          with:
+            java-version: 17
+            distribution: 'temurin'
+            cache: 'maven'
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd tilbake-e2e/autotest; mvn -B --no-transfer-progress --settings .m2/maven-settings.xml -Dtest="**" test
       - name: Samle Docker-logs ved feil
@@ -140,7 +145,7 @@ jobs:
     if: github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
     name: Deploy til dev-gcp
     runs-on: ubuntu-latest
-    needs: [build-jar-docker, run-junit]
+    needs: [ build-jar-docker, run-junit ]
     steps:
       - uses: actions/checkout@v2
         with:
