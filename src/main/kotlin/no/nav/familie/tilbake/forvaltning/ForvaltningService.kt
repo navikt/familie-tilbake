@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -35,7 +35,6 @@ import java.util.UUID
 
 @Service
 class ForvaltningService(private val behandlingRepository: BehandlingRepository,
-                         private val fagsakRepository: FagsakRepository,
                          private val kravgrunnlagRepository: KravgrunnlagRepository,
                          private val hentKravgrunnlagService: HentKravgrunnlagService,
                          private val økonomiXmlMottattService: ØkonomiXmlMottattService,
@@ -102,22 +101,18 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun hentFagsystemsbehandling(behandlingId: UUID) {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        sjekkOmBehandlingErAvsluttet(behandling)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val aktivFagsystemsbehandling = behandling.aktivFagsystemsbehandling
+    fun hentFagsystemsbehandling(hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto) {
+        val ytelsestype = hentFagsystemsbehandlingRequest.ytelsestype
+        val eksternFagsakId = hentFagsystemsbehandlingRequest.eksternFagsakId
+        val eksternId = hentFagsystemsbehandlingRequest.eksternId
+
         val sendtRequest =
-                hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(fagsak.eksternFagsakId,
-                                                                                     fagsak.ytelsestype,
-                                                                                     aktivFagsystemsbehandling.eksternId)
+                hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId, ytelsestype, eksternId)
         // fjern eksisterende sendte request slik at ny request kan sendes
         if (sendtRequest != null) {
             hentFagsystemsbehandlingService.fjernHentFagsystemsbehandlingRequest(sendtRequest.id)
         }
-        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(fagsak.eksternFagsakId,
-                                                                            fagsak.ytelsestype,
-                                                                            aktivFagsystemsbehandling.eksternId)
+        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
     }
 
     @Transactional

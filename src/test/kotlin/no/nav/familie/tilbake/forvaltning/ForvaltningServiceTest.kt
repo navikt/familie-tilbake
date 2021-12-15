@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
@@ -204,17 +205,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentFagsystemsbehandling skal ikke hente fagsystemsbehandling når behandling er avsluttet`() {
-        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
-                                            .copy(status = Behandlingsstatus.AVSLUTTET))
-
-        val exception = shouldThrow<RuntimeException> {
-            forvaltningService.hentFagsystemsbehandling(behandling.id)
-        }
-        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
-    }
-
-    @Test
     fun `hentFagsystemsbehandling skal sende request til fagsystem for å hente fagsystemsbehandling`() {
         val eksternFagsakId = Testdata.fagsak.eksternFagsakId
         val ytelsestype = Testdata.fagsak.ytelsestype
@@ -223,7 +213,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val requestSendt = requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = eksternFagsakId,
                                                                                               ytelsestype = ytelsestype,
                                                                                               eksternId = eksternId))
-        forvaltningService.hentFagsystemsbehandling(behandling.id)
+        val hentFagsystemsbehandlingRequestDto = HentFagsystemsbehandlingRequestDto(ytelsestype, eksternFagsakId, eksternId)
+        forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequestDto)
         requestSendtRepository.findByIdOrNull(requestSendt.id).shouldBeNull()
         requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
                                                                                ytelsestype,
@@ -305,8 +296,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                       behandlingssteg: Behandlingssteg,
-                                       behandlingsstegstatus: Behandlingsstegstatus) {
+                                      behandlingssteg: Behandlingssteg,
+                                      behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
             behandlingsstegstatus == it.behandlingsstegsstatus
