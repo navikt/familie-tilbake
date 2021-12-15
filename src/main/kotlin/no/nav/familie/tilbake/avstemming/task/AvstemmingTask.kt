@@ -24,7 +24,7 @@ class AvstemmingTask(val taskService: TaskService,
                      val avstemmingService: AvstemmingService,
                      val avstemmingsfilRepository: AvstemmingsfilRepository,
                      val integrasjonerClient: IntegrasjonerClient,
-                     environment: Environment) : AsyncTaskStep {
+                     val environment: Environment) : AsyncTaskStep {
 
     val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
@@ -48,6 +48,8 @@ class AvstemmingTask(val taskService: TaskService,
     }
 
     override fun onCompletion(task: Task) {
+        if (environment.activeProfiles.contains("e2e")) return;
+
         val dato = LocalDate.parse(task.payload)
         val nesteAvstemming = Task(type = TYPE,
                                    payload = dato.plusDays(1).toString(),
