@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
@@ -11,10 +12,12 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.util.UUID
+import javax.validation.Valid
 
 // Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
 
@@ -58,14 +61,14 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
-    @Operation(summary = "Hent fagsysytemsbehandlingsinformasjon på nytt via Kafka")
-    @PostMapping(path = ["/behandling/{behandlingId}/fagsystemsbehandling/v1"],
-                     produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Hent fagsysytemsbehandlingsinformasjon fra fagsystem via Kafka")
+    @PostMapping(path = ["/fagsystemsbehandling/v1"],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                        handling = "Henter fagsystemsbehandling på nytt",
-                        henteParam = "behandlingId")
-    fun hentFagsystemsbehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
-        forvaltningService.hentFagsystemsbehandling(behandlingId)
+                        handling = "Henter fagsystemsbehandling fra fagsystem via kafka")
+    fun hentFagsystemsbehandling(@Valid @RequestBody
+                                 hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto): Ressurs<String> {
+        forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequest)
         return Ressurs.success("OK")
     }
 
