@@ -13,7 +13,7 @@ Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.
     {{/switch}}
 {{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saka di om tilbakebetaling på nytt. Derfor gjeld ikkje det tidlegare vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnBestemt}}}.
+Vi har vurdert saka di om tilbakebetaling på nytt{{#if behandling.erRevurderingEtterKlageNfp}}, fordi du klaga{{/if}}. Derfor gjeld ikkje det tidlegare vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnUbestemt}}}.
     {{#if varsel.varsletDato }}
 
 {{> varsel-tekst}}
@@ -25,7 +25,10 @@ Du må ikkje betale tilbake det feilutbetalte beløpet.
     {{#if varsel.varsletDato }}
 {{> varsel-tekst}}
     {{else}}
-I brev {{{dato  fagsaksvedtaksdato}}} fekk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikkje betale tilbake det du har fått for mykje.{{/if}}
+        {{#if behandling.erRevurderingEtterKlageNfp}}
+Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mykje.
+        {{else}}
+I brev {{{dato  fagsaksvedtaksdato}}} fekk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{/if}}{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikkje betale tilbake det du har fått for mykje.{{/if}}
     {{/if}}
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}

@@ -22,7 +22,8 @@ object VedtakHjemmel {
                    effektForBruker: EffektForBruker,
                    ytelsestype: Ytelsestype,
                    språkkode: Språkkode,
-                   visHjemmelForRenter: Boolean): HbHjemmel {
+                   visHjemmelForRenter: Boolean,
+                   klagebehandling: Boolean): HbHjemmel {
         val foreldetVanlig = erNoeSattTilVanligForeldet(foreldelse)
         val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(foreldelse)
         val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype, vilkårsperioder)
@@ -45,11 +46,14 @@ object VedtakHjemmel {
         } else if (foreldetVanlig) {
             hjemler.add(Hjemler.FORELDELSE_2_3)
         }
-        if (EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER == effektForBruker) {
-            hjemler.add(Hjemler.FORVALTNING_35_A)
-        }
-        if (EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER == effektForBruker) {
-            hjemler.add(Hjemler.FORVALTNING_35_C)
+
+        if (!klagebehandling) {
+            if (EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER == effektForBruker) {
+                hjemler.add(Hjemler.FORVALTNING_35_A)
+            }
+            if (EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER == effektForBruker) {
+                hjemler.add(Hjemler.FORVALTNING_35_C)
+            }
         }
         val hjemmelstekst = join(hjemler, " og ", språkkode)
         return HbHjemmel(hjemmelstekst, hjemmelstekst.contains("og"))

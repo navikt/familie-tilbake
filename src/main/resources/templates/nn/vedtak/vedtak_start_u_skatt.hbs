@@ -1,6 +1,6 @@
 {{~#* inline "evt-renter-utsagn" ~}}{{#if totalresultat.totaltRentebeløp}} Dette beløpet er med renter.{{/if}}{{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saka di om tilbakebetaling på nytt. Derfor gjeld ikkje det tidlegare vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnUbestemt}}}.
+Vi har vurdert saka di om tilbakebetaling på nytt{{#if behandling.erRevurderingEtterKlageNfp}}, fordi du klaga{{/if}}. Derfor gjeld ikkje det tidlegare vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnUbestemt}}}.
 
 {{/if}}
 {{#if varsel.varsletDato}}
@@ -16,7 +16,11 @@ Vi varsla deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel.
     {{/case}}
     {{/switch}}
 {{else}}
-{{~#* inline "brev-ytelse-endret" ~}}I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{~/inline~}}
+{{~#* inline "brev-ytelse-endret" ~}}
+    {{#if behandling.erRevurderingEtterKlageNfp}}
+Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mykje.{{else}}
+I brev {{{dato  fagsaksvedtaksdato}}} fekk du melding om at {{{ytelsesnavnEiendomsform}}} er endra. Endringa gjorde at du har fått utbetalt for mykje.{{/if}}
+{{~/inline~}}
     {{#switch totalresultat.hovedresultat}}
     {{#case "FULL_TILBAKEBETALING"}}
 {{>brev-ytelse-endret}} Du må betale tilbake {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er heile det feilutbetalte beløpet.{{>evt-renter-utsagn}}

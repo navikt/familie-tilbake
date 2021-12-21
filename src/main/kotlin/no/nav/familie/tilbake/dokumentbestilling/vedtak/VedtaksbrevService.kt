@@ -198,13 +198,15 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vedtaksbrevtype = behandling.utledVedtaksbrevstype()
         val hbVedtaksResultatBeløp = HbVedtaksResultatBeløp(resulatPerioder)
         val effektForBruker: VedtakHjemmel.EffektForBruker = utledEffektForBruker(behandling, hbVedtaksResultatBeløp)
+        val klagebehandling = behandling.sisteÅrsak?.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
         val hbHjemmel = VedtakHjemmel.lagHjemmel(vedtakResultatType,
                                                  foreldelse,
                                                  vilkårPerioder,
                                                  effektForBruker,
                                                  fagsak.ytelsestype,
                                                  brevmetadata.språkkode,
-                                                 visHjemmelForRenter = true) // sannsynligvis hjemmel
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling) // sannsynligvis hjemmel
         val perioder: List<HbVedtaksbrevsperiode> = lagHbVedtaksbrevPerioder(behandling.id,
                                                                              perioderFritekst,
                                                                              resulatPerioder,

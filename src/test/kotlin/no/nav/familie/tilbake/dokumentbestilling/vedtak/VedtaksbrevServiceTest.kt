@@ -54,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import java.io.File
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -193,6 +194,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
 
+        File("test.pdf").writeBytes(bytes)
         PdfaValidator.validatePdf(bytes)
     }
 

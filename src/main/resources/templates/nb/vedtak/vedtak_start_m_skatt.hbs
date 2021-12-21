@@ -25,7 +25,10 @@ Du må ikke betale tilbake det feilutbetalte beløpet.
     {{#if varsel.varsletDato }}
 {{> varsel-tekst}}
     {{else}}
-I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endret. Endringen gjorde at du har fått utbetalt for mye.{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikke betale tilbake det du har fått for mye.{{/if}}
+        {{#if behandling.erRevurderingEtterKlageNfp}}
+Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mykje.
+        {{else}}
+I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endret. Endringen gjorde at du har fått utbetalt for mye.{{/if}}{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikke betale tilbake det du har fått for mye.{{/if}}
     {{/if}}
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
