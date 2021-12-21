@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
 object HendelsesundertypePerHendelsestype {
 
-    private val HIERARKI = mapOf(Hendelsestype.ANNET to setOf(Hendelsesundertype.ANNET_FRITEKST),
+    val HIERARKI = mapOf(Hendelsestype.ANNET to setOf(Hendelsesundertype.ANNET_FRITEKST),
                                  Hendelsestype.BOR_MED_SØKER to setOf(Hendelsesundertype.BOR_IKKE_MED_BARN),
                                  Hendelsestype.BOSATT_I_RIKET to setOf(Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
                                                                        Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,

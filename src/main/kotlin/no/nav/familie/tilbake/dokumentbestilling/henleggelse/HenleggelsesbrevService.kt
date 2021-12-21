@@ -87,7 +87,7 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
         } else {
             eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
         }
-        val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+        val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val metadata = Brevmetadata(behandlendeEnhetId = behandling.behandlendeEnhet,
                                     behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
                                     ytelsestype = fagsak.ytelsestype,
@@ -97,7 +97,7 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
                                     mottageradresse = adresseinfo,
                                     saksnummer = fagsak.eksternFagsakId,
                                     sakspartsnavn = personinfo.navn,
-                                    vergenavn = vergeNavn,
+                                    vergenavn = vergenavn,
                                     finnesVerge = behandling.harVerge,
                                     tittel = TITTEL_HENLEGGELSESBREV,
                                     behandlingstype = behandling.type)
