@@ -8,7 +8,8 @@ import java.time.Period
 
 object Constants {
 
-    private val rettsgebyrForDato = listOf(Datobeløp(LocalDate.of(2021, 1, 1), 1199))
+    private val rettsgebyrForDato = listOf(Datobeløp(LocalDate.of(2021, 1, 1), 1199),
+                                           Datobeløp(LocalDate.of(2022, 1, 1), 1223))
 
     private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2021, 5, 1), 106399))
 
