@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.config.Constants
 
 object BehandlingMapper {
 
@@ -49,12 +50,14 @@ object BehandlingMapper {
                                      konsekvenser = fagsystemskonsekvenser)
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
+        val enhetsnavn =
+                if (fagsak.fagsystem == Fagsystem.EF) Constants.ENHETSNAVN_EF else opprettTilbakekrevingRequest.enhetsnavn
 
         return Behandling(fagsakId = fagsak.id,
                           type = Behandlingstype.TILBAKEKREVING,
                           ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
-                          behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
+                          behandlendeEnhetsNavn = enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
                           fagsystemsbehandling = setOf(fagsystemsbehandling),
                           varsler = varsler,
