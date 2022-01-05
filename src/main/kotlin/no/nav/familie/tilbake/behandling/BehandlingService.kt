@@ -310,10 +310,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
                        frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
         }
-
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
+        val enhetsnavn = if (fagsak.fagsystem == Fagsystem.EF) Constants.ENHETSNAVN_EF else enhet.navn
 
-        behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
+        behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhetsnavn))
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
