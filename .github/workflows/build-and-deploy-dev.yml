@@ -25,7 +25,7 @@ jobs:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B --no-transfer-progress package verify -Dmaven.test.skip=true --settings .m2/maven-settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)
       - name: Bygg Docker image
         run: |
@@ -64,7 +64,7 @@ jobs:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)
 
   run-e2e:
