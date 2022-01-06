@@ -50,14 +50,12 @@ object BehandlingMapper {
                                      konsekvenser = fagsystemskonsekvenser)
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
-        val enhetsnavn =
-                if (fagsak.fagsystem == Fagsystem.EF) Constants.ENHETSNAVN_EF else opprettTilbakekrevingRequest.enhetsnavn
 
         return Behandling(fagsakId = fagsak.id,
                           type = Behandlingstype.TILBAKEKREVING,
                           ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
                           behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
-                          behandlendeEnhetsNavn = enhetsnavn,
+                          behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
                           manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
                           fagsystemsbehandling = setOf(fagsystemsbehandling),
                           varsler = varsler,

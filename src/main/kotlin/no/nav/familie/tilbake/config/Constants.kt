@@ -23,8 +23,6 @@ object Constants {
 
     const val statusmeldingXmlRootElement: String = "urn:endringKravOgVedtakstatus"
 
-    const val ENHETSNAVN_EF = "NAV Arbeid og ytelser"
-
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     val grunnbeløp = grunnbeløpForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp

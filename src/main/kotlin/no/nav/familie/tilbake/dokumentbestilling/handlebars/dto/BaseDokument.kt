@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.dokumentbestilling.handlebars.dto
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 
 private const val EF_URL = "nav.no/familie/alene-med-barn"
 
@@ -9,6 +11,13 @@ open class BaseDokument(val ytelsestype: Ytelsestype,
                         override val språkkode: Språkkode,
                         val behandlendeEnhetsNavn: String,
                         val ansvarligSaksbehandler: String) : Språkstøtte {
+
+    val avsenderenhet =
+            if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == Fagsystem.EF) {
+                "NAV Arbeid og ytelser"
+            } else {
+                behandlendeEnhetsNavn
+            }
 
     private val infoMap =
             mapOf(Ytelsestype.BARNETRYGD to Ytelsesinfo("nav.no/barnetrygd",
