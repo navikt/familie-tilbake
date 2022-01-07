@@ -40,7 +40,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorVedtaksslutt {
 
     @Test
