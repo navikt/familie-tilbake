@@ -72,6 +72,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.insert(Testdata.behandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
         dokumentBehandlingService = DokumentbehandlingService(behandlingRepository,
+                                                              fagsakRepository,
                                                               behandlingskontrollService,
                                                               kravgrunnlagRepository,
                                                               taskService,

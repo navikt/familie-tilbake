@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -24,6 +25,7 @@ import java.util.UUID
 @Service
 class Fattevedtakssteg(private val behandlingskontrollService: BehandlingskontrollService,
                        private val behandlingRepository: BehandlingRepository,
+                       private val fagsakRepository: FagsakRepository,
                        private val totrinnService: TotrinnService,
                        private val oppgaveTaskService: OppgaveTaskService,
                        private val historikkTaskService: HistorikkTaskService,
@@ -47,9 +49,10 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         totrinnService.lagreTotrinnsvurderinger(behandlingId, fatteVedtaksstegDto.totrinnsvurderinger)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         // step3: lukk Godkjenne vedtak oppgaver
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, fagsystem, Oppgavetype.GodkjenneVedtak.name)
         }
 
         // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
@@ -59,8 +62,10 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
 
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-                                                  Aktør.BESLUTTER)
+                                                  Aktør.BESLUTTER,
+                                                  fagsystem.name)
             oppgaveTaskService.opprettOppgaveTask(behandlingId,
+                                                  fagsystem,
                                                   Oppgavetype.BehandleUnderkjentVedtak,
                                                   behandling.ansvarligSaksbehandler)
         } else {
@@ -69,7 +74,8 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
                                                                                           Behandlingsstegstatus.UTFØRT))
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                                                  Aktør.BESLUTTER)
+                                                  Aktør.BESLUTTER,
+                                                  fagsystem.name)
             // step 5: opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         }
@@ -85,9 +91,11 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
                                                                                       Behandlingsstegstatus.UTFØRT))
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                                              Aktør.BESLUTTER)
+                                              Aktør.BESLUTTER,
+                                              fagsystem.name)
         behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }

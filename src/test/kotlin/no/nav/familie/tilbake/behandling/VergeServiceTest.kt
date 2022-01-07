@@ -112,7 +112,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         verify {
             historikkTaskService.lagHistorikkTask(behandling.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                                                  Aktør.SAKSBEHANDLER)
+                                                  Aktør.SAKSBEHANDLER,
+                                                  "BA")
         }
     }
 
@@ -204,7 +205,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         verify {
             historikkTaskService.lagHistorikkTask(behandlingFørOppdatering.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                                                  Aktør.SAKSBEHANDLER)
+                                                  Aktør.SAKSBEHANDLER,
+                                                  "BA")
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
@@ -225,7 +227,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         vergeService.fjernVerge(behandlingUtenVerge.id)
 
         behandlingUtenVerge.harVerge.shouldBeFalse()
-        verify(exactly = 0) { historikkTaskService.lagHistorikkTask(any(), any(), any()) }
+        verify(exactly = 0) { historikkTaskService.lagHistorikkTask(any(), any(), any(), any()) }
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingUtenVerge.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
@@ -294,8 +296,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                       behandlingssteg: Behandlingssteg,
-                                       behandlingsstegstatus: Behandlingsstegstatus) {
+                                      behandlingssteg: Behandlingssteg,
+                                      behandlingsstegstatus: Behandlingsstegstatus) {
 
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&

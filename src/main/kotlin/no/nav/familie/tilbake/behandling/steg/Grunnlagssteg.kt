@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling.steg
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -16,6 +17,7 @@ import java.util.UUID
 
 @Service
 class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                    private val fagsakRepository: FagsakRepository,
                     private val behandlingskontrollService: BehandlingskontrollService,
                     private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
@@ -30,9 +32,11 @@ class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
                                                                      Behandlingsstegsinfo(Behandlingssteg.GRUNNLAG,
                                                                                           Behandlingsstegstatus.UTFØRT))
             behandlingskontrollService.fortsettBehandling(behandlingId)
+            val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
                                                   Aktør.VEDTAKSLØSNING,
+                                                  fagsystem.name,
                                                   triggerTid = LocalDateTime.now().plusSeconds(2))
         }
     }

@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -25,12 +26,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
-                         val behandlingskontrollService: BehandlingskontrollService,
-                         val vedtaksbrevService: VedtaksbrevService,
-                         val oppgaveTaskService: OppgaveTaskService,
-                         val totrinnService: TotrinnService,
-                         val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository,
+                         private val fagsakRepository: FagsakRepository,
+                         private val behandlingskontrollService: BehandlingskontrollService,
+                         private val vedtaksbrevService: VedtaksbrevService,
+                         private val oppgaveTaskService: OppgaveTaskService,
+                         private val totrinnService: TotrinnService,
+                         private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,9 +48,11 @@ class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
 
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.SAKSBEHANDLER)
+                                              Aktør.SAKSBEHANDLER,
+                                              fagsystem.name)
 
         flyttBehandlingVidere(behandlingId)
 
@@ -59,15 +63,18 @@ class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                                                       .BEHANDLING_SENDT_TIL_BESLUTTER,
                                               aktør = Aktør.SAKSBEHANDLER,
+                                              fagsystem = fagsystem.name,
                                               triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 
     @Transactional
     override fun utførStegAutomatisk(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.VEDTAKSLØSNING)
+                                              Aktør.VEDTAKSLØSNING,
+                                              fagsystem.name)
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
@@ -77,6 +84,7 @@ class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                                                       .BEHANDLING_SENDT_TIL_BESLUTTER,
                                               aktør = Aktør.VEDTAKSLØSNING,
+                                              fagsystem = fagsystem.name,
                                               triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 
@@ -106,11 +114,12 @@ class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, fagsystem, oppgavetype.name)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR){
-            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
+            oppgaveTaskService.opprettOppgaveTask(behandlingId, fagsystem, Oppgavetype.GodkjenneVedtak)
         }
     }
 

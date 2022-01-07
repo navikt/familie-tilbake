@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -21,12 +22,13 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
-                      val behandlingskontrollService: BehandlingskontrollService,
-                      val foreldelseService: ForeldelseService,
-                      val historikkTaskService: HistorikkTaskService,
+class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                      private val behandlingskontrollService: BehandlingskontrollService,
+                      private val fagsakRepository: FagsakRepository,
+                      private val foreldelseService: ForeldelseService,
+                      private val historikkTaskService: HistorikkTaskService,
                       @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
-                      val foreldelseAntallMåned: Long) : IBehandlingssteg {
+                      private val foreldelseAntallMåned: Long) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -86,9 +88,11 @@ class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
     }
 
     private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT,
-                                              aktør)
+                                              aktør,
+                                              fagsystem.name)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

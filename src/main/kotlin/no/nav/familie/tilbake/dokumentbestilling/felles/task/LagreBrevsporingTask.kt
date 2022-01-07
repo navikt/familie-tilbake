@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -21,7 +22,7 @@ import java.util.UUID
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer brev",
                      triggerTidVedFeilISekunder = 60 * 5L)
-class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
+class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
                            private val taskService: TaskService,
                            private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {
 
@@ -47,6 +48,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
+                                              fagsystem = task.fagsystem(),
                                               aktør = utledAktør(brevtype, ansvarligSaksbehandler))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
@@ -56,7 +58,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         // Behandling bør avsluttes etter å sende vedtaksbrev
         // AvsluttBehandlingTask må kalles kun en gang selv om behandling har verge
         if (brevtype == Brevtype.VEDTAK && mottager == Brevmottager.BRUKER) {
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload))
+            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata))
         }
     }
 

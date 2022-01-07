@@ -42,7 +42,8 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(oppdatertBehandling)
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                                              Aktør.SAKSBEHANDLER)
+                                              Aktør.SAKSBEHANDLER,
+                                              fagsak.fagsystem.name)
     }
 
     @Transactional
@@ -56,13 +57,15 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
     fun fjernVerge(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val finnesAktivVerge = behandling.harVerge
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         if (finnesAktivVerge) {
             val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet())
             behandlingRepository.update(oppdatertBehandling)
             historikkTaskService.lagHistorikkTask(behandling.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                                                  Aktør.SAKSBEHANDLER)
+                                                  Aktør.SAKSBEHANDLER,
+                                                  fagsak.fagsystem.name)
         }
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.VERGE,

@@ -1,10 +1,12 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -13,6 +15,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -54,10 +57,11 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
+        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
         if (behandling == null) {
             arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
-            tellerService.tellUkobletKravgrunnlag(ytelsestype)
+            tellerService.tellUkobletKravgrunnlag(fagsystem)
             return
         }
         // mapper grunnlag til Kravgrunnlag431
@@ -67,12 +71,13 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-                                              Aktør.VEDTAKSLØSNING)
+                                              Aktør.VEDTAKSLØSNING,
+                                              fagsystem.name)
 
         //oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
-            håndterOppgave(behandling)
+            håndterOppgave(behandling, fagsystem)
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
@@ -94,7 +99,9 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             }
         }
         stegService.håndterSteg(behandling.id)
-        tellerService.tellKobletKravgrunnlag(ytelsestype)
+        tellerService.
+
+        tellKobletKravgrunnlag(fagsystem)
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
@@ -140,14 +147,16 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                   setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
                                   setProperty("ytelsestype", ytelsestype.name)
                                   setProperty("eksternId", kravgrunnlag431.referanse)
+                                  setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
                               }))
     }
 
-    private fun håndterOppgave(behandling: Behandling) {
+    private fun håndterOppgave(behandling: Behandling, fagsystem: Fagsystem) {
         val revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato
         val interval = ChronoUnit.DAYS.between(revurderingsvedtaksdato, LocalDate.now())
         if (interval >= FRIST_DATO_GRENSE) {
             oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                   fagsystem = fagsystem.name,
                                                    beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
                                                    frist = LocalDate.now().plusDays(1))
         } else {
@@ -156,6 +165,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                               "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
                               "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
             oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
+                                                   fagsystem = fagsystem.name,
                                                    beskrivelse = beskrivelse,
                                                    frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE))
         }

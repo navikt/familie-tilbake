@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling.batch
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -23,7 +24,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       private val brevsporingRepository: BrevsporingRepository,
                                       private val stegService: StegService) {
 
-    fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<UUID> {
+    fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
@@ -38,7 +39,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
             sumNyttBeløp < Constants.MAKS_FEILUTBETALTBELØP_PER_YTELSE.getValue(fagsak.ytelsestype) &&
             // behandlinger som ikke sendte brev
             !brevsporingRepository.existsByBehandlingId(it.id)
-        }.map { it.id }
+        }
     }
 
     @Transactional

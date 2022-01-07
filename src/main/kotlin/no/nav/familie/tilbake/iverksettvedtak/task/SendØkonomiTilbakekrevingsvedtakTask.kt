@@ -41,7 +41,8 @@ class SendØkonomiTilbakekrevingsvedtakTask(private val iverksettelseService: Iv
     @Transactional
     override fun onCompletion(task: Task) {
         taskService.save(Task(type = SendVedtaksbrevTask.TYPE,
-                              payload = task.payload))
+                              payload = task.payload,
+                              properties = task.metadata))
     }
 
     companion object {
