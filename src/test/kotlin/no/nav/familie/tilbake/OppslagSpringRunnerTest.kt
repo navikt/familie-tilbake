@@ -102,7 +102,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        listOf(Fagsak::class,
+        setOf(Fagsak::class,
                Behandling::class,
                Behandlingsårsak::class,
                Fagsystemsbehandling::class,
@@ -134,8 +134,8 @@ abstract class OppslagSpringRunnerTest {
                Verge::class,
                Avstemmingsfil::class,
                HentFagsystemsbehandlingRequestSendt::class,
-               Task::class,
                TaskLogg::class,
+               Task::class,
                Meldingstelling::class)
                 .reversed()
                 .forEach { jdbcAggregateOperations.deleteAll(it.java) }
