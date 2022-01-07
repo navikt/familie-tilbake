@@ -469,6 +469,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&
+               !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
                behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
