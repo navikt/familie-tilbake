@@ -5,7 +5,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -48,7 +47,6 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
-                                              fagsystem = task.fagsystem(),
                                               aktør = utledAktør(brevtype, ansvarligSaksbehandler))
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {

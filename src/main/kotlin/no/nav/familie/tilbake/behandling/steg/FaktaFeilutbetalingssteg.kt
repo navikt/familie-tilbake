@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -20,7 +19,6 @@ import java.util.UUID
 
 @Service
 class FaktaFeilutbetalingssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                               private val fagsakRepository: FagsakRepository,
                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
                                private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
@@ -36,11 +34,9 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
 
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.SAKSBEHANDLER,
-                                              fagsystem.name)
+                                              Aktør.SAKSBEHANDLER)
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
             flyttBehandlingVidere(behandlingId)
@@ -52,11 +48,9 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg og behandler automatisk..")
         faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
 
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.VEDTAKSLØSNING,
-                                              fagsystem.name)
+                                              Aktør.VEDTAKSLØSNING)
 
         flyttBehandlingVidere(behandlingId)
     }

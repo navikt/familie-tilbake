@@ -136,8 +136,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkTaskService.lagHistorikkTask(revurdering.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                              Aktør.SAKSBEHANDLER,
-                                              fagsystem.name)
+                                              Aktør.SAKSBEHANDLER)
 
         behandlingskontrollService.fortsettBehandling(revurdering.id)
         stegService.håndterSteg(revurdering.id)
@@ -216,8 +215,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                              Aktør.SAKSBEHANDLER,
-                                              fagsystem.name)
+                                              Aktør.SAKSBEHANDLER
+        )
 
         stegService.gjenopptaSteg(behandlingId)
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId, fagsystem.name, "Behandling er tatt av vent", LocalDate.now())
@@ -266,7 +265,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = aktør,
-                                              fagsystem = fagsystem.name,
                                               beskrivelse = fjernNewlinesFraString(henleggelsesbrevFritekstDto.begrunnelse))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
@@ -337,7 +335,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              fagsystem = fagsystem.name,
                                               beskrivelse = fjernNewlinesFraString(byttEnhetDto.begrunnelse))
 
         oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
@@ -373,8 +370,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                              Aktør.VEDTAKSLØSNING,
-                                              fagsystem.name)
+                                              Aktør.VEDTAKSLØSNING)
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)

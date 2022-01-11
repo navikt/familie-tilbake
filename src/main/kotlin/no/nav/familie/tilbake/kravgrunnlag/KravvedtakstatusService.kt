@@ -144,7 +144,6 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.VEDTAKSLØSNING,
-                                              fagsystem= fagsystem.name,
                                               beskrivelse = venteårsak.beskrivelse)
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId, fagsystem.name, venteårsak.beskrivelse, tidsfrist)
     }

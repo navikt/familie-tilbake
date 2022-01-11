@@ -112,8 +112,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         verify {
             historikkTaskService.lagHistorikkTask(behandling.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                                                  Aktør.SAKSBEHANDLER,
-                                                  "BA")
+                                                  Aktør.SAKSBEHANDLER)
         }
     }
 
@@ -205,8 +204,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         verify {
             historikkTaskService.lagHistorikkTask(behandlingFørOppdatering.id,
                                                   TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                                                  Aktør.SAKSBEHANDLER,
-                                                  "BA")
+                                                  Aktør.SAKSBEHANDLER)
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)

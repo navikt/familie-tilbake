@@ -71,8 +71,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-                                              Aktør.VEDTAKSLØSNING,
-                                              fagsystem.name)
+                                              Aktør.VEDTAKSLØSNING)
 
         //oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)

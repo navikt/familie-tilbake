@@ -98,7 +98,6 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              fagsystem = fagsystem.name,
                                               beskrivelse = "")
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, fagsystem)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
@@ -128,11 +127,9 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         endretKravgrunnlagEventPublisher.fireEvent(behandlingId)
         behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FAKTA)
 
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
-                                              Aktør.SAKSBEHANDLER,
-                                              fagsystem.name)
+                                              Aktør.SAKSBEHANDLER)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {

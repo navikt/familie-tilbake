@@ -48,11 +48,9 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
 
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.SAKSBEHANDLER,
-                                              fagsystem.name)
+                                              Aktør.SAKSBEHANDLER)
 
         flyttBehandlingVidere(behandlingId)
 
@@ -63,18 +61,15 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                                                       .BEHANDLING_SENDT_TIL_BESLUTTER,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              fagsystem = fagsystem.name,
                                               triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 
     @Transactional
     override fun utførStegAutomatisk(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.VEDTAKSLØSNING,
-                                              fagsystem.name)
+                                              Aktør.VEDTAKSLØSNING)
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
@@ -84,7 +79,6 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                                                       .BEHANDLING_SENDT_TIL_BESLUTTER,
                                               aktør = Aktør.VEDTAKSLØSNING,
-                                              fagsystem = fagsystem.name,
                                               triggerTid = LocalDateTime.now().plusSeconds(2))
     }
 

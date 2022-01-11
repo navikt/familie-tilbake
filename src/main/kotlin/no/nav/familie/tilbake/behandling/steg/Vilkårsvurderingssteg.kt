@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling.steg
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -26,7 +25,6 @@ import java.util.UUID
 
 @Service
 class Vilkårsvurderingssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                            private val fagsakRepository: FagsakRepository,
                             private val vilkårsvurderingService: VilkårsvurderingService,
                             private val foreldelseService: ForeldelseService,
                             private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
@@ -104,10 +102,8 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
     }
 
     private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
-                                              aktør,
-                                              fagsystem.name)
+                                              aktør)
     }
 }

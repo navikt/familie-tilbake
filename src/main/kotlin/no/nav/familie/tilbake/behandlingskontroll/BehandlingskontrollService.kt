@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandlingskontroll
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -29,7 +28,6 @@ import java.util.UUID
 @Service
 class BehandlingskontrollService(private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
                                  private val behandlingRepository: BehandlingRepository,
-                                 private val fagsakRepository: FagsakRepository,
                                  private val behandlingTilstandService: BehandlingTilstandService,
                                  private val kravgrunnlagRepository: KravgrunnlagRepository,
                                  private val historikkTaskService: HistorikkTaskService) {
@@ -44,7 +42,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         val aktivtStegstilstand = finnAktivStegstilstand(behandlingsstegstilstand)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         if (aktivtStegstilstand == null) {
             val nesteStegMetaData = finnNesteBehandlingsstegMedStatus(behandling, behandlingsstegstilstand)
@@ -54,7 +51,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                         .lagHistorikkTask(behandlingId = behandlingId,
                                           historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                           aktør = Aktør.VEDTAKSLØSNING,
-                                          fagsystem = fagsak.fagsystem.name,
                                           beskrivelse = nesteStegMetaData.venteårsak?.beskrivelse)
             }
         } else {
@@ -136,12 +132,11 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                                                       venteårsak = venteårsak,
                                                                                       tidsfrist = tidsfrist))
         //oppdater tilsvarende behandlingsstatus
-        val behandling = oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
+
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              fagsystem = fagsak.fagsystem.name,
                                               beskrivelse = venteårsak.beskrivelse)
     }
 
@@ -331,13 +326,12 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                     tidsfrist = venteårsak?.defaultVenteTidIUker?.let { tidsfrist?.plusWeeks(it) })
     }
 
-    private fun oppdaterBehandlingsstatus(behandlingId: UUID, behandlingssteg: Behandlingssteg): Behandling {
+    private fun oppdaterBehandlingsstatus(behandlingId: UUID, behandlingssteg: Behandlingssteg) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // Oppdaterer tilsvarende behandlingsstatus bortsett fra Avsluttet steg. Det håndteres separat av AvsluttBehandlingTask
         if (Behandlingssteg.AVSLUTTET != behandlingssteg) {
-            return behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
+            behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
         }
-        return behandling
     }
 
 }
