@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.forvaltning
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -45,7 +44,6 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                          private val historikkTaskService: HistorikkTaskService,
                          private val oppgaveTaskService: OppgaveTaskService,
                          private val tellerService: TellerService,
-                         private val fagsakRepository: FagsakRepository,
                          private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
                          private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
 
@@ -94,12 +92,11 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                                                     avsluttetDato = LocalDate.now()))
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
 
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = Aktør.SAKSBEHANDLER,
                                               beskrivelse = "")
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, fagsystem)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 

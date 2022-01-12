@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -27,7 +26,6 @@ import java.util.UUID
 
 @Service
 class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository,
-                         private val fagsakRepository: FagsakRepository,
                          private val behandlingskontrollService: BehandlingskontrollService,
                          private val vedtaksbrevService: VedtaksbrevService,
                          private val oppgaveTaskService: OppgaveTaskService,
@@ -108,12 +106,11 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, fagsystem, oppgavetype.name)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.opprettOppgaveTask(behandlingId, fagsystem, Oppgavetype.GodkjenneVedtak)
+            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
         }
     }
 

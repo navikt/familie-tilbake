@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -16,7 +15,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigStatusmeldingFeil
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -33,7 +31,6 @@ import java.util.UUID
 @Service
 class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRepository,
                               private val behandlingRepository: BehandlingRepository,
-                              private val fagsakRepository: FagsakRepository,
                               private val mottattXmlService: ØkonomiXmlMottattService,
                               private val stegService: StegService,
                               private val tellerService: TellerService,
@@ -109,11 +106,9 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                 håndterSperMeldingMedBehandling(behandling.id, kravgrunnlag431)
             }
             Kravstatuskode.ENDRET -> {
-                val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
                 kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = false))
                 stegService.håndterSteg(behandling.id)
                 oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                                       fagsystem = fagsystem.name,
                                                        beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
                                                        frist = LocalDate.now())
             }
@@ -140,12 +135,11 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                                  behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                                                                  venteårsak = venteårsak,
                                                                  tidsfrist = tidsfrist))
-        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(kravgrunnlag431.fagområdekode.ytelsestype)
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.VEDTAKSLØSNING,
                                               beskrivelse = venteårsak.beskrivelse)
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, fagsystem.name, venteårsak.beskrivelse, tidsfrist)
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, venteårsak.beskrivelse, tidsfrist)
     }
 
 }

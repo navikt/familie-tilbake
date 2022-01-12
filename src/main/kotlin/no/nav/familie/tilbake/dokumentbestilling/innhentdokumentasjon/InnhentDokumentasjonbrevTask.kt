@@ -7,7 +7,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -27,7 +26,6 @@ import java.util.UUID
                      beskrivelse = "Sender innhent dokumentasjonsbrev",
                      triggerTidVedFeilISekunder = 60 * 5L)
 class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingRepository,
-                                   private val fagsakRepository: FagsakRepository,
                                    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
                                    private val behandlingskontrollService: BehandlingskontrollService,
                                    private val oppgaveTaskService: OppgaveTaskService) : AsyncTaskStep {
@@ -40,11 +38,9 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
             innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
         }
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               fagsystem = fagsystem.name,
                                                beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
                                                        .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
                                                frist = fristTid)

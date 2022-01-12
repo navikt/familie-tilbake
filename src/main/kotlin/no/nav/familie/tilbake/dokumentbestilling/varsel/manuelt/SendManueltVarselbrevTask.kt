@@ -9,7 +9,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
@@ -53,7 +52,6 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               task.fagsystem(),
                                                beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
                                                        .ansvarligSaksbehandler} har sendt varselbrev til bruker",
                                                frist = fristTid)

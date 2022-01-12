@@ -88,7 +88,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
         //Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(behandling.id, opprettTilbakekrevingRequest.fagsystem, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
                         .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet) {
@@ -147,7 +147,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                  properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         //Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(revurdering.id, fagsystem, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(revurdering.id, Oppgavetype.BehandleSak)
 
         return revurdering
     }
@@ -196,8 +196,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG -> "Ny frist satt på bakgrunn av mottatt kravgrunnlag fra økonomi"
             else -> "Frist er oppdatert av saksbehandler ${ContextService.hentSaksbehandler()}"
         }
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, fagsystem.name, beskrivelse, behandlingPåVentDto.tidsfrist)
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, beskrivelse, behandlingPåVentDto.tidsfrist)
     }
 
     @Transactional
@@ -211,7 +210,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
         oppdaterAnsvarligSaksbehandler(behandlingId)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
@@ -219,13 +217,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
 
         stegService.gjenopptaSteg(behandlingId)
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, fagsystem.name, "Behandling er tatt av vent", LocalDate.now())
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
 
         // oppdaterer oppgave hvis saken er fortsatt på vent
         val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
             oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
-                                                   fagsystem.name,
                                                    aktivStegstilstand.venteårsak!!.beskrivelse,
                                                    aktivStegstilstand.tidsfrist!!)
         }
@@ -274,7 +271,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         // Ferdigstill oppgave
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, fagsystem)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 
@@ -291,8 +288,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         //oppdater saksbehandler på oppgaven også hvis det er ny saksbehandler som behandler saken
         if (gammelSaksbehandler != ContextService.hentSaksbehandler()
             && ContextService.hentSaksbehandler() != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
-            oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, fagsystem)
+            oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         }
     }
 
@@ -338,7 +334,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                               beskrivelse = fjernNewlinesFraString(byttEnhetDto.begrunnelse))
 
         oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
-                                                    fagsystem = fagsystem,
                                                     beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
                                                     enhetId = byttEnhetDto.enhet)
     }
