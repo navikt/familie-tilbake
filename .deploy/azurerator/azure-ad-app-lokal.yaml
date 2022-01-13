@@ -25,6 +25,8 @@ spec:
       namespace: teamfamilie
     - application: familie-ba-sak
       cluster: dev-fss
+    - application: familie-ba-sak
+      cluster: dev-gcp
     - application: familie-ba-sak-lokal
       cluster: dev-fss
       namespace: teamfamilie
