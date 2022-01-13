@@ -30,7 +30,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -43,7 +42,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorPeriodeVilkår {
 
     @Test
@@ -167,11 +166,20 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                                                  foreldelsevurdering,
                                                  fritekst,
                                                  pengerIBehold)
-        val vilkårTekst: String = FellesTekstformaterer.lagDeltekst(periodeOgFelles, AvsnittUtil.PARTIAL_PERIODE_VILKÅR)
+        val vilkårTekst = lagVilkårTekst(periodeOgFelles)
         val overskrift = overskrift(resultat, vurdering, lavtBeløp, fritekst, pengerIBehold, foreldelsevurdering)
         val prettyprint = prettyprint(vilkårTekst, overskrift)
         println()
         println(prettyprint)
+    }
+
+    fun lagVilkårTekst(periodeOgFelles: HbVedtaksbrevPeriodeOgFelles): String {
+        if (periodeOgFelles.periode.vurderinger.harForeldelsesavsnitt) {
+            return FellesTekstformaterer.lagDeltekst(periodeOgFelles, AvsnittUtil.PARTIAL_PERIODE_FORELDELSE) +
+                   System.lineSeparator() + System.lineSeparator() +
+                   FellesTekstformaterer.lagDeltekst(periodeOgFelles, AvsnittUtil.PARTIAL_PERIODE_VILKÅR)
+        }
+        return FellesTekstformaterer.lagDeltekst(periodeOgFelles, AvsnittUtil.PARTIAL_PERIODE_VILKÅR)
     }
 
     private fun lagPeriodeOgFelles(ytelsetype: Ytelsestype,

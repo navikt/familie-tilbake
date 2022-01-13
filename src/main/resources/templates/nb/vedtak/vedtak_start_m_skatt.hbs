@@ -13,7 +13,7 @@ Vi varslet deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel
     {{/switch}}
 {{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saken din om tilbakebetaling på nytt. Derfor gjelder ikke det tidligere vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnBestemt}}}.
+Vi har vurdert saken din om tilbakebetaling på nytt{{#if behandling.erRevurderingEtterKlageNfp}}, fordi du klaget{{/if}}. Derfor gjelder ikke det tidligere vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnUbestemt}}}.
     {{#if varsel.varsletDato }}
 
 {{> varsel-tekst}}
@@ -26,7 +26,7 @@ Du må ikke betale tilbake det feilutbetalte beløpet.
 {{> varsel-tekst}}
     {{else}}
         {{#if behandling.erRevurderingEtterKlageNfp}}
-Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mykje.
+Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mye.
         {{else}}
 I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendomsform}}} er endret. Endringen gjorde at du har fått utbetalt for mye.{{/if}}{{#if (eq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}} Du må ikke betale tilbake det du har fått for mye.{{/if}}
     {{/if}}
