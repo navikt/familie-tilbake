@@ -310,9 +310,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
                        frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
         }
-
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
-
         behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
@@ -469,6 +467,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&
+               !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
                behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }

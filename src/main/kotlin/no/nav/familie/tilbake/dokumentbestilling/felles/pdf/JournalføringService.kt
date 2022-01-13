@@ -54,7 +54,8 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
                                dokumentkategori: Dokumentkategori,
                                brevmetadata: Brevmetadata,
                                brevmottager: Brevmottager,
-                               vedleggPdf: ByteArray): JournalpostIdOgDokumentId {
+                               vedleggPdf: ByteArray,
+                               eksternReferanseId: String?): JournalpostIdOgDokumentId {
         logger.info("Starter journalføring av {} til {} for behandlingId={}", dokumentkategori, brevmottager, behandling.id)
         val dokument = Dokument(dokument = vedleggPdf,
                                 filtype = Filtype.PDFA,
@@ -66,7 +67,8 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
                                              hoveddokumentvarianter = listOf(dokument),
                                              fagsakId = fagsak.eksternFagsakId,
                                              journalførendeEnhet = behandling.behandlendeEnhet,
-                                             avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata))
+                                             avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
+                                             eksternReferanseId = eksternReferanseId)
 
 
         val response = integrasjonerClient.arkiver(request)

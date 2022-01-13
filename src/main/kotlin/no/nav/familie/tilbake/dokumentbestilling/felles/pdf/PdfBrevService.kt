@@ -80,9 +80,20 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                                                            mapBrevtypeTilDokumentkategori(brevtype),
                                                            data.metadata,
                                                            data.mottager,
-                                                           pdf)
+                                                           pdf,
+                                                           lagEksternReferanseId(behandling, brevtype))
 
 
+    }
+
+    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype): String? {
+        // varsel må håndteres spesifikt, siden automatisk varselbrev ellers ville få samme eksternReferanseId som vedtaksbrev i
+        // fagsystem. For dei andre er default logikk riktig.
+        return if (brevtype == Brevtype.VARSEL) {
+            "${behandling.eksternBrukId}_varsel"
+        } else {
+            null
+        }
     }
 
     private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {
