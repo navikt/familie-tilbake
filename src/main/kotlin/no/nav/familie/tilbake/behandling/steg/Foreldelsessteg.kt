@@ -21,12 +21,12 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class Foreldelsessteg(val kravgrunnlagRepository: KravgrunnlagRepository,
-                      val behandlingskontrollService: BehandlingskontrollService,
-                      val foreldelseService: ForeldelseService,
-                      val historikkTaskService: HistorikkTaskService,
+class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
+                      private val behandlingskontrollService: BehandlingskontrollService,
+                      private val foreldelseService: ForeldelseService,
+                      private val historikkTaskService: HistorikkTaskService,
                       @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
-                      val foreldelseAntallMåned: Long) : IBehandlingssteg {
+                      private val foreldelseAntallMåned: Long) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

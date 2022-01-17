@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling
 
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -21,6 +22,7 @@ import java.util.UUID
 @Service
 @Transactional
 class DokumentbehandlingService(private val behandlingRepository: BehandlingRepository,
+                                private val fagsakRepository: FagsakRepository,
                                 private val behandlingskontrollService: BehandlingskontrollService,
                                 private val kravgrunnlagRepository: KravgrunnlagRepository,
                                 private val taskService: TaskService,
@@ -56,8 +58,9 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
+        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         val sendVarselbrev =
-                SendManueltVarselbrevTask.opprettTask(behandlingId = behandling.id, maltype = maltype, fritekst = fritekst)
+                SendManueltVarselbrevTask.opprettTask(behandling.id, fagsystem, maltype, fritekst)
         taskService.save(sendVarselbrev)
         settPåVent(behandling)
     }
@@ -74,8 +77,9 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
+        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         val sendInnhentDokumentasjonBrev =
-                InnhentDokumentasjonbrevTask.opprettTask(behandlingId = behandling.id, fritekst = fritekst)
+                InnhentDokumentasjonbrevTask.opprettTask(behandling.id, fagsystem, fritekst)
         taskService.save(sendInnhentDokumentasjonBrev)
         settPåVent(behandling)
     }

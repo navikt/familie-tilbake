@@ -18,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FaktaFeilutbetalingssteg(val behandlingskontrollService: BehandlingskontrollService,
-                               val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-                               val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class FaktaFeilutbetalingssteg(private val behandlingskontrollService: BehandlingskontrollService,
+                               private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+                               private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

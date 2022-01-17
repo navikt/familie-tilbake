@@ -1,15 +1,18 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 
@@ -34,10 +37,12 @@ class SendHenleggelsesbrevTask(private val henleggelsesbrevService: Henleggelses
     companion object {
 
         fun opprettTask(behandlingId: UUID,
+                        fagsystem: Fagsystem,
                         fritekst: String?): Task =
                 Task(type = TYPE,
                      payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
-                     triggerTid = LocalDateTime.now().plusSeconds(15))
+                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) })
+                        .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "distribuerHenleggelsesbrev"
     }

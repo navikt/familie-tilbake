@@ -3,13 +3,16 @@ package no.nav.familie.tilbake.historikkinnslag
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
 @Service
-class HistorikkTaskService(private val taskRepository: TaskRepository) {
+class HistorikkTaskService(private val taskRepository: TaskRepository,
+                           private val fagsakRepository: FagsakRepository) {
 
     fun lagHistorikkTask(behandlingId: UUID,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
@@ -17,11 +20,14 @@ class HistorikkTaskService(private val taskRepository: TaskRepository) {
                          triggerTid: LocalDateTime? = null,
                          beskrivelse: String? = null) {
 
-        val properties = Properties()
-        properties.setProperty("historikkinnslagstype", historikkinnslagstype.name)
-        properties.setProperty("aktør", aktør.name)
-        properties.setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
-        beskrivelse?.let { properties.setProperty("beskrivelse", beskrivelse) }
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val properties = Properties().apply {
+            setProperty("historikkinnslagstype", historikkinnslagstype.name)
+            setProperty("aktør", aktør.name)
+            setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
+            setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
+            beskrivelse?.let { setProperty("beskrivelse", it) }
+        }
 
         val task = Task(type = LagHistorikkinnslagTask.TYPE,
                         payload = behandlingId.toString(),

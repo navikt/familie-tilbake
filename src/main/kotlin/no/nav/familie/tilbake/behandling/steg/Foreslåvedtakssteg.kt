@@ -25,12 +25,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
-                         val behandlingskontrollService: BehandlingskontrollService,
-                         val vedtaksbrevService: VedtaksbrevService,
-                         val oppgaveTaskService: OppgaveTaskService,
-                         val totrinnService: TotrinnService,
-                         val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository,
+                         private val behandlingskontrollService: BehandlingskontrollService,
+                         private val vedtaksbrevService: VedtaksbrevService,
+                         private val oppgaveTaskService: OppgaveTaskService,
+                         private val totrinnService: TotrinnService,
+                         private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -109,7 +109,7 @@ class Foreslåvedtakssteg(val behandlingRepository: BehandlingRepository,
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR){
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
             oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
         }
     }

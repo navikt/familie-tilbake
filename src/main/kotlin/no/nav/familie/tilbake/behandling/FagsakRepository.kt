@@ -4,11 +4,15 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
 interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepository<Fagsak> {
+
+    @Query("""SELECT f.* FROM fagsak f JOIN behandling b ON b.fagsak_id = f.id WHERE b.id = :behandlingId""")
+    fun finnFagsakForBehandlingId(behandlingId: UUID): Fagsak
 
     fun findByFagsystemAndEksternFagsakId(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak?
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
@@ -34,14 +35,14 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
     }
 
     @Transactional
-    fun oppdaterBehandlingsvedtak(behandlingId: UUID, iverksettingsstatus: Iverksettingsstatus) {
+    fun oppdaterBehandlingsvedtak(behandlingId: UUID, iverksettingsstatus: Iverksettingsstatus): Behandling {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val aktivBehandlingsresultat = requireNotNull(behandling.sisteResultat) { "Behandlingsresultat kan ikke være null" }
         val behandlingsvedtak =
                 requireNotNull(aktivBehandlingsresultat.behandlingsvedtak) { "Behandlingsvedtak kan ikke være null" }
         val oppdatertBehandlingsresultat = aktivBehandlingsresultat
                 .copy(behandlingsvedtak = behandlingsvedtak.copy(iverksettingsstatus = iverksettingsstatus))
-        behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
+        return behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
     }
 
     private fun utledBehandlingsresultatstype(vedtaksresultat: Vedtaksresultat): Behandlingsresultatstype {

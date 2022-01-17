@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -10,13 +12,17 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-class OppgaveTaskService(private val taskRepository: TaskRepository) {
+class OppgaveTaskService(private val taskRepository: TaskRepository,
+                         private val fagsakRepository: FagsakRepository) {
 
     @Transactional
     fun opprettOppgaveTask(behandlingId: UUID, oppgavetype: Oppgavetype, saksbehandler: String? = null) {
-        val properties = Properties()
-        properties.setProperty("oppgavetype", oppgavetype.name)
-        saksbehandler?.let { properties.setProperty("saksbehandler", it) }
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+        val properties = Properties().apply {
+            setProperty("oppgavetype", oppgavetype.name)
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+            saksbehandler?.let { setProperty("saksbehandler", it) }
+        }
         taskRepository.save(Task(type = LagOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
@@ -24,9 +30,12 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
     fun ferdigstilleOppgaveTask(behandlingId: UUID, oppgavetype: String? = null) {
-        val properties = Properties()
-        if (!oppgavetype.isNullOrEmpty()) {
-            properties.setProperty("oppgavetype", oppgavetype)
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+        val properties = Properties().apply {
+            if (!oppgavetype.isNullOrEmpty()) {
+                setProperty("oppgavetype", oppgavetype)
+            }
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
         }
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
@@ -35,7 +44,9 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
     fun oppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate) {
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         val properties = Properties().apply {
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("beskrivelse", beskrivelse)
             setProperty("frist", frist.toString())
         }
@@ -45,10 +56,10 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
     }
 
     @Transactional
-    fun oppdaterEnhetOppgaveTask(behandlingId: UUID,
-                                 beskrivelse: String,
-                                 enhetId: String) {
+    fun oppdaterEnhetOppgaveTask(behandlingId: UUID, beskrivelse: String, enhetId: String) {
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
         val properties = Properties().apply {
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("beskrivelse", beskrivelse)
             setProperty("enhetId", enhetId)
         }
@@ -59,7 +70,8 @@ class OppgaveTaskService(private val taskRepository: TaskRepository) {
 
     @Transactional
     fun oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId: UUID) {
-        val properties = Properties()
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+        val properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
         taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))

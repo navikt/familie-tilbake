@@ -38,7 +38,7 @@ class HentFagsystemsbehandlingTask(private val håndterGamleKravgrunnlagService:
         logger.info("Oppretter HåndterGammelKravgrunnlagTask for mottattXmlId=${task.payload}")
         taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE,
                               payload = task.payload,
-                              triggerTid = LocalDateTime.now().plusSeconds(60)))
+                              properties = task.metadata).medTriggerTid(LocalDateTime.now().plusSeconds(60)))
     }
 
 
