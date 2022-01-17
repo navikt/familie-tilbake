@@ -15,9 +15,9 @@ object Constants {
 
     private val brukersSvarfrist: Period = Period.ofWeeks(3)
 
-    fun brukersSvarfrist() = LocalDate.now().plus(brukersSvarfrist)
+    fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
 
-    fun saksbehandlersTidsfrist() = brukersSvarfrist().plusDays(1)
+    fun saksbehandlersTidsfrist(): LocalDate = brukersSvarfrist().plusDays(1)
 
     const val kravgrunnlagXmlRootElement: String = "urn:detaljertKravgrunnlagMelding"
 
@@ -45,3 +45,7 @@ object Constants {
 
 }
 
+object PropertyName {
+
+    const val FAGSYSTEM = "fagsystem"
+}

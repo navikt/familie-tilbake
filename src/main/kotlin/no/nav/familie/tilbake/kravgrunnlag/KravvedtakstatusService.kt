@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -56,13 +57,13 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                              vedtakId = vedtakId)
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
             mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
-            tellerService.tellUkobletStatusmelding(ytelsestype)
+            tellerService.tellUkobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
             return
         }
         val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling)
         mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
-        tellerService.tellKobletStatusmelding(ytelsestype)
+        tellerService.tellKobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
     }
 
     private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {

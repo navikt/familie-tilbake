@@ -8,6 +8,8 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.avstemming.AvstemmingService
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
 import no.nav.familie.tilbake.avstemming.domain.AvstemmingsfilRepository
+import no.nav.familie.tilbake.common.fagsystem
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -15,21 +17,22 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Properties
 import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = AvstemmingTask.TYPE,
                      beskrivelse = "Avstemming av krav.")
-class AvstemmingTask(val taskService: TaskService,
-                     val avstemmingService: AvstemmingService,
-                     val avstemmingsfilRepository: AvstemmingsfilRepository,
-                     val integrasjonerClient: IntegrasjonerClient,
-                     val environment: Environment) : AsyncTaskStep {
+class AvstemmingTask(private val taskService: TaskService,
+                     private val avstemmingService: AvstemmingService,
+                     private val avstemmingsfilRepository: AvstemmingsfilRepository,
+                     private val integrasjonerClient: IntegrasjonerClient,
+                     private val environment: Environment) : AsyncTaskStep {
 
-    val applikasjon = "familie-tilbake"
+    private val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
 
-    val miljø = if (environment.activeProfiles.contains("prod")) "p" else "q"
+    private val miljø = if (environment.activeProfiles.contains("prod")) "p" else "q"
 
     override fun doTask(task: Task) {
         val dato = LocalDate.parse(task.payload)
@@ -48,12 +51,13 @@ class AvstemmingTask(val taskService: TaskService,
     }
 
     override fun onCompletion(task: Task) {
-        if (environment.activeProfiles.contains("e2e")) return;
+        if (environment.activeProfiles.contains("e2e")) return
 
         val dato = LocalDate.parse(task.payload)
         val nesteAvstemming = Task(type = TYPE,
                                    payload = dato.plusDays(1).toString(),
-                                   triggerTid = dato.plusDays(2).atTime(8, 0))
+                                   properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) })
+                .medTriggerTid(dato.plusDays(2).atTime(8, 0))
         taskService.save(nesteAvstemming)
     }
 

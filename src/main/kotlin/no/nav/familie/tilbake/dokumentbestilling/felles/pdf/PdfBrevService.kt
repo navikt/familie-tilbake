@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHeader
@@ -55,7 +56,7 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         val idString = behandling.id.toString()
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
-            setProperty("fagsystem", fagsak.fagsystem.name)
+            setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
             setProperty("dokumentId", dokumentreferanse.dokumentId)
             setProperty("mottager", brevdata.mottager.name)
             setProperty("brevtype", brevtype.name)

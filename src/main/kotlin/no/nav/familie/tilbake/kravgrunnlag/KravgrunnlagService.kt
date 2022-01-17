@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -13,6 +14,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -54,10 +56,11 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
+        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
         if (behandling == null) {
             arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
-            tellerService.tellUkobletKravgrunnlag(ytelsestype)
+            tellerService.tellUkobletKravgrunnlag(fagsystem)
             return
         }
         // mapper grunnlag til Kravgrunnlag431
@@ -94,7 +97,9 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             }
         }
         stegService.håndterSteg(behandling.id)
-        tellerService.tellKobletKravgrunnlag(ytelsestype)
+        tellerService.
+
+        tellKobletKravgrunnlag(fagsystem)
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
@@ -140,6 +145,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                   setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
                                   setProperty("ytelsestype", ytelsestype.name)
                                   setProperty("eksternId", kravgrunnlag431.referanse)
+                                  setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
                               }))
     }
 

@@ -24,10 +24,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Vilkårsvurderingssteg(val behandlingskontrollService: BehandlingskontrollService,
-                            val vilkårsvurderingService: VilkårsvurderingService,
-                            val foreldelseService: ForeldelseService,
-                            val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Vilkårsvurderingssteg(private val behandlingskontrollService: BehandlingskontrollService,
+                            private val vilkårsvurderingService: VilkårsvurderingService,
+                            private val foreldelseService: ForeldelseService,
+                            private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

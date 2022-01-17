@@ -21,7 +21,7 @@ import java.util.UUID
                      maxAntallFeil = 3,
                      beskrivelse = "Lagrer brev",
                      triggerTidVedFeilISekunder = 60 * 5L)
-class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
+class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
                            private val taskService: TaskService,
                            private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {
 
@@ -56,7 +56,7 @@ class LagreBrevsporingTask(val brevsporingService: BrevsporingService,
         // Behandling bør avsluttes etter å sende vedtaksbrev
         // AvsluttBehandlingTask må kalles kun en gang selv om behandling har verge
         if (brevtype == Brevtype.VEDTAK && mottager == Brevmottager.BRUKER) {
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload))
+            taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata))
         }
     }
 

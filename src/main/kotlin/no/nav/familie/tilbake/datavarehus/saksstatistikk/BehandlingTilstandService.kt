@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -49,8 +51,11 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         val task = Task(SendSakshendelseTilDvhTask.TASK_TYPE,
                         behandlingId.toString(),
                         Properties().apply {
-                            put("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
-                            put("beskrivelse", hendelsesbeskrivelse)
+                            setProperty("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
+                            setProperty("beskrivelse", hendelsesbeskrivelse)
+                            setProperty(PropertyName.FAGSYSTEM,
+                                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name)
+
                         })
         taskService.save(task)
     }

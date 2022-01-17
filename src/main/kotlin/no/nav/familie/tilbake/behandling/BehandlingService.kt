@@ -35,6 +35,7 @@ import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -92,7 +93,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
                         .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet) {
             val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
-                                      payload = behandling.id.toString())
+                                      payload = behandling.id.toString(),
+                                      properties = Properties().apply {
+                                          setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
+                                      })
             taskRepository.save(sendVarselbrev)
         }
 
@@ -106,6 +110,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
             setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.name)
             setProperty("eksternId", opprettManueltTilbakekrevingRequest.eksternId)
+            setProperty(PropertyName.FAGSYSTEM,
+                        FagsystemUtil.hentFagsystemFraYtelsestype(opprettManueltTilbakekrevingRequest.ytelsestype).name)
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
         }
         taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE,
@@ -127,6 +133,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val revurdering = BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype)
         behandlingRepository.insert(revurdering)
 
+        val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkTaskService.lagHistorikkTask(revurdering.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
                                               Aktør.SAKSBEHANDLER)
@@ -135,7 +142,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.håndterSteg(revurdering.id)
 
         // kjør HentKravgrunnlagTask for å hente kravgrunnlag på nytt fra økonomi
-        taskRepository.save(Task(type = HentKravgrunnlagTask.TYPE, payload = revurdering.id.toString()))
+        taskRepository.save(Task(type = HentKravgrunnlagTask.TYPE,
+                                 payload = revurdering.id.toString(),
+                                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(revurdering.id, Oppgavetype.BehandleSak)
@@ -204,7 +213,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         historikkTaskService.lagHistorikkTask(behandling.id,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                              Aktør.SAKSBEHANDLER)
+                                              Aktør.SAKSBEHANDLER
+        )
 
         stegService.gjenopptaSteg(behandlingId)
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
@@ -241,6 +251,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
+        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+
 
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
@@ -253,7 +265,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                               beskrivelse = fjernNewlinesFraString(henleggelsesbrevFritekstDto.begrunnelse))
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId, henleggelsesbrevFritekstDto.fritekst))
+            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId,
+                                                                     fagsystem,
+                                                                     henleggelsesbrevFritekstDto.fritekst))
         }
 
         // Ferdigstill oppgave
@@ -305,10 +319,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun byttBehandlendeEnhet(behandlingId: UUID, byttEnhetDto: ByttEnhetDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        if (fagsak.fagsystem != Fagsystem.BA) {
-            throw Feil(message = "Ikke implementert for fagsystem ${fagsak.fagsystem}",
-                       frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsak.fagsystem.navn}")
+        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        if (fagsystem != Fagsystem.BA) {
+            throw Feil(message = "Ikke implementert for fagsystem $fagsystem",
+                       frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsystem.navn}")
         }
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
         behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
@@ -357,7 +371,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.håndterSteg(behandling.id)
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
-        taskRepository.save(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandling.id.toString()))
+        taskRepository.save(Task(type = FinnKravgrunnlagTask.TYPE,
+                                 payload = behandling.id.toString(),
+                                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         return behandling
     }

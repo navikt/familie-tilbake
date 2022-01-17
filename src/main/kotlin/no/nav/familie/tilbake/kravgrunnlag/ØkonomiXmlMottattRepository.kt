@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattIdOgYtelse
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -32,7 +33,7 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
 
     // language=PostgreSQL
     @Query(""" 
-        SELECT oko.id
+        SELECT oko.id, oko.ytelsestype
         FROM okonomi_xml_mottatt oko
         WHERE CASE (ytelsestype)
                     WHEN 'BARNETRYGD' THEN opprettet_tid < :barnetrygdBestemtDato
@@ -46,6 +47,6 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
                                         barnetilsynBestemtDato: LocalDate,
                                         overgangsstonadbestemtdato: LocalDate,
                                         skolePengerBestemtDato: LocalDate,
-                                        kontantstottebestemtdato: LocalDate): List<UUID>
+                                        kontantstottebestemtdato: LocalDate): List<ØkonomiXmlMottattIdOgYtelse>
 
 }

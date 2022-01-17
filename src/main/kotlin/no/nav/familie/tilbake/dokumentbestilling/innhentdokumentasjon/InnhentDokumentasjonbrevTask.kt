@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -11,11 +11,13 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -39,7 +41,8 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling.ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
+                                               beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
+                                                       .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
                                                frist = fristTid)
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
@@ -53,10 +56,12 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
     companion object {
 
         fun opprettTask(behandlingId: UUID,
+                        fagsystem: Fagsystem,
                         fritekst: String): Task =
                 Task(type = TYPE,
                      payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
-                     triggerTid = LocalDateTime.now().plusSeconds(15))
+                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) })
+                        .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "brev.sendInnhentDokumentasjon"
     }

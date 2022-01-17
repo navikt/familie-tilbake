@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.micrometer
 
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Tags
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -23,36 +23,36 @@ import java.time.LocalDate
 class TellerService(private val fagsakRepository: FagsakRepository,
                     private val meldingstellingRepository: MeldingstellingRepository) {
 
-    fun tellKobletKravgrunnlag(ytelsestype: Ytelsestype) =
-            tellMelding(ytelsestype, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
+    fun tellKobletKravgrunnlag(fagsystem: Fagsystem) =
+            tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
 
-    fun tellUkobletKravgrunnlag(ytelsestype: Ytelsestype) =
-            tellMelding(ytelsestype, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
+    fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) =
+            tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
 
-    fun tellKobletStatusmelding(ytelsestype: Ytelsestype) =
-            tellMelding(ytelsestype, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
+    fun tellKobletStatusmelding(fagsystem: Fagsystem) =
+            tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
 
-    fun tellUkobletStatusmelding(ytelsestype: Ytelsestype) =
-            tellMelding(ytelsestype, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
+    fun tellUkobletStatusmelding(fagsystem: Fagsystem) =
+            tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
 
-    fun tellMelding(ytelsestype: Ytelsestype, type: Meldingstype, status: Mottaksstatus) {
+    fun tellMelding(fagsystem: Fagsystem, type: Meldingstype, status: Mottaksstatus) {
 
-        val meldingstelling = meldingstellingRepository.findByYtelsestypeAndAndTypeAndStatusAndDato(ytelsestype,
-                                                                                                    type,
-                                                                                                    status,
-                                                                                                    LocalDate.now())
+        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(fagsystem,
+                                                                                               type,
+                                                                                               status,
+                                                                                               LocalDate.now())
         if (meldingstelling == null) {
-            meldingstellingRepository.insert(Meldingstelling(ytelsestype = ytelsestype,
+            meldingstellingRepository.insert(Meldingstelling(fagsystem = fagsystem,
                                                              type = type,
                                                              status = status))
         } else {
-            meldingstellingRepository.oppdaterTeller(ytelsestype, type, status)
+            meldingstellingRepository.oppdaterTeller(fagsystem, type, status)
         }
     }
 
     fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
         Metrics.counter("Brevteller",
-                        Tags.of("ytelse", fagsak.ytelsestype.kode,
+                        Tags.of("ytelse", fagsak.fagsystem.name,
                                 "brevtype", brevtype.name)).increment()
     }
 
@@ -62,7 +62,7 @@ class TellerService(private val fagsakRepository: FagsakRepository,
             Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
 
         Metrics.counter("Vedtaksteller",
-                        Tags.of("ytelse", fagsak.ytelsestype.kode,
+                        Tags.of("ytelse", fagsak.fagsystem.name,
                                 "vedtakstype", vedtakstype)).increment()
     }
 
