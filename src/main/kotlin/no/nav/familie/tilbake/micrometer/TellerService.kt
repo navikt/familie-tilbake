@@ -52,7 +52,7 @@ class TellerService(private val fagsakRepository: FagsakRepository,
 
     fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
         Metrics.counter("Brevteller",
-                        Tags.of("ytelse", fagsak.fagsystem.name,
+                        Tags.of("fagsystem", fagsak.fagsystem.name,
                                 "brevtype", brevtype.name)).increment()
     }
 
@@ -62,7 +62,7 @@ class TellerService(private val fagsakRepository: FagsakRepository,
             Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
 
         Metrics.counter("Vedtaksteller",
-                        Tags.of("ytelse", fagsak.fagsystem.name,
+                        Tags.of("fagsystem", fagsak.fagsystem.name,
                                 "vedtakstype", vedtakstype)).increment()
     }
 
