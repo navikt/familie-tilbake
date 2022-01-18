@@ -70,7 +70,7 @@ data class Kravgrunnlagsperiode432(@Id
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(periode, månedligSkattebeløp, beløp)
+        return Objects.hash(id, periode, månedligSkattebeløp, beløp)
     }
 }
 
