@@ -60,17 +60,13 @@ data class Kravgrunnlagsperiode432(@Id
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                    val sporbar: Sporbar = Sporbar()) {
 
-    override fun equals(other: Any?): Boolean {
+    fun harIdentiskKravgrunnlagsperiode(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val that = other as Kravgrunnlagsperiode432
         return this.månedligSkattebeløp == that.månedligSkattebeløp &&
                this.periode == that.periode &&
                this.beløp == that.beløp
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(id, periode, månedligSkattebeløp, beløp)
     }
 }
 

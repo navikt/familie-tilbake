@@ -245,7 +245,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                                    setOf(lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
                                          lagFeilBeløp(BigDecimal.valueOf(10000))))
         val grunnlagPeriode1: Kravgrunnlagsperiode432 =
-                lagGrunnlagPeriode(periode1, 1000,
+                lagGrunnlagPeriode(periode1,
+                                   1000,
                                    setOf(lagYtelBeløp(BigDecimal.valueOf(10000),
                                                       BigDecimal.valueOf(10)),
                                          lagFeilBeløp(BigDecimal.valueOf(10000))))

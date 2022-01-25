@@ -178,7 +178,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         var erIdentiskKravgrunnlag = harSammeAntallPerioder
         if (harSammeAntallPerioder) {
             for (i in perioderIEndretKravgrunnlag.indices step 1) {
-                if (perioderIEndretKravgrunnlag[i] != perioderIForrigeKravgrunnlag[i]) {
+                if (!perioderIEndretKravgrunnlag[i].harIdentiskKravgrunnlagsperiode(perioderIForrigeKravgrunnlag[i])) {
                     erIdentiskKravgrunnlag = false
                 }
             }
