@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.TotrinnsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.totrinn.TotrinnService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -26,7 +27,7 @@ class TotrinnController(private val totrinnService: TotrinnService) {
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter totrinnsvurderinger for en gitt behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentTotrinnsvurderinger(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<TotrinnsvurderingDto> {
         return Ressurs.success(totrinnService.hentTotrinnsvurderinger(behandlingId))
     }

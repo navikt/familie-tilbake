@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.Avsnitt
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -82,7 +83,7 @@ class DokumentController(private val varselbrevService: VarselbrevService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter vedtaksbrevtekst",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
     }

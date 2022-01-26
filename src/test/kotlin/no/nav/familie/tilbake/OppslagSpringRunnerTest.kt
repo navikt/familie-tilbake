@@ -39,6 +39,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,6 +50,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
+import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -65,6 +67,7 @@ abstract class OppslagSpringRunnerTest {
     private val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
+    protected val headers = HttpHeaders()
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
@@ -74,6 +77,9 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired
     private lateinit var cacheManager: CacheManager
+
+    @Autowired
+    private lateinit var mockOAuth2Server: MockOAuth2Server
 
     @LocalServerPort
     private var port: Int? = 0
@@ -85,6 +91,13 @@ abstract class OppslagSpringRunnerTest {
         resetDatabase()
         clearCaches()
         resetWiremockServers()
+    }
+
+    protected fun lokalTestToken(): String = mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost").serialize()
+
+
+    protected fun localhost(uri: String): String {
+        return LOCALHOST + getPort() + uri
     }
 
     fun readXml(fileName: String): String {

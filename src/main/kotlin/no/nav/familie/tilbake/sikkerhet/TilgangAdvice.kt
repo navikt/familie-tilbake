@@ -1,9 +1,12 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsystemUtil
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -16,14 +19,21 @@ import org.aspectj.lang.annotation.Before
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.lang.reflect.Field
 import java.util.UUID
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 
+enum class HenteParam {
+    BEHANDLING_ID,
+    YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
+    FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
+    MOTTATT_XML_ID,
+    INGEN
+}
 
 @Aspect
 @Configuration
@@ -33,11 +43,11 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                     val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                     val integrasjonerClient: IntegrasjonerClient) {
 
-    private val behandlingIdParam = "behandlingId"
-    private val ytelsestypeParam = "ytelsestype"
-    private val fagsystemParam = "fagsystem"
-    private val eksternBrukIdParam = "eksternBrukId"
-    private val mottattXmlIdParam = "mottattXmlId"
+    private val feltnavnFagsystem = "fagsystem"
+    private val feltnavnYtelsestype = "ytelsestype"
+    private val feltnavnBehandlingId = "behandlingId"
+    private val feltnavnEksternBrukId = "eksternBrukId"
+    private val feltnavnEksternFagsakId = "eksternFagsakId"
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -46,76 +56,69 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         val minimumBehandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
         val handling = rolletilgangssjekk.handling
 
-        val brukerRolleOgFagsystemstilgang =
-                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
-
         val httpRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
 
-        if (HttpMethod.GET.matches(httpRequest.method) || rolletilgangssjekk.henteParam != "") {
+        if (HttpMethod.GET.matches(httpRequest.method) || rolletilgangssjekk.henteParam != HenteParam.INGEN) {
             validateFagsystemTilgangIGetRequest(rolletilgangssjekk.henteParam,
                                                 joinpoint.args,
-                                                brukerRolleOgFagsystemstilgang,
                                                 minimumBehandlerRolle,
                                                 handling)
         } else if (HttpMethod.POST.matches(httpRequest.method) || HttpMethod.PUT.matches(httpRequest.method)) {
             validateFagsystemTilgangIPostRequest(joinpoint.args[0],
-                                                 brukerRolleOgFagsystemstilgang,
                                                  minimumBehandlerRolle,
                                                  handling)
         } else {
-            logger.warn("${httpRequest.requestURI} støtter ikke tilgangssjekk")
+            logger.error("${httpRequest.requestURI} støtter ikke tilgangssjekk")
         }
-
     }
 
-    private fun validateFagsystemTilgangIGetRequest(param: String,
+    private fun validateFagsystemTilgangIGetRequest(param: HenteParam,
                                                     requestBody: Array<Any>,
-                                                    brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                                     minimumBehandlerRolle: Behandlerrolle,
                                                     handling: String) {
         when (param) {
-            behandlingIdParam -> {
+            HenteParam.BEHANDLING_ID -> {
                 val behandlingId = requestBody.first() as UUID
-                val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
-                val personerIBehandlingen = hentPersonerIBehandlingen(behandlingId)
+                val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
                 var behandlerRolle = minimumBehandlerRolle
                 if (requestBody.size > 1) {
                     behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody[1], minimumBehandlerRolle)
                 }
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                validate(fagsystem = fagsak.fagsystem,
                          minimumBehandlerRolle = behandlerRolle,
-                         personerIBehandlingen = personerIBehandlingen,
+                         fagsak = fagsak,
                          handling = handling)
 
             }
-            ytelsestypeParam -> {
+            HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
-                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
+                val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+                val eksternFagsakId = requestBody[1].toString()
+                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
 
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
-            }
-            fagsystemParam -> {
-                val fagsystem = Tilgangskontrollsfagsystem.fraKode(requestBody.first().toString())
-
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
-            }
-            eksternBrukIdParam -> {
-                val eksternBrukId = requestBody.first() as UUID
-                val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
-                val personerIBehandlingen = hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId)
-
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = personerIBehandlingen,
+                validate(fagsystem = fagsystem,
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = fagsak,
                          handling = handling)
             }
-            mottattXmlIdParam -> {
+            HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID -> {
+                val fagsystem = Fagsystem.valueOf(requestBody.first().toString())
+                val eksternFagsakId = requestBody[1].toString()
+                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+
+                validate(fagsystem = fagsystem,
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = fagsak,
+                         handling = handling)
+            }
+            HenteParam.MOTTATT_XML_ID -> {
                 val mottattXmlId = requestBody.first() as UUID
                 val økonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(mottattXmlId)
-                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(økonomiXmlMottatt.ytelsestype)
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(), handling = handling)
+
+                validate(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype),
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = null,
+                         handling = handling)
             }
             else -> {
                 kastTilgangssjekkException(handling)
@@ -124,43 +127,62 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
     }
 
     private fun validateFagsystemTilgangIPostRequest(requestBody: Any,
-                                                     brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
                                                      minimumBehandlerRolle: Behandlerrolle,
                                                      handling: String) {
-        val ytelsestypeFinnesIRequest = requestBody.javaClass.declaredFields.any { "ytelsestype" == it.name }
-        val behandlingIdFinnesIRequest = requestBody.javaClass.declaredFields.any { "behandlingId" == it.name }
-        val eksternBrukIdFinnesIRequest = requestBody.javaClass.declaredFields.any { "eksternBrukId" == it.name }
+        val fields: Collection<KProperty1<out Any, *>> = requestBody::class.declaredMemberProperties
+
+        val ytelsestypeFraRequest: KProperty1<out Any, *>? = fields.find { feltnavnYtelsestype == it.name }
+        val fagsystemFraRequest = fields.find { feltnavnFagsystem == it.name }
+        val behandlingIdFraRequest = fields.find { feltnavnBehandlingId == it.name }
+        val eksternBrukIdFraRequest = fields.find { feltnavnEksternBrukId == it.name }
+        val eksternFagsakIdFraRequest = fields.find { feltnavnEksternFagsakId == it.name }
 
         when {
-            ytelsestypeFinnesIRequest -> {
-                val felt = hentFelt(feltNavn = ytelsestypeParam, requestBody = requestBody)
-                val ytelsestype = Ytelsestype.valueOf(felt.get(requestBody).toString())
-                val fagsystem = Tilgangskontrollsfagsystem.fraYtelsestype(ytelsestype)
+            behandlingIdFraRequest != null -> {
+                val behandlingId: UUID = behandlingIdFraRequest.getter.call(requestBody) as UUID
+                val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
 
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
-                         minimumBehandlerRolle = minimumBehandlerRolle, personerIBehandlingen = emptyList(),
+                validate(fagsystem = fagsak.fagsystem,
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = fagsak,
                          handling = handling)
             }
-            behandlingIdFinnesIRequest -> {
-                val felt = hentFelt(feltNavn = behandlingIdParam, requestBody = requestBody)
-                val behandlingId: UUID = felt.get(requestBody) as UUID
-                val fagsystem = hentFagsystemAvBehandlingId(behandlingId)
-                val personerIBehandlingen = hentPersonerIBehandlingen(behandlingId)
+            eksternBrukIdFraRequest != null -> {
+                val eksternBrukId: UUID = eksternBrukIdFraRequest.getter.call(requestBody) as UUID
+                val fagsak = fagsakRepository.finnFagsakForEksternBrukId(eksternBrukId)
 
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                validate(fagsystem = fagsak.fagsystem,
                          minimumBehandlerRolle = minimumBehandlerRolle,
-                         personerIBehandlingen = personerIBehandlingen,
+                         fagsak = fagsak,
                          handling = handling)
             }
-            eksternBrukIdFinnesIRequest -> {
-                val felt = hentFelt(feltNavn = eksternBrukIdParam, requestBody = requestBody)
-                val eksternBrukId: UUID = felt.get(requestBody) as UUID
-                val fagsystem = hentFagsystemAvEksternBrukId(eksternBrukId)
-                val personerIBehandlingen = hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId)
+            fagsystemFraRequest != null && eksternFagsakIdFraRequest != null -> {
+                val fagsystem = fagsystemFraRequest.getter.call(requestBody) as Fagsystem
+                val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
+                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
 
-                validate(fagsystem = fagsystem, brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
+                validate(fagsystem = fagsystem,
                          minimumBehandlerRolle = minimumBehandlerRolle,
-                         personerIBehandlingen = personerIBehandlingen,
+                         fagsak = fagsak,
+                         handling = handling)
+            }
+            ytelsestypeFraRequest != null && eksternFagsakIdFraRequest != null -> {
+                val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
+                val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+                val eksternFagsakId = eksternFagsakIdFraRequest.getter.call(requestBody).toString()
+                val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
+
+                validate(fagsystem = fagsystem,
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = fagsak,
+                         handling = handling)
+            }
+            ytelsestypeFraRequest != null -> {
+                val ytelsestype = Ytelsestype.valueOf(ytelsestypeFraRequest.getter.call(requestBody).toString())
+
+                validate(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+                         minimumBehandlerRolle = minimumBehandlerRolle,
+                         fagsak = null,
                          handling = handling)
             }
             else -> {
@@ -169,41 +191,14 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
         }
     }
 
-    private fun hentFelt(feltNavn: String, requestBody: Any): Field {
-        val felt = requestBody.javaClass.declaredFields.filter { it.name == feltNavn }[0]
-        felt.isAccessible = true
-        return felt
-    }
-
-    private fun hentFagsystemAvBehandlingId(behandlingId: UUID): Tilgangskontrollsfagsystem {
-        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
-                         ?: throw Feil(message = "Behandling finnes ikke for $behandlingId", httpStatus = HttpStatus.BAD_REQUEST)
-        return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
-    }
-
-    private fun hentPersonerIBehandlingen(behandlingId: UUID): List<String> {
-        val behandling = behandlingRepository.findByIdOrNull(behandlingId)
-                         ?: throw Feil(message = "Behandling finnes ikke for $behandlingId", httpStatus = HttpStatus.BAD_REQUEST)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        return listOf(fagsak.bruker.ident)
-    }
-
-    private fun hentPersonerIBehandlingenBasertPåEksternBrukId(eksternBrukId: UUID): List<String> {
-        val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        return listOf(fagsak.bruker.ident)
-    }
-
-    private fun hentFagsystemAvEksternBrukId(eksternBrukId: UUID): Tilgangskontrollsfagsystem {
-        val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
-        return Tilgangskontrollsfagsystem.fraFagsystem(fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem)
-    }
-
-    private fun validate(fagsystem: Tilgangskontrollsfagsystem,
-                         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
+    private fun validate(fagsystem: Fagsystem,
                          minimumBehandlerRolle: Behandlerrolle,
-                         personerIBehandlingen: List<String>,
+                         fagsak: Fagsak?,
                          handling: String) {
+
+        val brukerRolleOgFagsystemstilgang =
+                ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
+
         // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
         if (brukerRolleOgFagsystemstilgang.tilganger.contains(Tilgangskontrollsfagsystem.SYSTEM_TILGANG)) {
             return
@@ -215,21 +210,25 @@ class TilgangAdvice(val rolleConfig: RolleConfig,
                                      handling = handling)
             return
         }
+        val tilgangskontrollsfagsystem = Tilgangskontrollsfagsystem.fraFagsystem(fagsystem)
         // sjekk om saksbehandler har riktig gruppe å aksessere denne ytelsestypen
-        validateFagsystem(fagsystem, brukerRolleOgFagsystemstilgang, handling)
+        validateFagsystem(tilgangskontrollsfagsystem, brukerRolleOgFagsystemstilgang, handling)
 
         // sjekk om saksbehandler har riktig rolle å aksessere denne ytelsestypen
-        validateRolle(brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(fagsystem),
+        validateRolle(brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
                       minimumBehandlerRolle = minimumBehandlerRolle,
                       handling = handling)
 
-        validateEgenAnsattKode6Kode7(personerIBehandlingen = personerIBehandlingen,
+        validateEgenAnsattKode6Kode7(fagsak = fagsak,
                                      handling = handling)
+
+//        logTilgangTilPerson()
     }
 
-    private fun validateEgenAnsattKode6Kode7(personerIBehandlingen: List<String>,
+    private fun validateEgenAnsattKode6Kode7(fagsak: Fagsak?,
                                              handling: String) {
 
+        val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: listOf()
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
         if (tilganger.any { !it.harTilgang }) {
             throw Feil(message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",

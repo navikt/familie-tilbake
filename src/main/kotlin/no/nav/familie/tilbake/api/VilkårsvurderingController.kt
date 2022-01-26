@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -26,7 +27,7 @@ class VilkårsvurderingController(val vilkårsvurderingService: Vilkårsvurderin
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter vilkårsvurdering for en gitt behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentVurdertVilkårsvurdering(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VurdertVilkårsvurderingDto> {
         return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
     }

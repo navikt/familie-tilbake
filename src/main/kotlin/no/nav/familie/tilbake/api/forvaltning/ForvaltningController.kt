@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -32,7 +33,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun korrigerKravgrunnlag(@PathVariable behandlingId: UUID,
                              @PathVariable kravgrunnlagId: BigInteger): Ressurs<String> {
         forvaltningService.korrigerKravgrunnlag(behandlingId, kravgrunnlagId)
@@ -44,7 +45,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Arkiverer mottatt kravgrunnlag",
-                        henteParam = "mottattXmlId")
+                        henteParam = HenteParam.MOTTATT_XML_ID)
     fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")
@@ -55,7 +56,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Tving henlegger behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.tvingHenleggBehandling(behandlingId)
         return Ressurs.success("OK")
@@ -77,7 +78,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.FORVALTER,
                         handling = "Flytter behandling tilbake til Fakta",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun flyttBehandlingTilFakta(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
         return Ressurs.success("OK")

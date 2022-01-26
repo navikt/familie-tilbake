@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -27,7 +28,7 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter fakta om feilutbetaling for en gitt behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentFaktaomfeilutbetaling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }

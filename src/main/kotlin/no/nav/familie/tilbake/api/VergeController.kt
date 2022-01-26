@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.VergeService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -27,7 +28,7 @@ class VergeController(private val vergeService: VergeService) {
     @PostMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Oppretter verge steg på behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun opprettVergeSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.opprettVergeSteg(behandlingId)
         return Ressurs.success("OK")
@@ -37,7 +38,7 @@ class VergeController(private val vergeService: VergeService) {
     @PutMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Deaktiverer ev. eksisterende verge.",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun fjernVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.fjernVerge(behandlingId)
         return Ressurs.success("OK")
@@ -47,7 +48,7 @@ class VergeController(private val vergeService: VergeService) {
     @GetMapping
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter verge informasjon",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))
     }

@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -26,7 +27,7 @@ class ForeldelseController(val foreldelseService: ForeldelseService) {
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter foreldelsesinformasjon for en gitt behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentVurdertForeldelse(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VurdertForeldelseDto> {
         return Ressurs.success(foreldelseService.hentVurdertForeldelse(behandlingId))
     }

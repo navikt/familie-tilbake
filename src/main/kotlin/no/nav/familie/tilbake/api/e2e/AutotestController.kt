@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile
@@ -69,7 +70,7 @@ class AutotestController(private val taskRepository: TaskRepository,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "endre ansvarlig saksbehandler",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun endreAnsvarligSaksbehandler(@PathVariable behandlingId: UUID,
                                     @PathVariable nyAnsvarligSaksbehandler: String): Ressurs<String> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

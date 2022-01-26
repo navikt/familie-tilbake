@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -72,7 +73,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter tilbakekrevingsbehandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentBehandling(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BehandlingDto> {
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
     }
@@ -83,7 +84,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     // Rollen blir endret til BESLUTTER i Tilgangskontroll for FatteVedtak steg
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
@@ -97,7 +98,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Setter saksbehandler behandling på vent eller utvider fristen",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun settBehandlingPåVent(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto): Ressurs<String> {
         behandlingService.settBehandlingPåVent(behandlingId, behandlingPåVentDto)
@@ -109,7 +110,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         behandlingService.taBehandlingAvvent(behandlingId)
         return Ressurs.success("OK")
@@ -120,7 +121,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Saksbehandler henlegger behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
                           @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String> {
         behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
@@ -132,7 +133,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Saksbehandler bytter enhet på behandling",
-                        henteParam = "behandlingId")
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun byttEnhet(@PathVariable("behandlingId") behandlingId: UUID,
                   @Valid @RequestBody byttEnhetDto: ByttEnhetDto): Ressurs<String> {
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
