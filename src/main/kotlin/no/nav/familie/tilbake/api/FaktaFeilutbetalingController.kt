@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
@@ -26,9 +27,10 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
     @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(path = ["/behandling/{behandlingId}/fakta/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Henter fakta om feilutbetaling for en gitt behandling",
-                        henteParam = HenteParam.BEHANDLING_ID)
+    @Rolletilgangssjekk(Behandlerrolle.VEILEDER,
+                        "Henter fakta om feilutbetaling for en gitt behandling",
+                        AuditLoggerEvent.ACCESS,
+                        HenteParam.BEHANDLING_ID)
     fun hentFaktaomfeilutbetaling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }

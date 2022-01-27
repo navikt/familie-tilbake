@@ -24,8 +24,8 @@ data class Sporingsdata(val event: AuditLoggerEvent,
 enum class AuditLoggerEvent(val type: String) {
     CREATE("create"),
     UPDATE("update"),
-    DELETE("delete"),
-    ACCESS("access")
+    ACCESS("access"),
+    NONE("Not logged")
 }
 
 data class CustomKeyValue(val key: String, val value: String)
