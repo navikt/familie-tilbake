@@ -57,9 +57,6 @@ spec:
       rules:
         - application: familie-ba-sak
           namespace: teamfamilie
-          cluster: dev-fss
-        - application: familie-ba-sak
-          namespace: teamfamilie
           cluster: dev-gcp
         - application: familie-ef-sak
           namespace: teamfamilie

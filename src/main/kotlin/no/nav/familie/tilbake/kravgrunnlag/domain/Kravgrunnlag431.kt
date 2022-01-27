@@ -11,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
+import java.util.Objects
 import java.util.UUID
 
 data class Kravgrunnlag431(@Id
@@ -57,7 +58,17 @@ data class Kravgrunnlagsperiode432(@Id
                                    @Version
                                    val versjon: Long = 0,
                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                   val sporbar: Sporbar = Sporbar())
+                                   val sporbar: Sporbar = Sporbar()) {
+
+    fun harIdentiskKravgrunnlagsperiode(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as Kravgrunnlagsperiode432
+        return this.månedligSkattebeløp == that.månedligSkattebeløp &&
+               this.periode == that.periode &&
+               this.beløp == that.beløp
+    }
+}
 
 
 @Table("kravgrunnlagsbelop433")
@@ -81,7 +92,37 @@ data class Kravgrunnlagsbeløp433(@Id
                                  @Version
                                  val versjon: Long = 0,
                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                 val sporbar: Sporbar = Sporbar())
+                                 val sporbar: Sporbar = Sporbar()) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as Kravgrunnlagsbeløp433
+        return this.klassekode == that.klassekode &&
+               this.klassetype == that.klassetype &&
+               this.nyttBeløp == that.nyttBeløp &&
+               this.opprinneligUtbetalingsbeløp == that.opprinneligUtbetalingsbeløp &&
+               this.uinnkrevdBeløp == that.uinnkrevdBeløp &&
+               this.tilbakekrevesBeløp == that.tilbakekrevesBeløp &&
+               this.resultatkode == that.resultatkode &&
+               this.skatteprosent == that.skatteprosent &&
+               this.skyldkode == that.skyldkode &&
+               this.årsakskode == that.årsakskode
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(klassekode,
+                            klassetype,
+                            nyttBeløp,
+                            opprinneligUtbetalingsbeløp,
+                            uinnkrevdBeløp,
+                            tilbakekrevesBeløp,
+                            resultatkode,
+                            skatteprosent,
+                            skyldkode,
+                            årsakskode)
+    }
+}
 
 enum class Klassekode(val aktivitet: String) {
     KL_KODE_FEIL_BA(""),

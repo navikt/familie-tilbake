@@ -65,6 +65,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
+        sjekkIdentiskKravgrunnlag(kravgrunnlag431)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
@@ -97,9 +98,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             }
         }
         stegService.håndterSteg(behandling.id)
-        tellerService.
-
-        tellKobletKravgrunnlag(fagsystem)
+        tellerService.tellKobletKravgrunnlag(fagsystem)
     }
 
     private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
@@ -166,6 +165,34 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                                    frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE))
         }
     }
+
+    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431) {
+        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET) {
+            return
+        }
+        // Antar økonomi sender alltid et NYTT kravgrunnlag før ENDR kravgrunnlag
+        val forrigeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(endretKravgrunnlag.behandlingId)
+        val harSammeAntallPerioder = forrigeKravgrunnlag.perioder.size == endretKravgrunnlag.perioder.size
+        val perioderIForrigeKravgrunnlag = forrigeKravgrunnlag.perioder.sortedBy { it.periode }
+        val perioderIEndretKravgrunnlag = endretKravgrunnlag.perioder.sortedBy { it.periode }
+        var erIdentiskKravgrunnlag = harSammeAntallPerioder
+        if (harSammeAntallPerioder) {
+            for (i in perioderIEndretKravgrunnlag.indices step 1) {
+                if (!perioderIEndretKravgrunnlag[i].harIdentiskKravgrunnlagsperiode(perioderIForrigeKravgrunnlag[i])) {
+                    erIdentiskKravgrunnlag = false
+                }
+            }
+        }
+        if (erIdentiskKravgrunnlag) {
+            log.warn("Mottatt kravgrunnlag med kravgrunnlagId ${endretKravgrunnlag.eksternKravgrunnlagId}," +
+                     "status ${endretKravgrunnlag.kravstatuskode.kode} og referanse ${endretKravgrunnlag.referanse} " +
+                     "for behandlingId=${endretKravgrunnlag.behandlingId} " +
+                     "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
+                     "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
+                     "Undersøk om ny referanse kan gi feil i brev..")
+        }
+    }
+
 
     companion object {
 

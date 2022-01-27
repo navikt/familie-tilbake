@@ -19,6 +19,8 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
@@ -233,17 +235,21 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `beregn skal beregne tilbakekrevingsbeløp for ikkeForeldetPeriode når beregnetPeriode er på tvers av grunnlagPeriode`() {
-        val periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-        val periode1 = Periode(LocalDate.of(2019, 5, 4), LocalDate.of(2019, 5, 6))
-        val logiskPeriode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 6))
+        val periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31))
+        val periode1 = Periode(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 30))
+        val logiskPeriode = Periode(LocalDate.of(2019, 5, 1),
+                                    LocalDate.of(2019, 6, 30))
         val grunnlagPeriode: Kravgrunnlagsperiode432 =
                 lagGrunnlagPeriode(periode,
                                    1000,
                                    setOf(lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
                                          lagFeilBeløp(BigDecimal.valueOf(10000))))
         val grunnlagPeriode1: Kravgrunnlagsperiode432 =
-                lagGrunnlagPeriode(periode1, 1000, setOf(lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
-                                                         lagFeilBeløp(BigDecimal.valueOf(10000))))
+                lagGrunnlagPeriode(periode1,
+                                   1000,
+                                   setOf(lagYtelBeløp(BigDecimal.valueOf(10000),
+                                                      BigDecimal.valueOf(10)),
+                                         lagFeilBeløp(BigDecimal.valueOf(10000))))
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode, grunnlagPeriode1))
         kravgrunnlagRepository.insert(grunnlag)
         lagForeldelse(Testdata.behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
@@ -369,25 +375,36 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFeilBeløp(feilutbetaling: BigDecimal): Kravgrunnlagsbeløp433 {
-        return Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID(),
-                                                       nyttBeløp = feilutbetaling)
+        return Kravgrunnlagsbeløp433(klassekode = Klassekode.KL_KODE_FEIL_BA,
+                                     klassetype = Klassetype.FEIL,
+                                     nyttBeløp = feilutbetaling,
+                                     opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
+                                     tilbakekrevesBeløp = BigDecimal.ZERO,
+                                     uinnkrevdBeløp = BigDecimal.ZERO,
+                                     skatteprosent = BigDecimal.ZERO)
 
     }
 
     private fun lagYtelBeløp(utbetalt: BigDecimal, skatteprosent: BigDecimal): Kravgrunnlagsbeløp433 {
-        return Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID(),
-                                                       opprinneligUtbetalingsbeløp = utbetalt,
-                                                       nyttBeløp = BigDecimal.ZERO,
-                                                       skatteprosent = skatteprosent)
+        return Kravgrunnlagsbeløp433(klassekode = Klassekode.BATR,
+                                     klassetype = Klassetype.YTEL,
+                                     tilbakekrevesBeløp = BigDecimal("10000"),
+                                     opprinneligUtbetalingsbeløp = utbetalt,
+                                     nyttBeløp = BigDecimal.ZERO,
+                                     skatteprosent = skatteprosent)
     }
 
     private fun lagYtelBeløp(utbetalt: BigDecimal,
                              nyttBeløp: BigDecimal,
                              skatteprosent: BigDecimal): Kravgrunnlagsbeløp433 {
-        return Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID(),
-                                                       opprinneligUtbetalingsbeløp = utbetalt,
-                                                       nyttBeløp = nyttBeløp,
-                                                       skatteprosent = skatteprosent)
+        return Kravgrunnlagsbeløp433(klassekode = Klassekode.BATR,
+                                     klassetype = Klassetype.YTEL,
+                                     tilbakekrevesBeløp = BigDecimal("10000"),
+                                     opprinneligUtbetalingsbeløp = utbetalt,
+                                     nyttBeløp = nyttBeløp,
+                                     skatteprosent = skatteprosent,
+                                     skyldkode = UUID.randomUUID()
+                                             .toString()) // brukte skyldkode for å få ulike Kravgrunnlagsbeløp433
     }
 
     private fun lagGrunnlagPeriode(periode: Periode,
