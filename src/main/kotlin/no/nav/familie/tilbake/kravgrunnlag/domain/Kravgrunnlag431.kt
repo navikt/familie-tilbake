@@ -129,6 +129,8 @@ enum class Klassekode(val aktivitet: String) {
     KL_KODE_FEIL_EFOG(""),
     KL_KODE_FEIL_PEN(""),
     KL_KODE_JUST_BA(""),
+    KL_KODE_JUST_EFOG(""),
+    KL_KODE_JUST_PEN(""),
     BATR("Barnetrygd"),
     BATRSMA("Småbarnstillegg"),
     EFOG("Overgangsstønad"),
