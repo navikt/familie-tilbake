@@ -229,6 +229,11 @@
             <version>${felles.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.papertrailapp</groupId>
+            <artifactId>logback-syslog4j</artifactId>
+            <version>1.0.0</version> <!-- August, 2014, men det er den som blir brukt på NAV -->
+        </dependency>
+        <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
             <version>${felles.version}</version>

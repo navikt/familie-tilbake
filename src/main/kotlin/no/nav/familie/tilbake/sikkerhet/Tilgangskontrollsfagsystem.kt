@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 // Denne enum-en brukes kun for tilgangskontroll
 enum class Tilgangskontrollsfagsystem(val kode: String) {
@@ -13,16 +12,6 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
     SYSTEM_TILGANG(""); //brukes internt bare for tilgangsskontroll
 
     companion object {
-
-        fun fraYtelsestype(type: Ytelsestype): Tilgangskontrollsfagsystem {
-            return when (type) {
-                Ytelsestype.BARNETRYGD -> BARNETRYGD
-                Ytelsestype.KONTANTSTØTTE -> KONTANTSTØTTE
-                Ytelsestype.OVERGANGSSTØNAD -> ENSLIG_FORELDER
-                Ytelsestype.BARNETILSYN -> ENSLIG_FORELDER
-                Ytelsestype.SKOLEPENGER -> ENSLIG_FORELDER
-            }
-        }
 
 
         fun fraKode(kode: String): Tilgangskontrollsfagsystem {

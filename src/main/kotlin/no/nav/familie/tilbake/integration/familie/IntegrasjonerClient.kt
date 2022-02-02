@@ -54,16 +54,16 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
+    private val tilgangssjekkUri =
+            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+                    .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
+                    .build()
+                    .toUri()
+
     private fun hentSaksbehandlerUri(id: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
                     .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER)
                     .pathSegment(id)
-                    .build()
-                    .toUri()
-
-    private fun hentTilgangssjekkUri() =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
                     .build()
                     .toUri()
 
@@ -194,7 +194,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         backoff = Backoff(delayExpression = "5000")
     )
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
-        return postForEntity(hentTilgangssjekkUri(), personIdenter)
+        return postForEntity(tilgangssjekkUri, personIdenter)
     }
 
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {

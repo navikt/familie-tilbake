@@ -6,7 +6,9 @@ import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
 import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
 import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
+import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -31,7 +33,8 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
                         handling = "Beregner feilutbetalt beløp for nye delte perioder",
-                        henteParam = "behandlingId")
+                        AuditLoggerEvent.ACCESS,
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun beregnBeløp(@PathVariable("behandlingId") behandlingId: UUID,
                     @Valid @RequestBody perioder: List<PeriodeDto>): Ressurs<BeregnetPerioderDto> {
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
@@ -42,7 +45,8 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter beregningsresultat",
-                        henteParam = "behandlingId")
+                        AuditLoggerEvent.ACCESS,
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentBeregningsresultat(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BeregningsresultatDto> {
         return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
     }

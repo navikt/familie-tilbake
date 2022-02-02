@@ -14,5 +14,8 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     @Query("""SELECT f.* FROM fagsak f JOIN behandling b ON b.fagsak_id = f.id WHERE b.id = :behandlingId""")
     fun finnFagsakForBehandlingId(behandlingId: UUID): Fagsak
 
+    @Query("""SELECT f.* FROM fagsak f JOIN behandling b ON b.fagsak_id = f.id WHERE b.ekstern_bruk_id = :eksternBrukId""")
+    fun finnFagsakForEksternBrukId(eksternBrukId: UUID): Fagsak
+
     fun findByFagsystemAndEksternFagsakId(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak?
 }
