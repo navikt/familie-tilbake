@@ -256,9 +256,12 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     private fun lagHbBehandling(behandling: Behandling): HbBehandling {
         val erRevurderingEtterKlage: Boolean = behandling.erRevurdering && behandling.årsaker
                 .any { it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP) }
+        val erRevurderingEtterKlageNfp: Boolean =
+                behandling.erRevurdering && behandling.årsaker.any { it.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP }
         val originalBehandlingVedtaksdato = if (behandling.erRevurdering) finnOriginalBehandlingVedtaksdato(behandling) else null
         return HbBehandling(erRevurdering = behandling.erRevurdering,
                             erRevurderingEtterKlage = erRevurderingEtterKlage,
+                            erRevurderingEtterKlageNfp = erRevurderingEtterKlageNfp,
                             originalBehandlingsdatoFagsakvedtak = originalBehandlingVedtaksdato)
     }
 
