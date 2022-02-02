@@ -6,6 +6,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
@@ -24,6 +25,11 @@ import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.web.client.exchange
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
+import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
@@ -44,6 +50,19 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakService: FagsakService
+
+
+    @Test
+    fun test() {
+        headers.setBearerAuth(lokalTestToken())
+        val uriHentSaksnummer = UriComponentsBuilder.fromHttpUrl(localhost("/api/fagsystem/EF/fagsak/123456/v1")).toUriString()
+
+        val response: ResponseEntity<Ressurs<Map<String, String>>> = restTemplate.exchange(uriHentSaksnummer,
+                                                                                           HttpMethod.GET,
+                                                                                           HttpEntity<String>(headers))
+
+        println(response)
+    }
 
     @Test
     fun `hentFagsak skal hente fagsak for barnetrygd`() {

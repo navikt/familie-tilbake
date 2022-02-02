@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
+import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
@@ -22,9 +24,7 @@ class JournalpostController(private val journalføringService: JournalføringSer
 
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Henter journalført dokument",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentDokument(@PathVariable behandlingId: UUID,
                      @PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
@@ -34,9 +34,7 @@ class JournalpostController(private val journalføringService: JournalføringSer
 
     @Operation(summary = "Hent journalpost informasjon")
     @GetMapping("/{behandlingId}/journalposter")
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Henter journalført dokument",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentJournalposter(@PathVariable behandlingId: UUID): Ressurs<List<Journalpost>> {
         return Ressurs.success(journalføringService.hentJournalposter(behandlingId))
     }

@@ -12,7 +12,9 @@ import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
+import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -38,7 +40,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @PostMapping(path = ["/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekreving", AuditLoggerEvent.CREATE)
     fun opprettBehandling(@Valid @RequestBody
                           opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Ressurs<String> {
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
@@ -49,7 +51,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @PostMapping(path = ["/manuelt/task/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekreving manuelt")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekreving manuelt", AuditLoggerEvent.CREATE)
     fun opprettBehandlingManuellTask(@Valid @RequestBody
                                      opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest): Ressurs<String> {
         behandlingService.opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest)
@@ -60,7 +62,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @PostMapping(path = ["/revurdering/v1"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER, handling = "Oppretter tilbakekrevingsrevurdering")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekrevingsrevurdering", AuditLoggerEvent.CREATE)
     fun opprettRevurdering(@Valid @RequestBody opprettRevurderingDto: OpprettRevurderingDto): Ressurs<String> {
         val behandling = behandlingService.opprettRevurdering(opprettRevurderingDto)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Revurdering er opprettet.")
@@ -72,7 +74,8 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 produces = [MediaType.APPLICATION_JSON_VALUE])
     @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
                         handling = "Henter tilbakekrevingsbehandling",
-                        henteParam = "behandlingId")
+                        AuditLoggerEvent.ACCESS,
+                        henteParam = HenteParam.BEHANDLING_ID)
     fun hentBehandling(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BehandlingDto> {
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
     }
@@ -81,9 +84,10 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @PostMapping(path = ["{behandlingId}/steg/v1"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     // Rollen blir endret til BESLUTTER i Tilgangskontroll for FatteVedtak steg
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun utførBehandlingssteg(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
@@ -95,9 +99,10 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Operation(summary = "Sett behandling på vent")
     @PutMapping(path = ["{behandlingId}/vent/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Setter saksbehandler behandling på vent eller utvider fristen",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Setter saksbehandler behandling på vent eller utvider fristen",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun settBehandlingPåVent(@PathVariable("behandlingId") behandlingId: UUID,
                              @Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto): Ressurs<String> {
         behandlingService.settBehandlingPåVent(behandlingId, behandlingPåVentDto)
@@ -107,9 +112,10 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Operation(summary = "Ta behandling av vent")
     @PutMapping(path = ["{behandlingId}/gjenoppta/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Saksbehandler tar behandling av vent etter å motta brukerrespons eller dokumentasjon",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         behandlingService.taBehandlingAvvent(behandlingId)
         return Ressurs.success("OK")
@@ -118,9 +124,10 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Operation(summary = "Henlegg behandling")
     @PutMapping(path = ["{behandlingId}/henlegg/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Saksbehandler henlegger behandling",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Saksbehandler henlegger behandling",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun henleggBehandling(@PathVariable("behandlingId") behandlingId: UUID,
                           @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto): Ressurs<String> {
         behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
@@ -130,9 +137,10 @@ class BehandlingController(private val behandlingService: BehandlingService,
     @Operation(summary = "Bytt enhet")
     @PutMapping(path = ["{behandlingId}/bytt-enhet/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Saksbehandler bytter enhet på behandling",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Saksbehandler bytter enhet på behandling",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun byttEnhet(@PathVariable("behandlingId") behandlingId: UUID,
                   @Valid @RequestBody byttEnhetDto: ByttEnhetDto): Ressurs<String> {
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)

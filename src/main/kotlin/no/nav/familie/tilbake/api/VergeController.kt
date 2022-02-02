@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.VergeService
+import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
+import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -25,9 +27,10 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Oppretter verge steg på behandling",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Oppretter verge steg på behandling",
+                        AuditLoggerEvent.CREATE,
+                        HenteParam.BEHANDLING_ID)
     fun opprettVergeSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.opprettVergeSteg(behandlingId)
         return Ressurs.success("OK")
@@ -35,9 +38,10 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Fjern verge")
     @PutMapping
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Deaktiverer ev. eksisterende verge.",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Deaktiverer ev. eksisterende verge.",
+                        AuditLoggerEvent.UPDATE,
+                        HenteParam.BEHANDLING_ID)
     fun fjernVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.fjernVerge(behandlingId)
         return Ressurs.success("OK")
@@ -45,9 +49,10 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Hent verge")
     @GetMapping
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Henter verge informasjon",
-                        henteParam = "behandlingId")
+    @Rolletilgangssjekk(Behandlerrolle.VEILEDER,
+                        "Henter verge informasjon",
+                        AuditLoggerEvent.ACCESS,
+                        HenteParam.BEHANDLING_ID)
     fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))
     }
