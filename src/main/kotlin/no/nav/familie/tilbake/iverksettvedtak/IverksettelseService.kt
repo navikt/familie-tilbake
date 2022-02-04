@@ -142,7 +142,13 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
 
         if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
             totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp) {
-            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId")
+            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                                 "Beregnet beløp i vedtaksbrev er " +
+                                 "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
+                                 "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
+                                 "Beregnet beløp i iverksettelse er " +
+                                 "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
+                                 "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp")
         }
     }
 }
