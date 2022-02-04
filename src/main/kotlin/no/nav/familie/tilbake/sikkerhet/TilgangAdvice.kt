@@ -3,8 +3,10 @@ package no.nav.familie.tilbake.sikkerhet
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -39,6 +41,7 @@ enum class HenteParam {
 @Configuration
 class TilgangAdvice(private val rolleConfig: RolleConfig,
                     private val fagsakRepository: FagsakRepository,
+                    private val behandlingRepository: BehandlingRepository,
                     private val auditLogger: AuditLogger,
                     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                     private val integrasjonerClient: IntegrasjonerClient) {
@@ -79,7 +82,9 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
         when (param) {
             HenteParam.BEHANDLING_ID -> {
                 val behandlingId = requestBody.first() as UUID
-                val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+                val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+
                 var behandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
                 if (requestBody.size > 1) {
                     behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(requestBody[1],
@@ -89,7 +94,7 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
                          minimumBehandlerrolle = behandlerRolle,
                          fagsak = fagsak,
                          handling = rolletilgangssjekk.handling)
-                logAccess(rolletilgangssjekk, fagsak, behandlingId)
+                logAccess(rolletilgangssjekk, fagsak, behandling)
             }
             HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID -> {
                 val ytelsestype = Ytelsestype.valueOf(requestBody.first().toString())
@@ -142,13 +147,14 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
         when {
             behandlingIdFraRequest != null -> {
                 val behandlingId: UUID = behandlingIdFraRequest.getter.call(requestBody) as UUID
-                val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+                val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
                 validate(fagsystem = fagsak.fagsystem,
                          minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                          fagsak = fagsak,
                          handling = rolletilgangssjekk.handling)
-                logAccess(rolletilgangssjekk, fagsak, behandlingId)
+                logAccess(rolletilgangssjekk, fagsak, behandling)
             }
             eksternBrukIdFraRequest != null -> {
                 val eksternBrukId: UUID = eksternBrukIdFraRequest.getter.call(requestBody) as UUID
@@ -226,14 +232,16 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
     }
 
 
-    fun logAccess(rolletilgangssjekk: Rolletilgangssjekk, fagsak: Fagsak?, behandlingId: UUID? = null) {
+    fun logAccess(rolletilgangssjekk: Rolletilgangssjekk, fagsak: Fagsak?, behandling: Behandling? = null) {
 
         fagsak?.let {
             auditLogger.log(
                     Sporingsdata(rolletilgangssjekk.auditLoggerEvent,
                                  fagsak.bruker.ident,
-                                 CustomKeyValue("fagsak", fagsak.id.toString()),
-                                 behandlingId?.let { CustomKeyValue("behandlingId", behandlingId.toString()) }),
+                                 CustomKeyValue("eksternFagsakId", fagsak.eksternFagsakId),
+                                 behandling?.let {
+                                     CustomKeyValue("behandlingEksternBrukId", behandling.eksternBrukId.toString())
+                                 }),
             )
         }
     }

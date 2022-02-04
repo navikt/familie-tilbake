@@ -126,6 +126,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     fun init() {
         tilgangAdvice = TilgangAdvice(rolleConfig,
                                       fagsakRepository,
+                                      behandlingRepository,
                                       auditLogger,
                                       mottattXmlRepository,
                                       mockIntegrasjonerClient)
