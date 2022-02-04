@@ -232,7 +232,7 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
             auditLogger.log(
                     Sporingsdata(rolletilgangssjekk.auditLoggerEvent,
                                  fagsak.bruker.ident,
-                                 CustomKeyValue("fagsak", fagsak.toString()),
+                                 CustomKeyValue("fagsak", fagsak.id.toString()),
                                  behandlingId?.let { CustomKeyValue("behandlingId", behandlingId.toString()) }),
             )
         }
