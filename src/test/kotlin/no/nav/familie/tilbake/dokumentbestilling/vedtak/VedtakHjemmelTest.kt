@@ -30,7 +30,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -46,7 +47,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NN,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -64,7 +66,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -83,7 +86,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
         hbHjemmel.lovhjemmelFlertall shouldBe true
@@ -102,7 +106,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 false)
+                                                 visHjemmelForRenter = false,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -120,7 +125,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 sjette ledd"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -138,7 +144,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NN,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15 sjette ledd"
         hbHjemmel.lovhjemmelFlertall shouldBe false
@@ -158,7 +165,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "foreldelsesloven §§ 2 og 3"
         hbHjemmel.lovhjemmelFlertall shouldBe true
@@ -181,7 +189,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3"
         hbHjemmel.lovhjemmelFlertall shouldBe true
@@ -203,7 +212,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
         hbHjemmel.lovhjemmelFlertall shouldBe true
@@ -226,7 +236,8 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10"
         hbHjemmel.lovhjemmelFlertall shouldBe true
@@ -250,14 +261,15 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10"
         hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
-    fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter er klage`() {
+    fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter og er klage fra KA`() {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
@@ -266,14 +278,15 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og forvaltningsloven § 35 c)"
         hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 
     @Test
-    fun `laghbHjemmel skal gi riktig hjemmel når det er både foreldelse med tilleggsfrist og renter er klage`() {
+    fun `laghbHjemmel skal gi riktig hjemmel når det er både foreldelse med tilleggsfrist og renter og er klage fra KA`() {
         val vurdertForeldelse: VurdertForeldelse = lagForeldelseperiode(periode) {
             it.copy(foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                     foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
@@ -289,9 +302,52 @@ class VedtakHjemmelTest {
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
                                                  Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
-                                                 true)
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = false)
 
-        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a, foreldelsesloven §§ 2, 3 og 10 og forvaltningsloven § 35 a)"
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a, " +
+                "foreldelsesloven §§ 2, 3 og 10 og forvaltningsloven § 35 a)"
+        hbHjemmel.lovhjemmelFlertall shouldBe true
+    }
+
+    @Test
+    fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter og er klage fra NFP`() {
+        val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
+
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+                                                 null,
+                                                 vurderingPerioder,
+                                                 VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
+                                                 Ytelsestype.OVERGANGSSTØNAD,
+                                                 Språkkode.NB,
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = true)
+
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
+        hbHjemmel.lovhjemmelFlertall shouldBe false
+    }
+
+    @Test
+    fun `laghbHjemmel skal gi riktig hjemmel når det er både foreldelse med tilleggsfrist og renter og er klage fra NFP`() {
+        val vurdertForeldelse: VurdertForeldelse = lagForeldelseperiode(periode) {
+            it.copy(foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
+                    foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
+                    oppdagelsesdato = periode.fom.plusMonths(5).atDay(1))
+        }
+        val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
+            it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = true)
+        }
+
+        val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
+                                                 vurdertForeldelse,
+                                                 vurderingPerioder,
+                                                 VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
+                                                 Ytelsestype.OVERGANGSSTØNAD,
+                                                 Språkkode.NB,
+                                                 visHjemmelForRenter = true,
+                                                 klagebehandling = true)
+
+        hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10"
         hbHjemmel.lovhjemmelFlertall shouldBe true
     }
 

@@ -13,7 +13,7 @@ Vi varslet deg {{{dato varsel.varsletDato}}} om at du har fått {{{kroner varsel
     {{/switch}}
 {{~/inline~}}
 {{#if behandling.erRevurdering}}
-Vi har vurdert saken din om tilbakebetaling på nytt. Derfor gjelder ikke det tidligere vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnBestemt}}}.
+Vi har vurdert saken din om tilbakebetaling på nytt{{#if behandling.erRevurderingEtterKlageNfp}}, fordi du klaget{{/if}}. Derfor gjelder ikke det tidligere vedtaket av {{{dato behandling.originalBehandlingsdatoFagsakvedtak}}} om tilbakebetaling av {{{ytelsesnavnUbestemt}}}.
     {{#if varsel.varsletDato }}
 
 {{> varsel-tekst}}
@@ -30,7 +30,7 @@ I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendo
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
-Beløpet du skylder før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
+{{#if behandling.erRevurderingEtterKlageNfp}}Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mye. {{/if}}Beløpet du skylder før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
 {{/if}}
 {{#if fritekstoppsummering}}
 

@@ -44,8 +44,7 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
         }
 
         if (behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING
-            && behandling.sisteÅrsak?.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                                                    Behandlingsårsakstype.REVURDERING_KLAGE_NFP)) {
+            && behandling.sisteÅrsak?.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA)) {
             log.info("Sender ikke vedtaksbrev etter revurdering som følge av klage for behandling: {}", behandlingId)
             taskService.save(Task(type = AvsluttBehandlingTask.TYPE,
                                   payload = task.payload,
