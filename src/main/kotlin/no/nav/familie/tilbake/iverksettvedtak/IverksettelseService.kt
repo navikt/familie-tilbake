@@ -133,16 +133,15 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         val beregnetTotalRenteBeløp = beregnetPerioder.sumOf { it.renter }
         val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
 
-        logger.info("TotalTilbakekrevingsbeløpUtenRenter i vedtaksbrev $totalTilbakekrevingsbeløpUtenRenter og " +
-                    "beregnet i iverksettlese $beregnetTotatlTilbakekrevingsbeløpUtenRenter for behandlingId=$behandlingId")
-        logger.info("TotalRenteBeløp i vedtaksbrev $totalRenteBeløp og " +
-                    "beregnet i iverksettlese $beregnetTotalRenteBeløp for behandlingId=$behandlingId")
-        logger.info("TotalSkatteBeløp i vedtaksbrev $totalSkatteBeløp og " +
-                    "beregnet i iverksettlese $beregnetSkattBeløp for behandlingId=$behandlingId")
-
         if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
             totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp) {
-            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId")
+            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                                 "Beregnet beløp i vedtaksbrev er " +
+                                 "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
+                                 "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
+                                 "Beregnet beløp i iverksettelse er " +
+                                 "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
+                                 "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp")
         }
     }
 }
