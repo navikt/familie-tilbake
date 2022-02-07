@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class Behandlingsstegstilstand(@Id
                                     val id: UUID = UUID.randomUUID(),
