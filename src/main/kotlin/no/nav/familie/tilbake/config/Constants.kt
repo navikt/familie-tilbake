@@ -13,7 +13,7 @@ object Constants {
 
     private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2021, 5, 1), 106399))
 
-    private val brukersSvarfrist: Period = Period.ofWeeks(3)
+    private val brukersSvarfrist: Period = Period.ofWeeks(2)
 
     fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
 

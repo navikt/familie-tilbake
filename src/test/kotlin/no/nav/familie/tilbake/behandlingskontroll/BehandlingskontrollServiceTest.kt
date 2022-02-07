@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
@@ -81,7 +81,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         sisteStegstilstand.behandlingsstegsstatus shouldBe VENTER
         assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         sisteStegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
-        sisteStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(4)
+        sisteStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(3)
     }
 
     @Test
@@ -102,7 +102,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         nyStegstilstand.behandlingsstegsstatus shouldBe VENTER
         assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         nyStegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
-        nyStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(4)
+        nyStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(3)
     }
 
 
@@ -300,7 +300,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         sisteStegstilstand.behandlingsstegsstatus shouldBe VENTER
         assertBehandlingsstatus(behandling.id, Behandlingsstatus.UTREDES)
         sisteStegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
-        sisteStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(4)
+        sisteStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(3)
 
         behandlingsstegstilstand.first { GRUNNLAG == it.behandlingssteg }.behandlingsstegsstatus shouldBe UTFØRT
         behandlingsstegstilstand.first { FAKTA == it.behandlingssteg }.behandlingsstegsstatus shouldBe UTFØRT

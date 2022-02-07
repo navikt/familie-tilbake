@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class Behandlingsstegstilstand(@Id
                                     val id: UUID = UUID.randomUUID(),
@@ -92,7 +92,7 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 
 enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) {
 
-    VENT_PÅ_BRUKERTILBAKEMELDING(4, "Venter på tilbakemelding fra bruker"),
+    VENT_PÅ_BRUKERTILBAKEMELDING(3, "Venter på tilbakemelding fra bruker"),
     VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4, "Venter på kravgrunnlag fra økonomi"),
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
     UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
