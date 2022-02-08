@@ -92,7 +92,7 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 
 enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) {
 
-    VENT_PÅ_BRUKERTILBAKEMELDING(4, "Venter på tilbakemelding fra bruker"),
+    VENT_PÅ_BRUKERTILBAKEMELDING(3, "Venter på tilbakemelding fra bruker"),
     VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4, "Venter på kravgrunnlag fra økonomi"),
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
     UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
