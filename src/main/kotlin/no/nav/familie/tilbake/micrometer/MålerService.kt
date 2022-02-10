@@ -104,7 +104,7 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
                                       "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
                               it.antall)
         }
-        sendteBrevGauge.register(rows)
+        sendteBrevGauge.register(rows,  true)
     }
 
     @Scheduled(initialDelay = 180000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -128,7 +128,7 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
                                       "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
                               it.antall)
         }
-        vedtakGauge.register(rows)
+        vedtakGauge.register(rows,  true)
     }
 
     @Scheduled(initialDelay = 210000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -148,7 +148,7 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
                                       "dato", it.dato.toString()),
                               it.antall)
         }
-        mottatteKravgrunnlagGauge.register(rows)
+        mottatteKravgrunnlagGauge.register(rows,  true)
     }
 
     @Scheduled(initialDelay = 240000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -166,7 +166,7 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
                                       "dato", it.dato.toString()),
                               it.antall)
         }
-        mottatteStatusmeldingerGauge.register(rows)
+        mottatteStatusmeldingerGauge.register(rows,  true)
     }
 
     @Scheduled(initialDelay = 270000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -179,7 +179,7 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
                               (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0))
         }
 
-        feiledeTasker.register(rows)
+        feiledeTasker.register(rows,  true)
     }
 
 
