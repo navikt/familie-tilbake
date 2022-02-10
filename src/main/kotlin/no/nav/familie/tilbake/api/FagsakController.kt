@@ -55,13 +55,27 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk( Behandlerrolle.SAKSBEHANDLER,
-                         "Sjekk om det er mulig å opprette behandling manuelt",
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Sjekk om det er mulig å opprette behandling manuelt",
                         AuditLoggerEvent.ACCESS,
-                         HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID)
+                        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID)
+    @Deprecated("Bruk /fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1. " +
+                "Flere ytelser inneholde Ø, som ikke fungerer optimalt i url.")
     fun kanBehandlingOpprettesManuelt(@PathVariable ytelsestype: Ytelsestype,
                                       @PathVariable eksternFagsakId: String): Ressurs<KanBehandlingOpprettesManueltRespons> {
         return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
+    }
+
+    @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
+    @GetMapping(path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
+                        "Sjekk om det er mulig å opprette behandling manuelt",
+                        AuditLoggerEvent.ACCESS,
+                        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID)
+    fun kanBehandlingOpprettesManuelt(@PathVariable fagsystem: Fagsystem,
+                                      @PathVariable eksternFagsakId: String): Ressurs<KanBehandlingOpprettesManueltRespons> {
+        return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, fagsystem))
     }
 
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")

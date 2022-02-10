@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -287,6 +288,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         return økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = mottattXml,
                                                                     kravstatuskode = Kravstatuskode.NYTT,
                                                                     eksternFagsakId = "0",
+                                                                    fagsystem = Fagsystem.BA,
                                                                     ytelsestype = Ytelsestype.BARNETRYGD,
                                                                     referanse = "0",
                                                                     eksternKravgrunnlagId = BigInteger.ZERO,

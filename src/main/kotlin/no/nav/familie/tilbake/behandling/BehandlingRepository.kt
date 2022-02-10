@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
@@ -20,6 +21,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             AND beh.status <>'AVSLUTTET' AND beh.type='TILBAKEKREVING'
     """)
     fun finnÅpenTilbakekrevingsbehandling(ytelsestype: Ytelsestype,
+                                          eksternFagsakId: String): Behandling?
+
+    // language=PostgreSQL
+    @Query("""
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.fagsystem=:fagsystem AND f.ekstern_fagsak_id=:eksternFagsakId
+            AND beh.status <>'AVSLUTTET' AND beh.type='TILBAKEKREVING'
+    """)
+    fun finnÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem,
                                           eksternFagsakId: String): Behandling?
 
     // language=PostgreSQL

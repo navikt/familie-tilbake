@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag.domain
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
@@ -15,6 +16,7 @@ data class ØkonomiXmlMottatt(@Id
                              val melding: String,
                              val kravstatuskode: Kravstatuskode,
                              val eksternFagsakId: String,
+                             val fagsystem: Fagsystem,
                              val ytelsestype: Ytelsestype,
                              val referanse: String,
                              val eksternKravgrunnlagId: BigInteger?,

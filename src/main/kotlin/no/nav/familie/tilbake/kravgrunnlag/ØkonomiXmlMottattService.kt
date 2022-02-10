@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -22,9 +23,11 @@ class ØkonomiXmlMottattService(private val mottattXmlRepository: ØkonomiXmlMot
     fun lagreMottattXml(kravgrunnlagXml: String,
                         kravgrunnlag: DetaljertKravgrunnlagDto,
                         ytelsestype: Ytelsestype) {
+
         mottattXmlRepository.insert(ØkonomiXmlMottatt(melding = kravgrunnlagXml,
                                                       kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
                                                       eksternFagsakId = kravgrunnlag.fagsystemId,
+                                                      fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                                                       ytelsestype = ytelsestype,
                                                       referanse = kravgrunnlag.referanse,
                                                       eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,

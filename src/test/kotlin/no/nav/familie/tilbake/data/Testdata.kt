@@ -240,6 +240,7 @@ object Testdata {
                                               kravstatuskode = Kravstatuskode.NYTT,
                                               eksternFagsakId = "testverdi",
                                               ytelsestype = Ytelsestype.BARNETRYGD,
+                                              fagsystem = Fagsystem.BA,
                                               referanse = "testverdi",
                                               eksternKravgrunnlagId = BigInteger.ZERO,
                                               vedtakId = BigInteger.ZERO,

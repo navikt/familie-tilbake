@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
@@ -24,6 +25,9 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
 
     fun findByEksternFagsakIdAndYtelsestype(eksternFagsakId: String,
                                             ytelsestype: Ytelsestype): List<ØkonomiXmlMottatt>
+
+    fun findByEksternFagsakIdAndFagsystem(eksternFagsakId: String,
+                                          fagsystem: Fagsystem): List<ØkonomiXmlMottatt>
 
     fun existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId: String,
                                                           ytelsestype: Ytelsestype,

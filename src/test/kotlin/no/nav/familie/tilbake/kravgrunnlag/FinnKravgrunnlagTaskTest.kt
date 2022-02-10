@@ -243,6 +243,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = kravgrunnlagXml,
                                                              kravstatuskode = Kravstatuskode.NYTT,
                                                              eksternFagsakId = eksternFagsakId,
+                                                             fagsystem = Fagsystem.BA,
                                                              ytelsestype = Ytelsestype.BARNETRYGD,
                                                              referanse = "0",
                                                              eksternKravgrunnlagId = BigInteger.ZERO,
