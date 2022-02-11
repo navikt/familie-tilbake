@@ -13,17 +13,12 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%m%n%xEx</pattern>
-        </layout>
-
-        <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
-            <host>audit.nais</host>
-            <port>6514</port>
-            <ident>FAMILIE-TILBAKE</ident>
-            <maxMessageLength>128000</maxMessageLength>
-        </syslogConfig>
+    <appender name="auditLogger" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>audit.nais</syslogHost>
+        <port>6514</port>
+        <facility>AUDIT</facility>
+        <suffixPattern>FAMILIE-TILBAKE %mdc %logger{30} %m %n%rEx</suffixPattern>
+        <throwableExcluded>true</throwableExcluded>
     </appender>
 
     <logger level="INFO" name="auditLogger" additivity="false">
