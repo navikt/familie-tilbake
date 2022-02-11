@@ -10,6 +10,8 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -43,12 +45,15 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
             val bestemtDato = LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(fagsak.ytelsestype))
-            logger.info("Behandling med id=${it.id} har bestemtdato=$bestemtDato")
+            logger.info("Henter kravgrunnlag som er gamle enn $bestemtDato")
+
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt = LocalDate.parse(kravgrunnlag.kontrollfelt,
                                                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
-            val sumNyttBeløp: BigDecimal =
-                    kravgrunnlag.perioder.sumOf { periode -> periode.beløp.sumOf { beløp -> beløp.nyttBeløp } }
+            val sumNyttBeløp: BigDecimal = kravgrunnlag.perioder.sumOf { periode ->
+                periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
+                        .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+            }
 
             kontrollFelt < bestemtDato &&
             sumNyttBeløp < Constants.MAKS_FEILUTBETALTBELØP_PER_YTELSE.getValue(fagsak.ytelsestype) &&
@@ -74,4 +79,10 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                             Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
                                             Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
                                             Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte)
+}
+
+fun main(){
+    val dato = LocalDate.parse("2022-02-10-18.43.15.192503",
+                               DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
+    print(dato < LocalDate.now())
 }
