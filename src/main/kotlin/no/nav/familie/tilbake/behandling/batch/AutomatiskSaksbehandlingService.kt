@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,15 +37,11 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
                                       private val alderGrenseKontantstøtte: Long) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
             val bestemtDato = LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(fagsak.ytelsestype))
-            logger.info("Henter kravgrunnlag som er gamle enn $bestemtDato")
-
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt = LocalDate.parse(kravgrunnlag.kontrollfelt,
                                                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
