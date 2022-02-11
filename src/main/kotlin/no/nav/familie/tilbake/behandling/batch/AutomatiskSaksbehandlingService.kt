@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,22 +25,25 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       private val kravgrunnlagRepository: KravgrunnlagRepository,
                                       private val brevsporingRepository: BrevsporingRepository,
                                       private val stegService: StegService,
-                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETRYGD:8}")
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETRYGD}")
                                       private val alderGrenseBarnetrygd: Long,
-                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN:6}")
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN}")
                                       private val alderGrenseBarnetilsyn: Long,
-                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD:6}")
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD}")
                                       private val alderGrenseOvergangsstønad: Long,
-                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER:6}")
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER}")
                                       private val alderGrenseSkolepenger: Long,
-                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE:8}")
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
                                       private val alderGrenseKontantstøtte: Long) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
             val bestemtDato = LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(fagsak.ytelsestype))
+            logger.info("Behandling med id=${it.id} har bestemtdato=$bestemtDato")
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt = LocalDate.parse(kravgrunnlag.kontrollfelt,
                                                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
