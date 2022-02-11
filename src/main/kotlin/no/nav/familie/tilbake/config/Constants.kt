@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.config
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period
@@ -17,7 +18,8 @@ object Constants {
 
     fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
 
-    fun saksbehandlersTidsfrist(): LocalDate = brukersSvarfrist().plusDays(1)
+    fun saksbehandlersTidsfrist(): LocalDate = LocalDate.now()
+            .plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
 
     const val kravgrunnlagXmlRootElement: String = "urn:detaljertKravgrunnlagMelding"
 
@@ -32,7 +34,7 @@ object Constants {
     const val BRUKER_ID_VEDTAKSLØSNINGEN = "VL"
 
     val MAKS_FEILUTBETALTBELØP_PER_YTELSE =
-            mapOf<Ytelsestype, BigDecimal>(Ytelsestype.BARNETRYGD to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
+            mapOf<Ytelsestype, BigDecimal>(Ytelsestype.BARNETRYGD to BigDecimal.valueOf(500),
                                            Ytelsestype.BARNETILSYN to BigDecimal.valueOf(rettsgebyr).multiply(BigDecimal(0.5)),
                                            Ytelsestype.OVERGANGSSTØNAD to BigDecimal.valueOf(rettsgebyr)
                                                    .multiply(BigDecimal(0.5)),

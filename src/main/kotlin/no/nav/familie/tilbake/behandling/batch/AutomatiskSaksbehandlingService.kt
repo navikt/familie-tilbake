@@ -10,6 +10,9 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -22,7 +25,17 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       private val fagsakRepository: FagsakRepository,
                                       private val kravgrunnlagRepository: KravgrunnlagRepository,
                                       private val brevsporingRepository: BrevsporingRepository,
-                                      private val stegService: StegService) {
+                                      private val stegService: StegService,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETRYGD}")
+                                      private val alderGrenseBarnetrygd: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN}")
+                                      private val alderGrenseBarnetilsyn: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD}")
+                                      private val alderGrenseOvergangsstønad: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER}")
+                                      private val alderGrenseSkolepenger: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
+                                      private val alderGrenseKontantstøtte: Long) {
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
@@ -32,8 +45,10 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt = LocalDate.parse(kravgrunnlag.kontrollfelt,
                                                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
-            val sumNyttBeløp: BigDecimal =
-                    kravgrunnlag.perioder.sumOf { periode -> periode.beløp.sumOf { beløp -> beløp.nyttBeløp } }
+            val sumNyttBeløp: BigDecimal = kravgrunnlag.perioder.sumOf { periode ->
+                periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
+                        .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+            }
 
             kontrollFelt < bestemtDato &&
             sumNyttBeløp < Constants.MAKS_FEILUTBETALTBELØP_PER_YTELSE.getValue(fagsak.ytelsestype) &&
@@ -54,13 +69,15 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
         stegService.håndterStegAutomatisk(behandlingId)
     }
 
-    companion object {
+    private val ALDERSGRENSE_I_UKER = mapOf(Ytelsestype.BARNETRYGD to alderGrenseBarnetrygd,
+                                            Ytelsestype.BARNETILSYN to alderGrenseBarnetilsyn,
+                                            Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
+                                            Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
+                                            Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte)
+}
 
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 8,
-                                                           Ytelsestype.BARNETILSYN to 6,
-                                                           Ytelsestype.OVERGANGSSTØNAD to 6,
-                                                           Ytelsestype.SKOLEPENGER to 6,
-                                                           Ytelsestype.KONTANTSTØTTE to 8)
-    }
-
+fun main(){
+    val dato = LocalDate.parse("2022-02-10-18.43.15.192503",
+                               DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
+    print(dato < LocalDate.now())
 }
