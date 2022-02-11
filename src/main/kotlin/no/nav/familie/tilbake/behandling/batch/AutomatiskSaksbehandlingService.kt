@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -22,7 +23,17 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                       private val fagsakRepository: FagsakRepository,
                                       private val kravgrunnlagRepository: KravgrunnlagRepository,
                                       private val brevsporingRepository: BrevsporingRepository,
-                                      private val stegService: StegService) {
+                                      private val stegService: StegService,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETRYGD:8}")
+                                      private val alderGrenseBarnetrygd: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_BARNETILSYN:6}")
+                                      private val alderGrenseBarnetilsyn: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_OVERGANGSSTØNAD:6}")
+                                      private val alderGrenseOvergangsstønad: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER:6}")
+                                      private val alderGrenseSkolepenger: Long,
+                                      @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE:8}")
+                                      private val alderGrenseKontantstøtte: Long) {
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
@@ -54,13 +65,9 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
         stegService.håndterStegAutomatisk(behandlingId)
     }
 
-    companion object {
-
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(Ytelsestype.BARNETRYGD to 8,
-                                                           Ytelsestype.BARNETILSYN to 6,
-                                                           Ytelsestype.OVERGANGSSTØNAD to 6,
-                                                           Ytelsestype.SKOLEPENGER to 6,
-                                                           Ytelsestype.KONTANTSTØTTE to 8)
-    }
-
+    private val ALDERSGRENSE_I_UKER = mapOf(Ytelsestype.BARNETRYGD to alderGrenseBarnetrygd,
+                                            Ytelsestype.BARNETILSYN to alderGrenseBarnetilsyn,
+                                            Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
+                                            Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
+                                            Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte)
 }
