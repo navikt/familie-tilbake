@@ -3,18 +3,23 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
+import no.nav.familie.tilbake.behandling.domain.Bruker
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class FagsakService(private val fagsakRepository: FagsakRepository,
@@ -37,6 +42,33 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return FagsakMapper.tilRespons(fagsak = fagsak,
                                        personinfo = personInfo,
                                        behandlinger = behandlinger)
+    }
+
+    @Transactional
+    fun finnFagsak(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak? {
+        return fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
+                                                                  eksternFagsakId = eksternFagsakId)
+   }
+
+    @Transactional
+    fun finnFagsystem(fagsakId: UUID): Fagsystem {
+        return fagsakRepository.findByIdOrThrow(fagsakId).fagsystem
+    }
+
+    @Transactional
+    fun finnFagsystemForBehandlingId(behandlingId: UUID): Fagsystem {
+        return fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+    }
+    @Transactional
+    fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+                      ytelsestype: Ytelsestype,
+                      fagsystem: Fagsystem): Fagsak {
+        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
+                            språkkode = opprettTilbakekrevingRequest.språkkode)
+        return fagsakRepository.insert(Fagsak(bruker = bruker,
+                                              eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+                                              ytelsestype = ytelsestype,
+                                              fagsystem = fagsystem))
     }
 
     @Transactional(readOnly = true)
