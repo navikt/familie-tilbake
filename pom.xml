@@ -234,6 +234,10 @@
             <version>1.0.0</version> <!-- August, 2014, men det er den som blir brukt på NAV -->
         </dependency>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId> <!-- Mulig fiks av snyk-meldinger som gjelder logback-syslog4j -->
+        </dependency>
+        <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
             <version>${felles.version}</version>
