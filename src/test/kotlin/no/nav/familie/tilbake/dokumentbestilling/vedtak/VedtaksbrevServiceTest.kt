@@ -194,7 +194,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
 
-        File("test.pdf").writeBytes(bytes)
+//        File("test.pdf").writeBytes(bytes)
         PdfaValidator.validatePdf(bytes)
     }
 
