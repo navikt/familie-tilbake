@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.config.PropertyName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -24,6 +25,7 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService,
         log.info("LagOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
         val saksbehandler = task.metadata.getProperty("saksbehandler")
+        val enhet = task.metadata.getProperty(PropertyName.ENHET) ?: "" // elvis-operator for bakoverkompatibilitet
         val behandlingId = UUID.fromString(task.payload)
 
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
@@ -31,6 +33,7 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService,
         val beskrivelse = behandlingsstegstilstand?.venteårsak?.beskrivelse
         oppgaveService.opprettOppgave(UUID.fromString(task.payload),
                                       oppgavetype,
+                                      enhet,
                                       beskrivelse,
                                       LocalDate.now().plusWeeks(fristeUker),
                                       saksbehandler)

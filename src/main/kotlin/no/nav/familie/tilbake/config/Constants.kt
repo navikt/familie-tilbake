@@ -50,4 +50,5 @@ object Constants {
 object PropertyName {
 
     const val FAGSYSTEM = "fagsystem"
+    const val ENHET = "enhet"
 }

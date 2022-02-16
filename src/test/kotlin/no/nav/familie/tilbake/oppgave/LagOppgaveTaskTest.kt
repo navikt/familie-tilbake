@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
-import io.kotest.matchers.shouldBe
-import io.mockk.slot
-import io.mockk.spyk
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -16,14 +14,13 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
-import java.util.UUID
 
 internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
@@ -39,49 +36,37 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
-    @Autowired
-    private lateinit var oppgaveService: OppgaveService
-
-    private lateinit var spykOppgaveService: OppgaveService
+    private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
 
     private lateinit var lagOppgaveTask: LagOppgaveTask
 
-    private lateinit var behandling: Behandling
-
-    private val behandlingSlot = slot<UUID>()
-    private val oppgavetypeSlot = slot<Oppgavetype>()
-    private val beskrivelseSlot = slot<String>()
-    private val fristForFerdigstillelse = slot<LocalDate>()
+    private val behandling: Behandling = Testdata.behandling
 
     private val dagensDato = LocalDate.now()
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
-        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        behandlingRepository.insert(behandling)
 
-        spykOppgaveService = spyk(oppgaveService)
-        lagOppgaveTask = LagOppgaveTask(spykOppgaveService, behandlingskontrollService)
+        lagOppgaveTask = LagOppgaveTask(mockOppgaveService, behandlingskontrollService)
     }
 
     @Test
     fun `doTask skal lage oppgave når behandling venter på varsel steg`() {
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+        val fristForFerdigstillelse = dagensDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
 
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            spykOppgaveService.opprettOppgave(capture(behandlingSlot),
-                                              capture(oppgavetypeSlot),
-                                              capture(beskrivelseSlot),
-                                              capture(fristForFerdigstillelse),
-                                              isNull())
+            mockOppgaveService.opprettOppgave(behandling.id,
+                                              Oppgavetype.BehandleSak,
+                                              "enhet",
+                                              Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
+                                              fristForFerdigstillelse,
+                                              null)
         }
-        behandlingSlot.captured shouldBe behandling.id
-        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
-        beskrivelseSlot.captured shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse
-        fristForFerdigstillelse.captured shouldBe dagensDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
     }
 
     @Test
@@ -89,20 +74,18 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
                                     Behandlingsstegstatus.VENTER,
                                     Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        val fristForFerdigstillelse = dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
 
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            spykOppgaveService.opprettOppgave(capture(behandlingSlot),
-                                              capture(oppgavetypeSlot),
-                                              capture(beskrivelseSlot),
-                                              capture(fristForFerdigstillelse),
-                                              isNull())
+            mockOppgaveService.opprettOppgave(behandling.id,
+                                              Oppgavetype.BehandleSak,
+                                              "enhet",
+                                              Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+                                              fristForFerdigstillelse,
+                                              null)
         }
-        behandlingSlot.captured shouldBe behandling.id
-        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
-        beskrivelseSlot.captured shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
-        fristForFerdigstillelse.captured shouldBe dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
     }
 
     @Test
@@ -112,15 +95,13 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            spykOppgaveService.opprettOppgave(capture(behandlingSlot),
-                                              capture(oppgavetypeSlot),
-                                              isNull(),
-                                              capture(fristForFerdigstillelse),
-                                              isNull())
+            mockOppgaveService.opprettOppgave(behandling.id,
+                                              Oppgavetype.BehandleSak,
+                                              "enhet",
+                                              null,
+                                              dagensDato,
+                                              null)
         }
-        behandlingSlot.captured shouldBe behandling.id
-        oppgavetypeSlot.captured shouldBe Oppgavetype.BehandleSak
-        fristForFerdigstillelse.captured shouldBe dagensDato
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
@@ -138,7 +119,10 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     private fun lagTask(): Task {
         return Task(type = LagOppgaveTask.TYPE,
                     payload = behandling.id.toString(),
-                    properties = Properties().apply { setProperty("oppgavetype", Oppgavetype.BehandleSak.name) })
+                    properties = Properties().apply {
+                        setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
+                        setProperty(PropertyName.ENHET, "enhet")
+                    })
     }
 
 

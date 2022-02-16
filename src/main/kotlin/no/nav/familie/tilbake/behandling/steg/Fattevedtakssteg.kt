@@ -60,7 +60,7 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
             historikkTaskService.lagHistorikkTask(behandlingId,
                                                   TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                                                   Aktør.BESLUTTER)
-            oppgaveTaskService.opprettOppgaveTask(behandlingId,
+            oppgaveTaskService.opprettOppgaveTask(behandling,
                                                   Oppgavetype.BehandleUnderkjentVedtak,
                                                   behandling.ansvarligSaksbehandler)
         } else {

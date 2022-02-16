@@ -31,6 +31,9 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                      private val personService: PersonService,
                      private val environment: Environment) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+
     private val antallOppgaveTyper = Oppgavetype.values().associateWith {
         Metrics.counter("oppgave.opprettet", "type", it.name)
     }
@@ -45,13 +48,13 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
-                SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                                "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
+                                   "$finnOppgaveRequest, $finnOppgaveResponse")
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
             finnOppgaveResponse.oppgaver.isEmpty() -> {
-                SECURELOG.error("Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
-                                "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error("Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
+                                   "$finnOppgaveRequest, $finnOppgaveResponse")
                 throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId}")
             }
             else -> {
@@ -62,6 +65,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
+                       enhet: String,
                        beskrivelse: String?,
                        fristForFerdigstillelse: LocalDate,
                        saksbehandler: String?): OppgaveResponse {
@@ -86,13 +90,41 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
                                                    enhetsnummer = behandling.behandlendeEnhet,
                                                    tilordnetRessurs = saksbehandler,
                                                    behandlingstype = Behandlingstype.Tilbakekreving.value,
-                                                   behandlingstema = null)
+                                                   behandlingstema = null,
+                                                   mappeId = finnAktuellMappe(enhet, oppgavetype))
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
         antallOppgaveTyper[oppgavetype]!!.increment()
 
         return opprettetOppgaveId
+    }
+
+    private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
+        if (enhetsnummer == NAY_ENSLIG_FORSØRGER || enhetsnummer == NAY_EGNE_ANSATTE) {
+            val søkemønster = lagSøkeuttrykk(oppgavetype) ?: return null
+            val mapper = integrasjonerClient.finnMapper(enhetsnummer)
+
+            val mappeIdForOppgave = mapper.find { it.navn.matches(søkemønster) }?.id?.toLong()
+            mappeIdForOppgave?.let {
+                logger.info("Legger oppgave i Godkjenne vedtak-mappe")
+            } ?: logger.error("Fant ikke mappe for oppgavetype = $oppgavetype")
+
+            return mappeIdForOppgave
+        }
+        return null
+    }
+
+    private fun lagSøkeuttrykk(oppgavetype: Oppgavetype): Regex? {
+        val s = when (oppgavetype) {
+            Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "EF.+Sak.+50"
+            Oppgavetype.GodkjenneVedtak -> "EF.+Sak.+70"
+            else -> {
+                logger.error("Ukjent oppgavetype = $oppgavetype")
+                return null
+            }
+        }
+        return Regex(s, RegexOption.IGNORE_CASE)
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
@@ -110,14 +142,14 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
-                SECURELOG.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                                "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
+                                   "$finnOppgaveRequest, $finnOppgaveResponse")
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
             finnOppgaveResponse.oppgaver.isEmpty() -> {
-                LOG.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
-                SECURELOG.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
-                                "$finnOppgaveRequest, $finnOppgaveResponse")
+                logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
+                secureLogger.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
+                                   "$finnOppgaveRequest, $finnOppgaveResponse")
             }
             else -> {
                 integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
@@ -148,7 +180,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(this::class.java)
-        val SECURELOG: Logger = LoggerFactory.getLogger("secureLogger")
+        private const val NAY_ENSLIG_FORSØRGER = "4489"
+        private const val NAY_EGNE_ANSATTE = "4483"
     }
 }
