@@ -41,7 +41,7 @@ class OppgaveServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearAllMocks()
+        clearAllMocks(answers = false)
         oppgaveService = OppgaveService(behandlingRepository,
                                         fagsakRepository,
                                         integrasjonerClient,
