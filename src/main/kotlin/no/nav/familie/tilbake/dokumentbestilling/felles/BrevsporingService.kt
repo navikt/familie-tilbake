@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.springframework.stereotype.Service

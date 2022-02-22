@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
