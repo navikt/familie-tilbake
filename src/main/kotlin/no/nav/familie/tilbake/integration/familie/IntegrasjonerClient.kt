@@ -112,7 +112,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
-    private fun finnMApperUri(enhetNr: String): URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+    private fun finnMapperUri(enhetNr: String): URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
             .build()
             .toUri()
@@ -172,7 +172,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     @Cacheable("mappeCache")
     fun finnMapper(enhet: String): List<MappeDto> {
-        val respons = getForEntity<Ressurs<List<MappeDto>>>(finnMApperUri(enhet))
+        val respons = getForEntity<Ressurs<List<MappeDto>>>(finnMapperUri(enhet))
         return respons.getDataOrThrow()
     }
 
