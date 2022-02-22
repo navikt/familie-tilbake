@@ -18,8 +18,8 @@ import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.familie.tilbake.sikkerhet.HenteParam
+import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.annotation.Profile

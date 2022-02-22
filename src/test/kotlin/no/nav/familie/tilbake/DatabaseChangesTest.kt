@@ -3,7 +3,6 @@ package no.nav.familie.tilbake
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.streams.toList
 
 class DatabaseChangesTest {
 

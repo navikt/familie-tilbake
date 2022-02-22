@@ -15,6 +15,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
@@ -30,7 +31,8 @@ import java.time.temporal.ChronoUnit
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
-@EnableScheduling //brukes av prosessering(Tasks)
+@EnableScheduling
+@EnableCaching
 @ConfigurationPropertiesScan
 class ApplicationConfig {
 

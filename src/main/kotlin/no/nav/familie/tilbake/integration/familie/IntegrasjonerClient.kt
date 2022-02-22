@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
@@ -20,9 +21,8 @@ import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
-
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpHeaders
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -54,59 +54,71 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
             .build()
             .toUri()
 
-    private val tilgangssjekkUri =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
-                    .build()
-                    .toUri()
+    private val tilgangssjekkUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
+            .build()
+            .toUri()
 
-    private fun hentSaksbehandlerUri(id: String) =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER)
-                    .pathSegment(id)
-                    .build()
-                    .toUri()
+    private fun hentSaksbehandlerUri(id: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
+            .build()
+            .toUri()
+
+    private val opprettOppgaveUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
+            .build()
+            .toUri()
+
+    private fun patchOppgaveUri(oppgave: Oppgave) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
+            .build()
+            .toUri()
+
+    private val finnoppgaverUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "/v4")
+            .build()
+            .toUri()
+
+    private fun ferdigstillOppgaveUri(oppgaveId: Long) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
+            .build()
+            .toUri()
 
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
-                    .pathSegment(organisasjonsnummer)
+                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer)
                     .build()
                     .toUri()
 
     private fun validerOrganisasjonUri(organisasjonsnummer: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON)
-                    .pathSegment(organisasjonsnummer)
-                    .pathSegment("valider")
+                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer, "valider")
                     .build()
                     .toUri()
 
-    private fun hentJournalpostUri() =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
-                    .build()
-                    .toUri()
+    private fun hentJournalpostUri() = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
+            .build()
+            .toUri()
 
     private fun hentJournalpostHentDokumentUri(journalpostId: String, dokumentInfoId: String) =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT)
-                    .pathSegment(journalpostId)
-                    .path(dokumentInfoId)
+                    .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
                     .build()
                     .toUri()
 
-    private fun hentNavkontorUri(enhetsId: String) =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR)
-                    .path(enhetsId)
-                    .build()
-                    .toUri()
+    private fun hentNavkontorUri(enhetsId: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
+            .build()
+            .toUri()
 
+    private fun finnMapperUri(enhetNr: String): URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
+            .build()
+            .toUri()
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
-        val response =
-                postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
+        val response = postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
         return response.getDataOrThrow()
     }
 
@@ -116,10 +128,7 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun distribuerJournalpost(journalpostId: String,
                               fagsystem: Fagsystem): String {
-        val request = DistribuerJournalpostRequest(journalpostId,
-                                                   fagsystem,
-                                                   integrasjonerConfig.applicationName)
-
+        val request = DistribuerJournalpostRequest(journalpostId, fagsystem, integrasjonerConfig.applicationName)
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
 
@@ -145,54 +154,39 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString() + "${IntegrasjonerConfig.PATH_OPPGAVE}/opprett")
-
-        return postForEntity<Ressurs<OppgaveResponse>>(uri,
-                                                       opprettOppgave,
-                                                       HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+        return postForEntity<Ressurs<OppgaveResponse>>(opprettOppgaveUri, opprettOppgave).getDataOrThrow()
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
-                             + "${IntegrasjonerConfig.PATH_OPPGAVE}/${patchOppgave.id}/oppdater")
-
-        return patchForEntity<Ressurs<OppgaveResponse>>(uri,
-                                                        patchOppgave,
-                                                        HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+        val uri = patchOppgaveUri(patchOppgave)
+        return patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave).getDataOrThrow()
     }
 
     fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
-                             + IntegrasjonerConfig.PATH_OPPGAVE + "/v4")
-
-        return postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri,
-                                                              finnOppgaveRequest,
-                                                              HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
+        return postForEntity<Ressurs<FinnOppgaveResponseDto>>(finnoppgaverUri, finnOppgaveRequest).getDataOrThrow()
     }
 
     fun ferdigstillOppgave(oppgaveId: Long) {
-        val uri = URI.create(integrasjonerConfig.integrasjonUri.toString()
-                             + IntegrasjonerConfig.PATH_OPPGAVE + "/$oppgaveId/ferdigstill")
+        patchForEntity<Ressurs<OppgaveResponse>>(ferdigstillOppgaveUri(oppgaveId), "")
+    }
 
-        patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8())
-
+    @Cacheable("mappeCache")
+    fun finnMapper(enhet: String): List<MappeDto> {
+        val respons = getForEntity<Ressurs<List<MappeDto>>>(finnMapperUri(enhet))
+        return respons.getDataOrThrow()
     }
 
     fun hentNavkontor(enhetsId: String): NavKontorEnhet {
         return getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
     }
 
-
     /*
      * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle
      * slike personer.
      */
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = "5000")
-    )
+    @Retryable(value = [Exception::class],
+               maxAttempts = 3,
+               backoff = Backoff(delayExpression = "5000"))
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(tilgangssjekkUri, personIdenter)
     }
@@ -204,10 +198,4 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
 
-}
-
-fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
-    this.add("Content-Type", "application/json;charset=UTF-8")
-    this.acceptCharset = listOf(Charsets.UTF_8)
-    return this
 }

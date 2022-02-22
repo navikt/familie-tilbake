@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,15 +17,16 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
                          private val fagsakRepository: FagsakRepository) {
 
     @Transactional
-    fun opprettOppgaveTask(behandlingId: UUID, oppgavetype: Oppgavetype, saksbehandler: String? = null) {
-        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
+    fun opprettOppgaveTask(behandling: Behandling, oppgavetype: Oppgavetype, saksbehandler: String? = null) {
+        val fagsystem = fagsakRepository.finnFagsakForBehandlingId(behandling.id).fagsystem
         val properties = Properties().apply {
             setProperty("oppgavetype", oppgavetype.name)
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+            setProperty(PropertyName.ENHET, behandling.behandlendeEnhet)
             saksbehandler?.let { setProperty("saksbehandler", it) }
         }
         taskRepository.save(Task(type = LagOppgaveTask.TYPE,
-                                 payload = behandlingId.toString(),
+                                 payload = behandling.id.toString(),
                                  properties = properties))
     }
 

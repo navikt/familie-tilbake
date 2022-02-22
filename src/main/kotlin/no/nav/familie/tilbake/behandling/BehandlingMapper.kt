@@ -31,7 +31,6 @@ import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.config.Constants
 
 object BehandlingMapper {
 
