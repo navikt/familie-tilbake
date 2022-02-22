@@ -110,7 +110,7 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.opprettOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak)
+            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.GodkjenneVedtak)
         }
     }
 

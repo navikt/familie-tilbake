@@ -85,7 +85,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
         //Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(behandling.id, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
                         .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet) {
@@ -150,7 +150,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                               properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         //Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(revurdering.id, Oppgavetype.BehandleSak)
+        oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak)
 
         return revurdering
     }
