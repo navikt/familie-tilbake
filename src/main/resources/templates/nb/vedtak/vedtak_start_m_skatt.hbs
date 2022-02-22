@@ -30,7 +30,7 @@ I brev {{{dato  fagsaksvedtaksdato}}} fikk du melding om at {{{ytelsesnavnEiendo
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
-{{#if behandling.erRevurderingEtterKlageNfp}}Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mye. {{/if}}Beløpet du skylder før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
+{{#if behandling.erRevurderingEtterKlageNfp}}Du har fått {{{kroner totaltFeilutbetaltBeløp}}} for mye. {{/if}}Beløpet du skylder før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
 {{/if}}
 {{#if fritekstoppsummering}}
 

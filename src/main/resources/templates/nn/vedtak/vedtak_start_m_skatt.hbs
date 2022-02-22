@@ -30,7 +30,7 @@ I brev {{{dato  fagsaksvedtaksdato}}} fekk du melding om at {{{ytelsesnavnEiendo
 {{/if}}
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
 
-{{#if behandling.erRevurderingEtterKlageNfp}}Du har fått {{{kroner totaltFeilutbetaltBeløp}}} kroner for mykje. {{/if}}Beløpet du skuldar før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}heile{{else}}delar av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trekt frå er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
+{{#if behandling.erRevurderingEtterKlageNfp}}Du har fått {{{kroner totaltFeilutbetaltBeløp}}} for mykje. {{/if}}Beløpet du skuldar før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}heile{{else}}delar av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet du skal betale tilbake etter skatten er trekt frå er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
 {{/if}}
 {{#if fritekstoppsummering}}
 

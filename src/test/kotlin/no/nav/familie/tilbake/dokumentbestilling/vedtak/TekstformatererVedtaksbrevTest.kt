@@ -541,7 +541,7 @@ class TekstformatererVedtaksbrevTest {
         val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
 
         val fasit = "Du har fått overgangsstønad for barn som ikke bor fast hos deg. Du har derfor fått 30 001 kroner " +
-                    "kroner for mye utbetalt i denne perioden."
+                    "for mye utbetalt i denne perioden."
         generertTekst shouldBe fasit
     }
 
