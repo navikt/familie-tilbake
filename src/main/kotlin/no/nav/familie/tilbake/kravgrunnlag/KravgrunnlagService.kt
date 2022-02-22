@@ -19,7 +19,6 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -58,7 +57,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
         if (behandling == null) {
-            arkiverEksisterendeGrunnlag(kravgrunnlag)
+            mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
             tellerService.tellUkobletKravgrunnlag(fagsystem)
             return
@@ -107,17 +106,6 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                                                       eksternFagsakId = fagsystemId)
     }
 
-    private fun arkiverEksisterendeGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        val eksisterendeKravgrunnlag: List<ØkonomiXmlMottatt> =
-                mottattXmlService.hentMottattKravgrunnlag(eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
-                                                          vedtakId = kravgrunnlag.vedtakId)
-        eksisterendeKravgrunnlag.forEach {
-            mottattXmlService.arkiverMottattXml(mottattXml = it.melding,
-                                                fagsystemId = it.eksternFagsakId,
-                                                ytelsestype = it.ytelsestype)
-        }
-        eksisterendeKravgrunnlag.forEach { mottattXmlService.slettMottattXml(it.id) }
-    }
 
     private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431, ytelsestype: Ytelsestype) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)

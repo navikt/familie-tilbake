@@ -11,9 +11,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -25,7 +24,7 @@ import java.util.UUID
 
 @Service
 class HenleggelsesbrevService(private val behandlingRepository: BehandlingRepository,
-                              private val brevSporingRepository: BrevsporingRepository,
+                              private val brevsporingService: BrevsporingService,
                               private val fagsakRepository: FagsakRepository,
                               private val eksterneDataForBrevService: EksterneDataForBrevService,
                               private val pdfBrevService: PdfBrevService) {
@@ -66,9 +65,7 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
                                    fritekst: String?,
                                    brevmottager: Brevmottager): Henleggelsesbrevsdokument {
 
-        val brevSporing: Brevsporing? =
-                brevSporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandling.id,
-                                                                                                       Brevtype.VARSEL)
+        val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
             throw IllegalStateException("Varselbrev er ikke sendt. Kan ikke forhåndsvise/sende " +
                                         "henleggelsesbrev for behandlingId=${behandling.id} når varsel ikke er sendt.")

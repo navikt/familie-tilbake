@@ -1,6 +1,5 @@
-package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
+package no.nav.familie.tilbake.dokumentbestilling.felles
 
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.springframework.stereotype.Service
@@ -29,4 +28,11 @@ class BrevsporingService(private val brevsporingRepository: BrevsporingRepositor
 
         return korrigertVarselbrev ?: varselbrev
     }
+
+    fun erVarselSendt(behandlingId: UUID): Boolean {
+        return brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId,
+                                                                       setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))
+
+    }
+
 }

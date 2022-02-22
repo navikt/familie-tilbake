@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -38,14 +38,14 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     lateinit var pdfBrevService: PdfBrevService
     lateinit var spyPdfBrevService: PdfBrevService
     private val fagsakRepository: FagsakRepository = mockk()
-    private val brevSporingRepository: BrevsporingRepository = mockk()
+    private val brevsporingService: BrevsporingService = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
 
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
         henleggelsesbrevService = HenleggelsesbrevService(behandlingRepository,
-                                                          brevSporingRepository,
+                                                          brevsporingService,
                                                           fagsakRepository,
                                                           eksterneDataForBrevService,
                                                           spyPdfBrevService)
@@ -58,8 +58,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
                 .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
         every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns "Siri Saksbehandler"
         every {
-            brevSporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId,
-                                                                                                   Brevtype.VARSEL)
+            brevsporingService.finnSisteVarsel(behandlingId)
         } returns (Testdata.brevsporing)
 
     }
@@ -99,8 +98,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sendHenleggelsebrev skal ikke sende henleggelsesbrev hvis varselbrev ikke sendt`() {
         every {
-            brevSporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId,
-                                                                                                   Brevtype.VARSEL)
+            brevsporingService.finnSisteVarsel(behandlingId)
         } returns (null)
 
         val e = shouldThrow<IllegalStateException> {

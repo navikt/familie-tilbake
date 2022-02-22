@@ -9,7 +9,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.BehandlingDto
 import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
@@ -21,8 +21,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.tilbake.behandling.domain.Bruker
-import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -37,8 +35,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -64,9 +61,9 @@ import java.util.UUID
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakRepository: FagsakRepository,
-                        private val taskRepository: TaskRepository,
-                        private val brevsporingRepository: BrevsporingRepository,
+                        private val fagsakService: FagsakService,
+                        private val taskService: TaskService,
+                        private val brevsporingService: BrevsporingService,
                         private val kravgrunnlagRepository: KravgrunnlagRepository,
                         private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                         private val behandlingskontrollService: BehandlingskontrollService,
@@ -97,7 +94,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                       properties = Properties().apply {
                                           setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
                                       })
-            taskRepository.save(sendVarselbrev)
+            taskService.save(sendVarselbrev)
         }
 
         return behandling
@@ -105,6 +102,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
+        val kanBehandlingOpprettesManuelt =
+                fagsakService.kanBehandlingOpprettesManuelt(opprettManueltTilbakekrevingRequest.eksternFagsakId,
+                                                            opprettManueltTilbakekrevingRequest.ytelsestype)
+        if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
+                throw Feil(message = kanBehandlingOpprettesManuelt.melding)
+        }
         logger.info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
         val properties = Properties().apply {
             setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
@@ -114,9 +117,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         FagsystemUtil.hentFagsystemFraYtelsestype(opprettManueltTilbakekrevingRequest.ytelsestype).name)
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
         }
-        taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE,
-                                 properties = properties,
-                                 payload = ""))
+        taskService.save(Task(type = OpprettBehandlingManueltTask.TYPE,
+                              properties = properties,
+                              payload = ""))
     }
 
     @Transactional
@@ -142,9 +145,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.håndterSteg(revurdering.id)
 
         // kjør HentKravgrunnlagTask for å hente kravgrunnlag på nytt fra økonomi
-        taskRepository.save(Task(type = HentKravgrunnlagTask.TYPE,
-                                 payload = revurdering.id.toString(),
-                                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+        taskService.save(Task(type = HentKravgrunnlagTask.TYPE,
+                              payload = revurdering.id.toString(),
+                              properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         //Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak)
@@ -155,16 +158,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional(readOnly = true)
     fun hentBehandling(behandlingId: UUID): BehandlingDto {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                 .hentBehandlingsstegstilstand(behandling)
-        val varselSendt = brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId, setOf(Brevtype.VARSEL,
-                                                                                                      Brevtype.KORRIGERT_VARSEL))
+        val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
-        val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
+        val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsystem)
         val kanRevurderingOpprettes: Boolean =
-                tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
+                tilgangService.tilgangTilÅOppretteRevurdering(fagsystem) && kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
@@ -251,8 +253,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
-
+        val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
 
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
@@ -262,12 +263,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = aktør,
-                                              beskrivelse = fjernNewlinesFraString(henleggelsesbrevFritekstDto.begrunnelse))
+                                              beskrivelse = henleggelsesbrevFritekstDto.begrunnelse)
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            taskRepository.save(SendHenleggelsesbrevTask.opprettTask(behandlingId,
-                                                                     fagsystem,
-                                                                     henleggelsesbrevFritekstDto.fritekst))
+            taskService.save(SendHenleggelsesbrevTask.opprettTask(behandlingId,
+                                                                  fagsystem,
+                                                                  henleggelsesbrevFritekstDto.fritekst))
         }
 
         // Ferdigstill oppgave
@@ -319,7 +320,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun byttBehandlendeEnhet(behandlingId: UUID, byttEnhetDto: ByttEnhetDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
-        val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
+        val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
         if (fagsystem != Fagsystem.BA) {
             throw Feil(message = "Ikke implementert for fagsystem $fagsystem",
                        frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsystem.navn}")
@@ -331,7 +332,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
                                               aktør = Aktør.SAKSBEHANDLER,
-                                              beskrivelse = fjernNewlinesFraString(byttEnhetDto.begrunnelse))
+                                              beskrivelse = byttEnhetDto.begrunnelse)
 
         oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
                                                     beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
@@ -356,8 +357,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId, erManueltOpprettet)
 
         // oppretter fagsak hvis det ikke finnes ellers bruker det eksisterende
-        val eksisterendeFagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem, eksternFagsakId)
-        val fagsak = eksisterendeFagsak ?: opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
+        val eksisterendeFagsak = fagsakService.finnFagsak(fagsystem, eksternFagsakId)
+        val fagsak = eksisterendeFagsak ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
         val behandling =
                 BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
@@ -371,9 +372,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.håndterSteg(behandling.id)
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
-        taskRepository.save(Task(type = FinnKravgrunnlagTask.TYPE,
-                                 payload = behandling.id.toString(),
-                                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+        taskService.save(Task(type = FinnKravgrunnlagTask.TYPE,
+                              payload = behandling.id.toString(),
+                              properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
         return behandling
     }
@@ -423,16 +424,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     }
 
-    private fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-                              ytelsestype: Ytelsestype,
-                              fagsystem: Fagsystem): Fagsak {
-        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
-                            språkkode = opprettTilbakekrevingRequest.språkkode)
-        return fagsakRepository.insert(Fagsak(bruker = bruker,
-                                              eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                                              ytelsestype = ytelsestype,
-                                              fagsystem = fagsystem))
-    }
 
     private fun kanHenleggeBehandling(behandling: Behandling,
                                       behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
@@ -450,9 +441,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanSendeHenleggelsesbrev(behandling: Behandling, behandlingsresultatstype: Behandlingsresultatstype): Boolean {
         return when (behandling.type) {
-            TILBAKEKREVING -> brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandling.id,
-                                                                                      setOf(Brevtype.VARSEL,
-                                                                                            Brevtype.KORRIGERT_VARSEL))
+            TILBAKEKREVING -> brevsporingService.erVarselSendt(behandling.id)
             REVURDERING_TILBAKEKREVING -> Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype
         }
     }
@@ -489,9 +478,4 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
 
-    private fun fjernNewlinesFraString(tekst: String): String {
-        return tekst
-                .replace("\r", "")
-                .replace("\n", " ")
-    }
 }

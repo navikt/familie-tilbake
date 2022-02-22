@@ -3,7 +3,7 @@ package no.nav.familie.tilbake.historikkinnslag
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -12,7 +12,7 @@ import java.util.UUID
 
 @Service
 class HistorikkTaskService(private val taskRepository: TaskRepository,
-                           private val fagsakRepository: FagsakRepository) {
+                           private val fagsakService: FagsakService) {
 
     fun lagHistorikkTask(behandlingId: UUID,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
@@ -20,18 +20,24 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
                          triggerTid: LocalDateTime? = null,
                          beskrivelse: String? = null) {
 
-        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty("historikkinnslagstype", historikkinnslagstype.name)
             setProperty("aktør", aktør.name)
-            setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
-            beskrivelse?.let { setProperty("beskrivelse", it) }
+            beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
         }
 
         val task = Task(type = LagHistorikkinnslagTask.TYPE,
                         payload = behandlingId.toString(),
                         properties = properties)
         triggerTid?.let { taskRepository.save(task.medTriggerTid(triggerTid)) } ?: taskRepository.save(task)
+    }
+
+    private fun fjernNewlinesFraString(tekst: String): String {
+        return tekst
+                .replace("\r", "")
+                .replace("\n", " ")
     }
 }

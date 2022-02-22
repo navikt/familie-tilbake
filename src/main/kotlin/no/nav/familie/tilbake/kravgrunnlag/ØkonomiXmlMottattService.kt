@@ -36,6 +36,18 @@ class ØkonomiXmlMottattService(private val mottattXmlRepository: ØkonomiXmlMot
         return mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId, vedtakId)
     }
 
+    fun arkiverEksisterendeGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
+        val eksisterendeKravgrunnlag: List<ØkonomiXmlMottatt> =
+                hentMottattKravgrunnlag(eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
+                                                          vedtakId = kravgrunnlag.vedtakId)
+        eksisterendeKravgrunnlag.forEach {
+            arkiverMottattXml(mottattXml = it.melding,
+                                                fagsystemId = it.eksternFagsakId,
+                                                ytelsestype = it.ytelsestype)
+        }
+        eksisterendeKravgrunnlag.forEach { slettMottattXml(it.id) }
+    }
+
     fun hentMottattKravgrunnlag(eksternFagsakId: String,
                                 ytelsestype: Ytelsestype,
                                 vedtakId: BigInteger): List<ØkonomiXmlMottatt> {
