@@ -188,7 +188,7 @@ class TekstformatererVedtaksbrevTest {
                                              kravgrunnlag = HbKravgrunnlag(riktigBeløp = BigDecimal(0),
                                                                            utbetaltBeløp = BigDecimal(1),
                                                                            feilutbetaltBeløp = BigDecimal(1)),
-                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                             fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
                                                              Hendelsesundertype.BOR_IKKE_MED_BARN,
                                                              "Her har økonomisystemet gjort noe helt feil."),
                                              vurderinger =
@@ -203,7 +203,7 @@ class TekstformatererVedtaksbrevTest {
                                              kravgrunnlag = HbKravgrunnlag(riktigBeløp = BigDecimal(0),
                                                                            utbetaltBeløp = BigDecimal(1),
                                                                            feilutbetaltBeløp = BigDecimal(1)),
-                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                             fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
                                                              Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -213,7 +213,7 @@ class TekstformatererVedtaksbrevTest {
                                                            fritekst = "Her burde du passet mer på!"),
                                              resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1)),
                        HbVedtaksbrevsperiode(periode = april,
-                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                             fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
                                                              Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              kravgrunnlag = HbKravgrunnlag(riktigBeløp = BigDecimal(0),
                                                                            utbetaltBeløp = BigDecimal(1),
@@ -249,7 +249,7 @@ class TekstformatererVedtaksbrevTest {
                       vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
         val perioder = listOf(HbVedtaksbrevsperiode(januar,
                                                     HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
-                                                    HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                                    HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
                                                     HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                                   vilkårsvurderingsresultat =
@@ -316,7 +316,7 @@ class TekstformatererVedtaksbrevTest {
                                              kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO,
                                                                            BigDecimal(1000),
                                                                            BigDecimal(1000)),
-                                             fakta = HbFakta(Hendelsestype.BOR_MED_SØKER,
+                                             fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
                                                              Hendelsesundertype.BOR_IKKE_MED_BARN),
                                              vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.FORELDET,
                                                                          aktsomhetsresultat = AnnenVurdering.FORELDET,
@@ -527,7 +527,7 @@ class TekstformatererVedtaksbrevTest {
         val periode =
                 HbVedtaksbrevsperiode(periode = januar,
                                       kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                                      fakta = HbFakta(Hendelsestype.BOR_MED_SØKER, Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                      fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER, Hendelsesundertype.BOR_IKKE_MED_BARN),
                                       vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                                   vilkårsvurderingsresultat = Vilkårsvurderingsresultat
                                                                           .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
