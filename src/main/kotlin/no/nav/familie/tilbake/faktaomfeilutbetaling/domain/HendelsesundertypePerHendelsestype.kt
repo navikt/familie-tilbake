@@ -36,6 +36,7 @@ object HendelsesundertypePerHendelsestype {
                                                                       Hendelsesundertype.UTDANNING,
                                                                       Hendelsesundertype.ETABLERER_EGEN_VIRKSOMHET),
                          Hendelsestype.STØNADSPERIODE to setOf(Hendelsesundertype.HOVEDPERIODE_3_ÅR,
+                                                               Hendelsesundertype.UTVIDELSE_UTDANNING,
                                                                Hendelsesundertype.UTVIDELSE_SÆRLIG_TILSYNSKREVENDE_BARN,
                                                                Hendelsesundertype.UTVIDELSE_FORBIGÅENDE_SYKDOM,
                                                                Hendelsesundertype.PÅVENTE_AV_SKOLESTART_STARTET_IKKE,

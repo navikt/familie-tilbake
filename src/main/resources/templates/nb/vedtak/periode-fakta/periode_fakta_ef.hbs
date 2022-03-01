@@ -123,6 +123,10 @@ Du har fått {{{ytelsesnavnUbestemt}}} etter at du avsluttet etableringen av ege
 Du har fått {{{ytelsesnavnUbestemt}}} i mer enn tre år og fyller ikke vilkårene for utvidelse av stønadsperioden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
+            {{#case "UTVIDELSE_UTDANNING" }}
+Du har fått {{{ytelsesnavnUbestemt}}} uten å ha vært i utdanning som utgjør minst halvparten av full tid. Derfor har du fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+            {{/case}}
             {{#case "UTVIDELSE_SÆRLIG_TILSYNSKREVENDE_BARN" }}
 Du har fått forlenget {{{ytelsesnavnUbestemt}}} fordi du har et særlig tilsynskrevende barn som hindret deg fra å være i arbeid. Du er ikke lenger forhindret fra å arbeide. Derfor har du ikke rett til {{{ytelsesnavnUbestemt}}}.
 
