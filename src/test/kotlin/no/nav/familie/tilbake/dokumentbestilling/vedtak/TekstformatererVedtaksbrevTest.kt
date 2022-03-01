@@ -189,7 +189,7 @@ class TekstformatererVedtaksbrevTest {
                                                                            utbetaltBeløp = BigDecimal(1),
                                                                            feilutbetaltBeløp = BigDecimal(1)),
                                              fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
-                                                             Hendelsesundertype.BOR_IKKE_MED_BARN,
+                                                             Hendelsesundertype.BARN_FLYTTET,
                                                              "Her har økonomisystemet gjort noe helt feil."),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -204,7 +204,7 @@ class TekstformatererVedtaksbrevTest {
                                                                            utbetaltBeløp = BigDecimal(1),
                                                                            feilutbetaltBeløp = BigDecimal(1)),
                                              fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
-                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                                             Hendelsesundertype.BARN_FLYTTET),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat =
@@ -214,7 +214,7 @@ class TekstformatererVedtaksbrevTest {
                                              resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1)),
                        HbVedtaksbrevsperiode(periode = april,
                                              fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
-                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                                             Hendelsesundertype.BARN_FLYTTET),
                                              kravgrunnlag = HbKravgrunnlag(riktigBeløp = BigDecimal(0),
                                                                            utbetaltBeløp = BigDecimal(1),
                                                                            feilutbetaltBeløp = BigDecimal(1)),
@@ -250,7 +250,7 @@ class TekstformatererVedtaksbrevTest {
         val perioder = listOf(HbVedtaksbrevsperiode(januar,
                                                     HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
                                                     HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
-                                                            Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                                            Hendelsesundertype.BARN_FLYTTET),
                                                     HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                                   vilkårsvurderingsresultat =
                                                                   Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
@@ -317,7 +317,7 @@ class TekstformatererVedtaksbrevTest {
                                                                            BigDecimal(1000),
                                                                            BigDecimal(1000)),
                                              fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER,
-                                                             Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                                             Hendelsesundertype.BARN_FLYTTET),
                                              vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.FORELDET,
                                                                          aktsomhetsresultat = AnnenVurdering.FORELDET,
                                                                          foreldelsesfrist = januar.fom.plusMonths(11)),
@@ -333,8 +333,8 @@ class TekstformatererVedtaksbrevTest {
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                                                            aktsomhetsresultat = AnnenVurdering.GOD_TRO,
                                                            beløpIBehold = BigDecimal(1000)),
-                                             fakta = HbFakta(Hendelsestype.LOVLIG_OPPHOLD,
-                                                             Hendelsesundertype.UTEN_OPPHOLDSTILLATELSE),
+                                             fakta = HbFakta(Hendelsestype.MEDLEMSKAP,
+                                                             Hendelsesundertype.LOVLIG_OPPHOLD),
                                              kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO,
                                                                            BigDecimal(1000),
                                                                            BigDecimal(1000)),
@@ -527,7 +527,7 @@ class TekstformatererVedtaksbrevTest {
         val periode =
                 HbVedtaksbrevsperiode(periode = januar,
                                       kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                                      fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER, Hendelsesundertype.BOR_IKKE_MED_BARN),
+                                      fakta = HbFakta(Hendelsestype.ENSLIG_FORSØRGER, Hendelsesundertype.BARN_FLYTTET),
                                       vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                                   vilkårsvurderingsresultat = Vilkårsvurderingsresultat
                                                                           .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,

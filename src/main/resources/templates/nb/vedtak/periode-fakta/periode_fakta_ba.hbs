@@ -7,7 +7,12 @@
         {{/switch}}
     {{/case}}
     {{#case "BOR_MED_SØKER"}}
-        {{> fakta-bor}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "BOR_IKKE_MED_BARN"}}
+                Du har fått {{{ytelsesnavnUbestemt}}} for barn som ikke bor fast hos deg. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
     {{/case}}
     {{#case "BOSATT_I_RIKET"}}
         {{#switch fakta.hendelsesundertype}}
@@ -30,7 +35,12 @@ Du har fått {{{ytelsesnavnUbestemt}}} uten at du bodde i Norge. Du har derfor f
         {{/switch}}
     {{/case}}
     {{#case "LOVLIG_OPPHOLD"}}
-        {{> fakta-opphold}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "UTEN_OPPHOLDSTILLATELSE"}}
+                Du har fått {{{ytelsesnavnUbestemt}}} uten at du hadde oppholdstillatelse i Norge. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
     {{/case}}
     {{#case "DØDSFALL"}}
         {{> fakta-død}}
