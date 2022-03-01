@@ -63,6 +63,7 @@ enum class Hendelsesundertype {
     SAMBOER,
     NYTT_BARN_SAMME_PARTNER,
     ENDRET_SAMVÆRSORDNING,
+    BARN_FLYTTET,
     NÆRE_BOFORHOLD,
     FORELDRE_LEVER_SAMMEN,
     BARN_8_ÅR,

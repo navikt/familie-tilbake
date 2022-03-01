@@ -27,7 +27,7 @@ object HendelsesundertypePerHendelsestype {
                                                                  Hendelsesundertype.SAMBOER,
                                                                  Hendelsesundertype.NYTT_BARN_SAMME_PARTNER,
                                                                  Hendelsesundertype.ENDRET_SAMVÆRSORDNING,
-                                                                 Hendelsesundertype.BOR_IKKE_MED_BARN,
+                                                                 Hendelsesundertype.BARN_FLYTTET,
                                                                  Hendelsesundertype.NÆRE_BOFORHOLD,
                                                                  Hendelsesundertype.FORELDRE_LEVER_SAMMEN),
                          Hendelsestype.OVERGANGSSTØNAD to setOf(Hendelsesundertype.BARN_8_ÅR),
