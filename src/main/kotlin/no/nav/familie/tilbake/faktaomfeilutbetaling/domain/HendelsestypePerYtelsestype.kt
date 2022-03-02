@@ -32,7 +32,8 @@ object HendelsestypePerYtelsestype {
                                                                   Hendelsestype.MEDLEMSKAP,
                                                                   Hendelsestype.OPPHOLD_I_NORGE,
                                                                   Hendelsestype.ENSLIG_FORSØRGER,
-                                                                  Hendelsestype.DØDSFALL),
+                                                                  Hendelsestype.DØDSFALL,
+                                                                  Hendelsestype.SKOLEPENGER),
                                  Ytelsestype.KONTANTSTØTTE to setOf(Hendelsestype.ANNET,
                                                                     Hendelsestype.BOR_MED_SØKER,
                                                                     Hendelsestype.DØDSFALL))
