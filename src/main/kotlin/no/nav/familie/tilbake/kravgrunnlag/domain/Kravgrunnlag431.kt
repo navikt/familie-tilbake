@@ -135,11 +135,13 @@ enum class Klassekode(val aktivitet: String) {
     BATRSMA("Småbarnstillegg"),
     EFOG("Overgangsstønad"),
     EFBT("Barnetilsyn"),
-    EFSP("Skolepenger");
+    EFSP("Skolepenger"),
+    TREK_KODER(""); // Felles klassekode for alle TREK klassetyper
 
     companion object {
 
-        fun fraKode(kode: String): Klassekode {
+        fun fraKode(kode: String, klassetype: Klassetype): Klassekode {
+            if (klassetype == Klassetype.TREK) return TREK_KODER
             return values().firstOrNull { it.name == kode }
                    ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
         }
