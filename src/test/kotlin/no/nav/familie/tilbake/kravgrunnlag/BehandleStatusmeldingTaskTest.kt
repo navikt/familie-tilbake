@@ -177,7 +177,12 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        assertOppgaveTask(venteårsak.beskrivelse, LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker))
+        taskRepository.findAll().none {
+            it.type == OppdaterOppgaveTask.TYPE &&
+            it.payload == behandling.id.toString() &&
+            it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
+            it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
+        }.shouldBeTrue()
     }
 
     @Test
