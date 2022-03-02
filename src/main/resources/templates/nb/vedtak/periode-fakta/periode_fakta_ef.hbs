@@ -157,7 +157,7 @@ Du har fått forlenget {{{ytelsesnavnUbestemt}}} fordi du ventet på barnetilsyn
 Du har fått forlenget {{{ytelsesnavnUbestemt}}} fordi du ventet på barnetilsyn. Fordi barnet har startet i en tilsynsordning, har du ikke lenger rett på stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
-            {{#case "REELL_ARBEIDSSØKER" }}
+            {{#case "ARBEIDSSØKER" }}
 Du har fått {{{ytelsesnavnUbestemt}}} fordi du meldte deg som arbeidssøker. Fordi du ikke er reell arbeidssøker lenger, har du ikke rett på stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
@@ -201,7 +201,7 @@ Du har fått pensjon som gjenlevende ektefelle som skulle ha redusert {{{ytelses
     {{/case}}
     {{#case "STØNAD_TIL_BARNETILSYN"}}
         {{#switch fakta.hendelsesundertype}}
-            {{#case "ARBEID" }}
+            {{#case "IKKE_I_ARBEID" }}
 Du har fått stønad til barnetilsyn. Fordi du ikke lenger er i arbeid, har du ikke rett til stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}

@@ -157,7 +157,7 @@ Du har fått forlenga {{{ytelsesnavnUbestemt}}} fordi du venta på barnetilsyn. 
 Du har fått forlenga {{{ytelsesnavnUbestemt}}} fordi du venta på barnetilsyn. Fordi barnet har byrja i ei tilsynsordning, har du ikkje lenger rett på stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt i denne perioden.
             {{/case}}
-            {{#case "REELL_ARBEIDSSØKER" }}
+            {{#case "ARBEIDSSØKER" }}
 Du har fått {{{ytelsesnavnUbestemt}}} fordi du melde deg som arbeidssøkar. Fordi du ikkje er reell arbeidssøkar lenger, har du ikkje rett på stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt i denne perioden.
             {{/case}}
@@ -201,7 +201,7 @@ Du har fått pensjon som attlevande ektefelle som skulle ha redusert {{{ytelsesn
     {{/case}}
     {{#case "STØNAD_TIL_BARNETILSYN"}}
         {{#switch fakta.hendelsesundertype}}
-            {{#case "ARBEID" }}
+            {{#case "IKKE_ARBEID" }}
 Du har fått stønad til barnetilsyn. Fordi du ikkje lenger er i arbeid, har du ikkje rett til stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt i denne perioden.
             {{/case}}
