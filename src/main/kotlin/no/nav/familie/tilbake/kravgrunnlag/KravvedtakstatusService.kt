@@ -139,7 +139,13 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                                               aktør = Aktør.VEDTAKSLØSNING,
                                               beskrivelse = venteårsak.beskrivelse)
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, venteårsak.beskrivelse, tidsfrist)
+
+        // oppgave oppdateres ikke dersom behandling venter på varsel
+        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
+        if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true){
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId, venteårsak.beskrivelse, tidsfrist)
+        }
+
     }
 
 }
