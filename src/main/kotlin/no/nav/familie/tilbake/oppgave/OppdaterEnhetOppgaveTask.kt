@@ -5,6 +5,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
@@ -23,7 +25,8 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : Asy
         val behandlingId = UUID.fromString(task.payload)
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-        val nyBeskrivelse = beskrivelse + "/n" + oppgave.beskrivelse
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) +":" +
+                            beskrivelse + "/n" + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse))
     }
 
