@@ -22,7 +22,9 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsestypePerYtelsestype
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsesundertypePerHendelsestype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -47,12 +49,16 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for OS`() {
-        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NB)
+        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
+                            Språkkode.NB,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for OS nynorsk`() {
-        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD, Språkkode.NN)
+        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
+                            Språkkode.NN,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
     }
 
     @Test
@@ -68,39 +74,29 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     @SafeVarargs
     private fun lagTeksterOgValider(ytelsestype: Ytelsestype,
                                     språkkode: Språkkode,
-                                    vararg unntak: Set<HendelseMedUndertype>) {
+                                    vararg unntak: HendelseMedUndertype) {
         val felles: HbVedtaksbrevFelles = lagFellesBuilder(språkkode, ytelsestype)
 
         val resultat = lagFaktatekster(felles, ytelsestype)
         sjekkVerdier(resultat, *unntak)
     }
 
-    private fun sjekkVerdier(verdier: Map<HendelseMedUndertype, String>, vararg unntattUnikhet: Set<HendelseMedUndertype>) {
-        val tekstTilHendelsestype: MutableMap<String, MutableSet<HendelseMedUndertype>> =
-                TreeMap<String, MutableSet<HendelseMedUndertype>>()
-        for ((key, value) in verdier) {
-            if (tekstTilHendelsestype.containsKey(value)) {
-                tekstTilHendelsestype[value]!!.add(key)
-            } else {
-                val liste: MutableSet<HendelseMedUndertype> = HashSet()
-                liste.add(key)
-                tekstTilHendelsestype[value] = liste
-            }
-        }
-        val hendelsestypeTilTekst: MutableMap<Set<HendelseMedUndertype>, String> = HashMap()
-        for ((key, value) in tekstTilHendelsestype) {
-            hendelsestypeTilTekst[value] = key
-        }
-        for (unntak in unntattUnikhet) {
-            hendelsestypeTilTekst.remove(unntak)
-        }
-        var feilmelding = ""
-        for ((key, value) in hendelsestypeTilTekst) {
-            if (key.size > 1) {
-                feilmelding += """$value mapper alle til $key
-"""
-            }
-        }
+    private fun sjekkVerdier(verdier: Map<HendelseMedUndertype, String>, vararg unntattUnikhet: HendelseMedUndertype) {
+        val tekstTilHendelsestyper = TreeMap<String, MutableSet<HendelseMedUndertype>>()
+        verdier.filter { (key, _) -> key !in unntattUnikhet }
+                .forEach { (key, value) ->
+                    if (tekstTilHendelsestyper.containsKey(value)) {
+                        tekstTilHendelsestyper[value]!!.add(key)
+                    } else {
+                        val liste: MutableSet<HendelseMedUndertype> = HashSet()
+                        liste.add(key)
+                        tekstTilHendelsestyper[value] = liste
+                    }
+                }
+        val feilmelding = tekstTilHendelsestyper.filter { (_, value) -> value.size > 1 }.map { (key, value) ->
+            """$value mapper alle til "$key"""
+        }.joinToString("\n")
+
         if (feilmelding.isNotEmpty()) {
             throw AssertionError(feilmelding)
         }
