@@ -29,7 +29,7 @@ rolle:
     saksbehandler: "e40090eb-c2fb-400e-b412-e9084019a73b"
     beslutter: "e40090eb-c2fb-400e-b412-e9084019a73b"
   teamfamilie:
-    forvalter: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b" #må endre til PROD objektId
+    forvalter: "3d718ae5-f25e-47a4-b4b3-084a97604c1d"
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
 
