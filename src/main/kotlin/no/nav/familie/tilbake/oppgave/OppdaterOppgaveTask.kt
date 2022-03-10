@@ -32,7 +32,7 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
 
         val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) +":" +
-                            beskrivelse + "\n" + oppgave.beskrivelse
+                            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(fristFerdigstillelse = frist,
                                                  beskrivelse = nyBeskrivelse))
     }

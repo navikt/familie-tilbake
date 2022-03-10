@@ -26,7 +26,7 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : Asy
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) +":" +
-                            beskrivelse + "/n" + oppgave.beskrivelse
+                            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse))
     }
 
