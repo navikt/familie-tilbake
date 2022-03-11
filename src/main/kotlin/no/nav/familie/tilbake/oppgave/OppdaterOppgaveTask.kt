@@ -6,6 +6,8 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 
@@ -29,7 +31,8 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
 
-        val nyBeskrivelse = beskrivelse + "\n" + oppgave.beskrivelse
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) +":" +
+                            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         oppgaveService.patchOppgave(oppgave.copy(fristFerdigstillelse = frist,
                                                  beskrivelse = nyBeskrivelse))
     }
