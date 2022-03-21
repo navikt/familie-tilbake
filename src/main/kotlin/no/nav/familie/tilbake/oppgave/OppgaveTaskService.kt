@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
@@ -54,7 +55,8 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
         }
         taskRepository.save(Task(type = OppdaterOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
-                                 properties = properties))
+                                 properties = properties)
+                            .medTriggerTid(LocalDateTime.now().plusSeconds(2)))
     }
 
     @Transactional
