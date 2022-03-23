@@ -101,6 +101,15 @@ class StegService(val steg: List<IBehandlingssteg>,
         }
     }
 
+    fun kanAnsvarligSaksbehandlerOppdateres(behandlingId: UUID,
+                                            behandlingsstegDto: BehandlingsstegDto): Boolean {
+        val behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
+        return when (behandlingssteg) {
+            Behandlingssteg.IVERKSETT_VEDTAK, Behandlingssteg.FATTE_VEDTAK -> false
+            else -> true
+        }
+    }
+
     private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
                                     ?: throw  Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
