@@ -224,8 +224,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander,
-                               Behandlingssteg.FORESLÅ_VEDTAK,
-                               Behandlingsstegstatus.TILBAKEFØRT)
+                              Behandlingssteg.FORESLÅ_VEDTAK,
+                              Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
@@ -694,6 +694,59 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
     }
 
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når behandling er sendt til beslutter`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val behandlingsstegDto = BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
+        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+                .shouldBeTrue()
+
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter underkjenner vedtak`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = false)
+        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+                .shouldBeFalse()
+
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere false når beslutter godkjenner vedtak`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = true)
+        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+                .shouldBeFalse()
+
+    }
+
+    @Test
+    fun `kanAnsvarligSaksbehandlerOppdateres skal returnere true når saksbehandler utfører vilkårsvurderingssteg`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
+
+        val behandlingsstegDto = lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(LocalDate.of(2021, 1, 1),
+                                                                                  LocalDate.of(2021, 1, 31)))
+        stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
+                .shouldBeTrue()
+    }
+
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
                                             behandlingsstegstatus: Behandlingsstegstatus,
                                             venteårsak: Venteårsak? = null) {
@@ -739,8 +792,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                       behandlingssteg: Behandlingssteg,
-                                       behandlingsstegstatus: Behandlingsstegstatus) {
+                                      behandlingssteg: Behandlingssteg,
+                                      behandlingsstegstatus: Behandlingsstegstatus) {
 
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
@@ -789,7 +842,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                     aktør: Aktør) {
+                                    aktør: Aktør) {
         taskRepository.findByStatus(Status.UBEHANDLET).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
             historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&

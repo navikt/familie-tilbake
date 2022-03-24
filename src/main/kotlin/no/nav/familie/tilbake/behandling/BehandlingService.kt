@@ -279,10 +279,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        //ansvarlig saksbehandler kan ikke oppdateres når behandling er på Fatte Vedtak Steg og Iverksettelse Vedtak steg
-        if (behandling.status == Behandlingsstatus.FATTER_VEDTAK || behandling.status == Behandlingsstatus.IVERKSETTER_VEDTAK) {
-            return
-        }
         val gammelSaksbehandler = behandling.ansvarligSaksbehandler
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
 

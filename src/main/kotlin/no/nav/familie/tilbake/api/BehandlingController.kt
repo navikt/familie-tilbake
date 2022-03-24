@@ -92,7 +92,9 @@ class BehandlingController(private val behandlingService: BehandlingService,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
 
-        behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
+        if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
+            behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
+        }
         return Ressurs.success("OK")
     }
 

@@ -22,7 +22,8 @@ data class Behandlingsstegstilstand(@Id
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                                     val sporbar: Sporbar = Sporbar())
 
-enum class Behandlingssteg(val sekvens: Int, val kanSaksbehandles: Boolean,
+enum class Behandlingssteg(val sekvens: Int,
+                           val kanSaksbehandles: Boolean,
                            val kanBesluttes: Boolean,
                            val behandlingsstatus: Behandlingsstatus,
                            private val beskrivelse: String) {
