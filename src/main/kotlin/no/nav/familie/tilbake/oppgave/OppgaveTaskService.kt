@@ -42,7 +42,7 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
         }
         taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
-                                 properties = properties))
+                                 properties = properties).medTriggerTid(LocalDateTime.now().plusSeconds(2)))
     }
 
     @Transactional
