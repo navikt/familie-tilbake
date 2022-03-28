@@ -54,7 +54,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
-import java.io.File
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -369,7 +368,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetaltePerioder =
                 setOf(FaktaFeilutbetalingsperiode(periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                                  hendelsestype = Hendelsestype.ANNET,
+                                                  hendelsestype = Hendelsestype.ANNET_BA,
                                                   hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST))
         faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandling.id)
         faktaRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,

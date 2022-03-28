@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 object HendelsestypePerYtelsestype {
 
-    private val HIERARKI = mapOf(Ytelsestype.BARNETRYGD to setOf(Hendelsestype.ANNET,
+    private val HIERARKI = mapOf(Ytelsestype.BARNETRYGD to setOf(Hendelsestype.ANNET_BA,
                                                                  Hendelsestype.BOR_MED_SØKER,
                                                                  Hendelsestype.DØDSFALL,
                                                                  Hendelsestype.BOSATT_I_RIKET,
@@ -22,12 +22,14 @@ object HendelsestypePerYtelsestype {
                                                                       Hendelsestype.INNTEKT,
                                                                       Hendelsestype.PENSJONSYTELSER,
                                                                       Hendelsestype.DØDSFALL),
-                                 Ytelsestype.BARNETILSYN to setOf(Hendelsestype.ANNET,
+                                 Ytelsestype.BARNETILSYN to setOf(Hendelsestype.ANNET_BA,
                                                                   Hendelsestype.MEDLEMSKAP,
                                                                   Hendelsestype.OPPHOLD_I_NORGE,
                                                                   Hendelsestype.ENSLIG_FORSØRGER,
                                                                   Hendelsestype.STØNAD_TIL_BARNETILSYN,
-                                                                  Hendelsestype.DØDSFALL),
+                                                                  Hendelsestype.DØDSFALL,
+                                                                  Hendelsestype.MEDLEMSKAP_BA,
+                                                                  Hendelsestype.UTVIDET),
                                  Ytelsestype.SKOLEPENGER to setOf(Hendelsestype.ANNET,
                                                                   Hendelsestype.MEDLEMSKAP,
                                                                   Hendelsestype.OPPHOLD_I_NORGE,

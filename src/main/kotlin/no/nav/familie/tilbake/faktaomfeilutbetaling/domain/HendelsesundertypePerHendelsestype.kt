@@ -3,20 +3,45 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 object HendelsesundertypePerHendelsestype {
 
     val HIERARKI = mapOf(Hendelsestype.ANNET to setOf(Hendelsesundertype.ANNET_FRITEKST),
+                         Hendelsestype.ANNET_BA to setOf(Hendelsesundertype.ANNET_FRITEKST,
+                                                         Hendelsesundertype.SATSENDRING,
+                                                         Hendelsesundertype.SMÅBARNSTILLEGG_3_ÅR,
+                                                         Hendelsesundertype.SMÅBARNSTILLEGG_OVERANGSSTØNAD),
                          Hendelsestype.BOR_MED_SØKER to setOf(Hendelsesundertype.BOR_IKKE_MED_BARN),
                          Hendelsestype.BOSATT_I_RIKET to setOf(Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
                                                                Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,
                                                                Hendelsesundertype.BARN_BOR_IKKE_I_NORGE,
-                                                               Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE),
+                                                               Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE,
+                                                               Hendelsesundertype.BRUKER_OG_BARN_FLYTTET_FRA_NORGE,
+                                                               Hendelsesundertype.BRUKER_OG_BARN_BOR_IKKE_I_NORGE),
                          Hendelsestype.LOVLIG_OPPHOLD to setOf(Hendelsesundertype.UTEN_OPPHOLDSTILLATELSE),
                          Hendelsestype.DØDSFALL to setOf(Hendelsesundertype.BARN_DØD,
                                                          Hendelsesundertype.BRUKER_DØD),
                          Hendelsestype.DELT_BOSTED to setOf(Hendelsesundertype.ENIGHET_OM_OPPHØR_DELT_BOSTED,
-                                                            Hendelsesundertype.UENIGHET_OM_OPPHØR_DELT_BOSTED),
+                                                            Hendelsesundertype.UENIGHET_OM_OPPHØR_DELT_BOSTED,
+                                                            Hendelsesundertype.FLYTTET_SAMMEN),
                          Hendelsestype.BARNS_ALDER to setOf(Hendelsesundertype.BARN_OVER_6_ÅR,
                                                             Hendelsesundertype.BARN_OVER_18_ÅR),
                          Hendelsestype.MEDLEMSKAP to setOf(Hendelsesundertype.MEDLEM_SISTE_5_ÅR,
                                                            Hendelsesundertype.LOVLIG_OPPHOLD),
+                         Hendelsestype.MEDLEMSKAP_BA to setOf(Hendelsesundertype.UTENLANDS_IKKE_MEDLEM,
+                                                              Hendelsesundertype.MEDLEMSKAP_OPPHØRT,
+                                                              Hendelsesundertype.ANNEN_FORELDER_IKKE_MEDLEM,
+                                                              Hendelsesundertype.ANNEN_FORELDER_OPPHØRT_MEDLEMSKAP,
+                                                              Hendelsesundertype.FLERE_UTENLANDSOPPHOLD,
+                                                              Hendelsesundertype.BOSATT_IKKE_MEDLEM),
+                         Hendelsestype.UTVIDET to setOf(Hendelsesundertype.GIFT,
+                                                        Hendelsesundertype.NYTT_BARN,
+                                                        Hendelsesundertype.SAMBOER_12_MÅNEDER,
+                                                        Hendelsesundertype.FLYTTET_SAMMEN_ANNEN_FORELDER,
+                                                        Hendelsesundertype.FLYTTET_SAMMEN_EKTEFELLE,
+                                                        Hendelsesundertype.FLYTTET_SAMMEN_SAMBOER,
+                                                        Hendelsesundertype.GIFT_IKKE_EGEN_HUSHOLDNING,
+                                                        Hendelsesundertype.SAMBOER_IKKE_EGEN_HUSHOLDNING,
+                                                        Hendelsesundertype.EKTEFELLE_AVSLUTTET_SONING,
+                                                        Hendelsesundertype.SAMBOER_AVSLUTTET_SONING,
+                                                        Hendelsesundertype.EKTEFELLE_INSTITUSJON,
+                                                        Hendelsesundertype.SAMBOER_INSTITUSJON),
                          Hendelsestype.OPPHOLD_I_NORGE to setOf(Hendelsesundertype.BRUKER_IKKE_OPPHOLD_I_NORGE,
                                                                 Hendelsesundertype.BARN_IKKE_OPPHOLD_I_NORGE,
                                                                 Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,
@@ -64,11 +89,7 @@ object HendelsesundertypePerHendelsestype {
                                                                        Hendelsesundertype.KONTANTSTØTTE,
                                                                        Hendelsesundertype.ØKT_KONTANTSTØTTE),
                          Hendelsestype.SKOLEPENGER to setOf(Hendelsesundertype.IKKE_RETT_TIL_OVERGANGSSTØNAD,
-                                                            Hendelsesundertype.SLUTTET_I_UTDANNING)
-
-
-    )
-
+                                                            Hendelsesundertype.SLUTTET_I_UTDANNING))
 
     fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> {
         return HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")
