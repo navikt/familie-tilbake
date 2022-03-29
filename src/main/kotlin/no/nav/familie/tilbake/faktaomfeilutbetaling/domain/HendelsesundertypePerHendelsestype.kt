@@ -6,7 +6,7 @@ object HendelsesundertypePerHendelsestype {
                          Hendelsestype.ANNET_BA to setOf(Hendelsesundertype.ANNET_FRITEKST,
                                                          Hendelsesundertype.SATSENDRING,
                                                          Hendelsesundertype.SMÅBARNSTILLEGG_3_ÅR,
-                                                         Hendelsesundertype.SMÅBARNSTILLEGG_OVERANGSSTØNAD),
+                                                         Hendelsesundertype.SMÅBARNSTILLEGG_OVERGANGSSTØNAD),
                          Hendelsestype.BOR_MED_SØKER to setOf(Hendelsesundertype.BOR_IKKE_MED_BARN),
                          Hendelsestype.BOSATT_I_RIKET to setOf(Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
                                                                Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,
