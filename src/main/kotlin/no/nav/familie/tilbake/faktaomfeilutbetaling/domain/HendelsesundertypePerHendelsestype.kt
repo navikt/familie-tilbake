@@ -5,7 +5,7 @@ object HendelsesundertypePerHendelsestype {
     val HIERARKI = mapOf(Hendelsestype.ANNET to setOf(Hendelsesundertype.ANNET_FRITEKST),
                          Hendelsestype.SATSER to setOf(Hendelsesundertype.SATSENDRING),
                          Hendelsestype.SMÅBARNSTILLEGG to setOf(Hendelsesundertype.SMÅBARNSTILLEGG_3_ÅR,
-                                                       Hendelsesundertype.SMÅBARNSTILLEGG_OVERGANGSSTØNAD),
+                                                                Hendelsesundertype.SMÅBARNSTILLEGG_OVERGANGSSTØNAD),
                          Hendelsestype.BOR_MED_SØKER to setOf(Hendelsesundertype.BOR_IKKE_MED_BARN),
                          Hendelsestype.BOSATT_I_RIKET to setOf(Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
                                                                Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,
