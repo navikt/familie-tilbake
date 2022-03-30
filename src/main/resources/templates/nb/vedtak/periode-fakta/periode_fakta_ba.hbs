@@ -1,13 +1,21 @@
 {{> nb/vedtak/periode-fakta/periode_fakta_felles}}
 {{#switch fakta.hendelsestype}}
-    {{#case "ANNET_BA"}}
+    {{#case "ANNET"}}
         {{#switch fakta.hendelsesundertype}}
             {{#case "ANNET_FRITEKST"}}
             {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "SATSER"}}
+        {{#switch fakta.hendelsesundertype}}
             {{#case "SATSENDRING"}}
 Barnetrygden er endret fordi det har vært en satsendring. Du har derfor fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "SMÅBARNSTILLEGG"}}
+        {{#switch fakta.hendelsesundertype}}
             {{#case "SMÅBARNSTILLEGG_3_ÅR"}}
 Du har fått småbarnstillegg etter at barnet fylte 3 år. Du har derfor fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.

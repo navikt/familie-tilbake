@@ -36,7 +36,8 @@ enum class Hendelsestype {
     PENSJONSYTELSER,
     STØNAD_TIL_BARNETILSYN,
     SKOLEPENGER,
-    ANNET_BA,
+    SATSER,
+    SMÅBARNSTILLEGG,
     MEDLEMSKAP_BA,
     UTVIDET,
 }

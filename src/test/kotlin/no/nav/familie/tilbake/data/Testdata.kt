@@ -228,7 +228,7 @@ object Testdata {
 
     private val faktaFeilutbetalingsperiode =
             FaktaFeilutbetalingsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
-                                        hendelsestype = Hendelsestype.ANNET_BA,
+                                        hendelsestype = Hendelsestype.ANNET,
                                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(begrunnelse = "testverdi",

@@ -82,7 +82,7 @@ class AvsnittUtilTest {
         val perioder =
                 listOf(HbVedtaksbrevsperiode(periode = januar,
                                              kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                                             fakta = HbFakta(Hendelsestype.ANNET_BA, Hendelsesundertype.ANNET_FRITEKST),
+                                             fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
                                              vurderinger =
                                              HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                                                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat

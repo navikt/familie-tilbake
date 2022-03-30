@@ -368,7 +368,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetaltePerioder =
                 setOf(FaktaFeilutbetalingsperiode(periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                                  hendelsestype = Hendelsestype.ANNET_BA,
+                                                  hendelsestype = Hendelsestype.ANNET,
                                                   hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST))
         faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandling.id)
         faktaRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,
