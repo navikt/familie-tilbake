@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.forvaltning
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -33,6 +34,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepositor
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
@@ -280,6 +282,59 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                     .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
             it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
         }
+    }
+
+    @Test
+    fun `annulerKravgrunnlag skal annulere kravgrunnlag som er koblet med en behandling`() {
+        val kravgrunnlag = kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        shouldNotThrowAny { forvaltningService.annulerKravgrunnlag(kravgrunnlag.eksternKravgrunnlagId) }
+    }
+
+    @Test
+    fun `annulerKravgrunnlag skal annulere kravgrunnlag som er mottatt i økonomiXmlMottatt`() {
+        val økonomiXmlMottatt = økonomiXmlMottattRepository.insert(Testdata.økonomiXmlMottatt)
+        shouldNotThrowAny { forvaltningService.annulerKravgrunnlag(økonomiXmlMottatt.eksternKravgrunnlagId!!) }
+    }
+
+    @Test
+    fun `annulerKravgrunnlag skal ikke annulere kravgrunnlag når behandling venter på kravgrunnlag`() {
+        val eksternKravgrunnlagId = BigInteger.ZERO
+        val exception = shouldThrow<RuntimeException> { forvaltningService.annulerKravgrunnlag(eksternKravgrunnlagId) }
+        exception.message shouldBe "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId"
+    }
+
+    @Test
+    fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype`() {
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val kravgrunnlag = Testdata.kravgrunnlag431
+        kravgrunnlagRepository.insert(kravgrunnlag.copy(fagsystemId = fagsak.eksternFagsakId,
+                                                        fagområdekode = Fagområdekode.values()
+                                                                .first { it.ytelsestype == fagsak.ytelsestype }))
+        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
+        forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
+        forvaltningsinfo.mottattXmlId.shouldBeNull()
+    }
+
+    @Test
+    fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val mottattXml = Testdata.økonomiXmlMottatt
+        økonomiXmlMottattRepository.insert(mottattXml.copy(eksternFagsakId = fagsak.eksternFagsakId,
+                                                           ytelsestype = fagsak.ytelsestype))
+        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
+        forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
+        forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
+    }
+
+    @Test
+    fun `hentForvaltningsinfo skal ikke hente forvaltningsinfo når behandling venter på kravgrunnlag`() {
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val exception = shouldThrow<RuntimeException> {
+            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype,
+                                                    fagsak.eksternFagsakId)
+        }
+        exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
+                "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {
