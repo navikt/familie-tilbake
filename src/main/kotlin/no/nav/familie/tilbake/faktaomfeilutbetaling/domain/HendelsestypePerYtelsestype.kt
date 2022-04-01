@@ -6,12 +6,16 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 object HendelsestypePerYtelsestype {
 
     private val HIERARKI = mapOf(Ytelsestype.BARNETRYGD to setOf(Hendelsestype.ANNET,
+                                                                 Hendelsestype.SATSER,
+                                                                 Hendelsestype.SMÅBARNSTILLEGG,
+                                                                 Hendelsestype.MEDLEMSKAP_BA,
                                                                  Hendelsestype.BOR_MED_SØKER,
                                                                  Hendelsestype.DØDSFALL,
                                                                  Hendelsestype.BOSATT_I_RIKET,
                                                                  Hendelsestype.LOVLIG_OPPHOLD,
                                                                  Hendelsestype.DELT_BOSTED,
-                                                                 Hendelsestype.BARNS_ALDER),
+                                                                 Hendelsestype.BARNS_ALDER,
+                                                                 Hendelsestype.UTVIDET),
                                  Ytelsestype.OVERGANGSSTØNAD to setOf(Hendelsestype.ANNET,
                                                                       Hendelsestype.MEDLEMSKAP,
                                                                       Hendelsestype.OPPHOLD_I_NORGE,

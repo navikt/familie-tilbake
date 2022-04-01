@@ -48,26 +48,54 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                                             ansvarligSaksbehandler = "Bob")
 
     @Test
-    fun `lagDeltekst skal støtte alle permutasjoner av fakta for OS`() {
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG`() {
         lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
                             Språkkode.NB,
                             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
     }
 
     @Test
-    fun `lagDeltekst skal støtte alle permutasjoner av fakta for OS nynorsk`() {
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG nynorsk`() {
         lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
                             Språkkode.NN,
                             HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
     }
 
     @Test
-    fun `lagDeltekst skal støtte alle permutasjoner av fakta for BT`() {
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT`() {
+        lagTeksterOgValider(Ytelsestype.BARNETILSYN,
+                            Språkkode.NB,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+    }
+
+    @Test
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT nynorsk`() {
+        lagTeksterOgValider(Ytelsestype.BARNETILSYN,
+                            Språkkode.NN,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+    }
+
+    @Test
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP`() {
+        lagTeksterOgValider(Ytelsestype.SKOLEPENGER,
+                            Språkkode.NB,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+    }
+
+    @Test
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP nynorsk`() {
+        lagTeksterOgValider(Ytelsestype.SKOLEPENGER,
+                            Språkkode.NN,
+                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+    }
+
+    @Test
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for BA`() {
         lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NB)
     }
 
     @Test
-    fun `lagDeltekst skal støtte alle permutasjoner av fakta for BT nynorsk`() {
+    fun `lagDeltekst skal støtte alle permutasjoner av fakta for BA nynorsk`() {
         lagTeksterOgValider(Ytelsestype.BARNETRYGD, Språkkode.NN)
     }
 
