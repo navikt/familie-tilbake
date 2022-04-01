@@ -57,12 +57,13 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
         val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val data = when (maltype) {
             Dokumentmalstype.VARSEL -> {
-                val varselbrevsdokument = lagVarselbrevForSending(fritekst,
-                                                                  behandling,
-                                                                  fagsak,
-                                                                  brevmottager,
-                                                                  false)
-                lagManueltVarselBrev(varselbrevsdokument)
+                val varselbrevsdokument: Varselbrevsdokument = lagVarselbrevForSending(fritekst,
+                                                                       behandling,
+                                                                       fagsak,
+                                                                       brevmottager,
+                                                                       false)
+
+                lagManueltVarselBrev(varselbrevsdokument.copy(brevmetadata = varselbrevsdokument.brevmetadata.copy()))
             }
             Dokumentmalstype.KORRIGERT_VARSEL -> {
                 val varselbrevsdokument =

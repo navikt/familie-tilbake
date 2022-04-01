@@ -11,6 +11,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
@@ -65,6 +67,7 @@ import java.util.UUID
 
 @Service
 class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
+                         private val behandlingskontrollService: BehandlingskontrollService,
                          private val faktaRepository: FaktaFeilutbetalingRepository,
                          private val foreldelseRepository: VurdertForeldelseRepository,
                          private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -186,12 +189,15 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
                                        brevmottager: Brevmottager): Vedtaksbrevsdata {
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val beregnetResultat = tilbakekrevingBeregningService.beregn(behandling.id)
+        val steg = behandlingskontrollService.finnAktivtSteg(behandling.id)
         val brevMetadata: Brevmetadata = lagMetadataForVedtaksbrev(behandling,
+                                                                   steg,
                                                                    fagsak,
                                                                    personinfo,
                                                                    beregnetResultat.vedtaksresultat,
                                                                    brevmottager)
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(behandling,
+                                                             steg,
                                                              fagsak,
                                                              personinfo,
                                                              beregnetResultat,
@@ -202,6 +208,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagHbVedtaksbrevsdata(behandling: Behandling,
+                                      steg: Behandlingssteg?,
                                       fagsak: Fagsak,
                                       personinfo: Personinfo,
                                       beregnetResultat: Beregningsresultat,
@@ -234,7 +241,11 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val hbBehandling: HbBehandling = lagHbBehandling(behandling)
         val varsletBeløp = finnVarsletBeløp(behandling)
         val varsletDato = finnVarsletDato(behandling.id)
-        val ansvarligBeslutter = behandling.ansvarligBeslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it) }
+        val ansvarligBeslutter = if (steg == Behandlingssteg.FATTE_VEDTAK) {
+            behandling.ansvarligBeslutter?.let { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(it) }
+        } else {
+            null
+        }
         val erFeilutbetaltBeløpKorrigertNed =
                 varsletBeløp != null && hbVedtaksResultatBeløp.totaltFeilutbetaltBeløp < varsletBeløp
         val vedtaksbrevFelles =
@@ -341,6 +352,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagMetadataForVedtaksbrev(behandling: Behandling,
+                                          steg: Behandlingssteg?,
                                           fagsak: Fagsak,
                                           personinfo: Personinfo,
                                           vedtakResultatType: Vedtaksresultat?,
@@ -352,8 +364,11 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val tilbakekreves = Vedtaksresultat.FULL_TILBAKEBETALING == vedtakResultatType ||
                             Vedtaksresultat.DELVIS_TILBAKEBETALING == vedtakResultatType
-        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
-
+        val ansvarligSaksbehandler = if (steg == Behandlingssteg.FORESLÅ_VEDTAK) {
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+        } else {
+            eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+        }
         return Brevmetadata(ansvarligSaksbehandler = ansvarligSaksbehandler,
                             behandlendeEnhetId = behandling.behandlendeEnhet,
                             behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,

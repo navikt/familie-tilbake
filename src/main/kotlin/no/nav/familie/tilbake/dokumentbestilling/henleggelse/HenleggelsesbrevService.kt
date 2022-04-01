@@ -82,7 +82,7 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
         val ansvarligSaksbehandler = if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             SIGNATUR_AUTOMATISK_HENLEGGELSESBREV
         } else {
-            eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         }
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val metadata = Brevmetadata(behandlendeEnhetId = behandling.behandlendeEnhet,

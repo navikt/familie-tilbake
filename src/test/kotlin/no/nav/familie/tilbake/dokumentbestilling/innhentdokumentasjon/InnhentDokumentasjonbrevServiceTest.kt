@@ -41,7 +41,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
-        every { mockEksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns "Siri Saksbehandler"
+        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
         every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
                 .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
     }

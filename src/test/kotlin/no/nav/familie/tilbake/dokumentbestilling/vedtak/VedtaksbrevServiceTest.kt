@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
@@ -54,7 +55,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
-import java.io.File
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -63,6 +63,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
 
     @Autowired
     private lateinit var faktaRepository: FaktaFeilutbetalingRepository
@@ -113,6 +116,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
         vedtaksbrevService = VedtaksbrevService(behandlingRepository,
+                                                behandlingskontrollService,
                                                 faktaRepository,
                                                 foreldelseRepository,
                                                 vilkårsvurderingRepository,
