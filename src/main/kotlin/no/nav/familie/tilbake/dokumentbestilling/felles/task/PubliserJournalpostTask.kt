@@ -41,7 +41,7 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
             if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)){
                 historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                     historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
-                    aktør = Aktør.VEDTAKSLØSNING)
+                    aktør = Aktør.VEDTAKSLØSNING, beskrivelse = "Mottaker har ukjent adresse")
             } else {
                 throw ressursException
             }

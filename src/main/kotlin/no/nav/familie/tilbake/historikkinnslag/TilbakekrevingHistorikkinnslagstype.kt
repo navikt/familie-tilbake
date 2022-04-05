@@ -25,7 +25,7 @@ enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
     ENDRET_ENHET(tittel = "Endret enhet", tekst = "Ny enhet: "),
     BEHANDLING_FLYTTET_MED_FORVALTNING(tittel = "Problem i forvaltning",
                                        tekst = "Behandling flyttet tilbake til Fakta"),
-    BREV_IKKE_SENDT_UKJENT_ADRESSE(tittel = "Bruker har ukjent adresse, brev ikke sendt"),
+    BREV_IKKE_SENDT_UKJENT_ADRESSE(tittel = "Brev ikke sendt", tekst = "Årsak: "),
 
     // Skjermlenke type
     VERGE_OPPRETTET(tittel = "Verge registert",
