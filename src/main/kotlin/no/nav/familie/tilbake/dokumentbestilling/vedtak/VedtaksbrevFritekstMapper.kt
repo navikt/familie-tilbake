@@ -29,7 +29,7 @@ object VedtaksbrevFritekstMapper {
         return vedtaksbrevsperioder
     }
 
-    fun mapFritekstFraDb(fritekstPerioder: List<Vedtaksbrevsperiode>): List<PeriodeMedTekstDto> {
+    fun mapFritekstFraDb(fritekstPerioder: Set<Vedtaksbrevsperiode>): List<PeriodeMedTekstDto> {
 
         val perioderTilMap = HashMap<Periode, MutableMap<Friteksttype, String>>()
 

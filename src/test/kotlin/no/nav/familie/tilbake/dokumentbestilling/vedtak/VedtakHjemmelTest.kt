@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
@@ -25,10 +26,8 @@ class VedtakHjemmelTest {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -37,15 +36,21 @@ class VedtakHjemmelTest {
         hbHjemmel.lovhjemmelFlertall shouldBe false
     }
 
+    private fun lagVedtaksbrevgrunnlag(vurdertForeldelse: VurdertForeldelse?,
+                                       vurderingPerioder: Set<Vilkårsvurderingsperiode>): Vedtaksbrevgrunnlag {
+        val behandling = Testdata.vedtaksbrevbehandling
+                .copy(vurderteForeldelser = vurdertForeldelse?.let { setOf(it) } ?: setOf(),
+                      vilkårsvurdering = setOf(Testdata.vilkårsvurdering.copy(perioder = vurderingPerioder)))
+        return Testdata.vedtaksbrevgrunnlag.copy(behandlinger = setOf(behandling), ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
+    }
+
     @Test
     fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter nynorsk`() {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NN,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -61,10 +66,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -81,10 +84,8 @@ class VedtakHjemmelTest {
                 }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -101,10 +102,8 @@ class VedtakHjemmelTest {
                 }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = false,
                                                  klagebehandling = false)
@@ -120,10 +119,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -139,10 +136,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NN,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -160,10 +155,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 emptySet(),
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, emptySet()),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -184,10 +177,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -207,10 +198,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -231,10 +220,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -256,10 +243,9 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse,
+                                                                        vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -273,10 +259,8 @@ class VedtakHjemmelTest {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -297,10 +281,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = false)
@@ -315,10 +297,8 @@ class VedtakHjemmelTest {
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) { it }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 null,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(null, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = true)
@@ -339,10 +319,8 @@ class VedtakHjemmelTest {
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
-                                                 vurdertForeldelse,
-                                                 vurderingPerioder,
+                                                 lagVedtaksbrevgrunnlag(vurdertForeldelse, vurderingPerioder),
                                                  VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
-                                                 Ytelsestype.OVERGANGSSTØNAD,
                                                  Språkkode.NB,
                                                  visHjemmelForRenter = true,
                                                  klagebehandling = true)

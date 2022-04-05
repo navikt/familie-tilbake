@@ -24,6 +24,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevbehandling
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
@@ -98,7 +100,7 @@ object Testdata {
     val behandling = Behandling(fagsakId = fagsak.id,
                                 type = Behandlingstype.TILBAKEKREVING,
                                 opprettetDato = LocalDate.now(),
-                                avsluttetDato = LocalDate.now(),
+                                avsluttetDato = null,
                                 ansvarligSaksbehandler = "saksbehandler",
                                 ansvarligBeslutter = "beslutter",
                                 behandlendeEnhet = "testverdi",
@@ -132,11 +134,11 @@ object Testdata {
                                                             behandlingssteg = Behandlingssteg.FAKTA,
                                                             behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
-
     val totrinnsvurdering = Totrinnsvurdering(behandlingId = behandling.id,
                                               behandlingssteg = Behandlingssteg.FAKTA,
                                               godkjent = true,
                                               begrunnelse = "testverdi")
+
 
     private val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                         foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
@@ -266,4 +268,22 @@ object Testdata {
                                   dokumentId = "testverdi",
                                   brevtype = Brevtype.VARSEL)
 
+    val vedtaksbrevbehandling = Vedtaksbrevbehandling(id = fagsak.id,
+                                                      type = Behandlingstype.TILBAKEKREVING,
+                                                      ansvarligSaksbehandler = "saksbehandler",
+                                                      ansvarligBeslutter = "beslutter",
+                                                      behandlendeEnhet = "testverdi",
+                                                      behandlendeEnhetsNavn = "testverdi",
+                                                      fagsystemsbehandling = setOf(fagsystemsbehandling),
+                                                      resultater = setOf(behandlingsresultat),
+                                                      varsler = setOf(varsel),
+                                                      verger = setOf(verge),
+                                                      vedtaksbrevOppsummering = vedtaksbrevsoppsummering)
+
+    val vedtaksbrevgrunnlag = Vedtaksbrevgrunnlag(id = behandling.id,
+                                                  bruker = bruker,
+                                                  eksternFagsakId = "testverdi",
+                                                  fagsystem = Fagsystem.BA,
+                                                  ytelsestype = Ytelsestype.BARNETRYGD,
+                                                  behandlinger = setOf(vedtaksbrevbehandling))
 }
