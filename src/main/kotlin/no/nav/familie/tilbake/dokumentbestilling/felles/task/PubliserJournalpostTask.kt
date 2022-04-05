@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.historikkinnslag.Historikkinnslagstype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -14,7 +13,7 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = PubliserJournalpostTask.TYPE,
