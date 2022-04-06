@@ -30,8 +30,6 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
     override fun doTask(task: Task) {
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
-
-
         try {
             integrasjonerClient.distribuerJournalpost(
                 task.metadata.getProperty("journalpostId"),
@@ -39,9 +37,9 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
             )
         } catch (ressursException: RessursException) {
             if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)){
-                historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
-                    historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
-                    aktør = Aktør.VEDTAKSLØSNING, beskrivelse = "Mottaker har ukjent adresse")
+                // ta med info om ukjent adresse
+                task.metadata["ukjentAdresse"] = true
+                taskService.save(task)
             } else {
                 throw ressursException
             }

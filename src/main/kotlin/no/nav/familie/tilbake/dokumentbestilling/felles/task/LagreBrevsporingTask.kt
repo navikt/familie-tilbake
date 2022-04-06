@@ -47,7 +47,8 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
 
         historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
                                               historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
-                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler))
+                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                                              ukjentAdresse = task.metadata.getOrDefault("ukjentAdresse", false) as Boolean)
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))

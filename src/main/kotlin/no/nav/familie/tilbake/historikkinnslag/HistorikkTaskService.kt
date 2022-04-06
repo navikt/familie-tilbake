@@ -18,7 +18,8 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                          aktør: Aktør,
                          triggerTid: LocalDateTime? = null,
-                         beskrivelse: String? = null) {
+                         beskrivelse: String? = null,
+                         ukjentAdresse: Boolean? = false) {
 
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
@@ -26,7 +27,11 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
             setProperty("aktør", aktør.name)
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
-            beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
+            if (ukjentAdresse != null && ukjentAdresse) {
+                setProperty("beskrivelse", "Mottaker har ukjent adresse, brev ikke sendt")
+            } else {
+                beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
+            }
         }
 
         val task = Task(type = LagHistorikkinnslagTask.TYPE,
