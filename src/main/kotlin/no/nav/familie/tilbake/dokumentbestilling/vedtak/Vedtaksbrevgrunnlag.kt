@@ -27,6 +27,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
+/**
+ * Alternativ spring-visualisering av fagsak-tabellen med tilhørende behandlinger. Tilpasset databehovet for vedtaksbrev.
+ */
 @Table("fagsak")
 data class Vedtaksbrevgrunnlag(@Id
                                val id: UUID,
@@ -36,8 +39,7 @@ data class Vedtaksbrevgrunnlag(@Id
                                val fagsystem: Fagsystem,
                                val ytelsestype: Ytelsestype,
                                @MappedCollection(idColumn = "fagsak_id")
-                               val behandlinger: Set<Vedtaksbrevbehandling>
-) {
+                               val behandlinger: Set<Vedtaksbrevbehandling>) {
 
     val behandling get() = behandlinger.first { it.avsluttetDato == null }
 
@@ -50,6 +52,11 @@ data class Vedtaksbrevgrunnlag(@Id
     val aktivVerge get() = behandling.verger.firstOrNull { it.aktiv }
 
     val erRevurdering get() = behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING
+
+    val erRevurderingEtterKlage
+        get() = behandling.erRevurdering && behandling.årsaker.any {
+            it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP)
+        }
 
     val varsletBeløp get() = behandling.aktivtVarsel?.varselbeløp?.let { BigDecimal(it) }
 
@@ -101,6 +108,9 @@ data class Vedtaksbrevgrunnlag(@Id
 
 }
 
+/**
+ * Alternativ spring-visualisering av behandling-tabellen med tilhørende relasjoner som er nødvendig for vedtaksbrev.
+ */
 @Table("behandling")
 data class Vedtaksbrevbehandling(@Id
                                  val id: UUID,

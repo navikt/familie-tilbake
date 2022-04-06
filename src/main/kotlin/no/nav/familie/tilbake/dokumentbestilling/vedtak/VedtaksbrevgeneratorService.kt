@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
-import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
@@ -185,22 +184,17 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
     }
 
     private fun lagHbBehandling(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag): HbBehandling {
-        val erRevurderingEtterKlage: Boolean = vedtaksbrevgrunnlag.erRevurdering && vedtaksbrevgrunnlag.behandling.årsaker
-                .any { it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP) }
-        val erRevurderingEtterKlageNfp: Boolean = vedtaksbrevgrunnlag.erRevurderingEtterKlageNfp
-        val originalBehandlingVedtaksdato = vedtaksbrevgrunnlag.finnOriginalBehandlingVedtaksdato()
         return HbBehandling(erRevurdering = vedtaksbrevgrunnlag.erRevurdering,
-                            erRevurderingEtterKlage = erRevurderingEtterKlage,
-                            erRevurderingEtterKlageNfp = erRevurderingEtterKlageNfp,
-                            originalBehandlingsdatoFagsakvedtak = originalBehandlingVedtaksdato)
+                            erRevurderingEtterKlage = vedtaksbrevgrunnlag.erRevurderingEtterKlage,
+                            erRevurderingEtterKlageNfp = vedtaksbrevgrunnlag.erRevurderingEtterKlageNfp,
+                            originalBehandlingsdatoFagsakvedtak = vedtaksbrevgrunnlag.finnOriginalBehandlingVedtaksdato())
     }
 
     private fun lagHbVedtaksbrevPerioder(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
                                          beregningsresultat: Beregningsresultat,
                                          perioderFritekst: List<PeriodeMedTekstDto>): List<HbVedtaksbrevsperiode> {
-        val fakta: FaktaFeilutbetaling =
-                vedtaksbrevgrunnlag.faktaFeilutbetaling
-                ?: error("Vedtaksbrev mangler fakta for behandling: ${vedtaksbrevgrunnlag.behandling.id}")
+        val fakta = vedtaksbrevgrunnlag.faktaFeilutbetaling
+                    ?: error("Vedtaksbrev mangler fakta for behandling: ${vedtaksbrevgrunnlag.behandling.id}")
         return if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
             emptyList()
         } else {
