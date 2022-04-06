@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.Aspect
@@ -25,6 +26,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import java.math.BigInteger
 import java.util.UUID
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
@@ -34,6 +36,7 @@ enum class HenteParam {
     YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     MOTTATT_XML_ID,
+    EKSTERN_KRAVGRUNNLAG_ID,
     INGEN
 }
 
@@ -42,6 +45,7 @@ enum class HenteParam {
 class TilgangAdvice(private val rolleConfig: RolleConfig,
                     private val fagsakRepository: FagsakRepository,
                     private val behandlingRepository: BehandlingRepository,
+                    private val kravgrunnlagRepository: KravgrunnlagRepository,
                     private val auditLogger: AuditLogger,
                     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                     private val integrasjonerClient: IntegrasjonerClient) {
@@ -124,6 +128,21 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
                 val økonomiXmlMottatt = økonomiXmlMottattRepository.findByIdOrThrow(mottattXmlId)
 
                 validate(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype),
+                         minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
+                         fagsak = null,
+                         handling = rolletilgangssjekk.handling)
+            }
+            HenteParam.EKSTERN_KRAVGRUNNLAG_ID -> {
+                val eksternKravgrunnlagId = requestBody.first() as BigInteger
+                val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternKravgrunnlagId(eksternKravgrunnlagId)
+                val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId)
+                if (økonomiXmlMottatt == null && kravgrunnlag == null) {
+                    throw Feil(message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId",
+                               httpStatus = HttpStatus.BAD_REQUEST)
+                }
+                val ytelsestype = økonomiXmlMottatt?.ytelsestype ?: kravgrunnlag!!.fagområdekode.ytelsestype
+
+                validate(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                          minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                          fagsak = null,
                          handling = rolletilgangssjekk.handling)

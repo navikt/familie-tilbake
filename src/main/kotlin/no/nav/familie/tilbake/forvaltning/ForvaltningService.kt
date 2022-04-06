@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
+import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -17,10 +19,12 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -36,7 +40,9 @@ import java.util.UUID
 @Service
 class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                          private val kravgrunnlagRepository: KravgrunnlagRepository,
+                         private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                          private val hentKravgrunnlagService: HentKravgrunnlagService,
+                         private val annulerKravgrunnlagService: AnnulerKravgrunnlagService,
                          private val økonomiXmlMottattService: ØkonomiXmlMottattService,
                          private val stegService: StegService,
                          private val behandlingskontrollService: BehandlingskontrollService,
@@ -127,6 +133,30 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
                                               Aktør.SAKSBEHANDLER)
+    }
+
+    fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger) {
+        val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternKravgrunnlagId(eksternKravgrunnlagId)
+        val kravgrunnlag431 = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId)
+        if (økonomiXmlMottatt == null && kravgrunnlag431 == null) {
+            throw Feil(message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId")
+        }
+        val vedtakId = økonomiXmlMottatt?.vedtakId ?: kravgrunnlag431!!.vedtakId
+        annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId)
+    }
+
+    fun hentForvaltningsinfo(ytelsestype: Ytelsestype, eksternFagsakId: String): Forvaltningsinfo {
+        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
+        if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
+            val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            return Forvaltningsinfo(kravgrunnlag431.eksternKravgrunnlagId, null)
+        }
+        val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
+        if (økonomiXmlMottatt.isEmpty()) {
+            throw Feil("Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
+                       httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        return Forvaltningsinfo(økonomiXmlMottatt[0].eksternKravgrunnlagId!!, økonomiXmlMottatt[0].id)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {

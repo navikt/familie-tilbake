@@ -35,6 +35,7 @@ import no.nav.familie.tilbake.config.RolleConfig
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -97,6 +98,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
 
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
+
     private val auditLogger: AuditLogger = mockk(relaxed = true)
 
     private val mockJoinpoint: JoinPoint = mockk()
@@ -127,6 +131,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         tilgangAdvice = TilgangAdvice(rolleConfig,
                                       fagsakRepository,
                                       behandlingRepository,
+                                      kravgrunnlagRepository,
                                       auditLogger,
                                       mottattXmlRepository,
                                       mockIntegrasjonerClient)
@@ -425,6 +430,21 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                                     "Arkiverer mottatt kravgrunnlag",
                                                     AuditLoggerEvent.ACCESS,
                                                     HenteParam.MOTTATT_XML_ID)
+
+        shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal forvalter ha tilgang til forvaltningstjeneste annuler kravgrunnlag med input som eksternKravgrunnlagId`() {
+        val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
+        val økonomiXmlMottatt = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
+        // PUT request uten body
+        opprettRequestContext("/annuler/kravgrunnlag/${økonomiXmlMottatt.eksternKravgrunnlagId}/v1", HttpMethod.PUT, token)
+        every { mockJoinpoint.args } returns arrayOf(økonomiXmlMottatt.eksternKravgrunnlagId)
+        val rolletilgangssjekk = Rolletilgangssjekk(Behandlerrolle.FORVALTER,
+                                                    "Annulerer mottatt kravgrunnlag",
+                                                    AuditLoggerEvent.ACCESS,
+                                                    HenteParam.EKSTERN_KRAVGRUNNLAG_ID)
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
