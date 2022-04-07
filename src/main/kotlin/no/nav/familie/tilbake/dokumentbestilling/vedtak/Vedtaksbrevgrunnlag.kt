@@ -78,13 +78,13 @@ data class Vedtaksbrevgrunnlag(@Id
     fun finnOriginalBehandlingVedtaksdato(): LocalDate? {
         return if (erRevurdering) {
             val behandlingÅrsak = behandling.årsaker.first()
-            behandlingÅrsak.originalBehandlingId ?: error("Mangler orginalBehandlingId for behandling: ${behandling.id}")
+            behandlingÅrsak.originalBehandlingId ?: error("Mangler originalBehandlingId for behandling: ${behandling.id}")
 
             behandlinger.first { it.id == behandlingÅrsak.originalBehandlingId }
                     .sisteResultat
                     ?.behandlingsvedtak
                     ?.vedtaksdato
-            ?: error("Mangler vedtaksdato for orginal behandling med id : ${behandlingÅrsak.originalBehandlingId}")
+            ?: error("Mangler vedtaksdato for original behandling med id : ${behandlingÅrsak.originalBehandlingId}")
         } else {
             null
         }
