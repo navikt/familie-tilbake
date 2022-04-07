@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -21,10 +20,12 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient,
     }
 
     fun hentSaksbehandlernavn(id: String): String {
-        val saksbehandlerId = if (id == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            ContextService.hentSaksbehandler()
-        } else id
+        val saksbehandler = integrasjonerClient.hentSaksbehandler(id)
+        return saksbehandler.fornavn + " " + saksbehandler.etternavn
+    }
 
+    fun hentPåloggetSaksbehandlernavnMedDefault(defaultId: String): String {
+        val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId)
         val saksbehandler = integrasjonerClient.hentSaksbehandler(saksbehandlerId)
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }

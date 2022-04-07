@@ -10,6 +10,8 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -70,6 +72,11 @@ data class Vedtaksbrevgrunnlag(@Id
     val vurdertForeldelse get() = behandling.vurderteForeldelser.firstOrNull { it.aktiv }
     val faktaFeilutbetaling get() = behandling.faktaFeilutbetaling.firstOrNull { it.aktiv }
 
+    val aktivtSteg
+        get() = behandling.behandlingsstegstilstander.firstOrNull {
+            Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus)
+        }?.behandlingssteg
+
     val sisteVarsel
         get() = behandling.brevsporing
                 .filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
@@ -104,8 +111,6 @@ data class Vedtaksbrevgrunnlag(@Id
             Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
         }
     }
-
-
 }
 
 /**
@@ -138,6 +143,8 @@ data class Vedtaksbrevbehandling(@Id
                                  val brevsporing: Set<Brevsporing> = setOf(),
                                  @MappedCollection(idColumn = "behandling_id")
                                  val resultater: Set<Behandlingsresultat> = setOf(),
+                                 @MappedCollection(idColumn = "behandling_id")
+                                 val behandlingsstegstilstander: Set<Behandlingsstegstilstand> = setOf(),
                                  @MappedCollection(idColumn = "behandling_id")
                                  val årsaker: Set<Behandlingsårsak> = setOf(),
                                  @MappedCollection(idColumn = "behandling_id")

@@ -13,11 +13,15 @@ object ContextService {
 
 
     fun hentSaksbehandler(): String {
+        return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
+    }
+
+    fun hentPåloggetSaksbehandler(defaultverdi: String): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: defaultverdi
                 },
-                      onFailure = { Constants.BRUKER_ID_VEDTAKSLØSNINGEN })
+                      onFailure = { defaultverdi })
     }
 
     private fun hentGrupper(): List<String> {

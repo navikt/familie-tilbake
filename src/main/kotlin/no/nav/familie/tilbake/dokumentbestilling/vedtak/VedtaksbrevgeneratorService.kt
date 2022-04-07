@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
@@ -145,8 +146,13 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
         val hbBehandling: HbBehandling = lagHbBehandling(vedtaksbrevgrunnlag)
         val varsletBeløp = vedtaksbrevgrunnlag.varsletBeløp
         val varsletDato = vedtaksbrevgrunnlag.sisteVarsel?.sporbar?.opprettetTid?.toLocalDate()
-        val ansvarligBeslutter =
-                vedtaksbrevgrunnlag.behandling.ansvarligBeslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it) }
+        val ansvarligBeslutter = if (vedtaksbrevgrunnlag.aktivtSteg == Behandlingssteg.FATTE_VEDTAK) {
+            vedtaksbrevgrunnlag.behandling.ansvarligBeslutter?.let {
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(it)
+            }
+        } else {
+            null
+        }
         val erFeilutbetaltBeløpKorrigertNed =
                 varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
         val vedtaksbrevFelles =
@@ -241,9 +247,12 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(vedtaksbrevgrunnlag.aktivVerge, adresseinfo)
         val tilbakekreves = Vedtaksresultat.FULL_TILBAKEBETALING == vedtakResultatType ||
                             Vedtaksresultat.DELVIS_TILBAKEBETALING == vedtakResultatType
-        val ansvarligSaksbehandler =
-                eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
-
+        val ansvarligSaksbehandler = if (vedtaksbrevgrunnlag.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK) {
+            eksterneDataForBrevService
+                    .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
+        } else {
+            eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
+        }
         return Brevmetadata(ansvarligSaksbehandler = ansvarligSaksbehandler,
                             behandlendeEnhetId = vedtaksbrevgrunnlag.behandling.behandlendeEnhet,
                             behandlendeEnhetsNavn = vedtaksbrevgrunnlag.behandling.behandlendeEnhetsNavn,
