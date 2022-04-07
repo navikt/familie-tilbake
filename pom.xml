@@ -22,7 +22,7 @@
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.6.10</kotlin.version>
-        <felles.version>1.20220329165814_c0860ec</felles.version>
+        <felles.version>1.20220406145421_5f46d64</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>2.0_20220331215756_9594442</kontrakter.version>
         <kotest.version>5.2.2</kotest.version>
