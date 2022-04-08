@@ -75,4 +75,7 @@ enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
     INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE(tittel = "Innhent dokumentasjon sendt til verge",
                                                tekst = "Innhent dokumentasjon",
                                                type = Historikkinnslagstype.BREV),
+    BREV_IKKE_SENDT_UKJENT_ADRESSE(tittel = "Bruker har ukjent adresse, brev ikke sendt",
+                                   tekst = "",
+                                   type = Historikkinnslagstype.BREV)
 }

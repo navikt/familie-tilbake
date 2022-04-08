@@ -27,12 +27,14 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktør"))
         val opprettetTidspunkt = LocalDateTime.parse(task.metadata.getProperty("opprettetTidspunkt"))
         val beskrivelse = task.metadata.getProperty("beskrivelse")
+        val brevtype = task.metadata.getProperty("brevtype")
 
         historikkService.lagHistorikkinnslag(behandlingId,
                                              historikkinnslagstype,
                                              aktør,
                                              opprettetTidspunkt,
-                                             beskrivelse)
+                                             beskrivelse,
+                                             brevtype)
     }
 
     companion object {

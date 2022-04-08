@@ -44,11 +44,22 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
+        val ukjentAdresse = (task.metadata.getOrDefault("ukjentAdresse", "false") as String).toBoolean()
+        val opprinneligHistorikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager)
 
-        historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
-                                              historikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager),
-                                              aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                                              ukjentAdresse = task.metadata.getOrDefault("ukjentAdresse", false) as Boolean)
+        if (ukjentAdresse) {
+            historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
+                                                  historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
+                                                  aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                                                  beskrivelse = opprinneligHistorikkinnslagstype.tekst,
+                                                  brevtype = brevtype)
+        } else {
+            historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
+                                                  historikkinnslagstype = opprinneligHistorikkinnslagstype,
+                                                  aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                                                  brevtype = brevtype)
+        }
+
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
