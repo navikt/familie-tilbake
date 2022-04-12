@@ -5,6 +5,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.Properties
@@ -18,7 +19,8 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
                          historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                          aktør: Aktør,
                          triggerTid: LocalDateTime? = null,
-                         beskrivelse: String? = null) {
+                         beskrivelse: String? = null,
+                         brevtype: Brevtype? = null) {
 
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
@@ -27,6 +29,7 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
             beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
+            brevtype?.let { setProperty("brevtype", brevtype.name) }
         }
 
         val task = Task(type = LagHistorikkinnslagTask.TYPE,

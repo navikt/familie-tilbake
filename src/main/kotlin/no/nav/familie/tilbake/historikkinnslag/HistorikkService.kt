@@ -14,17 +14,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT_TIL_VERGE
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT_TIL_VERGE
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT_TIL_VERGE
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT_TIL_VERGE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.springframework.stereotype.Service
@@ -43,12 +34,14 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                             historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                             aktør: Aktør,
                             opprettetTidspunkt: LocalDateTime,
-                            beskrivelse: String? = null) {
+                            beskrivelse: String? = null,
+                            brevtype: String? = null) {
         val request = lagHistorikkinnslagRequest(behandlingId = behandlingId,
                                                  aktør = aktør,
                                                  historikkinnslagstype = historikkinnslagstype,
                                                  opprettetTidspunkt = opprettetTidspunkt,
-                                                 beskrivelse = beskrivelse)
+                                                 beskrivelse = beskrivelse,
+                                                 brevtype = brevtype)
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
 
@@ -56,11 +49,12 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                            aktør: Aktør,
                                            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                                            opprettetTidspunkt: LocalDateTime,
-                                           beskrivelse: String?): OpprettHistorikkinnslagRequest {
+                                           beskrivelse: String?,
+                                           brevtype: String?): OpprettHistorikkinnslagRequest {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevdata = hentBrevdata(behandling, historikkinnslagstype)
+        val brevdata = hentBrevdata(behandling, brevtype)
 
         return OpprettHistorikkinnslagRequest(behandlingId = behandling.eksternBrukId.toString(),
                                               eksternFagsakId = fagsak.eksternFagsakId,
@@ -91,6 +85,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                 }
             }
             ENDRET_ENHET -> historikkinnslagstype.tekst + behandling.behandlendeEnhet + ", Begrunnelse: " + beskrivelse
+            BREV_IKKE_SENDT_UKJENT_ADRESSE -> "$beskrivelse er ikke sendt"
             else -> historikkinnslagstype.tekst
         }
     }
@@ -103,15 +98,9 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    private fun hentBrevdata(behandling: Behandling, historikkinnslagstype: TilbakekrevingHistorikkinnslagstype): Brevsporing? {
-        val brevtype = when (historikkinnslagstype) {
-            VARSELBREV_SENDT, VARSELBREV_SENDT_TIL_VERGE -> Brevtype.VARSEL
-            KORRIGERT_VARSELBREV_SENDT, KORRIGERT_VARSELBREV_SENDT_TIL_VERGE -> Brevtype.KORRIGERT_VARSEL
-            VEDTAKSBREV_SENDT, VEDTAKSBREV_SENDT_TIL_VERGE -> Brevtype.VEDTAK
-            HENLEGGELSESBREV_SENDT, HENLEGGELSESBREV_SENDT_TIL_VERGE -> Brevtype.HENLEGGELSE
-            INNHENT_DOKUMENTASJON_BREV_SENDT, INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE -> Brevtype.INNHENT_DOKUMENTASJON
-            else -> null
-        }
+    private fun hentBrevdata(behandling: Behandling,
+                             brevtypeIString: String?): Brevsporing? {
+        val brevtype = brevtypeIString?.let { Brevtype.valueOf(it) }
         return brevtype?.let {
             brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandling.id,
                                                                                                    brevtype)
