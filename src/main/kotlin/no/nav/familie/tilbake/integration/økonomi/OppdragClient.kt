@@ -4,6 +4,9 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
+import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
@@ -36,10 +39,12 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -52,6 +57,8 @@ interface OppdragClient {
             : DetaljertKravgrunnlagDto
 
     fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest)
+
+    fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering
 }
 
 @Service
@@ -73,6 +80,9 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
 
     private val annulerKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
             .path(ANNULER_KRAVGRUNNLAG_URI).build().toUri()
+
+    private val hentFeilutbetalingerFraSimuleringUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .path(HENT_FEILUTBETALINGER_FRA_SIMULERING_URI).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
@@ -143,6 +153,25 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         }
     }
 
+    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest)
+            : FeilutbetalingerFraSimulering {
+        logger.info("Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
+        try {
+            return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri = URI.create(hentFeilutbetalingerFraSimuleringUri
+                                                                                                  .toString()),
+                                                                         payload = request)
+                    .getDataOrThrow()
+
+        } catch (exception: Exception) {
+            logger.error("Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
+                         "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}" +
+                         "Feiler med ${exception.message}")
+            throw IntegrasjonException(msg = "Noe gikk galt ved henting av feilutbetalinger fra simulering",
+                                       throwable = exception)
+        }
+    }
+
     private fun validerHentKravgrunnlagRespons(mmelDto: MmelDto, kravgrunnlagId: BigInteger) {
         if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
             logger.error("Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
@@ -178,6 +207,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett/"
         const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag/"
         const val ANNULER_KRAVGRUNNLAG_URI = "/api/tilbakekreving/annuler/kravgrunnlag/"
+        const val HENT_FEILUTBETALINGER_FRA_SIMULERING_URI = "/api/simulering/feilutbetalinger"
         const val PING_URI = "/internal/status/alive"
     }
 }
@@ -207,6 +237,17 @@ class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagReposito
 
     override fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest) {
         logger.info("Kaller mock annulering request i e2e-profil")
+    }
+
+    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering {
+        logger.info("Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
+        val feilutbetaltPeriode = FeilutbetaltPeriode(fom = YearMonth.now().minusMonths(2).atDay(1),
+                                                      tom = YearMonth.now().minusMonths(1).atDay(1),
+                                                      feilutbetaltBeløp = BigDecimal("20000"),
+                                                      tidligereUtbetaltBeløp = BigDecimal("30000"),
+                                                      nyttBeløp = BigDecimal("10000"))
+        return FeilutbetalingerFraSimulering(feilutbetaltePerioder = listOf(feilutbetaltPeriode))
     }
 
     fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
