@@ -70,26 +70,25 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override val pingUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(PING_URI).build().toUri()
+            .path(PING_PATH).build().toUri()
 
-    private val iverksettelseUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(IVERKSETTELSE_URI).build().toUri()
+    private fun iverksettelseUri(behandlingId: UUID): URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .pathSegment(IVERKSETTELSE_PATH, behandlingId.toString()).build().toUri()
 
-    private val hentKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(HENT_KRAVGRUNNLAG_URI).build().toUri()
+    private fun hentKravgrunnlagUri(kravgrunnlagId: BigInteger): URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .pathSegment(HENT_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
 
-    private val annulerKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(ANNULER_KRAVGRUNNLAG_URI).build().toUri()
+    private fun annulerKravgrunnlagUri(kravgrunnlagId: BigInteger): URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
 
     private val hentFeilutbetalingerFraSimuleringUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .path(HENT_FEILUTBETALINGER_FRA_SIMULERING_URI).build().toUri()
+            .pathSegment(HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
-            val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = URI.create(iverksettelseUri.toString() +
-                                                                                                 behandlingId.toString()),
+            val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = iverksettelseUri(behandlingId),
                                                                                 payload = tilbakekrevingsvedtakRequest)
                     .getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
@@ -113,8 +112,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
             : DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
-            val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = URI.create(hentKravgrunnlagUri.toString() +
-                                                                                                  kravgrunnlagId.toString()),
+            val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = hentKravgrunnlagUri(kravgrunnlagId),
                                                                                  payload = hentKravgrunnlagRequest)
                     .getDataOrThrow()
             validerHentKravgrunnlagRespons(respons.mmel, kravgrunnlagId)
@@ -132,8 +130,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
                                      kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest) {
         logger.info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
         try {
-            val respons = postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(uri = URI.create(annulerKravgrunnlagUri.toString() +
-                                                                                               eksternKravgrunnlagId.toString()),
+            val respons = postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(uri = annulerKravgrunnlagUri(eksternKravgrunnlagId),
                                                                               payload = kravgrunnlagAnnulerRequest)
                     .getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
@@ -158,8 +155,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         logger.info("Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
                     "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
         try {
-            return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri = URI.create(hentFeilutbetalingerFraSimuleringUri
-                                                                                                  .toString()),
+            return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri = hentFeilutbetalingerFraSimuleringUri,
                                                                          payload = request)
                     .getDataOrThrow()
 
@@ -204,11 +200,12 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
 
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
-        const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett/"
-        const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag/"
-        const val ANNULER_KRAVGRUNNLAG_URI = "/api/tilbakekreving/annuler/kravgrunnlag/"
-        const val HENT_FEILUTBETALINGER_FRA_SIMULERING_URI = "/api/simulering/feilutbetalinger"
-        const val PING_URI = "/internal/status/alive"
+
+        const val IVERKSETTELSE_PATH = "/api/tilbakekreving/iverksett/"
+        const val HENT_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/kravgrunnlag/"
+        const val ANNULER_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/annuler/kravgrunnlag/"
+        const val HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH = "/api/simulering/feilutbetalinger"
+        const val PING_PATH = "/internal/status/alive"
     }
 }
 
