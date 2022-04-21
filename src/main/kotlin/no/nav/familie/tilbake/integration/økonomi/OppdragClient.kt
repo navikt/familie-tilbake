@@ -15,6 +15,8 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
+import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerResponse
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -48,6 +50,8 @@ interface OppdragClient {
 
     fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
             : DetaljertKravgrunnlagDto
+
+    fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest)
 }
 
 @Service
@@ -66,6 +70,9 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
 
     private val hentKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
             .path(HENT_KRAVGRUNNLAG_URI).build().toUri()
+
+    private val annulerKravgrunnlagUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .path(ANNULER_KRAVGRUNNLAG_URI).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
@@ -111,6 +118,31 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         }
     }
 
+    override fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger,
+                                     kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest) {
+        logger.info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
+        try {
+            val respons = postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(uri = URI.create(annulerKravgrunnlagUri.toString() +
+                                                                                               eksternKravgrunnlagId.toString()),
+                                                                              payload = kravgrunnlagAnnulerRequest)
+                    .getDataOrThrow()
+            if (!erResponsOk(respons.mmel)) {
+                logger.error("Fikk feil respons fra økonomi ved annulering " +
+                             "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
+                             "Mottatt respons:${lagRespons(respons.mmel)}")
+                throw IntegrasjonException(msg = "Fikk feil respons fra økonomi ved annulering " +
+                                                 "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
+                                                 "Mottatt respons:${lagRespons(respons.mmel)}")
+            }
+            logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
+        } catch (exception: Exception) {
+            logger.error("Kravgrunnlag kan ikke hentes fra økonomi for behandling=$eksternKravgrunnlagId. " +
+                         "Feiler med ${exception.message}")
+            throw IntegrasjonException(msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
+                                       throwable = exception)
+        }
+    }
+
     private fun validerHentKravgrunnlagRespons(mmelDto: MmelDto, kravgrunnlagId: BigInteger) {
         if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto)) {
             logger.error("Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
@@ -145,6 +177,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
         const val IVERKSETTELSE_URI = "/api/tilbakekreving/iverksett/"
         const val HENT_KRAVGRUNNLAG_URI = "/api/tilbakekreving/kravgrunnlag/"
+        const val ANNULER_KRAVGRUNNLAG_URI = "/api/tilbakekreving/annuler/kravgrunnlag/"
         const val PING_URI = "/internal/status/alive"
     }
 }
@@ -156,7 +189,7 @@ class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagReposito
 
     override fun iverksettVedtak(behandlingId: UUID,
                                  tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
-        logger.info("Skipper arkivering av dokument i e2e-profil")
+        logger.info("Sender mock iverksettelse respons i e2e-profil")
         val mmelDto = MmelDto()
         mmelDto.alvorlighetsgrad = "00"
         val response = TilbakekrevingsvedtakResponse()
@@ -170,6 +203,10 @@ class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagReposito
         val respons = lagKravgrunnlagRespons(hentKravgrunnlagRequest)
         logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
         return respons.detaljertkravgrunnlag
+    }
+
+    override fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest) {
+        logger.info("Kaller mock annulering request i e2e-profil")
     }
 
     fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {

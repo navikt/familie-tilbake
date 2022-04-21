@@ -63,14 +63,14 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for varselbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VARSEL))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.VEDTAKSLØSNING, Brevtype.VARSEL)
     }
 
     @Test
     fun `onCompletion skal lage historikk task for manuelt varselbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VARSEL, "Z0000"))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT, Aktør.SAKSBEHANDLER, Brevtype.VARSEL)
     }
 
     @Test
@@ -84,7 +84,9 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for korrigert varselbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.KORRIGERT_VARSEL))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT,
+                            Aktør.SAKSBEHANDLER,
+                            Brevtype.KORRIGERT_VARSEL)
     }
 
     @Test
@@ -98,7 +100,9 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for henleggelsesbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.HENLEGGELSE))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT,
+                            Aktør.VEDTAKSLØSNING,
+                            Brevtype.HENLEGGELSE)
     }
 
     @Test
@@ -112,7 +116,9 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for innhent dokumentasjon`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.INNHENT_DOKUMENTASJON))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT, Aktør.SAKSBEHANDLER)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT,
+                            Aktør.SAKSBEHANDLER,
+                            Brevtype.INNHENT_DOKUMENTASJON)
     }
 
     @Test
@@ -126,7 +132,23 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal lage historikk task for vedtaksbrev`() {
         lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK))
 
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT, Aktør.VEDTAKSLØSNING)
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT, Aktør.VEDTAKSLØSNING, Brevtype.VEDTAK)
+    }
+
+    @Test
+    fun `onCompletion skal lage historikk task for vedtaksbrev når mottaker adresse er ukjent`() {
+        lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK).also { task ->
+            task.metadata.also { it["ukjentAdresse"] = "true" }
+        })
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
+                            Aktør.VEDTAKSLØSNING,
+                            Brevtype.VEDTAK)
+        taskRepository.findByStatus(Status.UBEHANDLET)
+                .shouldHaveSingleElement {
+                    it.type == LagHistorikkinnslagTask.TYPE &&
+                    TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
+                }
     }
 
     private fun opprettTask(behandlingId: UUID,
@@ -152,12 +174,14 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                     aktør: Aktør) {
+                                    aktør: Aktør,
+                                    brevtype: Brevtype) {
         taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
             historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
             aktør.name == it.metadata["aktør"] &&
-            behandlingId.toString() == it.payload
+            behandlingId.toString() == it.payload &&
+            brevtype.name == it.metadata["brevtype"]
         }
     }
 }

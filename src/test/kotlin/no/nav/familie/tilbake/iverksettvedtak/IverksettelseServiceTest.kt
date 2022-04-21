@@ -251,8 +251,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertRespons(kvittering: String?,
-                               alvorlighetsgrad: String,
-                               kodeMelding: String) {
+                              alvorlighetsgrad: String,
+                              kodeMelding: String) {
         kvittering.shouldNotBeEmpty()
         val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
         mmelDto.alvorlighetsgrad shouldBe alvorlighetsgrad
@@ -275,36 +275,36 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         førstePeriode.belopRenter shouldBe BigDecimal.ZERO
         førstePeriode.tilbakekrevingsbelop.size shouldBe 2
         assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                     klassekode = Klassekode.KL_KODE_FEIL_BA,
-                     nyttBeløp = BigDecimal(5000))
+                    klassekode = Klassekode.KL_KODE_FEIL_BA,
+                    nyttBeløp = BigDecimal(5000))
         assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                     klassekode = Klassekode.BATR,
-                     utbetaltBeløp = BigDecimal(5000),
-                     tilbakekrevesBeløp = BigDecimal(5000),
-                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                    klassekode = Klassekode.BATR,
+                    utbetaltBeløp = BigDecimal(5000),
+                    tilbakekrevesBeløp = BigDecimal(5000),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsvedtak.tilbakekrevingsperiode[0]
         andrePeriode.periode.shouldNotBeNull()
         andrePeriode.belopRenter shouldBe BigDecimal.ZERO
         andrePeriode.tilbakekrevingsbelop.size shouldBe 2
         assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                     klassekode = Klassekode.KL_KODE_FEIL_BA,
-                     nyttBeløp = BigDecimal(5000))
+                    klassekode = Klassekode.KL_KODE_FEIL_BA,
+                    nyttBeløp = BigDecimal(5000))
         assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                     klassekode = Klassekode.BATR,
-                     utbetaltBeløp = BigDecimal(5000),
-                     tilbakekrevesBeløp = BigDecimal(5000),
-                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+                    klassekode = Klassekode.BATR,
+                    utbetaltBeløp = BigDecimal(5000),
+                    tilbakekrevesBeløp = BigDecimal(5000),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
     }
 
     private fun assertBeløp(beløpene: List<TilbakekrevingsbelopDto>,
-                             klassekode: Klassekode,
-                             nyttBeløp: BigDecimal = BigDecimal.ZERO,
-                             utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-                             tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
-                             uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
-                             skattBeløp: BigDecimal = BigDecimal.ZERO,
-                             kodeResultat: KodeResultat? = null) {
+                            klassekode: Klassekode,
+                            nyttBeløp: BigDecimal = BigDecimal.ZERO,
+                            utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
+                            tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
+                            uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
+                            skattBeløp: BigDecimal = BigDecimal.ZERO,
+                            kodeResultat: KodeResultat? = null) {
         beløpene.any {
             klassekode.name == it.kodeKlasse &&
             nyttBeløp == it.belopNy &&

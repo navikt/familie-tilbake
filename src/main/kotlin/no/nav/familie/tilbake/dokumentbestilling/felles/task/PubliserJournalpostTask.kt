@@ -1,12 +1,15 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,15 +18,29 @@ import org.springframework.stereotype.Service
                      beskrivelse = "Publiserer journalpost",
                      triggerTidVedFeilISekunder = 60 * 5L)
 class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClient,
-                              private val taskService: TaskService) : AsyncTaskStep {
+                              private val taskService: TaskService,
+                              private val historikkTaskService: HistorikkTaskService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
-        integrasjonerClient.distribuerJournalpost(task.metadata.getProperty("journalpostId"),
-                                                  Fagsystem.valueOf(task.metadata.getProperty("fagsystem")))
+        try {
+            integrasjonerClient.distribuerJournalpost(
+                task.metadata.getProperty("journalpostId"),
+                Fagsystem.valueOf(task.metadata.getProperty("fagsystem"))
+            )
+        } catch (ressursException: RessursException) {
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)){
+                // ta med info om ukjent adresse
+                task.metadata["ukjentAdresse"] = "true"
+            } else {
+                throw ressursException
+            }
+
+        }
 
     }
 
@@ -31,6 +48,11 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
         taskService.save(Task(LagreBrevsporingTask.TYPE, task.payload, task.metadata))
     }
 
+    // 400 BAD_REQUEST + kanal print er eneste måten å vite at bruker ikke er digital og har ukjent adresse fra Dokdist
+    // https://nav-it.slack.com/archives/C6W9E5GPJ/p1647947002270879?thread_ts=1647936835.099329&cid=C6W9E5GPJ
+    fun mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException: RessursException) =
+        ressursException.httpStatus == HttpStatus.BAD_REQUEST &&
+                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
     companion object {
 
