@@ -24,7 +24,7 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient,
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
-    fun hentPåloggetSaksbehandlernavnMedDefault(defaultId: String): String {
+    fun hentPåloggetSaksbehandlernavnMedDefault(defaultId: String?): String {
         val saksbehandlerId = ContextService.hentPåloggetSaksbehandler(defaultId)
         val saksbehandler = integrasjonerClient.hentSaksbehandler(saksbehandlerId)
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
