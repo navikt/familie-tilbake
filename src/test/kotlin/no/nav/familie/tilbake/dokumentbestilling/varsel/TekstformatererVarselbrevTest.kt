@@ -36,7 +36,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(språkkode = Språkkode.NN)
         val varselbrevsdokument = varselbrevsdokument.copy(brevmetadata = metadata,
                                                            feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
-        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_flere_perioder.txt")
         generertBrev shouldBe fasit
     }
@@ -44,7 +44,7 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode overgangsstønad`() {
         val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
-        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode.txt")
         generertBrev shouldBe fasit
     }
@@ -54,14 +54,14 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(ytelsestype = Ytelsestype.BARNETRYGD)
         val varselbrevsdokument = varselbrevsdokument.copy(brevmetadata = metadata,
                                                            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
-        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/BA_en_periode.txt")
         generertBrev shouldBe fasit
     }
 
     @Test
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift`() {
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata, false)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
@@ -69,14 +69,14 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 
     @Test
     fun `lagKorrigertVarselbrevsoverskrift skal generere korrigert varselbrevsoverskrift`() {
-        val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(metadata)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata, true)
         val fasit = "Korrigert varsel om feilutbetalt overgangsstønad"
         overskrift shouldBe fasit
     }
@@ -84,7 +84,7 @@ class TekstformatererVarselbrevTest {
     @Test
     fun `lagKorrigertVarselbrevsoverskrift skal generere korrigert varselbrevsoverskrift nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
-        val overskrift = TekstformatererVarselbrev.lagKorrigertVarselbrevsoverskrift(brevMetadata)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, true)
         val fasit = "Korrigert varsel om feilutbetalt overgangsstønad"
         overskrift shouldBe fasit
     }
@@ -95,7 +95,7 @@ class TekstformatererVarselbrevTest {
                                      finnesVerge = true,
                                      språkkode = Språkkode.NB)
         val varselbrevSamletInfo = varselbrevsdokument.copy(brevmetadata = metadata)
-        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevSamletInfo)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevSamletInfo, false)
         val fasit = les("/varselbrev/OS_en_periode.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
         generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
