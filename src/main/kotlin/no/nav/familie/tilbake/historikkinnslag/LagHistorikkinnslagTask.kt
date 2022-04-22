@@ -36,7 +36,8 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
                                              aktør,
                                              opprettetTidspunkt,
                                              beskrivelse,
-                                             brevtype)
+                                             brevtype,
+                                             beslutter)
     }
 
     companion object {
