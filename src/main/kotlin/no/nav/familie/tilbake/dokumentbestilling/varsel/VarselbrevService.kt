@@ -28,8 +28,8 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
     fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottager)
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)
-        val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
+        val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
         val fritekst = varselbrevsdokument.varseltekstFraSaksbehandler
 
@@ -43,6 +43,8 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                                 varsletFeilutbetaling,
                                 fritekst)
     }
+
+
 
     private fun lagVarselbrevForSending(behandling: Behandling,
                                         fagsak: Fagsak,
@@ -64,8 +66,8 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         val varselbrevsdokument = lagVarselbrevForForhåndsvisning(forhåndsvisVarselbrevRequest)
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata)
-        val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
+        val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val data = Fritekstbrevsdata(overskrift = overskrift,
                                      brevtekst = brevtekst,
                                      brevmetadata = varselbrevsdokument.brevmetadata)

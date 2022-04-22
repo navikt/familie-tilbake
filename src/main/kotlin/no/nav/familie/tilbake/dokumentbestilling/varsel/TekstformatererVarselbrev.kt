@@ -7,19 +7,13 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbre
 
 object TekstformatererVarselbrev {
 
-    fun lagFritekst(varselbrevsdokument: Varselbrevsdokument): String {
-        return FellesTekstformaterer.lagBrevtekst(varselbrevsdokument, "varsel/varsel")
+    fun lagFritekst(varselbrevsdokument: Varselbrevsdokument, erKorrigert: Boolean): String {
+        val filsti = if (erKorrigert) "varsel/korrigert_varsel" else "varsel/varsel"
+        return FellesTekstformaterer.lagBrevtekst(varselbrevsdokument, filsti)
     }
 
-    fun lagKorrigertFritekst(varselbrevsdokument: Varselbrevsdokument): String {
-        return FellesTekstformaterer.lagBrevtekst(varselbrevsdokument, "varsel/korrigert_varsel")
-    }
-
-    fun lagVarselbrevsoverskrift(brevmetadata: Brevmetadata): String {
-        return FellesTekstformaterer.lagBrevtekst(Brevoverskriftsdata(brevmetadata), "varsel/varsel_overskrift")
-    }
-
-    fun lagKorrigertVarselbrevsoverskrift(brevmetadata: Brevmetadata): String {
-        return FellesTekstformaterer.lagBrevtekst(Brevoverskriftsdata(brevmetadata), "varsel/korrigert_varsel_overskrift")
+    fun lagVarselbrevsoverskrift(brevmetadata: Brevmetadata, erKorrigert: Boolean): String {
+        val filsti = if (erKorrigert) "varsel/korrigert_varsel_overskrift" else "varsel/varsel_overskrift"
+        return FellesTekstformaterer.lagBrevtekst(Brevoverskriftsdata(brevmetadata), filsti)
     }
 }
