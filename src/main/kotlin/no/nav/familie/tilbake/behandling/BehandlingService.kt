@@ -221,7 +221,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         stegService.gjenopptaSteg(behandlingId)
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
 
-        // oppdaterer oppgave hvis saken er fortsatt på vent
+        // oppdaterer oppgave hvis saken er fortsatt på vent,
+        // f.eks saken var på vent med brukerstilbakemelding og har ikke fått kravgrunnlag
         val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
             oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
