@@ -173,7 +173,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         println(prettyprint)
     }
 
-    fun lagVilkårTekst(periodeOgFelles: HbVedtaksbrevPeriodeOgFelles): String {
+    private fun lagVilkårTekst(periodeOgFelles: HbVedtaksbrevPeriodeOgFelles): String {
         if (periodeOgFelles.periode.vurderinger.harForeldelsesavsnitt) {
             return FellesTekstformaterer.lagDeltekst(periodeOgFelles, AvsnittUtil.PARTIAL_PERIODE_FORELDELSE) +
                    System.lineSeparator() + System.lineSeparator() +
@@ -258,6 +258,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                             behandlendeEnhetsNavn = "Oslo",
                             ansvarligSaksbehandler = "Bob",
                             språkkode = språkkode,
+                            saksnummer = "1232456",
                             ytelsestype = ytelsestype)
     }
 

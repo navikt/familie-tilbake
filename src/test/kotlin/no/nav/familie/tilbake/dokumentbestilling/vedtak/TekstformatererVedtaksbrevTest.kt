@@ -55,6 +55,7 @@ class TekstformatererVedtaksbrevTest {
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
                                             behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                            saksnummer = "1232456",
                                             ansvarligSaksbehandler = "Ansvarlig Saksbehandler")
 
     private val felles =

@@ -6,10 +6,14 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
+import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.Scanner
 
 class TekstformatererVarselbrevTest {
@@ -20,6 +24,7 @@ class TekstformatererVarselbrevTest {
                                         språkkode = Språkkode.NB,
                                         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
                                         behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                        saksnummer = "1232456",
                                         ansvarligSaksbehandler = "Bob")
 
     private val varselbrevsdokument =
@@ -99,6 +104,70 @@ class TekstformatererVarselbrevTest {
         val fasit = les("/varselbrev/OS_en_periode.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
         generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
+    }
+
+    @Test
+    fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på bokmål`() {
+
+        val vedleggsdata = Vedleggsdata(Språkkode.NB,
+                                        false,
+                                        listOf(FeilutbetaltPeriode(YearMonth.of(2022, 1),
+                                                                   BigDecimal(1572),
+                                                                   BigDecimal(1573),
+                                                                   BigDecimal(1574))))
+
+        val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+
+        val fasit = les("/varselbrev/vedlegg/vedlegg_nb_uten_skatt.txt")
+        html shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på nynorsk`() {
+
+        val vedleggsdata = Vedleggsdata(Språkkode.NN,
+                                        false,
+                                        listOf(FeilutbetaltPeriode(YearMonth.of(2022, 1),
+                                                                   BigDecimal(1572),
+                                                                   BigDecimal(1573),
+                                                                   BigDecimal(1574))))
+
+        val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+
+        val fasit = les("/varselbrev/vedlegg/vedlegg_nn_uten_skatt.txt")
+        html shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på bokmål`() {
+
+        val vedleggsdata = Vedleggsdata(Språkkode.NB,
+                                        true,
+                                        listOf(FeilutbetaltPeriode(YearMonth.of(2022, 1),
+                                                                   BigDecimal(1572),
+                                                                   BigDecimal(1573),
+                                                                   BigDecimal(1574))))
+
+        val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+
+        val fasit = les("/varselbrev/vedlegg/vedlegg_nb_med_skatt.txt")
+        html shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på nynorsk`() {
+
+        val vedleggsdata = Vedleggsdata(Språkkode.NN,
+                                        true,
+                                        listOf(FeilutbetaltPeriode(YearMonth.of(2022, 1),
+                                                                   BigDecimal(1572),
+                                                                   BigDecimal(1573),
+                                                                   BigDecimal(1574))))
+
+        val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+
+        val fasit = les("/varselbrev/vedlegg/vedlegg_nn_med_skatt.txt")
+        html shouldBe fasit
     }
 
     private fun lagFeilutbetalingerMedFlerePerioder(): List<Handlebarsperiode> {

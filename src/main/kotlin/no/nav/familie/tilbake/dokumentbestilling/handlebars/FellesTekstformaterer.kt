@@ -95,6 +95,7 @@ object FellesTekstformaterer {
             registerHelper("kroner", KroneFormattererMedTusenskille())
             registerHelper("dato", DatoHelper())
             registerHelper("kortdato", KortdatoHelper())
+            registerHelper("måned", MånedHelper())
             registerHelper("storForbokstav", StorBokstavHelper())
             registerHelper("switch", SwitchHelper())
             registerHelper("case", CaseHelper())

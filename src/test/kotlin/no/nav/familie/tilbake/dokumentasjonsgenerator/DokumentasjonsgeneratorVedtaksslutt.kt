@@ -198,6 +198,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
                             ansvarligSaksbehandler = "<Saksbehandlers navn>",
                             vergenavn = "<annen mottaker>",
                             språkkode = språkkode,
+                            saksnummer = "1232456",
                             ytelsestype = ytelsestype)
     }
 
