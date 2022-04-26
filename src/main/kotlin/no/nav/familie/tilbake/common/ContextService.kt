@@ -13,11 +13,17 @@ object ContextService {
 
 
     fun hentSaksbehandler(): String {
+        return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
+    }
+
+    fun hentPåloggetSaksbehandler(defaultverdi: String?): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+                    return it.getClaims("azuread")?.get("NAVident")?.toString()
+                           ?: defaultverdi
+                           ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
                 },
-                      onFailure = { Constants.BRUKER_ID_VEDTAKSLØSNINGEN })
+                      onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") })
     }
 
     private fun hentGrupper(): List<String> {

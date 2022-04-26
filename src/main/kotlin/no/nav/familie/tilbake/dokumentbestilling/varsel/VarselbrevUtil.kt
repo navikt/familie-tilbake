@@ -65,7 +65,8 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
 
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
-        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(ContextService.hentSaksbehandler())
+        val ansvarligSaksbehandler =
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(ContextService.hentSaksbehandler())
 
         val metadata = Brevmetadata(behandlendeEnhetId = request.behandlendeEnhetId,
                                     behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
@@ -94,7 +95,8 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                        fagsak: Fagsak,
                                        vergenavn: String?,
                                        erKorrigert: Boolean): Brevmetadata {
-        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+        val ansvarligSaksbehandler =
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
 
         return Brevmetadata(sakspartId = personinfo.ident,
                             sakspartsnavn = personinfo.navn,

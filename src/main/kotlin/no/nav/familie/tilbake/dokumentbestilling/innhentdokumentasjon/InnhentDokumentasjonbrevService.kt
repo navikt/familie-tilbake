@@ -75,7 +75,8 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
         val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-        val ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler)
+        val ansvarligSaksbehandler =
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         val brevmetadata = Brevmetadata(sakspartId = personinfo.ident,
                                         sakspartsnavn = personinfo.navn,
                                         finnesVerge = behandling.harVerge,

@@ -51,7 +51,11 @@ data class VilkårsvurderingGodTro(@Id
                                   @Version
                                   val versjon: Long = 0,
                                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                  val sporbar: Sporbar = Sporbar())
+                                  val sporbar: Sporbar = Sporbar()) {
+
+    val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
+
+}
 
 
 @Table("vilkarsvurdering_aktsomhet")
@@ -89,6 +93,11 @@ data class VilkårsvurderingAktsomhet(@Id
             check(tilbakekrevSmåbeløp) { "Dette er gyldig bare for Simpel uaktsom" }
         }
     }
+
+    val skalHaSærligeGrunner
+        get() = Aktsomhet.GROV_UAKTSOMHET == aktsomhet || Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet && this.tilbakekrevSmåbeløp
+
+    val særligeGrunner get() = vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
 
 }
 
