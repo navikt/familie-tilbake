@@ -9,6 +9,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
+import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -31,8 +35,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.URI
+import java.time.YearMonth
 import java.util.UUID
 
 internal class OppdragClientTest : OppslagSpringRunnerTest() {
@@ -84,7 +90,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagIverksettelseRespons()).toJson())))
         val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
 
@@ -93,7 +99,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal ikke sende iverksettelse request til oppdrag når oppdrag har nedetid`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
                                        .willReturn(WireMock.status(HttpStatus.REQUEST_TIMEOUT_408)))
 
         val exception = shouldThrow<RuntimeException> {
@@ -107,7 +113,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal ikke iverksette behandling til oppdrag når økonomi ikke svarer`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_URI + behandling.id))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
 
         val exception = shouldThrow<RuntimeException> {
@@ -123,7 +129,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal hente kravgrunnlag fra oppdrag`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
                                                                  kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "OK"))
@@ -136,7 +142,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag ikke finnes i økonomi`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
                                                                  kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420010I"))
@@ -156,7 +162,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag er sperret i økonomi`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
                                                                  kravgrunnlagId))
                                        .willReturn(WireMock.okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
                                                                                                               "B420012I"))
@@ -172,7 +178,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når økonomi ikke svarer`() {
 
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_URI +
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
                                                                  kravgrunnlagId))
                                        .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
         val exception = shouldThrow<RuntimeException> {
@@ -181,6 +187,40 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
+        exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
+    }
+
+    @Test
+    fun `hentFeilutbetalingerFraSimulering skal hente feilutbetalinger fra simulering`() {
+        val feilutbetaltPeriode = FeilutbetaltPeriode(fom = YearMonth.now().minusMonths(2).atDay(1),
+                                                      tom = YearMonth.now().minusMonths(1).atDay(1),
+                                                      feilutbetaltBeløp = BigDecimal("20000"),
+                                                      tidligereUtbetaltBeløp = BigDecimal("30000"),
+                                                      nyttBeløp = BigDecimal("10000"))
+        val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH))
+                                       .willReturn(WireMock.okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
+
+        val respons =
+                oppdragClient.hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
+                                                                                                         "123",
+                                                                                                         "1"))
+        respons shouldNotBe null
+    }
+
+    @Test
+    fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH))
+                                       .willReturn(WireMock.serviceUnavailable().withStatusMessage("Couldn't send message")))
+
+        val exception = shouldThrow<RuntimeException> {
+            oppdragClient.hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
+                                                                                                     "123",
+                                                                                                     "1"))
+        }
+        exception.shouldNotBeNull()
+        exception.shouldBeInstanceOf<IntegrasjonException>()
+        exception.message shouldBe "Noe gikk galt ved henting av feilutbetalinger fra simulering"
         exception.cause?.message shouldBe "503 Couldn't send message: [no body]"
     }
 
