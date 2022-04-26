@@ -313,6 +313,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId.shouldBeNull()
+        forvaltningsinfo.eksternId shouldBe kravgrunnlag.referanse
     }
 
     @Test
@@ -324,6 +325,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
+        forvaltningsinfo.eksternId shouldBe mottattXml.referanse
     }
 
     @Test

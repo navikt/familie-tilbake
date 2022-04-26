@@ -149,14 +149,16 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-            return Forvaltningsinfo(kravgrunnlag431.eksternKravgrunnlagId, null)
+            return Forvaltningsinfo(kravgrunnlag431.eksternKravgrunnlagId, null, kravgrunnlag431.referanse)
         }
         val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil("Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
-        return Forvaltningsinfo(økonomiXmlMottatt[0].eksternKravgrunnlagId!!, økonomiXmlMottatt[0].id)
+        return Forvaltningsinfo(økonomiXmlMottatt[0].eksternKravgrunnlagId!!,
+                                økonomiXmlMottatt[0].id,
+                                økonomiXmlMottatt[0].referanse)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {

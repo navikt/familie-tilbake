@@ -112,4 +112,4 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     }
 }
 
-data class Forvaltningsinfo(val eksternKravgrunnlagId: BigInteger, val mottattXmlId: UUID?)
+data class Forvaltningsinfo(val eksternKravgrunnlagId: BigInteger, val mottattXmlId: UUID?, val eksternId: String)
