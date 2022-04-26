@@ -17,21 +17,20 @@ object VedtakHjemmel {
                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
 
     fun lagHjemmel(vedtaksresultatstype: Vedtaksresultat,
-                   foreldelse: VurdertForeldelse?,
-                   vilkårsperioder: Set<Vilkårsvurderingsperiode>,
+                   vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
                    effektForBruker: EffektForBruker,
-                   ytelsestype: Ytelsestype,
                    språkkode: Språkkode,
                    visHjemmelForRenter: Boolean,
                    klagebehandling: Boolean): HbHjemmel {
-        val foreldetVanlig = erNoeSattTilVanligForeldet(foreldelse)
-        val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(foreldelse)
-        val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype, vilkårsperioder)
-        val renter = visHjemmelForRenter && erRenterBenyttet(vilkårsperioder)
-        val barnetrygd = Ytelsestype.BARNETRYGD == ytelsestype
-        val kontantstøtte = Ytelsestype.KONTANTSTØTTE == ytelsestype
+        val foreldetVanlig = erNoeSattTilVanligForeldet(vedtaksbrevgrunnlag.vurdertForeldelse)
+        val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(vedtaksbrevgrunnlag.vurdertForeldelse)
+        val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype,
+                                                         vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
+        val renter = visHjemmelForRenter && erRenterBenyttet(vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
+        val barnetrygd = Ytelsestype.BARNETRYGD == vedtaksbrevgrunnlag.ytelsestype
+        val kontantstøtte = Ytelsestype.KONTANTSTØTTE == vedtaksbrevgrunnlag.ytelsestype
         val hjemler: MutableList<Hjemler> = ArrayList()
-        if (vilkårsperioder.isNotEmpty()) {
+        if (vedtaksbrevgrunnlag.vilkårsvurderingsperioder.isNotEmpty()) {
             when {
                 barnetrygd && ignorerteSmåbeløp -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15_SJETTE))
                 ignorerteSmåbeløp -> hjemler.add(Hjemler.FOLKETRYGD_22_15_SJETTE)

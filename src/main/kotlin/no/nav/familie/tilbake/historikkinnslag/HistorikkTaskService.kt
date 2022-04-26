@@ -20,7 +20,8 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
                          aktør: Aktør,
                          triggerTid: LocalDateTime? = null,
                          beskrivelse: String? = null,
-                         brevtype: Brevtype? = null) {
+                         brevtype: Brevtype? = null,
+                         beslutter: String? = null) {
 
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
@@ -28,6 +29,7 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
             setProperty("aktør", aktør.name)
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
+            beslutter?.let { setProperty(PropertyName.BESLUTTER, beslutter) }
             beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
             brevtype?.let { setProperty("brevtype", brevtype.name) }
         }

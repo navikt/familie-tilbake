@@ -51,4 +51,5 @@ object PropertyName {
 
     const val FAGSYSTEM = "fagsystem"
     const val ENHET = "enhet"
+    const val BESLUTTER = "beslutter"
 }

@@ -35,13 +35,15 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                             aktør: Aktør,
                             opprettetTidspunkt: LocalDateTime,
                             beskrivelse: String? = null,
-                            brevtype: String? = null) {
-        val request = lagHistorikkinnslagRequest(behandlingId = behandlingId,
-                                                 aktør = aktør,
-                                                 historikkinnslagstype = historikkinnslagstype,
-                                                 opprettetTidspunkt = opprettetTidspunkt,
-                                                 beskrivelse = beskrivelse,
-                                                 brevtype = brevtype)
+                            brevtype: String? = null,
+                            beslutter: String? = null) {
+        val request = lagHistorikkinnslagRequest(behandlingId,
+                                                 aktør,
+                                                 historikkinnslagstype,
+                                                 opprettetTidspunkt,
+                                                 beskrivelse,
+                                                 brevtype,
+                                                 beslutter)
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
 
@@ -50,7 +52,8 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
                                            opprettetTidspunkt: LocalDateTime,
                                            beskrivelse: String?,
-                                           brevtype: String?): OpprettHistorikkinnslagRequest {
+                                           brevtype: String?,
+                                           beslutter: String?): OpprettHistorikkinnslagRequest {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -62,7 +65,7 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
                                               applikasjon = Applikasjon.FAMILIE_TILBAKE,
                                               type = historikkinnslagstype.type,
                                               aktør = aktør,
-                                              aktørIdent = hentAktørIdent(behandling, aktør),
+                                              aktørIdent = hentAktørIdent(behandling, aktør, beslutter),
                                               opprettetTidspunkt = opprettetTidspunkt,
                                               steg = historikkinnslagstype.steg?.name,
                                               tittel = historikkinnslagstype.tittel,
@@ -90,11 +93,15 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    private fun hentAktørIdent(behandling: Behandling, aktør: Aktør): String {
+    private fun hentAktørIdent(behandling: Behandling,
+                               aktør: Aktør,
+                               beslutter: String?): String {
         return when (aktør) {
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
-            Aktør.BESLUTTER -> behandling.ansvarligBeslutter!!
+            Aktør.BESLUTTER -> behandling.ansvarligBeslutter
+                               ?: beslutter
+                               ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
         }
     }
 

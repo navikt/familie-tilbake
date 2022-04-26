@@ -486,8 +486,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.KLAR)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.UTFØRT)
 
-        assertAnsvarligBeslutter()
-        assertBehandlingsstatus(behandlingId, Behandlingsstatus.IVERKSETTER_VEDTAK)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandling.ansvarligBeslutter shouldBe "Z0000"
+        behandling.status shouldBe Behandlingsstatus.IVERKSETTER_VEDTAK
 
         val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         totrinnsvurderinger.shouldNotBeEmpty()
@@ -499,7 +500,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
 
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val behandlingsresultat = behandling.sisteResultat
         behandlingsresultat.shouldNotBeNull()
         behandlingsresultat.type shouldBe Behandlingsresultatstype.INGEN_TILBAKEBETALING
@@ -523,8 +523,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
 
-        assertAnsvarligBeslutter()
-        assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandling.ansvarligBeslutter shouldBe null
+        behandling.status shouldBe Behandlingsstatus.UTREDES
 
         val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         totrinnsvurderinger.shouldNotBeEmpty()
@@ -826,11 +827,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private fun assertBehandlingsstatus(behandlingId: UUID, behandlingsstatus: Behandlingsstatus) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandling.status shouldBe behandlingsstatus
-    }
-
-    private fun assertAnsvarligBeslutter() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandling.ansvarligBeslutter shouldBe "Z0000"
     }
 
     private fun assertOppgave(tasktype: String, forventet: Int = 1) {

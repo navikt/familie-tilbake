@@ -79,6 +79,12 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(ansvarligBeslutter = ContextService.hentSaksbehandler()))
     }
 
+    @Transactional
+    fun fjernAnsvarligBeslutter(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(ansvarligBeslutter = null))
+    }
+
     private fun finnOmStegKanBesluttes(behandlingssteg: Behandlingssteg,
                                        behandlingsstegstilstand: List<Behandlingsstegstilstand>): Boolean {
         return behandlingsstegstilstand.any {

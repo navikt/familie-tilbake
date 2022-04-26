@@ -21,12 +21,10 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
@@ -37,7 +35,6 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
@@ -64,10 +61,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var faktaRepository: FaktaFeilutbetalingRepository
+    private lateinit var vedtaksbrevgeneratorService: VedtaksbrevgeneratorService
 
     @Autowired
-    private lateinit var foreldelseRepository: VurdertForeldelseRepository
+    private lateinit var vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService
+
+    @Autowired
+    private lateinit var faktaRepository: FaktaFeilutbetalingRepository
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
@@ -80,12 +80,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository
-
-    @Autowired
-    private lateinit var brevsporingService: BrevsporingService
-
-    @Autowired
-    private lateinit var tilbakekrevingBeregningService: TilbakekrevingsberegningService
 
     @Autowired
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
@@ -112,15 +106,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
         vedtaksbrevService = VedtaksbrevService(behandlingRepository,
+                                                vedtaksbrevgeneratorService,
+                                                vedtaksbrevgrunnlagService,
                                                 faktaRepository,
-                                                foreldelseRepository,
                                                 vilkårsvurderingRepository,
                                                 fagsakRepository,
                                                 vedtaksbrevsoppsummeringRepository,
                                                 vedtaksbrevsperiodeRepository,
-                                                brevsporingService,
-                                                tilbakekrevingBeregningService,
-                                                eksterneDataForBrevService,
                                                 spyPdfBrevService)
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
