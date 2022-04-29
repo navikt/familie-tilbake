@@ -73,11 +73,12 @@ internal object TilbakekrevingsberegningVilkår {
         for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
-                skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                                                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
+                val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
+                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.HALF_UP)
             }
         }
-        return skattBeløp.setScale(0, RoundingMode.DOWN)
+        return skattBeløp
     }
 
     private fun finnBeløpUtenRenter(kravgrunnlagBeløp: BigDecimal, andel: BigDecimal?, manueltBeløp: BigDecimal?): BigDecimal {
@@ -139,4 +140,12 @@ internal object TilbakekrevingsberegningVilkår {
         }
         throw IllegalArgumentException("VVurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
     }
+}
+
+fun main(){
+    println(BigDecimal("429.4841")
+                    .add(BigDecimal("431.1465"))
+                    .add(BigDecimal("262.4370"))
+                    .add(BigDecimal("37.4910"))
+                    .setScale (4, RoundingMode.DOWN))
 }
