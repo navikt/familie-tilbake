@@ -48,8 +48,10 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // step3: lukk Godkjenne vedtak oppgaver
-        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) { // TODO er denne sjekken nødvendig her?
+            oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
+                                                                   opprettFerdigstillOppgaveTask = true,
+                                                                   ferdigstillOppgavetype = Oppgavetype.GodkjenneVedtak.name)
         }
 
         // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg

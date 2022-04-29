@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -27,7 +28,8 @@ import java.util.UUID
 class Vilkårsvurderingssteg(private val behandlingskontrollService: BehandlingskontrollService,
                             private val vilkårsvurderingService: VilkårsvurderingService,
                             private val foreldelseService: ForeldelseService,
-                            private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+                            private val historikkTaskService: HistorikkTaskService,
+                            private val oppgaveTaskService: OppgaveTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -56,10 +58,12 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
 
+        oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
+                                                               opprettFerdigstillOppgaveTask = false)
+
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 

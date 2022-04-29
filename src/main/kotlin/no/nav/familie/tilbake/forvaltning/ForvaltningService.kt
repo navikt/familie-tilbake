@@ -102,7 +102,7 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
                                               aktør = Aktør.SAKSBEHANDLER,
                                               beskrivelse = "")
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 

@@ -53,7 +53,7 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
-        håndterOppgave(behandlingId)
+        håndterOppgave(behandlingId, true)
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
@@ -71,7 +71,7 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
-        håndterOppgave(behandlingId)
+        håndterOppgave(behandlingId, false)
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
                                               historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
@@ -100,13 +100,19 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-    private fun håndterOppgave(behandlingId: UUID) {
+    private fun håndterOppgave(behandlingId: UUID, oppdaterTilordnetRessurs: Boolean) {
         val finnesUnderkjenteSteg = totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)
         var oppgavetype = Oppgavetype.BehandleSak
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
+        if (oppdaterTilordnetRessurs) {
+            oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
+                                                                   opprettFerdigstillOppgaveTask = true,
+                                                                   ferdigstillOppgavetype = oppgavetype.name)
+        } else {
+            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+        }
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
