@@ -43,7 +43,8 @@ data class Vedtaksbrevgrunnlag(@Id
                                @MappedCollection(idColumn = "fagsak_id")
                                val behandlinger: Set<Vedtaksbrevbehandling>) {
 
-    val behandling get() = behandlinger.first { it.avsluttetDato == null }
+    val behandling
+        get() = behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX } ?: error("Behandling finnes ikke for vedtak")
 
     val klagebehandling get() = behandling.sisteÅrsak?.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
 
