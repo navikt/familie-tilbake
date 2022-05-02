@@ -141,11 +141,3 @@ internal object TilbakekrevingsberegningVilkår {
         throw IllegalArgumentException("VVurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
     }
 }
-
-fun main(){
-    println(BigDecimal("429.4841")
-                    .add(BigDecimal("431.1465"))
-                    .add(BigDecimal("262.4370"))
-                    .add(BigDecimal("37.4910"))
-                    .setScale (4, RoundingMode.DOWN))
-}
