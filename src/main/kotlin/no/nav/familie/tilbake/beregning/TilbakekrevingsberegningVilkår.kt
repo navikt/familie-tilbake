@@ -73,11 +73,12 @@ internal object TilbakekrevingsberegningVilkår {
         for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
-                skattBeløp = skattBeløp.add(delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                                                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
+                val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
+                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.HALF_UP)
             }
         }
-        return skattBeløp.setScale(0, RoundingMode.DOWN)
+        return skattBeløp
     }
 
     private fun finnBeløpUtenRenter(kravgrunnlagBeløp: BigDecimal, andel: BigDecimal?, manueltBeløp: BigDecimal?): BigDecimal {

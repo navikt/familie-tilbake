@@ -424,7 +424,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     utbetaltBeløp = BigDecimal(5000),
                     tilbakekrevesBeløp = BigDecimal(2500),
                     uinnkrevdBeløp = BigDecimal(2500),
-                    skattBeløp = BigDecimal(645),
+                    skattBeløp = BigDecimal(646),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
     }
@@ -1004,7 +1004,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     utbetaltBeløp = BigDecimal(19950),
                     tilbakekrevesBeløp = BigDecimal(877),
                     uinnkrevdBeløp = BigDecimal(878),
-                    skattBeløp = BigDecimal(385),
+                    skattBeløp = BigDecimal(386),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
 
         val andrePeriode = tilbakekrevingsperioder[1]
@@ -1020,6 +1020,93 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal(877),
                     skattBeløp = BigDecimal(439),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
+    }
+
+    @Test
+    fun `beregnVedtaksperioder skal beregne EF perioder med full tilbakekreving og skatt avrunding`() {
+        kravgrunnlagRepository.deleteById(kravgrunnlag.id)
+        fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
+
+        val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding_2.xml")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                                                                 behandling.id)
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
+
+        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(sortedPerioder[0].fom,
+                                                                                sortedPerioder[3].tom),
+                                                           begrunnelse = "testverdi",
+                                                           aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                                                                                       begrunnelse = "simpel uaktsomhet begrunnelse",
+                                                                                       tilbakekrevSmåbeløp = true,
+                                                                                       særligeGrunnerBegrunnelse = "test",
+                                                                                       særligeGrunnerTilReduksjon = true,
+                                                                                       særligeGrunner = listOf(SærligGrunnDto(
+                                                                                               HELT_ELLER_DELVIS_NAVS_FEIL)),
+                                                                                       andelTilbakekreves = BigDecimal(100)),
+                                                           vilkårsvurderingsresultat =
+                                                           Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
+
+        vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
+
+        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
+        tilbakekrevingsperioder.shouldNotBeNull()
+        tilbakekrevingsperioder.size shouldBe 4
+        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
+
+        val førstePeriode = tilbakekrevingsperioder[0]
+        førstePeriode.periode shouldBe sortedPerioder[0]
+        førstePeriode.renter shouldBe BigDecimal(0)
+        var feilPostering = førstePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
+        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(2962), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        var ytelsePostering = førstePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
+        assertBeløp(beløp = ytelsePostering,
+                    utbetaltBeløp = BigDecimal(12607),
+                    tilbakekrevesBeløp = BigDecimal(2962),
+                    uinnkrevdBeløp = BigDecimal.ZERO,
+                    skattBeløp = BigDecimal(429),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+
+        val andrePeriode = tilbakekrevingsperioder[1]
+        andrePeriode.periode shouldBe sortedPerioder[1]
+        andrePeriode.renter shouldBe BigDecimal(0)
+        feilPostering = andrePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
+        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1725), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        ytelsePostering = andrePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
+        assertBeløp(beløp = ytelsePostering,
+                    utbetaltBeløp = BigDecimal(12607),
+                    tilbakekrevesBeløp = BigDecimal(1725),
+                    uinnkrevdBeløp = BigDecimal.ZERO,
+                    skattBeløp = BigDecimal(431),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+
+        val tredjePeriode = tilbakekrevingsperioder[2]
+        tredjePeriode.periode shouldBe sortedPerioder[2]
+        tredjePeriode.renter shouldBe BigDecimal(0)
+        feilPostering = tredjePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
+        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(1050), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        ytelsePostering = tredjePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
+        assertBeløp(beløp = ytelsePostering,
+                    utbetaltBeløp = BigDecimal(12607),
+                    tilbakekrevesBeløp = BigDecimal(1050),
+                    uinnkrevdBeløp = BigDecimal.ZERO,
+                    skattBeløp = BigDecimal(262),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+
+        val fjerdePeriode = tilbakekrevingsperioder[3]
+        fjerdePeriode.periode shouldBe sortedPerioder[3]
+        fjerdePeriode.renter shouldBe BigDecimal(0)
+        feilPostering = fjerdePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
+        assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(150), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        ytelsePostering = fjerdePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
+        assertBeløp(beløp = ytelsePostering,
+                    utbetaltBeløp = BigDecimal(12607),
+                    tilbakekrevesBeløp = BigDecimal(150),
+                    uinnkrevdBeløp = BigDecimal.ZERO,
+                    skattBeløp = BigDecimal(37),
+                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
     }
 
     private fun lagForeldelse(perioder: List<Periode>) {
