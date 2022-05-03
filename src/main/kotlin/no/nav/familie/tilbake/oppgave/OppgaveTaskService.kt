@@ -98,7 +98,7 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
         }
-        taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerOppgaveTask.TYPE,
+        taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
     }

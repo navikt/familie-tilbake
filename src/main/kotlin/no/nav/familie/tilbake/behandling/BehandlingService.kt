@@ -285,11 +285,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID): String {
+    fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val forrigeSaksbehandler = behandling.ansvarligSaksbehandler
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
-        return forrigeSaksbehandler
     }
 
     @Transactional

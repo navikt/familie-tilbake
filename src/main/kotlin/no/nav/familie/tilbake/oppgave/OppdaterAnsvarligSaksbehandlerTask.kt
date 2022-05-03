@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OppdaterAnsvarligSaksbehandlerOppgaveTask.TYPE,
+@TaskStepBeskrivelse(taskStepType = OppdaterAnsvarligSaksbehandlerTask.TYPE,
                      maxAntallFeil = 3,
                      beskrivelse = "Oppdaterer tilordnet ressurs på oppgave",
                      triggerTidVedFeilISekunder = 300L)
-class OppdaterAnsvarligSaksbehandlerOppgaveTask(private val oppgaveService: OppgaveService,
-                                                private val oppgaveTaskService: OppgaveTaskService,
-                                                private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
+class OppdaterAnsvarligSaksbehandlerTask(private val oppgaveService: OppgaveService,
+                                         private val oppgaveTaskService: OppgaveTaskService,
+                                         private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
