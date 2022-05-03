@@ -92,7 +92,6 @@ class BehandlingController(private val behandlingService: BehandlingService,
                              @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto): Ressurs<String> {
         stegService.håndterSteg(behandlingId, behandlingsstegDto)
 
-        // TODO: Kvifor er denne her? Prøvde å flytte den til dei forskjellige stega, men fikk sirkulære avhengigheter
         if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }

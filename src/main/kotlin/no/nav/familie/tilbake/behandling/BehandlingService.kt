@@ -231,10 +231,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         // f.eks saken var på vent med brukerstilbakemelding og har ikke fått kravgrunnlag
         val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
-            // TODO: Blir ikkje dette riktig? Det er vel strengt tatt systemet som setter den på vent
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandlingId,
-                                                   beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
-                                                   frist = aktivStegstilstand.tidsfrist!!)
+            oppgaveTaskService.oppdaterOppgaveTaskMedTriggertid(behandlingId = behandlingId,
+                                                                beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
+                                                                frist = aktivStegstilstand.tidsfrist!!,
+                                                                triggerTid = 2L)
         }
     }
 
@@ -259,7 +259,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
 
-        val forrigeAnsvarligSaksbehandler = oppdaterAnsvarligSaksbehandler(behandlingId)
+        oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
         val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
 
@@ -280,13 +280,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         // Ferdigstill oppgave
-        if (forrigeAnsvarligSaksbehandler != ContextService.hentSaksbehandler()
-            && ContextService.hentSaksbehandler() != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
-                                                                   opprettFerdigstillOppgaveTask = true)
-        } else {
-            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
-        }
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 

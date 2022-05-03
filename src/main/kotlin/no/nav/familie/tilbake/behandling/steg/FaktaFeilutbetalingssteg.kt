@@ -37,8 +37,7 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
 
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
 
-        oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
-                                                               opprettFerdigstillOppgaveTask = false)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,

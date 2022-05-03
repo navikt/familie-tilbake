@@ -41,8 +41,7 @@ class Vergessteg(private val behandlingRepository: BehandlingRepository,
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
 
-        oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
-                                                               opprettFerdigstillOppgaveTask = false)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
                                                                  Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT))

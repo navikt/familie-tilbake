@@ -50,8 +50,7 @@ class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto))
 
-        oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
-                                                               opprettFerdigstillOppgaveTask = false)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 

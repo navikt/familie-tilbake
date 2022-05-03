@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
@@ -47,6 +48,22 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
 
     @Transactional
     fun oppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate, saksbehandler: String? = null) {
+        opprettOppdaterOppgaveTask(behandlingId = behandlingId,
+                                   beskrivelse = beskrivelse,
+                                   frist = frist,
+                                   saksbehandler = saksbehandler)
+    }
+
+    @Transactional
+    fun oppdaterOppgaveTaskMedTriggertid(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long, saksbehandler: String? = null) {
+        opprettOppdaterOppgaveTask(behandlingId = behandlingId,
+                                   beskrivelse = beskrivelse,
+                                   frist = frist,
+                                   triggerTid = triggerTid,
+                                   saksbehandler = saksbehandler)
+    }
+
+    private fun opprettOppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long? = null, saksbehandler: String? = null) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
@@ -54,9 +71,11 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
             setProperty("frist", frist.toString())
             saksbehandler?.let { setProperty("saksbehandler", it) }
         }
-        taskRepository.save(Task(type = OppdaterOppgaveTask.TYPE,
-                                 payload = behandlingId.toString(),
-                                 properties = properties))
+        val task = Task(type = OppdaterOppgaveTask.TYPE,
+                        payload = behandlingId.toString(),
+                        properties = properties)
+        triggerTid?.let { task.medTriggerTid(LocalDateTime.now().plusSeconds(it)) }
+        taskRepository.save(task)
     }
 
     @Transactional
@@ -74,20 +93,12 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
     }
 
     @Transactional
-    fun oppdaterTilordnetRessursOppgaveTask(behandlingId: UUID,
-                                            opprettFerdigstillOppgaveTask: Boolean = false,
-                                            ferdigstillOppgavetype: String? = null) {
+    fun oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId: UUID) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
-            if (opprettFerdigstillOppgaveTask) {
-                setProperty("opprettFerdigstillOppgaveTask", "true")
-            }
-            if (!ferdigstillOppgavetype.isNullOrEmpty()) {
-                setProperty("ferdigstillOppgavetype", ferdigstillOppgavetype)
-            }
         }
-        taskRepository.save(Task(type = OppdaterTilordnetRessursOppgaveTask.TYPE,
+        taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerOppgaveTask.TYPE,
                                  payload = behandlingId.toString(),
                                  properties = properties))
     }

@@ -58,8 +58,7 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
 
-        oppgaveTaskService.oppdaterTilordnetRessursOppgaveTask(behandlingId = behandlingId,
-                                                               opprettFerdigstillOppgaveTask = false)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
