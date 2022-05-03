@@ -59,7 +59,6 @@ import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsve
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppdaterTilordnetRessursOppgaveTask
 import no.nav.familie.tilbake.totrinn.TotrinnsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -427,7 +426,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.FATTER_VEDTAK)
         assertFaktadata(behandlingsstegFaktaDto)
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE, 3)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertOppgave(LagOppgaveTask.TYPE)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT, Aktør.SAKSBEHANDLER)
@@ -451,12 +450,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                 faktaAvsnitt = "fakta tekst")))
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE, 3)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertOppgave(LagOppgaveTask.TYPE)
 
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = false))
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE, 4)
+        assertOppgave(FerdigstillOppgaveTask.TYPE, 2)
         assertOppgave(LagOppgaveTask.TYPE, 2)
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -465,7 +464,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE, 5)
+        assertOppgave(FerdigstillOppgaveTask.TYPE, 3)
         assertOppgave(LagOppgaveTask.TYPE, 3)
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER, Aktør.BESLUTTER)
@@ -498,7 +497,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && it.godkjent }.shouldBeTrue()
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && it.godkjent }.shouldBeTrue()
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET, Aktør.BESLUTTER)
 
         val behandlingsresultat = behandling.sisteResultat
@@ -535,7 +534,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING && !it.godkjent }.shouldBeTrue()
         totrinnsvurderinger.any { it.behandlingssteg == Behandlingssteg.FORESLÅ_VEDTAK && !it.godkjent }.shouldBeTrue()
 
-        assertOppgave(OppdaterTilordnetRessursOppgaveTask.TYPE)
+        assertOppgave(FerdigstillOppgaveTask.TYPE)
         assertOppgave(LagOppgaveTask.TYPE)
     }
 
