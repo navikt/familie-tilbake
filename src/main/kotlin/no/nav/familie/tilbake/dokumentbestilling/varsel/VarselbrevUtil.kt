@@ -174,7 +174,10 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                    fagsystemsbehandlingId: String?,
                    varsletTotalbeløp: Long): String {
         return if (varselbrevsdokument.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)) {
-            if (fagsystemsbehandlingId == null) return ""
+            if (fagsystemsbehandlingId == null) {
+                error("fagsystemsbehandlingId mangler for forhåndsvisning av varselbrev. " +
+                      "Saksnummer ${varselbrevsdokument.brevmetadata.saksnummer}")
+            }
 
             val vedleggsdata =
                     sammenstillInfoFraSimuleringForVedlegg(varselbrevsdokument, fagsystemsbehandlingId, varsletTotalbeløp)
