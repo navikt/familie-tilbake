@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -21,6 +22,7 @@ import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbre
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -29,6 +31,7 @@ import java.util.UUID
 @Service
 class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrevService,
                      private val oppdragClient: OppdragClient,
+                     private val kravgrunnlagRepository: KravgrunnlagRepository,
                      private val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
 
     companion object {
@@ -157,14 +160,15 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
 
     private fun sammenstillInfoFraKravgrunnlag(varselbrevsdokument: Varselbrevsdokument,
                                                behandlingId: UUID): Vedleggsdata {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-        val beregningsresultat = tilbakekrevingsberegningService.beregn(behandlingId)
+        val beregningsresultat = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
 
-        val perioder = beregningsresultat.beregningsresultatsperioder.map {
-            FeilutbetaltPeriode(YearMonth.from(it.periode.fom),
-                                it.riktigYtelsesbeløp,
-                                it.utbetaltYtelsesbeløp,
-                                it.feilutbetaltBeløp)
+        val perioder = beregningsresultat.map {
+            FeilutbetaltPeriode(YearMonth.from(it.key.fom),
+                                it.value.riktigYtelsesbeløp,
+                                it.value.utbetaltYtelsesbeløp,
+                                it.value.feilutbetaltBeløp)
         }
 
         return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
@@ -190,7 +194,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
     fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument, behandlingId: UUID): String {
         return if (varselbrevsdokument.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)) {
             val vedleggsdata = sammenstillInfoFraKravgrunnlag(varselbrevsdokument, behandlingId)
-            return TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+            TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
         } else {
             ""
         }

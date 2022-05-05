@@ -19,22 +19,44 @@ import java.util.function.Function
 @Service
 object KravgrunnlagsberegningService {
 
+    private val feilutbetaltYtelsesbeløputleder: (Kravgrunnlagsperiode432) -> BigDecimal = { kgPeriode: Kravgrunnlagsperiode432 ->
+        kgPeriode.beløp
+                .filter { it.klassetype == Klassetype.FEIL }
+                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+    }
+
+    private val utbetaltYtelsesbeløputleder = { kgPeriode: Kravgrunnlagsperiode432 ->
+        kgPeriode.beløp
+                .filter { it.klassetype == Klassetype.YTEL }
+                .sumOf(Kravgrunnlagsbeløp433::opprinneligUtbetalingsbeløp)
+    }
+
+    private val riktigYteslesbeløputleder = { kgPeriode: Kravgrunnlagsperiode432 ->
+        kgPeriode.beløp
+                .filter { it.klassetype == Klassetype.YTEL }
+                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+    }
+
+
     fun fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag: Kravgrunnlag431,
                                           vurderingsperioder: List<Periode>): Map<Periode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
-            FordeltKravgrunnlagsbeløp(beregnFeilutbetaltBeløp(kravgrunnlag, it),
-                                      beregnUtbetaltYtelseBeløp(kravgrunnlag, it),
-                                      beregnRiktigYtelseBeløp(kravgrunnlag, it))
+            FordeltKravgrunnlagsbeløp(beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
+                                      beregnBeløp(kravgrunnlag, it, utbetaltYtelsesbeløputleder),
+                                      beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder))
+        }
+    }
+
+    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Periode, FordeltKravgrunnlagsbeløp> {
+        return kravgrunnlag.perioder.associate {
+            it.periode to FordeltKravgrunnlagsbeløp(feilutbetaltYtelsesbeløputleder(it),
+                                                    utbetaltYtelsesbeløputleder(it),
+                                                    riktigYteslesbeløputleder(it))
         }
     }
 
     fun beregnFeilutbetaltBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Periode): BigDecimal {
-        val feilutbetaltBeløpUtleder = { kgPeriode: Kravgrunnlagsperiode432 ->
-            kgPeriode.beløp
-                    .filter { it.klassetype == Klassetype.FEIL }
-                    .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
-        }
-        return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltBeløpUtleder)
+        return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
     }
 
     fun validatePerioder(perioder: List<PeriodeDto>) {
@@ -49,31 +71,6 @@ object KravgrunnlagsberegningService {
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-    }
-
-    /**
-     * Utbetalt beløp er ikke justert med trekk, det er OK for vår bruk
-     */
-    private fun beregnUtbetaltYtelseBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Periode): BigDecimal {
-        val feilutbetaltBeløpUtleder =
-                { kgPeriode: Kravgrunnlagsperiode432 ->
-                    kgPeriode.beløp
-                            .filter { it.klassetype == Klassetype.YTEL }
-                            .sumOf(Kravgrunnlagsbeløp433::opprinneligUtbetalingsbeløp)
-                }
-        return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltBeløpUtleder)
-    }
-
-    /**
-     * Riktig beløp er ikke justert med trekk, det er OK for vår bruk
-     */
-    private fun beregnRiktigYtelseBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Periode): BigDecimal {
-        val feilutbetaltBeløpUtleder = { kgPeriode: Kravgrunnlagsperiode432 ->
-            kgPeriode.beløp
-                    .filter { it.klassetype == Klassetype.YTEL }
-                    .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
-        }
-        return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltBeløpUtleder)
     }
 
     private fun beregnBeløp(kravgrunnlag: Kravgrunnlag431,
