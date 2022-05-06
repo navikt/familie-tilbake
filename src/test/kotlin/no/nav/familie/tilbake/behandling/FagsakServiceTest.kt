@@ -67,7 +67,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentFagsak skal hente fagsak for barnetrygd`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
 
@@ -136,7 +136,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `finnesÅpenTilbakekrevingsbehandling skal returnere false om behandling er avsluttet`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        var behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
+        var behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -147,7 +147,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `finnesÅpenTilbakekrevingsbehandling skal returnere true om det finnes en åpen behandling`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
         val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
         finnesBehandling.finnesÅpenBehandling.shouldBeTrue()
@@ -156,7 +156,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `kanBehandlingOpprettesManuelt skal returnere false når det finnes en åpen tilbakekrevingsbehandling`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, Ytelsestype.BARNETRYGD)
         respons.kanBehandlingOpprettes.shouldBeFalse()
@@ -203,7 +203,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
-    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String): Behandling {
+    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String = "123"): Behandling {
         val fagsak = Fagsak(eksternFagsakId = eksternFagsakId,
                             bruker = Bruker(personIdent, Språkkode.NB),
                             ytelsestype = ytelsestype,
