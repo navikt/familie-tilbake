@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
@@ -58,9 +58,7 @@ interface OppdragClient {
 
     fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest)
 
-    fun hentFeilutbetalingerFraSimulering(ytelsestype: Ytelsestype,
-                                          saksnummer: String,
-                                          eksternBehandlingId: String): FeilutbetalingerFraSimulering
+    fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering
 }
 
 @Service
@@ -83,14 +81,8 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
     private fun annulerKravgrunnlagUri(kravgrunnlagId: BigInteger): URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
             .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
 
-    private fun hentFeilutbetalingerFraSimuleringUri(ytelsestype: Ytelsestype,
-                                                     saksnummer: String,
-                                                     eksternBehandlingId: String): URI =
-            UriComponentsBuilder.fromUri(familieOppdragUrl)
-                    .pathSegment(HENT_FEILUTBETALINGER_PATH, ytelsestype.name, saksnummer, eksternBehandlingId)
-                    .encode()
-                    .build()
-                    .toUri()
+    private val hentFeilutbetalingerFraSimuleringUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
+            .pathSegment(HENT_FEILUTBETALINGER_PATH).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
@@ -158,18 +150,18 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         }
     }
 
-    override fun hentFeilutbetalingerFraSimulering(ytelsestype: Ytelsestype,
-                                                   saksnummer: String,
-                                                   eksternBehandlingId: String): FeilutbetalingerFraSimulering {
-        logger.info("Henter feilubetalinger fra simulering for ytelsestype=$ytelsestype, " +
-                    "eksternFagsakId=$saksnummer og eksternId=$eksternBehandlingId")
-        val uri = hentFeilutbetalingerFraSimuleringUri(ytelsestype, saksnummer, eksternBehandlingId)
+    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest)
+            : FeilutbetalingerFraSimulering {
+        logger.info("Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
         try {
-            return getForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri).getDataOrThrow()
+            return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri = hentFeilutbetalingerFraSimuleringUri,
+                                                                         payload = request)
+                    .getDataOrThrow()
 
         } catch (exception: Exception) {
-            logger.error("Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=$ytelsestype, " +
-                         "eksternFagsakId=$saksnummer og eksternId=$eksternBehandlingId" +
+            logger.error("Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
+                         "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}" +
                          "Feiler med ${exception.message}")
             throw IntegrasjonException(msg = "Noe gikk galt ved henting av feilutbetalinger fra simulering",
                                        throwable = exception)
@@ -244,11 +236,9 @@ class MockOppdragClient(private val kravgrunnlagRepository: KravgrunnlagReposito
         logger.info("Kaller mock annulering request i e2e-profil")
     }
 
-    override fun hentFeilutbetalingerFraSimulering(ytelsestype: Ytelsestype,
-                                                   saksnummer: String,
-                                                   eksternBehandlingId: String): FeilutbetalingerFraSimulering {
-        logger.info("Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=$ytelsestype, " +
-                    "eksternFagsakId=$saksnummer og eksternId=$eksternBehandlingId")
+    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering {
+        logger.info("Henter feilubetalinger fra simulering i e2e-profil for ytelsestype=${request.ytelsestype}, " +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
         val feilutbetaltPeriode = FeilutbetaltPeriode(fom = YearMonth.now().minusMonths(2).atDay(1),
                                                       tom = YearMonth.now().minusMonths(1).atDay(1),
                                                       feilutbetaltBeløp = BigDecimal("20000"),

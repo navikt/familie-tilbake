@@ -1,13 +1,11 @@
 package no.nav.familie.tilbake.integration.økonomi
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.serviceUnavailable
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,6 +15,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -203,20 +202,25 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                                                       tidligereUtbetaltBeløp = BigDecimal("30000"),
                                                       nyttBeløp = BigDecimal("10000"))
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
-        wireMockServer.stubFor(get(urlMatching(".+")).willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
+        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
+                                       .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
 
-        val respons =
-                oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.BARNETILSYN, "123", "1")
+        val respons = oppdragClient
+                .hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
+                                                                                            "123",
+                                                                                            "1"))
         respons shouldNotBe null
     }
 
     @Test
     fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
-        wireMockServer.stubFor(get(urlMatching(".+"))
+        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
                                        .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")))
 
         val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.BARNETILSYN, "123", "1")
+            oppdragClient.hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
+                                                                                                     "123",
+                                                                                                     "1"))
         }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()

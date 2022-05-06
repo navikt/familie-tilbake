@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -8,7 +9,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
-import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
@@ -31,8 +31,7 @@ import java.util.UUID
 @Service
 class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrevService,
                      private val oppdragClient: OppdragClient,
-                     private val kravgrunnlagRepository: KravgrunnlagRepository,
-                     private val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
+                     private val kravgrunnlagRepository: KravgrunnlagRepository) {
 
     companion object {
 
@@ -137,10 +136,12 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                                        eksternBehandlingId: String,
                                                        varsletTotalbeløp: Long): Vedleggsdata {
 
-        val feilutbetalingerFraSimulering =
-                oppdragClient.hentFeilutbetalingerFraSimulering(varselbrevsdokument.ytelsestype,
-                                                                varselbrevsdokument.brevmetadata.saksnummer,
-                                                                eksternBehandlingId)
+        val request = HentFeilutbetalingerFraSimuleringRequest(
+                varselbrevsdokument.ytelsestype,
+                varselbrevsdokument.brevmetadata.saksnummer,
+                eksternBehandlingId)
+
+        val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request)
 
         val perioder = feilutbetalingerFraSimulering.feilutbetaltePerioder.map {
             FeilutbetaltPeriode(YearMonth.from(it.fom),
