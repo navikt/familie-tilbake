@@ -203,21 +203,20 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                                                       tidligereUtbetaltBeløp = BigDecimal("30000"),
                                                       nyttBeløp = BigDecimal("10000"))
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
-        wireMockServer.stubFor(get(urlMatching(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH + ".+"))
-                                       .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
+        wireMockServer.stubFor(get(urlMatching(".+")).willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
 
         val respons =
-                oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.OVERGANGSSTØNAD, "123", "1")
+                oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.BARNETILSYN, "123", "1")
         respons shouldNotBe null
     }
 
     @Test
     fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
-        wireMockServer.stubFor(get(urlMatching(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH + ".+"))
+        wireMockServer.stubFor(get(urlMatching(".+"))
                                        .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")))
 
         val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.OVERGANGSSTØNAD, "123", "1")
+            oppdragClient.hentFeilutbetalingerFraSimulering(Ytelsestype.BARNETILSYN, "123", "1")
         }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
