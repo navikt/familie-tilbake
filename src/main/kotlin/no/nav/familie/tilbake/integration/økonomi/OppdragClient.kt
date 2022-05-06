@@ -88,6 +88,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
                                                      eksternBehandlingId: String): URI =
             UriComponentsBuilder.fromUri(familieOppdragUrl)
                     .pathSegment(HENT_FEILUTBETALINGER_PATH, ytelsestype.name, saksnummer, eksternBehandlingId)
+                    .encode()
                     .build()
                     .toUri()
 
