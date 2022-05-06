@@ -42,7 +42,8 @@ class PdlClient(val pdlConfig: PdlConfig,
                 Personinfo(ident = ident,
                            fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                            navn = it.navn.first().fulltNavn(),
-                           kjønn = it.kjønn.first().kjønn)
+                           kjønn = it.kjønn.first().kjønn,
+                           dødsdato = it.dødsfall.firstOrNull()?.let { it2 -> LocalDate.parse(it2.dødsdato) })
             }
         } else {
             logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")

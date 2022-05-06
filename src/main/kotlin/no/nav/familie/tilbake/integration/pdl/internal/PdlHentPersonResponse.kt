@@ -19,7 +19,8 @@ data class PdlPerson(val person: PdlPersonData?)
 
 data class PdlPersonData(@JsonProperty("foedsel") val fødsel: List<PdlFødselsDato>,
                          val navn: List<PdlNavn>,
-                         @JsonProperty("kjoenn") val kjønn: List<PdlKjønn>)
+                         @JsonProperty("kjoenn") val kjønn: List<PdlKjønn>,
+                         @JsonProperty("doedsfall") val dødsfall: List<PdlDødsfall> = emptyList())
 
 
 data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
@@ -51,3 +52,5 @@ enum class Kjønn {
     KVINNE,
     UKJENT
 }
+
+data class PdlDødsfall(@JsonProperty("doedsdato") val dødsdato: String? = null)

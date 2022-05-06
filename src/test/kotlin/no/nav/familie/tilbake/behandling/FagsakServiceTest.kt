@@ -67,7 +67,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentFagsak skal hente fagsak for barnetrygd`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
 
@@ -81,6 +81,35 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         brukerDto.navn shouldBe "testverdi"
         brukerDto.kjønn shouldBe Kjønn.MANN
         brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+        brukerDto.dødsdato shouldBe null
+
+        val behandlinger = fagsakDto.behandlinger
+        behandlinger.size shouldBe 1
+        val behandlingsoppsummeringtDto = behandlinger.toList()[0]
+        behandlingsoppsummeringtDto.behandlingId shouldBe behandling.id
+        behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
+        behandlingsoppsummeringtDto.status shouldBe behandling.status
+        behandlingsoppsummeringtDto.type shouldBe behandling.type
+    }
+
+    @Test
+    fun `hentFagsak skal hente fagsak for død person`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "doed1234")
+
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
+
+        fagsakDto.eksternFagsakId shouldBe eksternFagsakId
+        fagsakDto.språkkode shouldBe Språkkode.NB
+        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        fagsakDto.fagsystem shouldBe Fagsystem.BA
+
+        val brukerDto = fagsakDto.bruker
+        brukerDto.personIdent shouldBe "doed1234"
+        brukerDto.navn shouldBe "testverdi"
+        brukerDto.kjønn shouldBe Kjønn.MANN
+        brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+        brukerDto.dødsdato shouldBe LocalDate.of(2022, 4, 1)
 
         val behandlinger = fagsakDto.behandlinger
         behandlinger.size shouldBe 1
@@ -107,7 +136,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `finnesÅpenTilbakekrevingsbehandling skal returnere false om behandling er avsluttet`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        var behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        var behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -118,7 +147,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `finnesÅpenTilbakekrevingsbehandling skal returnere true om det finnes en åpen behandling`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
 
         val finnesBehandling = fagsakService.finnesÅpenTilbakekrevingsbehandling(Fagsystem.BA, eksternFagsakId)
         finnesBehandling.finnesÅpenBehandling.shouldBeTrue()
@@ -127,7 +156,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `kanBehandlingOpprettesManuelt skal returnere false når det finnes en åpen tilbakekrevingsbehandling`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "123")
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, Ytelsestype.BARNETRYGD)
         respons.kanBehandlingOpprettes.shouldBeFalse()
@@ -174,9 +203,9 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
-    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {
+    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String): Behandling {
         val fagsak = Fagsak(eksternFagsakId = eksternFagsakId,
-                            bruker = Bruker("123", Språkkode.NB),
+                            bruker = Bruker(personIdent, Språkkode.NB),
                             ytelsestype = ytelsestype,
                             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
         fagsakRepository.insert(fagsak)
