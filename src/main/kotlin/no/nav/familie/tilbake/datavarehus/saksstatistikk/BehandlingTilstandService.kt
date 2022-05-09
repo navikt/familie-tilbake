@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -10,14 +11,17 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.Properties
@@ -28,7 +32,8 @@ import java.util.UUID
 class BehandlingTilstandService(private val behandlingRepository: BehandlingRepository,
                                 private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
                                 private val fagsakRepository: FagsakRepository,
-                                private val taskService: TaskService) {
+                                private val taskService: TaskService,
+                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
 
     fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, info: Behandlingsstegsinfo) {
@@ -71,6 +76,17 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         val venterPåØkonomi: Boolean = Venteårsak.venterPåØkonomi(behandlingsstegstilstand?.venteårsak)
         val behandlingsårsak = behandling.årsaker.firstOrNull()
         val forrigeBehandling = behandlingsårsak?.originalBehandlingId?.let { behandlingRepository.findByIdOrNull(it) }
+
+        var feilutbetaltePerioder: List<Periode>? = null
+        var totalFeilutbetaltBeløp: BigDecimal? = null
+        val erBehandlingsstegEtterGrunnlagSteg =
+                behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
+        if (erBehandlingsstegEtterGrunnlagSteg) {
+            val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
+            feilutbetaltePerioder = fakta.feilutbetaltePerioder.map { Periode(it.periode.fom, it.periode.tom) }
+            totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
+        }
+
         return Behandlingstilstand(ytelsestype = fagsak.ytelsestype,
                                    saksnummer = fagsak.eksternFagsakId,
                                    behandlingUuid = behandling.eksternBrukId,
@@ -86,7 +102,9 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
                                    venterPåBruker = venterPåBruker,
                                    venterPåØkonomi = venterPåØkonomi,
                                    forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
-                                   revurderingOpprettetÅrsak = behandlingsårsak?.type)
+                                   revurderingOpprettetÅrsak = behandlingsårsak?.type,
+                                   totalFeilutbetaltBeløp = totalFeilutbetaltBeløp,
+                                   feilutbetaltePerioder = feilutbetaltePerioder)
     }
 
 }
