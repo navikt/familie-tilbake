@@ -10,4 +10,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     kjoenn {
         kjoenn
     }
+    doedsfall {
+        doedsdato
+    }
 }}

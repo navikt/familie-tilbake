@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.config
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Data
 import no.nav.familie.tilbake.integration.pdl.internal.IdentInformasjon
@@ -24,11 +25,20 @@ class PdlClientConfig {
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
 
-        every { pdlClient.hentPersoninfo(any(), any()) } answers {
+        val identerDødePersoner = listOf("doed1234")
+        val ident = slot<String>()
+        every { pdlClient.hentPersoninfo(capture(ident), any()) } answers {
+            val dødsdato = if (identerDødePersoner.contains(ident.captured)) {
+                LocalDate.of(2022, 4, 1)
+            } else {
+                null
+            }
             Personinfo(ident = "32132132111",
                        fødselsdato = LocalDate.now().minusYears(20),
                        navn = "testverdi",
-                       kjønn = Kjønn.MANN)
+                       kjønn = Kjønn.MANN,
+                       dødsdato = dødsdato,
+            )
         }
         every { pdlClient.hentIdenter(any(), any()) } answers {
             PdlHentIdenterResponse(data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),

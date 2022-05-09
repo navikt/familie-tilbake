@@ -81,6 +81,35 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         brukerDto.navn shouldBe "testverdi"
         brukerDto.kjønn shouldBe Kjønn.MANN
         brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+        brukerDto.dødsdato shouldBe null
+
+        val behandlinger = fagsakDto.behandlinger
+        behandlinger.size shouldBe 1
+        val behandlingsoppsummeringtDto = behandlinger.toList()[0]
+        behandlingsoppsummeringtDto.behandlingId shouldBe behandling.id
+        behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
+        behandlingsoppsummeringtDto.status shouldBe behandling.status
+        behandlingsoppsummeringtDto.type shouldBe behandling.type
+    }
+
+    @Test
+    fun `hentFagsak skal hente fagsak for død person`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val behandling = opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "doed1234")
+
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
+
+        fagsakDto.eksternFagsakId shouldBe eksternFagsakId
+        fagsakDto.språkkode shouldBe Språkkode.NB
+        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        fagsakDto.fagsystem shouldBe Fagsystem.BA
+
+        val brukerDto = fagsakDto.bruker
+        brukerDto.personIdent shouldBe "doed1234"
+        brukerDto.navn shouldBe "testverdi"
+        brukerDto.kjønn shouldBe Kjønn.MANN
+        brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+        brukerDto.dødsdato shouldBe LocalDate.of(2022, 4, 1)
 
         val behandlinger = fagsakDto.behandlinger
         behandlinger.size shouldBe 1
@@ -174,9 +203,9 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
-    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String): Behandling {
+    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String = "123"): Behandling {
         val fagsak = Fagsak(eksternFagsakId = eksternFagsakId,
-                            bruker = Bruker("123", Språkkode.NB),
+                            bruker = Bruker(personIdent, Språkkode.NB),
                             ytelsestype = ytelsestype,
                             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
         fagsakRepository.insert(fagsak)

@@ -158,15 +158,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional(readOnly = true)
     fun hentBehandling(behandlingId: UUID): BehandlingDto {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
                 .hentBehandlingsstegstilstand(behandling)
         val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
-        val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsystem)
+        val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
         val kanRevurderingOpprettes: Boolean =
-                tilgangService.tilgangTilÅOppretteRevurdering(fagsystem) && kanRevurderingOpprettes(behandling)
+                tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
 
         return BehandlingMapper.tilRespons(behandling,
                                            erBehandlingPåVent,
@@ -174,7 +174,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                            kanEndres,
                                            kanRevurderingOpprettes,
                                            behandlingsstegsinfoer,
-                                           varselSendt)
+                                           varselSendt,
+                                           fagsak.eksternFagsakId)
     }
 
     @Transactional
