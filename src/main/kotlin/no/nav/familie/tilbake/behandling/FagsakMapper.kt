@@ -15,7 +15,8 @@ object FagsakMapper {
         val bruker = BrukerDto(personIdent = fagsak.bruker.ident,
                                navn = personinfo.navn,
                                fødselsdato = personinfo.fødselsdato,
-                               kjønn = personinfo.kjønn)
+                               kjønn = personinfo.kjønn,
+                               dødsdato = personinfo.dødsdato)
 
         val behandlingListe = behandlinger.map {
             BehandlingsoppsummeringDto(behandlingId = it.id,

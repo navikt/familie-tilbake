@@ -61,6 +61,21 @@ class PdlClientTest {
         respons.navn shouldBe "ENGASJERT FYR"
         respons.kjønn shouldBe Kjønn.MANN
         respons.fødselsdato shouldBe LocalDate.of(1955, 9, 13)
+        respons.dødsdato shouldBe null
+    }
+
+    @Test
+    fun `hentPersoninfo skal hente info for en død person`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("pdlOkResponseDødPerson.json"))))
+
+        val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
+
+        respons.shouldNotBeNull()
+        respons.navn shouldBe "ENGASJERT FYR"
+        respons.kjønn shouldBe Kjønn.MANN
+        respons.fødselsdato shouldBe LocalDate.of(1955, 9, 13)
+        respons.dødsdato shouldBe LocalDate.of(2022, 4, 1)
     }
 
     @Test

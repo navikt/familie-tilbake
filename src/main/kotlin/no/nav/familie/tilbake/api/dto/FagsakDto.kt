@@ -19,7 +19,8 @@ data class FagsakDto(val eksternFagsakId: String,
 data class BrukerDto(val personIdent: String,
                      val navn: String,
                      val fødselsdato: LocalDate,
-                     val kjønn: Kjønn)
+                     val kjønn: Kjønn,
+                     val dødsdato: LocalDate? = null)
 
 data class BehandlingsoppsummeringDto(val behandlingId: UUID,
                                       val eksternBrukId: UUID,

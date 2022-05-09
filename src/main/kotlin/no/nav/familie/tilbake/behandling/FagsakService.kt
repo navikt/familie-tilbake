@@ -28,6 +28,10 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
                     private val personService: PersonService) {
 
+    fun hentFagsak(fagsakId: UUID): Fagsak {
+        return fagsakRepository.findByIdOrThrow(fagsakId)
+    }
+
     @Transactional(readOnly = true)
     fun hentFagsak(fagsystem: Fagsystem, eksternFagsakId: String): FagsakDto {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
