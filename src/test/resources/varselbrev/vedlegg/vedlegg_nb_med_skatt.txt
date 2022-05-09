@@ -1,4 +1,4 @@
-<h4>Spesifikasjon av beløpet i varselet</h4>
+<h4>Spesifikasjon av feilutbetalt beløp per måned</h4>
 <table>
     <thead>
     <tr>

@@ -96,12 +96,14 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsfritekst skal generere varselbrev for verge`() {
-        val metadata = metadata.copy(vergenavn = "John Doe",
+        val metadata = metadata.copy(ytelsestype = Ytelsestype.BARNETRYGD,
+                                     vergenavn = "John Doe",
                                      finnesVerge = true,
                                      språkkode = Språkkode.NB)
-        val varselbrevSamletInfo = varselbrevsdokument.copy(brevmetadata = metadata)
-        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevSamletInfo, false)
-        val fasit = les("/varselbrev/OS_en_periode.txt")
+        val varselbrevsdokument = varselbrevsdokument.copy(brevmetadata = metadata,
+                                                           feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/BA_en_periode.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
         generertBrev shouldBe "$fasit${System.lineSeparator().repeat(2)}$vergeTekst"
     }

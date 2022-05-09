@@ -22,6 +22,8 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
+    val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)
+
     private val datoerHvisSammenhengendePeriode: Handlebarsperiode? = if (feilutbetaltePerioder.size == 1) {
         Handlebarsperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
     } else null

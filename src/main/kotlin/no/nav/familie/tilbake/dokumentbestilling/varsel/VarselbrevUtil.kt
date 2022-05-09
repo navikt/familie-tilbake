@@ -178,7 +178,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
     fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument,
                    fagsystemsbehandlingId: String?,
                    varsletTotalbeløp: Long): String {
-        return if (varselbrevsdokument.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)) {
+        return if (varselbrevsdokument.harVedlegg) {
             if (fagsystemsbehandlingId == null) {
                 error("fagsystemsbehandlingId mangler for forhåndsvisning av varselbrev. " +
                       "Saksnummer ${varselbrevsdokument.brevmetadata.saksnummer}")
@@ -193,7 +193,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
     }
 
     fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument, behandlingId: UUID): String {
-        return if (varselbrevsdokument.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)) {
+        return if (varselbrevsdokument.harVedlegg) {
             val vedleggsdata = sammenstillInfoFraKravgrunnlag(varselbrevsdokument, behandlingId)
             TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
         } else {
