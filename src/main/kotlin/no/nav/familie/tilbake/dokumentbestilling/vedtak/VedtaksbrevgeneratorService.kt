@@ -147,7 +147,8 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
         val varsletBeløp = vedtaksbrevgrunnlag.varsletBeløp
         val varsletDato = vedtaksbrevgrunnlag.sisteVarsel?.sporbar?.opprettetTid?.toLocalDate()
         val ansvarligBeslutter = if (vedtaksbrevgrunnlag.aktivtSteg in setOf(Behandlingssteg.FATTE_VEDTAK,
-                                                                             Behandlingssteg.IVERKSETT_VEDTAK)) {
+                                                                             Behandlingssteg.IVERKSETT_VEDTAK,
+                                                                             Behandlingssteg.AVSLUTTET)) {
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
         } else {
             null
