@@ -77,13 +77,13 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         val behandlingsårsak = behandling.årsaker.firstOrNull()
         val forrigeBehandling = behandlingsårsak?.originalBehandlingId?.let { behandlingRepository.findByIdOrNull(it) }
 
-        var feilutbetaltePerioder: List<Periode>? = null
+        var totalFeilutbetaltPeriode: Periode? = null
         var totalFeilutbetaltBeløp: BigDecimal? = null
         val erBehandlingsstegEtterGrunnlagSteg =
                 behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
         if (erBehandlingsstegEtterGrunnlagSteg) {
             val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
-            feilutbetaltePerioder = fakta.feilutbetaltePerioder.map { Periode(it.periode.fom, it.periode.tom) }
+            totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
             totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
         }
 
@@ -104,7 +104,7 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
                                    forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
                                    revurderingOpprettetÅrsak = behandlingsårsak?.type,
                                    totalFeilutbetaltBeløp = totalFeilutbetaltBeløp,
-                                   feilutbetaltePerioder = feilutbetaltePerioder)
+                                   totalFeilutbetaltPeriode = totalFeilutbetaltPeriode)
     }
 
 }

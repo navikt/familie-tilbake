@@ -28,4 +28,4 @@ data class Behandlingstilstand(val funksjoneltTidspunkt: OffsetDateTime,
                                val forrigeBehandling: UUID?,
                                val revurderingOpprettetÅrsak: Behandlingsårsakstype?,
                                val totalFeilutbetaltBeløp : BigDecimal?,
-                               val feilutbetaltePerioder: List<Periode>?)
+                               val totalFeilutbetaltPeriode: Periode?)

@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.internal.TaskService
@@ -94,7 +94,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.ansvarligSaksbehandler shouldBe behandling.ansvarligSaksbehandler
         tilstand.ansvarligEnhet shouldBe behandling.behandlendeEnhet
         tilstand.totalFeilutbetaltBeløp.shouldBeNull()
-        tilstand.feilutbetaltePerioder.shouldBeNull()
+        tilstand.totalFeilutbetaltPeriode.shouldBeNull()
     }
 
     @Test
@@ -126,11 +126,11 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.ansvarligSaksbehandler shouldBe "Z111111"
         tilstand.ansvarligEnhet shouldBe "1234"
         tilstand.totalFeilutbetaltBeløp shouldBe BigDecimal("10000.00")
-        tilstand.feilutbetaltePerioder.shouldNotBeNull()
-        tilstand.feilutbetaltePerioder!!.any {
+        tilstand.totalFeilutbetaltPeriode.shouldNotBeNull()
+        tilstand.totalFeilutbetaltPeriode!!.should {
             it.fom == YearMonth.now().minusMonths(1).atDay(1) &&
             it.tom == YearMonth.now().atEndOfMonth()
-        }.shouldBeTrue()
+        }
     }
 
     @Test
@@ -157,11 +157,11 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                                                       OffsetDateTime.now().plusSeconds(1))
 
         tilstand.totalFeilutbetaltBeløp shouldBe BigDecimal("10000.00")
-        tilstand.feilutbetaltePerioder.shouldNotBeNull()
-        tilstand.feilutbetaltePerioder!!.any {
+        tilstand.totalFeilutbetaltPeriode.shouldNotBeNull()
+        tilstand.totalFeilutbetaltPeriode!!.should {
             it.fom == YearMonth.now().minusMonths(1).atDay(1) &&
             it.tom == YearMonth.now().atEndOfMonth()
-        }.shouldBeTrue()
+        }
     }
 
 }
