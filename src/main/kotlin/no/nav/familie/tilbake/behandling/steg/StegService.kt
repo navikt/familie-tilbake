@@ -79,13 +79,13 @@ class StegService(val steg: List<IBehandlingssteg>,
             throw Feil(message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
                                  "Kan ikke saksbehandle den automatisk")
         }
-         while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
-             hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
-             if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
-                 break
-             }
-             aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-         }
+        while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
+            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
+            if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
+                break
+            }
+            aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        }
 
     }
 
