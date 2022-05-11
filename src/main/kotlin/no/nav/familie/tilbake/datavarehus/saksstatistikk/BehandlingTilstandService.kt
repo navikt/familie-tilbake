@@ -79,9 +79,8 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
 
         var totalFeilutbetaltPeriode: Periode? = null
         var totalFeilutbetaltBeløp: BigDecimal? = null
-        val nåværendeBehandlingssteg = behandlingsstegstilstandRepository.finnSisteBehandlingssteg(behandlingId)
         val erBehandlingsstegEtterGrunnlagSteg =
-                nåværendeBehandlingssteg?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
+                behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
         if (erBehandlingsstegEtterGrunnlagSteg) {
             val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
             totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
