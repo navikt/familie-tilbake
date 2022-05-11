@@ -1,25 +1,37 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
+import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Varsel
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
+import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
 @Service
-class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrevService) {
+class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrevService,
+                     private val oppdragClient: OppdragClient,
+                     private val kravgrunnlagRepository: KravgrunnlagRepository) {
 
     companion object {
 
@@ -118,6 +130,86 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                    erKorrigert = varsel != null,
                                    varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
                                    varsletBeløp = varsel?.varselbeløp)
+    }
+
+    private fun sammenstillInfoFraSimuleringForVedlegg(varselbrevsdokument: Varselbrevsdokument,
+                                                       eksternBehandlingId: String,
+                                                       varsletTotalbeløp: Long): Vedleggsdata {
+
+        val request = HentFeilutbetalingerFraSimuleringRequest(
+                varselbrevsdokument.ytelsestype,
+                varselbrevsdokument.brevmetadata.saksnummer,
+                eksternBehandlingId)
+
+        val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request)
+
+        val perioder = feilutbetalingerFraSimulering.feilutbetaltePerioder.map {
+            FeilutbetaltPeriode(YearMonth.from(it.fom),
+                                it.nyttBeløp,
+                                it.tidligereUtbetaltBeløp,
+                                it.feilutbetaltBeløp)
+
+        }
+
+        validerKorrektTotalbeløp(perioder,
+                                 varsletTotalbeløp,
+                                 varselbrevsdokument.ytelsestype,
+                                 varselbrevsdokument.brevmetadata.saksnummer,
+                                 eksternBehandlingId)
+        return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
+    }
+
+    private fun sammenstillInfoFraKravgrunnlag(varselbrevsdokument: Varselbrevsdokument,
+                                               behandlingId: UUID): Vedleggsdata {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+
+        val beregningsresultat = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
+
+        val perioder = beregningsresultat.map {
+            FeilutbetaltPeriode(YearMonth.from(it.key.fom),
+                                it.value.riktigYtelsesbeløp,
+                                it.value.utbetaltYtelsesbeløp,
+                                it.value.feilutbetaltBeløp)
+        }
+
+        return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
+    }
+
+    fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument,
+                   fagsystemsbehandlingId: String?,
+                   varsletTotalbeløp: Long): String {
+        return if (varselbrevsdokument.harVedlegg) {
+            if (fagsystemsbehandlingId == null) {
+                error("fagsystemsbehandlingId mangler for forhåndsvisning av varselbrev. " +
+                      "Saksnummer ${varselbrevsdokument.brevmetadata.saksnummer}")
+            }
+
+            val vedleggsdata =
+                    sammenstillInfoFraSimuleringForVedlegg(varselbrevsdokument, fagsystemsbehandlingId, varsletTotalbeløp)
+            TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+        } else {
+            ""
+        }
+    }
+
+    fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument, behandlingId: UUID): String {
+        return if (varselbrevsdokument.harVedlegg) {
+            val vedleggsdata = sammenstillInfoFraKravgrunnlag(varselbrevsdokument, behandlingId)
+            TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
+        } else {
+            ""
+        }
+    }
+
+    private fun validerKorrektTotalbeløp(feilutbetaltePerioder: List<FeilutbetaltPeriode>,
+                                         varsletTotalFeilutbetaltBeløp: Long,
+                                         ytelsestype: Ytelsestype,
+                                         eksternFagsakId: String,
+                                         eksternId: String) {
+        if (feilutbetaltePerioder.sumOf { it.feilutbetaltBeløp.toLong() } != varsletTotalFeilutbetaltBeløp) {
+            throw Feil(message = "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra simulering " +
+                                 "for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId")
+        }
     }
 
     private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {

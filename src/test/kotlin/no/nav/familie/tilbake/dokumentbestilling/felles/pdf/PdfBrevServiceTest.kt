@@ -42,6 +42,7 @@ internal class PdfBrevServiceTest {
                                                         ansvarligSaksbehandler = "Bob",
                                                         språkkode = Språkkode.NB,
                                                         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                                                        saksnummer = "1232456",
                                                         behandlingstype = Behandlingstype.TILBAKEKREVING),
                                 overskrift = "",
                                 mottager = Brevmottager.BRUKER,

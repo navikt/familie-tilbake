@@ -177,6 +177,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
                             mottageradresse = Adresseinfo("01020312345", "Bob"),
                             behandlendeEnhetsNavn = "Oslo",
                             ansvarligSaksbehandler = "Bob",
+                            saksnummer = "1232456",
                             språkkode = språkkode,
                             ytelsestype = ytelsestype)
     }

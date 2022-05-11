@@ -32,6 +32,9 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
         val fritekst = varselbrevsdokument.varseltekstFraSaksbehandler
+        val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument,
+                                                behandling.aktivFagsystemsbehandling.eksternId,
+                                                varselbrevsdokument.beløp)
 
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
@@ -39,7 +42,8 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                                 Brevdata(mottager = brevmottager,
                                          metadata = varselbrevsdokument.brevmetadata,
                                          overskrift = overskrift,
-                                         brevtekst = brevtekst),
+                                         brevtekst = brevtekst,
+                                         vedleggHtml = vedlegg),
                                 varsletFeilutbetaling,
                                 fritekst)
     }
@@ -72,10 +76,14 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                                      brevtekst = brevtekst,
                                      brevmetadata = varselbrevsdokument.brevmetadata)
         val brevmottager = if (varselbrevsdokument.brevmetadata.finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument,
+                                                forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
+                                                varselbrevsdokument.beløp)
         return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
                                                               metadata = data.brevmetadata,
                                                               overskrift = data.overskrift,
-                                                              brevtekst = data.brevtekst))
+                                                              brevtekst = data.brevtekst,
+                                                              vedleggHtml = vedlegg))
     }
 
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {

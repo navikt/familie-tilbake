@@ -19,6 +19,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
                                         språkkode = Språkkode.NB,
                                         ytelsestype = Ytelsestype.BARNETILSYN,
                                         behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                        saksnummer = "1232456",
                                         ansvarligSaksbehandler = "Bob")
     private val innhentDokumentasjonsbrevsdokument =
             InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,

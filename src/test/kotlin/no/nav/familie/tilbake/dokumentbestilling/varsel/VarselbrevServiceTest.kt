@@ -55,7 +55,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun hentForhåndsvisningVarselbrev() {
         val forhåndsvisVarselbrevRequest =
                 ForhåndsvisVarselbrevRequest("Dette er et varsel!",
-                                             Ytelsestype.OVERGANGSSTØNAD,
+                                             Ytelsestype.BARNETRYGD,
                                              "1570",
                                              "Bodø",
                                              "321321",

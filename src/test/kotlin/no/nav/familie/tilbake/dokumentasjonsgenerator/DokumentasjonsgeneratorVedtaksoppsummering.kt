@@ -265,6 +265,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                             behandlendeEnhetsNavn = "Oslo",
                             ansvarligSaksbehandler = "Bob",
                             språkkode = språkkode,
+                            saksnummer = "1232456",
                             ytelsestype = ytelsestype)
     }
 

@@ -45,6 +45,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                                             språkkode = Språkkode.NB,
                                             ytelsestype = Ytelsestype.BARNETRYGD,
                                             behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+                                            saksnummer = "1232456",
                                             ansvarligSaksbehandler = "Bob")
 
     @Test
