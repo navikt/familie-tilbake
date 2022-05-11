@@ -284,6 +284,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når manuelt varsel sendt og behandling er i vilkår steg `() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
                                           Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
                                           Behandlingsstegsinfo(FAKTA, UTFØRT),
@@ -313,6 +314,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når mottok sper melding og behandling er i vilkår steg `() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
                                           Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
                                           Behandlingsstegsinfo(FAKTA, UTFØRT),
