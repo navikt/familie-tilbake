@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.sakshendelse.Behandlingstilstand
@@ -85,6 +86,13 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
             val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
             totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
             totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
+        } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL) {
+            val varsel = behandling.aktivtVarsel ?: throw Feil("Behandling $behandlingId venter på varselssteg uten varsel data")
+            val førsteDagIVarselsperiode = varsel.perioder.minOf { it.fom }
+            val sisteDagIVarselsperiode = varsel.perioder.maxOf { it.tom }
+
+            totalFeilutbetaltBeløp = varsel.varselbeløp.toBigDecimal()
+            totalFeilutbetaltPeriode = Periode(førsteDagIVarselsperiode, sisteDagIVarselsperiode)
         }
 
         return Behandlingstilstand(ytelsestype = fagsak.ytelsestype,
