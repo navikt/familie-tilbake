@@ -9,6 +9,7 @@ import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -91,6 +92,17 @@ class KortdatoHelper : Helper<Any> {
 
     override fun apply(context: Any, options: Options?): Any {
         val date = objectMapper.convertValue(context, LocalDate::class.java)
+        return format.format(date)
+    }
+}
+
+class MånedHelper : Helper<Any> {
+
+
+    private val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("NO"))
+
+    override fun apply(context: Any, options: Options?): Any {
+        val date = objectMapper.convertValue(context, YearMonth::class.java)
         return format.format(date)
     }
 }

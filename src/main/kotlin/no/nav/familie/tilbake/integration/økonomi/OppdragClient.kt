@@ -50,8 +50,8 @@ import java.util.UUID
 
 interface OppdragClient {
 
-    fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
-            : TilbakekrevingsvedtakResponse
+    fun iverksettVedtak(behandlingId: UUID,
+                        tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse
 
     fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
             : DetaljertKravgrunnlagDto
@@ -82,7 +82,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
             .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString()).build().toUri()
 
     private val hentFeilutbetalingerFraSimuleringUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
-            .pathSegment(HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH).build().toUri()
+            .pathSegment(HENT_FEILUTBETALINGER_PATH).build().toUri()
 
     override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
             : TilbakekrevingsvedtakResponse {
@@ -145,8 +145,8 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         } catch (exception: Exception) {
             logger.error("Kravgrunnlag kan ikke hentes fra økonomi for behandling=$eksternKravgrunnlagId. " +
                          "Feiler med ${exception.message}")
-            throw IntegrasjonException(msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
-                                       throwable = exception)
+            throw IntegrasjonException("Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
+                                       exception)
         }
     }
 
@@ -204,7 +204,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         const val IVERKSETTELSE_PATH = "/api/tilbakekreving/iverksett/"
         const val HENT_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/kravgrunnlag/"
         const val ANNULER_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/annuler/kravgrunnlag/"
-        const val HENT_FEILUTBETALINGER_FRA_SIMULERING_PATH = "/api/simulering/feilutbetalinger"
+        const val HENT_FEILUTBETALINGER_PATH = "/api/simulering/feilutbetalinger"
         const val PING_PATH = "/internal/status/alive"
     }
 }

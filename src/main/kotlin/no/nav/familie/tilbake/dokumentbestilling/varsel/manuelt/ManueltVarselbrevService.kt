@@ -43,13 +43,15 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, erKorrigert)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
+        val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandling.id)
         pdfBrevService.sendBrev(behandling,
                                 fagsak,
                                 if (erKorrigert) Brevtype.KORRIGERT_VARSEL else Brevtype.VARSEL,
                                 Brevdata(mottager = brevmottager,
                                          overskrift = overskrift,
                                          brevtekst = brevtekst,
-                                         metadata = varselbrevsdokument.brevmetadata),
+                                         metadata = varselbrevsdokument.brevmetadata,
+                                         vedleggHtml = vedlegg),
                                 varsletFeilutbetaling,
                                 fritekst)
     }
@@ -63,10 +65,12 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
         val varselbrevsdokument = lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, behandling.aktivtVarsel)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, erKorrigert)
+        val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandlingId)
         return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
                                                               overskrift = overskrift,
                                                               brevtekst = brevtekst,
-                                                              metadata = varselbrevsdokument.brevmetadata))
+                                                              metadata = varselbrevsdokument.brevmetadata,
+                                                              vedleggHtml = vedlegg))
     }
 
     private fun lagVarselbrev(fritekst: String,
