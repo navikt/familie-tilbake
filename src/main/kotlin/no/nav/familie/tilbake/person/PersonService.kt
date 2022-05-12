@@ -1,15 +1,27 @@
 package no.nav.familie.tilbake.person
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 
 @Service
-class PersonService(val pdlClient: PdlClient) {
+class PersonService(private val pdlClient: PdlClient,
+                    private val fagsakRepository: FagsakRepository,
+                    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher) {
 
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): Personinfo {
-        return pdlClient.hentPersoninfo(personIdent, fagsystem)
+        val personInfo = pdlClient.hentPersoninfo(personIdent, fagsystem)
+        // fire event for å oppdatere personIdent når lagret personIdent ikke matcher med PDL.
+        if (personIdent != personInfo.ident) {
+            val fagsak = fagsakRepository.finnFagsakForFagsystemAndIdent(fagsystem, personIdent)
+                         ?: throw Feil("Finnes ikke fagsak")
+            endretPersonIdentEventPublisher.fireEvent(personInfo.ident, fagsak.id)
+        }
+        return personInfo
     }
 
 

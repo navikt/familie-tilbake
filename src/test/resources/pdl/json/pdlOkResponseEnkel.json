@@ -42,6 +42,13 @@
         {
           "gradering": "UGRADERT"
         }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "12345678910",
+          "status": "I_BRUK",
+          "type": "DNR"
+        }
       ]
     }
   }

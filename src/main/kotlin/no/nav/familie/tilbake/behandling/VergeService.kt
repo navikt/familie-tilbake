@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.integration.pdl.PdlClient
+import no.nav.familie.tilbake.person.PersonService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,7 +28,7 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
                    private val historikkTaskService: HistorikkTaskService,
                    private val behandlingskontrollService: BehandlingskontrollService,
                    private val integrasjonerClient: IntegrasjonerClient,
-                   private val pdlClient: PdlClient) {
+                   private val personService: PersonService) {
 
     @Transactional
     fun lagreVerge(behandlingId: UUID, vergeDto: VergeDto) {
@@ -102,7 +102,7 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
             else -> {
                 requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
                 //Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
-                pdlClient.hentPersoninfo(vergeDto.ident, fagsystem)
+                personService.hentPersoninfo(vergeDto.ident, fagsystem)
             }
         }
     }
