@@ -50,7 +50,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
 import java.time.YearMonth
 
