@@ -281,15 +281,15 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
         // Håndter fakta steg
         stegService.håndterSteg(behandling.id,
-                                BehandlingsstegFaktaDto(listOf(FaktaFeilutbetalingsperiodeDto(PeriodeDto(YearMonth.of(2018, 1),
-                                                                                                         YearMonth.of(2018, 2)),
+                                BehandlingsstegFaktaDto(listOf(FaktaFeilutbetalingsperiodeDto(PeriodeDto(YearMonth.of(2020, 8),
+                                                                                                         YearMonth.of(2020, 8)),
                                                                                               Hendelsestype.ANNET,
                                                                                               Hendelsesundertype.ANNET_FRITEKST)),
                                                         "Fakta begrunnelse"))
         // Håndter foreldelse steg
         stegService.håndterSteg(behandling.id,
-                                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(YearMonth.of(2018, 1),
-                                                                                                     YearMonth.of(2018, 2)),
+                                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(YearMonth.of(2020, 8),
+                                                                                                     YearMonth.of(2020, 8)),
                                                                                           "Foreldelse begrunnelse",
                                                                                           Foreldelsesvurderingstype
                                                                                                   .IKKE_FORELDET))))
@@ -348,7 +348,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
-        val periode = PeriodeDto(YearMonth.of(2018, 1), YearMonth.of(2018, 2))
+        val periode = PeriodeDto(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
         // Håndter fakta steg
         stegService.håndterSteg(behandling.id,
                                 BehandlingsstegFaktaDto(listOf(FaktaFeilutbetalingsperiodeDto(periode,

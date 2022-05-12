@@ -69,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
@@ -112,6 +113,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
+
+    private val FOM = YearMonth.now().minusMonths(1).atDay(1)
+    private val TOM = YearMonth.now().atEndOfMonth()
 
     @BeforeEach
     fun init() {
@@ -250,7 +254,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                                                                                        tom = LocalDate.of(2010, 1, 31)))))
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
-        val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
+        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(LocalDate.of(2010, 1, 1),
+                                                                                                LocalDate.of(2010, 1, 31)),
+                                                                           hendelsestype = Hendelsestype.ANNET,
+                                                                           hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+        val behandlingsstegFaktaDto = BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
+                                                              begrunnelse = "testverdi")
 
         stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto)
 
@@ -409,12 +418,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                               LocalDate.of(2021, 1, 31))))
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
 
         val fritekstavsnitt =
-                FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                                     LocalDate.of(2021, 1, 31)),
+                FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(FOM, TOM),
                                                                                 faktaAvsnitt = "fakta tekst")))
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt))
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -441,13 +448,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                               LocalDate.of(2021, 1, 31))))
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
 
-        val fritekstavsnitt =
-                FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                                     LocalDate.of(2021, 1, 31)),
-                                                                                faktaAvsnitt = "fakta tekst")))
+        val fritekstavsnitt = FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(FOM, TOM),
+                                                                                              faktaAvsnitt = "fakta tekst")))
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
         assertOppgave(FerdigstillOppgaveTask.TYPE)
@@ -511,6 +515,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal tilbakeføre fatte vedtak og flytte til foreslå vedtak når beslutter underkjente steg`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -575,6 +580,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal opprette og utføre verge steg når behandling er på foreslå vedtak`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
@@ -682,6 +688,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i vilkårsvurderingssteg`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING,
                                     Behandlingsstegstatus.VENTER,
                                     Venteårsak.AVVENTER_DOKUMENTASJON)
@@ -760,8 +767,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
-        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                                LocalDate.of(2021, 1, 31)),
+        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(FOM, TOM),
                                                                            hendelsestype = Hendelsestype.ANNET,
                                                                            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
         return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),

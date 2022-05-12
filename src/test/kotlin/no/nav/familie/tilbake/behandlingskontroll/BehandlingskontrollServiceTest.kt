@@ -207,6 +207,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til foreldelsessteg etter fakta steg er utført`() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT)))
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -225,6 +227,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT),
                                           Behandlingsstegsinfo(FORELDELSE, UTFØRT)))
 
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -281,6 +284,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når manuelt varsel sendt og behandling er i vilkår steg `() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
                                           Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
                                           Behandlingsstegsinfo(FAKTA, UTFØRT),
@@ -310,6 +314,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når mottok sper melding og behandling er i vilkår steg `() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
                                           Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
                                           Behandlingsstegsinfo(FAKTA, UTFØRT),
