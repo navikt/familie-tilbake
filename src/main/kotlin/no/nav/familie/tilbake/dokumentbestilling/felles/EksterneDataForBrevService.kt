@@ -39,24 +39,41 @@ class EksterneDataForBrevService(private val pdlClient: PdlClient,
                     verge: Verge?,
                     fagsystem: Fagsystem): Adresseinfo {
 
-        if (Vergetype.ADVOKAT == verge?.type) {
-            return hentOrganisasjonsadresse(verge.orgNr!!, verge.navn, personinfo, brevmottager)
-        } else if (Brevmottager.VERGE == brevmottager && verge != null) {
-            val person = hentPerson(verge.ident!!, fagsystem)
-            return hentAdresse(person)
-        }
-        return hentAdresse(personinfo)
+        return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
+               ?: hentAdresse(personinfo)
     }
 
     fun hentAdresse(personinfo: Personinfo,
                     brevmottager: Brevmottager,
-                    verge: VergeDto?,
+                    vergeDto: VergeDto?,
                     fagsystem: Fagsystem): Adresseinfo {
 
-        if (Vergetype.ADVOKAT == verge?.vergetype) {
-            return hentOrganisasjonsadresse(verge.organisasjonsnummer!!, verge.navn, personinfo, brevmottager)
-        } else if (Brevmottager.VERGE == brevmottager && verge != null) {
-            val person = hentPerson(verge.personIdent!!, fagsystem)
+        return vergeDto?.let {
+            hentAdresse(it.vergetype,
+                        it.organisasjonsnummer,
+                        it.navn,
+                        personinfo,
+                        brevmottager,
+                        it.personIdent,
+                        fagsystem)
+        } ?: hentAdresse(personinfo)
+    }
+
+    private fun hentAdresse(vergeType: Vergetype,
+                            organisasjonsnummer: String?,
+                            navn: String,
+                            personinfo: Personinfo,
+                            brevmottager: Brevmottager,
+                            personIdent: String?,
+                            fagsystem: Fagsystem): Adresseinfo {
+
+        if (Vergetype.ADVOKAT == vergeType) {
+            return hentOrganisasjonsadresse(organisasjonsnummer ?: error("organisasjonsnummer er påkrevd for $vergeType"),
+                                            navn,
+                                            personinfo,
+                                            brevmottager)
+        } else if (Brevmottager.VERGE == brevmottager) {
+            val person = hentPerson(personIdent ?: error("personIdent er påkrevd for $vergeType"), fagsystem)
             return hentAdresse(person)
         }
         return hentAdresse(personinfo)

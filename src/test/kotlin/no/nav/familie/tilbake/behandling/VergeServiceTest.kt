@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +45,9 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -168,6 +172,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge!!
 
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
@@ -192,6 +198,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val gammelVerge = behandlingFørOppdatering.aktivVerge
         gammelVerge.shouldNotBeNull()
+
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingFørOppdatering.id, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
@@ -218,6 +226,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandlingFørOppdatering = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         val behandlingUtenVerge = behandlingRepository.update(behandlingFørOppdatering.copy(verger = emptySet()))
 
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
         lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandlingUtenVerge.id, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
@@ -237,6 +247,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettVergeSteg skal opprette verge steg når behandling er på vilkårsvurdering steg`() {
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
