@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.6</version>
+        <version>2.6.7</version>
     </parent>
 
     <properties>
@@ -21,17 +21,17 @@
         <java.version>17</java.version>
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.6.10</kotlin.version>
-        <felles.version>1.20220329165814_c0860ec</felles.version>
+        <kotlin.version>1.6.21</kotlin.version>
+        <felles.version>1.20220503150007_21cbfef</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20220412101553_5627657</kontrakter.version>
-        <kotest.version>5.2.2</kotest.version>
-        <nav.security.version>2.0.14</nav.security.version>
+        <kontrakter.version>2.0_20220512111203_87a5bab</kontrakter.version>
+        <kotest.version>5.3.0</kotest.version>
+        <nav.security.version>2.0.17</nav.security.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <jaxb-impl.version>2.3.6</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <mockk.version>1.12.3</mockk.version>
+        <mockk.version>1.12.4</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -39,10 +39,10 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>3.1.1</spring.cloud-contract>
-        <testcontainers.version>1.16.3</testcontainers.version>
-        <tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</tjenestespesifikasjoner.version>
-        <kafka.version>3.1.0</kafka.version>
+        <spring.cloud-contract>3.1.2</spring.cloud-contract>
+        <testcontainers.version>1.17.1</testcontainers.version>
+        <tjenestespesifikasjoner.version>2589.e85bf84</tjenestespesifikasjoner.version>
+        <kafka.version>3.2.0</kafka.version>
     </properties>
 
 
@@ -183,7 +183,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.3</version>
+            <version>42.3.5</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -273,7 +273,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.6</version>
+            <version>1.6.8</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -328,7 +328,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.32.0</version>
+            <version>2.33.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -453,7 +453,7 @@
                 <!-- Plugin required to build java classes from XSD using XJC -->
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
+                <version>0.15.1</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.glassfish.jaxb</groupId>
