@@ -54,7 +54,8 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
                                                beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
                                                        .ansvarligSaksbehandler} har sendt varselbrev til bruker",
-                                               frist = fristTid)
+                                               frist = fristTid,
+                                               saksbehandler = behandling.ansvarligSaksbehandler)
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
             behandlingskontrollService.settBehandlingPåVent(behandling.id,

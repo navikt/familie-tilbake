@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
@@ -26,7 +27,8 @@ class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository
                       private val foreldelseService: ForeldelseService,
                       private val historikkTaskService: HistorikkTaskService,
                       @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
-                      private val foreldelseAntallMåned: Long) : IBehandlingssteg {
+                      private val foreldelseAntallMåned: Long,
+                      private val oppgaveTaskService: OppgaveTaskService) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -47,6 +49,8 @@ class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto))
+
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
@@ -86,9 +90,7 @@ class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository
     }
 
     private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT,
-                                              aktør)
+        historikkTaskService.lagHistorikkTask(behandlingId, TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, aktør)
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

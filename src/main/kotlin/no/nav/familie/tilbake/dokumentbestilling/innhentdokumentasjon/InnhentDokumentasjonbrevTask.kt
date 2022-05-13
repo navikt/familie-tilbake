@@ -43,7 +43,8 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
         oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
                                                beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
                                                        .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
-                                               frist = fristTid)
+                                               frist = fristTid,
+                                               saksbehandler = behandling.ansvarligSaksbehandler)
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
             behandlingskontrollService.settBehandlingPåVent(behandling.id,

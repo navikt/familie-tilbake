@@ -106,7 +106,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 fagsakService.kanBehandlingOpprettesManuelt(opprettManueltTilbakekrevingRequest.eksternFagsakId,
                                                             opprettManueltTilbakekrevingRequest.ytelsestype)
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
-                throw Feil(message = kanBehandlingOpprettesManuelt.melding)
+            throw Feil(message = kanBehandlingOpprettesManuelt.melding)
         }
         logger.info("Oppretter OpprettBehandlingManueltTask for request=$opprettManueltTilbakekrevingRequest")
         val properties = Properties().apply {
@@ -199,7 +199,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG -> "Ny frist satt på bakgrunn av mottatt kravgrunnlag fra økonomi"
             else -> "Frist er oppdatert av saksbehandler ${ContextService.hentSaksbehandler()}"
         }
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, beskrivelse, behandlingPåVentDto.tidsfrist)
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
+                                               beskrivelse,
+                                               behandlingPåVentDto.tidsfrist,
+                                               ContextService.hentSaksbehandler())
     }
 
     @Transactional
@@ -220,15 +223,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
 
         stegService.gjenopptaSteg(behandlingId)
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId, "Behandling er tatt av vent", LocalDate.now())
+        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandlingId,
+                                               beskrivelse = "Behandling er tatt av vent",
+                                               frist = LocalDate.now(),
+                                               saksbehandler = ContextService.hentSaksbehandler())
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,
         // f.eks saken var på vent med brukerstilbakemelding og har ikke fått kravgrunnlag
         val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
-                                                   aktivStegstilstand.venteårsak!!.beskrivelse,
-                                                   aktivStegstilstand.tidsfrist!!)
+            oppgaveTaskService.oppdaterOppgaveTaskMedTriggertid(behandlingId = behandlingId,
+                                                                beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
+                                                                frist = aktivStegstilstand.tidsfrist!!,
+                                                                triggerTid = 2L)
         }
     }
 
@@ -274,21 +281,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         // Ferdigstill oppgave
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
     }
 
     @Transactional
     fun oppdaterAnsvarligSaksbehandler(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val gammelSaksbehandler = behandling.ansvarligSaksbehandler
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = ContextService.hentSaksbehandler()))
-
-        //oppdater saksbehandler på oppgaven også hvis det er ny saksbehandler som behandler saken
-        if (gammelSaksbehandler != ContextService.hentSaksbehandler()
-            && ContextService.hentSaksbehandler() != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
-            oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
-        }
     }
 
     @Transactional

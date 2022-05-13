@@ -142,8 +142,10 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
 
         // oppgave oppdateres ikke dersom behandling venter på varsel
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
-        if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true){
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId, venteårsak.beskrivelse, tidsfrist)
+        if (aktivtBehandlingssteg?.let { it != Behandlingssteg.VARSEL } == true) {
+            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandlingId,
+                                                   beskrivelse = venteårsak.beskrivelse,
+                                                   frist = tidsfrist)
         }
 
     }

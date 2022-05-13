@@ -106,7 +106,7 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
