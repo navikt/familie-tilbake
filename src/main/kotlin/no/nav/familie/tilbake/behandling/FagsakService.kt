@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEvent
-import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -21,6 +20,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -29,8 +29,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingRepository: BehandlingRepository,
                     private val taskRepository: TaskRepository,
                     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-                    private val personService: PersonService,
-                    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher) {
+                    private val personService: PersonService) {
 
     fun hentFagsak(fagsakId: UUID): Fagsak {
         return fagsakRepository.findByIdOrThrow(fagsakId)
@@ -145,7 +144,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     @EventListener
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun oppdaterPersonIdent(endretPersonIdentEvent: EndretPersonIdentEvent) {
         val fagsak = fagsakRepository.findByIdOrThrow(endretPersonIdentEvent.fagsakId)
         fagsakRepository.update(fagsak.copy(bruker = Bruker(ident = endretPersonIdentEvent.source as String,

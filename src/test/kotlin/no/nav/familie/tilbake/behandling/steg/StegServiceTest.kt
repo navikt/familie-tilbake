@@ -595,7 +595,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
 
-        val vergeData = BehandlingsstegVergeDto(verge = VergeDto(ident = "testverdi",
+        val vergeData = BehandlingsstegVergeDto(verge = VergeDto(ident = "32132132111",
                                                                  type = Vergetype.VERGE_FOR_BARN,
                                                                  navn = "testverdi",
                                                                  begrunnelse = "testverdi"))
