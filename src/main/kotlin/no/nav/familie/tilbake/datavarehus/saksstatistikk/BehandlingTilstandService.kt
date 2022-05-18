@@ -82,11 +82,12 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         var totalFeilutbetaltBeløp: BigDecimal? = null
         val erBehandlingsstegEtterGrunnlagSteg =
                 behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
+        val erBehandlingHenlagt = behandling.sisteResultat?.erBehandlingHenlagt() ?: false
         if (erBehandlingsstegEtterGrunnlagSteg) {
             val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
             totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
             totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
-        } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL) {
+        } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL && !erBehandlingHenlagt) {
             val varsel = behandling.aktivtVarsel ?: throw Feil("Behandling $behandlingId venter på varselssteg uten varsel data")
             val førsteDagIVarselsperiode = varsel.perioder.minOf { it.fom }
             val sisteDagIVarselsperiode = varsel.perioder.maxOf { it.tom }
