@@ -18,4 +18,7 @@ interface FagsakRepository : RepositoryInterface<Fagsak, UUID>, InsertUpdateRepo
     fun finnFagsakForEksternBrukId(eksternBrukId: UUID): Fagsak
 
     fun findByFagsystemAndEksternFagsakId(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak?
+
+    @Query("""SELECT f.* FROM fagsak f WHERE f.fagsystem = :fagsystem AND f.bruker_ident=:personIdent""")
+    fun finnFagsakForFagsystemAndIdent(fagsystem: Fagsystem, personIdent: String): Fagsak?
 }

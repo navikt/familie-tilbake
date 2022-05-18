@@ -66,7 +66,7 @@ object Testdata {
 
     val avstemmingsfil = Avstemmingsfil(fil = Fil("File.txt", ByteArray(100) { 1 }))
 
-    private val bruker = Bruker(ident = "321321321")
+    private val bruker = Bruker(ident = "32132132111")
 
     val fagsak = Fagsak(ytelsestype = Ytelsestype.BARNETRYGD,
                         fagsystem = Fagsystem.BA,
@@ -86,7 +86,7 @@ object Testdata {
                                 varselbeløp = 123,
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
-    val verge = Verge(ident = "testverdi",
+    val verge = Verge(ident = "32132132111",
                       type = Vergetype.VERGE_FOR_BARN,
                       orgNr = "testverdi",
                       navn = "testverdi",

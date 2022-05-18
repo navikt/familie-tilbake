@@ -21,6 +21,13 @@
         {
           "doedsdato": "2022-04-01"
         }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "12345678910",
+          "status": "OPPHOERT",
+          "type": "FNR"
+        }
       ]
     }
   }

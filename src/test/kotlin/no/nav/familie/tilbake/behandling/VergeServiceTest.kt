@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -28,6 +29,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
+import no.nav.familie.tilbake.person.PersonService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,7 +58,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private lateinit var integrasjonerClient: IntegrasjonerClient
 
     @Autowired
-    private lateinit var pdlClient: PdlClient
+    private lateinit var personService: PersonService
 
     private lateinit var vergeService: VergeService
 
@@ -77,7 +79,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                                     historikkTaskService,
                                     behandlingskontrollService,
                                     integrasjonerClient,
-                                    pdlClient)
+                                    personService)
         clearAllMocks(answers = false)
     }
 
@@ -135,7 +137,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                                         historikkTaskService,
                                         behandlingskontrollService,
                                         mockIntegrasjonerClient,
-                                        pdlClient)
+                                        personService)
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
 
@@ -153,12 +155,14 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVerge skal ikke lagre verge når personen ikke finnes i PDL`() {
         val mockPdlClient = mockk<PdlClient>()
+        val mockEndretPersonIdentEventPublisher: EndretPersonIdentEventPublisher = mockk()
+        val personService = PersonService(mockPdlClient, fagsakRepository, mockEndretPersonIdentEventPublisher)
         val vergeService = VergeService(behandlingRepository,
                                         fagsakRepository,
                                         historikkTaskService,
                                         behandlingskontrollService,
                                         integrasjonerClient,
-                                        mockPdlClient)
+                                        personService)
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
 

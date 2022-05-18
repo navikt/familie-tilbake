@@ -24,7 +24,7 @@ import java.net.URI
 import java.time.LocalDate
 
 @Service
-class PdlClient(val pdlConfig: PdlConfig,
+class PdlClient(private val pdlConfig: PdlConfig,
                 @Qualifier("azureClientCredential") restTemplate: RestOperations)
     : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
@@ -39,7 +39,8 @@ class PdlClient(val pdlConfig: PdlConfig,
                                                                       httpHeaders(fagsystem))
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
-                Personinfo(ident = ident,
+                val aktivtIdent = it.identer.first().identifikasjonsnummer ?: error("Kan ikke hente aktivt ident fra PDL")
+                Personinfo(ident = aktivtIdent,
                            fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                            navn = it.navn.first().fulltNavn(),
                            kjønn = it.kjønn.first().kjønn,

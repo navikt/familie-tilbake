@@ -10,14 +10,17 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEvent
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.person.PersonService
+import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -138,6 +141,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true,
                                                     kravgrunnlagsreferanse = kravgrunnlagsreferanse,
                                                     melding = "Det er mulig å opprette behandling manuelt.")
+    }
+
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun oppdaterPersonIdent(endretPersonIdentEvent: EndretPersonIdentEvent) {
+        val fagsak = fagsakRepository.findByIdOrThrow(endretPersonIdentEvent.fagsakId)
+        fagsakRepository.update(fagsak.copy(bruker = Bruker(ident = endretPersonIdentEvent.source as String,
+                                                            språkkode = fagsak.bruker.språkkode)))
     }
 
 }
