@@ -82,7 +82,7 @@ object Testdata {
                                  resultat = "OPPHØR",
                                  årsak = "testverdi")
 
-    private val varsel = Varsel(varseltekst = "testverdi",
+    val varsel = Varsel(varseltekst = "testverdi",
                                 varselbeløp = 123,
                                 perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)))
 
