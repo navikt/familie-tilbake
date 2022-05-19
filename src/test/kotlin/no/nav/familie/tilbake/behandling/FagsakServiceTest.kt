@@ -136,7 +136,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         fagsakDto.fagsystem shouldBe Fagsystem.BA
 
         val brukerDto = fagsakDto.bruker
-        brukerDto.personIdent shouldBe "32132132111"
+        brukerDto.personIdent shouldBe "12345678910"
         brukerDto.navn shouldBe "testverdi"
         brukerDto.kjønn shouldBe Kjønn.MANN
         brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
