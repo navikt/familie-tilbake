@@ -104,8 +104,13 @@ class IntegrasjonerClientConfig {
                                                                                      "Bob",
                                                                                      "Burger")
         every { integrasjonerClient.finnOppgaver(any()) } answers {
-            FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                                   oppgaver = listOf(Oppgave(id = 1)))
+            if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
+                FinnOppgaveResponseDto(antallTreffTotalt = 0,
+                                       oppgaver = emptyList())
+            } else {
+                FinnOppgaveResponseDto(antallTreffTotalt = 1,
+                                       oppgaver = listOf(Oppgave(id = 1)))
+            }
         }
 
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
