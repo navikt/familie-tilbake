@@ -33,7 +33,7 @@ class PdlClientConfig {
             } else {
                 null
             }
-            Personinfo(ident = "32132132111",
+            Personinfo(ident = ident.captured ?: "32132132111",
                        fødselsdato = LocalDate.now().minusYears(20),
                        navn = "testverdi",
                        kjønn = Kjønn.MANN,
