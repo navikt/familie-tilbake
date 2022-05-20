@@ -10,29 +10,24 @@ object TotrinnMapper {
 
     fun tilRespons(totrinnsvurderinger: List<Totrinnsvurdering>,
                    behandlingsstegstilstand: List<Behandlingsstegstilstand>): TotrinnsvurderingDto {
-        val totrinnsstegsinfo = when {
-            totrinnsvurderinger.isEmpty() -> {
-                hentStegeneGjelderForTotrinn(behandlingsstegstilstand)
-                        .map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
-            }
-            else -> {
-                totrinnsvurderinger.map {
-                    Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg,
-                                      godkjent = it.godkjent,
-                                      begrunnelse = it.begrunnelse)
-                } + hentStegeneGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
-                        .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }
-                        .map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
-            }
+        val totrinnsstegsinfo = if (totrinnsvurderinger.isEmpty()) {
+            hentStegSomGjelderForTotrinn(behandlingsstegstilstand)
+        } else {
+            totrinnsvurderinger.map {
+                Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg,
+                                  godkjent = it.godkjent,
+                                  begrunnelse = it.begrunnelse)
+            } + hentStegSomGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
+                    .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }
         }
         return TotrinnsvurderingDto(totrinnsstegsinfo = totrinnsstegsinfo.sortedBy { it.behandlingssteg.sekvens })
     }
 
-    private fun hentStegeneGjelderForTotrinn(behandlingsstegstilstand: List<Behandlingsstegstilstand>) =
+    private fun hentStegSomGjelderForTotrinn(behandlingsstegstilstand: List<Behandlingsstegstilstand>) =
             behandlingsstegstilstand.filter {
                 it.behandlingssteg.kanBesluttes &&
                 it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
-            }
+            }.map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
 
 
 }
