@@ -39,4 +39,4 @@ NAV Arbeid og ytelser
 Bob
 
 
-Vedlegg: Spesifikasjon av feilutbetalt beløp per måned
+Vedlegg: Oversikt feilutbetalt beløp per måned
