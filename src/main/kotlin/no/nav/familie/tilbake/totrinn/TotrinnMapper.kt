@@ -12,10 +12,7 @@ object TotrinnMapper {
                    behandlingsstegstilstand: List<Behandlingsstegstilstand>): TotrinnsvurderingDto {
         val totrinnsstegsinfo = when {
             totrinnsvurderinger.isEmpty() -> {
-                behandlingsstegstilstand.filter {
-                    it.behandlingssteg.kanBesluttes &&
-                    it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
-                }
+                hentStegeneGjelderForTotrinn(behandlingsstegstilstand)
                         .map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
             }
             else -> {
@@ -23,11 +20,19 @@ object TotrinnMapper {
                     Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg,
                                       godkjent = it.godkjent,
                                       begrunnelse = it.begrunnelse)
-                }
+                } + hentStegeneGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
+                        .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }
+                        .map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
             }
         }
-        return TotrinnsvurderingDto(totrinnsstegsinfo = totrinnsstegsinfo)
+        return TotrinnsvurderingDto(totrinnsstegsinfo = totrinnsstegsinfo.sortedBy { it.behandlingssteg.sekvens })
     }
+
+    private fun hentStegeneGjelderForTotrinn(behandlingsstegstilstand: List<Behandlingsstegstilstand>) =
+            behandlingsstegstilstand.filter {
+                it.behandlingssteg.kanBesluttes &&
+                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+            }
 
 
 }
