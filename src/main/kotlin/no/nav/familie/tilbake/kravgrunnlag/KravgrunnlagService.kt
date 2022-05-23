@@ -64,7 +64,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
-        sjekkIdentiskKravgrunnlag(kravgrunnlag431)
+        sjekkIdentiskKravgrunnlag(kravgrunnlag431,behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
@@ -154,8 +154,8 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
     }
 
-    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431) {
-        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET) {
+    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
+        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET && behandling.aktivtVarsel != null) {
             return
         }
         // Antar økonomi sender alltid et NYTT kravgrunnlag før ENDR kravgrunnlag
