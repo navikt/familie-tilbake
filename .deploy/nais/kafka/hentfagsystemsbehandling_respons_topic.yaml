@@ -14,6 +14,8 @@ spec:
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 1  # -1 means unlimited
+    retentionMs: 1000
+    segmentMs: 600000
   acl:
     - team: teamfamilie
       application: familie-tilbake #owner
