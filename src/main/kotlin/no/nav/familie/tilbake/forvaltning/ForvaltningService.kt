@@ -132,7 +132,7 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
 
         historikkTaskService.lagHistorikkTask(behandlingId,
                                               TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
-                                              Aktør.SAKSBEHANDLER)
+                                              Aktør.VEDTAKSLØSNING)
     }
 
     fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger) {

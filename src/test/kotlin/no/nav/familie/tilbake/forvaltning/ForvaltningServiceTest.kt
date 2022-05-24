@@ -280,7 +280,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             it.payload == behandling.id.toString() &&
             it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
                     .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
-            it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
+            it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }
     }
 
