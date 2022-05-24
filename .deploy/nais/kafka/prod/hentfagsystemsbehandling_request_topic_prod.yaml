@@ -24,3 +24,7 @@ spec:
     - team: teamfamilie
       application: familie-ef-iverksett #owner
       access: read   # readwrite
+    - team: teamfamilie
+      application: familie-tilbake-kafka-manager #forvalter
+      access: read   # read
+

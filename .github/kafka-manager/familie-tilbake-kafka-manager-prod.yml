@@ -9,7 +9,7 @@ spec:
   image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2021.12.17_13.09-1e4eaff6c45c # See https://github.com/navikt/kafka-manager/packages
   port: 8080
   ingresses:
-    - https://familie-tilbake-kafka-manager.dev.intern.nav.no
+    - https://familie-tilbake-kafka-manager.intern.nav.no
   prometheus:
     enabled: true
     path: /internal/prometheus
@@ -33,12 +33,12 @@ spec:
   azure: # Required
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         groups:
-          - id: c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b # forvaltning
+          - id: 3d718ae5-f25e-47a4-b4b3-084a97604c1d # forvaltning
   kafka: # Optional. Required for Aiven
-    pool: nav-dev
+    pool: nav-prod
   env:
     - name: APP_CONFIG_JSON # Required
       value: >
