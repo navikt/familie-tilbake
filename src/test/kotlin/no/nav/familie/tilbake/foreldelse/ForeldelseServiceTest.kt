@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +36,9 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var foreldelsesRepository: VurdertForeldelseRepository
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     @Autowired
     private lateinit var foreldelseService: ForeldelseService
@@ -160,6 +164,45 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                                             BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)))
         }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
+    }
+
+    @Test
+    fun `lagreVurdertForeldelse skal nullstille forrige vurdert vilkårsvurdering når det er endring i foreldesesperiode`() {
+        val forrigeForeldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                              LocalDate.of(2017, 4, 30),
+                                                              Foreldelsesvurderingstype.IKKE_FORELDET)
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
+
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
+
+        val nyForeldelsesperiode1 = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                          LocalDate.of(2017, 2, 28),
+                                                          Foreldelsesvurderingstype.IKKE_FORELDET)
+        val nyForeldelsesperiode2 = lagForeldelsesperiode(LocalDate.of(2017, 3, 1),
+                                                          LocalDate.of(2017, 4, 30),
+                                                          Foreldelsesvurderingstype.IKKE_FORELDET)
+        foreldelseService.lagreVurdertForeldelse(behandling.id,
+                                                 BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode1,
+                                                                                     nyForeldelsesperiode2)))
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
+    }
+
+    @Test
+    fun `lagreVurdertForeldelse skal ikke nullstille vurdert vilkårsvurdering når det er ingen endring i foreldesesperiode`() {
+        val forrigeForeldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                              LocalDate.of(2017, 4, 30),
+                                                              Foreldelsesvurderingstype.IKKE_FORELDET)
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
+        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
+
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
+
+        val nyForeldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
+                                                          LocalDate.of(2017, 4, 30),
+                                                          Foreldelsesvurderingstype.FORELDET)
+        foreldelseService.lagreVurdertForeldelse(behandling.id,BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
+        vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
     }
 
     private fun lagForeldelsesperiode(fom: LocalDate,
