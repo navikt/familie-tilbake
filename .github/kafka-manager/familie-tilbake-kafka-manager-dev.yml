@@ -37,7 +37,7 @@ spec:
       tenant: nav.no
       claims:
         groups:
-          - id: c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b # forvaltning
+          - id: 3d718ae5-f25e-47a4-b4b3-084a97604c1d # forvaltning
   kafka: # Optional. Required for Aiven
     pool: nav-dev
   env:
