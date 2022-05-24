@@ -8,20 +8,17 @@ metadata:
 spec:
   image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2022.04.29_05.41-7d6eab541ff2 # See https://github.com/navikt/kafka-manager/packages
   port: 8080
-  webproxy: true
   ingresses:
     - https://familie-tilbake-kafka-manager.dev.intern.nav.no
   prometheus:
     enabled: true
     path: /internal/prometheus
   readiness:
-    path: /internal/status/isAlive
-    initialDelay: 30
-    failureThreshold: 10
+    path: /internal/health/readiness
+    initialDelay: 20
   liveness:
-    path: /internal/status/isAlive
-    initialDelay: 30
-    failureThreshold: 10
+    path: /internal/health/liveness
+    initialDelay: 20
   replicas:
     min: 1
     max: 1  # 1 instance is required since in-memory session management is used
