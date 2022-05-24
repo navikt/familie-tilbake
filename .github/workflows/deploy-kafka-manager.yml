@@ -14,7 +14,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-dev.yaml
+          RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-dev.yml
       #- name: Deploy familile-tilbake-kafka-manager til prod
        # uses: nais/deploy/actions/deploy@v1
         #env:
