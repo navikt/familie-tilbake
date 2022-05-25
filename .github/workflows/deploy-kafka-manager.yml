@@ -1,0 +1,23 @@
+name: Deploy familile-tilbake-kafka-manager
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Deploy familile-tilbake-kafka-manager til dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-dev.yml
+      - name: Deploy familile-tilbake-kafka-manager til prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-prod.yml
