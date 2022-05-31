@@ -39,8 +39,10 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
 
-        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(faktaFeilutbetaling,
-                                                                       FaktaFeilutbetaling::sporbar, FaktaFeilutbetaling::versjon)
+        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
+            faktaFeilutbetaling,
+            FaktaFeilutbetaling::sporbar, FaktaFeilutbetaling::versjon
+        )
         lagretFaktaFeilutbetaling.versjon shouldBe 1
     }
 
@@ -53,9 +55,11 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingRepository.update(oppdatertFaktaFeilutbetaling)
 
         lagretFaktaFeilutbetaling = faktaFeilutbetalingRepository.findByIdOrThrow(faktaFeilutbetaling.id)
-        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(oppdatertFaktaFeilutbetaling,
-                                                                       FaktaFeilutbetaling::sporbar,
-                                                                       FaktaFeilutbetaling::versjon)
+        lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
+            oppdatertFaktaFeilutbetaling,
+            FaktaFeilutbetaling::sporbar,
+            FaktaFeilutbetaling::versjon
+        )
         lagretFaktaFeilutbetaling.versjon shouldBe 2
     }
 
@@ -65,9 +69,10 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        findByBehandlingId?.shouldBeEqualToComparingFieldsExcept(faktaFeilutbetaling,
-                                                                 FaktaFeilutbetaling::sporbar,
-                                                                 FaktaFeilutbetaling::versjon)
+        findByBehandlingId?.shouldBeEqualToComparingFieldsExcept(
+            faktaFeilutbetaling,
+            FaktaFeilutbetaling::sporbar,
+            FaktaFeilutbetaling::versjon
+        )
     }
-
 }

@@ -10,8 +10,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface ØkonomiXmlMottattArkivRepository : RepositoryInterface<ØkonomiXmlMottattArkiv, UUID>,
-                                             InsertUpdateRepository<ØkonomiXmlMottattArkiv> {
+interface ØkonomiXmlMottattArkivRepository :
+    RepositoryInterface<ØkonomiXmlMottattArkiv, UUID>,
+    InsertUpdateRepository<ØkonomiXmlMottattArkiv> {
 
     fun findByEksternFagsakIdAndYtelsestype(eksternFagsakId: String, ytelsestype: Ytelsestype): List<ØkonomiXmlMottattArkiv>
 }

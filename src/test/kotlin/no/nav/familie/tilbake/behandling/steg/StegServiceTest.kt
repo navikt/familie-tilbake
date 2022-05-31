@@ -136,9 +136,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(verger = emptySet()))
 
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.GRUNNLAG,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         stegService.håndterSteg(behandlingId)
@@ -149,9 +151,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal utføre grunnlagssteg,autoutføre verge steg og fortsette til Fakta steg når behandling har verge`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.GRUNNLAG,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         stegService.håndterSteg(behandlingId)
@@ -174,9 +178,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterSteg skal ikke utføre faktafeilutbetaling når behandling er på vent`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.AVVENTER_DOKUMENTASJON)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.FAKTA,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.AVVENTER_DOKUMENTASJON
+        )
 
         val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
@@ -203,7 +209,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertFaktadata(behandlingsstegFaktaDto)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -227,14 +233,16 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         aktivtBehandlingssteg?.behandlingsstegsstatus shouldBe Behandlingsstegstatus.KLAR
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
-        assertBehandlingssteg(behandlingsstegstilstander,
-                              Behandlingssteg.FORESLÅ_VEDTAK,
-                              Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(
+            behandlingsstegstilstander,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+            Behandlingsstegstatus.TILBAKEFØRT
+        )
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -249,17 +257,31 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         var kravgrunnlag431 = Testdata.kravgrunnlag431
         for (grunnlagsperiode in kravgrunnlag431.perioder) {
             kravgrunnlag431 =
-                    kravgrunnlag431.copy(perioder =
-                                         setOf(grunnlagsperiode.copy(periode = Periode(fom = LocalDate.of(2010, 1, 1),
-                                                                                       tom = LocalDate.of(2010, 1, 31)))))
+                kravgrunnlag431.copy(
+                    perioder =
+                    setOf(
+                        grunnlagsperiode.copy(
+                            periode = Periode(
+                                fom = LocalDate.of(2010, 1, 1),
+                                tom = LocalDate.of(2010, 1, 31)
+                            )
+                        )
+                    )
+                )
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
-        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(LocalDate.of(2010, 1, 1),
-                                                                                                LocalDate.of(2010, 1, 31)),
-                                                                           hendelsestype = Hendelsestype.ANNET,
-                                                                           hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
-        val behandlingsstegFaktaDto = BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
-                                                              begrunnelse = "testverdi")
+        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(
+            periode = PeriodeDto(
+                LocalDate.of(2010, 1, 1),
+                LocalDate.of(2010, 1, 31)
+            ),
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
+        val behandlingsstegFaktaDto = BehandlingsstegFaktaDto(
+            feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
+            begrunnelse = "testverdi"
+        )
 
         stegService.håndterSteg(behandlingId, behandlingsstegFaktaDto)
 
@@ -274,7 +296,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
@@ -286,16 +308,32 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         var kravgrunnlag431 = Testdata.kravgrunnlag431
         for (grunnlagsperiode in kravgrunnlag431.perioder) {
             kravgrunnlag431 =
-                    kravgrunnlag431.copy(perioder =
-                                         setOf(grunnlagsperiode.copy(periode = Periode(fom = LocalDate.of(2010, 1, 1),
-                                                                                       tom = LocalDate.of(2010, 1, 31)))))
+                kravgrunnlag431.copy(
+                    perioder =
+                    setOf(
+                        grunnlagsperiode.copy(
+                            periode = Periode(
+                                fom = LocalDate.of(2010, 1, 1),
+                                tom = LocalDate.of(2010, 1, 31)
+                            )
+                        )
+                    )
+                )
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
         val behandlingsstegForeldelseDto =
-                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(LocalDate.of(2010, 1, 1),
-                                                                                     LocalDate.of(2010, 1, 31)),
-                                                                          "foreldelses begrunnelse",
-                                                                          Foreldelsesvurderingstype.FORELDET)))
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    ForeldelsesperiodeDto(
+                        PeriodeDto(
+                            LocalDate.of(2010, 1, 1),
+                            LocalDate.of(2010, 1, 31)
+                        ),
+                        "foreldelses begrunnelse",
+                        Foreldelsesvurderingstype.FORELDET
+                    )
+                )
+            )
         stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto)
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -310,7 +348,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -321,27 +359,47 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.KLAR)
 
         val førstePeriode = Testdata.kravgrunnlagsperiode432
-                .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = LocalDate.of(2018, 1, 1),
-                                        tom = LocalDate.of(2018, 1, 31)),
-                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+            .copy(
+                id = UUID.randomUUID(),
+                periode = Periode(
+                    fom = LocalDate.of(2018, 1, 1),
+                    tom = LocalDate.of(2018, 1, 31)
+                ),
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
+                )
+            )
         val andrePeriode = Testdata.kravgrunnlagsperiode432
-                .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = LocalDate.of(2018, 2, 1),
-                                        tom = LocalDate.of(2018, 2, 28)),
-                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+            .copy(
+                id = UUID.randomUUID(),
+                periode = Periode(
+                    fom = LocalDate.of(2018, 2, 1),
+                    tom = LocalDate.of(2018, 2, 28)
+                ),
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
+                )
+            )
 
         val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
         val behandlingsstegForeldelseDto =
-                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(førstePeriode.periode),
-                                                                          "foreldelses begrunnelse",
-                                                                          Foreldelsesvurderingstype.FORELDET),
-                                                    ForeldelsesperiodeDto(PeriodeDto(andrePeriode.periode),
-                                                                          "foreldelses begrunnelse",
-                                                                          Foreldelsesvurderingstype.IKKE_FORELDET)))
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    ForeldelsesperiodeDto(
+                        PeriodeDto(førstePeriode.periode),
+                        "foreldelses begrunnelse",
+                        Foreldelsesvurderingstype.FORELDET
+                    ),
+                    ForeldelsesperiodeDto(
+                        PeriodeDto(andrePeriode.periode),
+                        "foreldelses begrunnelse",
+                        Foreldelsesvurderingstype.IKKE_FORELDET
+                    )
+                )
+            )
         stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto)
 
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
@@ -353,7 +411,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
@@ -365,23 +423,43 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         var kravgrunnlag431 = Testdata.kravgrunnlag431
         for (grunnlagsperiode in kravgrunnlag431.perioder) {
             kravgrunnlag431 =
-                    kravgrunnlag431.copy(perioder = setOf(grunnlagsperiode.copy(periode = Periode(LocalDate.of(2010, 1, 1),
-                                                                                                  LocalDate.of(2010, 1, 31)))))
+                kravgrunnlag431.copy(
+                    perioder = setOf(
+                        grunnlagsperiode.copy(
+                            periode = Periode(
+                                LocalDate.of(2010, 1, 1),
+                                LocalDate.of(2010, 1, 31)
+                            )
+                        )
+                    )
+                )
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
         // foreldelsesteg vurderte som IKKE_FORELDET med første omgang
         var behandlingsstegForeldelseDto =
-                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(LocalDate.of(2010, 1, 1),
-                                                                                     LocalDate.of(2010, 1, 31)),
-                                                                          "foreldelses begrunnelse",
-                                                                          Foreldelsesvurderingstype.IKKE_FORELDET)))
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    ForeldelsesperiodeDto(
+                        PeriodeDto(
+                            LocalDate.of(2010, 1, 1),
+                            LocalDate.of(2010, 1, 31)
+                        ),
+                        "foreldelses begrunnelse",
+                        Foreldelsesvurderingstype.IKKE_FORELDET
+                    )
+                )
+            )
         stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto)
         var behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         // behandle vilkårsvurderingssteg
-        val behandlingsstegVilkårsvurderingDto = lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(LocalDate.of(2010, 1, 1),
-                                                                                                  LocalDate.of(2010, 1, 31)))
+        val behandlingsstegVilkårsvurderingDto = lagBehandlingsstegVilkårsvurderingDto(
+            PeriodeDto(
+                LocalDate.of(2010, 1, 1),
+                LocalDate.of(2010, 1, 31)
+            )
+        )
         stegService.håndterSteg(behandlingId, behandlingsstegVilkårsvurderingDto)
         behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -390,10 +468,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         // behandler foreldelse steg på nytt og endrer periode til foreldet
         behandlingsstegForeldelseDto =
-                BehandlingsstegForeldelseDto(listOf(ForeldelsesperiodeDto(PeriodeDto(LocalDate.of(2010, 1, 1),
-                                                                                     LocalDate.of(2010, 1, 31)),
-                                                                          "foreldelses begrunnelse",
-                                                                          Foreldelsesvurderingstype.FORELDET)))
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    ForeldelsesperiodeDto(
+                        PeriodeDto(
+                            LocalDate.of(2010, 1, 1),
+                            LocalDate.of(2010, 1, 31)
+                        ),
+                        "foreldelses begrunnelse",
+                        Foreldelsesvurderingstype.FORELDET
+                    )
+                )
+            )
         stegService.håndterSteg(behandlingId, behandlingsstegForeldelseDto)
         behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -403,7 +489,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).shouldBeNull()
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
@@ -421,8 +507,14 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
 
         val fritekstavsnitt =
-                FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(FOM, TOM),
-                                                                                faktaAvsnitt = "fakta tekst")))
+            FritekstavsnittDto(
+                perioderMedTekst = listOf(
+                    PeriodeMedTekstDto(
+                        periode = PeriodeDto(FOM, TOM),
+                        faktaAvsnitt = "fakta tekst"
+                    )
+                )
+            )
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt))
         val behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -450,8 +542,14 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // behandle vilkårsvurderingssteg
         stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
 
-        val fritekstavsnitt = FritekstavsnittDto(perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(FOM, TOM),
-                                                                                              faktaAvsnitt = "fakta tekst")))
+        val fritekstavsnitt = FritekstavsnittDto(
+            perioderMedTekst = listOf(
+                PeriodeMedTekstDto(
+                    periode = PeriodeDto(FOM, TOM),
+                    faktaAvsnitt = "fakta tekst"
+                )
+            )
+        )
         stegService.håndterSteg(behandlingId, BehandlingsstegForeslåVedtaksstegDto(fritekstavsnitt = fritekstavsnitt))
 
         assertOppgave(FerdigstillOppgaveTask.TYPE)
@@ -568,8 +666,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.FATTER_VEDTAK,
-                                                    ansvarligSaksbehandler = "Z0000"))
+        behandlingRepository.update(
+            behandling.copy(
+                status = Behandlingsstatus.FATTER_VEDTAK,
+                ansvarligSaksbehandler = "Z0000"
+            )
+        )
 
         val exception = shouldThrow<RuntimeException> {
             stegService.håndterSteg(behandlingId, lagBehandlingsstegFatteVedtaksstegDto(godkjent = true))
@@ -595,10 +697,14 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FAKTA, Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.KLAR)
 
-        val vergeData = BehandlingsstegVergeDto(verge = VergeDto(ident = "32132132111",
-                                                                 type = Vergetype.VERGE_FOR_BARN,
-                                                                 navn = "testverdi",
-                                                                 begrunnelse = "testverdi"))
+        val vergeData = BehandlingsstegVergeDto(
+            verge = VergeDto(
+                ident = "32132132111",
+                type = Vergetype.VERGE_FOR_BARN,
+                navn = "testverdi",
+                begrunnelse = "testverdi"
+            )
+        )
         stegService.håndterSteg(behandlingId, vergeData)
         behandlingsstegstilstander = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
@@ -608,12 +714,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
     }
 
-
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling og fortsette til grunnlag når behandling er i varselssteg uten grunnlag`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.VARSEL,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
+        )
 
         stegService.gjenopptaSteg(behandlingId)
 
@@ -625,15 +732,17 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
         aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         aktivtBehandlingsstegstilstand.tidsfrist shouldBe LocalDate.now()
-                .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
+            .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
     }
 
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling og fortsette til fakta når behandling er i varselssteg med grunnlag`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.VARSEL,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
+        )
 
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
@@ -652,9 +761,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `gjenopptaSteg skal ikke gjenoppta behandling når behandling er i grunnlagssteg uten grunnlag`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.GRUNNLAG,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
 
         stegService.gjenopptaSteg(behandlingId)
 
@@ -664,14 +775,16 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         aktivtBehandlingsstegstilstand.behandlingsstegsstatus shouldBe Behandlingsstegstatus.VENTER
         aktivtBehandlingsstegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         aktivtBehandlingsstegstilstand.tidsfrist shouldBe LocalDate.now()
-                .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
+            .plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
     }
 
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i grunnlagssteg med grunnlag`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.GRUNNLAG,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         stegService.gjenopptaSteg(behandlingId)
@@ -689,9 +802,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling når behandling er i vilkårsvurderingssteg`() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.AVVENTER_DOKUMENTASJON)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.VILKÅRSVURDERING,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.AVVENTER_DOKUMENTASJON
+        )
 
         stegService.gjenopptaSteg(behandlingId)
 
@@ -711,8 +826,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegDto = BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
-                .shouldBeTrue()
-
+            .shouldBeTrue()
     }
 
     @Test
@@ -725,8 +839,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = false)
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
-                .shouldBeFalse()
-
+            .shouldBeFalse()
     }
 
     @Test
@@ -739,8 +852,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = true)
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
-                .shouldBeFalse()
-
+            .shouldBeFalse()
     }
 
     @Test
@@ -749,62 +861,98 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
-        val behandlingsstegDto = lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(LocalDate.of(2021, 1, 1),
-                                                                                  LocalDate.of(2021, 1, 31)))
+        val behandlingsstegDto = lagBehandlingsstegVilkårsvurderingDto(
+            PeriodeDto(
+                LocalDate.of(2021, 1, 1),
+                LocalDate.of(2021, 1, 31)
+            )
+        )
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
-                .shouldBeTrue()
+            .shouldBeTrue()
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
-                                            behandlingsstegstatus: Behandlingsstegstatus,
-                                            venteårsak: Venteårsak? = null) {
+    private fun lagBehandlingsstegstilstand(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus,
+        venteårsak: Venteårsak? = null
+    ) {
         val tidsfrist: LocalDate? = venteårsak?.let { LocalDate.now().plusWeeks(it.defaultVenteTidIUker) }
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus,
-                                                                           venteårsak = venteårsak,
-                                                                           tidsfrist = tidsfrist,
-                                                                           behandlingId = behandlingId))
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus,
+                venteårsak = venteårsak,
+                tidsfrist = tidsfrist,
+                behandlingId = behandlingId
+            )
+        )
     }
 
     private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
-        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(periode = PeriodeDto(FOM, TOM),
-                                                                           hendelsestype = Hendelsestype.ANNET,
-                                                                           hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
-        return BehandlingsstegFaktaDto(feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
-                                       begrunnelse = "testverdi")
+        val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(
+            periode = PeriodeDto(FOM, TOM),
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
+        return BehandlingsstegFaktaDto(
+            feilutbetaltePerioder = listOf(faktaFeilutbetaltePerioderDto),
+            begrunnelse = "testverdi"
+        )
     }
 
     private fun lagBehandlingsstegVilkårsvurderingDto(periode: PeriodeDto): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(listOf(VilkårsvurderingsperiodeDto(periode,
-                                                                                     Vilkårsvurderingsresultat.GOD_TRO,
-                                                                                     "Vilkårsvurdering begrunnelse",
-                                                                                     GodTroDto(false,
-                                                                                               null,
-                                                                                               "God tro begrunnelse"))))
+        return BehandlingsstegVilkårsvurderingDto(
+            listOf(
+                VilkårsvurderingsperiodeDto(
+                    periode,
+                    Vilkårsvurderingsresultat.GOD_TRO,
+                    "Vilkårsvurdering begrunnelse",
+                    GodTroDto(
+                        false,
+                        null,
+                        "God tro begrunnelse"
+                    )
+                )
+            )
+        )
     }
 
     private fun lagBehandlingsstegFatteVedtaksstegDto(godkjent: Boolean): BehandlingsstegFatteVedtaksstegDto {
-        return BehandlingsstegFatteVedtaksstegDto(listOf(VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FAKTA,
-                                                                           godkjent = godkjent,
-                                                                           begrunnelse = "fakta totrinn begrunnelse"),
-                                                         VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORELDELSE,
-                                                                           godkjent = godkjent,
-                                                                           begrunnelse = "foreldelse totrinn begrunnelse"),
-                                                         VurdertTotrinnDto(behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
-                                                                           godkjent = godkjent,
-                                                                           begrunnelse = "vilkårsvurdering totrinn begrunnelse"),
-                                                         VurdertTotrinnDto(behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                           godkjent = godkjent,
-                                                                           begrunnelse = "foreslåvedtak totrinn begrunnelse")))
+        return BehandlingsstegFatteVedtaksstegDto(
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = godkjent,
+                    begrunnelse = "fakta totrinn begrunnelse"
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORELDELSE,
+                    godkjent = godkjent,
+                    begrunnelse = "foreldelse totrinn begrunnelse"
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = godkjent,
+                    begrunnelse = "vilkårsvurdering totrinn begrunnelse"
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = godkjent,
+                    begrunnelse = "foreslåvedtak totrinn begrunnelse"
+                )
+            )
+        )
     }
 
-    private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                      behandlingssteg: Behandlingssteg,
-                                      behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun assertBehandlingssteg(
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
 
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
-            behandlingsstegstatus == it.behandlingsstegsstatus
+                behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
 
@@ -836,21 +984,27 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOppgave(tasktype: String, forventet: Int = 1) {
-        val taskene = taskRepository.findByStatusIn(status = listOf(Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                                                                    Status.BEHANDLER, Status.FERDIG), page = Pageable.unpaged())
-                .filter { tasktype == it.type }
+        val taskene = taskRepository.findByStatusIn(
+            status = listOf(
+                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
+                Status.BEHANDLER, Status.FERDIG
+            ),
+            page = Pageable.unpaged()
+        )
+            .filter { tasktype == it.type }
 
         taskene.size shouldBe forventet
     }
 
-    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                    aktør: Aktør) {
+    private fun assertHistorikkTask(
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        aktør: Aktør
+    ) {
         taskRepository.findByStatus(Status.UBEHANDLET).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
-            historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-            aktør.name == it.metadata["aktør"] &&
-            behandlingId.toString() == it.payload
+                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                aktør.name == it.metadata["aktør"] &&
+                behandlingId.toString() == it.payload
         }.shouldBeTrue()
     }
-
 }

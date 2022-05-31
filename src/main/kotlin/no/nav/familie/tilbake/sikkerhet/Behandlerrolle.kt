@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.sikkerhet
 
-
 enum class Behandlerrolle(val nivå: Int) {
     SYSTEM(5),
     BESLUTTER(4),

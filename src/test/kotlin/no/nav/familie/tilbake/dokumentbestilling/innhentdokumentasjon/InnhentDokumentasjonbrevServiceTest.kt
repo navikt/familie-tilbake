@@ -32,10 +32,12 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(fagsakRepository,
-                                                                          behandlingRepository,
-                                                                          mockEksterneDataForBrevService,
-                                                                          pdfBrevService)
+        innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(
+            fagsakRepository,
+            behandlingRepository,
+            mockEksterneDataForBrevService,
+            pdfBrevService
+        )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
@@ -43,15 +45,16 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
         every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
-                .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
+            .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
     }
 
     @Test
     fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
-        val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(Testdata.behandling.id,
-                                                                                               flereOpplysninger)
+        val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
+            Testdata.behandling.id,
+            flereOpplysninger
+        )
 
         PdfaValidator.validatePdf(data)
     }
-
 }

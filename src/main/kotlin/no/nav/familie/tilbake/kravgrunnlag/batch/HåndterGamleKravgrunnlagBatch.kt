@@ -23,9 +23,11 @@ import java.time.LocalDate
 import java.util.Properties
 
 @Service
-class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlMottattService,
-                                    private val taskService: TaskService,
-                                    private val environment: Environment) {
+class HåndterGamleKravgrunnlagBatch(
+    private val mottattXmlService: ØkonomiXmlMottattService,
+    private val taskService: TaskService,
+    private val environment: Environment
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,43 +35,61 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
     @Transactional
     fun utfør() {
         if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
-                    it.contains("local") ||
-                    it.contains("integrasjonstest")
-                }) {
+            it.contains("local") ||
+                it.contains("integrasjonstest")
+        }
+        ) {
             return
         }
 
         logger.info("Starter HåndterGamleKravgrunnlagBatch..")
         logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
-        val mottattXmlIdsMedYtelse = mottattXmlService.hentFrakobletGamleMottattXmlIds(beregnBestemtDato(BARNETRYGD),
-                                                                                       beregnBestemtDato(BARNETILSYN),
-                                                                                       beregnBestemtDato(OVERGANGSSTØNAD),
-                                                                                       beregnBestemtDato(SKOLEPENGER),
-                                                                                       beregnBestemtDato(KONTANTSTØTTE))
+        val mottattXmlIdsMedYtelse = mottattXmlService.hentFrakobletGamleMottattXmlIds(
+            beregnBestemtDato(BARNETRYGD),
+            beregnBestemtDato(BARNETILSYN),
+            beregnBestemtDato(OVERGANGSSTØNAD),
+            beregnBestemtDato(SKOLEPENGER),
+            beregnBestemtDato(KONTANTSTØTTE)
+        )
 
         if (mottattXmlIdsMedYtelse.isNotEmpty()) {
-            logger.info("Det finnes ${mottattXmlIdsMedYtelse.size} kravgrunnlag som er eldre enn " +
-                        "$ALDERSGRENSE_I_UKER uker fra dagens dato")
+            logger.info(
+                "Det finnes ${mottattXmlIdsMedYtelse.size} kravgrunnlag som er eldre enn " +
+                    "$ALDERSGRENSE_I_UKER uker fra dagens dato"
+            )
 
-            val alleFeiledeTasker = taskService.finnTasksMedStatus(listOf(Status.FEILET,
-                                                                          Status.KLAR_TIL_PLUKK), Pageable.unpaged())
+            val alleFeiledeTasker = taskService.finnTasksMedStatus(
+                listOf(
+                    Status.FEILET,
+                    Status.KLAR_TIL_PLUKK
+                ),
+                Pageable.unpaged()
+            )
             mottattXmlIdsMedYtelse.forEach { mottattXmlIdOgYtelse ->
                 val finnesTask = alleFeiledeTasker.any {
                     it.payload == mottattXmlIdOgYtelse.id.toString() &&
-                    (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
+                        (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
                 }
                 if (!finnesTask) {
                     val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(mottattXmlIdOgYtelse.ytelsestype)
-                    taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE,
-                                          payload = mottattXmlIdOgYtelse.id.toString(),
-                                          properties = Properties().apply {
-                                              setProperty(PropertyName.FAGSYSTEM,
-                                                          fagsystem.name)
-                                          }))
+                    taskService.save(
+                        Task(
+                            type = HentFagsystemsbehandlingTask.TYPE,
+                            payload = mottattXmlIdOgYtelse.id.toString(),
+                            properties = Properties().apply {
+                                setProperty(
+                                    PropertyName.FAGSYSTEM,
+                                    fagsystem.name
+                                )
+                            }
+                        )
+                    )
                 } else {
-                    logger.info("Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
-                                "eller HentFagsystemsbehandlingTask " +
-                                "på det samme kravgrunnlaget med id ${mottattXmlIdOgYtelse.id}")
+                    logger.info(
+                        "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
+                            "eller HentFagsystemsbehandlingTask " +
+                            "på det samme kravgrunnlaget med id ${mottattXmlIdOgYtelse.id}"
+                    )
                 }
             }
         } else {
@@ -84,11 +104,12 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
 
     companion object {
 
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(BARNETRYGD to 8,
-                                                           BARNETILSYN to 6,
-                                                           OVERGANGSSTØNAD to 6,
-                                                           SKOLEPENGER to 6,
-                                                           KONTANTSTØTTE to 8)
+        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(
+            BARNETRYGD to 8,
+            BARNETILSYN to 6,
+            OVERGANGSSTØNAD to 6,
+            SKOLEPENGER to 6,
+            KONTANTSTØTTE to 8
+        )
     }
-
 }

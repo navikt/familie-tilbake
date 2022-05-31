@@ -37,5 +37,4 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         lagretVilkår.shouldBeEqualToComparingFieldsExcept(oppdatertVilkår, Vilkårsvurdering::sporbar, Vilkårsvurdering::versjon)
         lagretVilkår.versjon shouldBe 2
     }
-
 }

@@ -25,10 +25,11 @@ class JournalpostController(private val journalføringService: JournalføringSer
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
-    fun hentDokument(@PathVariable behandlingId: UUID,
-                     @PathVariable journalpostId: String,
-                     @PathVariable dokumentInfoId: String)
-            : Ressurs<ByteArray> {
+    fun hentDokument(
+        @PathVariable behandlingId: UUID,
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String
+    ): Ressurs<ByteArray> {
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
     }
 

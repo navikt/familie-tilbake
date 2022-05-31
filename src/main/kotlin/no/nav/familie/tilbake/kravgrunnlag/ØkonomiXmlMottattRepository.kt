@@ -18,21 +18,28 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
 
     fun findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId: BigInteger, vedtakId: BigInteger): List<ØkonomiXmlMottatt>
 
-    fun findByEksternFagsakIdAndYtelsestypeAndVedtakId(eksternFagsakId: String,
-                                                       ytelsestype: Ytelsestype,
-                                                       vedtakId: BigInteger): List<ØkonomiXmlMottatt>
+    fun findByEksternFagsakIdAndYtelsestypeAndVedtakId(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        vedtakId: BigInteger
+    ): List<ØkonomiXmlMottatt>
 
-    fun findByEksternFagsakIdAndYtelsestype(eksternFagsakId: String,
-                                            ytelsestype: Ytelsestype): List<ØkonomiXmlMottatt>
+    fun findByEksternFagsakIdAndYtelsestype(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype
+    ): List<ØkonomiXmlMottatt>
 
-    fun existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId: String,
-                                                          ytelsestype: Ytelsestype,
-                                                          referanse: String): Boolean
+    fun existsByEksternFagsakIdAndYtelsestypeAndReferanse(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        referanse: String
+    ): Boolean
 
     fun findByEksternKravgrunnlagId(eksternKravgrunnlagId: BigInteger): ØkonomiXmlMottatt?
 
     // language=PostgreSQL
-    @Query(""" 
+    @Query(
+        """ 
         SELECT oko.id, oko.ytelsestype
         FROM okonomi_xml_mottatt oko
         WHERE CASE (ytelsestype)
@@ -42,11 +49,13 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
                     WHEN 'SKOLEPENGER' THEN opprettet_tid < :skolePengerBestemtDato
                     WHEN 'KONTANTSTØTTE' THEN opprettet_tid < :kontantstottebestemtdato
                END
-      """)
-    fun hentFrakobletGamleMottattXmlIds(barnetrygdBestemtDato: LocalDate,
-                                        barnetilsynBestemtDato: LocalDate,
-                                        overgangsstonadbestemtdato: LocalDate,
-                                        skolePengerBestemtDato: LocalDate,
-                                        kontantstottebestemtdato: LocalDate): List<ØkonomiXmlMottattIdOgYtelse>
-
+      """
+    )
+    fun hentFrakobletGamleMottattXmlIds(
+        barnetrygdBestemtDato: LocalDate,
+        barnetilsynBestemtDato: LocalDate,
+        overgangsstonadbestemtdato: LocalDate,
+        skolePengerBestemtDato: LocalDate,
+        kontantstottebestemtdato: LocalDate
+    ): List<ØkonomiXmlMottattIdOgYtelse>
 }

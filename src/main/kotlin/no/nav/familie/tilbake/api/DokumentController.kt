@@ -30,10 +30,12 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/api/dokument")
 @ProtectedWithClaims(issuer = "azuread")
-class DokumentController(private val varselbrevService: VarselbrevService,
-                         private val dokumentbehandlingService: DokumentbehandlingService,
-                         private val henleggelsesbrevService: HenleggelsesbrevService,
-                         private val vedtaksbrevService: VedtaksbrevService) {
+class DokumentController(
+    private val varselbrevService: VarselbrevService,
+    private val dokumentbehandlingService: DokumentbehandlingService,
+    private val henleggelsesbrevService: HenleggelsesbrevService,
+    private val vedtaksbrevService: VedtaksbrevService
+) {
 
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
@@ -48,42 +50,51 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     @PostMapping("/forhandsvis")
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun forhåndsvisBrev(@RequestBody @Valid bestillBrevDto: BestillBrevDto): Ressurs<ByteArray> {
-        val dokument: ByteArray = dokumentbehandlingService.forhåndsvisBrev(bestillBrevDto.behandlingId,
-                                                                            bestillBrevDto.brevmalkode,
-                                                                            bestillBrevDto.fritekst)
+        val dokument: ByteArray = dokumentbehandlingService.forhåndsvisBrev(
+            bestillBrevDto.behandlingId,
+            bestillBrevDto.brevmalkode,
+            bestillBrevDto.fritekst
+        )
         return Ressurs.success(dokument)
     }
 
     @Operation(summary = "Forhåndsvis varselbrev")
-    @PostMapping("/forhandsvis-varselbrev",
-                 produces = [MediaType.APPLICATION_PDF_VALUE])
+    @PostMapping(
+        "/forhandsvis-varselbrev",
+        produces = [MediaType.APPLICATION_PDF_VALUE]
+    )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVarselbrev(@Valid @RequestBody forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
-    @PostMapping("/forhandsvis-henleggelsesbrev",
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        "/forhandsvis-henleggelsesbrev",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser henleggelsesbrev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningHenleggelsesbrev(@Valid @RequestBody dto: ForhåndsvisningHenleggelsesbrevDto): Ressurs<ByteArray> {
         return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
 
     @Operation(summary = "Forhåndsvis vedtaksbrev")
-    @PostMapping("/forhandsvis-vedtaksbrev",
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        "/forhandsvis-vedtaksbrev",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVedtaksbrev(@Valid @RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
     }
 
     @Operation(summary = "Hent vedtaksbrevtekst")
-    @GetMapping("/vedtaksbrevtekst/{behandlingId}",
-                produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(
+        "/vedtaksbrevtekst/{behandlingId}",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
     }
-
 }

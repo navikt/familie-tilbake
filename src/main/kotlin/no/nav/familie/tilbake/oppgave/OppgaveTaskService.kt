@@ -15,8 +15,10 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-class OppgaveTaskService(private val taskRepository: TaskRepository,
-                         private val fagsakService: FagsakService) {
+class OppgaveTaskService(
+    private val taskRepository: TaskRepository,
+    private val fagsakService: FagsakService
+) {
 
     @Transactional
     fun opprettOppgaveTask(behandling: Behandling, oppgavetype: Oppgavetype, saksbehandler: String? = null) {
@@ -27,9 +29,13 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
             setProperty(PropertyName.ENHET, behandling.behandlendeEnhet)
             saksbehandler?.let { setProperty("saksbehandler", it) }
         }
-        taskRepository.save(Task(type = LagOppgaveTask.TYPE,
-                                 payload = behandling.id.toString(),
-                                 properties = properties))
+        taskRepository.save(
+            Task(
+                type = LagOppgaveTask.TYPE,
+                payload = behandling.id.toString(),
+                properties = properties
+            )
+        )
     }
 
     @Transactional
@@ -41,26 +47,34 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
             }
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
         }
-        taskRepository.save(Task(type = FerdigstillOppgaveTask.TYPE,
-                                 payload = behandlingId.toString(),
-                                 properties = properties))
+        taskRepository.save(
+            Task(
+                type = FerdigstillOppgaveTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties
+            )
+        )
     }
 
     @Transactional
     fun oppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate, saksbehandler: String? = null) {
-        opprettOppdaterOppgaveTask(behandlingId = behandlingId,
-                                   beskrivelse = beskrivelse,
-                                   frist = frist,
-                                   saksbehandler = saksbehandler)
+        opprettOppdaterOppgaveTask(
+            behandlingId = behandlingId,
+            beskrivelse = beskrivelse,
+            frist = frist,
+            saksbehandler = saksbehandler
+        )
     }
 
     @Transactional
     fun oppdaterOppgaveTaskMedTriggertid(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long, saksbehandler: String? = null) {
-        opprettOppdaterOppgaveTask(behandlingId = behandlingId,
-                                   beskrivelse = beskrivelse,
-                                   frist = frist,
-                                   triggerTid = triggerTid,
-                                   saksbehandler = saksbehandler)
+        opprettOppdaterOppgaveTask(
+            behandlingId = behandlingId,
+            beskrivelse = beskrivelse,
+            frist = frist,
+            triggerTid = triggerTid,
+            saksbehandler = saksbehandler
+        )
     }
 
     private fun opprettOppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long? = null, saksbehandler: String? = null) {
@@ -71,9 +85,11 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
             setProperty("frist", frist.toString())
             saksbehandler?.let { setProperty("saksbehandler", it) }
         }
-        val task = Task(type = OppdaterOppgaveTask.TYPE,
-                        payload = behandlingId.toString(),
-                        properties = properties)
+        val task = Task(
+            type = OppdaterOppgaveTask.TYPE,
+            payload = behandlingId.toString(),
+            properties = properties
+        )
         triggerTid?.let { task.medTriggerTid(LocalDateTime.now().plusSeconds(it)) }
         taskRepository.save(task)
     }
@@ -87,9 +103,13 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
             setProperty("enhetId", enhetId)
             setProperty("saksbehandler", ContextService.hentSaksbehandler())
         }
-        taskRepository.save(Task(type = OppdaterEnhetOppgaveTask.TYPE,
-                                 payload = behandlingId.toString(),
-                                 properties = properties))
+        taskRepository.save(
+            Task(
+                type = OppdaterEnhetOppgaveTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties
+            )
+        )
     }
 
     @Transactional
@@ -98,8 +118,12 @@ class OppgaveTaskService(private val taskRepository: TaskRepository,
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
         }
-        taskRepository.save(Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
-                                 payload = behandlingId.toString(),
-                                 properties = properties))
+        taskRepository.save(
+            Task(
+                type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties
+            )
+        )
     }
 }

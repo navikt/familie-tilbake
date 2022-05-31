@@ -82,25 +82,39 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val førstePeriode = Testdata.kravgrunnlagsperiode432
-                .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
-                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+            .copy(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
+                )
+            )
         val andrePeriode = Testdata.kravgrunnlagsperiode432
-                .copy(id = UUID.randomUUID(),
-                      periode = Periode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
-                      beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())))
+            .copy(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
+                )
+            )
 
         val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
 
-        val periode = FaktaFeilutbetalingsperiode(periode = Periode(førstePeriode.periode.fom, andrePeriode.periode.tom),
-                                                  hendelsestype = Hendelsestype.ANNET,
-                                                  hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
-        faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,
-                                                                 begrunnelse = "fakta begrunnelse",
-                                                                 perioder = setOf(periode)))
+        val periode = FaktaFeilutbetalingsperiode(
+            periode = Periode(førstePeriode.periode.fom, andrePeriode.periode.tom),
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
+        faktaFeilutbetalingRepository.insert(
+            FaktaFeilutbetaling(
+                behandlingId = behandling.id,
+                begrunnelse = "fakta begrunnelse",
+                perioder = setOf(periode)
+            )
+        )
 
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -164,7 +178,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering når perioder er delt opp`() {
-        //delt opp i to perioder
+        // delt opp i to perioder
         val periode1 = PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         val periode2 = PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         val behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(perioder = listOf(periode1, periode2))
@@ -204,26 +218,40 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-        val justBeløp = lagKravgrunnlagsbeløp(klassetype = Klassetype.JUST,
-                                              nyttBeløp = BigDecimal(5000),
-                                              opprinneligUtbetalingsbeløp = BigDecimal.ZERO)
-        val trekBeløp = lagKravgrunnlagsbeløp(klassetype = Klassetype.TREK,
-                                              nyttBeløp = BigDecimal.ZERO,
-                                              opprinneligUtbetalingsbeløp = BigDecimal(-2000))
-        val skatBeløp = lagKravgrunnlagsbeløp(klassetype = Klassetype.SKAT,
-                                              nyttBeløp = BigDecimal.ZERO,
-                                              opprinneligUtbetalingsbeløp = BigDecimal(-2000))
+        val justBeløp = lagKravgrunnlagsbeløp(
+            klassetype = Klassetype.JUST,
+            nyttBeløp = BigDecimal(5000),
+            opprinneligUtbetalingsbeløp = BigDecimal.ZERO
+        )
+        val trekBeløp = lagKravgrunnlagsbeløp(
+            klassetype = Klassetype.TREK,
+            nyttBeløp = BigDecimal.ZERO,
+            opprinneligUtbetalingsbeløp = BigDecimal(-2000)
+        )
+        val skatBeløp = lagKravgrunnlagsbeløp(
+            klassetype = Klassetype.SKAT,
+            nyttBeløp = BigDecimal.ZERO,
+            opprinneligUtbetalingsbeløp = BigDecimal(-2000)
+        )
         val førstePeriode = kravgrunnlag431.perioder
-                .toList()[0]
-                .copy(beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    justBeløp))
+            .toList()[0]
+            .copy(
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    justBeløp
+                )
+            )
         val andrePeriode = kravgrunnlag431.perioder
-                .toList()[1]
-                .copy(beløp = setOf(Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                                    trekBeløp,
-                                    skatBeløp))
+            .toList()[1]
+            .copy(
+                beløp = setOf(
+                    Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                    trekBeløp,
+                    skatBeløp
+                )
+            )
         kravgrunnlagRepository.update(kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode)))
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
@@ -257,9 +285,11 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente allerede lagret simpel aktsomhet vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-                lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
-        vilkårsvurderingService.lagreVilkårsvurdering(behandlingId = behandling.id,
-                                                      behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto)
+            lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandlingId = behandling.id,
+            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto
+        )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
         vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
@@ -297,9 +327,11 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente allerede lagret god tro vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-                lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
-        vilkårsvurderingService.lagreVilkårsvurdering(behandlingId = behandling.id,
-                                                      behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto)
+            lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandlingId = behandling.id,
+            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto
+        )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
         vurdertVilkårsvurderingDto.rettsgebyr shouldBe Constants.rettsgebyr
@@ -340,17 +372,27 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         // behandle vilkårsvurdering
         vilkårsvurderingService
-                .lagreVilkårsvurdering(behandling.id,
-                                       lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 2),
-                                                                                                 YearMonth.of(2020, 2)))))
+            .lagreVilkårsvurdering(
+                behandling.id,
+                lagVilkårsvurderingMedGodTro(
+                    perioder = listOf(
+                        PeriodeDto(
+                            YearMonth.of(2020, 2),
+                            YearMonth.of(2020, 2)
+                        )
+                    )
+                )
+            )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
 
         // endret begge perioder til IKKE_FORELDET
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId = behandling.id)!!
-        oppdaterForeldelsesvurdering(vurdertForeldelse,
-                                     Foreldelsesvurderingstype.IKKE_FORELDET,
-                                     Foreldelsesvurderingstype.IKKE_FORELDET)
+        oppdaterForeldelsesvurdering(
+            vurdertForeldelse,
+            Foreldelsesvurderingstype.IKKE_FORELDET,
+            Foreldelsesvurderingstype.IKKE_FORELDET
+        )
 
         vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
@@ -401,9 +443,17 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         // behandle vilkårsvurdering
         vilkårsvurderingService
-                .lagreVilkårsvurdering(behandling.id,
-                                       lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 2),
-                                                                                                 YearMonth.of(2020, 2)))))
+            .lagreVilkårsvurdering(
+                behandling.id,
+                lagVilkårsvurderingMedGodTro(
+                    perioder = listOf(
+                        PeriodeDto(
+                            YearMonth.of(2020, 2),
+                            YearMonth.of(2020, 2)
+                        )
+                    )
+                )
+            )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
 
@@ -437,15 +487,18 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         andreForeldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 2"
     }
 
-
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når andelTilbakekreves er mer enn 100 prosent `() {
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService
-                    .lagreVilkårsvurdering(behandling.id,
-                                           lagVilkårsvurderingMedSimpelAktsomhet(andelTilbakekreves = BigDecimal(120),
-                                                                                 særligGrunn =
-                                                                                 SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
+                .lagreVilkårsvurdering(
+                    behandling.id,
+                    lagVilkårsvurderingMedSimpelAktsomhet(
+                        andelTilbakekreves = BigDecimal(120),
+                        særligGrunn =
+                        SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
+                    )
+                )
         }
         exception.message shouldBe "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent"
     }
@@ -454,18 +507,22 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når ANNET særlig grunner mangler ANNET begrunnelse`() {
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService
-                    .lagreVilkårsvurdering(behandling.id,
-                                           lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.ANNET)))
+                .lagreVilkårsvurdering(
+                    behandling.id,
+                    lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.ANNET))
+                )
         }
         exception.message shouldBe "ANNET særlig grunner må ha ANNET begrunnelse"
     }
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når manueltSattBeløp er mer enn feilutbetalt beløp`() {
-        //forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
+        // forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
         val behandlingsstegVilkårsvurderingDto =
-                lagVilkårsvurderingMedSimpelAktsomhet(manueltSattBeløp = BigDecimal(30000),
-                                                      særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
+            lagVilkårsvurderingMedSimpelAktsomhet(
+                manueltSattBeløp = BigDecimal(30000),
+                særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
+            )
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
         }
@@ -474,22 +531,36 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når tilbakekrevesBeløp er mer enn feilutbetalt beløp`() {
-        //forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
+        // forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
         val exception = shouldThrow<RuntimeException> {
-            vilkårsvurderingService.lagreVilkårsvurdering(behandling.id,
-                                                          lagVilkårsvurderingMedGodTro(listOf(PeriodeDto(YearMonth.of(2020, 1),
-                                                                                                         YearMonth.of(2020, 2))),
-                                                                                       BigDecimal(30000)))
+            vilkårsvurderingService.lagreVilkårsvurdering(
+                behandling.id,
+                lagVilkårsvurderingMedGodTro(
+                    listOf(
+                        PeriodeDto(
+                            YearMonth.of(2020, 1),
+                            YearMonth.of(2020, 2)
+                        )
+                    ),
+                    BigDecimal(30000)
+                )
+            )
         }
         exception.message shouldBe "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
     }
 
     @Test
     fun `lagreVilkårsvurdering skal lagre vilkårsvurdering med false ileggRenter for barnetrygd behandling`() {
-        //forutsetter at behandling opprettet for barnetrygd fra Testdata
+        // forutsetter at behandling opprettet for barnetrygd fra Testdata
         vilkårsvurderingService
-                .lagreVilkårsvurdering(behandling.id, lagVilkårsvurderingMedSimpelAktsomhet(ileggRenter = true, særligGrunn =
-                SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
+            .lagreVilkårsvurdering(
+                behandling.id,
+                lagVilkårsvurderingMedSimpelAktsomhet(
+                    ileggRenter = true,
+                    særligGrunn =
+                    SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
+                )
+            )
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         vilkårsvurdering.shouldNotBeNull()
@@ -523,25 +594,33 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg, behandlingsstegstatus: Behandlingsstegstatus) {
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus,
-                                                                           behandlingId = behandling.id))
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus,
+                behandlingId = behandling.id
+            )
+        )
     }
 
-    private fun lagKravgrunnlagsbeløp(klassetype: Klassetype,
-                                      nyttBeløp: BigDecimal,
-                                      opprinneligUtbetalingsbeløp: BigDecimal): Kravgrunnlagsbeløp433 {
-        return Kravgrunnlagsbeløp433(id = UUID.randomUUID(),
-                                     klassetype = klassetype,
-                                     klassekode = Klassekode.BATR,
-                                     opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,
-                                     nyttBeløp = nyttBeløp,
-                                     tilbakekrevesBeløp = BigDecimal.ZERO,
-                                     skatteprosent = BigDecimal.ZERO,
-                                     uinnkrevdBeløp = BigDecimal.ZERO,
-                                     resultatkode = "testverdi",
-                                     årsakskode = "testverdi",
-                                     skyldkode = "testverdi")
+    private fun lagKravgrunnlagsbeløp(
+        klassetype: Klassetype,
+        nyttBeløp: BigDecimal,
+        opprinneligUtbetalingsbeløp: BigDecimal
+    ): Kravgrunnlagsbeløp433 {
+        return Kravgrunnlagsbeløp433(
+            id = UUID.randomUUID(),
+            klassetype = klassetype,
+            klassekode = Klassekode.BATR,
+            opprinneligUtbetalingsbeløp = opprinneligUtbetalingsbeløp,
+            nyttBeløp = nyttBeløp,
+            tilbakekrevesBeløp = BigDecimal.ZERO,
+            skatteprosent = BigDecimal.ZERO,
+            uinnkrevdBeløp = BigDecimal.ZERO,
+            resultatkode = "testverdi",
+            årsakskode = "testverdi",
+            skyldkode = "testverdi"
+        )
     }
 
     private fun assertAktiviteter(aktiviteter: List<AktivitetDto>) {
@@ -550,58 +629,84 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         aktiviteter[0].aktivitet shouldBe Klassekode.BATR.aktivitet
     }
 
-    private fun lagVilkårsvurderingMedSimpelAktsomhet(andelTilbakekreves: BigDecimal? = null,
-                                                      manueltSattBeløp: BigDecimal? = null,
-                                                      ileggRenter: Boolean? = null,
-                                                      særligGrunn: SærligGrunnDto)
-            : BehandlingsstegVilkårsvurderingDto {
-        val periode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
-                                                  vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                                                  begrunnelse = "Vilkårsvurdering begrunnelse",
-                                                  aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                                                                              andelTilbakekreves = andelTilbakekreves,
-                                                                              beløpTilbakekreves = manueltSattBeløp,
-                                                                              ileggRenter = ileggRenter,
-                                                                              begrunnelse = "Aktsomhet begrunnelse",
-                                                                              særligeGrunner = listOf(særligGrunn),
-                                                                              tilbakekrevSmåbeløp = false,
-                                                                              særligeGrunnerBegrunnelse =
-                                                                              "Særlig grunner begrunnelse"))
+    private fun lagVilkårsvurderingMedSimpelAktsomhet(
+        andelTilbakekreves: BigDecimal? = null,
+        manueltSattBeløp: BigDecimal? = null,
+        ileggRenter: Boolean? = null,
+        særligGrunn: SærligGrunnDto
+    ): BehandlingsstegVilkårsvurderingDto {
+        val periode = VilkårsvurderingsperiodeDto(
+            periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+            begrunnelse = "Vilkårsvurdering begrunnelse",
+            aktsomhetDto = AktsomhetDto(
+                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                andelTilbakekreves = andelTilbakekreves,
+                beløpTilbakekreves = manueltSattBeløp,
+                ileggRenter = ileggRenter,
+                begrunnelse = "Aktsomhet begrunnelse",
+                særligeGrunner = listOf(særligGrunn),
+                tilbakekrevSmåbeløp = false,
+                særligeGrunnerBegrunnelse =
+                "Særlig grunner begrunnelse"
+            )
+        )
         return BehandlingsstegVilkårsvurderingDto(listOf(periode))
     }
 
-    private fun lagVilkårsvurderingMedGodTro(perioder: List<PeriodeDto>,
-                                             beløpTilbakekreves: BigDecimal? = null): BehandlingsstegVilkårsvurderingDto {
-        return BehandlingsstegVilkårsvurderingDto(vilkårsvurderingsperioder = perioder.map {
-            VilkårsvurderingsperiodeDto(periode = it,
-                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                                        begrunnelse = "Vilkårsvurdering begrunnelse",
-                                        godTroDto = GodTroDto(begrunnelse = "God tro begrunnelse",
-                                                              beløpErIBehold = true,
-                                                              beløpTilbakekreves = beløpTilbakekreves))
-        })
+    private fun lagVilkårsvurderingMedGodTro(
+        perioder: List<PeriodeDto>,
+        beløpTilbakekreves: BigDecimal? = null
+    ): BehandlingsstegVilkårsvurderingDto {
+        return BehandlingsstegVilkårsvurderingDto(
+            vilkårsvurderingsperioder = perioder.map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    begrunnelse = "Vilkårsvurdering begrunnelse",
+                    godTroDto = GodTroDto(
+                        begrunnelse = "God tro begrunnelse",
+                        beløpErIBehold = true,
+                        beløpTilbakekreves = beløpTilbakekreves
+                    )
+                )
+            }
+        )
     }
 
     private fun lagForeldese(vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
         val foreldelsesperioder =
-                setOf(Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-                                         foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
-                                         begrunnelse = "foreldelse begrunnelse 1"),
-                      Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
-                                         foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
-                                         begrunnelse = "foreldelse begrunnelse 2"))
+            setOf(
+                Foreldelsesperiode(
+                    periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                    foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
+                    begrunnelse = "foreldelse begrunnelse 1"
+                ),
+                Foreldelsesperiode(
+                    periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                    foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
+                    begrunnelse = "foreldelse begrunnelse 2"
+                )
+            )
         foreldelseRepository.insert(VurdertForeldelse(behandlingId = behandling.id, foreldelsesperioder = foreldelsesperioder))
     }
 
-    private fun oppdaterForeldelsesvurdering(vurdertForeldelse: VurdertForeldelse,
-                                             vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype) {
-        val foreldelsesperioder = setOf(Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-                                                           foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
-                                                           begrunnelse = "foreldelse begrunnelse 1"),
-                                        Foreldelsesperiode(periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
-                                                           foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
-                                                           begrunnelse = "foreldelse begrunnelse 2"))
+    private fun oppdaterForeldelsesvurdering(
+        vurdertForeldelse: VurdertForeldelse,
+        vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype
+    ) {
+        val foreldelsesperioder = setOf(
+            Foreldelsesperiode(
+                periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
+                begrunnelse = "foreldelse begrunnelse 1"
+            ),
+            Foreldelsesperiode(
+                periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
+                begrunnelse = "foreldelse begrunnelse 2"
+            )
+        )
         foreldelseRepository.update(vurdertForeldelse.copy(foreldelsesperioder = foreldelsesperioder))
     }
-
 }

@@ -9,12 +9,14 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 @Table("okonomi_xml_mottatt_arkiv")
-data class ØkonomiXmlMottattArkiv(@Id
-                                  val id: UUID = UUID.randomUUID(),
-                                  val melding: String,
-                                  val eksternFagsakId: String,
-                                  val ytelsestype: Ytelsestype,
-                                  @Version
-                                  val versjon: Long = 0,
-                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                  val sporbar: Sporbar = Sporbar())
+data class ØkonomiXmlMottattArkiv(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val melding: String,
+    val eksternFagsakId: String,
+    val ytelsestype: Ytelsestype,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)

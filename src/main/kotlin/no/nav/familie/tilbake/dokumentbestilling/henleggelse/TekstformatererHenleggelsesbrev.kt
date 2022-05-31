@@ -20,7 +20,9 @@ internal object TekstformatererHenleggelsesbrev {
     }
 
     fun lagRevurderingsoverskrift(brevmetadata: Brevmetadata): String {
-        return FellesTekstformaterer.lagBrevtekst(Brevoverskriftsdata(brevmetadata),
-                                                  "henleggelse/henleggelse_revurdering_overskrift")
+        return FellesTekstformaterer.lagBrevtekst(
+            Brevoverskriftsdata(brevmetadata),
+            "henleggelse/henleggelse_revurdering_overskrift"
+        )
     }
 }

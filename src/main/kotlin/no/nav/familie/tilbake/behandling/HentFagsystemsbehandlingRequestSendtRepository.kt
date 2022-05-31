@@ -8,11 +8,13 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface HentFagsystemsbehandlingRequestSendtRepository : RepositoryInterface<HentFagsystemsbehandlingRequestSendt, UUID>,
-                                                           InsertUpdateRepository<HentFagsystemsbehandlingRequestSendt> {
+interface HentFagsystemsbehandlingRequestSendtRepository :
+    RepositoryInterface<HentFagsystemsbehandlingRequestSendt, UUID>,
+    InsertUpdateRepository<HentFagsystemsbehandlingRequestSendt> {
 
-    fun findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId: String,
-                                                        ytelsestype: Ytelsestype,
-                                                        eksternId: String): HentFagsystemsbehandlingRequestSendt?
-
+    fun findByEksternFagsakIdAndYtelsestypeAndEksternId(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String
+    ): HentFagsystemsbehandlingRequestSendt?
 }

@@ -8,9 +8,9 @@ internal class DokprodTilHtmlTest {
     @Test
     fun `dokprodInnholdTilHtml skal Konvertere Overskrift Og Avsnitt`() {
         val resultat =
-                DokprodTilHtml.dokprodInnholdTilHtml("_Overskrift\nFørste avsnitt\n\nAndre avsnitt\n\nTredje avsnitt")
+            DokprodTilHtml.dokprodInnholdTilHtml("_Overskrift\nFørste avsnitt\n\nAndre avsnitt\n\nTredje avsnitt")
         resultat shouldBe "<div class=\"samepage\"><h2>Overskrift</h2><p>Første avsnitt</p>" +
-                "</div><p>Andre avsnitt</p><p>Tredje avsnitt</p>"
+            "</div><p>Andre avsnitt</p><p>Tredje avsnitt</p>"
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class DokprodTilHtmlTest {
 
     @Test
     fun `dokprodInnholdTilHtml skal Konvertere Halvhjertede Avsnitt`() {
-        //halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
+        // halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
         val resultat = DokprodTilHtml.dokprodInnholdTilHtml("Foo\nBar")
 
         resultat shouldBe "<p>Foo<br/>Bar</p>"
@@ -45,7 +45,7 @@ internal class DokprodTilHtmlTest {
 
     @Test
     fun `dokprodInnholdTilHtml skal Spesialbehandle Hilsen`() {
-        //halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
+        // halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
         val resultat = DokprodTilHtml.dokprodInnholdTilHtml("Med vennlig hilsen\nNAV Familie- og pensjonsytelser")
 
         resultat shouldBe "<p class=\"hilsen\">Med vennlig hilsen<br/>NAV Familie- og pensjonsytelser</p>"

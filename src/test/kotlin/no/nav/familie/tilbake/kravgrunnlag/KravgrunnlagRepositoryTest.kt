@@ -39,10 +39,12 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
 
-        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(kravgrunnlag431,
-                                                                   Kravgrunnlag431::sporbar,
-                                                                   Kravgrunnlag431::perioder,
-                                                                   Kravgrunnlag431::versjon)
+        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+            kravgrunnlag431,
+            Kravgrunnlag431::sporbar,
+            Kravgrunnlag431::perioder,
+            Kravgrunnlag431::versjon
+        )
         lagretKravgrunnlag431.versjon shouldBe 1
     }
 
@@ -55,10 +57,12 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(oppdatertKravgrunnlag431)
 
         lagretKravgrunnlag431 = kravgrunnlagRepository.findByIdOrThrow(kravgrunnlag431.id)
-        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(oppdatertKravgrunnlag431,
-                                                                   Kravgrunnlag431::sporbar,
-                                                                   Kravgrunnlag431::perioder,
-                                                                   Kravgrunnlag431::versjon)
+        lagretKravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+            oppdatertKravgrunnlag431,
+            Kravgrunnlag431::sporbar,
+            Kravgrunnlag431::perioder,
+            Kravgrunnlag431::versjon
+        )
         lagretKravgrunnlag431.versjon shouldBe 2
     }
 
@@ -68,11 +72,11 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
 
         val findByBehandlingId = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
 
-        kravgrunnlag431.shouldBeEqualToComparingFieldsExcept(findByBehandlingId,
-                                                             Kravgrunnlag431::sporbar,
-                                                             Kravgrunnlag431::perioder,
-                                                             Kravgrunnlag431::versjon)
+        kravgrunnlag431.shouldBeEqualToComparingFieldsExcept(
+            findByBehandlingId,
+            Kravgrunnlag431::sporbar,
+            Kravgrunnlag431::perioder,
+            Kravgrunnlag431::versjon
+        )
     }
-
 }
-

@@ -7,15 +7,16 @@ import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 
-
 @ConstructorBinding
 data class FlywayConfig(private val role: String) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Bean
-    fun flywayConfig(@Value("\${spring.flyway.placeholders.ignoreIfProd}") ignoreIfProd: String,
-                     environment: Environment): FlywayConfigurationCustomizer {
+    fun flywayConfig(
+        @Value("\${spring.flyway.placeholders.ignoreIfProd}") ignoreIfProd: String,
+        environment: Environment
+    ): FlywayConfigurationCustomizer {
         logger.info("DB-oppdateringer kjøres med rolle $role")
         val isProd = environment.activeProfiles.contains("prod")
         val ignore = ignoreIfProd == "--"

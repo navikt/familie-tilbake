@@ -37,13 +37,14 @@ object DokprodTilHtml {
                     val la = linje.replace("{venstrejustert}", "")
                     val saksbehandler = la.substringBefore("{høyrejustert}")
                     val beslutter = la.substringAfter("{høyrejustert}")
-                    builder.append("""<table class="signatur">
+                    builder.append(
+                        """<table class="signatur">
                     <tr>
                     <td class="saksbehandler">$saksbehandler</td>
                     <td class="beslutter">$beslutter</td>
                     </tr>
-                    </table>""")
-
+                    </table>"""
+                    )
 
                     continue
                 }
@@ -61,7 +62,6 @@ object DokprodTilHtml {
                     } else {
                         builder.append("<h2>").append(linje.substring(1)).append("</h2>")
                     }
-
                 } else {
                     if (!harAvsnitt) {
                         harAvsnitt = true
@@ -101,8 +101,8 @@ object DokprodTilHtml {
     }
 
     private fun hentAvsnittene(dokprod: String): List<String> {
-        //avsnitt ved dobbelt linjeskift
-        //avsnitt ved overskrift (linje starter med _)
+        // avsnitt ved dobbelt linjeskift
+        // avsnitt ved overskrift (linje starter med _)
         return dokprod.split("(\n\r?\n\r?)|(\n\r?(?=_))".toRegex())
     }
 
@@ -114,6 +114,6 @@ object DokprodTilHtml {
 
     private fun ekstraLinjeskiftFørHilsing(s: String): String {
         return s.replace("<p>Med vennlig hilsen", "<p class=\"hilsen\">Med vennlig hilsen")
-                .replace("<p>Med vennleg helsing", "<p class=\"hilsen\">Med vennleg helsing")
+            .replace("<p>Med vennleg helsing", "<p class=\"hilsen\">Med vennleg helsing")
     }
 }

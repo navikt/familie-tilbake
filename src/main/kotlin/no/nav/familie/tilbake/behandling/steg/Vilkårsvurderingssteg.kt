@@ -25,11 +25,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Vilkårsvurderingssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                            private val vilkårsvurderingService: VilkårsvurderingService,
-                            private val foreldelseService: ForeldelseService,
-                            private val historikkTaskService: HistorikkTaskService,
-                            private val oppgaveTaskService: OppgaveTaskService) : IBehandlingssteg {
+class Vilkårsvurderingssteg(
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val foreldelseService: ForeldelseService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -42,8 +44,10 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
 
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT))
+            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT)
+            )
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
     }
@@ -52,9 +56,11 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         if (harAllePerioderForeldet(behandlingId)) {
-            throw Feil(message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
-                       frontendFeilmelding = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
+                frontendFeilmelding = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
 
@@ -77,17 +83,23 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
         vilkårsvurderingService.lagreFastVilkårForAutomatiskSaksbehandling(behandlingId)
         lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT)
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(VILKÅRSVURDERING,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                VILKÅRSVURDERING,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -101,12 +113,14 @@ class Vilkårsvurderingssteg(private val behandlingskontrollService: Behandlings
 
     private fun harAllePerioderForeldet(behandlingId: UUID): Boolean {
         return foreldelseService.hentAktivVurdertForeldelse(behandlingId)
-                       ?.foreldelsesperioder?.all { it.erForeldet() } ?: false
+            ?.foreldelsesperioder?.all { it.erForeldet() } ?: false
     }
 
     private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
-                                              aktør)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
+            aktør
+        )
     }
 }

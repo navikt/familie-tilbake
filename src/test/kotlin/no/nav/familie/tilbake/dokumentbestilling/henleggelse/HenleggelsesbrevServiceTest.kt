@@ -44,23 +44,24 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
-        henleggelsesbrevService = HenleggelsesbrevService(behandlingRepository,
-                                                          brevsporingService,
-                                                          fagsakRepository,
-                                                          eksterneDataForBrevService,
-                                                          spyPdfBrevService)
+        henleggelsesbrevService = HenleggelsesbrevService(
+            behandlingRepository,
+            brevsporingService,
+            fagsakRepository,
+            eksterneDataForBrevService,
+            spyPdfBrevService
+        )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
-                .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
+            .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
         every {
             brevsporingService.finnSisteVarsel(behandlingId)
         } returns (Testdata.brevsporing)
-
     }
 
     @Test
@@ -68,12 +69,14 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         henleggelsesbrevService.sendHenleggelsebrev(behandlingId, null, Brevmottager.BRUKER)
 
         verify {
-            spyPdfBrevService.sendBrev(Testdata.behandling,
-                                       Testdata.fagsak,
-                                       Brevtype.HENLEGGELSE,
-                                       any(),
-                                       any(),
-                                       any())
+            spyPdfBrevService.sendBrev(
+                Testdata.behandling,
+                Testdata.fagsak,
+                Brevtype.HENLEGGELSE,
+                any(),
+                any(),
+                any()
+            )
         }
     }
 
@@ -87,10 +90,12 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentForhåndsvisningHenleggelsesbrev skal returnere pdf for henleggelsebrev for tilbakekreving revurdering`() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
-                .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+            .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
-        val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId,
-                                                                                REVURDERING_HENLEGGELSESBREV_FRITEKST)
+        val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
+            behandlingId,
+            REVURDERING_HENLEGGELSESBREV_FRITEKST
+        )
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -102,9 +107,11 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         } returns (null)
 
         val e = shouldThrow<IllegalStateException> {
-            henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
-                                                        null,
-                                                        Brevmottager.BRUKER)
+            henleggelsesbrevService.sendHenleggelsebrev(
+                behandlingId,
+                null,
+                Brevmottager.BRUKER
+            )
         }
 
         e.message shouldContain "varsel ikke er sendt"
@@ -113,12 +120,14 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sendHenleggelsebrev skal ikke sende henleggelsesbrev for tilbakekreving revurdering uten fritekst`() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
-                .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+            .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val e = shouldThrow<IllegalStateException> {
-            henleggelsesbrevService.sendHenleggelsebrev(behandlingId,
-                                                        null,
-                                                        Brevmottager.BRUKER)
+            henleggelsesbrevService.sendHenleggelsebrev(
+                behandlingId,
+                null,
+                Brevmottager.BRUKER
+            )
         }
 
         e.message shouldContain "henleggelsesbrev uten fritekst"

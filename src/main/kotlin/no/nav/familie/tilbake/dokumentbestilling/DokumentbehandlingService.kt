@@ -21,13 +21,15 @@ import java.util.UUID
 
 @Service
 @Transactional
-class DokumentbehandlingService(private val behandlingRepository: BehandlingRepository,
-                                private val fagsakRepository: FagsakRepository,
-                                private val behandlingskontrollService: BehandlingskontrollService,
-                                private val kravgrunnlagRepository: KravgrunnlagRepository,
-                                private val taskService: TaskService,
-                                private val manueltVarselBrevService: ManueltVarselbrevService,
-                                private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService) {
+class DokumentbehandlingService(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val taskService: TaskService,
+    private val manueltVarselBrevService: ManueltVarselbrevService,
+    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
+) {
 
     fun bestillBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -41,7 +43,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
             håndterInnhentDokumentasjon(behandling, fritekst)
         }
     }
-
 
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
@@ -60,18 +61,19 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         val sendVarselbrev =
-                SendManueltVarselbrevTask.opprettTask(behandling.id, fagsystem, maltype, fritekst)
+            SendManueltVarselbrevTask.opprettTask(behandling.id, fagsystem, maltype, fritekst)
         taskService.save(sendVarselbrev)
         settPåVent(behandling)
     }
 
     private fun settPåVent(behandling: Behandling) {
         val tidsfrist = Constants.saksbehandlersTidsfrist()
-        behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                        Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                        tidsfrist)
+        behandlingskontrollService.settBehandlingPåVent(
+            behandling.id,
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+            tidsfrist
+        )
     }
-
 
     private fun håndterInnhentDokumentasjon(behandling: Behandling, fritekst: String) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
@@ -79,7 +81,7 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         val sendInnhentDokumentasjonBrev =
-                InnhentDokumentasjonbrevTask.opprettTask(behandling.id, fagsystem, fritekst)
+            InnhentDokumentasjonbrevTask.opprettTask(behandling.id, fagsystem, fritekst)
         taskService.save(sendInnhentDokumentasjonBrev)
         settPåVent(behandling)
     }

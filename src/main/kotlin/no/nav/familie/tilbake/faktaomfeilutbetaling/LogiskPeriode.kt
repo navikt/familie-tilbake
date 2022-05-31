@@ -5,8 +5,10 @@ import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.SortedMap
 
-data class LogiskPeriode(val periode: Periode,
-                         val feilutbetaltBeløp: BigDecimal) {
+data class LogiskPeriode(
+    val periode: Periode,
+    val feilutbetaltBeløp: BigDecimal
+) {
 
     val fom get() = periode.fom
     val tom get() = periode.tom
@@ -25,8 +27,12 @@ object LogiskPeriodeUtil {
                 sisteMåned = periode.tom
             } else {
                 if (harOppholdMellom(sisteMåned!!, periode.fom)) {
-                    resultat.add(LogiskPeriode(periode = Periode(førsteMåned!!, sisteMåned),
-                                               feilutbetaltBeløp = logiskPeriodeBeløp))
+                    resultat.add(
+                        LogiskPeriode(
+                            periode = Periode(førsteMåned!!, sisteMåned),
+                            feilutbetaltBeløp = logiskPeriodeBeløp
+                        )
+                    )
                     førsteMåned = periode.fom
                     logiskPeriodeBeløp = BigDecimal.ZERO
                 }
@@ -35,8 +41,12 @@ object LogiskPeriodeUtil {
             logiskPeriodeBeløp = logiskPeriodeBeløp.add(feilutbetaltBeløp)
         }
         if (BigDecimal.ZERO.compareTo(logiskPeriodeBeløp) != 0) {
-            resultat.add(LogiskPeriode(periode = Periode(førsteMåned!!, sisteMåned!!),
-                                       feilutbetaltBeløp = logiskPeriodeBeløp))
+            resultat.add(
+                LogiskPeriode(
+                    periode = Periode(førsteMåned!!, sisteMåned!!),
+                    feilutbetaltBeløp = logiskPeriodeBeløp
+                )
+            )
         }
         return resultat.toList()
     }

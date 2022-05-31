@@ -97,21 +97,29 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         behandlingsstegstilstandRepository
-                .insert(Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                 behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
-                                                 tidsfrist = LocalDate.now().plusWeeks(3),
-                                                 venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG))
+            .insert(
+                Behandlingsstegstilstand(
+                    behandlingId = behandling.id,
+                    behandlingssteg = Behandlingssteg.GRUNNLAG,
+                    behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                    tidsfrist = LocalDate.now().plusWeeks(3),
+                    venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+                )
+            )
     }
 
     @Test
     fun `korrigerKravgrunnlag skal ikke hente korrigert kravgrunnlag når behandling er avsluttet`() {
-        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
-                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+        behandlingRepository.update(
+            behandlingRepository.findByIdOrThrow(behandling.id)
+                .copy(status = Behandlingsstatus.AVSLUTTET)
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            forvaltningService.korrigerKravgrunnlag(behandling.id,
-                                                    BigInteger.ZERO)
+            forvaltningService.korrigerKravgrunnlag(
+                behandling.id,
+                BigInteger.ZERO
+            )
         }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
@@ -120,8 +128,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `korrigerKravgrunnlag skal hente korrigert kravgrunnlag når behandling allerede har et kravgrunnlag`() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
-        forvaltningService.korrigerKravgrunnlag(behandling.id,
-                                                Testdata.kravgrunnlag431.eksternKravgrunnlagId)
+        forvaltningService.korrigerKravgrunnlag(
+            behandling.id,
+            Testdata.kravgrunnlag431.eksternKravgrunnlagId
+        )
 
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
         kravgrunnlagene.size shouldBe 2
@@ -146,21 +156,24 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
-
     @Test
     fun `arkiverMottattKravgrunnlag skal arkivere mottatt xml`() {
         val økonomiXmlMottatt = lagMottattXml()
         forvaltningService.arkiverMottattKravgrunnlag(økonomiXmlMottatt.id)
 
         økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id).shouldBeFalse()
-        økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(økonomiXmlMottatt.eksternFagsakId,
-                                                                             økonomiXmlMottatt.ytelsestype).shouldNotBeEmpty()
+        økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+            økonomiXmlMottatt.eksternFagsakId,
+            økonomiXmlMottatt.ytelsestype
+        ).shouldNotBeEmpty()
     }
 
     @Test
     fun `tvingHenleggBehandling skal ikke henlegge behandling når behandling er avsluttet`() {
-        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
-                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+        behandlingRepository.update(
+            behandlingRepository.findByIdOrThrow(behandling.id)
+                .copy(status = Behandlingsstatus.AVSLUTTET)
+        )
 
         val exception = shouldThrow<RuntimeException> {
             forvaltningService.tvingHenleggBehandling(behandling.id)
@@ -192,17 +205,17 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val tasker = taskRepository.findAll()
         tasker.shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
-            behandling.id.toString() == it.payload &&
-            Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
+                behandling.id.toString() == it.payload &&
+                Aktør.SAKSBEHANDLER.name == it.metadata.getProperty("aktør") &&
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.name == it.metadata.getProperty("historikkinnslagstype")
         }
         tasker.any {
             SendSakshendelseTilDvhTask.TASK_TYPE == it.type &&
-            behandling.id.toString() == it.payload
+                behandling.id.toString() == it.payload
         }.shouldBeTrue()
         tasker.shouldHaveSingleElement {
             FerdigstillOppgaveTask.TYPE == it.type &&
-            behandling.id.toString() == it.payload
+                behandling.id.toString() == it.payload
         }
     }
 
@@ -212,21 +225,29 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val ytelsestype = Testdata.fagsak.ytelsestype
         val eksternId = behandling.aktivFagsystemsbehandling.eksternId
         // finnes en eksisterende request
-        val requestSendt = requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = eksternFagsakId,
-                                                                                              ytelsestype = ytelsestype,
-                                                                                              eksternId = eksternId))
+        val requestSendt = requestSendtRepository.insert(
+            HentFagsystemsbehandlingRequestSendt(
+                eksternFagsakId = eksternFagsakId,
+                ytelsestype = ytelsestype,
+                eksternId = eksternId
+            )
+        )
         val hentFagsystemsbehandlingRequestDto = HentFagsystemsbehandlingRequestDto(ytelsestype, eksternFagsakId, eksternId)
         forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequestDto)
         requestSendtRepository.findByIdOrNull(requestSendt.id).shouldBeNull()
-        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
-                                                                               ytelsestype,
-                                                                               eksternId).shouldNotBeNull()
+        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+            eksternFagsakId,
+            ytelsestype,
+            eksternId
+        ).shouldNotBeNull()
     }
 
     @Test
     fun `flyttBehandlingsstegTilbakeTilFakta skal ikke flytte behandlingssteg når behandling er avsluttet`() {
-        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
-                                            .copy(status = Behandlingsstatus.AVSLUTTET))
+        behandlingRepository.update(
+            behandlingRepository.findByIdOrThrow(behandling.id)
+                .copy(status = Behandlingsstatus.AVSLUTTET)
+        )
 
         val exception = shouldThrow<RuntimeException> {
             forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
@@ -236,13 +257,19 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `flyttBehandlingsstegTilbakeTilFakta skal flytte behandlingssteg til FAKTA når behandling er i IVERKSETT_VEDTAK steg`() {
-        behandlingRepository.update(behandlingRepository.findByIdOrThrow(behandling.id)
-                                            .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK))
+        behandlingRepository.update(
+            behandlingRepository.findByIdOrThrow(behandling.id)
+                .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK)
+        )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         behandlingsstegstilstandRepository
-                .update(behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(behandling.id,
-                                                                                                Behandlingssteg.GRUNNLAG)!!
-                                .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
+            .update(
+                behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
+                    behandling.id,
+                    Behandlingssteg.GRUNNLAG
+                )!!
+                    .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT)
+            )
 
         faktaFeilutbetalingRepository.insert(Testdata.faktaFeilutbetaling)
         lagBehandlingssteg(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
@@ -277,10 +304,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
         taskRepository.findAll().shouldHaveSingleElement {
             it.type == LagHistorikkinnslagTask.TYPE &&
-            it.payload == behandling.id.toString() &&
-            it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
-                    .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
-            it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
+                it.payload == behandling.id.toString() &&
+                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
+                .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
+                it.metadata["aktør"] == Aktør.SAKSBEHANDLER.name
         }
     }
 
@@ -307,9 +334,13 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val kravgrunnlag = Testdata.kravgrunnlag431
-        kravgrunnlagRepository.insert(kravgrunnlag.copy(fagsystemId = fagsak.eksternFagsakId,
-                                                        fagområdekode = Fagområdekode.values()
-                                                                .first { it.ytelsestype == fagsak.ytelsestype }))
+        kravgrunnlagRepository.insert(
+            kravgrunnlag.copy(
+                fagsystemId = fagsak.eksternFagsakId,
+                fagområdekode = Fagområdekode.values()
+                    .first { it.ytelsestype == fagsak.ytelsestype }
+            )
+        )
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId.shouldBeNull()
@@ -320,8 +351,12 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val mottattXml = Testdata.økonomiXmlMottatt
-        økonomiXmlMottattRepository.insert(mottattXml.copy(eksternFagsakId = fagsak.eksternFagsakId,
-                                                           ytelsestype = fagsak.ytelsestype))
+        økonomiXmlMottattRepository.insert(
+            mottattXml.copy(
+                eksternFagsakId = fagsak.eksternFagsakId,
+                ytelsestype = fagsak.ytelsestype
+            )
+        )
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
@@ -332,39 +367,53 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `hentForvaltningsinfo skal ikke hente forvaltningsinfo når behandling venter på kravgrunnlag`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val exception = shouldThrow<RuntimeException> {
-            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype,
-                                                    fagsak.eksternFagsakId)
+            forvaltningService.hentForvaltningsinfo(
+                fagsak.ytelsestype,
+                fagsak.eksternFagsakId
+            )
         }
         exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
-                "og eksternFagsakId=${fagsak.eksternFagsakId}"
+            "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {
         val mottattXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        return økonomiXmlMottattRepository.insert(ØkonomiXmlMottatt(melding = mottattXml,
-                                                                    kravstatuskode = Kravstatuskode.NYTT,
-                                                                    eksternFagsakId = "0",
-                                                                    ytelsestype = Ytelsestype.BARNETRYGD,
-                                                                    referanse = "0",
-                                                                    eksternKravgrunnlagId = BigInteger.ZERO,
-                                                                    vedtakId = BigInteger.ZERO,
-                                                                    kontrollfelt = "2021-03-02-18.50.15.236315",
-                                                                    sperret = false))
+        return økonomiXmlMottattRepository.insert(
+            ØkonomiXmlMottatt(
+                melding = mottattXml,
+                kravstatuskode = Kravstatuskode.NYTT,
+                eksternFagsakId = "0",
+                ytelsestype = Ytelsestype.BARNETRYGD,
+                referanse = "0",
+                eksternKravgrunnlagId = BigInteger.ZERO,
+                vedtakId = BigInteger.ZERO,
+                kontrollfelt = "2021-03-02-18.50.15.236315",
+                sperret = false
+            )
+        )
     }
 
-    private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                      behandlingssteg: Behandlingssteg,
-                                      behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun assertBehandlingssteg(
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
-            behandlingsstegstatus == it.behandlingsstegsstatus
+                behandlingsstegstatus == it.behandlingsstegsstatus
         }.shouldBeTrue()
     }
 
-    private fun lagBehandlingssteg(behandlingssteg: Behandlingssteg,
-                                   behandlingsstegstatus: Behandlingsstegstatus) {
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                                           behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus))
+    private fun lagBehandlingssteg(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus
+            )
+        )
     }
 }

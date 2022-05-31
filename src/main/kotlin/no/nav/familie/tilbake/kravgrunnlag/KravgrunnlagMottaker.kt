@@ -14,7 +14,6 @@ import java.util.Properties
 import java.util.UUID
 import javax.jms.TextMessage
 
-
 @Service
 @Profile("!e2e & !integrasjonstest")
 class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
@@ -30,19 +29,25 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
         log.info("Mottatt melding fra oppdrag")
         secureLog.info(meldingFraOppdrag)
         if (meldingFraOppdrag.contains(Constants.kravgrunnlagXmlRootElement)) {
-            taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
-                                     payload = meldingFraOppdrag,
-                                     properties = Properties().apply {
-                                         this["callId"] = UUID.randomUUID()
-                                     }))
-
+            taskRepository.save(
+                Task(
+                    type = BehandleKravgrunnlagTask.TYPE,
+                    payload = meldingFraOppdrag,
+                    properties = Properties().apply {
+                        this["callId"] = UUID.randomUUID()
+                    }
+                )
+            )
         } else {
-            taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
-                                     payload = meldingFraOppdrag,
-                                     properties = Properties().apply {
-                                         this["callId"] = UUID.randomUUID()
-                                     }))
+            taskRepository.save(
+                Task(
+                    type = BehandleStatusmeldingTask.TYPE,
+                    payload = meldingFraOppdrag,
+                    properties = Properties().apply {
+                        this["callId"] = UUID.randomUUID()
+                    }
+                )
+            )
         }
     }
-
 }

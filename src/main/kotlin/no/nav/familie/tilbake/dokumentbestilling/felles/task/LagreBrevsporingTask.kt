@@ -17,13 +17,17 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagreBrevsporingTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Lagrer brev",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
-                           private val taskService: TaskService,
-                           private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = LagreBrevsporingTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Lagrer brev",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class LagreBrevsporingTask(
+    private val brevsporingService: BrevsporingService,
+    private val taskService: TaskService,
+    private val historikkTaskService: HistorikkTaskService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -33,11 +37,12 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
         val journalpostId = task.metadata.getProperty("journalpostId")
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
 
-
-        brevsporingService.lagreInfoOmUtsendtBrev(UUID.fromString(task.payload),
-                                                  dokumentId,
-                                                  journalpostId,
-                                                  brevtype)
+        brevsporingService.lagreInfoOmUtsendtBrev(
+            UUID.fromString(task.payload),
+            dokumentId,
+            journalpostId,
+            brevtype
+        )
     }
 
     override fun onCompletion(task: Task) {
@@ -48,18 +53,21 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
         val opprinneligHistorikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager)
 
         if (ukjentAdresse) {
-            historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
-                                                  historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
-                                                  aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                                                  beskrivelse = opprinneligHistorikkinnslagstype.tekst,
-                                                  brevtype = brevtype)
+            historikkTaskService.lagHistorikkTask(
+                behandlingId = UUID.fromString(task.payload),
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                beskrivelse = opprinneligHistorikkinnslagstype.tekst,
+                brevtype = brevtype
+            )
         } else {
-            historikkTaskService.lagHistorikkTask(behandlingId = UUID.fromString(task.payload),
-                                                  historikkinnslagstype = opprinneligHistorikkinnslagstype,
-                                                  aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                                                  brevtype = brevtype)
+            historikkTaskService.lagHistorikkTask(
+                behandlingId = UUID.fromString(task.payload),
+                historikkinnslagstype = opprinneligHistorikkinnslagstype,
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                brevtype = brevtype
+            )
         }
-
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
@@ -91,8 +99,10 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
         }
     }
 
-    private fun utledAktør(brevtype: Brevtype,
-                           ansvarligSaksbehandler: String?): Aktør {
+    private fun utledAktør(
+        brevtype: Brevtype,
+        ansvarligSaksbehandler: String?
+    ): Aktør {
         return when {
             brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
             brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER

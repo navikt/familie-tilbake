@@ -43,18 +43,28 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private val behandling = Testdata.behandling
-    private val periode = Periode(fom = YearMonth.now().minusMonths(2),
-                                  tom = YearMonth.now())
+    private val periode = Periode(
+        fom = YearMonth.now().minusMonths(2),
+        tom = YearMonth.now()
+    )
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val kravgrunnlag = Testdata.kravgrunnlag431
-                .copy(perioder = setOf(Kravgrunnlagsperiode432(periode = periode,
-                                                               beløp = setOf(Testdata.feilKravgrunnlagsbeløp433,
-                                                                             Testdata.ytelKravgrunnlagsbeløp433),
-                                                               månedligSkattebeløp = BigDecimal("123.11"))))
+            .copy(
+                perioder = setOf(
+                    Kravgrunnlagsperiode432(
+                        periode = periode,
+                        beløp = setOf(
+                            Testdata.feilKravgrunnlagsbeløp433,
+                            Testdata.ytelKravgrunnlagsbeløp433
+                        ),
+                        månedligSkattebeløp = BigDecimal("123.11")
+                    )
+                )
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
     }
 
@@ -69,9 +79,11 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingDto.varsletBeløp shouldBe varsletData?.varselbeløp
 
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
-        assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                     hendelsestype = Hendelsestype.ANNET,
-                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalingDto,
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
     }
 
     @Test
@@ -86,9 +98,11 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingDto.begrunnelse shouldBe "Fakta begrunnelse"
         faktaFeilutbetalingDto.varsletBeløp.shouldBeNull()
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
-        assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                     hendelsestype = Hendelsestype.ANNET,
-                                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalingDto,
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
     }
 
     @Test
@@ -98,23 +112,31 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingDto.begrunnelse shouldBe ""
         faktaFeilutbetalingDto.varsletBeløp shouldBe behandling.aktivtVarsel?.varselbeløp
         assertFagsystemsbehandling(faktaFeilutbetalingDto, behandling)
-        assertFeilutbetaltePerioder(faktaFeilutbetalingDto = faktaFeilutbetalingDto,
-                                     hendelsestype = null,
-                                     hendelsesundertype = null)
+        assertFeilutbetaltePerioder(
+            faktaFeilutbetalingDto = faktaFeilutbetalingDto,
+            hendelsestype = null,
+            hendelsesundertype = null
+        )
     }
 
     private fun lagFaktaomfeilutbetaling(behandlingId: UUID) {
-        val faktaPerioder = FaktaFeilutbetalingsperiode(periode = periode,
-                                                        hendelsestype = Hendelsestype.ANNET,
-                                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
-        val faktaFeilutbetaling = FaktaFeilutbetaling(behandlingId = behandlingId,
-                                                      begrunnelse = "Fakta begrunnelse",
-                                                      perioder = setOf(faktaPerioder))
+        val faktaPerioder = FaktaFeilutbetalingsperiode(
+            periode = periode,
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+        )
+        val faktaFeilutbetaling = FaktaFeilutbetaling(
+            behandlingId = behandlingId,
+            begrunnelse = "Fakta begrunnelse",
+            perioder = setOf(faktaPerioder)
+        )
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
     }
 
-    private fun assertFagsystemsbehandling(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
-                                            behandling: Behandling) {
+    private fun assertFagsystemsbehandling(
+        faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
+        behandling: Behandling
+    ) {
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling
         val faktainfo = faktaFeilutbetalingDto.faktainfo
         faktainfo.tilbakekrevingsvalg shouldBe fagsystemsbehandling.tilbakekrevingsvalg
@@ -124,9 +146,11 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         faktainfo.konsekvensForYtelser.shouldBeEmpty()
     }
 
-    private fun assertFeilutbetaltePerioder(faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
-                                             hendelsestype: Hendelsestype?,
-                                             hendelsesundertype: Hendelsesundertype?) {
+    private fun assertFeilutbetaltePerioder(
+        faktaFeilutbetalingDto: FaktaFeilutbetalingDto,
+        hendelsestype: Hendelsestype?,
+        hendelsesundertype: Hendelsesundertype?
+    ) {
         faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe PeriodeDto(periode)
         faktaFeilutbetalingDto.totaltFeilutbetaltBeløp shouldBe BigDecimal.valueOf(1000000, 2)
 
@@ -136,5 +160,4 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         feilutbetaltePeriode.hendelsesundertype shouldBe hendelsesundertype
         feilutbetaltePeriode.periode shouldBe PeriodeDto(periode)
     }
-
 }

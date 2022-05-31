@@ -5,9 +5,9 @@ import java.nio.charset.StandardCharsets
 
 object FileStructureUtil {
 
-    //colorprofile fra https://pippin.gimp.org/sRGBz/
+    // colorprofile fra https://pippin.gimp.org/sRGBz/
     val colorProfile: ByteArray
-        get() =//colorprofile fra https://pippin.gimp.org/sRGBz/
+        get() = // colorprofile fra https://pippin.gimp.org/sRGBz/
             readResource("colorprofile/sRGBz.icc")
 
     fun readResource(location: String): ByteArray {

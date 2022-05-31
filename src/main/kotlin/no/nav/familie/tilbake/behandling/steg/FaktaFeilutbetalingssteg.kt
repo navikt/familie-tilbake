@@ -19,10 +19,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FaktaFeilutbetalingssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                               private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-                               private val historikkTaskService: HistorikkTaskService,
-                               private val oppgaveTaskService: OppgaveTaskService) : IBehandlingssteg {
+class FaktaFeilutbetalingssteg(
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -39,9 +41,11 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.SAKSBEHANDLER)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+            Aktør.SAKSBEHANDLER
+        )
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
             flyttBehandlingVidere(behandlingId)
@@ -53,9 +57,11 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg og behandler automatisk..")
         faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+            Aktør.VEDTAKSLØSNING
+        )
 
         flyttBehandlingVidere(behandlingId)
     }
@@ -63,9 +69,13 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FAKTA} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -78,9 +88,13 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
     }
 
     private fun flyttBehandlingVidere(behandlingId: UUID) {
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
-                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 }

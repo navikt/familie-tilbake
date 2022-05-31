@@ -16,13 +16,17 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Sender tilbakekrevingsvedtak til økonomi",
-                     triggerTidVedFeilISekunder = 300L)
-class SendØkonomiTilbakekrevingsvedtakTask(private val iverksettelseService: IverksettelseService,
-                                           private val taskService: TaskService,
-                                           private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Sender tilbakekrevingsvedtak til økonomi",
+    triggerTidVedFeilISekunder = 300L
+)
+class SendØkonomiTilbakekrevingsvedtakTask(
+    private val iverksettelseService: IverksettelseService,
+    private val taskService: TaskService,
+    private val behandlingskontrollService: BehandlingskontrollService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -32,17 +36,25 @@ class SendØkonomiTilbakekrevingsvedtakTask(private val iverksettelseService: Iv
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
         behandlingskontrollService
-                .oppdaterBehandlingsstegsstaus(behandlingId,
-                                               Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
-                                                                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT))
+            .oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT
+                )
+            )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     @Transactional
     override fun onCompletion(task: Task) {
-        taskService.save(Task(type = SendVedtaksbrevTask.TYPE,
-                              payload = task.payload,
-                              properties = task.metadata))
+        taskService.save(
+            Task(
+                type = SendVedtaksbrevTask.TYPE,
+                payload = task.payload,
+                properties = task.metadata
+            )
+        )
     }
 
     companion object {

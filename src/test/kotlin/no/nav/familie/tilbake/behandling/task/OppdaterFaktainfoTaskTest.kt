@@ -64,10 +64,14 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal oppdatere fakta info når respons-en har mottatt fra fagsystem`() {
         requestSendtRepository
-                .insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = fagsak.eksternFagsakId,
-                                                             eksternId = "1",
-                                                             ytelsestype = fagsak.ytelsestype,
-                                                             respons = objectMapper.writeValueAsString(lagRespons())))
+            .insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = fagsak.eksternFagsakId,
+                    eksternId = "1",
+                    ytelsestype = fagsak.ytelsestype,
+                    respons = objectMapper.writeValueAsString(lagRespons())
+                )
+            )
 
         oppdaterFaktainfoTask.doTask(lagTask())
 
@@ -80,40 +84,48 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke oppdatere fakta info når respons-en ikke har mottatt fra fagsystem`() {
-        requestSendtRepository.insert(HentFagsystemsbehandlingRequestSendt(eksternFagsakId = fagsak.eksternFagsakId,
-                                                                           eksternId = "1",
-                                                                           ytelsestype = fagsak.ytelsestype))
+        requestSendtRepository.insert(
+            HentFagsystemsbehandlingRequestSendt(
+                eksternFagsakId = fagsak.eksternFagsakId,
+                eksternId = "1",
+                ytelsestype = fagsak.ytelsestype
+            )
+        )
         val exception = shouldThrow<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
         exception.message shouldBe "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
-                "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
-                "Task kan kjøre på nytt manuelt når respons er mottatt."
+            "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
+            "Task kan kjøre på nytt manuelt når respons er mottatt."
     }
 
     private fun lagRespons(): HentFagsystemsbehandlingRespons {
-        val hentFagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = fagsak.eksternFagsakId,
-                                                                eksternId = "1",
-                                                                ytelsestype = fagsak.ytelsestype,
-                                                                personIdent = fagsak.bruker.ident,
-                                                                språkkode = fagsak.bruker.språkkode,
-                                                                enhetId = behandling.behandlendeEnhet,
-                                                                enhetsnavn = behandling.behandlendeEnhetsNavn,
-                                                                revurderingsvedtaksdato = LocalDate.now(),
-                                                                faktainfo = Faktainfo(revurderingsårsak = "testårsak",
-                                                                                      revurderingsresultat = "testresultat",
-                                                                                      tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                              .IGNORER_TILBAKEKREVING))
+        val hentFagsystemsbehandling = HentFagsystemsbehandling(
+            eksternFagsakId = fagsak.eksternFagsakId,
+            eksternId = "1",
+            ytelsestype = fagsak.ytelsestype,
+            personIdent = fagsak.bruker.ident,
+            språkkode = fagsak.bruker.språkkode,
+            enhetId = behandling.behandlendeEnhet,
+            enhetsnavn = behandling.behandlendeEnhetsNavn,
+            revurderingsvedtaksdato = LocalDate.now(),
+            faktainfo = Faktainfo(
+                revurderingsårsak = "testårsak",
+                revurderingsresultat = "testresultat",
+                tilbakekrevingsvalg = Tilbakekrevingsvalg
+                    .IGNORER_TILBAKEKREVING
+            )
+        )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
     private fun lagTask(): Task {
-        return Task(type = OppdaterFaktainfoTask.TYPE,
-                    payload = "",
-                    properties = Properties().apply {
-                        setProperty("eksternFagsakId", fagsak.eksternFagsakId)
-                        setProperty("ytelsestype", fagsak.ytelsestype.name)
-                        setProperty("eksternId", "1")
-                    })
+        return Task(
+            type = OppdaterFaktainfoTask.TYPE,
+            payload = "",
+            properties = Properties().apply {
+                setProperty("eksternFagsakId", fagsak.eksternFagsakId)
+                setProperty("ytelsestype", fagsak.ytelsestype.name)
+                setProperty("eksternId", "1")
+            }
+        )
     }
-
-
 }

@@ -22,76 +22,95 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakRepository,
-                                      private val behandlingRepository: BehandlingRepository,
-                                      private val eksterneDataForBrevService: EksterneDataForBrevService,
-                                      private val pdfBrevService: PdfBrevService) {
+class InnhentDokumentasjonbrevService(
+    private val fagsakRepository: FagsakRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val pdfBrevService: PdfBrevService
+) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
-        val brevdata = Brevdata(mottager = brevmottager,
-                                metadata = fritekstbrevsdata.brevmetadata,
-                                overskrift = fritekstbrevsdata.overskrift,
-                                brevtekst = fritekstbrevsdata.brevtekst)
-        pdfBrevService.sendBrev(behandling = behandling,
-                                fagsak = fagsak,
-                                brevtype = Brevtype.INNHENT_DOKUMENTASJON,
-                                data = brevdata,
-                                fritekst = fritekst)
+        val brevdata = Brevdata(
+            mottager = brevmottager,
+            metadata = fritekstbrevsdata.brevmetadata,
+            overskrift = fritekstbrevsdata.overskrift,
+            brevtekst = fritekstbrevsdata.brevtekst
+        )
+        pdfBrevService.sendBrev(
+            behandling = behandling,
+            fagsak = fagsak,
+            brevtype = Brevtype.INNHENT_DOKUMENTASJON,
+            data = brevdata,
+            fritekst = fritekst
+        )
     }
 
-
-    fun hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId: UUID,
-                                                    fritekst: String): ByteArray {
+    fun hentForhåndsvisningInnhentDokumentasjonBrev(
+        behandlingId: UUID,
+        fritekst: String
+    ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val brevmottager: Brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
 
-        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevmottager,
-                                                              metadata = fritekstbrevsdata.brevmetadata,
-                                                              overskrift = fritekstbrevsdata.overskrift,
-                                                              brevtekst = fritekstbrevsdata.brevtekst))
+        return pdfBrevService.genererForhåndsvisning(
+            Brevdata(
+                mottager = brevmottager,
+                metadata = fritekstbrevsdata.brevmetadata,
+                overskrift = fritekstbrevsdata.overskrift,
+                brevtekst = fritekstbrevsdata.brevtekst
+            )
+        )
     }
 
     private fun lagInnhentDokumentasjonsbrev(dokument: InnhentDokumentasjonsbrevsdokument): Fritekstbrevsdata {
         val overskrift =
-                TekstformatererInnhentDokumentasjonsbrev.lagOverskrift(dokument.brevmetadata)
+            TekstformatererInnhentDokumentasjonsbrev.lagOverskrift(dokument.brevmetadata)
         val brevtekst = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
-        return Fritekstbrevsdata(overskrift = overskrift,
-                                 brevtekst = brevtekst,
-                                 brevmetadata = dokument.brevmetadata)
+        return Fritekstbrevsdata(
+            overskrift = overskrift,
+            brevtekst = brevtekst,
+            brevmetadata = dokument.brevmetadata
+        )
     }
 
-    private fun settOppInnhentDokumentasjonsbrevsdokument(behandling: Behandling,
-                                                          fagsak: Fagsak,
-                                                          fritekst: String,
-                                                          brevmottager: Brevmottager): InnhentDokumentasjonsbrevsdokument {
+    private fun settOppInnhentDokumentasjonsbrevsdokument(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        fritekst: String,
+        brevmottager: Brevmottager
+    ): InnhentDokumentasjonsbrevsdokument {
 
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
-                eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+            eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
         val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val ansvarligSaksbehandler =
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
-        val brevmetadata = Brevmetadata(sakspartId = personinfo.ident,
-                                        sakspartsnavn = personinfo.navn,
-                                        finnesVerge = behandling.harVerge,
-                                        vergenavn = vergenavn,
-                                        mottageradresse = adresseinfo,
-                                        behandlendeEnhetId = behandling.behandlendeEnhet,
-                                        behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                                        ansvarligSaksbehandler = ansvarligSaksbehandler,
-                                        saksnummer = fagsak.eksternFagsakId,
-                                        språkkode = fagsak.bruker.språkkode,
-                                        ytelsestype = fagsak.ytelsestype,
-                                        tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB])
-        return InnhentDokumentasjonsbrevsdokument(brevmetadata = brevmetadata,
-                                                  fristdato = Constants.brukersSvarfrist(),
-                                                  fritekstFraSaksbehandler = fritekst)
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+        val brevmetadata = Brevmetadata(
+            sakspartId = personinfo.ident,
+            sakspartsnavn = personinfo.navn,
+            finnesVerge = behandling.harVerge,
+            vergenavn = vergenavn,
+            mottageradresse = adresseinfo,
+            behandlendeEnhetId = behandling.behandlendeEnhet,
+            behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            saksnummer = fagsak.eksternFagsakId,
+            språkkode = fagsak.bruker.språkkode,
+            ytelsestype = fagsak.ytelsestype,
+            tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB]
+        )
+        return InnhentDokumentasjonsbrevsdokument(
+            brevmetadata = brevmetadata,
+            fristdato = Constants.brukersSvarfrist(),
+            fritekstFraSaksbehandler = fritekst
+        )
     }
 
     private fun getTittel(brevmottager: Brevmottager): String {

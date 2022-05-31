@@ -31,91 +31,92 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                          private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-
+class IntegrasjonerClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    private val integrasjonerConfig: IntegrasjonerConfig
+) :
+    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
 
     private val arkiverUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
+        .build()
+        .toUri()
 
     private val distribuerUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_DISTRIBUER)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_DISTRIBUER)
+        .build()
+        .toUri()
 
     private val sftpUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_SFTP)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_SFTP)
+        .build()
+        .toUri()
 
     private val tilgangssjekkUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
+        .build()
+        .toUri()
 
     private fun hentSaksbehandlerUri(id: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
+        .build()
+        .toUri()
 
     private val opprettOppgaveUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
+        .build()
+        .toUri()
 
     private fun patchOppgaveUri(oppgave: Oppgave) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
+        .build()
+        .toUri()
 
     private val finnoppgaverUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "/v4")
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "/v4")
+        .build()
+        .toUri()
 
     private fun ferdigstillOppgaveUri(oppgaveId: Long) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
+        .build()
+        .toUri()
 
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer)
-                    .build()
-                    .toUri()
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer)
+            .build()
+            .toUri()
 
     private fun validerOrganisasjonUri(organisasjonsnummer: String) =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer, "valider")
-                    .build()
-                    .toUri()
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_ORGANISASJON, organisasjonsnummer, "valider")
+            .build()
+            .toUri()
 
     private fun hentJournalpostUri() = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
+        .build()
+        .toUri()
 
     private fun hentJournalpostHentDokumentUri(journalpostId: String, dokumentInfoId: String) =
-            UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-                    .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
-                    .build()
-                    .toUri()
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
+            .build()
+            .toUri()
 
     private fun hentNavkontorUri(enhetsId: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
+        .build()
+        .toUri()
 
     private fun finnMapperUri(enhetNr: String): URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
-            .build()
-            .toUri()
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
+        .build()
+        .toUri()
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val response = postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
@@ -126,8 +127,10 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
         putForEntity<Any>(sftpUri, fil)
     }
 
-    fun distribuerJournalpost(journalpostId: String,
-                              fagsystem: Fagsystem): String {
+    fun distribuerJournalpost(
+        journalpostId: String,
+        fagsystem: Fagsystem
+    ): String {
         val request = DistribuerJournalpostRequest(journalpostId, fagsystem, integrasjonerConfig.applicationName)
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
@@ -184,18 +187,21 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
      * Sjekker personene i behandlingen er egen ansatt, kode 6 eller kode 7. Og om saksbehandler har rettigheter til å behandle
      * slike personer.
      */
-    @Retryable(value = [Exception::class],
-               maxAttempts = 3,
-               backoff = Backoff(delayExpression = "5000"))
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = "5000")
+    )
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(tilgangssjekkUri, personIdenter)
     }
 
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
-        secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
-                          "og data $journalposterForBrukerRequest")
+        secureLogger.info(
+            "henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
+                "og data $journalposterForBrukerRequest"
+        )
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
-
 }

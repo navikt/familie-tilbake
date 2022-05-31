@@ -29,24 +29,34 @@ import javax.validation.Valid
 class BeregningController(val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
 
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
-    @PostMapping(path = ["{behandlingId}/beregn/v1"],
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "Beregner feilutbetalt beløp for nye delte perioder",
-                        AuditLoggerEvent.ACCESS,
-                        henteParam = HenteParam.BEHANDLING_ID)
-    fun beregnBeløp(@PathVariable("behandlingId") behandlingId: UUID,
-                    @Valid @RequestBody perioder: List<PeriodeDto>): Ressurs<BeregnetPerioderDto> {
+    @PostMapping(
+        path = ["{behandlingId}/beregn/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        handling = "Beregner feilutbetalt beløp for nye delte perioder",
+        AuditLoggerEvent.ACCESS,
+        henteParam = HenteParam.BEHANDLING_ID
+    )
+    fun beregnBeløp(
+        @PathVariable("behandlingId") behandlingId: UUID,
+        @Valid @RequestBody perioder: List<PeriodeDto>
+    ): Ressurs<BeregnetPerioderDto> {
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
     }
 
     @Operation(summary = "Hent beregningsresultat")
-    @GetMapping(path = ["{behandlingId}/beregn/resultat/v1"],
-                produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                        handling = "Henter beregningsresultat",
-                        AuditLoggerEvent.ACCESS,
-                        henteParam = HenteParam.BEHANDLING_ID)
+    @GetMapping(
+        path = ["{behandlingId}/beregn/resultat/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+        handling = "Henter beregningsresultat",
+        AuditLoggerEvent.ACCESS,
+        henteParam = HenteParam.BEHANDLING_ID
+    )
     fun hentBeregningsresultat(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BeregningsresultatDto> {
         return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
     }

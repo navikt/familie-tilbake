@@ -20,14 +20,18 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendVedtaksbrevTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Sender vedtaksbrev",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository,
-                          private val fagsakRepository: FagsakRepository,
-                          private val vedtaksbrevService: VedtaksbrevService,
-                          private val taskService: TaskService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = SendVedtaksbrevTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Sender vedtaksbrev",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class SendVedtaksbrevTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val taskService: TaskService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -37,18 +41,27 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
             log.info("Behandlingen $behandlingId ble saksbehandlet automatisk, sender ikke vedtaksbrev")
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE,
-                                  payload = task.payload,
-                                  properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+            taskService.save(
+                Task(
+                    type = AvsluttBehandlingTask.TYPE,
+                    payload = task.payload,
+                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+                )
+            )
             return
         }
 
-        if (behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING
-            && behandling.sisteÅrsak?.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA)) {
+        if (behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING &&
+            behandling.sisteÅrsak?.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA)
+        ) {
             log.info("Sender ikke vedtaksbrev etter revurdering som følge av klage for behandling: {}", behandlingId)
-            taskService.save(Task(type = AvsluttBehandlingTask.TYPE,
-                                  payload = task.payload,
-                                  properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+            taskService.save(
+                Task(
+                    type = AvsluttBehandlingTask.TYPE,
+                    payload = task.payload,
+                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+                )
+            )
             return
         }
 
@@ -60,9 +73,13 @@ class SendVedtaksbrevTask(private val behandlingRepository: BehandlingRepository
     }
 
     override fun onCompletion(task: Task) {
-        taskService.save(Task(type = SendVedtaksoppsummeringTilDvhTask.TYPE,
-                              payload = task.payload,
-                              properties = task.metadata))
+        taskService.save(
+            Task(
+                type = SendVedtaksoppsummeringTilDvhTask.TYPE,
+                payload = task.payload,
+                properties = task.metadata
+            )
+        )
     }
 
     companion object {
