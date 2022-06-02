@@ -254,7 +254,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(forrigeBehandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        //oppretter ny behandling for en annen eksternId
+        // oppretter ny behandling for en annen eksternId
         val nyOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(finnesVerge = false,
                                                                              finnesVarsel = true,
                                                                              manueltOpprettet = false,
@@ -856,7 +856,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
+        // oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                                                       opprettetTid = LocalDateTime.now().minusDays(10))))
         // sender varselsbrev
@@ -902,7 +902,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                                                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        //oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
+        // oppdaterer opprettettidspunkt slik at behandlingen kan henlegges
         behandlingRepository.update(behandling.copy(sporbar = Sporbar(opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                                                                       opprettetTid = LocalDateTime.now().minusDays(10))))
 
@@ -922,7 +922,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val behandlingssresultat = behandling.sisteResultat
         behandlingssresultat.shouldNotBeNull()
         behandlingssresultat.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
-
 
         taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE }.shouldBeNull()
         assertHistorikkTask(behandling.id,

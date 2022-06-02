@@ -16,8 +16,8 @@ import java.util.UUID
                      maxAntallFeil = 3,
                      triggerTidVedFeilISekunder = 60 * 5L)
 class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
-                                    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService)
-    : AsyncTaskStep {
+                                    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService) :
+    AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -49,11 +49,8 @@ class HåndterGammelKravgrunnlagTask(private val håndterGamleKravgrunnlagServic
         håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
     }
 
-
     companion object {
 
         const val TYPE = "gammelKravgrunnlag.håndter"
     }
-
-
 }

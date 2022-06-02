@@ -14,7 +14,6 @@ import java.util.Properties
 import java.util.UUID
 import javax.jms.TextMessage
 
-
 @Service
 @Profile("!e2e & !integrasjonstest")
 class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
@@ -35,7 +34,6 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
                                      properties = Properties().apply {
                                          this["callId"] = UUID.randomUUID()
                                      }))
-
         } else {
             taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
                                      payload = meldingFraOppdrag,
@@ -44,5 +42,4 @@ class KravgrunnlagMottaker(private val taskRepository: TaskRepository) {
                                      }))
         }
     }
-
 }

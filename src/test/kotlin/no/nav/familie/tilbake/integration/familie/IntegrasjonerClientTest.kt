@@ -120,8 +120,4 @@ internal class IntegrasjonerClientTest {
 
         integrasjonerClient.validerOrganisasjon("987654321").shouldBeFalse()
     }
-
 }
-
-
-

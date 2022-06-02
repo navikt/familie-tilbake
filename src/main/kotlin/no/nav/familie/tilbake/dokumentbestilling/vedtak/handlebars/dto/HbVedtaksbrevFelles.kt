@@ -42,7 +42,6 @@ data class HbVedtaksbrevFelles(val brevmetadata: Brevmetadata,
     @Suppress("unused") // Handlebars
     val isSkalIkkeViseSkatt = Ytelsestype.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
 
-
     val harVedlegg = vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR
     val hovedresultat = totalresultat.hovedresultat
 }

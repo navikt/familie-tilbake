@@ -32,7 +32,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -84,7 +83,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
-        //Lag oppgave for behandling
+        // Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
@@ -149,7 +148,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                               payload = revurdering.id.toString(),
                               properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
 
-        //Lag oppgave for behandling
+        // Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak)
 
         return revurdering
@@ -252,10 +251,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-        //oppdaterer behandlingsstegstilstand
+        // oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
 
-        //oppdaterer behandlingsresultat og behandling
+        // oppdaterer behandlingsresultat og behandling
         behandlingRepository.update(behandling.copy(resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
                                                     status = Behandlingsstatus.AVSLUTTET,
                                                     avsluttetDato = LocalDate.now()))
@@ -398,7 +397,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-        //hvis behandlingen er henlagt, kan det opprettes ny behandling
+        // hvis behandlingen er henlagt, kan det opprettes ny behandling
         val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
         if (avsluttetBehandlinger.isNotEmpty()) {
             val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
@@ -419,9 +418,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                               "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
             throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
         }
-
     }
-
 
     private fun kanHenleggeBehandling(behandling: Behandling,
                                       behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
@@ -431,8 +428,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
                                                behandling.opprettetTidspunkt < LocalDate.now()
                                                        .atStartOfDay()
-                                                       .minusDays(opprettelseDagerBegrensning))
-                   && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
+                                                       .minusDays(opprettelseDagerBegrensning)) &&
+                   !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
     }
@@ -474,6 +471,4 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
                behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
-
-
 }

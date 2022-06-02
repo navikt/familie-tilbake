@@ -42,7 +42,6 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
                 manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
             manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
-
         } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
             if (behandling.harVerge) {
                 manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
@@ -71,7 +70,7 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
                      payload = objectMapper.writeValueAsString(SendManueltVarselbrevTaskdata(behandlingId = behandlingId,
                                                                                              maltype = maltype,
                                                                                              fritekst = fritekst)),
-                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }                )
+                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) })
 
         const val TYPE = "brev.sendManueltVarsel"
     }

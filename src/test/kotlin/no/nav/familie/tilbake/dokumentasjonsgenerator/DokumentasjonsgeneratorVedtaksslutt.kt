@@ -39,7 +39,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+// @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorVedtaksslutt {
 
     @Test
@@ -202,7 +202,6 @@ class DokumentasjonsgeneratorVedtaksslutt {
                             ytelsestype = ytelsestype)
     }
 
-
     private fun lagPerioder(flerePerioder: Boolean): List<HbVedtaksbrevsperiode> {
         if (flerePerioder) {
             return listOf(lagPeriode(PERIODE1), lagPeriode(PERIODE2))
@@ -230,13 +229,13 @@ class DokumentasjonsgeneratorVedtaksslutt {
                            medVerge: Boolean,
                            feilutbetaltBeløpBortfalt: Boolean,
                            erRevurdering: Boolean): String {
-        return ("*[ " + (if (flerePerioder) "flere perioder" else "en periode")
-                + " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk")
-                + " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel")
-                + " - " + (if (medVerge) "med verge" else "uten verge")
-                + " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær")
-                + (if (erRevurdering) " - revurdering" else "")
-                + " ]*")
+        return ("*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
+                " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
+                " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
+                " - " + (if (medVerge) "med verge" else "uten verge") +
+                " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
+                (if (erRevurdering) " - revurdering" else "") +
+                " ]*")
     }
 
     private fun prettyprint(s: String): String {

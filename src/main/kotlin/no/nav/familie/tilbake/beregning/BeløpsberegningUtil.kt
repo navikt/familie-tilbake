@@ -25,5 +25,4 @@ object BeløpsberegningUtil {
         val ytelseBeløp: BigDecimal = beregnBeløp(vurderingsperiode, kravgrunnlagsperiode, grunnlagBeløpPerMåned)
         return ytelseBeløp.setScale(0, RoundingMode.HALF_UP)
     }
-
 }

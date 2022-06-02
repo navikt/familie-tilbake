@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.micrometer.TellerService
 import org.junit.jupiter.api.Test
-
 import java.util.Base64
 
 internal class PdfBrevServiceTest {
@@ -28,7 +27,6 @@ internal class PdfBrevServiceTest {
     private val pdfBrevService = PdfBrevService(journalføringService,
                                                 tellerService,
                                                 taskService)
-
 
     @Test
     fun `sendBrev oppretter en task med korrekt fritekst`() {

@@ -87,10 +87,10 @@ class ForvaltningService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
 
-        //oppdaterer behandlingsstegstilstand
+        // oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
 
-        //oppdaterer behandlingsresultat og behandling
+        // oppdaterer behandlingsresultat og behandling
         val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD)
         behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat),
                                                     status = Behandlingsstatus.AVSLUTTET,

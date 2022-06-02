@@ -37,7 +37,5 @@ class SwaggerConfig(@Value("\${AUTHORIZATION_URL}")
                                .authorizationCode(OAuthFlow().authorizationUrl(authorizationUrl)
                                                           .tokenUrl(tokenUrl)
                                                           .scopes(Scopes().addString(apiScope, "read,write"))))
-
     }
-
 }

@@ -37,7 +37,6 @@ object KravgrunnlagsberegningService {
                 .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
     }
 
-
     fun fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag: Kravgrunnlag431,
                                           vurderingsperioder: List<Periode>): Map<Periode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
@@ -70,7 +69,6 @@ object KravgrunnlagsberegningService {
                        frontendFeilmelding = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
-
     }
 
     private fun beregnBeløp(kravgrunnlag: Kravgrunnlag431,
@@ -89,5 +87,4 @@ object KravgrunnlagsberegningService {
                 }
         return sum.setScale(0, RoundingMode.HALF_UP)
     }
-
 }

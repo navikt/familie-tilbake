@@ -11,5 +11,4 @@ class HbVedtaksbrevPeriodeOgFelles(@get:JsonUnwrapped
                                    val periode: HbVedtaksbrevsperiode) : Språkstøtte {
 
     override val språkkode: Språkkode = felles.språkkode
-
 }

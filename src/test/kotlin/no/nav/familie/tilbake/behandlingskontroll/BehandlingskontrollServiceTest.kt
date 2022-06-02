@@ -52,7 +52,6 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
-
     private val behandling = Testdata.behandling
 
     @BeforeEach
@@ -104,7 +103,6 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         nyStegstilstand.venteårsak shouldBe Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
         nyStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(3)
     }
-
 
     @Test
     fun `fortsettBehandling skal oppdatere til grunnlagssteg etter behandling er opprettet uten varsel`() {
@@ -412,9 +410,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                                                                                venteårsak = it.venteårsak,
                                                                                tidsfrist = it.tidsfrist))
         }
-
     }
-
 
     private fun lagFagsystemsbehandling(tilbakekrevingsvalg: Tilbakekrevingsvalg): Fagsystemsbehandling {
         return Fagsystemsbehandling(eksternId = "123",

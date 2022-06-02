@@ -85,5 +85,4 @@ class DokumentController(private val varselbrevService: VarselbrevService,
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
     }
-
 }

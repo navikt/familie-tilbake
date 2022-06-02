@@ -53,5 +53,4 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                               Behandling::versjon)
         lagretBehandling.versjon shouldBe 2
     }
-
 }

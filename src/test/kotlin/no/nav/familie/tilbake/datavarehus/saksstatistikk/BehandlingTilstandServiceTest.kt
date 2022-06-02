@@ -42,7 +42,6 @@ import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-
 class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
@@ -232,5 +231,4 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                                             faktainfo = faktainfo,
                                             saksbehandlerIdent = "Z0000")
     }
-
 }

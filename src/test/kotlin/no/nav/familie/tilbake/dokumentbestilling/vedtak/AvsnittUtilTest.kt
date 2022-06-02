@@ -130,7 +130,6 @@ class AvsnittUtilTest {
         resultat[3].underavsnittsliste.forEach { it.fritekstTillatt shouldBe false }
     }
 
-
     @Test
     fun `parseTekst skal parse tekst til avsnitt`() {
         val tekst = "_Hovedoverskrift i brevet\n\n" +
@@ -218,7 +217,7 @@ class AvsnittUtilTest {
 
         resultat.overskrift shouldBe "Hovedoverskrift"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        //underavsnitt.shouldHaveSize(1);
+        // underavsnitt.shouldHaveSize(1);
         underavsnitt[0].overskrift shouldBe "underoverskrift 1"
         underavsnitt[0].brødtekst shouldBe null
         underavsnitt[0].fritekstTillatt.shouldBeTrue()

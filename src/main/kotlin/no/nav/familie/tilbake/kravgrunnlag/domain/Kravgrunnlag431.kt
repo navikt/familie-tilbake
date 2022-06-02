@@ -70,7 +70,6 @@ data class Kravgrunnlagsperiode432(@Id
     }
 }
 
-
 @Table("kravgrunnlagsbelop433")
 data class Kravgrunnlagsbeløp433(@Id
                                  val id: UUID = UUID.randomUUID(),

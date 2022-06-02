@@ -1,0 +1,2 @@
+[*.{kt,kts}]
+disabled_rules = wrapping, parameter-list-wrapping, indent

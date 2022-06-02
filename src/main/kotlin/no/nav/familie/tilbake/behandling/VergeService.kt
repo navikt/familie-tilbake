@@ -101,7 +101,7 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
             }
             else -> {
                 requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
-                //Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
+                // Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
                 personService.hentPersoninfo(vergeDto.ident, fagsystem)
             }
         }

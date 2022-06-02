@@ -256,5 +256,4 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         mmelDto.kodeMelding = kodeMelding
         return mmelDto
     }
-
 }

@@ -41,7 +41,6 @@ class HentFagsystemsbehandlingTask(private val håndterGamleKravgrunnlagService:
                               properties = task.metadata).medTriggerTid(LocalDateTime.now().plusSeconds(60)))
     }
 
-
     companion object {
 
         const val TYPE = "gammelKravgrunnlag.hentFagsystemsbehandling"

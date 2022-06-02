@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.integration.pdl
 
-
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
@@ -25,11 +24,10 @@ import java.time.LocalDate
 
 @Service
 class PdlClient(private val pdlConfig: PdlConfig,
-                @Qualifier("azureClientCredential") restTemplate: RestOperations)
-    : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+                @Qualifier("azureClientCredential") restTemplate: RestOperations) :
+    AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
-
 
     fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
@@ -67,7 +65,6 @@ class PdlClient(private val pdlConfig: PdlConfig,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
         return HttpHeaders().apply {
@@ -86,4 +83,3 @@ class PdlClient(private val pdlConfig: PdlConfig,
         operations.optionsForAllow(pingUri)
     }
 }
-

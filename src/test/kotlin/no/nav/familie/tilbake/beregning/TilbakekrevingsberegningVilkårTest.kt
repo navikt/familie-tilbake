@@ -46,12 +46,11 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.FORSETT,
                                                                          begrunnelse = "foo"))
 
-
-        //act
+        // act
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
 
-        //assert
+        // assert
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
         resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
         resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
@@ -70,13 +69,13 @@ class TilbakekrevingsberegningVilkårTest {
                                                                                         begrunnelse = "foo",
                                                                                         ileggRenter = true))
 
-        //act
+        // act
         val resultat: Beregningsresultatsperiode = beregn(forstoBurdeForstattVurdering,
                                                           BigDecimal.valueOf(10000),
                                                           Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
                                                           true)
 
-        //assert
+        // assert
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
         resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
         resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
@@ -95,13 +94,13 @@ class TilbakekrevingsberegningVilkårTest {
                                                                                         begrunnelse = "foo",
                                                                                         ileggRenter = false))
 
-        //act
+        // act
         val resultat: Beregningsresultatsperiode = beregn(forstoBurdeForstattVurdering,
                                                           BigDecimal.valueOf(10000),
                                                           Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
                                                           true)
 
-        //assert
+        // assert
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(10000)
         resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
         resultat.rentebeløp shouldBe BigDecimal.valueOf(0)
@@ -120,7 +119,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          særligeGrunnerTilReduksjon = false,
                                                                          ileggRenter = true))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
@@ -135,7 +134,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          særligeGrunnerTilReduksjon = false,
                                                                          tilbakekrevSmåbeløp = false))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(522), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.ZERO
@@ -150,7 +149,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          ileggRenter = true,
                                                                          andelTilbakekreves = BigDecimal.valueOf(70)))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7700)
@@ -165,7 +164,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          ileggRenter = false,
                                                                          andelTilbakekreves = BigDecimal.valueOf(70)))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7000)
@@ -181,7 +180,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          ileggRenter = false,
                                                                          andelTilbakekreves = BigDecimal("0.01")))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(70000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7)
@@ -197,7 +196,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          ileggRenter = false,
                                                                          manueltSattBeløp = BigDecimal.valueOf(6556)))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(6556)
@@ -212,7 +211,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                          ileggRenter = true,
                                                                          manueltSattBeløp = BigDecimal.valueOf(6000)))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(6600)
@@ -225,7 +224,7 @@ class TilbakekrevingsberegningVilkårTest {
                                                                    beløpTilbakekreves = BigDecimal.valueOf(8991),
                                                                    begrunnelse = "foo"))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
@@ -240,7 +239,7 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(godTro = VilkårsvurderingGodTro(beløpErIBehold = false,
                                                                    begrunnelse = "foo"))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.ZERO
@@ -258,7 +257,7 @@ class TilbakekrevingsberegningVilkårTest {
         val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
-        //assert
+        // assert
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
@@ -277,11 +276,11 @@ class TilbakekrevingsberegningVilkårTest {
         val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
-        //act
+        // act
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
 
-        //assert
+        // assert
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
         resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
         resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
@@ -302,11 +301,11 @@ class TilbakekrevingsberegningVilkårTest {
         val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
 
-        //act
+        // act
         val resultat: Beregningsresultatsperiode =
                 beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), false)
 
-        //assert
+        // assert
         resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(10000)
         resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
         resultat.rentebeløp shouldBe BigDecimal.valueOf(0)

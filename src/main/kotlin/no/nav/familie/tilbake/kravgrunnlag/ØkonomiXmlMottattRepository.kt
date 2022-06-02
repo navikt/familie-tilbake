@@ -48,5 +48,4 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
                                         overgangsstonadbestemtdato: LocalDate,
                                         skolePengerBestemtDato: LocalDate,
                                         kontantstottebestemtdato: LocalDate): List<ØkonomiXmlMottattIdOgYtelse>
-
 }

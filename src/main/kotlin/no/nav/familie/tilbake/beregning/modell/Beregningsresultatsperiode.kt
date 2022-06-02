@@ -17,4 +17,3 @@ data class Beregningsresultatsperiode(val periode: Periode,
                                       val tilbakekrevingsbeløpEtterSkatt: BigDecimal,
                                       val utbetaltYtelsesbeløp: BigDecimal, // Rått beløp, ikke justert for ev. trekk
                                       val riktigYtelsesbeløp: BigDecimal) // Rått beløp, ikke justert for ev. trekk
-

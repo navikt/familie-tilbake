@@ -70,7 +70,6 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
                                              avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
                                              eksternReferanseId = eksternReferanseId)
 
-
         val response = integrasjonerClient.arkiver(request)
 
         val dokumentinfoId = response.dokumenter?.first()?.dokumentInfoId

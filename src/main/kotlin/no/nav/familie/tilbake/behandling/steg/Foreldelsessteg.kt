@@ -101,5 +101,4 @@ class Foreldelsessteg(private val kravgrunnlagRepository: KravgrunnlagRepository
     fun deaktiverEksisterendeVurdertForeldelse(endretKravgrunnlagEvent: EndretKravgrunnlagEvent) {
         foreldelseService.deaktiverEksisterendeVurdertForeldelse(behandlingId = endretKravgrunnlagEvent.behandlingId)
     }
-
 }

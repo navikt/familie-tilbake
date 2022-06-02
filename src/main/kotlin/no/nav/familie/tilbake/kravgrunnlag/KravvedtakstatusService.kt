@@ -95,7 +95,6 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }
-
     }
 
     private fun håndterStatusmeldingerMedBehandling(kravgrunnlag431: Kravgrunnlag431,
@@ -147,7 +146,5 @@ class KravvedtakstatusService(private val kravgrunnlagRepository: KravgrunnlagRe
                                                    beskrivelse = venteårsak.beskrivelse,
                                                    frist = tidsfrist)
         }
-
     }
-
 }

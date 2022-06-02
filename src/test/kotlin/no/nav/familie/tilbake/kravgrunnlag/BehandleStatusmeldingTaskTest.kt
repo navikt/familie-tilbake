@@ -152,7 +152,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         assertArkivertXml(2, true, Kravstatuskode.AVSLUTTET)
     }
 
@@ -211,7 +210,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
@@ -259,7 +257,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.KLAR)
 
-
         var statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         var task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
         behandleStatusmeldingTask.doTask(task)
@@ -284,7 +281,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertArkivertXml(3, true, Kravstatuskode.SPERRET, Kravstatuskode.ENDRET)
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
-
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
@@ -322,7 +318,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
                             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
@@ -348,15 +343,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement { Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus }
         behandlingsstegstilstand.shouldHaveSingleElement {
-            Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus
-            && it.behandlingssteg == VARSEL
+            Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus &&
+            it.behandlingssteg == VARSEL
         }
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
@@ -370,14 +364,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         opprettGrunnlag()
 
-        //oppdater FAKTA steg manuelt til UTFØRT
+        // oppdater FAKTA steg manuelt til UTFØRT
         val aktivtBehandlingsstegstilstand = behandlingsstegstilstandRepository
                 .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
         aktivtBehandlingsstegstilstand.shouldNotBeNull()
         aktivtBehandlingsstegstilstand.let {
             behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
         }
-        //sett aktivt behandlingssteg til FORESLÅ_VEDTAK
+        // sett aktivt behandlingssteg til FORESLÅ_VEDTAK
         lagBehandlingsstegstilstand(FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)

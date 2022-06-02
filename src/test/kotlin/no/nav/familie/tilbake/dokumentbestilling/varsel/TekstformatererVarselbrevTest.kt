@@ -35,7 +35,6 @@ class TekstformatererVarselbrevTest {
                                 revurderingsvedtaksdato = LocalDate.of(2019, 12, 18),
                                 brevmetadata = metadata)
 
-
     @Test
     fun `lagVarselbrevsfritekst skal generere varseltekst for flere perioder overgangsstønad`() {
         val metadata = metadata.copy(språkkode = Språkkode.NN)
@@ -180,12 +179,10 @@ class TekstformatererVarselbrevTest {
         return listOf(periode1, periode2)
     }
 
-
     private fun lagFeilutbetalingerMedKunEnPeriode(): List<Handlebarsperiode> {
         return listOf(Handlebarsperiode(LocalDate.of(2019, 3, 3),
                                         LocalDate.of(2020, 3, 3)))
     }
-
 
     private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->

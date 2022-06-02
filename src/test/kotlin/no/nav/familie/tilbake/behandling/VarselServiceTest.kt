@@ -79,5 +79,4 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
             it.tom == Testdata.varsel.perioder.first().tom
         }.shouldBeTrue()
     }
-
 }

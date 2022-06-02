@@ -27,5 +27,4 @@ internal class AvstemmingsfilRepositoryTest : OppslagSpringRunnerTest() {
                                                                   Avstemmingsfil::versjon)
         lagretAvstemmingsfil.versjon shouldBe 1
     }
-
 }

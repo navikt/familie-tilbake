@@ -54,9 +54,7 @@ data class VilkårsvurderingGodTro(@Id
                                   val sporbar: Sporbar = Sporbar()) {
 
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
-
 }
-
 
 @Table("vilkarsvurdering_aktsomhet")
 data class VilkårsvurderingAktsomhet(@Id
@@ -81,8 +79,7 @@ data class VilkårsvurderingAktsomhet(@Id
                                      val sporbar: Sporbar = Sporbar()) {
 
     init {
-        require(!(andelTilbakekreves != null && manueltSattBeløp != null))
-        { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
+        require(!(andelTilbakekreves != null && manueltSattBeløp != null)) { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
         if (aktsomhet == Aktsomhet.FORSETT) {
             check(!særligeGrunnerTilReduksjon) { "Ved FORSETT skal ikke særligeGrunnerTilReduksjon settes her" }
             check(manueltSattBeløp == null) { "Ved FORSETT er beløp automatisk, og skal ikke settes her" }
@@ -98,7 +95,6 @@ data class VilkårsvurderingAktsomhet(@Id
         get() = Aktsomhet.GROV_UAKTSOMHET == aktsomhet || Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet && this.tilbakekrevSmåbeløp
 
     val særligeGrunner get() = vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
-
 }
 
 @Table("vilkarsvurdering_serlig_grunn")
@@ -146,4 +142,3 @@ enum class Vilkårsvurderingsresultat(val navn: String) {
     GOD_TRO("Nei, mottaker har mottatt beløpet i god tro (1. ledd)"),
     UDEFINERT("Ikke Definert")
 }
-

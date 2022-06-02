@@ -164,7 +164,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering når perioder er delt opp`() {
-        //delt opp i to perioder
+        // delt opp i to perioder
         val periode1 = PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         val periode2 = PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         val behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(perioder = listOf(periode1, periode2))
@@ -437,7 +437,6 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         andreForeldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 2"
     }
 
-
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når andelTilbakekreves er mer enn 100 prosent `() {
         val exception = shouldThrow<RuntimeException> {
@@ -462,7 +461,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når manueltSattBeløp er mer enn feilutbetalt beløp`() {
-        //forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
+        // forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
         val behandlingsstegVilkårsvurderingDto =
                 lagVilkårsvurderingMedSimpelAktsomhet(manueltSattBeløp = BigDecimal(30000),
                                                       særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
@@ -474,7 +473,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVilkårsvurdering skal ikke lagre vilkårsvurdering når tilbakekrevesBeløp er mer enn feilutbetalt beløp`() {
-        //forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
+        // forutsetter at kravgrunnlag har 20000 som feilutbetalt beløp fra Testdata
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(behandling.id,
                                                           lagVilkårsvurderingMedGodTro(listOf(PeriodeDto(YearMonth.of(2020, 1),
@@ -486,7 +485,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVilkårsvurdering skal lagre vilkårsvurdering med false ileggRenter for barnetrygd behandling`() {
-        //forutsetter at behandling opprettet for barnetrygd fra Testdata
+        // forutsetter at behandling opprettet for barnetrygd fra Testdata
         vilkårsvurderingService
                 .lagreVilkårsvurdering(behandling.id, lagVilkårsvurderingMedSimpelAktsomhet(ileggRenter = true, særligGrunn =
                 SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)))
@@ -553,8 +552,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderingMedSimpelAktsomhet(andelTilbakekreves: BigDecimal? = null,
                                                       manueltSattBeløp: BigDecimal? = null,
                                                       ileggRenter: Boolean? = null,
-                                                      særligGrunn: SærligGrunnDto)
-            : BehandlingsstegVilkårsvurderingDto {
+                                                      særligGrunn: SærligGrunnDto): BehandlingsstegVilkårsvurderingDto {
         val periode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
                                                   vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                                                   begrunnelse = "Vilkårsvurdering begrunnelse",
@@ -603,5 +601,4 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                                                            begrunnelse = "foreldelse begrunnelse 2"))
         foreldelseRepository.update(vurdertForeldelse.copy(foreldelsesperioder = foreldelsesperioder))
     }
-
 }

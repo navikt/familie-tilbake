@@ -90,5 +90,4 @@ class HåndterGamleKravgrunnlagBatch(private val mottattXmlService: ØkonomiXmlM
                                                            SKOLEPENGER to 6,
                                                            KONTANTSTØTTE to 8)
     }
-
 }

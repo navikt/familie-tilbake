@@ -14,5 +14,4 @@ object TekstformatererHeader {
     private fun lagHeader(data: HeaderData): String {
         return FellesTekstformaterer.lagBrevtekst(data, "header")
     }
-
 }

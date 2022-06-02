@@ -11,5 +11,4 @@ data class HbFakta(val hendelsestype: Hendelsestype,
     init {
         require(HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).contains(hendelsesundertype))
     }
-
 }

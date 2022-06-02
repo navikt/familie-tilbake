@@ -21,6 +21,5 @@ class HbVedtaksbrevDatoer(val opphørsdatoDødSøker: LocalDate? = null,
                 hendelsesundertyper.contains(it.fakta.hendelsesundertype)
             }?.periode?.fom
         }
-
     }
 }

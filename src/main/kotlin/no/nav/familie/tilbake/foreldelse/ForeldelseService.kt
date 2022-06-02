@@ -70,7 +70,7 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
     }
 
     @Transactional
-    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId: UUID, vurdertForeldelse: VurdertForeldelse){
+    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId: UUID, vurdertForeldelse: VurdertForeldelse) {
         val eksisterendeVurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) ?: return
         val eksisterendeVurdertForeldelsesperioder = eksisterendeVurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()
         val nyVurdertForeldelsesperioder = vurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()
@@ -82,5 +82,4 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
             vilkårsvurderingRepository.update(vilkårsvurdering)
         }
     }
-
 }

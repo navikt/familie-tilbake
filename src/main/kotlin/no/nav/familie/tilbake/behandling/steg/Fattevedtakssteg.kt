@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -103,5 +102,4 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FATTE_VEDTAK
     }
-
 }

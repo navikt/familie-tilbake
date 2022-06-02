@@ -12,6 +12,4 @@ interface VedtaksbrevgrunnlagRepository : RepositoryInterface<Vedtaksbrevgrunnla
     @Language("PostgreSQL")
     @Query("SELECT fagsak_id FROM behandling WHERE id = :behandlingId")
     fun finnFagsakIdForBehandlingId(behandlingId: UUID): UUID
-
-
 }

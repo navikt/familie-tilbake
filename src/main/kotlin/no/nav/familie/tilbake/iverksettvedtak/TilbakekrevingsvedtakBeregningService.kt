@@ -47,7 +47,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             kravgrunnlagsperioderMedSkatt = oppdaterGjenståendeSkattetrekk(perioder, kravgrunnlagsperioderMedSkatt)
             perioder = justerAvrundingSkatt(beregnetPeriode, perioder, kravgrunnlagsperioderMedSkatt)
 
-            //renter
+            // renter
             perioder = beregnRenter(beregnetPeriode, perioder)
             justerAvrundingRenter(beregnetPeriode, perioder)
         }.flatten()
@@ -141,7 +141,6 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                 }
             }
             periode.copy(beløp = justertebeløp)
-
         }
     }
 
@@ -165,8 +164,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     }
 
     private fun oppdaterGjenståendeSkattetrekk(perioder: List<Tilbakekrevingsperiode>,
-                                               kravgrunnlagsperioderMedSkatt: Map<Periode, BigDecimal>)
-            : Map<Periode, BigDecimal> {
+                                               kravgrunnlagsperioderMedSkatt: Map<Periode, BigDecimal>): Map<Periode, BigDecimal> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         perioder.forEach {
             val skattBeløp = it.beløp
@@ -177,7 +175,6 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         }
         return grunnlagsperioderMedSkatt
     }
-
 
     private fun justerAvrundingSkatt(beregnetPeriode: Beregningsresultatsperiode,
                                      perioder: List<Tilbakekrevingsperiode>,
@@ -273,6 +270,4 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             else -> perioder
         }
     }
-
 }
-

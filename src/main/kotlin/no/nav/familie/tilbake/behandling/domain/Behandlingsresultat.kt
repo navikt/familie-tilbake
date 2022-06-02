@@ -28,7 +28,6 @@ data class Behandlingsresultat(@Id
                       Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
     }
 
-
     fun erBehandlingHenlagt(): Boolean {
         return ALLE_HENLEGGELSESKODER.contains(type)
     }
@@ -56,7 +55,6 @@ enum class Iverksettingsstatus {
     IVERKSATT
 }
 
-
 enum class Behandlingsresultatstype(val navn: String) {
     IKKE_FASTSATT("Ikke fastsatt"),
     HENLAGT_FEILOPPRETTET("Henlagt, søknaden er feilopprettet"),
@@ -64,7 +62,7 @@ enum class Behandlingsresultatstype(val navn: String) {
     HENLAGT_FEILOPPRETTET_UTEN_BREV("Feilaktig opprettet - uten henleggelsesbrev"),
     HENLAGT_KRAVGRUNNLAG_NULLSTILT("Kravgrunnlaget er nullstilt"),
     HENLAGT_TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
-    HENLAGT("Henlagt"),  // kun brukes i frontend
+    HENLAGT("Henlagt"), // kun brukes i frontend
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
     DELVIS_TILBAKEBETALING("Delvis tilbakebetaling"),
     FULL_TILBAKEBETALING("Full tilbakebetaling");

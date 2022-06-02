@@ -124,7 +124,4 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                         setProperty(PropertyName.ENHET, "enhet")
                     })
     }
-
-
 }
-

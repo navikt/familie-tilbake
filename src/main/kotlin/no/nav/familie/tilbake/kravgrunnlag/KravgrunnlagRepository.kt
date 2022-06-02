@@ -26,5 +26,4 @@ interface KravgrunnlagRepository : RepositoryInterface<Kravgrunnlag431, UUID>,
     fun findByBehandlingId(behandlingId: UUID): List<Kravgrunnlag431>
 
     fun findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431?
-
 }

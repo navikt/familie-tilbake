@@ -34,5 +34,4 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
     fun hentFaktaomfeilutbetaling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }
-
 }

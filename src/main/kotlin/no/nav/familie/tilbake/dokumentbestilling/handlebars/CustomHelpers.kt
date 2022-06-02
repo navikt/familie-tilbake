@@ -13,9 +13,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
 class SwitchHelper : Helper<Any> {
-
 
     override fun apply(variabel: Any, options: Options): Any {
 
@@ -31,8 +29,8 @@ class SwitchHelper : Helper<Any> {
         if (Integer.valueOf(1) == antall) {
             return resultat
         }
-        throw IllegalArgumentException("Switch-case må treffe i 1 case, men traff i " + antall
-                                       + " med verdien " + ctx.get("__condition_variable"))
+        throw IllegalArgumentException("Switch-case må treffe i 1 case, men traff i " + antall +
+                                       " med verdien " + ctx.get("__condition_variable"))
     }
 }
 
@@ -97,7 +95,6 @@ class KortdatoHelper : Helper<Any> {
 }
 
 class MånedHelper : Helper<Any> {
-
 
     private val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("NO"))
 

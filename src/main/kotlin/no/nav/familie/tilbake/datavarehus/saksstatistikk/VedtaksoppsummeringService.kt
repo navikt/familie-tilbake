@@ -31,7 +31,6 @@ class VedtaksoppsummeringService(private val behandlingRepository: BehandlingRep
                                  private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
                                  private val beregningService: TilbakekrevingsberegningService) {
 
-
     fun hentVedtaksoppsummering(behandlingId: UUID): Vedtaksoppsummering {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -116,7 +115,6 @@ class VedtaksoppsummeringService(private val behandlingRepository: BehandlingRep
                               feilutbetaltBeløp = resultatPeriode.feilutbetaltBeløp,
                               bruttoTilbakekrevingsbeløp = resultatPeriode.tilbakekrevingsbeløp,
                               rentebeløp = resultatPeriode.rentebeløp)
-
             } else {
                 null
             }

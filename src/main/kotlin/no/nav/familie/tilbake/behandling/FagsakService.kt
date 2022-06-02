@@ -150,5 +150,4 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         fagsakRepository.update(fagsak.copy(bruker = Bruker(ident = endretPersonIdentEvent.source as String,
                                                             språkkode = fagsak.bruker.språkkode)))
     }
-
 }

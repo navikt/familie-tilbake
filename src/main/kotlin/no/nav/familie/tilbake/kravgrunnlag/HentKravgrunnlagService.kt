@@ -55,13 +55,12 @@ class HentKravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRe
         val hentkravgrunnlag = HentKravgrunnlagDetaljDto()
         hentkravgrunnlag.kravgrunnlagId = kravgrunnlagId
         hentkravgrunnlag.kodeAksjon = kodeAksjon.kode
-        hentkravgrunnlag.enhetAnsvarlig = "8020" //fast verdi
-        hentkravgrunnlag.saksbehId = "K231B433" //fast verdi
+        hentkravgrunnlag.enhetAnsvarlig = "8020" // fast verdi
+        hentkravgrunnlag.saksbehId = "K231B433" // fast verdi
 
         val request = KravgrunnlagHentDetaljRequest()
         request.hentkravgrunnlag = hentkravgrunnlag
 
         return request
     }
-
 }

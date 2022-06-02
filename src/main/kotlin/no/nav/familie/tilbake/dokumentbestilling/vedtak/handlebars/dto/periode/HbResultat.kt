@@ -9,5 +9,4 @@ class HbResultat(val tilbakekrevesBeløp: BigDecimal,
                  val tilbakekrevesBeløpUtenSkattMedRenter: BigDecimal) {
 
     val tilbakekrevesBeløpMedRenter: BigDecimal = tilbakekrevesBeløp.add(rentebeløp)
-
 }

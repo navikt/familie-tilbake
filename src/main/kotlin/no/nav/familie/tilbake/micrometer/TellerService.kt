@@ -65,5 +65,4 @@ class TellerService(private val fagsakRepository: FagsakRepository,
                         Tags.of("fagsystem", fagsak.fagsystem.name,
                                 "vedtakstype", vedtakstype)).increment()
     }
-
 }

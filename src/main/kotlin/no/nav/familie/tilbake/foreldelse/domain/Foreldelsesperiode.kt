@@ -24,7 +24,6 @@ data class Foreldelsesperiode(@Id
     fun erForeldet(): Boolean {
         return Foreldelsesvurderingstype.FORELDET == foreldelsesvurderingstype
     }
-
 }
 
 enum class Foreldelsesvurderingstype(val navn: String) {

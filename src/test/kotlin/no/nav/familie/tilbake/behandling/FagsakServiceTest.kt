@@ -51,7 +51,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
-
     @Test
     fun test() {
         headers.setBearerAuth(lokalTestToken())
@@ -125,7 +124,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val eksternFagsakId = UUID.randomUUID().toString()
         opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "12345678910")
 
-        //Antar mock PDL client returnerer 32132132111
+        // Antar mock PDL client returnerer 32132132111
         // første kall mot PDL får differanse på ident og kaster endretPersonIdentPublisher event
         fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
@@ -211,7 +210,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
                 "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
                 "ta kontakt med brukerstøtte for å rapportere feilen."
-
     }
 
     @Test

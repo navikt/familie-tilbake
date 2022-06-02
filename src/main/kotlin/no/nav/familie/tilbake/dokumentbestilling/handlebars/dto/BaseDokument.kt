@@ -79,5 +79,4 @@ open class BaseDokument(val ytelsestype: Ytelsestype,
     private class Ytelsesinfo(val url: String, val navn: Map<Språkkode, Ytelsesnavn>)
 
     private class Ytelsesnavn(val ubestemt: String, val bestemt: String, val eiendomsform: String)
-
 }

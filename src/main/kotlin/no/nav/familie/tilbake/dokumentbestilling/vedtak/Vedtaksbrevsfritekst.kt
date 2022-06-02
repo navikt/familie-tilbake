@@ -34,13 +34,11 @@ object Vedtaksbrevsfritekst {
                          vurderinger = vurderinger)
         }
 
-
         val fritekstType = utledFritekstTypeForOppsummering(vedtaksbrevsdata)
         val felles = vedtaksbrevsdata.felles
                 .copy(fritekstoppsummering = markerFritekst(fritekstType, vedtaksbrevsdata.felles.fritekstoppsummering, null))
         return vedtaksbrevsdata.copy(felles = felles,
                                      perioder = perioder)
-
     }
 
     private fun utledFritekstTypeForOppsummering(vedtaksbrevsdata: HbVedtaksbrevsdata): FritekstType {
@@ -89,7 +87,6 @@ object Vedtaksbrevsfritekst {
             tekst.startsWith(FRITEKST_MARKERING_START) -> tekst.substring(FRITEKST_MARKERING_START.length)
             tekst.startsWith(FRITEKST_PÅKREVET_MARKERING_START) -> tekst.substring(FRITEKST_PÅKREVET_MARKERING_START.length)
             else -> throw IllegalArgumentException("Utvikler-feil: denne metoden skal bare brukes på fritekstmarkering-start")
-
         }
     }
 

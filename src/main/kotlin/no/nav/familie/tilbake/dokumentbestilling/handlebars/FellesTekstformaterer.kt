@@ -66,10 +66,10 @@ object FellesTekstformaterer {
 
     private fun applyTemplate(data: Any, template: Template): String {
         return try {
-            //Går via JSON for å
-            //1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
-            //2. ha egen navngiving på variablene i template for enklere å lese template
-            //3. unngår at template feiler når variable endrer navn
+            // Går via JSON for å
+            // 1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
+            // 2. ha egen navngiving på variablene i template for enklere å lese template
+            // 3. unngår at template feiler når variable endrer navn
             val jsonNode: JsonNode = OM.valueToTree(data)
             val context = Context.newBuilder(jsonNode)
                     .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)

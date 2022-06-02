@@ -32,9 +32,8 @@ import java.net.URI
 
 @Component
 class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                          private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-
+                          private val integrasjonerConfig: IntegrasjonerConfig) :
+    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI =
             UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
@@ -197,5 +196,4 @@ class IntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
-
 }

@@ -84,7 +84,6 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXMl: String
     private lateinit var mottattXmlId: UUID
 
-
     private val eksternFagsakIdSlot = slot<String>()
     private val ytelsestypeSlot = slot<Ytelsestype>()
     private val eksternIdSlot = slot<String>()

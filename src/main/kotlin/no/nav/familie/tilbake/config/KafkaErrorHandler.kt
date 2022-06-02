@@ -88,5 +88,4 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
     init {
         this.executor = SimpleAsyncTaskExecutor()
     }
-
 }

@@ -55,7 +55,7 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk( Behandlerrolle.SAKSBEHANDLER,
+    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
                          "Sjekk om det er mulig å opprette behandling manuelt",
                         AuditLoggerEvent.ACCESS,
                          HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID)

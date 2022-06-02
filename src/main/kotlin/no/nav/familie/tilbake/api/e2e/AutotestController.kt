@@ -81,8 +81,8 @@ class AutotestController(private val taskRepository: TaskRepository,
     }
 
     @PostMapping(path = ["/publiser/fagsystemsbehandling"])
-    fun publishFagsystemsbehandlingsdata(@Valid @RequestBody opprettManueltTilbakekrevingRequest
-                                         : OpprettManueltTilbakekrevingRequest): Ressurs<String> {
+    fun publishFagsystemsbehandlingsdata(@Valid @RequestBody opprettManueltTilbakekrevingRequest:
+                                         OpprettManueltTilbakekrevingRequest): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId

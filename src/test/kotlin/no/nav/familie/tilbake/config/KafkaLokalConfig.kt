@@ -22,7 +22,6 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 
-
 @Configuration
 @EnableKafka
 @Profile("local")
@@ -81,7 +80,6 @@ class KafkaLokalConfig(@Value("\${LOKAL_BROKER_KAFKA_PORT:8093}") private val br
         return factory
     }
 
-
     private fun producerConfigs() = mapOf(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092",
                                           ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
                                           ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
@@ -97,5 +95,4 @@ class KafkaLokalConfig(@Value("\${LOKAL_BROKER_KAFKA_PORT:8093}") private val br
                                           ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
                                           CommonClientConfigs.RETRIES_CONFIG to 10,
                                           CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100)
-
 }

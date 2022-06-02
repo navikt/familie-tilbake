@@ -40,7 +40,7 @@ object VilkårsvurderingMapper {
                    faktaFeilutbetaling: FaktaFeilutbetaling,
                    kravgrunnlag431: Kravgrunnlag431): VurdertVilkårsvurderingDto {
 
-        //allerede behandlet perioder uten perioder som er foreldet
+        // allerede behandlet perioder uten perioder som er foreldet
         val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
                 ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
                 ?.map {
@@ -95,12 +95,10 @@ object VilkårsvurderingMapper {
                                 perioder = vilkårsvurderingsperiode)
     }
 
-    private fun tilVilkårsvurderingsresultatDto(vilkårsvurderingsperiode: Vilkårsvurderingsperiode)
-            : VurdertVilkårsvurderingsresultatDto {
+    private fun tilVilkårsvurderingsresultatDto(vilkårsvurderingsperiode: Vilkårsvurderingsperiode): VurdertVilkårsvurderingsresultatDto {
         return VurdertVilkårsvurderingsresultatDto(vilkårsvurderingsresultat = vilkårsvurderingsperiode.vilkårsvurderingsresultat,
                                                    godTro = tilGodTroDto(vilkårsvurderingsperiode.godTro),
                                                    aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhet))
-
     }
 
     private fun tilGodTroDto(vilkårsvurderingGodTro: VilkårsvurderingGodTro?): VurdertGodTroDto? {

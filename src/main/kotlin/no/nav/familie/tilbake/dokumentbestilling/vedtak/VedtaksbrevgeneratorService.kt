@@ -44,11 +44,9 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
-
 @Service
 class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
                                   private val eksterneDataForBrevService: EksterneDataForBrevService) {
-
 
     fun genererVedtaksbrevForSending(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
                                      brevmottager: Brevmottager): Brevdata {
@@ -86,15 +84,12 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
                         overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
                         brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
                         vedleggHtml = vedleggHtml)
-
-
     }
 
     fun genererVedtaksbrevsdata(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag): HbVedtaksbrevsdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, vedtaksbrevgrunnlag.brevmottager)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
-
 
     private fun hentDataForVedtaksbrev(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
                                        brevmottager: Brevmottager): Vedtaksbrevsdata {
@@ -332,7 +327,6 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
                              fritekstForeldelse = fritekst?.foreldelseAvsnitt)
     }
 
-
     private fun utledResultat(resultatPeriode: Beregningsresultatsperiode, foreldelse: VurdertForeldelse?): HbResultat {
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, resultatPeriode.periode)
         val foreldetPeriode = foreldelsePeriode != null && foreldelsePeriode.erForeldet()
@@ -345,7 +339,6 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
                               resultatPeriode.feilutbetaltBeløp.subtract(resultatPeriode.tilbakekrevingsbeløp)
                           } else null)
     }
-
 
     private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Periode): Foreldelsesperiode? {
         return if (foreldelse == null) {
@@ -369,6 +362,4 @@ class VedtaksbrevgeneratorService(private val tilbakekrevingBeregningService: Ti
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
         private const val KLAGEFRIST_UKER = 6
     }
-
-
 }

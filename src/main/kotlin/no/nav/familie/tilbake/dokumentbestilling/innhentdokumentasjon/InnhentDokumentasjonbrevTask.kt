@@ -51,7 +51,6 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
                                                             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                             fristTid)
         }
-
     }
 
     companion object {

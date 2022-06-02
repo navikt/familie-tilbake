@@ -59,12 +59,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-
     }
 
     @Test
@@ -382,7 +380,6 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                                      tilbakekrevesBeløp = BigDecimal.ZERO,
                                      uinnkrevdBeløp = BigDecimal.ZERO,
                                      skatteprosent = BigDecimal.ZERO)
-
     }
 
     private fun lagYtelBeløp(utbetalt: BigDecimal, skatteprosent: BigDecimal): Kravgrunnlagsbeløp433 {
@@ -413,11 +410,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         return Kravgrunnlagsperiode432(periode = periode,
                                        månedligSkattebeløp = BigDecimal.valueOf(skattMnd.toLong()),
                                        beløp = beløp)
-
     }
 
     private fun lagGrunnlag(perioder: Set<Kravgrunnlagsperiode432>): Kravgrunnlag431 {
         return Testdata.kravgrunnlag431.copy(perioder = perioder)
-
     }
 }

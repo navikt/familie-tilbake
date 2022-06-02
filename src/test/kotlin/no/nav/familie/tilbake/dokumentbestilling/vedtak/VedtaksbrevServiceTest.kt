@@ -47,15 +47,14 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
-
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository

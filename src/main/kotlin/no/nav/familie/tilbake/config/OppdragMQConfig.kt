@@ -63,7 +63,6 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         return pooledFactory
     }
 
-
     @Bean
     fun jmsListenerContainerFactory(@Qualifier("mqQueueConnectionFactory") connectionFactory: ConnectionFactory,
                                     configurer: DefaultJmsListenerContainerFactoryConfigurer): JmsListenerContainerFactory<*> {

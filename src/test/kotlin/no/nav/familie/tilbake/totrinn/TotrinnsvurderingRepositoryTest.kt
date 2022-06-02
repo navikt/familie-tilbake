@@ -57,5 +57,4 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
                                                                      Totrinnsvurdering::versjon)
         lagretTotrinnsvurdering.versjon shouldBe 2
     }
-
 }

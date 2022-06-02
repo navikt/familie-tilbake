@@ -60,7 +60,6 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every {
             brevsporingService.finnSisteVarsel(behandlingId)
         } returns (Testdata.brevsporing)
-
     }
 
     @Test

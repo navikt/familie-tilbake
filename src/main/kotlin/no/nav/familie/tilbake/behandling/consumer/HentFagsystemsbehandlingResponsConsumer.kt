@@ -20,7 +20,6 @@ class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingSe
 
     var latch: CountDownLatch = CountDownLatch(1)
 
-
     @KafkaListener(id = "familie-tilbake",
                    topics = [KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC],
                    containerFactory = "concurrentKafkaListenerContainerFactory")

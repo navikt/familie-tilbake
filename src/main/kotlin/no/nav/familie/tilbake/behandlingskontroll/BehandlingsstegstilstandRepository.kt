@@ -18,5 +18,4 @@ interface BehandlingsstegstilstandRepository : RepositoryInterface<Behandlingsst
                                                       statuser: List<Behandlingsstegstatus>): Behandlingsstegstilstand?
 
     fun findByBehandlingIdAndBehandlingssteg(behandlingId: UUID, behandlingssteg: Behandlingssteg): Behandlingsstegstilstand?
-
 }

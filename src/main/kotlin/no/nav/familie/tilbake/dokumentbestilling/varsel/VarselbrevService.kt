@@ -24,7 +24,6 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                         private val pdfBrevService: PdfBrevService,
                         private val varselbrevUtil: VarselbrevUtil) {
 
-
     fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottager)
@@ -48,14 +47,12 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                                 fritekst)
     }
 
-
-
     private fun lagVarselbrevForSending(behandling: Behandling,
                                         fagsak: Fagsak,
                                         brevmottager: Brevmottager): Varselbrevsdokument {
         val verge = behandling.aktivVerge
 
-        //Henter data fra pdl
+        // Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
@@ -99,5 +96,4 @@ class VarselbrevService(private val fagsakRepository: FagsakRepository,
                                                                          request,
                                                                          personinfo)
     }
-
 }

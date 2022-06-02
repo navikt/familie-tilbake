@@ -71,5 +71,4 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
 
         const val TYPE = "opprettBehandlingManuelt"
     }
-
 }

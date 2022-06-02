@@ -58,7 +58,6 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                    fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
                                    varseltekstFraSaksbehandler = varsel?.varseltekst,
                                    feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel))
-
     }
 
     fun sammenstillInfoForForhåndvisningVarselbrev(adresseinfo: Adresseinfo,
@@ -112,9 +111,7 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                             språkkode = fagsak.bruker.språkkode,
                             ytelsestype = fagsak.ytelsestype,
                             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert))
-
     }
-
 
     fun sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(metadata: Brevmetadata,
                                                                  fritekst: String?,
@@ -148,7 +145,6 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
                                 it.nyttBeløp,
                                 it.tidligereUtbetaltBeløp,
                                 it.feilutbetaltBeløp)
-
         }
 
         validerKorrektTotalbeløp(perioder,
@@ -228,5 +224,4 @@ class VarselbrevUtil(private val eksterneDataForBrevService: EksterneDataForBrev
     private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Handlebarsperiode> {
         return feilutbetalingsfakta.feilutbetaltePerioder.map { Handlebarsperiode(it.periode.fom, it.periode.tom) }
     }
-
 }

@@ -26,7 +26,6 @@ enum class TilbakekrevingHistorikkinnslagstype(val tittel: String,
     BEHANDLING_FLYTTET_MED_FORVALTNING(tittel = "Problem i forvaltning",
                                        tekst = "Behandling flyttet tilbake til Fakta"),
 
-
     // Skjermlenke type
     VERGE_OPPRETTET(tittel = "Verge registert",
                     type = Historikkinnslagstype.SKJERMLENKE,

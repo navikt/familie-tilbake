@@ -27,7 +27,7 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : Asy
         val behandlingId = UUID.fromString(task.payload)
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) +":" +
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
                             beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         var patchetOppgave = oppgave.copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse)
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {

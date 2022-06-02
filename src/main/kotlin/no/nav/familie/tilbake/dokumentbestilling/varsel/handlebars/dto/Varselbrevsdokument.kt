@@ -59,5 +59,4 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
             requireNotNull(annenMottagersNavn) { "annenMottagersNavn" }
         }
     }
-
 }

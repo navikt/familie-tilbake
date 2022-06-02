@@ -109,5 +109,4 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
-
 }

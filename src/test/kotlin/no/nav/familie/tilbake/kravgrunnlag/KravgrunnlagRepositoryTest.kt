@@ -73,6 +73,4 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
                                                              Kravgrunnlag431::perioder,
                                                              Kravgrunnlag431::versjon)
     }
-
 }
-

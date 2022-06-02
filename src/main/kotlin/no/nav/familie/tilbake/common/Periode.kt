@@ -54,5 +54,4 @@ data class Periode(val fom: YearMonth,
     override fun compareTo(other: Periode): Int {
         return COMPARATOR.compare(this, other)
     }
-
 }

@@ -61,5 +61,4 @@ class AutomatiskSaksbehandlingBatch(private val automatiskSaksbehandlingService:
         }
         logger.info("Stopper AutomatiskSaksbehandlingBatch..")
     }
-
 }

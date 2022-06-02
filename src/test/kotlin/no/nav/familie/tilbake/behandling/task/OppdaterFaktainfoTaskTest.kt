@@ -114,6 +114,4 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                         setProperty("eksternId", "1")
                     })
     }
-
-
 }

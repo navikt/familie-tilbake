@@ -45,5 +45,4 @@ object ForeldelseMapper {
         }.toSet()
         return VurdertForeldelse(behandlingId = behandlingId, foreldelsesperioder = foreldelsesperioder)
     }
-
 }

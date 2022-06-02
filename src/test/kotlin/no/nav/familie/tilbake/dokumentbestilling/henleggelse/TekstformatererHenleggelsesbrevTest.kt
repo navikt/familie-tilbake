@@ -25,7 +25,6 @@ class TekstformatererHenleggelsesbrevTest {
                                             saksnummer = "1232456",
                                             ansvarligSaksbehandler = "Bob")
 
-
     private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(brevmetadata,
                                                                       niendeMars,
                                                                       REVURDERING_HENLEGGELSESBREV_FRITEKST)

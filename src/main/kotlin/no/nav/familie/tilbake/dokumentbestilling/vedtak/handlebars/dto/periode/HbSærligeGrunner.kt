@@ -17,5 +17,4 @@ data class HbSærligeGrunner(val størrelse: Boolean = false,
                                                       grunner.contains(SærligGrunn.TID_FRA_UTBETALING),
                                                       fritekst,
                                                       fritekstAnnet)
-
 }

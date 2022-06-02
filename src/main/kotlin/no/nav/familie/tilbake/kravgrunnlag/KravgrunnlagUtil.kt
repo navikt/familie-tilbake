@@ -44,7 +44,7 @@ object KravgrunnlagUtil {
         return try {
             val jaxbUnmarshaller: Unmarshaller = jaxbContext.createUnmarshaller()
 
-            //satt xsd for å validere mottatt xml
+            // satt xsd for å validere mottatt xml
             val schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
             val kravgrunnlagSchema =
                     schemaFactory.newSchema(this.javaClass.classLoader.getResource("xsd/kravgrunnlag_detalj.xsd"))
@@ -60,7 +60,7 @@ object KravgrunnlagUtil {
         return try {
             val jaxbUnmarshaller: Unmarshaller = statusmeldingJaxbContext.createUnmarshaller()
 
-            //satt xsd for å validere mottatt xml
+            // satt xsd for å validere mottatt xml
             val schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
             val statusmeldingSchema =
                     schemaFactory.newSchema(this.javaClass.classLoader.getResource("xsd/krav_og_vedtakstatus.xsd"))
@@ -77,8 +77,7 @@ object KravgrunnlagUtil {
                ?: throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
     }
 
-    fun sammenlignKravgrunnlag(mottattKravgrunnlag: DetaljertKravgrunnlagDto, hentetKravgrunnlag: DetaljertKravgrunnlagDto)
-            : String {
+    fun sammenlignKravgrunnlag(mottattKravgrunnlag: DetaljertKravgrunnlagDto, hentetKravgrunnlag: DetaljertKravgrunnlagDto): String {
         val builder = DiffBuilder(mottattKravgrunnlag, hentetKravgrunnlag, ToStringStyle.JSON_STYLE)
                 .append("kravgrunnlagId", mottattKravgrunnlag.kravgrunnlagId, hentetKravgrunnlag.kravgrunnlagId)
                 .append("vedtakId", mottattKravgrunnlag.vedtakId, hentetKravgrunnlag.vedtakId)
@@ -140,5 +139,4 @@ object KravgrunnlagUtil {
 
         return størrePerioder.filter { mindrePerioder.none { mindre -> mindre.periode.fom == it.periode.fom } }
     }
-
 }

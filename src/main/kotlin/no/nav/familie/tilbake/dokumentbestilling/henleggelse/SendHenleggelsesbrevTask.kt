@@ -15,7 +15,6 @@ import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
-
 @Component
 @TaskStepBeskrivelse(taskStepType = SendHenleggelsesbrevTask.TYPE,
                      maxAntallFeil = 50,
@@ -46,8 +45,6 @@ class SendHenleggelsesbrevTask(private val henleggelsesbrevService: Henleggelses
 
         const val TYPE = "distribuerHenleggelsesbrev"
     }
-
-
 }
 
 data class SendBrevTaskdata(val behandlingId: UUID,

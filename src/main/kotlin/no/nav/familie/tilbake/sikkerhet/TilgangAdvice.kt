@@ -250,7 +250,6 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
                                      handling = handling)
     }
 
-
     fun logAccess(rolletilgangssjekk: Rolletilgangssjekk, fagsak: Fagsak?, behandling: Behandling? = null) {
 
         fagsak?.let {
@@ -334,5 +333,4 @@ class TilgangAdvice(private val rolleConfig: RolleConfig,
         }
         return minimumBehandlerrolle
     }
-
 }

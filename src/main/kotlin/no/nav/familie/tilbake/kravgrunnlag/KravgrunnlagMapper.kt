@@ -62,7 +62,5 @@ object KravgrunnlagMapper {
                                   årsakskode = it.kodeAArsak,
                                   skyldkode = it.kodeSkyld)
         }.toSet()
-
     }
-
 }

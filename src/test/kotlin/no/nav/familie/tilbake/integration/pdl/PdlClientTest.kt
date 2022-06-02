@@ -35,7 +35,6 @@ class PdlClientTest {
             wiremockServerItem.start()
 
             pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
-
         }
 
         @AfterAll
@@ -83,12 +82,10 @@ class PdlClientTest {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
 
-
         val exception = shouldThrow<RuntimeException>(block =
                                                       { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }
-
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/pdl/json/$filnavn").readText()

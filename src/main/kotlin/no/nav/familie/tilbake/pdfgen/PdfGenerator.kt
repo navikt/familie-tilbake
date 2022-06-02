@@ -42,8 +42,8 @@ class PdfGenerator {
         genererPDF(html, baos, dokumentvariant)
         val bytes = baos.toByteArray()
         if (dokumentvariant == Dokumentvariant.ENDELIG) {
-            //validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
-            //validering er også bare nødvendig før journalføring, så det er OK
+            // validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
+            // validering er også bare nødvendig før journalføring, så det er OK
             PdfaValidator.validatePdf(bytes)
         }
         return bytes
@@ -82,7 +82,7 @@ class PdfGenerator {
     }
 
     private fun appendHtmlMetadata(html: String, format: DocFormat, dokumentvariant: Dokumentvariant): String {
-        //nødvendig doctype for å støtte non-breaking space i openhtmltopdf
+        // nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
                " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
                "<html>" +

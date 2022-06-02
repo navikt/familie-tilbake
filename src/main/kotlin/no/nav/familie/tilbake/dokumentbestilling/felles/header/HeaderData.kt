@@ -6,4 +6,3 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Språkstøtte
 class HeaderData(override val språkkode: Språkkode,
                  val person: Person,
                  val brev: Brev) : Språkstøtte
-

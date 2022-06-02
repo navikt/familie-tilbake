@@ -98,7 +98,6 @@ object BehandlingMapper {
                              fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
                              eksternFagsakId = eksternFagsakId,
                              behandlingsårsakstype = behandling.sisteÅrsak?.type)
-
     }
 
     private fun tilBehandlingstegsinfoDto(behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): List<BehandlingsstegsinfoDto> {
@@ -178,8 +177,7 @@ object BehandlingMapper {
         }
     }
 
-    private fun mapResultat(resultat: Behandlingsresultat?)
-            : no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
+    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
         return when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING

@@ -179,7 +179,6 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                                 datoer = HbVedtaksbrevDatoer(opphørsdatoDødSøker = LocalDate.of(2021, 5, 4),
                                                              opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4)))
 
-
     private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> {
         return HendelsestypePerYtelsestype.getHendelsestyper(ytelsestype).map { hendelsestype ->
             HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).map { hendelsesundertype ->

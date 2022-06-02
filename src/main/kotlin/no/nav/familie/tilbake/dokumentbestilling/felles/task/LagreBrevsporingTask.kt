@@ -33,7 +33,6 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
         val journalpostId = task.metadata.getProperty("journalpostId")
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
 
-
         brevsporingService.lagreInfoOmUtsendtBrev(UUID.fromString(task.payload),
                                                   dokumentId,
                                                   journalpostId,
@@ -59,7 +58,6 @@ class LagreBrevsporingTask(private val brevsporingService: BrevsporingService,
                                                   aktør = utledAktør(brevtype, ansvarligSaksbehandler),
                                                   brevtype = brevtype)
         }
-
 
         if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))

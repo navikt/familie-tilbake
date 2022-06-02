@@ -56,5 +56,4 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
                                                                             Vedtaksbrevsoppsummering::versjon)
         lagretVedtaksbrevsoppsummering.versjon shouldBe 2
     }
-
 }

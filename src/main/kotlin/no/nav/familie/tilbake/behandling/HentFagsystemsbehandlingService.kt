@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
-
 @Service
 class HentFagsystemsbehandlingService(private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
                                       private val kafkaProducer: KafkaProducer) {
@@ -49,7 +48,7 @@ class HentFagsystemsbehandlingService(private val requestSendtRepository: HentFa
     }
 
     @Transactional
-    fun fjernHentFagsystemsbehandlingRequest(requestId: UUID){
+    fun fjernHentFagsystemsbehandlingRequest(requestId: UUID) {
         requestSendtRepository.deleteById(requestId)
     }
 

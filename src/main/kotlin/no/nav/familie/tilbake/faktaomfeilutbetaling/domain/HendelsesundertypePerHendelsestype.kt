@@ -94,4 +94,3 @@ object HendelsesundertypePerHendelsestype {
         return HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")
     }
 }
-

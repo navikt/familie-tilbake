@@ -64,7 +64,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
-        sjekkIdentiskKravgrunnlag(kravgrunnlag431,behandling)
+        sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
@@ -72,7 +72,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
                                               TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
                                               Aktør.VEDTAKSLØSNING)
 
-        //oppdater frist på oppgave når behandling venter på grunnlag
+        // oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
             håndterOppgave(behandling)
@@ -105,7 +105,6 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         return behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = ytelsestype,
                                                                       eksternFagsakId = fagsystemId)
     }
-
 
     private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431, ytelsestype: Ytelsestype) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
@@ -155,7 +154,7 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
     }
 
     private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
-        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET ) {
+        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET) {
             return
         }
         // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
@@ -183,10 +182,8 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
     }
 
-
     companion object {
 
         const val FRIST_DATO_GRENSE = 10L
     }
-
 }

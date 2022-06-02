@@ -21,7 +21,6 @@ class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val validator = Validation.buildDefaultValidatorFactory().validator
 
-
     override fun doTask(task: Task) {
         log.info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)

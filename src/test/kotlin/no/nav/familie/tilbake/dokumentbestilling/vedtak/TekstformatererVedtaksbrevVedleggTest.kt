@@ -50,7 +50,6 @@ class TekstformatererVedtaksbrevVedleggTest {
                                             saksnummer = "1232456",
                                             ansvarligSaksbehandler = "Bob")
 
-
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med en periode uten renter`() {
         val data = getVedtaksbrevData(Språkkode.NB)
@@ -217,7 +216,6 @@ class TekstformatererVedtaksbrevVedleggTest {
         val fasit = les("/vedtaksbrev/vedlegg/vedlegg_med_og_uten_renter.txt")
         generertBrev shouldBe fasit
     }
-
 
     @Throws(IOException::class) private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->

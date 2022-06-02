@@ -29,5 +29,4 @@ class TilgangService(private val rolleConfig: RolleConfig) {
         }
         return behandlerrolle
     }
-
 }

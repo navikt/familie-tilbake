@@ -79,14 +79,13 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                               brevmottager: Brevmottager,
                               erKorrigert: Boolean,
                               aktivtVarsel: Varsel? = null): Varselbrevsdokument {
-        //Henter data fra pdl
+        // Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
 
-
-        //Henter feilutbetaling fakta
+        // Henter feilutbetaling fakta
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
 
         val metadata = varselbrevUtil.sammenstillInfoForBrevmetadata(behandling,
@@ -101,5 +100,4 @@ class ManueltVarselbrevService(private val behandlingRepository: BehandlingRepos
                                                                                        feilutbetalingsfakta,
                                                                                        aktivtVarsel)
     }
-
 }

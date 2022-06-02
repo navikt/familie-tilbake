@@ -36,7 +36,6 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
                                 private val taskService: TaskService,
                                 private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
-
     fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, info: Behandlingsstegsinfo) {
         val hendelsesbeskrivelse = "Ny behandlingsstegstilstand " +
                                    "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
@@ -61,7 +60,6 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
                             setProperty("beskrivelse", hendelsesbeskrivelse)
                             setProperty(PropertyName.FAGSYSTEM,
                                         FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name)
-
                         })
         taskService.save(task)
     }
@@ -115,5 +113,4 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
                                    totalFeilutbetaltBeløp = totalFeilutbetaltBeløp,
                                    totalFeilutbetaltPeriode = totalFeilutbetaltPeriode)
     }
-
 }

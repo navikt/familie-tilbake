@@ -146,7 +146,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
     }
 
-
     @Test
     fun `arkiverMottattKravgrunnlag skal arkivere mottatt xml`() {
         val økonomiXmlMottatt = lagMottattXml()

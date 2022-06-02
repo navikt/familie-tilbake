@@ -49,7 +49,6 @@ object VedtaksbrevFritekstMapper {
         }
     }
 
-
     private fun lagFaktaAvsnitt(behandlingId: UUID, faktaAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
         return faktaAvsnittMedPeriode.faktaAvsnitt?.let {
             Vedtaksbrevsperiode(behandlingId = behandlingId,

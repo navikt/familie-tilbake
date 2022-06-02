@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.avstemming
 
-
 class FilMapper(private val rader: List<Rad>) {
 
     fun tilFlatfil(): ByteArray {
@@ -21,6 +20,4 @@ class FilMapper(private val rader: List<Rad>) {
                            "renter" + Rad.SKILLETEGN_KOLONNER +
                            "erOmgjøringTilIngenTilbakekreving" + SKILLETEGN_RADER
     }
-
-
 }

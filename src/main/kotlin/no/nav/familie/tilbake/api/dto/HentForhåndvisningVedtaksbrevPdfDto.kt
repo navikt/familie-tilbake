@@ -9,5 +9,3 @@ class HentForhåndvisningVedtaksbrevPdfDto(var behandlingId: UUID,
                                           var oppsummeringstekst: String? = null,
                                           @Size(max = 100, message = "For mange perioder") @Valid
                                           var perioderMedTekst: List<PeriodeMedTekstDto>)
-
-

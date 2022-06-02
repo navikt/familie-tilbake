@@ -44,7 +44,6 @@ object DokprodTilHtml {
                     </tr>
                     </table>""")
 
-
                     continue
                 }
                 val overskrift = linje.startsWith("_")
@@ -61,7 +60,6 @@ object DokprodTilHtml {
                     } else {
                         builder.append("<h2>").append(linje.substring(1)).append("</h2>")
                     }
-
                 } else {
                     if (!harAvsnitt) {
                         harAvsnitt = true
@@ -101,8 +99,8 @@ object DokprodTilHtml {
     }
 
     private fun hentAvsnittene(dokprod: String): List<String> {
-        //avsnitt ved dobbelt linjeskift
-        //avsnitt ved overskrift (linje starter med _)
+        // avsnitt ved dobbelt linjeskift
+        // avsnitt ved overskrift (linje starter med _)
         return dokprod.split("(\n\r?\n\r?)|(\n\r?(?=_))".toRegex())
     }
 

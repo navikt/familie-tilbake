@@ -191,7 +191,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
         fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
-
     }
 
     private fun lagTask(): Task {

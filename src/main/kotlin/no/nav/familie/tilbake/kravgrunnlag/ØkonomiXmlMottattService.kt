@@ -18,7 +18,6 @@ import java.util.UUID
 class ØkonomiXmlMottattService(private val mottattXmlRepository: ØkonomiXmlMottattRepository,
                                private val mottattXmlArkivRepository: ØkonomiXmlMottattArkivRepository) {
 
-
     fun lagreMottattXml(kravgrunnlagXml: String,
                         kravgrunnlag: DetaljertKravgrunnlagDto,
                         ytelsestype: Ytelsestype) {

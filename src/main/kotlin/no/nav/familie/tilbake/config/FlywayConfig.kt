@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 
-
 @ConstructorBinding
 data class FlywayConfig(private val role: String) {
 

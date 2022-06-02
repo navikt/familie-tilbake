@@ -32,5 +32,4 @@ class LagreVarselbrevsporingTask(private val varselService: VarselService) : Asy
 
         const val TYPE = "lagreVarselbrevsporing"
     }
-
 }

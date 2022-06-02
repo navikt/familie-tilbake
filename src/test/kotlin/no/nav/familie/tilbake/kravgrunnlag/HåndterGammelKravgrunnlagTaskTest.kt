@@ -99,7 +99,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXMl: String
     private lateinit var mottattXmlId: UUID
 
-
     @BeforeEach
     fun init() {
         mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
@@ -148,7 +147,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                              eksternId = xmlMottatt.referanse,
                                                              respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)))
 
-
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
@@ -177,7 +175,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                              eksternId = xmlMottatt.referanse,
                                                              respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)))
 
-
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
@@ -205,14 +202,12 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                              eksternId = xmlMottatt.referanse,
                                                              respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)))
 
-
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
                 IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
 
         val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
     }
-
 
     private fun lagTask(): Task {
         return taskRepository.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
@@ -243,5 +238,4 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
-
 }

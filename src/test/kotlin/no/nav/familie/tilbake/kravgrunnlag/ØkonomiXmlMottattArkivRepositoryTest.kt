@@ -42,5 +42,4 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
                                                                           ØkonomiXmlMottattArkiv::versjon)
         lagretØkonomiXmlMottattArkiv.versjon shouldBe 2
     }
-
 }

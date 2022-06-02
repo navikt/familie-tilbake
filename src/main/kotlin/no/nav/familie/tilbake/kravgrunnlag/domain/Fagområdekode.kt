@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.kravgrunnlag.domain
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
-
 enum class Fagområdekode(val navn: String, val ytelsestype: Ytelsestype) {
 
     BA("Barnetrygd", Ytelsestype.BARNETRYGD),
@@ -22,5 +21,4 @@ enum class Fagområdekode(val navn: String, val ytelsestype: Ytelsestype) {
             throw IllegalArgumentException("Ukjent Fagområdekode $kode")
         }
     }
-
 }

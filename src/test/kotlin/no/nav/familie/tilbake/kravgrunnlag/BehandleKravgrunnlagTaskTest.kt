@@ -220,7 +220,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        //behandling venter fortsatt på brukerstilbakemelding, oppretter ikke grunnlagssteg
+        // behandling venter fortsatt på brukerstilbakemelding, oppretter ikke grunnlagssteg
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER)
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
@@ -645,8 +645,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                                                behandlingssteg: Behandlingssteg,
                                                behandlingsstegstatus: Behandlingsstegstatus) {
         behandlingsstegstilstand.any {
-            behandlingssteg == it.behandlingssteg
-            && behandlingsstegstatus == it.behandlingsstegsstatus
+            behandlingssteg == it.behandlingssteg &&
+            behandlingsstegstatus == it.behandlingsstegsstatus
         }.shouldBeTrue()
     }
 
@@ -678,5 +678,4 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             fristDato.toString() == it.metadata["frist"]
         }.shouldBeTrue()
     }
-
 }

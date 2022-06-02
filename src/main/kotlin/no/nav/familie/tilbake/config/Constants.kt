@@ -6,7 +6,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period
 
-
 object Constants {
 
     private val rettsgebyrForDato = listOf(Datobeløp(LocalDate.of(2021, 1, 1), 1199),
@@ -44,7 +43,6 @@ object Constants {
                                                    .multiply(BigDecimal(0.5)))
 
     const val AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE = "Automatisk satt verdi"
-
 }
 
 object PropertyName {

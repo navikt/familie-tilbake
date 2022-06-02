@@ -78,12 +78,11 @@ data class Behandling(@Id
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type
-               && this.årsaker.any {
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type &&
+               this.årsaker.any {
             Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
         }
     }
-
 }
 
 data class Fagsystemsbehandling(@Id

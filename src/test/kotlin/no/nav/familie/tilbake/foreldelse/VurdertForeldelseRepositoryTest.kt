@@ -57,5 +57,4 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
                                                                      VurdertForeldelse::versjon)
         lagretVurdertForeldelse.versjon shouldBe 2
     }
-
 }

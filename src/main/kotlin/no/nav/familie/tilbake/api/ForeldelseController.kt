@@ -33,5 +33,4 @@ class ForeldelseController(val foreldelseService: ForeldelseService) {
     fun hentVurdertForeldelse(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VurdertForeldelseDto> {
         return Ressurs.success(foreldelseService.hentVurdertForeldelse(behandlingId))
     }
-
 }

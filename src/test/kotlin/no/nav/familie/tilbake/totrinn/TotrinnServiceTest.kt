@@ -39,7 +39,6 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
-
     }
 
     @Test
@@ -91,7 +90,6 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         totrinnsstegsinfo.shouldContainExactly(Totrinnsstegsinfo(Behandlingssteg.FAKTA, true, "testverdi"),
                                                Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
                                                Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi"))
-
     }
 
     @Test
@@ -125,7 +123,6 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                                                Totrinnsstegsinfo(Behandlingssteg.FORELDELSE, null, null),
                                                Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
                                                Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi"))
-
     }
 
     @Test
@@ -157,6 +154,4 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                                                                            behandlingssteg = behandlingssteg,
                                                                            behandlingsstegsstatus = behandlingsstegstatus))
     }
-
-
 }

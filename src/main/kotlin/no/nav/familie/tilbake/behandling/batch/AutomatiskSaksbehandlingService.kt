@@ -76,7 +76,7 @@ class AutomatiskSaksbehandlingService(private val behandlingRepository: Behandli
                                             Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte)
 }
 
-fun main(){
+fun main() {
     val dato = LocalDate.parse("2022-02-10-18.43.15.192503",
                                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
     print(dato < LocalDate.now())

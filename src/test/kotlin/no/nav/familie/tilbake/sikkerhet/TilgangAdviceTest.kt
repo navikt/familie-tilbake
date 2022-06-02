@@ -83,7 +83,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         RequestContextHolder.currentRequestAttributes().removeAttribute(SpringTokenValidationContextHolder::class.java.name, 0)
     }
 
-
     private lateinit var tilgangAdvice: TilgangAdvice
 
     @Autowired
@@ -124,7 +123,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                                                                "testresultat",
                                                                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL),
                                          saksbehandlerIdent = "bob")
-
 
     @BeforeEach
     fun init() {
@@ -557,7 +555,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
     }
 
-
     private fun opprettToken(behandlerNavn: String, gruppeNavn: List<String>): String {
         val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
@@ -565,7 +562,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         return Jwts.builder().setExpiration(calendar.time)
                 .setIssuer("azuread")
                 .addClaims(additionalParameters).compact()
-
     }
 
     private fun opprettRequestContext(requestUri: String, requestMethod: HttpMethod, token: String) {
@@ -577,6 +573,4 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         RequestContextHolder.currentRequestAttributes()
                 .setAttribute(SpringTokenValidationContextHolder::class.java.name, tokenValidationContext, 0)
     }
-
-
 }

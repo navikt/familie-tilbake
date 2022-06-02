@@ -384,7 +384,6 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                                       type = Historikkinnslagstype.HENDELSE)
     }
 
-
     private fun assertHistorikkinnslagRequest(aktør: Aktør, aktørIdent: String,
                                               tittel: String, type: Historikkinnslagstype,
                                               tekst: String? = null, steg: String? = null,
@@ -406,5 +405,4 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         request.dokumentId shouldBe dokumentId
         request.journalpostId shouldBe journalpostId
     }
-
 }

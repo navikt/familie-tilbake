@@ -24,7 +24,6 @@ import java.time.YearMonth
 import java.util.Optional
 import javax.sql.DataSource
 
-
 @Configuration
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie.tilbake", "no.nav.familie.prosessering")
@@ -34,7 +33,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
     fun operations(dataSource: DataSource): NamedParameterJdbcOperations {
         return NamedParameterJdbcTemplate(dataSource)
     }
-
 
     @Bean
     fun transactionManager(dataSource: DataSource): PlatformTransactionManager {
@@ -93,7 +91,5 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
                 YearMonth.of(localDate.year, localDate.month)
             }
         }
-
     }
-
 }

@@ -50,7 +50,6 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 
-
     @Test
     fun hentForhåndsvisningVarselbrev() {
         val forhåndsvisVarselbrevRequest =

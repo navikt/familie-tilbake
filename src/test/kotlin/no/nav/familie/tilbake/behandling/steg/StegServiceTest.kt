@@ -203,7 +203,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertFaktadata(behandlingsstegFaktaDto)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -234,7 +234,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertFaktadata(behandlingsstegFaktaDto)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -274,7 +274,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
         assertFaktadata(behandlingsstegFaktaDto)
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
@@ -310,7 +310,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertForeldelsesdata(behandlingsstegForeldelseDto.foreldetPerioder[0])
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
     }
@@ -353,7 +353,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstatus(behandlingId, Behandlingsstatus.UTREDES)
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
     }
 
@@ -403,7 +403,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         // deaktiverte tildligere behandlet vilkårsvurdering når alle perioder er foreldet
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId).shouldBeNull()
 
-        //historikk
+        // historikk
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT, Aktør.VEDTAKSLØSNING)
@@ -608,7 +608,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstander, Behandlingssteg.VERGE, Behandlingsstegstatus.UTFØRT)
     }
 
-
     @Test
     fun `gjenopptaSteg skal gjenoppta behandling og fortsette til grunnlag når behandling er i varselssteg uten grunnlag`() {
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL,
@@ -712,7 +711,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegDto = BehandlingsstegForeslåVedtaksstegDto(FritekstavsnittDto(perioderMedTekst = emptyList()))
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
                 .shouldBeTrue()
-
     }
 
     @Test
@@ -726,7 +724,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = false)
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
                 .shouldBeFalse()
-
     }
 
     @Test
@@ -740,7 +737,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegDto = lagBehandlingsstegFatteVedtaksstegDto(godkjent = true)
         stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)
                 .shouldBeFalse()
-
     }
 
     @Test
@@ -852,5 +848,4 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandlingId.toString() == it.payload
         }.shouldBeTrue()
     }
-
 }

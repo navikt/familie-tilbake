@@ -21,7 +21,6 @@ data class HbVurderinger(val vilkårsvurderingsresultat: Vilkårsvurderingsresul
     val harForeldelsesavsnitt = foreldelsevurdering in setOf(Foreldelsesvurderingstype.FORELDET,
                                                              Foreldelsesvurderingstype.TILLEGGSFRIST)
 
-
     init {
         if (Foreldelsesvurderingstype.IKKE_VURDERT == foreldelsevurdering ||
             Foreldelsesvurderingstype.IKKE_FORELDET == foreldelsevurdering) {
@@ -35,9 +34,7 @@ data class HbVurderinger(val vilkårsvurderingsresultat: Vilkårsvurderingsresul
         if (AnnenVurdering.GOD_TRO == aktsomhetsresultat) {
             requireNotNull(beløpIBehold) { "beløp i behold er ikke satt" }
         } else {
-            require(beløpIBehold == null)
-            { "beløp i behold skal ikke være satt når aktsomhetsresultat er $aktsomhetsresultat" }
+            require(beløpIBehold == null) { "beløp i behold skal ikke være satt når aktsomhetsresultat er $aktsomhetsresultat" }
         }
     }
-
 }

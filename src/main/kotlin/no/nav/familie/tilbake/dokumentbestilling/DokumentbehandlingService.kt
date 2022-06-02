@@ -42,7 +42,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
         }
     }
 
-
     fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
         var dokument = ByteArray(0)
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
@@ -71,7 +70,6 @@ class DokumentbehandlingService(private val behandlingRepository: BehandlingRepo
                                                         Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                                                         tidsfrist)
     }
-
 
     private fun håndterInnhentDokumentasjon(behandling: Behandling, fritekst: String) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {

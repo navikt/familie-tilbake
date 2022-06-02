@@ -151,7 +151,6 @@ class VedtakHjemmelTest {
         val vurdertForeldelse = lagForeldelseperiode(periode) {
             it.copy(foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
                     foreldelsesfrist = periode.fom.plusMonths(11).atDay(1))
-
         }
 
         val hbHjemmel = VedtakHjemmel.lagHjemmel(Vedtaksresultat.INGEN_TILBAKEBETALING,
@@ -163,7 +162,6 @@ class VedtakHjemmelTest {
 
         hbHjemmel.lovhjemmelVedtak shouldBe "foreldelsesloven §§ 2 og 3"
         hbHjemmel.lovhjemmelFlertall shouldBe true
-
     }
 
     @Test
@@ -185,7 +183,6 @@ class VedtakHjemmelTest {
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3"
         hbHjemmel.lovhjemmelFlertall shouldBe true
-
     }
 
     @Test
@@ -236,7 +233,6 @@ class VedtakHjemmelTest {
             it.copy(foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                     foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
                     oppdagelsesdato = periode.fom.plusMonths(5).atDay(1))
-
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
             it.copy(aktsomhet = Aktsomhet.GROV_UAKTSOMHET, ileggRenter = true)

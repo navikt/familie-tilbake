@@ -23,7 +23,6 @@ interface MeldingstellingRepository : RepositoryInterface<Meldingstelling, UUID>
               GROUP BY fagsystem, dato""")
     fun summerAntallForType(type: Meldingstype): List<ForekomsterPerDag>
 
-
     @Modifying
     @Query("""UPDATE meldingstelling SET antall = antall + 1 
               WHERE fagsystem = :fagsystem
@@ -34,7 +33,6 @@ interface MeldingstellingRepository : RepositoryInterface<Meldingstelling, UUID>
                        type: Meldingstype,
                        status: Mottaksstatus,
                        dato: LocalDate = LocalDate.now())
-
 
     // language=PostgreSQL
     @Query("""SELECT fagsystem, 
@@ -91,5 +89,4 @@ interface MeldingstellingRepository : RepositoryInterface<Meldingstelling, UUID>
               WHERE status = 'AVSLUTTET'
               GROUP BY fagsystem, vedtakstype, år, uke""")
     fun finnVedtak(): List<VedtakPerUke>
-
 }

@@ -42,7 +42,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+// @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorPeriodeVilkår {
 
     @Test
@@ -205,8 +205,8 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                                                                                   Foreldelsesvurderingstype.TILLEGGSFRIST))
                                   FORELDELSESFRIST else null,
                               fritekstForeldelse = if (foreldelsevurdering in setOf(Foreldelsesvurderingstype.FORELDET,
-                                                                                    Foreldelsesvurderingstype.TILLEGGSFRIST)
-                                                       && fritekst) "[ fritekst her ]" else null,
+                                                                                    Foreldelsesvurderingstype.TILLEGGSFRIST) &&
+                                                       fritekst) "[ fritekst her ]" else null,
                               oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering)
                                   OPPDAGELSES_DATO else null)
 
@@ -248,7 +248,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
     }
 
-
     private fun lagMetadata(ytelsestype: Ytelsestype,
                             språkkode: Språkkode): Brevmetadata {
 
@@ -262,7 +261,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                             ytelsestype = ytelsestype)
     }
 
-
     private fun overskrift(resultat: Vilkårsvurderingsresultat,
                            vurdering: Vurdering?,
                            lavtBeløp: Boolean,
@@ -271,13 +269,12 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                            foreldelsevurdering: Foreldelsesvurderingstype): String {
         return ("*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
                 (if (vurdering != null) " - " + vurdering.navn else "") +
-                (if (fritekst) " - med fritekst" else " - uten fritekst")
-                + hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
+                (if (fritekst) " - med fritekst" else " - uten fritekst") +
+                hentVIlkårsvurderingOverskriftDel(foreldelsevurdering) +
                 (if (pengerIBehold) " - penger i behold" else "") +
-                (if (lavtBeløp) " - lavt beløp" else "")
-                + " ]*")
+                (if (lavtBeløp) " - lavt beløp" else "") +
+                " ]*")
     }
-
 
     private fun prettyprint(vilkårTekst: String, overskrift: String): String {
         return vilkårTekst.replace("__.+".toRegex(), overskrift)
@@ -327,5 +324,4 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             else -> throw IllegalArgumentException("Foreldelsesvurderingstype ikke støttet. Type: $foreldelsevurdering")
         }
     }
-
 }

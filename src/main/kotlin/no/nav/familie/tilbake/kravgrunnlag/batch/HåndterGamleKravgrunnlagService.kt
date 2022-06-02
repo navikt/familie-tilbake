@@ -133,8 +133,7 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
     private fun lagOpprettBehandlingsrequest(eksternFagsakId: String,
                                              ytelsestype: Ytelsestype,
                                              eksternId: String,
-                                             fagsystemsbehandlingData: HentFagsystemsbehandling)
-            : OpprettTilbakekrevingRequest {
+                                             fagsystemsbehandlingData: HentFagsystemsbehandling): OpprettTilbakekrevingRequest {
         return OpprettTilbakekrevingRequest(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                                             ytelsestype = ytelsestype,
                                             eksternFagsakId = eksternFagsakId,

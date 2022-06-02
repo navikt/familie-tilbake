@@ -31,7 +31,6 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var håndterGamleKravgrunnlagBatch: HåndterGamleKravgrunnlagBatch
 
-
     @Test
     fun `utfør skal ikke opprette tasker når det ikke finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)

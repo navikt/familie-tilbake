@@ -605,7 +605,6 @@ class TekstformatererVedtaksbrevTest {
                 " betale tilbake hele beløpet."
     }
 
-
     private fun lagBrevOverskriftTestoppsett(ytelsestype: Ytelsestype,
                                              hovedresultat: Vedtaksresultat,
                                              språkkode: Språkkode): HbVedtaksbrevsdata {

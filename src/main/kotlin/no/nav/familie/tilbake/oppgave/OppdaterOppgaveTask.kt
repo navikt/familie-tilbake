@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-
 @Service
 @TaskStepBeskrivelse(taskStepType = OppdaterOppgaveTask.TYPE,
                      maxAntallFeil = 3,
@@ -33,7 +32,7 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
 
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) +":" +
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
                             beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         var patchetOppgave = oppgave.copy(fristFerdigstillelse = frist,
                                           beskrivelse = nyBeskrivelse)

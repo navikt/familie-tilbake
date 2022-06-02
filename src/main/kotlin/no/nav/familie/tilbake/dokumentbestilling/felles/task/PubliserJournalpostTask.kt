@@ -33,15 +33,13 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
                 Fagsystem.valueOf(task.metadata.getProperty("fagsystem"))
             )
         } catch (ressursException: RessursException) {
-            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)){
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)) {
                 // ta med info om ukjent adresse
                 task.metadata["ukjentAdresse"] = "true"
             } else {
                 throw ressursException
             }
-
         }
-
     }
 
     override fun onCompletion(task: Task) {

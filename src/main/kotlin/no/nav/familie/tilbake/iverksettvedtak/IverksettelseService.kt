@@ -55,7 +55,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         // Send request til økonomi
         val respons = oppdragClient.iverksettVedtak(behandlingId, request)
 
-        //oppdater respons
+        // oppdater respons
         økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
         økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = objectMapper.writeValueAsString(respons.mmel)))
 

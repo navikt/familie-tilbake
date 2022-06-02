@@ -84,11 +84,10 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
-        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)){
+        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
             throw Feil("Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
                        "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.")
         }
-
 
         val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId,
                                                                           gruppe = IdentGruppe.AKTOERID),
@@ -187,7 +186,7 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         } else {
             ""
         } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/" +
+               "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/" +
                eksternbrukBehandlingID
     }
 

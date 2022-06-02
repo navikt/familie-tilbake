@@ -129,5 +129,4 @@ enum class Hendelsesundertype {
     SAMBOER_AVSLUTTET_SONING,
     EKTEFELLE_INSTITUSJON,
     SAMBOER_INSTITUSJON,
-
 }

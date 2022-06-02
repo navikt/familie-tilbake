@@ -36,7 +36,6 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 class ApplicationConfig {
 
-
     @Bean
     fun servletWebServerFactory(): ServletWebServerFactory {
         val serverFactory = JettyServletWebServerFactory()

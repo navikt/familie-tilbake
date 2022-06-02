@@ -28,6 +28,4 @@ object TotrinnMapper {
                 it.behandlingssteg.kanBesluttes &&
                 it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
             }.map { Totrinnsstegsinfo(behandlingssteg = it.behandlingssteg) }
-
-
 }

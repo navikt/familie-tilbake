@@ -14,5 +14,4 @@ interface HentFagsystemsbehandlingRequestSendtRepository : RepositoryInterface<H
     fun findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId: String,
                                                         ytelsestype: Ytelsestype,
                                                         eksternId: String): HentFagsystemsbehandlingRequestSendt?
-
 }

@@ -26,7 +26,6 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
                                                fritekstFraSaksbehandler = "Dette er ein fritekst.",
                                                fristdato = LocalDate.of(2020, 3, 2))
 
-
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev`() {
         val dokument = InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,
@@ -106,6 +105,4 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
             }
         }
     }
-
-
 }

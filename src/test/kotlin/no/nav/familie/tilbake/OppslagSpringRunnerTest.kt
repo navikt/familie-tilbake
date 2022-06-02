@@ -56,7 +56,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 
-
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -94,7 +93,6 @@ abstract class OppslagSpringRunnerTest {
     }
 
     protected fun lokalTestToken(): String = mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost").serialize()
-
 
     protected fun localhost(uri: String): String {
         return LOCALHOST + getPort() + uri

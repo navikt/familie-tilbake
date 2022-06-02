@@ -27,5 +27,5 @@ data class Behandlingstilstand(val funksjoneltTidspunkt: OffsetDateTime,
                                val ansvarligBeslutter: String?,
                                val forrigeBehandling: UUID?,
                                val revurderingOpprettetÅrsak: Behandlingsårsakstype?,
-                               val totalFeilutbetaltBeløp : BigDecimal?,
+                               val totalFeilutbetaltBeløp: BigDecimal?,
                                val totalFeilutbetaltPeriode: Periode?)

@@ -69,5 +69,4 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
                                                                  FaktaFeilutbetaling::sporbar,
                                                                  FaktaFeilutbetaling::versjon)
     }
-
 }

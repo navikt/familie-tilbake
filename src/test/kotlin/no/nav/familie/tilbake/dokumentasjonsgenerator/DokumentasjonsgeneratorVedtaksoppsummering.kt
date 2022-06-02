@@ -255,7 +255,6 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                     erRevurderingEtterKlageNfp)
     }
 
-
     private fun lagMetadata(ytelsestype: Ytelsestype,
                             språkkode: Språkkode): Brevmetadata {
 
@@ -278,12 +277,12 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                             erRevurdering: Boolean,
                             erRevurderingEtterKlageNfp: Boolean) {
         println(("*[ " + tilbakebetaling.navn) + " - " +
-                (if (medVarsel) "med varsel" else "uten varsel") + " - "
-                + (if (skatt != 0L) "med skatt" else "uten skatt") + " - "
-                + (if (renter != 0L) "med renter" else "uten renter")
-                + (if (medKorrigertBeløp) " - med korrigert beløp" else "")
-                + (if (erRevurdering) " - revurdering " else "")
-                + (if (erRevurderingEtterKlageNfp) " klage nfp" else "") + " ]*")
+                (if (medVarsel) "med varsel" else "uten varsel") + " - " +
+                (if (skatt != 0L) "med skatt" else "uten skatt") + " - " +
+                (if (renter != 0L) "med renter" else "uten renter") +
+                (if (medKorrigertBeløp) " - med korrigert beløp" else "") +
+                (if (erRevurdering) " - revurdering " else "") +
+                (if (erRevurderingEtterKlageNfp) " klage nfp" else "") + " ]*")
         val parametrisertTekst = generertTekst
                 .replace(" 1\u00A0010\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
                 .replace(" 1\u00A0000\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
@@ -291,7 +290,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                 .replace(" 900\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
                 .replace(" 25\u00A0000\u00A0kroner".toRegex(), " <varslet beløp> kroner")
                 .replace("15. januar 2020", if (medVarsel) "<varseldato>" else "<vedtaksdato>")
-                .replace("15. februar 2020",  "<original vedtaksdato>")
+                .replace("15. februar 2020", "<original vedtaksdato>")
         println(parametrisertTekst)
         println()
     }

@@ -78,7 +78,6 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
                                                               taskService,
                                                               mockManueltVarselBrevService,
                                                               mockInnhentDokumentasjonbrevService)
-
     }
 
     @Test
@@ -108,7 +107,6 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
         tasks.first().type shouldBe InnhentDokumentasjonbrevTask.TYPE
-
     }
 
     @Test

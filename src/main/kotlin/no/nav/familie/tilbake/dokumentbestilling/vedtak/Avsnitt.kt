@@ -8,7 +8,6 @@ enum class Avsnittstype {
     TILLEGGSINFORMASJON
 }
 
-
 data class Avsnitt(val overskrift: String? = null,
                    val underavsnittsliste: List<Underavsnitt> = listOf(),
                    val avsnittstype: Avsnittstype? = null,
@@ -23,8 +22,7 @@ class Underavsnitt(val overskrift: String? = null,
                    val underavsnittstype: Underavsnittstype? = null) {
 
     init {
-        require(!(!fritekstTillatt && fritekstPåkrevet))
-        { "Det gir ikke mening at fritekst er påkrevet når fritekst ikke er tillatt" }
+        require(!(!fritekstTillatt && fritekstPåkrevet)) { "Det gir ikke mening at fritekst er påkrevet når fritekst ikke er tillatt" }
     }
 }
 

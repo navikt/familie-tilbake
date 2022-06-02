@@ -21,7 +21,6 @@ class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
@@ -46,5 +45,4 @@ class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.GRUNNLAG
     }
-
 }

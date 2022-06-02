@@ -116,7 +116,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
             }
         }
-
     }
 
     @Transactional
@@ -131,7 +130,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         behandlingsstegstilstandRepository.update(aktivtBehandlingsstegstilstand.copy(behandlingsstegsstatus = VENTER,
                                                                                       venteårsak = venteårsak,
                                                                                       tidsfrist = tidsfrist))
-        //oppdater tilsvarende behandlingsstatus
+        // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, aktivtBehandlingsstegstilstand.behandlingssteg)
 
         historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
@@ -147,7 +146,6 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
         behandlingsstegstilstand.filter { it.behandlingssteg != Behandlingssteg.VARSEL }
                 .forEach {
                     behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = AVBRUTT))
-
                 }
     }
 
@@ -178,7 +176,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     fun finnAktivStegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>): Behandlingsstegstilstand? {
         return behandlingsstegstilstand
                 .firstOrNull { Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus) }
-        //forutsetter at behandling kan ha kun et aktiv steg om gangen
+        // forutsetter at behandling kan ha kun et aktiv steg om gangen
     }
 
     fun finnAktivStegstilstand(behandlingId: UUID): Behandlingsstegstilstand? {
@@ -188,8 +186,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     @Transactional
     fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (behandling.erAvsluttet && (behandlingsstegsinfo.behandlingssteg != Behandlingssteg.AVSLUTTET
-                                       && behandlingsstegsinfo.behandlingsstegstatus != UTFØRT)) {
+        if (behandling.erAvsluttet && (behandlingsstegsinfo.behandlingssteg != Behandlingssteg.AVSLUTTET &&
+                                       behandlingsstegsinfo.behandlingsstegstatus != UTFØRT)) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet, " +
                        "så status=${behandlingsstegsinfo.behandlingsstegstatus} kan ikke oppdateres")
         }
@@ -199,14 +197,12 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                 ?: throw Feil(message = "Behandling med id=$behandlingId og " +
                                         "steg=${behandlingsstegsinfo.behandlingssteg} finnes ikke")
 
-
         behandlingsstegstilstandRepository
                 .update(behandlingsstegstilstand.copy(behandlingsstegsstatus = behandlingsstegsinfo.behandlingsstegstatus,
                                                       venteårsak = behandlingsstegsinfo.venteårsak,
                                                       tidsfrist = behandlingsstegsinfo.tidsfrist))
 
-
-        //oppdater tilsvarende behandlingsstatus
+        // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, behandlingsstegsinfo.behandlingssteg)
         behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, behandlingsstegsinfo)
     }
@@ -220,7 +216,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                  venteårsak = nesteStegMedStatus.venteårsak,
                                                  tidsfrist = nesteStegMedStatus.tidsfrist,
                                                  behandlingsstegsstatus = nesteStegMedStatus.behandlingsstegstatus))
-        //oppdater tilsvarende behandlingsstatus
+        // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, nesteStegMedStatus.behandlingssteg)
         behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus)
     }
@@ -244,7 +240,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
                                                   stegstilstand: List<Behandlingsstegstilstand>): Behandlingsstegsinfo {
         if (stegstilstand.isEmpty()) {
             return when {
-                //setter tidsfristen fra opprettelse dato
+                // setter tidsfristen fra opprettelse dato
                 kanSendeVarselsbrev(behandling) -> lagBehandlingsstegsinfo(Behandlingssteg.VARSEL,
                                                                            VENTER,
                                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
@@ -259,7 +255,7 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
 
         val finnesAvbruttSteg = stegstilstand.any { AVBRUTT == it.behandlingsstegsstatus }
         if (finnesAvbruttSteg) {
-            //forutsetter behandling har et AVBRUTT steg om gangen
+            // forutsetter behandling har et AVBRUTT steg om gangen
             val avbruttSteg = stegstilstand.first { AVBRUTT == it.behandlingsstegsstatus }
             return lagBehandlingsstegsinfo(avbruttSteg.behandlingssteg, KLAR)
         }
@@ -303,8 +299,8 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
     }
 
     private fun kanSendeVarselsbrev(behandling: Behandling): Boolean {
-        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg
-               && !behandling.manueltOpprettet && !behandling.erRevurdering
+        return Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL == behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg &&
+               !behandling.manueltOpprettet && !behandling.erRevurdering
     }
 
     private fun harAktivtGrunnlag(behandling: Behandling): Boolean {
@@ -333,5 +329,4 @@ class BehandlingskontrollService(private val behandlingsstegstilstandRepository:
             behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
         }
     }
-
 }

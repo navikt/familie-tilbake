@@ -24,7 +24,6 @@ class PersonService(private val pdlClient: PdlClient,
         return personInfo
     }
 
-
     fun hentAktørId(personIdent: String, fagsystem: Fagsystem): List<String> {
         val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem)
         return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" }.map { it.ident }
@@ -35,5 +34,4 @@ class PersonService(private val pdlClient: PdlClient,
         if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
         return aktørId.first()
     }
-
 }

@@ -29,7 +29,6 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
                                                                  Behandlingsstegsinfo(Behandlingssteg.VARSEL,
                                                                                       Behandlingsstegstatus.UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
-
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

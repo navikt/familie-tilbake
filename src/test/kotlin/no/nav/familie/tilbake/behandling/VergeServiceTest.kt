@@ -29,8 +29,8 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
-import no.nav.familie.tilbake.person.PersonService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -63,7 +63,6 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private lateinit var vergeService: VergeService
 
     private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
-
 
     private val vergeDto = VergeDto(orgNr = "987654321",
                                     type = Vergetype.ADVOKAT,
@@ -318,5 +317,4 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
-
 }

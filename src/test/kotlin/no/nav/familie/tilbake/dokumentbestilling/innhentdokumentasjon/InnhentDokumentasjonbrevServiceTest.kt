@@ -53,5 +53,4 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
         PdfaValidator.validatePdf(data)
     }
-
 }

@@ -39,7 +39,7 @@ class DokprodTilHtmlTest {
 
     @Test
     fun `dokprodInnholdTilHtml skal konvertere halvhjertede avsnitt`() {
-        //halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
+        // halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
         val resultat: String = DokprodTilHtml.dokprodInnholdTilHtml("Foo\nBar")
 
         resultat shouldBe "<p>Foo<br/>Bar</p>"
@@ -47,7 +47,7 @@ class DokprodTilHtmlTest {
 
     @Test
     fun `dokprodInnholdTilHtml skal spesialbehandle hilsen`() {
-        //halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
+        // halvhjertet avsnitt er hvor det er tatt kun ett linjeskift.
         val resultat: String = DokprodTilHtml.dokprodInnholdTilHtml("Med vennlig hilsen\nNAV Familie- og pensjonsytelser")
 
         resultat shouldBe "<p class=\"hilsen\">Med vennlig hilsen<br/>NAV Familie- og pensjonsytelser</p>"

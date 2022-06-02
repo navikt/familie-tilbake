@@ -13,9 +13,9 @@ class AnnulerKravgrunnlagService(private val oppdragClient: OppdragClient) {
     fun annulerKravgrunnlagRequest(eksternKravgrunnlagId: BigInteger,
                                    vedtakId: BigInteger) {
         val annullerKravgrunnlagDto = AnnullerKravgrunnlagDto()
-        annullerKravgrunnlagDto.kodeAksjon = KodeAksjon.ANNULERE_GRUNNLAG.kode //fast verdi
+        annullerKravgrunnlagDto.kodeAksjon = KodeAksjon.ANNULERE_GRUNNLAG.kode // fast verdi
         annullerKravgrunnlagDto.vedtakId = vedtakId
-        annullerKravgrunnlagDto.saksbehId = "K231B433" //fast verdi
+        annullerKravgrunnlagDto.saksbehId = "K231B433" // fast verdi
 
         val annulerRequest = KravgrunnlagAnnulerRequest()
         annulerRequest.annullerkravgrunnlag = annullerKravgrunnlagDto

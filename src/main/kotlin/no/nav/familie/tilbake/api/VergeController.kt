@@ -56,5 +56,4 @@ class VergeController(private val vergeService: VergeService) {
     fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))
     }
-
 }

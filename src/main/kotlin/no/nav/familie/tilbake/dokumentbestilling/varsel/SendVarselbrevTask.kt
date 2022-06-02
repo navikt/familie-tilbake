@@ -17,7 +17,6 @@ import java.util.UUID
 class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
 
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -31,5 +30,4 @@ class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
 
         const val TYPE = "brev.sendVarsel"
     }
-
 }

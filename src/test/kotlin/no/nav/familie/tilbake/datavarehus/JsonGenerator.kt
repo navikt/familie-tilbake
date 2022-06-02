@@ -63,12 +63,10 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                                                  "java.time.OffsetDateTime" to "datetime",
                                                  "java.time.LocalDate" to "date")
 
-
     companion object {
 
         @JvmStatic val JSON_SCHEMA_DRAFT_2020_12_URL = "https://json-schema.org/draft/2020-12/schema"
     }
-
 
     open class MySerializerProvider {
 
@@ -82,7 +80,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             return myProvider!!
         }
     }
-
 
     abstract class EnumSupport {
 
@@ -104,7 +101,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
     data class WorkInProgress(val classInProgress: Class<*>, val nodeInProgress: ObjectNode)
 
-
     // Class that manages creating new defenitions or getting $refs to existing definitions
     inner class DefinitionsHandler {
 
@@ -121,7 +117,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             workInProgressStack.add(workInProgressStack.size, workInProgress)
             workInProgress = null
         }
-
 
         fun popworkInProgress() {
             val item = workInProgressStack.size - 1
@@ -175,7 +170,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
     data class PropertyNode(val main: ObjectNode, val meta: ObjectNode)
 
-
     inner class MyJsonFormatVisitorWrapper(val objectMapper: ObjectMapper,
                                            private val level: Int = 0,
                                            val node: ObjectNode = JsonNodeFactory.instance.objectNode(),
@@ -183,7 +177,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             // This property may represent the BeanProperty when we're directly processing beneath the property
                                            val currentProperty: BeanProperty?) : JsonFormatVisitorWrapper,
                                                                                  MySerializerProvider() {
-
 
         open inner class MyJsonObjectFormatVisitor(private val thisObjectNode: ObjectNode,
                                                    private val propertiesNode: ObjectNode) : JsonObjectFormatVisitor,
@@ -230,7 +223,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     prop.getAnnotation(JsonPropertyDescription::class.java)?.let {
                         thisPropertyNode.meta.put("description", it.value)
                     }
-
                 }
             }
 
@@ -360,7 +352,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             // So we're going to treat it as type=object with additionalProperties = true,
             // so that it can hold whatever the map can hold
 
-
             val additionalPropsObject = JsonNodeFactory.instance.objectNode()
 
             node.put("type", "object")
@@ -483,11 +474,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     val thisOneOfNode = JsonNodeFactory.instance.objectNode()
                     thisOneOfNode.put("\$ref", definitionInfo.ref)
                     anyOfArrayNode.add(thisOneOfNode)
-
                 }
 
                 return null // Returning null to stop jackson from visiting this object since we have done it manually
-
             } else {
 
                 val objectBuilder: (ObjectNode) -> JsonObjectFormatVisitor? = { thisObjectNode ->
@@ -538,7 +527,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
                     MyJsonObjectFormatVisitor(thisObjectNode, propertiesNode)
                 }
-
 
                 return if (level == 0) {
                     // This is the first level - we must not use definitions

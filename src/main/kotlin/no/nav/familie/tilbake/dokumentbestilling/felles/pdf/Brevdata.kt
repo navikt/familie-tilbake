@@ -9,4 +9,3 @@ data class Brevdata(var metadata: Brevmetadata,
                     val mottager: Brevmottager,
                     val brevtekst: String,
                     val vedleggHtml: String = "")
-

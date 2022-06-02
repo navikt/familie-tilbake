@@ -70,7 +70,5 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
                                                                                                        Brevtype.VARSEL)
 
         funnetBrevsporing?.shouldBeEqualToComparingFieldsExcept(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
-
     }
-
 }

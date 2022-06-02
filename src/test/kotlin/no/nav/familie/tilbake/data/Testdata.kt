@@ -139,7 +139,6 @@ object Testdata {
                                               godkjent = true,
                                               begrunnelse = "testverdi")
 
-
     private val foreldelsesperiode = Foreldelsesperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(1)),
                                                         foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                                                         begrunnelse = "testverdi",

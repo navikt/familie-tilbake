@@ -49,5 +49,4 @@ class OppdaterFaktainfoTask(private val hentFagsystemsbehandlingService: HentFag
 
         const val TYPE = "oppdater.faktainfo"
     }
-
 }

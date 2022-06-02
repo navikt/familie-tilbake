@@ -45,7 +45,6 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
     private var behandling = Testdata.behandling
 
-
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
@@ -75,7 +74,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val foreldetPeriode = vurdertForeldelseDto.foreldetPerioder[0]
         foreldetPeriode.periode.fom shouldBe LocalDate.of(2017, 1, 1)
         foreldetPeriode.periode.tom shouldBe LocalDate.of(2017, 2, 28)
-        //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
+        // feilutbetaltBeløp er 10000.00 i Testdata for hver periode
         foreldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         foreldetPeriode.foreldelsesvurderingstype.shouldBeNull()
         foreldetPeriode.begrunnelse.shouldBeNull()
@@ -102,7 +101,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val førstePeriode = vurdertForeldelseDto.foreldetPerioder[0]
         førstePeriode.periode.fom shouldBe LocalDate.of(2017, 1, 1)
         førstePeriode.periode.tom shouldBe LocalDate.of(2017, 1, 31)
-        //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
+        // feilutbetaltBeløp er 10000.00 i Testdata for hver periode
         førstePeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         førstePeriode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.FORELDET
         førstePeriode.begrunnelse shouldBe "foreldelses begrunnelse"
@@ -112,7 +111,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val andrePeriode = vurdertForeldelseDto.foreldetPerioder[1]
         andrePeriode.periode.fom shouldBe LocalDate.of(2017, 2, 1)
         andrePeriode.periode.tom shouldBe LocalDate.of(2017, 2, 28)
-        //feilutbetaltBeløp er 10000.00 i Testdata for hver periode
+        // feilutbetaltBeløp er 10000.00 i Testdata for hver periode
         andrePeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         andrePeriode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.IKKE_FORELDET
         andrePeriode.begrunnelse shouldBe "foreldelses begrunnelse"
@@ -201,7 +200,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val nyForeldelsesperiode = lagForeldelsesperiode(LocalDate.of(2017, 1, 1),
                                                           LocalDate.of(2017, 4, 30),
                                                           Foreldelsesvurderingstype.FORELDET)
-        foreldelseService.lagreVurdertForeldelse(behandling.id,BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
+        foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
     }
 
@@ -213,5 +212,4 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                                      foreldelsesvurderingstype = foreldelsesvurderingstype,
                                      foreldelsesfrist = LocalDate.of(2017, 2, 28))
     }
-
 }

@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
-
 object HendelsestypePerYtelsestype {
 
     private val HIERARKI = mapOf(Ytelsestype.BARNETRYGD to setOf(Hendelsestype.ANNET,

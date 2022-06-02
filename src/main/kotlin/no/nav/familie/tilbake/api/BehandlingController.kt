@@ -68,7 +68,6 @@ class BehandlingController(private val behandlingService: BehandlingService,
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Revurdering er opprettet.")
     }
 
-
     @Operation(summary = "Hent behandling")
     @GetMapping(path = ["/v1/{behandlingId}"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])

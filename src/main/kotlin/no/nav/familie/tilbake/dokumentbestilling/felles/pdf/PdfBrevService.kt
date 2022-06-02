@@ -83,8 +83,6 @@ class PdfBrevService(private val journalføringService: JournalføringService,
                                                            data.mottager,
                                                            pdf,
                                                            lagEksternReferanseId(behandling, brevtype))
-
-
     }
 
     private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype): String? {

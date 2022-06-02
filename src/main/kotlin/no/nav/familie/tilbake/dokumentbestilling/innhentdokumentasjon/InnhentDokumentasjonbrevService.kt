@@ -42,7 +42,6 @@ class InnhentDokumentasjonbrevService(private val fagsakRepository: FagsakReposi
                                 fritekst = fritekst)
     }
 
-
     fun hentForhåndsvisningInnhentDokumentasjonBrev(behandlingId: UUID,
                                                     fritekst: String): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

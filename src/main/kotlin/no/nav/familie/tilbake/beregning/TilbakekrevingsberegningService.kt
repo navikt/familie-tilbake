@@ -129,8 +129,7 @@ class TilbakekrevingsberegningService(private val kravgrunnlagRepository: Kravgr
     }
 
     private fun beregnForForeldedePerioder(vurdertForeldelse: VurdertForeldelse?,
-                                           kravbeløpPerPeriode: Map<Periode, FordeltKravgrunnlagsbeløp>)
-            : Collection<Beregningsresultatsperiode> {
+                                           kravbeløpPerPeriode: Map<Periode, FordeltKravgrunnlagsbeløp>): Collection<Beregningsresultatsperiode> {
         return vurdertForeldelse?.foreldelsesperioder
                        ?.filter { Foreldelsesvurderingstype.FORELDET == it.foreldelsesvurderingstype }
                        ?.map { beregnForeldetPeriode(kravbeløpPerPeriode, it) }
@@ -200,5 +199,4 @@ class TilbakekrevingsberegningService(private val kravgrunnlagRepository: Kravgr
         }
         return Vedtaksresultat.FULL_TILBAKEBETALING
     }
-
 }

@@ -59,5 +59,4 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
                                                                             Behandlingsstegstilstand::versjon)
         lagretBehandlingsstegstilstand.versjon shouldBe 2
     }
-
 }

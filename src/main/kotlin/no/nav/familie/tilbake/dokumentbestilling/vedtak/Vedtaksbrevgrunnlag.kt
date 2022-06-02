@@ -107,8 +107,8 @@ data class Vedtaksbrevgrunnlag(@Id
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type
-               && behandling.årsaker.any {
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
+               behandling.årsaker.any {
             Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
         }
     }
@@ -158,6 +158,4 @@ data class Vedtaksbrevbehandling(@Id
     val sisteÅrsak get() = årsaker.firstOrNull()
 
     val aktivtVarsel get() = varsler.firstOrNull { it.aktiv }
-
 }
-

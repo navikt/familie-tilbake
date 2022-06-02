@@ -57,5 +57,4 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
                                                                        Vedtaksbrevsperiode::versjon)
         lagretVedtaksbrevsperiode.versjon shouldBe 2
     }
-
 }

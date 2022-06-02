@@ -81,7 +81,6 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                                                                               Behandlingsstegstatus.UTFØRT))
         behandlingsstegstilstandRepository.insert(lagBehandlingsstegstilstand(Behandlingssteg.FAKTA,
                                                                               Behandlingsstegstatus.KLAR))
-
     }
 
     @Test

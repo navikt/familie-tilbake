@@ -69,7 +69,6 @@ data class FaktaFeilutbetalingsperiodeDto(val periode: PeriodeDto,
                                           val hendelsestype: Hendelsestype,
                                           val hendelsesundertype: Hendelsesundertype)
 
-
 @JsonTypeName(BehandlingsstegForeldelseDto.STEGNAVN)
 data class BehandlingsstegForeldelseDto(val foreldetPerioder: List<ForeldelsesperiodeDto>) : BehandlingsstegDto() {
 
@@ -90,10 +89,9 @@ data class ForeldelsesperiodeDto(val periode: PeriodeDto,
                                  val foreldelsesfrist: LocalDate? = null,
                                  val oppdagelsesdato: LocalDate? = null)
 
-
 @JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEGNAVN)
-data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>)
-    : BehandlingsstegDto() {
+data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>) :
+    BehandlingsstegDto() {
 
     override fun getSteg(): String {
         return STEGNAVN

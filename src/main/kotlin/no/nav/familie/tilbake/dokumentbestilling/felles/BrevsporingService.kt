@@ -8,7 +8,6 @@ import java.util.UUID
 @Service
 class BrevsporingService(private val brevsporingRepository: BrevsporingRepository) {
 
-
     fun lagreInfoOmUtsendtBrev(behandlingId: UUID,
                                dokumentId: String,
                                journalpostId: String,
@@ -32,7 +31,5 @@ class BrevsporingService(private val brevsporingRepository: BrevsporingRepositor
     fun erVarselSendt(behandlingId: UUID): Boolean {
         return brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId,
                                                                        setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))
-
     }
-
 }

@@ -57,7 +57,7 @@ class StegService(val steg: List<IBehandlingssteg>,
         behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
 
-        //sjekk om aktivtBehandlingssteg kan autoutføres
+        // sjekk om aktivtBehandlingssteg kan autoutføres
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         if (aktivtBehandlingssteg in listOf(Behandlingssteg.FORELDELSE,
                                             Behandlingssteg.VILKÅRSVURDERING)) {
@@ -86,7 +86,6 @@ class StegService(val steg: List<IBehandlingssteg>,
             }
             aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         }
-
     }
 
     fun gjenopptaSteg(behandlingId: UUID) {
@@ -112,7 +111,7 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
-                                    ?: throw  Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
+                                    ?: throw Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
                                                    frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg")
         if (aktivtBehandlingssteg !in setOf(Behandlingssteg.VARSEL,
                                             Behandlingssteg.GRUNNLAG,

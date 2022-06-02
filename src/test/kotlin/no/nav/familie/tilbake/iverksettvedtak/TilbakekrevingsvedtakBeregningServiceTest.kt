@@ -127,7 +127,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     tilbakekrevesBeløp = BigDecimal(2500),
                     uinnkrevdBeløp = BigDecimal(2500),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
-
     }
 
     @Test
@@ -166,7 +165,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     tilbakekrevesBeløp = BigDecimal(1650),
                     uinnkrevdBeløp = BigDecimal(3350),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
-
     }
 
     @Test
@@ -204,7 +202,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     tilbakekrevesBeløp = BigDecimal(5000),
                     uinnkrevdBeløp = BigDecimal.ZERO,
                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
-
     }
 
     @Test
@@ -241,7 +238,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     tilbakekrevesBeløp = BigDecimal.ZERO,
                     uinnkrevdBeløp = BigDecimal(5000),
                     kodeResultat = KodeResultat.INGEN_TILBAKEKREVING)
-
     }
 
     @Test
@@ -279,7 +275,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     tilbakekrevesBeløp = BigDecimal(1500),
                     uinnkrevdBeløp = BigDecimal(3500),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
-
     }
 
     @Test
@@ -371,7 +366,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal(2500),
                     skattBeløp = BigDecimal(250),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
-
     }
 
     @Test
@@ -426,7 +420,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal(2500),
                     skattBeløp = BigDecimal(646),
                     kodeResultat = KodeResultat.DELVIS_TILBAKEKREVING)
-
     }
 
     @Test
@@ -466,7 +459,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal(0),
                     skattBeløp = BigDecimal(0),
                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
-
     }
 
     @Test
@@ -488,7 +480,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
-        //en beregnet periode med 100 prosent tilbakekreving
+        // en beregnet periode med 100 prosent tilbakekreving
         lagAktsomhetVilkårsvurdering(listOf(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))), Aktsomhet.GROV_UAKTSOMHET)
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
@@ -535,7 +527,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal(0),
                     skattBeløp = BigDecimal(750),
                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
-
     }
 
     @Test
@@ -558,10 +549,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val kravgrunnlag = lagKravgrunnlag(perioder, BigDecimal.ZERO, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
-        //1,2 beregnet periode er foreldet
+        // 1,2 beregnet periode er foreldet
         lagForeldelse(listOf(perioder[0], perioder[1]))
 
-        //3,4 beregnet periode er godtro med ingen tilbakekreving
+        // 3,4 beregnet periode er godtro med ingen tilbakekreving
         val godtroPerioder = listOf(perioder[2], perioder[3]).map {
             VilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
                                         begrunnelse = "testverdi",
@@ -683,7 +674,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        //1,2 perioder er vilkårsvurdert med god tro(ingen tilbakebetaling)
+        // 1,2 perioder er vilkårsvurdert med god tro(ingen tilbakebetaling)
         val godTroPeriode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(sortedPerioder[0].fom, sortedPerioder[1].tom),
                                                         begrunnelse = "testverdi",
                                                         godTroDto = GodTroDto(begrunnelse = "testverdi",
@@ -691,7 +682,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO)
 
         val særligGrunner = listOf(SærligGrunnDto(ANNET, "testverdi"))
-        //3,4 perioder er vilkårsvurdert med SIMPEL UAKTSOMHET(50 prosent tilbakebetaling)
+        // 3,4 perioder er vilkårsvurdert med SIMPEL UAKTSOMHET(50 prosent tilbakebetaling)
         val simpelUaktsomhetPeriode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(sortedPerioder[2].fom,
                                                                                        sortedPerioder[3].tom),
                                                                   begrunnelse = "testverdi",
@@ -707,8 +698,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                                                   vilkårsvurderingsresultat =
                                                                   Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT)
 
-
-        //5,6,7 perioder er vilkårsvurdert med GROV UAKTSOMHET(100 prosent tilbakebetaling)
+        // 5,6,7 perioder er vilkårsvurdert med GROV UAKTSOMHET(100 prosent tilbakebetaling)
         val grovUaktsomhetPeriode = VilkårsvurderingsperiodeDto(periode = PeriodeDto(sortedPerioder[4].fom,
                                                                                      sortedPerioder[6].tom),
                                                                 begrunnelse = "testverdi",
@@ -956,7 +946,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     uinnkrevdBeløp = BigDecimal.ZERO,
                     skattBeløp = BigDecimal(1875),
                     kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
-
     }
 
     @Test
@@ -1119,7 +1108,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         foreldelsesService.lagreVurdertForeldelse(behandling.id, foreldelsesdata)
     }
 
-
     private fun lagAktsomhetVilkårsvurdering(perioder: List<Periode>,
                                              aktsomhet: Aktsomhet,
                                              andelTilbakreves: BigDecimal? = null,
@@ -1140,7 +1128,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT)
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
-
     }
 
     private fun lagGodTroVilkårsvurdering(perioder: List<Periode>,
@@ -1223,5 +1210,4 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                                            val tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
                                            val uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
                                            val skatteprosent: BigDecimal = BigDecimal.ZERO)
-
 }

@@ -53,8 +53,7 @@ interface OppdragClient {
     fun iverksettVedtak(behandlingId: UUID,
                         tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse
 
-    fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
-            : DetaljertKravgrunnlagDto
+    fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest): DetaljertKravgrunnlagDto
 
     fun annulerKravgrunnlag(eksternKravgrunnlagId: BigInteger, kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest)
 
@@ -64,8 +63,8 @@ interface OppdragClient {
 @Service
 @Profile("!e2e & !mock-økonomi")
 class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
-                           @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI)
-    : AbstractPingableRestClient(restOperations, "familie.oppdrag"), OppdragClient {
+                           @Value("\${FAMILIE_OPPDRAG_URL}") private val familieOppdragUrl: URI) :
+    AbstractPingableRestClient(restOperations, "familie.oppdrag"), OppdragClient {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -84,8 +83,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
     private val hentFeilutbetalingerFraSimuleringUri: URI = UriComponentsBuilder.fromUri(familieOppdragUrl)
             .pathSegment(HENT_FEILUTBETALINGER_PATH).build().toUri()
 
-    override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest)
-            : TilbakekrevingsvedtakResponse {
+    override fun iverksettVedtak(behandlingId: UUID, tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest): TilbakekrevingsvedtakResponse {
         logger.info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
         try {
             val respons = postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(uri = iverksettelseUri(behandlingId),
@@ -99,7 +97,6 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
             }
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
             return respons
-
         } catch (exception: Exception) {
             logger.error("tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
                          "Feiler med ${exception.message}.")
@@ -108,8 +105,7 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         }
     }
 
-    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest)
-            : DetaljertKravgrunnlagDto {
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
         try {
             val respons = postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(uri = hentKravgrunnlagUri(kravgrunnlagId),
@@ -150,15 +146,13 @@ class DefaultOppdragClient(@Qualifier("azure") restOperations: RestOperations,
         }
     }
 
-    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest)
-            : FeilutbetalingerFraSimulering {
+    override fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering {
         logger.info("Henter feilubetalinger fra simulering for ytelsestype=${request.ytelsestype}, " +
                     "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}")
         try {
             return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(uri = hentFeilutbetalingerFraSimuleringUri,
                                                                          payload = request)
                     .getDataOrThrow()
-
         } catch (exception: Exception) {
             logger.error("Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
                          "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}" +

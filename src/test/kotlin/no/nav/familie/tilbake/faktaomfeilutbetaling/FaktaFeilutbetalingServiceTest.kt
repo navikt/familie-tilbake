@@ -136,5 +136,4 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         feilutbetaltePeriode.hendelsesundertype shouldBe hendelsesundertype
         feilutbetaltePeriode.periode shouldBe PeriodeDto(periode)
     }
-
 }

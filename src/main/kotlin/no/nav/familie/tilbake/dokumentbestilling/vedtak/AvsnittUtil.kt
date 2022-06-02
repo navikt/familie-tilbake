@@ -89,7 +89,6 @@ internal object AvsnittUtil {
         var brødtekst: String? = null
         val underavsnitt = mutableListOf<Underavsnitt>()
 
-
         for (linje in splittet) {
 
             fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
@@ -97,9 +96,9 @@ internal object AvsnittUtil {
                     brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
 
             if (!leserFritekst &&
-                (fritekstTillatt
-                 || nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje)
-                 || avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje))) {
+                (fritekstTillatt ||
+                 nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje) ||
+                 avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje))) {
                 underavsnitt.add(Underavsnitt(overskrift,
                                               brødtekst,
                                               fritekst.joinToString("\n"),
@@ -152,9 +151,7 @@ internal object AvsnittUtil {
 
     private fun fjernFormattering(linje: String): String {
         return linje.removePrefix("{venstrejustert}").replace("{høyrejustert}", "\t\t\t")
-
     }
-
 
     private fun parseUnderavsnittstype(tekst: String): Underavsnittstype? {
         val rest = Vedtaksbrevsfritekst.fjernFritekstmarkering(tekst)

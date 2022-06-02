@@ -228,9 +228,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
                             språkkode = språkkode,
                             saksnummer = "1232456",
                             ytelsestype = Ytelsestype.BARNETRYGD)
-
     }
-
 
     private fun prettyPrint(s: String, overskrift: String): String {
         return s.replace("__Er det særlige grunner til å redusere beløpet?", overskrift)

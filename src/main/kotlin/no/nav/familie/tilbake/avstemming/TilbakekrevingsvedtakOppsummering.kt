@@ -13,7 +13,6 @@ class TilbakekrevingsvedtakOppsummering(val økonomivedtakId: String,
         return tilbakekrevesBruttoUtenRenter.signum() == 0
     }
 
-
     companion object {
 
         fun oppsummer(tilbakekrevingsvedtak: TilbakekrevingsvedtakDto): TilbakekrevingsvedtakOppsummering {

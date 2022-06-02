@@ -59,5 +59,4 @@ class Vergessteg(private val behandlingRepository: BehandlingRepository,
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.VERGE
     }
-
 }

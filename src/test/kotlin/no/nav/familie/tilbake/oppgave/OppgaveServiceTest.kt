@@ -29,7 +29,6 @@ import org.springframework.core.env.Environment
 import java.time.LocalDate
 import java.util.Properties
 
-
 class OppgaveServiceTest {
 
     private val behandlingRepository: BehandlingRepository = mockk(relaxed = true)
@@ -38,7 +37,6 @@ class OppgaveServiceTest {
     private val personService: PersonService = mockk(relaxed = true)
     private val environment: Environment = mockk(relaxed = true)
     private val taskRepository: TaskRepository = mockk(relaxed = true)
-
 
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
@@ -60,12 +58,11 @@ class OppgaveServiceTest {
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
         every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(0L, emptyList())
-        every { taskRepository.findByStatusInAndType(any(),any(),any()) } returns emptyList()
+        every { taskRepository.findByStatusInAndType(any(), any(), any()) } returns emptyList()
     }
 
     @Nested
     inner class OpprettOppgave {
-
 
         @Test
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4489`() {

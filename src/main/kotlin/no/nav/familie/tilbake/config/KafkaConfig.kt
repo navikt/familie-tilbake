@@ -20,7 +20,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 
-
 @Configuration
 @EnableKafka
 @Profile("dev", "prod")
@@ -45,8 +44,7 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
     }
 
     @Bean
-    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler)
-            : ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
@@ -54,7 +52,6 @@ class KafkaConfig(@Value("\${KAFKA_BROKERS:localhost}") private val kafkaBrokers
         factory.setErrorHandler(kafkaErrorHandler)
         return factory
     }
-
 
     private fun producerConfigs() = mapOf(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
                                           ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,

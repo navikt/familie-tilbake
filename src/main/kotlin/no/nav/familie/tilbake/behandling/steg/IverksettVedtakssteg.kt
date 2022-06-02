@@ -34,7 +34,6 @@ class IverksettVedtakssteg(private val behandlingsvedtakService: Behandlingsvedt
         taskService.save(Task(type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
                               payload = behandlingId.toString(),
                               properties = properties))
-
     }
 
     override fun utførStegAutomatisk(behandlingId: UUID) {

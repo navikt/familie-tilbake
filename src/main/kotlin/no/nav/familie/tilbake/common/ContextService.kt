@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus
 
 object ContextService {
 
-
     fun hentSaksbehandler(): String {
         return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
     }
@@ -113,8 +112,7 @@ object ContextService {
 
     private fun hentTilgangMedRolle(fagsystem: Tilgangskontrollsfagsystem,
                                     behandlerrolle: Behandlerrolle,
-                                    brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)
-            : Map<Tilgangskontrollsfagsystem, Behandlerrolle> {
+                                    brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>): Map<Tilgangskontrollsfagsystem, Behandlerrolle> {
         if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle, brukerTilganger)) {
             return mapOf(fagsystem to behandlerrolle)
         }
@@ -123,8 +121,7 @@ object ContextService {
 
     private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem: Tilgangskontrollsfagsystem,
                                                                 behandlerrolle: Behandlerrolle,
-                                                                brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)
-            : Boolean {
+                                                                brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>): Boolean {
         if (brukerTilganger.containsKey(fagsystem)) {
             return brukerTilganger[fagsystem]!!.nivå > behandlerrolle.nivå
         }

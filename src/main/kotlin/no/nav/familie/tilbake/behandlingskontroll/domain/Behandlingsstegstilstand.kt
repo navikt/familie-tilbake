@@ -65,7 +65,6 @@ enum class Behandlingssteg(val sekvens: Int,
                    ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
         }
     }
-
 }
 
 enum class Behandlingsstegstatus(private val beskrivelse: String) {
@@ -110,6 +109,4 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
             return venteårsak in listOf(VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, VENT_PÅ_MULIG_MOTREGNING)
         }
     }
-
-
 }
