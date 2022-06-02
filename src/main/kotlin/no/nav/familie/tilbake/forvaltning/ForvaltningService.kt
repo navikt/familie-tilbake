@@ -147,7 +147,7 @@ class ForvaltningService(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
-            Aktør.SAKSBEHANDLER
+            Aktør.VEDTAKSLØSNING
         )
     }
 

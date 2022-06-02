@@ -109,6 +109,51 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentTotrinnsvurderinger skal hente totrinnsvurdering etter beslutters vurdering med nytt behandlingssteg`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        totrinnService.lagreTotrinnsvurderinger(
+            behandlingId,
+            listOf(
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FAKTA,
+                    godkjent = true,
+                    begrunnelse = "testverdi"
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                    godkjent = false,
+                    begrunnelse = "testverdi"
+                ),
+                VurdertTotrinnDto(
+                    behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                    godkjent = false,
+                    begrunnelse = "testverdi"
+                )
+            )
+        )
+
+        // Dette steget var ikke behandlet med første omgang
+        lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+
+        val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
+
+        val totrinnsstegsinfo = totrinnsvurderingDto.totrinnsstegsinfo
+        totrinnsstegsinfo.shouldContainExactly(
+            Totrinnsstegsinfo(Behandlingssteg.FAKTA, true, "testverdi"),
+            Totrinnsstegsinfo(Behandlingssteg.FORELDELSE, null, null),
+            Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
+            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi")
+        )
+    }
+
+    @Test
     fun `lagreTotrinnsvurderinger skal ikke lagre når det mangler steg i request som kan besluttes`() {
         lagBehandlingsstegstilstand(Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)

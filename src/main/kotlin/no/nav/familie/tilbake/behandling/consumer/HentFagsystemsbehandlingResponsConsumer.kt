@@ -26,7 +26,7 @@ class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingSe
         containerFactory = "concurrentKafkaListenerContainerFactory"
     )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
-        logger.info("Fagsystemsbehandlingsdata er mottatt i kafka $consumerRecord")
+        logger.info("Fagsystemsbehandlingsdata er mottatt i kafka med key=${consumerRecord.key()}")
         secureLogger.info("Fagsystemsbehandlingsdata er mottatt i kafka $consumerRecord")
 
         val requestId = UUID.fromString(consumerRecord.key())

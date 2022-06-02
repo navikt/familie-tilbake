@@ -79,7 +79,8 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
-        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
+        val dokument =
+            innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD))
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
