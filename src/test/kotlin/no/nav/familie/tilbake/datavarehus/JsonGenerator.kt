@@ -59,16 +59,16 @@ class JsonGenerator {
  */
 class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
-    private val customType2FormatMapping = mapOf("java.time.LocalDateTime" to "datetime-local",
-                                                 "java.time.OffsetDateTime" to "datetime",
-                                                 "java.time.LocalDate" to "date")
-
+    private val customType2FormatMapping = mapOf(
+        "java.time.LocalDateTime" to "datetime-local",
+        "java.time.OffsetDateTime" to "datetime",
+        "java.time.LocalDate" to "date"
+    )
 
     companion object {
 
         @JvmStatic val JSON_SCHEMA_DRAFT_2020_12_URL = "https://json-schema.org/draft/2020-12/schema"
     }
-
 
     open class MySerializerProvider {
 
@@ -82,7 +82,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             return myProvider!!
         }
     }
-
 
     abstract class EnumSupport {
 
@@ -104,7 +103,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
     data class WorkInProgress(val classInProgress: Class<*>, val nodeInProgress: ObjectNode)
 
-
     // Class that manages creating new defenitions or getting $refs to existing definitions
     inner class DefinitionsHandler {
 
@@ -122,15 +120,16 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             workInProgress = null
         }
 
-
         fun popworkInProgress() {
             val item = workInProgressStack.size - 1
             workInProgress = workInProgressStack.removeAt(item)
         }
 
         // Either creates new definitions or return $ref to existing one
-        fun getOrCreateDefinition(clazz: Class<*>,
-                                  objectDefinitionBuilder: (ObjectNode) -> JsonObjectFormatVisitor?): DefinitionInfo {
+        fun getOrCreateDefinition(
+            clazz: Class<*>,
+            objectDefinitionBuilder: (ObjectNode) -> JsonObjectFormatVisitor?
+        ): DefinitionInfo {
             val ref = class2Ref[clazz]
             if (ref != null) {
                 if (workInProgress != null) {
@@ -175,24 +174,28 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
     data class PropertyNode(val main: ObjectNode, val meta: ObjectNode)
 
+    inner class MyJsonFormatVisitorWrapper(
+        val objectMapper: ObjectMapper,
+        private val level: Int = 0,
+        val node: ObjectNode = JsonNodeFactory.instance.objectNode(),
+        val definitionsHandler: DefinitionsHandler,
+        // This property may represent the BeanProperty when we're directly processing beneath the property
+        val currentProperty: BeanProperty?
+    ) : JsonFormatVisitorWrapper,
+        MySerializerProvider() {
 
-    inner class MyJsonFormatVisitorWrapper(val objectMapper: ObjectMapper,
-                                           private val level: Int = 0,
-                                           val node: ObjectNode = JsonNodeFactory.instance.objectNode(),
-                                           val definitionsHandler: DefinitionsHandler,
-            // This property may represent the BeanProperty when we're directly processing beneath the property
-                                           val currentProperty: BeanProperty?) : JsonFormatVisitorWrapper,
-                                                                                 MySerializerProvider() {
+        open inner class MyJsonObjectFormatVisitor(
+            private val thisObjectNode: ObjectNode,
+            private val propertiesNode: ObjectNode
+        ) : JsonObjectFormatVisitor,
+            MySerializerProvider() {
 
-
-        open inner class MyJsonObjectFormatVisitor(private val thisObjectNode: ObjectNode,
-                                                   private val propertiesNode: ObjectNode) : JsonObjectFormatVisitor,
-                                                                                             MySerializerProvider() {
-
-            private fun myPropertyHandler(propertyName: String,
-                                          propertyType: JavaType,
-                                          prop: BeanProperty?,
-                                          jsonPropertyRequired: Boolean) {
+            private fun myPropertyHandler(
+                propertyName: String,
+                propertyType: JavaType,
+                prop: BeanProperty?,
+                jsonPropertyRequired: Boolean
+            ) {
 
                 if (propertiesNode.get(propertyName) != null) {
                     return
@@ -230,7 +233,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     prop.getAnnotation(JsonPropertyDescription::class.java)?.let {
                         thisPropertyNode.meta.put("description", it.value)
                     }
-
                 }
             }
 
@@ -256,11 +258,13 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         fun createChild(childNode: ObjectNode, currentProperty: BeanProperty?): MyJsonFormatVisitorWrapper {
-            return MyJsonFormatVisitorWrapper(objectMapper,
-                                              level + 1,
-                                              node = childNode,
-                                              definitionsHandler = definitionsHandler,
-                                              currentProperty = currentProperty)
+            return MyJsonFormatVisitorWrapper(
+                objectMapper,
+                level + 1,
+                node = childNode,
+                definitionsHandler = definitionsHandler,
+                currentProperty = currentProperty
+            )
         }
 
         override fun expectStringFormat(type: JavaType?): JsonStringFormatVisitor {
@@ -307,8 +311,10 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             return object : JsonArrayFormatVisitor, MySerializerProvider() {
 
                 override fun itemsFormat(handler: JsonFormatVisitable?, elementType: JavaType?) {
-                    objectMapper.acceptJsonFormatVisitor(preferredElementType ?: elementType,
-                                                         createChild(itemsNode, currentProperty = null))
+                    objectMapper.acceptJsonFormatVisitor(
+                        preferredElementType ?: elementType,
+                        createChild(itemsNode, currentProperty = null)
+                    )
                 }
 
                 override fun itemsFormat(format: JsonFormatTypes?) {
@@ -359,7 +365,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             // There is no way to specify map in jsonSchema,
             // So we're going to treat it as type=object with additionalProperties = true,
             // so that it can hold whatever the map can hold
-
 
             val additionalPropsObject = JsonNodeFactory.instance.objectNode()
 
@@ -450,9 +455,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
                 val propertyName = jsonTypeInfo.property
                 val subTypeName: String = objectMapper.subtypeResolver
-                        .collectAndResolveSubtypesByClass(objectMapper.deserializationConfig, ac)
-                        .first { it.type == _type.rawClass } // find first
-                        .name
+                    .collectAndResolveSubtypesByClass(objectMapper.deserializationConfig, ac)
+                    .first { it.type == _type.rawClass } // find first
+                    .name
                 return PolymorphismInfo(propertyName, subTypeName)
             }
             return null
@@ -461,7 +466,7 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         override fun expectObjectFormat(_type: JavaType): JsonObjectFormatVisitor? {
             val ac = AnnotatedClassResolver.resolve(objectMapper.deserializationConfig, _type, objectMapper.deserializationConfig)
             val resolvedSubTypes =
-                    objectMapper.subtypeResolver.collectAndResolveSubtypesByClass(objectMapper.deserializationConfig, ac)
+                objectMapper.subtypeResolver.collectAndResolveSubtypesByClass(objectMapper.deserializationConfig, ac)
 
             val subTypes = resolvedSubTypes.map { it.type }.filter {
                 _type.rawClass.isAssignableFrom(it) && _type.rawClass != it
@@ -483,11 +488,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     val thisOneOfNode = JsonNodeFactory.instance.objectNode()
                     thisOneOfNode.put("\$ref", definitionInfo.ref)
                     anyOfArrayNode.add(thisOneOfNode)
-
                 }
 
                 return null // Returning null to stop jackson from visiting this object since we have done it manually
-
             } else {
 
                 val objectBuilder: (ObjectNode) -> JsonObjectFormatVisitor? = { thisObjectNode ->
@@ -496,9 +499,11 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     thisObjectNode.put("additionalProperties", false)
 
                     // If class is annotated with com.dr.ktjsonschema.JsonSchemaFormat, we should add it
-                    val annotatedClass = AnnotatedClassResolver.resolve(objectMapper.deserializationConfig,
-                                                                        _type,
-                                                                        objectMapper.deserializationConfig)
+                    val annotatedClass = AnnotatedClassResolver.resolve(
+                        objectMapper.deserializationConfig,
+                        _type,
+                        objectMapper.deserializationConfig
+                    )
                     resolvePropertyFormat(_type)?.let {
                         setFormat(thisObjectNode, it)
                     }
@@ -539,7 +544,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                     MyJsonObjectFormatVisitor(thisObjectNode, propertiesNode)
                 }
 
-
                 return if (level == 0) {
                     // This is the first level - we must not use definitions
                     objectBuilder(node)
@@ -560,11 +564,17 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
     private fun generateTitleFromPropertyName(propertyName: String): String {
         // Code found here:
         // http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human-readable-names-in-java
-        val s = propertyName.replace(Regex(String.format("%s|%s|%s",
-                                                         "(?<=[A-Z])(?=[A-Z][a-z])",
-                                                         "(?<=[^A-Z])(?=[A-Z])",
-                                                         "(?<=[A-Za-z])(?=[^A-Za-z])")),
-                                     " ")
+        val s = propertyName.replace(
+            Regex(
+                String.format(
+                    "%s|%s|%s",
+                    "(?<=[A-Z])(?=[A-Z][a-z])",
+                    "(?<=[^A-Z])(?=[A-Z])",
+                    "(?<=[A-Za-z])(?=[^A-Za-z])"
+                )
+            ),
+            " "
+        )
 
         // Make the first letter uppercase
         return s.substring(0, 1).uppercase() + s.substring(1)
@@ -592,10 +602,12 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         rootNode.put("title", generateTitleFromPropertyName(clazz.simpleName))
 
         val definitionsHandler = DefinitionsHandler()
-        val rootVisitor = MyJsonFormatVisitorWrapper(rootObjectMapper,
-                                                     node = rootNode,
-                                                     definitionsHandler = definitionsHandler,
-                                                     currentProperty = null)
+        val rootVisitor = MyJsonFormatVisitorWrapper(
+            rootObjectMapper,
+            node = rootNode,
+            definitionsHandler = definitionsHandler,
+            currentProperty = null
+        )
         rootObjectMapper.acceptJsonFormatVisitor(clazz, rootVisitor)
 
         definitionsHandler.getFinalDefinitionsNode()?.let {

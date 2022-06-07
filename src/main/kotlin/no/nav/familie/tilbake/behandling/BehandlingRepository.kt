@@ -14,49 +14,63 @@ import java.util.UUID
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
             SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
              WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
             AND beh.status <>'AVSLUTTET' AND beh.type='TILBAKEKREVING'
-    """)
-    fun finnÅpenTilbakekrevingsbehandling(ytelsestype: Ytelsestype,
-                                          eksternFagsakId: String): Behandling?
+    """
+    )
+    fun finnÅpenTilbakekrevingsbehandling(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String
+    ): Behandling?
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
             SELECT beh.* FROM behandling beh WHERE id=(SELECT arsak.behandling_id FROM behandlingsarsak arsak
             WHERE arsak.original_behandling_id=:behandlingId ORDER BY arsak.opprettet_tid DESC LIMIT 1)
             AND beh.status <>'AVSLUTTET' AND beh.type='REVURDERING_TILBAKEKREVING'
-    """)
+    """
+    )
     fun finnÅpenTilbakekrevingsrevurdering(behandlingId: UUID): Behandling?
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
             SELECT beh.* FROM behandling beh JOIN fagsystemsbehandling fag ON fag.behandling_id= beh.id 
             WHERE fag.ekstern_id=:eksternId AND fag.aktiv=TRUE 
             AND beh.type='TILBAKEKREVING' AND beh.status='AVSLUTTET' ORDER BY beh.opprettet_tid DESC
-    """)
+    """
+    )
     fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
             SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
              WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
             AND beh.ekstern_bruk_id=:eksternBrukId
-    """)
-    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(ytelsestype: Ytelsestype,
-                                                            eksternFagsakId: String,
-                                                            eksternBrukId: UUID): Behandling?
+    """
+    )
+    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+        eksternBrukId: UUID
+    ): Behandling?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
             SELECT beh.* FROM behandling beh JOIN behandlingsstegstilstand tilstand ON tilstand.behandling_id = beh.id
             WHERE beh.type='TILBAKEKREVING' AND beh.status='UTREDES' AND
             tilstand.behandlingssteg='FAKTA' AND tilstand.behandlingsstegsstatus='KLAR'
-    """)
+    """
+    )
     fun finnAlleBehandlingerKlarForSaksbehandling(): List<Behandling>
 }

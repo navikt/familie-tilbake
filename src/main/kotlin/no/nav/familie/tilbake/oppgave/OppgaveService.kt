@@ -31,12 +31,14 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
-class OppgaveService(private val behandlingRepository: BehandlingRepository,
-                     private val fagsakRepository: FagsakRepository,
-                     private val integrasjonerClient: IntegrasjonerClient,
-                     private val personService: PersonService,
-                     private val taskRepository: TaskRepository,
-                     private val environment: Environment) {
+class OppgaveService(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val personService: PersonService,
+    private val taskRepository: TaskRepository,
+    private val environment: Environment
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -49,19 +51,25 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val finnOppgaveRequest = FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
-                                                    saksreferanse = behandling.eksternBrukId.toString(),
-                                                    tema = fagsak.ytelsestype.tilTema())
+        val finnOppgaveRequest = FinnOppgaveRequest(
+            behandlingstype = Behandlingstype.Tilbakekreving,
+            saksreferanse = behandling.eksternBrukId.toString(),
+            tema = fagsak.ytelsestype.tilTema()
+        )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
-                secureLogger.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                                   "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error(
+                    "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
+                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
             finnOppgaveResponse.oppgaver.isEmpty() -> {
-                secureLogger.error("Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
-                                   "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error(
+                    "Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
+                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                )
                 throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId}")
             }
             else -> {
@@ -70,12 +78,14 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun opprettOppgave(behandlingId: UUID,
-                       oppgavetype: Oppgavetype,
-                       enhet: String,
-                       beskrivelse: String?,
-                       fristForFerdigstillelse: LocalDate,
-                       saksbehandler: String?): OppgaveResponse {
+    fun opprettOppgave(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        enhet: String,
+        beskrivelse: String?,
+        fristForFerdigstillelse: LocalDate,
+        saksbehandler: String?
+    ): OppgaveResponse {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
@@ -84,28 +94,35 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
-        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)){
-            throw Feil("Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                       "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.")
+        if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
+            throw Feil(
+                "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
+                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først."
+            )
         }
 
-
-        val opprettOppgave = OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId,
-                                                                          gruppe = IdentGruppe.AKTOERID),
-                                                   saksId = behandling.eksternBrukId.toString(),
-                                                   tema = fagsak.ytelsestype.tilTema(),
-                                                   oppgavetype = oppgavetype,
-                                                   behandlesAvApplikasjon = "familie-tilbake",
-                                                   fristFerdigstillelse = fristForFerdigstillelse,
-                                                   beskrivelse = lagOppgaveTekst(fagsak.eksternFagsakId,
-                                                                                 behandling.eksternBrukId.toString(),
-                                                                                 fagsak.fagsystem.name,
-                                                                                 beskrivelse),
-                                                   enhetsnummer = behandling.behandlendeEnhet,
-                                                   tilordnetRessurs = saksbehandler,
-                                                   behandlingstype = Behandlingstype.Tilbakekreving.value,
-                                                   behandlingstema = null,
-                                                   mappeId = finnAktuellMappe(enhet, oppgavetype))
+        val opprettOppgave = OpprettOppgaveRequest(
+            ident = OppgaveIdentV2(
+                ident = aktørId,
+                gruppe = IdentGruppe.AKTOERID
+            ),
+            saksId = behandling.eksternBrukId.toString(),
+            tema = fagsak.ytelsestype.tilTema(),
+            oppgavetype = oppgavetype,
+            behandlesAvApplikasjon = "familie-tilbake",
+            fristFerdigstillelse = fristForFerdigstillelse,
+            beskrivelse = lagOppgaveTekst(
+                fagsak.eksternFagsakId,
+                behandling.eksternBrukId.toString(),
+                fagsak.fagsystem.name,
+                beskrivelse
+            ),
+            enhetsnummer = behandling.behandlendeEnhet,
+            tilordnetRessurs = saksbehandler,
+            behandlingstype = Behandlingstype.Tilbakekreving.value,
+            behandlingstema = null,
+            mappeId = finnAktuellMappe(enhet, oppgavetype)
+        )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
@@ -152,14 +169,18 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
 
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
-                secureLogger.error("Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                                   "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error(
+                    "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
+                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
             finnOppgaveResponse.oppgaver.isEmpty() -> {
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
-                secureLogger.error("Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
-                                   "$finnOppgaveRequest, $finnOppgaveResponse")
+                secureLogger.error(
+                    "Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
+                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                )
             }
             else -> {
                 integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
@@ -167,28 +188,34 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    private fun finnOppgave(behandling: Behandling,
-                            oppgavetype: Oppgavetype?,
-                            fagsak: Fagsak): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
-        val finnOppgaveRequest = FinnOppgaveRequest(behandlingstype = Behandlingstype.Tilbakekreving,
-                                                    saksreferanse = behandling.eksternBrukId.toString(),
-                                                    oppgavetype = oppgavetype,
-                                                    tema = fagsak.ytelsestype.tilTema())
+    private fun finnOppgave(
+        behandling: Behandling,
+        oppgavetype: Oppgavetype?,
+        fagsak: Fagsak
+    ): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
+        val finnOppgaveRequest = FinnOppgaveRequest(
+            behandlingstype = Behandlingstype.Tilbakekreving,
+            saksreferanse = behandling.eksternBrukId.toString(),
+            oppgavetype = oppgavetype,
+            tema = fagsak.ytelsestype.tilTema()
+        )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         return Pair(finnOppgaveRequest, finnOppgaveResponse)
     }
 
-    private fun lagOppgaveTekst(eksternFagsakId: String,
-                                eksternbrukBehandlingID: String,
-                                fagsystem: String,
-                                beskrivelse: String? = null): String {
+    private fun lagOppgaveTekst(
+        eksternFagsakId: String,
+        eksternbrukBehandlingID: String,
+        fagsystem: String,
+        beskrivelse: String? = null
+    ): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } + "--- Opprettet av familie-tilbake ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/${fagsystem}/fagsak/${eksternFagsakId}/behandling/" +
-               eksternbrukBehandlingID
+            "https://${lagFamilieTilbakeFrontendUrl()}/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/" +
+            eksternbrukBehandlingID
     }
 
     private fun lagFamilieTilbakeFrontendUrl(): String {
@@ -200,16 +227,20 @@ class OppgaveService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun finnesFerdigstillOppgaveForBehandling(behandlingId: UUID, oppgavetype: Oppgavetype): Boolean {
-        val ubehandledeTasker = taskRepository.findByStatusInAndType(listOf(Status.UBEHANDLET,
-                                                                            Status.PLUKKET,
-                                                                            Status.FEILET,
-                                                                            Status.KLAR_TIL_PLUKK,
-                                                                            Status.BEHANDLER),
-                                                                     FerdigstillOppgaveTask.TYPE,
-                                                                     Pageable.unpaged())
+        val ubehandledeTasker = taskRepository.findByStatusInAndType(
+            listOf(
+                Status.UBEHANDLET,
+                Status.PLUKKET,
+                Status.FEILET,
+                Status.KLAR_TIL_PLUKK,
+                Status.BEHANDLER
+            ),
+            FerdigstillOppgaveTask.TYPE,
+            Pageable.unpaged()
+        )
         return ubehandledeTasker.any {
             it.payload == behandlingId.toString() &&
-            it.metadata.getProperty("oppgavetype") == oppgavetype.name
+                it.metadata.getProperty("oppgavetype") == oppgavetype.name
         }
     }
 

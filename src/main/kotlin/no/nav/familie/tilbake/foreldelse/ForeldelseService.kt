@@ -17,16 +17,18 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepository,
-                        private val kravgrunnlagRepository: KravgrunnlagRepository,
-                        private val vilkårsvurderingRepository: VilkårsvurderingRepository) {
+class ForeldelseService(
+    private val foreldelseRepository: VurdertForeldelseRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository
+) {
 
     fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelseDto {
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         // Faktaperioder kan ikke deles. Så logisk periode er samme som faktaperiode
         val feilutbetaltePerioder = LogiskPeriodeUtil
-                .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
+            .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
 
         return ForeldelseMapper.tilRespons(feilutbetaltePerioder, kravgrunnlag, vurdertForeldelse)
     }
@@ -37,8 +39,8 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
 
     fun erPeriodeForeldet(behandlingId: UUID, periode: Periode): Boolean {
         return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
-                       ?.any { periode == it.periode && it.erForeldet() }
-               ?: false
+            ?.any { periode == it.periode && it.erForeldet() }
+            ?: false
     }
 
     @Transactional
@@ -55,9 +57,11 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
     @Transactional
     fun lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId: UUID) {
         val foreldetPerioder = hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
-            ForeldelsesperiodeDto(periode = it.periode,
-                                  begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                                  foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET)
+            ForeldelsesperiodeDto(
+                periode = it.periode,
+                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET
+            )
         }
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId, foreldetPerioder))
     }
@@ -70,7 +74,7 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
     }
 
     @Transactional
-    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId: UUID, vurdertForeldelse: VurdertForeldelse){
+    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId: UUID, vurdertForeldelse: VurdertForeldelse) {
         val eksisterendeVurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) ?: return
         val eksisterendeVurdertForeldelsesperioder = eksisterendeVurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()
         val nyVurdertForeldelsesperioder = vurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()
@@ -82,5 +86,4 @@ class ForeldelseService(private val foreldelseRepository: VurdertForeldelseRepos
             vilkårsvurderingRepository.update(vilkårsvurdering)
         }
     }
-
 }

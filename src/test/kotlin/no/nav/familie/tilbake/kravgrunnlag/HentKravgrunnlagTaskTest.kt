@@ -100,11 +100,15 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal hente kravgrunnlag for revurderingstilbakekreving`() {
         val revurdering = behandlingRepository.insert(Testdata.revurdering)
         behandlingsstegstilstandRepository
-                .insert(Behandlingsstegstilstand(behandlingId = revurdering.id,
-                                                 behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
-                                                 venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                                                 tidsfrist = LocalDate.now().plusWeeks(3)))
+            .insert(
+                Behandlingsstegstilstand(
+                    behandlingId = revurdering.id,
+                    behandlingssteg = Behandlingssteg.GRUNNLAG,
+                    behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                    venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                    tidsfrist = LocalDate.now().plusWeeks(3)
+                )
+            )
 
         hentKravgrunnlagTask.doTask(lagTask(revurdering.id))
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(revurdering.id).shouldBeTrue()
@@ -125,17 +129,19 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(revurdering.id)
         behandlingsstegstilstand.any {
             Behandlingssteg.GRUNNLAG == it.behandlingssteg &&
-            Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
+                Behandlingsstegstatus.UTFØRT == it.behandlingsstegsstatus
         }.shouldBeTrue()
 
         behandlingsstegstilstand.any {
             Behandlingssteg.FAKTA == it.behandlingssteg &&
-            Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
+                Behandlingsstegstatus.KLAR == it.behandlingsstegsstatus
         }.shouldBeTrue()
     }
 
     private fun lagTask(behandlingId: UUID): Task {
-        return Task(type = HentKravgrunnlagTask.TYPE,
-                    payload = behandlingId.toString())
+        return Task(
+            type = HentKravgrunnlagTask.TYPE,
+            payload = behandlingId.toString()
+        )
     }
 }

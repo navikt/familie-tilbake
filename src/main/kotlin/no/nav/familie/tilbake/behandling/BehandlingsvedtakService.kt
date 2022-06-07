@@ -15,9 +15,11 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepository,
-                               private val tellerService: TellerService,
-                               private val tilbakeBeregningService: TilbakekrevingsberegningService) {
+class BehandlingsvedtakService(
+    private val behandlingRepository: BehandlingRepository,
+    private val tellerService: TellerService,
+    private val tilbakeBeregningService: TilbakekrevingsberegningService
+) {
 
     @Transactional
     fun opprettBehandlingsvedtak(behandlingId: UUID) {
@@ -26,10 +28,14 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
         val beregningsresultat = tilbakeBeregningService.beregn(behandlingId)
         val behandlingsresultatstype = utledBehandlingsresultatstype(beregningsresultat.vedtaksresultat)
 
-        val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now(),
-                                                  iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT)
-        val behandlingsresultat = Behandlingsresultat(type = behandlingsresultatstype,
-                                                      behandlingsvedtak = behandlingsvedtak)
+        val behandlingsvedtak = Behandlingsvedtak(
+            vedtaksdato = LocalDate.now(),
+            iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT
+        )
+        val behandlingsresultat = Behandlingsresultat(
+            type = behandlingsresultatstype,
+            behandlingsvedtak = behandlingsvedtak
+        )
         behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
         tellerService.tellVedtak(behandlingsresultatstype, behandling)
     }
@@ -39,9 +45,9 @@ class BehandlingsvedtakService(private val behandlingRepository: BehandlingRepos
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val aktivBehandlingsresultat = requireNotNull(behandling.sisteResultat) { "Behandlingsresultat kan ikke være null" }
         val behandlingsvedtak =
-                requireNotNull(aktivBehandlingsresultat.behandlingsvedtak) { "Behandlingsvedtak kan ikke være null" }
+            requireNotNull(aktivBehandlingsresultat.behandlingsvedtak) { "Behandlingsvedtak kan ikke være null" }
         val oppdatertBehandlingsresultat = aktivBehandlingsresultat
-                .copy(behandlingsvedtak = behandlingsvedtak.copy(iverksettingsstatus = iverksettingsstatus))
+            .copy(behandlingsvedtak = behandlingsvedtak.copy(iverksettingsstatus = iverksettingsstatus))
         return behandlingRepository.update(behandling.copy(resultater = setOf(oppdatertBehandlingsresultat)))
     }
 

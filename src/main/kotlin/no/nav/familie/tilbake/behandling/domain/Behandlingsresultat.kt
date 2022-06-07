@@ -8,26 +8,29 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.util.UUID
 
-data class Behandlingsresultat(@Id
-                               val id: UUID = UUID.randomUUID(),
-                               val type: Behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT,
-                               @MappedCollection(idColumn = "behandlingsresultat_id")
-                               val behandlingsvedtak: Behandlingsvedtak? = null,
-                               @Version
-                               val versjon: Long = 0,
-                               @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                               val sporbar: Sporbar = Sporbar()) {
+data class Behandlingsresultat(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val type: Behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT,
+    @MappedCollection(idColumn = "behandlingsresultat_id")
+    val behandlingsvedtak: Behandlingsvedtak? = null,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+) {
 
     companion object {
 
         val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> =
-                setOf(Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
-                      Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
-                      Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV)
+            setOf(
+                Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
+                Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
+                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV
+            )
     }
-
 
     fun erBehandlingHenlagt(): Boolean {
         return ALLE_HENLEGGELSESKODER.contains(type)
@@ -41,21 +44,22 @@ data class Behandlingsresultat(@Id
     }
 }
 
-data class Behandlingsvedtak(@Id
-                             val id: UUID = UUID.randomUUID(),
-                             val vedtaksdato: LocalDate,
-                             val iverksettingsstatus: Iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
-                             @Version
-                             val versjon: Long = 0,
-                             @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                             val sporbar: Sporbar = Sporbar())
+data class Behandlingsvedtak(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val vedtaksdato: LocalDate,
+    val iverksettingsstatus: Iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 enum class Iverksettingsstatus {
     IKKE_IVERKSATT,
     UNDER_IVERKSETTING,
     IVERKSATT
 }
-
 
 enum class Behandlingsresultatstype(val navn: String) {
     IKKE_FASTSATT("Ikke fastsatt"),
@@ -64,7 +68,7 @@ enum class Behandlingsresultatstype(val navn: String) {
     HENLAGT_FEILOPPRETTET_UTEN_BREV("Feilaktig opprettet - uten henleggelsesbrev"),
     HENLAGT_KRAVGRUNNLAG_NULLSTILT("Kravgrunnlaget er nullstilt"),
     HENLAGT_TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
-    HENLAGT("Henlagt"),  // kun brukes i frontend
+    HENLAGT("Henlagt"), // kun brukes i frontend
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
     DELVIS_TILBAKEBETALING("Delvis tilbakebetaling"),
     FULL_TILBAKEBETALING("Full tilbakebetaling");

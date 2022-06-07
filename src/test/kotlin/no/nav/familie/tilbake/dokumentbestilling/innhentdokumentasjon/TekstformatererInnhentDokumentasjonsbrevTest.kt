@@ -13,25 +13,30 @@ import java.util.Scanner
 
 class TekstformatererInnhentDokumentasjonsbrevTest {
 
-    private val metadata = Brevmetadata(sakspartId = "12345678901",
-                                        sakspartsnavn = "Test",
-                                        mottageradresse = Adresseinfo("12345678901", "Test"),
-                                        språkkode = Språkkode.NB,
-                                        ytelsestype = Ytelsestype.BARNETILSYN,
-                                        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-                                        saksnummer = "1232456",
-                                        ansvarligSaksbehandler = "Bob")
+    private val metadata = Brevmetadata(
+        sakspartId = "12345678901",
+        sakspartsnavn = "Test",
+        mottageradresse = Adresseinfo("12345678901", "Test"),
+        språkkode = Språkkode.NB,
+        ytelsestype = Ytelsestype.BARNETILSYN,
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        saksnummer = "1232456",
+        ansvarligSaksbehandler = "Bob"
+    )
     private val innhentDokumentasjonsbrevsdokument =
-            InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,
-                                               fritekstFraSaksbehandler = "Dette er ein fritekst.",
-                                               fristdato = LocalDate.of(2020, 3, 2))
-
+        InnhentDokumentasjonsbrevsdokument(
+            brevmetadata = metadata,
+            fritekstFraSaksbehandler = "Dette er ein fritekst.",
+            fristdato = LocalDate.of(2020, 3, 2)
+        )
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev`() {
-        val dokument = InnhentDokumentasjonsbrevsdokument(brevmetadata = metadata,
-                                                          fritekstFraSaksbehandler = "Dette er ein fritekst.",
-                                                          fristdato = LocalDate.of(2020, 3, 2))
+        val dokument = InnhentDokumentasjonsbrevsdokument(
+            brevmetadata = metadata,
+            fritekstFraSaksbehandler = "Dette er ein fritekst.",
+            fristdato = LocalDate.of(2020, 3, 2)
+        )
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
@@ -53,11 +58,15 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev for verge organisasjon`() {
-        val brevMetadata = metadata.copy(mottageradresse = Adresseinfo(ident = "12345678901",
-                                                                       mottagernavn = "Semba AS c/o John Doe"),
-                                         sakspartsnavn = "Test",
-                                         vergenavn = "John Doe",
-                                         finnesVerge = true)
+        val brevMetadata = metadata.copy(
+            mottageradresse = Adresseinfo(
+                ident = "12345678901",
+                mottagernavn = "Semba AS c/o John Doe"
+            ),
+            sakspartsnavn = "Test",
+            vergenavn = "John Doe",
+            finnesVerge = true
+        )
         val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
@@ -71,7 +80,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val dokument =
-                innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD))
+            innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD))
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
@@ -92,7 +101,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
 
         val overskrift = TekstformatererInnhentDokumentasjonsbrev
-                .lagOverskrift(brevMetadata)
+            .lagOverskrift(brevMetadata)
 
         val fasit = "Vi trenger fleire opplysningar"
         overskrift shouldBe fasit
@@ -106,6 +115,4 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
             }
         }
     }
-
-
 }

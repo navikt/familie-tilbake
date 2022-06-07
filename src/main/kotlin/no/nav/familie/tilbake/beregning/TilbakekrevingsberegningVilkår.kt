@@ -20,10 +20,12 @@ internal object TilbakekrevingsberegningVilkår {
     private val RENTESATS: BigDecimal = BigDecimal.valueOf(10)
     private val RENTEFAKTOR: BigDecimal = RENTESATS.divide(HUNDRE_PROSENT, 2, RoundingMode.UNNECESSARY)
 
-    fun beregn(vilkårVurdering: Vilkårsvurderingsperiode,
-               delresultat: FordeltKravgrunnlagsbeløp,
-               perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-               beregnRenter: Boolean): Beregningsresultatsperiode {
+    fun beregn(
+        vilkårVurdering: Vilkårsvurderingsperiode,
+        delresultat: FordeltKravgrunnlagsbeløp,
+        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
+        beregnRenter: Boolean
+    ): Beregningsresultatsperiode {
         val periode: Periode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
         val renter = beregnRenter && finnRenter(vilkårVurdering)
@@ -31,38 +33,46 @@ internal object TilbakekrevingsberegningVilkår {
         val manueltBeløp: BigDecimal? = finnManueltSattBeløp(vilkårVurdering)
         val ignoreresPgaLavtBeløp = false == vilkårVurdering.aktsomhet?.tilbakekrevSmåbeløp
         val beløpUtenRenter: BigDecimal =
-                if (ignoreresPgaLavtBeløp) BigDecimal.ZERO else finnBeløpUtenRenter(delresultat.feilutbetaltBeløp,
-                                                                                    andel,
-                                                                                    manueltBeløp)
+            if (ignoreresPgaLavtBeløp) BigDecimal.ZERO else finnBeløpUtenRenter(
+                delresultat.feilutbetaltBeløp,
+                andel,
+                manueltBeløp
+            )
         val rentebeløp: BigDecimal = beregnRentebeløp(beløpUtenRenter, renter)
         val tilbakekrevingBeløp: BigDecimal = beløpUtenRenter.add(rentebeløp)
         val skattBeløp: BigDecimal =
-                beregnSkattBeløp(periode,
-                                 beløpUtenRenter,
-                                 perioderMedSkatteprosent)
+            beregnSkattBeløp(
+                periode,
+                beløpUtenRenter,
+                perioderMedSkatteprosent
+            )
         val nettoBeløp: BigDecimal = tilbakekrevingBeløp.subtract(skattBeløp)
-        return Beregningsresultatsperiode(periode = periode,
-                                          vurdering = vurdering,
-                                          renteprosent = if (renter) RENTESATS else null,
-                                          feilutbetaltBeløp = delresultat.feilutbetaltBeløp,
-                                          riktigYtelsesbeløp = delresultat.riktigYtelsesbeløp,
-                                          utbetaltYtelsesbeløp = delresultat.utbetaltYtelsesbeløp,
-                                          andelAvBeløp = andel,
-                                          manueltSattTilbakekrevingsbeløp = manueltBeløp,
-                                          tilbakekrevingsbeløpUtenRenter = beløpUtenRenter,
-                                          rentebeløp = rentebeløp,
-                                          tilbakekrevingsbeløpEtterSkatt = nettoBeløp,
-                                          skattebeløp = skattBeløp,
-                                          tilbakekrevingsbeløp = tilbakekrevingBeløp)
+        return Beregningsresultatsperiode(
+            periode = periode,
+            vurdering = vurdering,
+            renteprosent = if (renter) RENTESATS else null,
+            feilutbetaltBeløp = delresultat.feilutbetaltBeløp,
+            riktigYtelsesbeløp = delresultat.riktigYtelsesbeløp,
+            utbetaltYtelsesbeløp = delresultat.utbetaltYtelsesbeløp,
+            andelAvBeløp = andel,
+            manueltSattTilbakekrevingsbeløp = manueltBeløp,
+            tilbakekrevingsbeløpUtenRenter = beløpUtenRenter,
+            rentebeløp = rentebeløp,
+            tilbakekrevingsbeløpEtterSkatt = nettoBeløp,
+            skattebeløp = skattBeløp,
+            tilbakekrevingsbeløp = tilbakekrevingBeløp
+        )
     }
 
     private fun beregnRentebeløp(beløp: BigDecimal, renter: Boolean): BigDecimal {
         return if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.HALF_UP) else BigDecimal.ZERO
     }
 
-    private fun beregnSkattBeløp(periode: Periode,
-                                 bruttoTilbakekrevesBeløp: BigDecimal,
-                                 perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>): BigDecimal {
+    private fun beregnSkattBeløp(
+        periode: Periode,
+        bruttoTilbakekrevesBeløp: BigDecimal,
+        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>
+    ): BigDecimal {
         val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
         val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {
             BigDecimal.ZERO
@@ -74,7 +84,7 @@ internal object TilbakekrevingsberegningVilkår {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                        .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
                 skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.HALF_UP)
             }
         }
@@ -96,7 +106,7 @@ internal object TilbakekrevingsberegningVilkår {
         if (aktsomhet != null) {
             val erForsett: Boolean = Aktsomhet.FORSETT == aktsomhet.aktsomhet
             return erForsett && (aktsomhet.ileggRenter == null || aktsomhet.ileggRenter) ||
-                   aktsomhet.ileggRenter != null && aktsomhet.ileggRenter
+                aktsomhet.ileggRenter != null && aktsomhet.ileggRenter
         }
         return false
     }

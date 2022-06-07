@@ -19,8 +19,12 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(januar, februar)
         val periode2 = Periode(mars, mai)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
-                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap())
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
+            mapOf(
+                periode1 to BigDecimal.valueOf(100),
+                periode2 to BigDecimal.valueOf(200)
+            ).toSortedMap()
+        )
 
         resultat.size shouldBe 1
         resultat[0].fom shouldBe januar
@@ -33,8 +37,12 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Periode(januar, februar)
         val periode2 = Periode(april, mai)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(mapOf(periode1 to BigDecimal.valueOf(100),
-                                                                  periode2 to BigDecimal.valueOf(200)).toSortedMap())
+        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
+            mapOf(
+                periode1 to BigDecimal.valueOf(100),
+                periode2 to BigDecimal.valueOf(200)
+            ).toSortedMap()
+        )
 
         resultat.size shouldBe 2
         resultat[0].fom shouldBe januar

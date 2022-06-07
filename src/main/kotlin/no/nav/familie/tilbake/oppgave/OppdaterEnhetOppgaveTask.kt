@@ -11,10 +11,12 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OppdaterEnhetOppgaveTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Oppdaterer enhet på oppgave",
-                     triggerTidVedFeilISekunder = 300L)
+@TaskStepBeskrivelse(
+    taskStepType = OppdaterEnhetOppgaveTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Oppdaterer enhet på oppgave",
+    triggerTidVedFeilISekunder = 300L
+)
 class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -27,8 +29,8 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : Asy
         val behandlingId = UUID.fromString(task.payload)
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) +":" +
-                            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
+            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
         var patchetOppgave = oppgave.copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse)
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)

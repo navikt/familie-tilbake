@@ -42,7 +42,6 @@ import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-
 class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
@@ -72,11 +71,13 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        service = BehandlingTilstandService(behandlingRepository,
-                                            behandlingsstegstilstandRepository,
-                                            fagsakRepository,
-                                            taskService,
-                                            faktaFeilutbetalingService)
+        service = BehandlingTilstandService(
+            behandlingRepository,
+            behandlingsstegstilstandRepository,
+            fagsakRepository,
+            taskService,
+            faktaFeilutbetalingService
+        )
 
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
@@ -84,8 +85,12 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling`() {
-        val behandling = behandlingService.opprettBehandling(lagOpprettTilbakekrevingRequest(true,
-                                                                                             OPPRETT_TILBAKEKREVING_MED_VARSEL))
+        val behandling = behandlingService.opprettBehandling(
+            lagOpprettTilbakekrevingRequest(
+                true,
+                OPPRETT_TILBAKEKREVING_MED_VARSEL
+            )
+        )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
@@ -108,14 +113,18 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.totalFeilutbetaltPeriode.shouldNotBeNull()
         tilstand.totalFeilutbetaltPeriode!!.should {
             it.fom == YearMonth.now().minusMonths(1).atDay(1) &&
-            it.tom == YearMonth.now().atEndOfMonth()
+                it.tom == YearMonth.now().atEndOfMonth()
         }
     }
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling uten varsel`() {
-        val behandling = behandlingService.opprettBehandling(lagOpprettTilbakekrevingRequest(false,
-                                                                                             OPPRETT_TILBAKEKREVING_UTEN_VARSEL))
+        val behandling = behandlingService.opprettBehandling(
+            lagOpprettTilbakekrevingRequest(
+                false,
+                OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            )
+        )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
@@ -141,10 +150,12 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for fattet behandling`() {
         val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING)
-        val fattetBehandling = behandling.copy(behandlendeEnhet = "1234", behandlendeEnhetsNavn = "foo bar",
-                                               ansvarligSaksbehandler = "Z111111",
-                                               ansvarligBeslutter = "Z111112",
-                                               resultater = setOf(behandlingsresultat))
+        val fattetBehandling = behandling.copy(
+            behandlendeEnhet = "1234", behandlendeEnhetsNavn = "foo bar",
+            ansvarligSaksbehandler = "Z111111",
+            ansvarligBeslutter = "Z111112",
+            resultater = setOf(behandlingsresultat)
+        )
         behandlingRepository.update(fattetBehandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand.copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
@@ -170,7 +181,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.totalFeilutbetaltPeriode.shouldNotBeNull()
         tilstand.totalFeilutbetaltPeriode!!.should {
             it.fom == YearMonth.now().minusMonths(1).atDay(1) &&
-            it.tom == YearMonth.now().atEndOfMonth()
+                it.tom == YearMonth.now().atEndOfMonth()
         }
     }
 
@@ -178,9 +189,13 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     fun `hentBehandlingensTilstand skal utlede behandlingstilstand for behandling på vent`() {
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        behandlingService.settBehandlingPåVent(behandling.id,
-                                               BehandlingPåVentDto(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                                   LocalDate.now().plusDays(1)))
+        behandlingService.settBehandlingPåVent(
+            behandling.id,
+            BehandlingPåVentDto(
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                LocalDate.now().plusDays(1)
+            )
+        )
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
@@ -194,43 +209,52 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.behandlingsresultat shouldBe Testdata.behandlingsresultat.type
         tilstand.venterPåBruker shouldBe true
         tilstand.venterPåØkonomi shouldBe false
-        tilstand.funksjoneltTidspunkt.shouldBeBetween(OffsetDateTime.now().minusMinutes(1),
-                                                      OffsetDateTime.now().plusSeconds(1))
+        tilstand.funksjoneltTidspunkt.shouldBeBetween(
+            OffsetDateTime.now().minusMinutes(1),
+            OffsetDateTime.now().plusSeconds(1)
+        )
 
         tilstand.totalFeilutbetaltBeløp shouldBe BigDecimal("10000.00")
         tilstand.totalFeilutbetaltPeriode.shouldNotBeNull()
         tilstand.totalFeilutbetaltPeriode!!.should {
             it.fom == YearMonth.now().minusMonths(1).atDay(1) &&
-            it.tom == YearMonth.now().atEndOfMonth()
+                it.tom == YearMonth.now().atEndOfMonth()
         }
     }
 
-    private fun lagOpprettTilbakekrevingRequest(finnesVarsel: Boolean,
-                                                tilbakekrevingsvalg: Tilbakekrevingsvalg): OpprettTilbakekrevingRequest {
+    private fun lagOpprettTilbakekrevingRequest(
+        finnesVarsel: Boolean,
+        tilbakekrevingsvalg: Tilbakekrevingsvalg
+    ): OpprettTilbakekrevingRequest {
         val fom = YearMonth.now().minusMonths(1).atDay(1)
         val tom = YearMonth.now().atEndOfMonth()
 
-        val varsel = if (finnesVarsel) Varsel(varseltekst = "testverdi",
-                                              sumFeilutbetaling = BigDecimal.valueOf(1500L),
-                                              perioder = listOf(Periode(fom, tom))) else null
+        val varsel = if (finnesVarsel) Varsel(
+            varseltekst = "testverdi",
+            sumFeilutbetaling = BigDecimal.valueOf(1500L),
+            perioder = listOf(Periode(fom, tom))
+        ) else null
 
-        val faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                  revurderingsresultat = "testresultat",
-                                  tilbakekrevingsvalg = tilbakekrevingsvalg)
+        val faktainfo = Faktainfo(
+            revurderingsårsak = "testverdi",
+            revurderingsresultat = "testresultat",
+            tilbakekrevingsvalg = tilbakekrevingsvalg
+        )
 
-        return OpprettTilbakekrevingRequest(ytelsestype = Ytelsestype.BARNETRYGD,
-                                            fagsystem = Fagsystem.BA,
-                                            eksternFagsakId = "1234567",
-                                            personIdent = "321321322",
-                                            eksternId = UUID.randomUUID().toString(),
-                                            manueltOpprettet = false,
-                                            språkkode = Språkkode.NN,
-                                            enhetId = "8020",
-                                            enhetsnavn = "Oslo",
-                                            varsel = varsel,
-                                            revurderingsvedtaksdato = fom,
-                                            faktainfo = faktainfo,
-                                            saksbehandlerIdent = "Z0000")
+        return OpprettTilbakekrevingRequest(
+            ytelsestype = Ytelsestype.BARNETRYGD,
+            fagsystem = Fagsystem.BA,
+            eksternFagsakId = "1234567",
+            personIdent = "321321322",
+            eksternId = UUID.randomUUID().toString(),
+            manueltOpprettet = false,
+            språkkode = Språkkode.NN,
+            enhetId = "8020",
+            enhetsnavn = "Oslo",
+            varsel = varsel,
+            revurderingsvedtaksdato = fom,
+            faktainfo = faktainfo,
+            saksbehandlerIdent = "Z0000"
+        )
     }
-
 }

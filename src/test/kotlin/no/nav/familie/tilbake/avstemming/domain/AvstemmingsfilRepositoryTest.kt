@@ -21,11 +21,12 @@ internal class AvstemmingsfilRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretAvstemmingsfil = avstemmingsfilRepository.findByIdOrThrow(avstemmingsfil.id)
 
-        lagretAvstemmingsfil.shouldBeEqualToComparingFieldsExcept(avstemmingsfil,
-                                                                  Avstemmingsfil::fil,
-                                                                  Avstemmingsfil::sporbar,
-                                                                  Avstemmingsfil::versjon)
+        lagretAvstemmingsfil.shouldBeEqualToComparingFieldsExcept(
+            avstemmingsfil,
+            Avstemmingsfil::fil,
+            Avstemmingsfil::sporbar,
+            Avstemmingsfil::versjon
+        )
         lagretAvstemmingsfil.versjon shouldBe 1
     }
-
 }

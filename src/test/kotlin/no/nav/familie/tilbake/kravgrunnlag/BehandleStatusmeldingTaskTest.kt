@@ -87,7 +87,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<Feil> { behandleStatusmeldingTask.doTask(task) }
         exception.message shouldBe "Det finnes intet kravgrunnlag for fagsystemId=${fagsak.eksternFagsakId} " +
-                "og ytelsestype=${fagsak.ytelsestype}"
+            "og ytelsestype=${fagsak.ytelsestype}"
     }
 
     @Test
@@ -152,7 +152,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.findAll().toList().shouldBeEmpty()
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         assertArkivertXml(2, true, Kravstatuskode.AVSLUTTET)
     }
 
@@ -179,9 +178,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
         taskRepository.findAll().none {
             it.type == OppdaterOppgaveTask.TYPE &&
-            it.payload == behandling.id.toString() &&
-            it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
-            it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
+                it.payload == behandling.id.toString() &&
+                it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
+                it.metadata["frist"] == LocalDate.now().plusWeeks(venteårsak.defaultVenteTidIUker).toString()
         }.shouldBeTrue()
     }
 
@@ -210,7 +209,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         assertArkivertXml(2, true, Kravstatuskode.SPERRET)
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
-
 
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
@@ -259,7 +257,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingstegstilstand(behandlingsstegstilstand, GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingstegstilstand(behandlingsstegstilstand, FAKTA, Behandlingsstegstatus.KLAR)
 
-
         var statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         var task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
         behandleStatusmeldingTask.doTask(task)
@@ -285,10 +282,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+        assertHistorikkTask(
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+        )
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
@@ -322,10 +320,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
-        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse)
+        assertHistorikkTask(
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+        )
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
     }
@@ -348,15 +347,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype).shouldBeEmpty()
 
-
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandling.status shouldBe Behandlingsstatus.AVSLUTTET
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement { Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus }
         behandlingsstegstilstand.shouldHaveSingleElement {
-            Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus
-            && it.behandlingssteg == VARSEL
+            Behandlingsstegstatus.AVBRUTT != it.behandlingsstegsstatus &&
+                it.behandlingssteg == VARSEL
         }
         assertBehandlingstegstilstand(behandlingsstegstilstand, VARSEL, Behandlingsstegstatus.UTFØRT)
 
@@ -370,14 +368,14 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
         opprettGrunnlag()
 
-        //oppdater FAKTA steg manuelt til UTFØRT
+        // oppdater FAKTA steg manuelt til UTFØRT
         val aktivtBehandlingsstegstilstand = behandlingsstegstilstandRepository
-                .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
+            .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
         aktivtBehandlingsstegstilstand.shouldNotBeNull()
         aktivtBehandlingsstegstilstand.let {
             behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
         }
-        //sett aktivt behandlingssteg til FORESLÅ_VEDTAK
+        // sett aktivt behandlingssteg til FORESLÅ_VEDTAK
         lagBehandlingsstegstilstand(FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
         lagBehandlingsstegstilstand(VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -389,31 +387,43 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandleKravgrunnlagTask.doTask(task)
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
-                                            behandlingsstegstatus: Behandlingsstegstatus,
-                                            venteårsak: Venteårsak? = null,
-                                            tidsfrist: LocalDate? = null) {
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                                           behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus,
-                                                                           venteårsak = venteårsak,
-                                                                           tidsfrist = tidsfrist))
+    private fun lagBehandlingsstegstilstand(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus,
+        venteårsak: Venteårsak? = null,
+        tidsfrist: LocalDate? = null
+    ) {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus,
+                venteårsak = venteårsak,
+                tidsfrist = tidsfrist
+            )
+        )
     }
 
-    private fun assertBehandlingstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                              behandlingssteg: Behandlingssteg,
-                                              behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun assertBehandlingstegstilstand(
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
-            behandlingsstegstatus == it.behandlingsstegsstatus
+                behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
 
-    private fun assertArkivertXml(size: Int,
-                                  finnesKravgrunnlag: Boolean,
-                                  vararg statusmeldingKravstatuskode: Kravstatuskode) {
-        val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId,
-                                                                                             fagsak.ytelsestype)
+    private fun assertArkivertXml(
+        size: Int,
+        finnesKravgrunnlag: Boolean,
+        vararg statusmeldingKravstatuskode: Kravstatuskode
+    ) {
+        val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(
+            fagsak.eksternFagsakId,
+            fagsak.ytelsestype
+        )
         arkivertXmlListe.size shouldBe size
 
         if (finnesKravgrunnlag) {
@@ -422,33 +432,39 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         statusmeldingKravstatuskode.forEach { kravstatuskode ->
             arkivertXmlListe.shouldHaveSingleElement {
                 it.melding.contains(Constants.statusmeldingXmlRootElement) &&
-                it.melding.contains(kravstatuskode.kode)
+                    it.melding.contains(kravstatuskode.kode)
             }
         }
     }
 
     private fun opprettTask(xml: String, taskType: String): Task {
-        return taskRepository.save(Task(type = taskType,
-                                        payload = xml))
+        return taskRepository.save(
+            Task(
+                type = taskType,
+                payload = xml
+            )
+        )
     }
 
-    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                    beskrivelse: String? = null) {
+    private fun assertHistorikkTask(
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        beskrivelse: String? = null
+    ) {
         taskRepository.findByStatus(Status.UBEHANDLET).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
-            historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-            Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
-            beskrivelse == it.metadata["beskrivelse"] &&
-            behandling.id.toString() == it.payload
+                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
+                beskrivelse == it.metadata["beskrivelse"] &&
+                behandling.id.toString() == it.payload
         }.shouldBeTrue()
     }
 
     private fun assertOppgaveTask(beskrivelse: String, fristTid: LocalDate) {
         taskRepository.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
-            it.payload == behandling.id.toString() &&
-            it.metadata["beskrivelse"] == beskrivelse &&
-            it.metadata["frist"] == fristTid.toString()
+                it.payload == behandling.id.toString() &&
+                it.metadata["beskrivelse"] == beskrivelse &&
+                it.metadata["frist"] == fristTid.toString()
         }.shouldBeTrue()
     }
 }

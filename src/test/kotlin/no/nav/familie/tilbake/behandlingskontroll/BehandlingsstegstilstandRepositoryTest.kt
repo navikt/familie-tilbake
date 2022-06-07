@@ -38,9 +38,11 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
 
         val lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
 
-        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(behandlingsstegstilstand,
-                                                                            Behandlingsstegstilstand::sporbar,
-                                                                            Behandlingsstegstilstand::versjon)
+        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
+            behandlingsstegstilstand,
+            Behandlingsstegstilstand::sporbar,
+            Behandlingsstegstilstand::versjon
+        )
         lagretBehandlingsstegstilstand.versjon shouldBe 1
     }
 
@@ -49,15 +51,16 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
         behandlingsstegstilstandRepository.insert(behandlingsstegstilstand)
         var lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
         val oppdatertBehandlingsstegstilstand =
-                lagretBehandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
+            lagretBehandlingsstegstilstand.copy(behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
 
         behandlingsstegstilstandRepository.update(oppdatertBehandlingsstegstilstand)
 
         lagretBehandlingsstegstilstand = behandlingsstegstilstandRepository.findByIdOrThrow(behandlingsstegstilstand.id)
-        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(oppdatertBehandlingsstegstilstand,
-                                                                            Behandlingsstegstilstand::sporbar,
-                                                                            Behandlingsstegstilstand::versjon)
+        lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
+            oppdatertBehandlingsstegstilstand,
+            Behandlingsstegstilstand::sporbar,
+            Behandlingsstegstilstand::versjon
+        )
         lagretBehandlingsstegstilstand.versjon shouldBe 2
     }
-
 }

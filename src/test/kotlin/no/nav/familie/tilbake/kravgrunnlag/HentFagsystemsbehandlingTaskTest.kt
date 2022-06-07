@@ -84,7 +84,6 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXMl: String
     private lateinit var mottattXmlId: UUID
 
-
     private val eksternFagsakIdSlot = slot<String>()
     private val ytelsestypeSlot = slot<Ytelsestype>()
     private val eksternIdSlot = slot<String>()
@@ -95,18 +94,20 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
-        håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(behandlingRepository,
-                                                                          kravgrunnlagRepository,
-                                                                          behandlingService,
-                                                                          behandlingskontrollService,
-                                                                          økonomiXmlMottattService,
-                                                                          mockHentKravgrunnlagService,
-                                                                          stegService,
-                                                                          historikkService)
+        håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(
+            behandlingRepository,
+            kravgrunnlagRepository,
+            behandlingService,
+            behandlingskontrollService,
+            økonomiXmlMottattService,
+            mockHentKravgrunnlagService,
+            stegService,
+            historikkService
+        )
         val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         hentFagsystemsbehandlingTask =
-                HentFagsystemsbehandlingTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
+            HentFagsystemsbehandlingTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
     }
@@ -123,10 +124,10 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<UgyldigKravgrunnlagFeil> { hentFagsystemsbehandlingTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag med $mottattXmlId er ugyldig." +
-                "Det finnes allerede en åpen behandling for " +
-                "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
-                "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                "ved å bruke forvaltningsrutine etter feilundersøkelse."
+            "Det finnes allerede en åpen behandling for " +
+            "fagsak=${xmlMottatt.eksternFagsakId} og ytelsestype=${xmlMottatt.ytelsestype}. " +
+            "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
+            "ved å bruke forvaltningsrutine etter feilundersøkelse."
     }
 
     @Test
@@ -134,17 +135,21 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         hentFagsystemsbehandlingTask.doTask(lagTask())
 
         verify {
-            hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(capture(eksternFagsakIdSlot),
-                                                                                capture(ytelsestypeSlot),
-                                                                                capture(eksternIdSlot))
+            hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
+                capture(eksternFagsakIdSlot),
+                capture(ytelsestypeSlot),
+                capture(eksternIdSlot)
+            )
         }
         eksternFagsakIdSlot.captured shouldBe xmlMottatt.eksternFagsakId
         ytelsestypeSlot.captured shouldBe xmlMottatt.ytelsestype
         eksternIdSlot.captured shouldBe xmlMottatt.referanse
 
-        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(xmlMottatt.eksternFagsakId,
-                                                                               xmlMottatt.ytelsestype,
-                                                                               xmlMottatt.referanse).shouldNotBeNull()
+        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+            xmlMottatt.eksternFagsakId,
+            xmlMottatt.ytelsestype,
+            xmlMottatt.referanse
+        ).shouldNotBeNull()
     }
 
     @Test
@@ -153,7 +158,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
         taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
             it.type == HåndterGammelKravgrunnlagTask.TYPE &&
-            it.payload == xmlMottatt.id.toString()
+                it.payload == xmlMottatt.id.toString()
         }
     }
 

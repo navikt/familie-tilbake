@@ -36,9 +36,11 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         vedtaksbrevsoppsummeringRepository.insert(vedtaksbrevsoppsummering)
 
         val lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(vedtaksbrevsoppsummering,
-                                                                            Vedtaksbrevsoppsummering::sporbar,
-                                                                            Vedtaksbrevsoppsummering::versjon)
+        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(
+            vedtaksbrevsoppsummering,
+            Vedtaksbrevsoppsummering::sporbar,
+            Vedtaksbrevsoppsummering::versjon
+        )
         lagretVedtaksbrevsoppsummering.versjon shouldBe 1
     }
 
@@ -51,10 +53,11 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         vedtaksbrevsoppsummeringRepository.update(oppdatertVedtaksbrevsoppsummering)
 
         lagretVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByIdOrThrow(vedtaksbrevsoppsummering.id)
-        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(oppdatertVedtaksbrevsoppsummering,
-                                                                            Vedtaksbrevsoppsummering::sporbar,
-                                                                            Vedtaksbrevsoppsummering::versjon)
+        lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(
+            oppdatertVedtaksbrevsoppsummering,
+            Vedtaksbrevsoppsummering::sporbar,
+            Vedtaksbrevsoppsummering::versjon
+        )
         lagretVedtaksbrevsoppsummering.versjon shouldBe 2
     }
-
 }

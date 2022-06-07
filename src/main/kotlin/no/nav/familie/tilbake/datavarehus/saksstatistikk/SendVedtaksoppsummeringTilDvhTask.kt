@@ -12,15 +12,18 @@ import java.util.UUID
 import javax.validation.Validation
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendVedtaksoppsummeringTilDvhTask.TYPE,
-                     beskrivelse = "Sender oppsummering av vedtak til datavarehus.")
-class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: VedtaksoppsummeringService,
-                                        private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = SendVedtaksoppsummeringTilDvhTask.TYPE,
+    beskrivelse = "Sender oppsummering av vedtak til datavarehus."
+)
+class SendVedtaksoppsummeringTilDvhTask(
+    private val vedtaksoppsummeringService: VedtaksoppsummeringService,
+    private val kafkaProducer: KafkaProducer
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val validator = Validation.buildDefaultValidatorFactory().validator
-
 
     override fun doTask(task: Task) {
         log.info("SendVedtaksoppsummeringTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
@@ -28,8 +31,10 @@ class SendVedtaksoppsummeringTilDvhTask(private val vedtaksoppsummeringService: 
         val vedtaksoppsummering: Vedtaksoppsummering = vedtaksoppsummeringService.hentVedtaksoppsummering(behandlingId)
         validate(vedtaksoppsummering)
 
-        secureLogger.info("Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
-                          "for behandling $behandlingId")
+        secureLogger.info(
+            "Sender Vedtaksoppsummering=${objectMapper.writeValueAsString(vedtaksoppsummering)} til Dvh " +
+                "for behandling $behandlingId"
+        )
         kafkaProducer.sendVedtaksdata(behandlingId, vedtaksoppsummering)
     }
 

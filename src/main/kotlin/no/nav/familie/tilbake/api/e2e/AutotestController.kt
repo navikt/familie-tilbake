@@ -41,74 +41,100 @@ import javax.validation.Valid
 @RequestMapping("/api/autotest")
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("e2e", "local", "integrasjonstest")
-class AutotestController(private val taskRepository: TaskRepository,
-                         private val behandlingRepository: BehandlingRepository,
-                         private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-                         private val kafkaTemplate: KafkaTemplate<String, String>,
-                         private val environment: Environment) {
+class AutotestController(
+    private val taskRepository: TaskRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
+    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val environment: Environment
+) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
-        taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
-                                 payload = kravgrunnlag,
-                                 properties = Properties().apply {
-                                     this["callId"] = UUID.randomUUID()
-                                 }))
+        taskRepository.save(
+            Task(
+                type = BehandleKravgrunnlagTask.TYPE,
+                payload = kravgrunnlag,
+                properties = Properties().apply {
+                    this["callId"] = UUID.randomUUID()
+                }
+            )
+        )
         return Ressurs.success("OK")
     }
 
     @PostMapping(path = ["/opprett/statusmelding/"])
     fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
-        taskRepository.save(Task(type = BehandleStatusmeldingTask.TYPE,
-                                 payload = statusmelding,
-                                 properties = Properties().apply {
-                                     this["callId"] = UUID.randomUUID()
-                                 }))
+        taskRepository.save(
+            Task(
+                type = BehandleStatusmeldingTask.TYPE,
+                payload = statusmelding,
+                properties = Properties().apply {
+                    this["callId"] = UUID.randomUUID()
+                }
+            )
+        )
         return Ressurs.success("OK")
     }
 
-    @PutMapping(path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
-                produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                        handling = "endre ansvarlig saksbehandler",
-                        AuditLoggerEvent.UPDATE,
-                        henteParam = HenteParam.BEHANDLING_ID)
-    fun endreAnsvarligSaksbehandler(@PathVariable behandlingId: UUID,
-                                    @PathVariable nyAnsvarligSaksbehandler: String): Ressurs<String> {
+    @PutMapping(
+        path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        handling = "endre ansvarlig saksbehandler",
+        AuditLoggerEvent.UPDATE,
+        henteParam = HenteParam.BEHANDLING_ID
+    )
+    fun endreAnsvarligSaksbehandler(
+        @PathVariable behandlingId: UUID,
+        @PathVariable nyAnsvarligSaksbehandler: String
+    ): Ressurs<String> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = nyAnsvarligSaksbehandler))
         return Ressurs.success("OK")
     }
 
     @PostMapping(path = ["/publiser/fagsystemsbehandling"])
-    fun publishFagsystemsbehandlingsdata(@Valid @RequestBody opprettManueltTilbakekrevingRequest
-                                         : OpprettManueltTilbakekrevingRequest): Ressurs<String> {
+    fun publishFagsystemsbehandlingsdata(
+        @Valid @RequestBody opprettManueltTilbakekrevingRequest:
+            OpprettManueltTilbakekrevingRequest
+    ): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val fagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = eksternFagsakId,
-                                                            ytelsestype = ytelsestype,
-                                                            eksternId = eksternId,
-                                                            personIdent = "12345678901",
-                                                            språkkode = Språkkode.NB,
-                                                            enhetId = "8020",
-                                                            enhetsnavn = "testverdi",
-                                                            revurderingsvedtaksdato = LocalDate.now(),
-                                                            faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                                                  revurderingsresultat = "OPPHØR",
-                                                                                  tilbakekrevingsvalg = Tilbakekrevingsvalg
-                                                                                          .IGNORER_TILBAKEKREVING))
-        val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId,
-                                                                                                  ytelsestype,
-                                                                                                  eksternId)
+        val fagsystemsbehandling = HentFagsystemsbehandling(
+            eksternFagsakId = eksternFagsakId,
+            ytelsestype = ytelsestype,
+            eksternId = eksternId,
+            personIdent = "12345678901",
+            språkkode = Språkkode.NB,
+            enhetId = "8020",
+            enhetsnavn = "testverdi",
+            revurderingsvedtaksdato = LocalDate.now(),
+            faktainfo = Faktainfo(
+                revurderingsårsak = "testverdi",
+                revurderingsresultat = "OPPHØR",
+                tilbakekrevingsvalg = Tilbakekrevingsvalg
+                    .IGNORER_TILBAKEKREVING
+            )
+        )
+        val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+            eksternFagsakId,
+            ytelsestype,
+            eksternId
+        )
         val melding =
-                objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
+            objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
         if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
-            val producerRecord = ProducerRecord(KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                                                requestSendt?.id.toString(),
-                                                melding)
+            val producerRecord = ProducerRecord(
+                KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
+                requestSendt?.id.toString(),
+                melding
+            )
             kafkaTemplate.send(producerRecord)
         }
         return Ressurs.success("OK")

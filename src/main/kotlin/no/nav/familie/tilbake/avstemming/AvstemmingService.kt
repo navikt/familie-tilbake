@@ -19,10 +19,12 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class AvstemmingService(private val behandlingRepository: BehandlingRepository,
-                        private val sendtXmlRepository: ØkonomiXmlSendtRepository,
-                        private val fagsakRepository: FagsakRepository,
-                        private val integrasjonerConfig: IntegrasjonerConfig) {
+class AvstemmingService(
+    private val behandlingRepository: BehandlingRepository,
+    private val sendtXmlRepository: ØkonomiXmlSendtRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val integrasjonerConfig: IntegrasjonerConfig
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -44,57 +46,69 @@ class AvstemmingService(private val behandlingRepository: BehandlingRepository,
             lagAvstemmingsradForVedtaket(behandling, oppsummering)
         }
         if (antallFeilet == 0) {
-            logger.info("Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
-                        "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming",
-                        dato,
-                        rader.size,
-                        sendteVedtak.size,
-                        antallFørstegangsvedtakUtenTilbakekreving)
+            logger.info(
+                "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
+                    "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming",
+                dato,
+                rader.size,
+                sendteVedtak.size,
+                antallFørstegangsvedtakUtenTilbakekreving
+            )
         } else {
-            logger.warn("Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
-                        "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming. " +
-                        "{} vedtak fikk negativ kvittering fra OS og sendes ikke til avstemming",
-                        dato,
-                        rader.size,
-                        sendteVedtak.size,
-                        antallFørstegangsvedtakUtenTilbakekreving,
-                        antallFeilet)
+            logger.warn(
+                "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
+                    "{} førstegangsvedtak uten tilbakekreving sendes ikke til avstemming. " +
+                    "{} vedtak fikk negativ kvittering fra OS og sendes ikke til avstemming",
+                dato,
+                rader.size,
+                sendteVedtak.size,
+                antallFørstegangsvedtakUtenTilbakekreving,
+                antallFeilet
+            )
         }
         return if (rader.isEmpty()) {
             null
         } else FilMapper(rader).tilFlatfil()
     }
 
-    private fun erFørstegangsvedtakUtenTilbakekreving(behandling: Behandling,
-                                                      oppsummering: TilbakekrevingsvedtakOppsummering): Boolean {
+    private fun erFørstegangsvedtakUtenTilbakekreving(
+        behandling: Behandling,
+        oppsummering: TilbakekrevingsvedtakOppsummering
+    ): Boolean {
         return behandling.type == Behandlingstype.TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
     }
 
-    private fun lagAvstemmingsradForVedtaket(behandling: Behandling,
-                                             oppsummering: TilbakekrevingsvedtakOppsummering): Rad {
+    private fun lagAvstemmingsradForVedtaket(
+        behandling: Behandling,
+        oppsummering: TilbakekrevingsvedtakOppsummering
+    ): Rad {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksdato = behandling.sisteResultat?.behandlingsvedtak?.vedtaksdato ?: error("Vedtaksdato mangler")
-        return Rad(avsender = integrasjonerConfig.applicationName,
-                   vedtakId = oppsummering.økonomivedtakId,
-                   fnr = fagsak.bruker.ident,
-                   vedtaksdato = vedtaksdato,
-                   fagsakYtelseType = fagsak.ytelsestype,
-                   tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
-                   tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,
-                   skatt = oppsummering.skatt,
-                   renter = oppsummering.renter,
-                   erOmgjøringTilIngenTilbakekreving = erOmgjøringTilIngenTilbakekreving(oppsummering, behandling))
+        return Rad(
+            avsender = integrasjonerConfig.applicationName,
+            vedtakId = oppsummering.økonomivedtakId,
+            fnr = fagsak.bruker.ident,
+            vedtaksdato = vedtaksdato,
+            fagsakYtelseType = fagsak.ytelsestype,
+            tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
+            tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,
+            skatt = oppsummering.skatt,
+            renter = oppsummering.renter,
+            erOmgjøringTilIngenTilbakekreving = erOmgjøringTilIngenTilbakekreving(oppsummering, behandling)
+        )
     }
 
-    private fun erOmgjøringTilIngenTilbakekreving(oppsummering: TilbakekrevingsvedtakOppsummering,
-                                                  behandling: Behandling): Boolean {
+    private fun erOmgjøringTilIngenTilbakekreving(
+        oppsummering: TilbakekrevingsvedtakOppsummering,
+        behandling: Behandling
+    ): Boolean {
         return behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
     }
 
     private fun oppsummer(sendtMelding: ØkonomiXmlSendt): TilbakekrevingsvedtakOppsummering {
         val xml: String = sendtMelding.melding
         val melding: TilbakekrevingsvedtakRequest =
-                TilbakekrevingsvedtakMarshaller.unmarshall(xml, sendtMelding.behandlingId, sendtMelding.id)
+            TilbakekrevingsvedtakMarshaller.unmarshall(xml, sendtMelding.behandlingId, sendtMelding.id)
         return TilbakekrevingsvedtakOppsummering.oppsummer(melding.tilbakekrevingsvedtak)
     }
 

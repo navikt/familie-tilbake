@@ -13,13 +13,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = PubliserJournalpostTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Publiserer journalpost",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClient,
-                              private val taskService: TaskService,
-                              private val historikkTaskService: HistorikkTaskService
+@TaskStepBeskrivelse(
+    taskStepType = PubliserJournalpostTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Publiserer journalpost",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class PubliserJournalpostTask(
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val taskService: TaskService,
+    private val historikkTaskService: HistorikkTaskService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -33,15 +36,13 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
                 Fagsystem.valueOf(task.metadata.getProperty("fagsystem"))
             )
         } catch (ressursException: RessursException) {
-            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)){
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)) {
                 // ta med info om ukjent adresse
                 task.metadata["ukjentAdresse"] = "true"
             } else {
                 throw ressursException
             }
-
         }
-
     }
 
     override fun onCompletion(task: Task) {
@@ -52,7 +53,7 @@ class PubliserJournalpostTask(private val integrasjonerClient: IntegrasjonerClie
     // https://nav-it.slack.com/archives/C6W9E5GPJ/p1647947002270879?thread_ts=1647936835.099329&cid=C6W9E5GPJ
     fun mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException: RessursException) =
         ressursException.httpStatus == HttpStatus.BAD_REQUEST &&
-                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+            ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
     companion object {
 

@@ -32,7 +32,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -60,22 +59,24 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val fagsakService: FagsakService,
-                        private val taskService: TaskService,
-                        private val brevsporingService: BrevsporingService,
-                        private val kravgrunnlagRepository: KravgrunnlagRepository,
-                        private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-                        private val behandlingskontrollService: BehandlingskontrollService,
-                        private val behandlingTilstandService: BehandlingTilstandService,
-                        private val tellerService: TellerService,
-                        private val stegService: StegService,
-                        private val oppgaveTaskService: OppgaveTaskService,
-                        private val historikkTaskService: HistorikkTaskService,
-                        private val tilgangService: TilgangService,
-                        @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
-                        private val opprettelseDagerBegrensning: Long,
-                        private val integrasjonerClient: IntegrasjonerClient) {
+class BehandlingService(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakService: FagsakService,
+    private val taskService: TaskService,
+    private val brevsporingService: BrevsporingService,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val behandlingTilstandService: BehandlingTilstandService,
+    private val tellerService: TellerService,
+    private val stegService: StegService,
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val tilgangService: TilgangService,
+    @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
+    private val opprettelseDagerBegrensning: Long,
+    private val integrasjonerClient: IntegrasjonerClient
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -84,16 +85,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
 
-        //Lag oppgave for behandling
+        // Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg
-                        .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet) {
-            val sendVarselbrev = Task(type = SendVarselbrevTask.TYPE,
-                                      payload = behandling.id.toString(),
-                                      properties = Properties().apply {
-                                          setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
-                                      })
+            .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet
+        ) {
+            val sendVarselbrev = Task(
+                type = SendVarselbrevTask.TYPE,
+                payload = behandling.id.toString(),
+                properties = Properties().apply {
+                    setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
+                }
+            )
             taskService.save(sendVarselbrev)
         }
 
@@ -103,8 +107,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
         val kanBehandlingOpprettesManuelt =
-                fagsakService.kanBehandlingOpprettesManuelt(opprettManueltTilbakekrevingRequest.eksternFagsakId,
-                                                            opprettManueltTilbakekrevingRequest.ytelsestype)
+            fagsakService.kanBehandlingOpprettesManuelt(
+                opprettManueltTilbakekrevingRequest.eksternFagsakId,
+                opprettManueltTilbakekrevingRequest.ytelsestype
+            )
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw Feil(message = kanBehandlingOpprettesManuelt.melding)
         }
@@ -113,13 +119,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             setProperty("eksternFagsakId", opprettManueltTilbakekrevingRequest.eksternFagsakId)
             setProperty("ytelsestype", opprettManueltTilbakekrevingRequest.ytelsestype.name)
             setProperty("eksternId", opprettManueltTilbakekrevingRequest.eksternId)
-            setProperty(PropertyName.FAGSYSTEM,
-                        FagsystemUtil.hentFagsystemFraYtelsestype(opprettManueltTilbakekrevingRequest.ytelsestype).name)
+            setProperty(
+                PropertyName.FAGSYSTEM,
+                FagsystemUtil.hentFagsystemFraYtelsestype(opprettManueltTilbakekrevingRequest.ytelsestype).name
+            )
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
         }
-        taskService.save(Task(type = OpprettBehandlingManueltTask.TYPE,
-                              properties = properties,
-                              payload = ""))
+        taskService.save(
+            Task(
+                type = OpprettBehandlingManueltTask.TYPE,
+                properties = properties,
+                payload = ""
+            )
+        )
     }
 
     @Transactional
@@ -129,27 +141,33 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val originalBehandling = behandlingRepository.findByIdOrThrow(originalBehandlingId)
         if (!kanRevurderingOpprettes(originalBehandling)) {
             val feilmelding = "Revurdering kan ikke opprettes for behandling $originalBehandlingId. " +
-                              "Enten behandlingen er ikke avsluttet med kravgrunnlag eller " +
-                              "det finnes allerede en åpen revurdering"
+                "Enten behandlingen er ikke avsluttet med kravgrunnlag eller " +
+                "det finnes allerede en åpen revurdering"
             throw Feil(message = feilmelding, frontendFeilmelding = feilmelding)
         }
         val revurdering = BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype)
         behandlingRepository.insert(revurdering)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
-        historikkTaskService.lagHistorikkTask(revurdering.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                              Aktør.SAKSBEHANDLER)
+        historikkTaskService.lagHistorikkTask(
+            revurdering.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+            Aktør.SAKSBEHANDLER
+        )
 
         behandlingskontrollService.fortsettBehandling(revurdering.id)
         stegService.håndterSteg(revurdering.id)
 
         // kjør HentKravgrunnlagTask for å hente kravgrunnlag på nytt fra økonomi
-        taskService.save(Task(type = HentKravgrunnlagTask.TYPE,
-                              payload = revurdering.id.toString(),
-                              properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+        taskService.save(
+            Task(
+                type = HentKravgrunnlagTask.TYPE,
+                payload = revurdering.id.toString(),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+            )
+        )
 
-        //Lag oppgave for behandling
+        // Lag oppgave for behandling
         oppgaveTaskService.opprettOppgaveTask(revurdering, Oppgavetype.BehandleSak)
 
         return revurdering
@@ -161,21 +179,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val erBehandlingPåVent: Boolean = behandlingskontrollService.erBehandlingPåVent(behandling.id)
         val behandlingsstegsinfoer: List<Behandlingsstegsinfo> = behandlingskontrollService
-                .hentBehandlingsstegstilstand(behandling)
+            .hentBehandlingsstegstilstand(behandling)
         val varselSendt = brevsporingService.erVarselSendt(behandlingId)
         val kanBehandlingHenlegges: Boolean = kanHenleggeBehandling(behandling)
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
         val kanRevurderingOpprettes: Boolean =
-                tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
+            tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
 
-        return BehandlingMapper.tilRespons(behandling,
-                                           erBehandlingPåVent,
-                                           kanBehandlingHenlegges,
-                                           kanEndres,
-                                           kanRevurderingOpprettes,
-                                           behandlingsstegsinfoer,
-                                           varselSendt,
-                                           fagsak.eksternFagsakId)
+        return BehandlingMapper.tilRespons(
+            behandling,
+            erBehandlingPåVent,
+            kanBehandlingHenlegges,
+            kanEndres,
+            kanRevurderingOpprettes,
+            behandlingsstegsinfoer,
+            varselSendt,
+            fagsak.eksternFagsakId
+        )
     }
 
     @Transactional
@@ -184,25 +204,31 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         if (LocalDate.now() >= behandlingPåVentDto.tidsfrist) {
-            throw Feil(message = "Fristen må være større enn dagens dato for behandling $behandlingId",
-                       frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                frontendFeilmelding = "Fristen må være større enn dagens dato for behandling $behandlingId",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        behandlingskontrollService.settBehandlingPåVent(behandlingId,
-                                                        behandlingPåVentDto.venteårsak,
-                                                        behandlingPåVentDto.tidsfrist)
+        behandlingskontrollService.settBehandlingPåVent(
+            behandlingId,
+            behandlingPåVentDto.venteårsak,
+            behandlingPåVentDto.tidsfrist
+        )
 
         val beskrivelse = when (behandlingPåVentDto.venteårsak) {
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING -> "Frist er oppdatert pga mottatt tilbakemelding fra bruker"
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG -> "Ny frist satt på bakgrunn av mottatt kravgrunnlag fra økonomi"
             else -> "Frist er oppdatert av saksbehandler ${ContextService.hentSaksbehandler()}"
         }
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId,
-                                               beskrivelse,
-                                               behandlingPåVentDto.tidsfrist,
-                                               ContextService.hentSaksbehandler())
+        oppgaveTaskService.oppdaterOppgaveTask(
+            behandlingId,
+            beskrivelse,
+            behandlingPåVentDto.tidsfrist,
+            ContextService.hentSaksbehandler()
+        )
     }
 
     @Transactional
@@ -211,31 +237,38 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
 
         if (!behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
-            throw Feil(message = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
-                       frontendFeilmelding = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
+                frontendFeilmelding = "Behandling $behandlingId er ikke på vent, kan ike gjenoppta",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                              Aktør.SAKSBEHANDLER
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+            Aktør.SAKSBEHANDLER
         )
 
         stegService.gjenopptaSteg(behandlingId)
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandlingId,
-                                               beskrivelse = "Behandling er tatt av vent",
-                                               frist = LocalDate.now(),
-                                               saksbehandler = ContextService.hentSaksbehandler())
+        oppgaveTaskService.oppdaterOppgaveTask(
+            behandlingId = behandlingId,
+            beskrivelse = "Behandling er tatt av vent",
+            frist = LocalDate.now(),
+            saksbehandler = ContextService.hentSaksbehandler()
+        )
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,
         // f.eks saken var på vent med brukerstilbakemelding og har ikke fått kravgrunnlag
         val aktivStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         if (aktivStegstilstand?.behandlingsstegsstatus == Behandlingsstegstatus.VENTER) {
-            oppgaveTaskService.oppdaterOppgaveTaskMedTriggertid(behandlingId = behandlingId,
-                                                                beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
-                                                                frist = aktivStegstilstand.tidsfrist!!,
-                                                                triggerTid = 2L)
+            oppgaveTaskService.oppdaterOppgaveTaskMedTriggertid(
+                behandlingId = behandlingId,
+                beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
+                frist = aktivStegstilstand.tidsfrist!!,
+                triggerTid = 2L
+            )
         }
     }
 
@@ -247,18 +280,24 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
 
         if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
-            throw Feil(message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
-                       frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
+                frontendFeilmelding = "Behandling med behandlingId=$behandlingId kan ikke henlegges.",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
 
-        //oppdaterer behandlingsstegstilstand
+        // oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)
 
-        //oppdaterer behandlingsresultat og behandling
-        behandlingRepository.update(behandling.copy(resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
-                                                    status = Behandlingsstatus.AVSLUTTET,
-                                                    avsluttetDato = LocalDate.now()))
+        // oppdaterer behandlingsresultat og behandling
+        behandlingRepository.update(
+            behandling.copy(
+                resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype)),
+                status = Behandlingsstatus.AVSLUTTET,
+                avsluttetDato = LocalDate.now()
+            )
+        )
 
         oppdaterAnsvarligSaksbehandler(behandlingId)
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
@@ -269,15 +308,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
             else -> Aktør.SAKSBEHANDLER
         }
-        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
-                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
-                                              aktør = aktør,
-                                              beskrivelse = henleggelsesbrevFritekstDto.begrunnelse)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
+            aktør = aktør,
+            beskrivelse = henleggelsesbrevFritekstDto.begrunnelse
+        )
 
         if (kanSendeHenleggelsesbrev(behandling, behandlingsresultatstype)) {
-            taskService.save(SendHenleggelsesbrevTask.opprettTask(behandlingId,
-                                                                  fagsystem,
-                                                                  henleggelsesbrevFritekstDto.fritekst))
+            taskService.save(
+                SendHenleggelsesbrevTask.opprettTask(
+                    behandlingId,
+                    fagsystem,
+                    henleggelsesbrevFritekstDto.fritekst
+                )
+            )
         }
 
         // Ferdigstill oppgave
@@ -292,26 +337,38 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun oppdaterFaktainfo(eksternFagsakId: String,
-                          ytelsestype: Ytelsestype,
-                          eksternId: String,
-                          respons: HentFagsystemsbehandling) {
+    fun oppdaterFaktainfo(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String,
+        respons: HentFagsystemsbehandling
+    ) {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-                         ?: throw Feil("Det finnes ikke en åpen behandling for " +
-                                       "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype")
+            ?: throw Feil(
+                "Det finnes ikke en åpen behandling for " +
+                    "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype"
+            )
         val faktainfo = respons.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val gammelFagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(aktiv = false)
-        val nyFagsystemsbehandling = Fagsystemsbehandling(eksternId = eksternId,
-                                                          årsak = faktainfo.revurderingsårsak,
-                                                          resultat = faktainfo.revurderingsresultat,
-                // kopier gammel tilbakekrevingsvalg om det ikke finnes i fagsystem
-                                                          tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
-                                                                                ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
-                                                          revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
-                                                          konsekvenser = fagsystemskonsekvenser)
-        behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(gammelFagsystemsbehandling,
-                                                                                 nyFagsystemsbehandling)))
+        val nyFagsystemsbehandling = Fagsystemsbehandling(
+            eksternId = eksternId,
+            årsak = faktainfo.revurderingsårsak,
+            resultat = faktainfo.revurderingsresultat,
+            // kopier gammel tilbakekrevingsvalg om det ikke finnes i fagsystem
+            tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
+                ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
+            revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
+            konsekvenser = fagsystemskonsekvenser
+        )
+        behandlingRepository.update(
+            behandling.copy(
+                fagsystemsbehandling = setOf(
+                    gammelFagsystemsbehandling,
+                    nyFagsystemsbehandling
+                )
+            )
+        )
     }
 
     @Transactional
@@ -320,21 +377,27 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         sjekkOmBehandlingAlleredeErAvsluttet(behandling)
         val fagsystem = fagsakService.finnFagsystem(behandling.fagsakId)
         if (fagsystem != Fagsystem.BA) {
-            throw Feil(message = "Ikke implementert for fagsystem $fagsystem",
-                       frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsystem.navn}")
+            throw Feil(
+                message = "Ikke implementert for fagsystem $fagsystem",
+                frontendFeilmelding = "Ikke implementert for fagsystem: ${fagsystem.navn}"
+            )
         }
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
         behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
-                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
-                                              aktør = Aktør.SAKSBEHANDLER,
-                                              beskrivelse = byttEnhetDto.begrunnelse)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
+            aktør = Aktør.SAKSBEHANDLER,
+            beskrivelse = byttEnhetDto.begrunnelse
+        )
 
-        oppgaveTaskService.oppdaterEnhetOppgaveTask(behandlingId = behandlingId,
-                                                    beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
-                                                    enhetId = byttEnhetDto.enhet)
+        oppgaveTaskService.oppdaterEnhetOppgaveTask(
+            behandlingId = behandlingId,
+            beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
+            enhetId = byttEnhetDto.enhet
+        )
     }
 
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
@@ -347,10 +410,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val ansvarligsaksbehandler = integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
-        logger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                    "og eksternId=$eksternId")
-        secureLogger.info("Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                          " og personIdent=${opprettTilbakekrevingRequest.personIdent}")
+        logger.info(
+            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+                "og eksternId=$eksternId"
+        )
+        secureLogger.info(
+            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+                " og personIdent=${opprettTilbakekrevingRequest.personIdent}"
+        )
 
         kanBehandlingOpprettes(ytelsestype, eksternFagsakId, eksternId, erManueltOpprettet)
 
@@ -359,80 +426,99 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val fagsak = eksisterendeFagsak ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
         val behandling =
-                BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
+            BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
         behandlingRepository.insert(behandling)
 
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-                                              Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+            Aktør.VEDTAKSLØSNING
+        )
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
-        taskService.save(Task(type = FinnKravgrunnlagTask.TYPE,
-                              payload = behandling.id.toString(),
-                              properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }))
+        taskService.save(
+            Task(
+                type = FinnKravgrunnlagTask.TYPE,
+                payload = behandling.id.toString(),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+            )
+        )
 
         return behandling
     }
 
-    private fun validateFagsystem(ytelsestype: Ytelsestype,
-                                  fagsystem: Fagsystem) {
+    private fun validateFagsystem(
+        ytelsestype: Ytelsestype,
+        fagsystem: Fagsystem
+    ) {
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) != fagsystem) {
-            throw Feil(message = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
-                       frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                frontendFeilmelding = "Behandling kan ikke opprettes med ytelsestype=$ytelsestype og fagsystem=$fagsystem",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
-    private fun kanBehandlingOpprettes(ytelsestype: Ytelsestype,
-                                       eksternFagsakId: String,
-                                       eksternId: String,
-                                       erManueltOpprettet: Boolean) {
+    private fun kanBehandlingOpprettes(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+        eksternId: String,
+        erManueltOpprettet: Boolean
+    ) {
         val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
-                              "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
-            throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
-                       httpStatus = HttpStatus.BAD_REQUEST)
+                "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
+            throw Feil(
+                message = feilMelding, frontendFeilmelding = feilMelding,
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
 
-        //hvis behandlingen er henlagt, kan det opprettes ny behandling
+        // hvis behandlingen er henlagt, kan det opprettes ny behandling
         val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
         if (avsluttetBehandlinger.isNotEmpty()) {
             val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
             val erSisteBehandlingHenlagt: Boolean =
-                    sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
+                sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
             if (!erSisteBehandlingHenlagt) {
                 val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
-                                  "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
-                throw Feil(message = feilMelding, frontendFeilmelding = feilMelding,
-                           httpStatus = HttpStatus.BAD_REQUEST)
+                    "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
+                throw Feil(
+                    message = feilMelding, frontendFeilmelding = feilMelding,
+                    httpStatus = HttpStatus.BAD_REQUEST
+                )
             }
         }
 
         // uten kravgrunnlag er det ikke mulig å opprette behandling manuelt
         if (erManueltOpprettet && !økonomiXmlMottattRepository
-                        .existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId, ytelsestype, eksternId)) {
+            .existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId, ytelsestype, eksternId)
+        ) {
             val feilMelding = "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                              "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
+                "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
             throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
         }
-
     }
 
-
-    private fun kanHenleggeBehandling(behandling: Behandling,
-                                      behandlingsresultatstype: Behandlingsresultatstype? = null): Boolean {
+    private fun kanHenleggeBehandling(
+        behandling: Behandling,
+        behandlingsresultatstype: Behandlingsresultatstype? = null
+    ): Boolean {
         if (Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT == behandlingsresultatstype) {
             return true
         } else if (TILBAKEKREVING == behandling.type) {
-            return !behandling.erAvsluttet && (!behandling.manueltOpprettet &&
-                                               behandling.opprettetTidspunkt < LocalDate.now()
-                                                       .atStartOfDay()
-                                                       .minusDays(opprettelseDagerBegrensning))
-                   && !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
+            return !behandling.erAvsluttet && (
+                !behandling.manueltOpprettet &&
+                    behandling.opprettetTidspunkt < LocalDate.now()
+                    .atStartOfDay()
+                    .minusDays(opprettelseDagerBegrensning)
+                ) &&
+                !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)
         }
         return true
     }
@@ -446,9 +532,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun sjekkOmBehandlingAlleredeErAvsluttet(behandling: Behandling) {
         if (behandling.erSaksbehandlingAvsluttet) {
-            throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                       frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -457,7 +545,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return false
         }
         if (Behandlingsstatus.FATTER_VEDTAK == behandling.status &&
-            behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
+            behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()
+        ) {
             return false
         }
 
@@ -470,10 +559,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun kanRevurderingOpprettes(behandling: Behandling): Boolean {
         return behandling.erAvsluttet &&
-               !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
-               kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
-               behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
+            !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
+            kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
+            behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
-
-
 }

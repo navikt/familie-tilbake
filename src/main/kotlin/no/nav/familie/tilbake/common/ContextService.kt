@@ -11,32 +11,37 @@ import org.springframework.http.HttpStatus
 
 object ContextService {
 
-
     fun hentSaksbehandler(): String {
         return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
     }
 
     fun hentPåloggetSaksbehandler(defaultverdi: String?): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = {
+            .fold(
+                onSuccess = {
                     return it.getClaims("azuread")?.get("NAVident")?.toString()
-                           ?: defaultverdi
-                           ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
+                        ?: defaultverdi
+                        ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
                 },
-                      onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") })
+                onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") }
+            )
     }
 
     private fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = {
+            .fold(
+                onSuccess = {
                     @Suppress("UNCHECKED_CAST")
                     it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
                 },
-                      onFailure = { emptyList() })
+                onFailure = { emptyList() }
+            )
     }
 
-    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig: RolleConfig,
-                                                               handling: String): InnloggetBrukertilgang {
+    fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
+        rolleConfig: RolleConfig,
+        handling: String
+    ): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
         val brukerTilganger = mutableMapOf<Tilgangskontrollsfagsystem, Behandlerrolle>()
         if (saksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
@@ -45,60 +50,102 @@ object ContextService {
         val grupper = hentGrupper()
 
         if (grupper.contains(rolleConfig.beslutterRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
-                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
+                    behandlerrolle = Behandlerrolle.BESLUTTER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
-                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
+                    behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
-                                                       behandlerrolle = Behandlerrolle.VEILEDER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
+                    behandlerrolle = Behandlerrolle.VEILEDER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
-                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
+                    behandlerrolle = Behandlerrolle.BESLUTTER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
-                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
+                    behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
-                                                       behandlerrolle = Behandlerrolle.VEILEDER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
+                    behandlerrolle = Behandlerrolle.VEILEDER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
-                                                       behandlerrolle = Behandlerrolle.BESLUTTER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
+                    behandlerrolle = Behandlerrolle.BESLUTTER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
-                                                       behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
+                    behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (grupper.contains(rolleConfig.veilederRolleKontantStøtte)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
-                                                       behandlerrolle = Behandlerrolle.VEILEDER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
+                    behandlerrolle = Behandlerrolle.VEILEDER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         // forvalter har system tilgang
         if (grupper.contains(rolleConfig.forvalterRolleTeamfamilie)) {
-            brukerTilganger.putAll(hentTilgangMedRolle(fagsystem = Tilgangskontrollsfagsystem.FORVALTER_TILGANG,
-                                                       behandlerrolle = Behandlerrolle.FORVALTER,
-                                                       brukerTilganger = brukerTilganger))
+            brukerTilganger.putAll(
+                hentTilgangMedRolle(
+                    fagsystem = Tilgangskontrollsfagsystem.FORVALTER_TILGANG,
+                    behandlerrolle = Behandlerrolle.FORVALTER,
+                    brukerTilganger = brukerTilganger
+                )
+            )
         }
         if (brukerTilganger.isEmpty()) {
-            throw Feil(message = "Bruker har mangler tilgang til $handling",
-                       frontendFeilmelding = "Bruker har mangler tilgang til $handling",
-                       httpStatus = HttpStatus.FORBIDDEN)
+            throw Feil(
+                message = "Bruker har mangler tilgang til $handling",
+                frontendFeilmelding = "Bruker har mangler tilgang til $handling",
+                httpStatus = HttpStatus.FORBIDDEN
+            )
         }
 
         return InnloggetBrukertilgang(brukerTilganger.toMap())
@@ -107,24 +154,26 @@ object ContextService {
     fun erMaskinTilMaskinToken(): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         return claims.get("oid") != null &&
-               claims.get("oid") == claims.get("sub") &&
-               claims.getAsList("roles").contains("access_as_application")
+            claims.get("oid") == claims.get("sub") &&
+            claims.getAsList("roles").contains("access_as_application")
     }
 
-    private fun hentTilgangMedRolle(fagsystem: Tilgangskontrollsfagsystem,
-                                    behandlerrolle: Behandlerrolle,
-                                    brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)
-            : Map<Tilgangskontrollsfagsystem, Behandlerrolle> {
+    private fun hentTilgangMedRolle(
+        fagsystem: Tilgangskontrollsfagsystem,
+        behandlerrolle: Behandlerrolle,
+        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>
+    ): Map<Tilgangskontrollsfagsystem, Behandlerrolle> {
         if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle, brukerTilganger)) {
             return mapOf(fagsystem to behandlerrolle)
         }
         return emptyMap()
     }
 
-    private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem: Tilgangskontrollsfagsystem,
-                                                                behandlerrolle: Behandlerrolle,
-                                                                brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>)
-            : Boolean {
+    private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(
+        fagsystem: Tilgangskontrollsfagsystem,
+        behandlerrolle: Behandlerrolle,
+        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>
+    ): Boolean {
         if (brukerTilganger.containsKey(fagsystem)) {
             return brukerTilganger[fagsystem]!!.nivå > behandlerrolle.nivå
         }

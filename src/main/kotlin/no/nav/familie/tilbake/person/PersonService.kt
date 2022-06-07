@@ -9,21 +9,22 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 
 @Service
-class PersonService(private val pdlClient: PdlClient,
-                    private val fagsakRepository: FagsakRepository,
-                    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher) {
+class PersonService(
+    private val pdlClient: PdlClient,
+    private val fagsakRepository: FagsakRepository,
+    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher
+) {
 
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): Personinfo {
         val personInfo = pdlClient.hentPersoninfo(personIdent, fagsystem)
         // fire event for å oppdatere personIdent når lagret personIdent ikke matcher med PDL.
         if (personIdent != personInfo.ident) {
             val fagsak = fagsakRepository.finnFagsakForFagsystemAndIdent(fagsystem, personIdent)
-                         ?: throw Feil("Finnes ikke fagsak")
+                ?: throw Feil("Finnes ikke fagsak")
             endretPersonIdentEventPublisher.fireEvent(personInfo.ident, fagsak.id)
         }
         return personInfo
     }
-
 
     fun hentAktørId(personIdent: String, fagsystem: Fagsystem): List<String> {
         val hentIdenter = pdlClient.hentIdenter(personIdent, fagsystem)
@@ -35,5 +36,4 @@ class PersonService(private val pdlClient: PdlClient,
         if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
         return aktørId.first()
     }
-
 }

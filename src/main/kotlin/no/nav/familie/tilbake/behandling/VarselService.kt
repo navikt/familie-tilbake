@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class VarselService(private val behandlingRepository: BehandlingRepository,
-                    private val kravgrunnlagRepository: KravgrunnlagRepository,
-                    private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
+class VarselService(
+    private val behandlingRepository: BehandlingRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService
+) {
 
     fun lagre(behandlingId: UUID, varseltekst: String, varselbeløp: Long) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -19,12 +21,14 @@ class VarselService(private val behandlingRepository: BehandlingRepository,
             val perioder = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder
             perioder.map { Varselsperiode(fom = it.periode.fom, tom = it.periode.tom) }.toSet()
         } else behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
-               ?: error("Aktivt varsel har ikke med varselsperioder")
+            ?: error("Aktivt varsel har ikke med varselsperioder")
 
         val varsler = behandling.varsler.map { it.copy(aktiv = false) } +
-                      Varsel(varseltekst = varseltekst,
-                             varselbeløp = varselbeløp,
-                             perioder = varselsperioder)
+            Varsel(
+                varseltekst = varseltekst,
+                varselbeløp = varselbeløp,
+                perioder = varselsperioder
+            )
         val copy = behandling.copy(varsler = varsler.toSet())
         behandlingRepository.update(copy)
     }

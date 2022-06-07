@@ -54,7 +54,7 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
         varselsperioder.shouldNotBeEmpty()
         varselsperioder.any {
             it.fom == kravgrunnlag.perioder.first().periode.fomDato &&
-            it.tom == kravgrunnlag.perioder.first().periode.tomDato
+                it.tom == kravgrunnlag.perioder.first().periode.tomDato
         }.shouldBeTrue()
     }
 
@@ -76,8 +76,7 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
         varselsperioder.shouldNotBeEmpty()
         varselsperioder.any {
             it.fom == Testdata.varsel.perioder.first().fom &&
-            it.tom == Testdata.varsel.perioder.first().tom
+                it.tom == Testdata.varsel.perioder.first().tom
         }.shouldBeTrue()
     }
-
 }

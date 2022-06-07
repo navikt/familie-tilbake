@@ -19,9 +19,11 @@ import java.util.Base64
 import java.util.Properties
 
 @Service
-class PdfBrevService(private val journalføringService: JournalføringService,
-                     private val tellerService: TellerService,
-                     private val taskService: TaskService) {
+class PdfBrevService(
+    private val journalføringService: JournalføringService,
+    private val tellerService: TellerService,
+    private val taskService: TaskService
+) {
 
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
     private val pdfGenerator: PdfGenerator = PdfGenerator()
@@ -31,12 +33,14 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         return pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.UTKAST)
     }
 
-    fun sendBrev(behandling: Behandling,
-                 fagsak: Fagsak,
-                 brevtype: Brevtype,
-                 data: Brevdata,
-                 varsletBeløp: Long? = null,
-                 fritekst: String? = null) {
+    fun sendBrev(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        brevtype: Brevtype,
+        data: Brevdata,
+        varsletBeløp: Long? = null,
+        fritekst: String? = null
+    ) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
         if (data.mottager == Brevmottager.BRUKER) { // Ikke tell kopier sendt til verge
@@ -45,13 +49,15 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
     }
 
-    private fun lagTaskerForUtsendingOgSporing(behandling: Behandling,
-                                               fagsak: Fagsak,
-                                               brevtype: Brevtype,
-                                               varsletBeløp: Long?,
-                                               fritekst: String?,
-                                               brevdata: Brevdata,
-                                               dokumentreferanse: JournalpostIdOgDokumentId) {
+    private fun lagTaskerForUtsendingOgSporing(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        brevtype: Brevtype,
+        varsletBeløp: Long?,
+        fritekst: String?,
+        brevdata: Brevdata,
+        dokumentreferanse: JournalpostIdOgDokumentId
+    ) {
 
         val idString = behandling.id.toString()
         val properties: Properties = Properties().apply {
@@ -69,22 +75,24 @@ class PdfBrevService(private val journalføringService: JournalføringService,
         taskService.save(Task(PubliserJournalpostTask.TYPE, idString, properties))
     }
 
-    private fun lagOgJournalførBrev(behandling: Behandling,
-                                    fagsak: Fagsak,
-                                    brevtype: Brevtype,
-                                    data: Brevdata): JournalpostIdOgDokumentId {
+    private fun lagOgJournalførBrev(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        brevtype: Brevtype,
+        data: Brevdata
+    ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
         val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
 
-        return journalføringService.journalførUtgåendeBrev(behandling,
-                                                           fagsak,
-                                                           mapBrevtypeTilDokumentkategori(brevtype),
-                                                           data.metadata,
-                                                           data.mottager,
-                                                           pdf,
-                                                           lagEksternReferanseId(behandling, brevtype))
-
-
+        return journalføringService.journalførUtgåendeBrev(
+            behandling,
+            fagsak,
+            mapBrevtypeTilDokumentkategori(brevtype),
+            data.metadata,
+            data.mottager,
+            pdf,
+            lagEksternReferanseId(behandling, brevtype)
+        )
     }
 
     private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype): String? {

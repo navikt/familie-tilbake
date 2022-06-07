@@ -33,15 +33,17 @@ import java.util.UUID
  * Alternativ spring-visualisering av fagsak-tabellen med tilhørende behandlinger. Tilpasset databehovet for vedtaksbrev.
  */
 @Table("fagsak")
-data class Vedtaksbrevgrunnlag(@Id
-                               val id: UUID,
-                               @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                               val bruker: Bruker,
-                               val eksternFagsakId: String,
-                               val fagsystem: Fagsystem,
-                               val ytelsestype: Ytelsestype,
-                               @MappedCollection(idColumn = "fagsak_id")
-                               val behandlinger: Set<Vedtaksbrevbehandling>) {
+data class Vedtaksbrevgrunnlag(
+    @Id
+    val id: UUID,
+    @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val bruker: Bruker,
+    val eksternFagsakId: String,
+    val fagsystem: Fagsystem,
+    val ytelsestype: Ytelsestype,
+    @MappedCollection(idColumn = "fagsak_id")
+    val behandlinger: Set<Vedtaksbrevbehandling>
+) {
 
     val behandling
         get() = behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX } ?: error("Behandling finnes ikke for vedtak")
@@ -80,8 +82,8 @@ data class Vedtaksbrevgrunnlag(@Id
 
     val sisteVarsel
         get() = behandling.brevsporing
-                .filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
-                .maxByOrNull { it.sporbar.opprettetTid }
+            .filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
+            .maxByOrNull { it.sporbar.opprettetTid }
 
     fun finnOriginalBehandlingVedtaksdato(): LocalDate? {
         return if (erRevurdering) {
@@ -89,10 +91,10 @@ data class Vedtaksbrevgrunnlag(@Id
             behandlingÅrsak.originalBehandlingId ?: error("Mangler originalBehandlingId for behandling: ${behandling.id}")
 
             behandlinger.first { it.id == behandlingÅrsak.originalBehandlingId }
-                    .sisteResultat
-                    ?.behandlingsvedtak
-                    ?.vedtaksdato
-            ?: error("Mangler vedtaksdato for original behandling med id : ${behandlingÅrsak.originalBehandlingId}")
+                .sisteResultat
+                ?.behandlingsvedtak
+                ?.vedtaksdato
+                ?: error("Mangler vedtaksdato for original behandling med id : ${behandlingÅrsak.originalBehandlingId}")
         } else {
             null
         }
@@ -107,10 +109,10 @@ data class Vedtaksbrevgrunnlag(@Id
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type
-               && behandling.årsaker.any {
-            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
-        }
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
+            behandling.årsaker.any {
+                Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
+            }
     }
 }
 
@@ -118,38 +120,40 @@ data class Vedtaksbrevgrunnlag(@Id
  * Alternativ spring-visualisering av behandling-tabellen med tilhørende relasjoner som er nødvendig for vedtaksbrev.
  */
 @Table("behandling")
-data class Vedtaksbrevbehandling(@Id
-                                 val id: UUID,
-                                 val type: Behandlingstype,
-                                 val ansvarligSaksbehandler: String,
-                                 val ansvarligBeslutter: String? = null,
-                                 val avsluttetDato: LocalDate? = null,
-                                 val behandlendeEnhet: String,
-                                 val behandlendeEnhetsNavn: String,
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val verger: Set<Verge> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val vedtaksbrevOppsummering: Vedtaksbrevsoppsummering?,
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val eksisterendePerioderForBrev: Set<Vedtaksbrevsperiode> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val vilkårsvurdering: Set<Vilkårsvurdering> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val faktaFeilutbetaling: Set<FaktaFeilutbetaling> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val varsler: Set<Varsel> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val brevsporing: Set<Brevsporing> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val resultater: Set<Behandlingsresultat> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val behandlingsstegstilstander: Set<Behandlingsstegstilstand> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val årsaker: Set<Behandlingsårsak> = setOf(),
-                                 @MappedCollection(idColumn = "behandling_id")
-                                 val vurderteForeldelser: Set<VurdertForeldelse> = setOf()) {
+data class Vedtaksbrevbehandling(
+    @Id
+    val id: UUID,
+    val type: Behandlingstype,
+    val ansvarligSaksbehandler: String,
+    val ansvarligBeslutter: String? = null,
+    val avsluttetDato: LocalDate? = null,
+    val behandlendeEnhet: String,
+    val behandlendeEnhetsNavn: String,
+    @MappedCollection(idColumn = "behandling_id")
+    val verger: Set<Verge> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val vedtaksbrevOppsummering: Vedtaksbrevsoppsummering?,
+    @MappedCollection(idColumn = "behandling_id")
+    val eksisterendePerioderForBrev: Set<Vedtaksbrevsperiode> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val vilkårsvurdering: Set<Vilkårsvurdering> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val faktaFeilutbetaling: Set<FaktaFeilutbetaling> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val varsler: Set<Varsel> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val brevsporing: Set<Brevsporing> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val resultater: Set<Behandlingsresultat> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val behandlingsstegstilstander: Set<Behandlingsstegstilstand> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val årsaker: Set<Behandlingsårsak> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val vurderteForeldelser: Set<VurdertForeldelse> = setOf()
+) {
 
     val erRevurdering get() = type == Behandlingstype.REVURDERING_TILBAKEKREVING
 
@@ -158,6 +162,4 @@ data class Vedtaksbrevbehandling(@Id
     val sisteÅrsak get() = årsaker.firstOrNull()
 
     val aktivtVarsel get() = varsler.firstOrNull { it.aktiv }
-
 }
-

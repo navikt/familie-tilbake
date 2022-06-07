@@ -16,24 +16,28 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
-                         private val vedtaksbrevgeneratorService: VedtaksbrevgeneratorService,
-                         private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
-                         private val faktaRepository: FaktaFeilutbetalingRepository,
-                         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                         private val fagsakRepository: FagsakRepository,
-                         private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
-                         private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
-                         private val pdfBrevService: PdfBrevService) {
+class VedtaksbrevService(
+    private val behandlingRepository: BehandlingRepository,
+    private val vedtaksbrevgeneratorService: VedtaksbrevgeneratorService,
+    private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
+    private val faktaRepository: FaktaFeilutbetalingRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
+    private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
+    private val pdfBrevService: PdfBrevService
+) {
 
     fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottager)
-        pdfBrevService.sendBrev(behandling,
-                                fagsak,
-                                Brevtype.VEDTAK,
-                                brevdata)
+        pdfBrevService.sendBrev(
+            behandling,
+            fagsak,
+            Brevtype.VEDTAK,
+            brevdata
+        )
     }
 
     fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
@@ -57,18 +61,20 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
         val vedtaksbrevsperioder = VedtaksbrevFritekstMapper
-                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
+            .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
 
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(behandling = behandling,
-                                                                    faktaFeilutbetaling = faktaFeilutbetaling,
-                                                                    vilkårsvurdering = vilkårsvurdering,
-                                                                    vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
-                                                                    avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
-                                                                    vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
-                                                                    vedtaksbrevstype = vedtaksbrevstype)
+        VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(
+            behandling = behandling,
+            faktaFeilutbetaling = faktaFeilutbetaling,
+            vilkårsvurdering = vilkårsvurdering,
+            vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
+            avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
+            vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
+            vedtaksbrevstype = vedtaksbrevstype
+        )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
         if (eksisterendeVedtaksbrevsoppsummering != null) {
@@ -85,7 +91,7 @@ class VedtaksbrevService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun deaktiverEksisterendeVedtaksbrevdata(behandlingId: UUID) {
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
-                ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
+            ?.let { vedtaksbrevsoppsummeringRepository.deleteById(it.id) }
         vedtaksbrevsperiodeRepository.findByBehandlingId(behandlingId).forEach { vedtaksbrevsperiodeRepository.deleteById(it.id) }
     }
 }

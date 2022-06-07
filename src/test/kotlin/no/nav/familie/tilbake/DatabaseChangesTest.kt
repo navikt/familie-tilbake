@@ -26,11 +26,11 @@ class DatabaseChangesTest {
             throw RuntimeException("Fant ikke noen migreringsscript")
         }
         migreringsscript
-                .forEach {
-                    val fileVersion = it.substring(1, it.indexOf("_"))
-                    if (fileVersion.toInt() > MERGED_DB_VERSION) {
-                        throw RuntimeException("Det finnes migreringsscript som har høyere versjon enn det som er merget")
-                    }
+            .forEach {
+                val fileVersion = it.substring(1, it.indexOf("_"))
+                if (fileVersion.toInt() > MERGED_DB_VERSION) {
+                    throw RuntimeException("Det finnes migreringsscript som har høyere versjon enn det som er merget")
                 }
+            }
     }
 }

@@ -7,12 +7,16 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
 import java.time.LocalDate
 import java.util.Objects
 
-data class InnhentDokumentasjonsbrevsdokument(val brevmetadata: Brevmetadata,
-                                              val fritekstFraSaksbehandler: String,
-                                              val fristdato: LocalDate) : BaseDokument(brevmetadata.ytelsestype,
-                                                                                       brevmetadata.språkkode,
-                                                                                       brevmetadata.behandlendeEnhetsNavn,
-                                                                                       brevmetadata.ansvarligSaksbehandler) {
+data class InnhentDokumentasjonsbrevsdokument(
+    val brevmetadata: Brevmetadata,
+    val fritekstFraSaksbehandler: String,
+    val fristdato: LocalDate
+) : BaseDokument(
+    brevmetadata.ytelsestype,
+    brevmetadata.språkkode,
+    brevmetadata.behandlendeEnhetsNavn,
+    brevmetadata.ansvarligSaksbehandler
+) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 

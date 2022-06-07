@@ -16,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.Properties
 
 @Service
-class AutomatiskSaksbehandlingBatch(private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService,
-                                    private val fagsakRepository: FagsakRepository,
-                                    private val taskService: TaskService,
-                                    private val environment: Environment) {
+class AutomatiskSaksbehandlingBatch(
+    private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService,
+    private val fagsakRepository: FagsakRepository,
+    private val taskService: TaskService,
+    private val environment: Environment
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -27,9 +29,10 @@ class AutomatiskSaksbehandlingBatch(private val automatiskSaksbehandlingService:
     @Transactional
     fun behandleAutomatisk() {
         if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
-                    it.contains("local") ||
-                    it.contains("integrasjonstest")
-                }) {
+            it.contains("local") ||
+                it.contains("integrasjonstest")
+        }
+        ) {
             return
         }
         logger.info("Starter AutomatiskSaksbehandlingBatch..")
@@ -39,21 +42,32 @@ class AutomatiskSaksbehandlingBatch(private val automatiskSaksbehandlingService:
         logger.info("Det finnes ${behandlinger.size} behandlinger som kan behandles automatisk")
 
         if (behandlinger.isNotEmpty()) {
-            val alleFeiledeTasker = taskService.finnTasksMedStatus(listOf(Status.FEILET,
-                                                                          Status.PLUKKET,
-                                                                          Status.KLAR_TIL_PLUKK), Pageable.unpaged())
+            val alleFeiledeTasker = taskService.finnTasksMedStatus(
+                listOf(
+                    Status.FEILET,
+                    Status.PLUKKET,
+                    Status.KLAR_TIL_PLUKK
+                ),
+                Pageable.unpaged()
+            )
             behandlinger.forEach {
                 val finnesTask = alleFeiledeTasker.any { task ->
                     task.type == AutomatiskSaksbehandlingTask.TYPE && task.payload == it.id.toString()
                 }
                 if (!finnesTask) {
                     val fagsystem = fagsakRepository.findByIdOrThrow(it.fagsakId).fagsystem
-                    taskService.save(Task(type = AutomatiskSaksbehandlingTask.TYPE,
-                                          payload = it.id.toString(),
-                                          properties = Properties().apply {
-                                              setProperty(PropertyName.FAGSYSTEM,
-                                                          fagsystem.name)
-                                          }))
+                    taskService.save(
+                        Task(
+                            type = AutomatiskSaksbehandlingTask.TYPE,
+                            payload = it.id.toString(),
+                            properties = Properties().apply {
+                                setProperty(
+                                    PropertyName.FAGSYSTEM,
+                                    fagsystem.name
+                                )
+                            }
+                        )
+                    )
                 } else {
                     logger.info("Det finnes allerede en feilet AutomatiskSaksbehandlingTask for samme behandlingId=${it.id}")
                 }
@@ -61,5 +75,4 @@ class AutomatiskSaksbehandlingBatch(private val automatiskSaksbehandlingService:
         }
         logger.info("Stopper AutomatiskSaksbehandlingBatch..")
     }
-
 }
