@@ -24,13 +24,15 @@ private const val UTF_8_WITH_PUA = 1208
 
 @Configuration
 @Profile("!integrasjonstest")
-class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
-                      @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,
-                      @Value("\${oppdrag.mq.channel}") val channel: String,
-                      @Value("\${oppdrag.mq.port}") val port: Int,
-                      @Value("\${CREDENTIAL_USERNAME}") val user: String,
-                      @Value("\${CREDENTIAL_PASSWORD}") val password: String,
-                      val environment: Environment) {
+class OppdragMQConfig(
+    @Value("\${oppdrag.mq.hostname}") val hostname: String,
+    @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,
+    @Value("\${oppdrag.mq.channel}") val channel: String,
+    @Value("\${oppdrag.mq.port}") val port: Int,
+    @Value("\${CREDENTIAL_USERNAME}") val user: String,
+    @Value("\${CREDENTIAL_PASSWORD}") val password: String,
+    val environment: Environment
+) {
 
     private val logger = LoggerFactory.getLogger(OppdragMQConfig::class.java)
 
@@ -63,10 +65,11 @@ class OppdragMQConfig(@Value("\${oppdrag.mq.hostname}") val hostname: String,
         return pooledFactory
     }
 
-
     @Bean
-    fun jmsListenerContainerFactory(@Qualifier("mqQueueConnectionFactory") connectionFactory: ConnectionFactory,
-                                    configurer: DefaultJmsListenerContainerFactoryConfigurer): JmsListenerContainerFactory<*> {
+    fun jmsListenerContainerFactory(
+        @Qualifier("mqQueueConnectionFactory") connectionFactory: ConnectionFactory,
+        configurer: DefaultJmsListenerContainerFactoryConfigurer
+    ): JmsListenerContainerFactory<*> {
         val factory = DefaultJmsListenerContainerFactory()
         configurer.configure(factory, connectionFactory)
 

@@ -10,13 +10,16 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendVarselbrevTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Sender varselbrev",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
-                         private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
-
+@TaskStepBeskrivelse(
+    taskStepType = SendVarselbrevTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Sender varselbrev",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class SendVarselbrevTask(
+    private val varselbrevService: VarselbrevService,
+    private val behandlingRepository: BehandlingRepository
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -31,5 +34,4 @@ class SendVarselbrevTask(private val varselbrevService: VarselbrevService,
 
         const val TYPE = "brev.sendVarsel"
     }
-
 }

@@ -7,16 +7,18 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
-data class FaktaFeilutbetalingsperiode(@Id
-                                       val id: UUID = UUID.randomUUID(),
-                                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                       val periode: Periode,
-                                       val hendelsestype: Hendelsestype,
-                                       val hendelsesundertype: Hendelsesundertype,
-                                       @Version
-                                       val versjon: Long = 0,
-                                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                       val sporbar: Sporbar = Sporbar())
+data class FaktaFeilutbetalingsperiode(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val periode: Periode,
+    val hendelsestype: Hendelsestype,
+    val hendelsesundertype: Hendelsesundertype,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 enum class Hendelsestype {
     ANNET,
@@ -129,5 +131,4 @@ enum class Hendelsesundertype {
     SAMBOER_AVSLUTTET_SONING,
     EKTEFELLE_INSTITUSJON,
     SAMBOER_INSTITUSJON,
-
 }

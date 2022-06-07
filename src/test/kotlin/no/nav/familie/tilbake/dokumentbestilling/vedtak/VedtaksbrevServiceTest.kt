@@ -47,15 +47,14 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
-
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -105,30 +104,34 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
-        vedtaksbrevService = VedtaksbrevService(behandlingRepository,
-                                                vedtaksbrevgeneratorService,
-                                                vedtaksbrevgrunnlagService,
-                                                faktaRepository,
-                                                vilkårsvurderingRepository,
-                                                fagsakRepository,
-                                                vedtaksbrevsoppsummeringRepository,
-                                                vedtaksbrevsperiodeRepository,
-                                                spyPdfBrevService)
+        vedtaksbrevService = VedtaksbrevService(
+            behandlingRepository,
+            vedtaksbrevgeneratorService,
+            vedtaksbrevgrunnlagService,
+            faktaRepository,
+            vilkårsvurderingRepository,
+            fagsakRepository,
+            vedtaksbrevsoppsummeringRepository,
+            vedtaksbrevsperiodeRepository,
+            spyPdfBrevService
+        )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering
-                                                  .copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null))))
+        vilkårsvurderingRepository.insert(
+            Testdata.vilkårsvurdering
+                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null)))
+        )
         faktaRepository.insert(Testdata.faktaFeilutbetaling)
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligSaksbehandler) }
-                .returns("Ansvarlig O'Saksbehandler")
+            .returns("Ansvarlig O'Saksbehandler")
         every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligBeslutter!!) }
-                .returns("Ansvarlig O'Beslutter")
+            .returns("Ansvarlig O'Beslutter")
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
@@ -144,10 +147,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         vedtaksbrevService.sendVedtaksbrev(Testdata.behandling, Brevmottager.BRUKER)
 
         verify {
-            spyPdfBrevService.sendBrev(capture(behandlingSlot),
-                                       capture(fagsakSlot),
-                                       capture(brevtypeSlot),
-                                       capture(brevdataSlot))
+            spyPdfBrevService.sendBrev(
+                capture(behandlingSlot),
+                capture(fagsakSlot),
+                capture(brevtypeSlot),
+                capture(brevdataSlot)
+            )
         }
         behandlingSlot.captured shouldBe Testdata.behandling
         fagsakSlot.captured shouldBe fagsak
@@ -157,15 +162,23 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf`() {
-        val dto = HentForhåndvisningVedtaksbrevPdfDto(Testdata.behandling.id,
-                                                      "Dette er en stor og gild oppsummeringstekst",
-                                                      listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
-                                                                                           LocalDate.now()),
-                                                                                "Friktekst om fakta",
-                                                                                "Friktekst om foreldelse",
-                                                                                "Friktekst om vilkår",
-                                                                                """Friktekst & > < ' "særligeGrunner""",
-                                                                                "Friktekst om særligeGrunnerAnnet")))
+        val dto = HentForhåndvisningVedtaksbrevPdfDto(
+            Testdata.behandling.id,
+            "Dette er en stor og gild oppsummeringstekst",
+            listOf(
+                PeriodeMedTekstDto(
+                    PeriodeDto(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now()
+                    ),
+                    "Friktekst om fakta",
+                    "Friktekst om foreldelse",
+                    "Friktekst om vilkår",
+                    """Friktekst & > < ' "særligeGrunner""",
+                    "Friktekst om særligeGrunnerAnnet"
+                )
+            )
+        )
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
         //   File("test.pdf").writeBytes(bytes)
@@ -175,13 +188,21 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf med xml-spesialtegn`() {
-        val dto = HentForhåndvisningVedtaksbrevPdfDto(Testdata.behandling.id,
-                                                      "Dette er en stor og gild oppsummeringstekst",
-                                                      listOf(PeriodeMedTekstDto(PeriodeDto(LocalDate.now().minusDays(1),
-                                                                                           LocalDate.now()),
-                                                                                faktaAvsnitt = "&bob",
-                                                                                vilkårAvsnitt = "<bob>",
-                                                                                særligeGrunnerAnnetAvsnitt = "'bob' \"bob\"")))
+        val dto = HentForhåndvisningVedtaksbrevPdfDto(
+            Testdata.behandling.id,
+            "Dette er en stor og gild oppsummeringstekst",
+            listOf(
+                PeriodeMedTekstDto(
+                    PeriodeDto(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now()
+                    ),
+                    faktaAvsnitt = "&bob",
+                    vilkårAvsnitt = "<bob>",
+                    særligeGrunnerAnnetAvsnitt = "'bob' \"bob\""
+                )
+            )
+        )
 
         val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
 
@@ -201,18 +222,28 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når en av de periodene er ugyldig`() {
         lagFakta()
-        val perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                                         faktaAvsnitt = "fakta fritekst",
-                                                         vilkårAvsnitt = "vilkår fritekst"),
-                                      PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 10), YearMonth.of(2021, 10)),
-                                                         faktaAvsnitt = "ugyldig",
-                                                         vilkårAvsnitt = "ugyldig"))
-        val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
-                                                    perioderMedTekst = perioderMedTekst)
+        val perioderMedTekst = listOf(
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                faktaAvsnitt = "fakta fritekst",
+                vilkårAvsnitt = "vilkår fritekst"
+            ),
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 10), YearMonth.of(2021, 10)),
+                faktaAvsnitt = "ugyldig",
+                vilkårAvsnitt = "ugyldig"
+            )
+        )
+        val fritekstAvsnittDto = FritekstavsnittDto(
+            oppsummeringstekst = "oppsummeringstekst",
+            perioderMedTekst = perioderMedTekst
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               fritekstAvsnittDto)
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                fritekstAvsnittDto
+            )
         }
         exception.message shouldBe "Periode 2021-10-01-2021-10-31 er ugyldig for behandling ${behandling.id}"
     }
@@ -221,9 +252,13 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når oppsummeringstekst er for lang`() {
         lagFakta()
         val exception = shouldThrow<RuntimeException> {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               lagFritekstAvsnittDto("fakta",
-                                                                                     RandomStringUtils.random(5000)))
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                lagFritekstAvsnittDto(
+                    "fakta",
+                    RandomStringUtils.random(5000)
+                )
+            )
         }
         exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
     }
@@ -233,19 +268,23 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         lagFakta()
         lagVilkårsvurdering()
         val exception = shouldThrow<RuntimeException> {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               lagFritekstAvsnittDto("fakta", "fakta data"))
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                lagFritekstAvsnittDto("fakta", "fakta data")
+            )
         }
         exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
-                "${Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
+            "${Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
     }
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for alle fakta perioder`() {
         lagFakta()
         val exception = shouldThrow<RuntimeException> {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               lagFritekstAvsnittDto())
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                lagFritekstAvsnittDto()
+            )
         }
         exception.message shouldBe "Mangler fakta fritekst for alle fakta perioder"
     }
@@ -253,23 +292,35 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for en av fakta perioder`() {
         lagFakta()
-        val perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-                                                         faktaAvsnitt = "fakta fritekst",
-                                                         vilkårAvsnitt = "vilkår fritekst"),
-                                      PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-                                                         faktaAvsnitt = "fakta fritekst",
-                                                         vilkårAvsnitt = "vilkår fritekst"),
-                                      PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
-                                                         vilkårAvsnitt = "vilkår fritekst"))
-        val fritekstAvsnittDto = FritekstavsnittDto(oppsummeringstekst = "oppsummeringstekst",
-                                                    perioderMedTekst = perioderMedTekst)
+        val perioderMedTekst = listOf(
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+                faktaAvsnitt = "fakta fritekst",
+                vilkårAvsnitt = "vilkår fritekst"
+            ),
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+                faktaAvsnitt = "fakta fritekst",
+                vilkårAvsnitt = "vilkår fritekst"
+            ),
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
+                vilkårAvsnitt = "vilkår fritekst"
+            )
+        )
+        val fritekstAvsnittDto = FritekstavsnittDto(
+            oppsummeringstekst = "oppsummeringstekst",
+            perioderMedTekst = perioderMedTekst
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                               fritekstavsnittDto = fritekstAvsnittDto)
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                fritekstavsnittDto = fritekstAvsnittDto
+            )
         }
         exception.message shouldBe "Mangler fakta fritekst for ${LocalDate.of(2021, 3, 1)}-" +
-                "${LocalDate.of(2021, 3, 31)}"
+            "${LocalDate.of(2021, 3, 31)}"
     }
 
     @Test
@@ -277,12 +328,16 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         lagFakta()
         lagVilkårsvurdering()
 
-        val fritekstAvsnittDto = lagFritekstAvsnittDto(faktaFritekst = "fakta fritekst",
-                                                       oppsummeringstekst = "oppsummering fritekst",
-                                                       særligGrunnerAnnetFritekst = "særliggrunner annet fritekst")
+        val fritekstAvsnittDto = lagFritekstAvsnittDto(
+            faktaFritekst = "fakta fritekst",
+            oppsummeringstekst = "oppsummering fritekst",
+            særligGrunnerAnnetFritekst = "særliggrunner annet fritekst"
+        )
 
-        vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId = behandling.id,
-                                                           fritekstavsnittDto = fritekstAvsnittDto)
+        vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+            behandlingId = behandling.id,
+            fritekstavsnittDto = fritekstAvsnittDto
+        )
 
         val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
         avsnittene.shouldNotBeEmpty()
@@ -292,10 +347,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         oppsummeringsavsnitt.shouldNotBeNull()
         oppsummeringsavsnitt.underavsnittsliste.size shouldBe 1
         val oppsummeringsunderavsnitt = oppsummeringsavsnitt.underavsnittsliste[0]
-        assertUnderavsnitt(underavsnitt = oppsummeringsunderavsnitt,
-                           fritekst = "oppsummering fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+        assertUnderavsnitt(
+            underavsnitt = oppsummeringsunderavsnitt,
+            fritekst = "oppsummering fritekst",
+            fritekstTillatt = true,
+            fritekstPåkrevet = false
+        )
 
         val periodeAvsnitter = avsnittene.firstOrNull { Avsnittstype.PERIODE == it.avsnittstype }
         periodeAvsnitter.shouldNotBeNull()
@@ -304,93 +361,131 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         periodeAvsnitter.underavsnittsliste.size shouldBe 6
         val faktaUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
+            .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
         faktaUnderavsnitt.shouldNotBeNull()
-        assertUnderavsnitt(underavsnitt = faktaUnderavsnitt,
-                           fritekst = "fakta fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = true)
+        assertUnderavsnitt(
+            underavsnitt = faktaUnderavsnitt,
+            fritekst = "fakta fritekst",
+            fritekstTillatt = true,
+            fritekstPåkrevet = true
+        )
 
         val foreldelseUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.FORELDELSE == it.underavsnittstype }
+            .firstOrNull { Underavsnittstype.FORELDELSE == it.underavsnittstype }
         foreldelseUnderavsnitt.shouldBeNull() // periodene er ikke foreldet
 
         val vilkårUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.VILKÅR == it.underavsnittstype }
+            .firstOrNull { Underavsnittstype.VILKÅR == it.underavsnittstype }
         vilkårUnderavsnitt.shouldNotBeNull()
-        assertUnderavsnitt(underavsnitt = vilkårUnderavsnitt,
-                           fritekst = "vilkår fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+        assertUnderavsnitt(
+            underavsnitt = vilkårUnderavsnitt,
+            fritekst = "vilkår fritekst",
+            fritekstTillatt = true,
+            fritekstPåkrevet = false
+        )
 
         val særligGrunnerUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
+            .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER == it.underavsnittstype }
         særligGrunnerUnderavsnitt.shouldNotBeNull()
-        assertUnderavsnitt(underavsnitt = særligGrunnerUnderavsnitt,
-                           fritekst = "særliggrunner fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = false)
+        assertUnderavsnitt(
+            underavsnitt = særligGrunnerUnderavsnitt,
+            fritekst = "særliggrunner fritekst",
+            fritekstTillatt = true,
+            fritekstPåkrevet = false
+        )
 
         val særligGrunnerAnnetUnderavsnitt = periodeAvsnitter.underavsnittsliste
-                .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
+            .firstOrNull { Underavsnittstype.SÆRLIGEGRUNNER_ANNET == it.underavsnittstype }
         særligGrunnerAnnetUnderavsnitt.shouldNotBeNull()
-        assertUnderavsnitt(underavsnitt = særligGrunnerAnnetUnderavsnitt,
-                           fritekst = "særliggrunner annet fritekst",
-                           fritekstTillatt = true,
-                           fritekstPåkrevet = true)
+        assertUnderavsnitt(
+            underavsnitt = særligGrunnerAnnetUnderavsnitt,
+            fritekst = "særliggrunner annet fritekst",
+            fritekstTillatt = true,
+            fritekstPåkrevet = true
+        )
 
         val tilleggsavsnitt = avsnittene.firstOrNull { Avsnittstype.TILLEGGSINFORMASJON == it.avsnittstype }
         tilleggsavsnitt.shouldNotBeNull()
     }
 
-    private fun lagFritekstAvsnittDto(faktaFritekst: String? = null,
-                                      oppsummeringstekst: String? = null,
-                                      særligGrunnerAnnetFritekst: String? = null): FritekstavsnittDto {
-        val perioderMedTekst = listOf(PeriodeMedTekstDto(periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                                         faktaAvsnitt = faktaFritekst,
-                                                         vilkårAvsnitt = "vilkår fritekst",
-                                                         foreldelseAvsnitt = "foreldelse fritekst",
-                                                         særligeGrunnerAvsnitt = "særliggrunner fritekst",
-                                                         særligeGrunnerAnnetAvsnitt = særligGrunnerAnnetFritekst))
-        return FritekstavsnittDto(oppsummeringstekst = oppsummeringstekst,
-                                  perioderMedTekst = perioderMedTekst)
+    private fun lagFritekstAvsnittDto(
+        faktaFritekst: String? = null,
+        oppsummeringstekst: String? = null,
+        særligGrunnerAnnetFritekst: String? = null
+    ): FritekstavsnittDto {
+        val perioderMedTekst = listOf(
+            PeriodeMedTekstDto(
+                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                faktaAvsnitt = faktaFritekst,
+                vilkårAvsnitt = "vilkår fritekst",
+                foreldelseAvsnitt = "foreldelse fritekst",
+                særligeGrunnerAvsnitt = "særliggrunner fritekst",
+                særligeGrunnerAnnetAvsnitt = særligGrunnerAnnetFritekst
+            )
+        )
+        return FritekstavsnittDto(
+            oppsummeringstekst = oppsummeringstekst,
+            perioderMedTekst = perioderMedTekst
+        )
     }
 
     private fun lagFakta() {
 
         val faktaFeilutbetaltePerioder =
-                setOf(FaktaFeilutbetalingsperiode(periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                                  hendelsestype = Hendelsestype.ANNET,
-                                                  hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST))
+            setOf(
+                FaktaFeilutbetalingsperiode(
+                    periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+                )
+            )
         faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandling.id)
-        faktaRepository.insert(FaktaFeilutbetaling(behandlingId = behandling.id,
-                                                   begrunnelse = "fakta begrrunnelse",
-                                                   perioder = faktaFeilutbetaltePerioder))
+        faktaRepository.insert(
+            FaktaFeilutbetaling(
+                behandlingId = behandling.id,
+                begrunnelse = "fakta begrrunnelse",
+                perioder = faktaFeilutbetaltePerioder
+            )
+        )
     }
 
     private fun lagVilkårsvurdering() {
         val aktsomhet =
-                VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                                          særligeGrunnerBegrunnelse = "Særlig grunner begrunnelse",
-                                          særligeGrunnerTilReduksjon = false,
-                                          vilkårsvurderingSærligeGrunner =
-                                          setOf(VilkårsvurderingSærligGrunn(særligGrunn = SærligGrunn.ANNET,
-                                                                            begrunnelse = "Annet begrunnelse")),
-                                          begrunnelse = "aktsomhet begrunnelse")
+            VilkårsvurderingAktsomhet(
+                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                særligeGrunnerBegrunnelse = "Særlig grunner begrunnelse",
+                særligeGrunnerTilReduksjon = false,
+                vilkårsvurderingSærligeGrunner =
+                setOf(
+                    VilkårsvurderingSærligGrunn(
+                        særligGrunn = SærligGrunn.ANNET,
+                        begrunnelse = "Annet begrunnelse"
+                    )
+                ),
+                begrunnelse = "aktsomhet begrunnelse"
+            )
         val vilkårsvurderingPeriode =
-                Vilkårsvurderingsperiode(periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
-                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                                         begrunnelse = "Vilkårsvurdering begrunnelse",
-                                         aktsomhet = aktsomhet)
+            Vilkårsvurderingsperiode(
+                periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                begrunnelse = "Vilkårsvurdering begrunnelse",
+                aktsomhet = aktsomhet
+            )
         vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandling.id)
-        vilkårsvurderingRepository.insert(Vilkårsvurdering(behandlingId = behandling.id,
-                                                           perioder = setOf(vilkårsvurderingPeriode)))
+        vilkårsvurderingRepository.insert(
+            Vilkårsvurdering(
+                behandlingId = behandling.id,
+                perioder = setOf(vilkårsvurderingPeriode)
+            )
+        )
     }
 
-    private fun assertUnderavsnitt(underavsnitt: Underavsnitt,
-                                   fritekst: String,
-                                   fritekstTillatt: Boolean,
-                                   fritekstPåkrevet: Boolean) {
+    private fun assertUnderavsnitt(
+        underavsnitt: Underavsnitt,
+        fritekst: String,
+        fritekstTillatt: Boolean,
+        fritekstPåkrevet: Boolean
+    ) {
         underavsnitt.fritekst shouldBe fritekst
         underavsnitt.fritekstTillatt shouldBe fritekstTillatt
         underavsnitt.fritekstPåkrevet shouldBe fritekstPåkrevet

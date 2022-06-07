@@ -31,17 +31,19 @@ import java.time.temporal.ChronoUnit
 import java.util.Properties
 
 @Service
-class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                          private val behandlingRepository: BehandlingRepository,
-                          private val mottattXmlService: ØkonomiXmlMottattService,
-                          private val stegService: StegService,
-                          private val behandlingskontrollService: BehandlingskontrollService,
-                          private val taskService: TaskService,
-                          private val tellerService: TellerService,
-                          private val oppgaveTaskService: OppgaveTaskService,
-                          private val historikkTaskService: HistorikkTaskService,
-                          private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-                          private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher) {
+class KravgrunnlagService(
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val mottattXmlService: ØkonomiXmlMottattService,
+    private val stegService: StegService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val taskService: TaskService,
+    private val tellerService: TellerService,
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
+    private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -64,15 +66,17 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         }
         // mapper grunnlag til Kravgrunnlag431
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
-        sjekkIdentiskKravgrunnlag(kravgrunnlag431)
+        sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
 
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-                                              Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
+            Aktør.VEDTAKSLØSNING
+        )
 
-        //oppdater frist på oppgave når behandling venter på grunnlag
+        // oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
             håndterOppgave(behandling)
@@ -85,13 +89,17 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             // behandling har allerede fått SPER melding og venter på kravgrunnlag
             when (aktivBehandlingsstegstilstand?.behandlingsstegsstatus) {
                 Behandlingsstegstatus.VENTER -> {
-                    log.info("Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
-                             "Flytter behandlingen til fakta steg")
+                    log.info(
+                        "Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
+                            "Flytter behandlingen til fakta steg"
+                    )
                     behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id)
                 }
                 else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
-                    log.info("Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
-                             "Flytter behandlingen til fakta steg")
+                    log.info(
+                        "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
+                            "Flytter behandlingen til fakta steg"
+                    )
                     behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA)
                 }
             }
@@ -100,12 +108,15 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         tellerService.tellKobletKravgrunnlag(fagsystem)
     }
 
-    private fun finnÅpenBehandling(ytelsestype: Ytelsestype,
-                                   fagsystemId: String): Behandling? {
-        return behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = ytelsestype,
-                                                                      eksternFagsakId = fagsystemId)
+    private fun finnÅpenBehandling(
+        ytelsestype: Ytelsestype,
+        fagsystemId: String
+    ): Behandling? {
+        return behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+            ytelsestype = ytelsestype,
+            eksternFagsakId = fagsystemId
+        )
     }
-
 
     private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431, ytelsestype: Ytelsestype) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
@@ -119,45 +130,59 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }
 
-    private fun hentOgOppdaterFaktaInfo(kravgrunnlag431: Kravgrunnlag431,
-                                        ytelsestype: Ytelsestype) {
+    private fun hentOgOppdaterFaktaInfo(
+        kravgrunnlag431: Kravgrunnlag431,
+        ytelsestype: Ytelsestype
+    ) {
         // henter faktainfo fra fagsystem for ny referanse via kafka
-        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId = kravgrunnlag431.fagsystemId,
-                                                                            ytelsestype = ytelsestype,
-                                                                            eksternId = kravgrunnlag431.referanse)
+        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
+            eksternFagsakId = kravgrunnlag431.fagsystemId,
+            ytelsestype = ytelsestype,
+            eksternId = kravgrunnlag431.referanse
+        )
         // OppdaterFaktainfoTask skal oppdatere fakta info med ny hentet faktainfo
-        taskService.save(Task(type = OppdaterFaktainfoTask.TYPE,
-                              payload = "",
-                              properties = Properties().apply {
-                                  setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
-                                  setProperty("ytelsestype", ytelsestype.name)
-                                  setProperty("eksternId", kravgrunnlag431.referanse)
-                                  setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
-                              }))
+        taskService.save(
+            Task(
+                type = OppdaterFaktainfoTask.TYPE,
+                payload = "",
+                properties = Properties().apply {
+                    setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
+                    setProperty("ytelsestype", ytelsestype.name)
+                    setProperty("eksternId", kravgrunnlag431.referanse)
+                    setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
+                }
+            )
+        )
     }
 
     private fun håndterOppgave(behandling: Behandling) {
         val revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato
         val interval = ChronoUnit.DAYS.between(revurderingsvedtaksdato, LocalDate.now())
         if (interval >= FRIST_DATO_GRENSE) {
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                                   beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
-                                                   frist = LocalDate.now().plusDays(1))
+            oppgaveTaskService.oppdaterOppgaveTask(
+                behandlingId = behandling.id,
+                beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
+                frist = LocalDate.now().plusDays(1)
+            )
         } else {
             val beskrivelse = "Behandling er tatt av vent, " +
-                              "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
-                              "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
-                              "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
-            oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                                   beskrivelse = beskrivelse,
-                                                   frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE))
+                "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
+                "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
+                "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
+            oppgaveTaskService.oppdaterOppgaveTask(
+                behandlingId = behandling.id,
+                beskrivelse = beskrivelse,
+                frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE)
+            )
         }
     }
 
-    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431) {
+    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
         if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET) {
             return
         }
+        // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
+        if (behandling.aktivtVarsel != null) return
         // Antar økonomi sender alltid et NYTT kravgrunnlag før ENDR kravgrunnlag
         val forrigeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(endretKravgrunnlag.behandlingId)
         val harSammeAntallPerioder = forrigeKravgrunnlag.perioder.size == endretKravgrunnlag.perioder.size
@@ -172,19 +197,19 @@ class KravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagReposi
             }
         }
         if (erIdentiskKravgrunnlag) {
-            log.warn("Mottatt kravgrunnlag med kravgrunnlagId ${endretKravgrunnlag.eksternKravgrunnlagId}," +
-                     "status ${endretKravgrunnlag.kravstatuskode.kode} og referanse ${endretKravgrunnlag.referanse} " +
-                     "for behandlingId=${endretKravgrunnlag.behandlingId} " +
-                     "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
-                     "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
-                     "Undersøk om ny referanse kan gi feil i brev..")
+            log.warn(
+                "Mottatt kravgrunnlag med kravgrunnlagId ${endretKravgrunnlag.eksternKravgrunnlagId}," +
+                    "status ${endretKravgrunnlag.kravstatuskode.kode} og referanse ${endretKravgrunnlag.referanse} " +
+                    "for behandlingId=${endretKravgrunnlag.behandlingId} " +
+                    "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
+                    "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
+                    "Undersøk om ny referanse kan gi feil i brev.."
+            )
         }
     }
-
 
     companion object {
 
         const val FRIST_DATO_GRENSE = 10L
     }
-
 }

@@ -42,8 +42,8 @@ class PdfGenerator {
         genererPDF(html, baos, dokumentvariant)
         val bytes = baos.toByteArray()
         if (dokumentvariant == Dokumentvariant.ENDELIG) {
-            //validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
-            //validering er også bare nødvendig før journalføring, så det er OK
+            // validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
+            // validering er også bare nødvendig før journalføring, så det er OK
             PdfaValidator.validatePdf(bytes)
         }
         return bytes
@@ -53,51 +53,57 @@ class PdfGenerator {
         val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant)
         val builder = PdfRendererBuilder()
         try {
-            builder.useFont(fontSupplier("SourceSansPro-Regular.ttf"),
-                            "Source Sans Pro",
-                            400,
-                            BaseRendererBuilder.FontStyle.NORMAL,
-                            true)
-                    .useFont(fontSupplier("SourceSansPro-Bold.ttf"),
-                             "Source Sans Pro",
-                             700,
-                             BaseRendererBuilder.FontStyle.OBLIQUE,
-                             true)
-                    .useFont(fontSupplier("SourceSansPro-It.ttf"),
-                             "Source Sans Pro",
-                             400,
-                             BaseRendererBuilder.FontStyle.ITALIC,
-                             true)
-                    .useColorProfile(FileStructureUtil.colorProfile)
-                    .useSVGDrawer(BatikSVGDrawer())
-                    .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_U)
-                    .withHtmlContent(htmlDocument, "")
-                    .toStream(outputStream)
-                    .useFastMode()
-                    .buildPdfRenderer()
-                    .createPDF()
+            builder.useFont(
+                fontSupplier("SourceSansPro-Regular.ttf"),
+                "Source Sans Pro",
+                400,
+                BaseRendererBuilder.FontStyle.NORMAL,
+                true
+            )
+                .useFont(
+                    fontSupplier("SourceSansPro-Bold.ttf"),
+                    "Source Sans Pro",
+                    700,
+                    BaseRendererBuilder.FontStyle.OBLIQUE,
+                    true
+                )
+                .useFont(
+                    fontSupplier("SourceSansPro-It.ttf"),
+                    "Source Sans Pro",
+                    400,
+                    BaseRendererBuilder.FontStyle.ITALIC,
+                    true
+                )
+                .useColorProfile(FileStructureUtil.colorProfile)
+                .useSVGDrawer(BatikSVGDrawer())
+                .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_U)
+                .withHtmlContent(htmlDocument, "")
+                .toStream(outputStream)
+                .useFastMode()
+                .buildPdfRenderer()
+                .createPDF()
         } catch (e: IOException) {
             throw RuntimeException("Feil ved generering av pdf", e)
         }
     }
 
     private fun appendHtmlMetadata(html: String, format: DocFormat, dokumentvariant: Dokumentvariant): String {
-        //nødvendig doctype for å støtte non-breaking space i openhtmltopdf
+        // nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
-               " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
-               "<html>" +
-               "<head>" +
-               "<meta charset=\"UTF-8\" />" +
-               "<style>" +
-               hentCss(format) +
-               "</style>" +
-               "</head>" +
-               lagBodyStartTag(dokumentvariant) +
-               "<div id=\"content\">" +
-               html +
-               "</div>" +
-               "</body>" +
-               "</html>"
+            " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
+            "<html>" +
+            "<head>" +
+            "<meta charset=\"UTF-8\" />" +
+            "<style>" +
+            hentCss(format) +
+            "</style>" +
+            "</head>" +
+            lagBodyStartTag(dokumentvariant) +
+            "<div id=\"content\">" +
+            html +
+            "</div>" +
+            "</body>" +
+            "</html>"
     }
 
     private fun fontSupplier(fontName: String): FSSupplier<InputStream> {

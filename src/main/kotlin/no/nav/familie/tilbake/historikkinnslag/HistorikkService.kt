@@ -24,59 +24,71 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HistorikkService(private val behandlingRepository: BehandlingRepository,
-                       private val fagsakRepository: FagsakRepository,
-                       private val brevsporingRepository: BrevsporingRepository,
-                       private val kafkaProducer: KafkaProducer) {
+class HistorikkService(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val brevsporingRepository: BrevsporingRepository,
+    private val kafkaProducer: KafkaProducer
+) {
 
     @Transactional
-    fun lagHistorikkinnslag(behandlingId: UUID,
-                            historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                            aktør: Aktør,
-                            opprettetTidspunkt: LocalDateTime,
-                            beskrivelse: String? = null,
-                            brevtype: String? = null,
-                            beslutter: String? = null) {
-        val request = lagHistorikkinnslagRequest(behandlingId,
-                                                 aktør,
-                                                 historikkinnslagstype,
-                                                 opprettetTidspunkt,
-                                                 beskrivelse,
-                                                 brevtype,
-                                                 beslutter)
+    fun lagHistorikkinnslag(
+        behandlingId: UUID,
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        aktør: Aktør,
+        opprettetTidspunkt: LocalDateTime,
+        beskrivelse: String? = null,
+        brevtype: String? = null,
+        beslutter: String? = null
+    ) {
+        val request = lagHistorikkinnslagRequest(
+            behandlingId,
+            aktør,
+            historikkinnslagstype,
+            opprettetTidspunkt,
+            beskrivelse,
+            brevtype,
+            beslutter
+        )
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
 
-    private fun lagHistorikkinnslagRequest(behandlingId: UUID,
-                                           aktør: Aktør,
-                                           historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                                           opprettetTidspunkt: LocalDateTime,
-                                           beskrivelse: String?,
-                                           brevtype: String?,
-                                           beslutter: String?): OpprettHistorikkinnslagRequest {
+    private fun lagHistorikkinnslagRequest(
+        behandlingId: UUID,
+        aktør: Aktør,
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        opprettetTidspunkt: LocalDateTime,
+        beskrivelse: String?,
+        brevtype: String?,
+        beslutter: String?
+    ): OpprettHistorikkinnslagRequest {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevdata = hentBrevdata(behandling, brevtype)
 
-        return OpprettHistorikkinnslagRequest(behandlingId = behandling.eksternBrukId.toString(),
-                                              eksternFagsakId = fagsak.eksternFagsakId,
-                                              fagsystem = fagsak.fagsystem,
-                                              applikasjon = Applikasjon.FAMILIE_TILBAKE,
-                                              type = historikkinnslagstype.type,
-                                              aktør = aktør,
-                                              aktørIdent = hentAktørIdent(behandling, aktør, beslutter),
-                                              opprettetTidspunkt = opprettetTidspunkt,
-                                              steg = historikkinnslagstype.steg?.name,
-                                              tittel = historikkinnslagstype.tittel,
-                                              tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
-                                              journalpostId = brevdata?.journalpostId,
-                                              dokumentId = brevdata?.dokumentId)
+        return OpprettHistorikkinnslagRequest(
+            behandlingId = behandling.eksternBrukId.toString(),
+            eksternFagsakId = fagsak.eksternFagsakId,
+            fagsystem = fagsak.fagsystem,
+            applikasjon = Applikasjon.FAMILIE_TILBAKE,
+            type = historikkinnslagstype.type,
+            aktør = aktør,
+            aktørIdent = hentAktørIdent(behandling, aktør, beslutter),
+            opprettetTidspunkt = opprettetTidspunkt,
+            steg = historikkinnslagstype.steg?.name,
+            tittel = historikkinnslagstype.tittel,
+            tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
+            journalpostId = brevdata?.journalpostId,
+            dokumentId = brevdata?.dokumentId
+        )
     }
 
-    private fun lagTekst(behandling: Behandling,
-                         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                         beskrivelse: String?): String? {
+    private fun lagTekst(
+        behandling: Behandling,
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        beskrivelse: String?
+    ): String? {
         return when (historikkinnslagstype) {
             BEHANDLING_PÅ_VENT -> historikkinnslagstype.tekst + beskrivelse
             VEDTAK_FATTET -> behandling.sisteResultat?.type?.let { historikkinnslagstype.tekst + it.navn }
@@ -93,24 +105,31 @@ class HistorikkService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    private fun hentAktørIdent(behandling: Behandling,
-                               aktør: Aktør,
-                               beslutter: String?): String {
+    private fun hentAktørIdent(
+        behandling: Behandling,
+        aktør: Aktør,
+        beslutter: String?
+    ): String {
         return when (aktør) {
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             Aktør.SAKSBEHANDLER -> behandling.ansvarligSaksbehandler
-            Aktør.BESLUTTER -> behandling.ansvarligBeslutter
-                               ?: beslutter
-                               ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
+            Aktør.BESLUTTER ->
+                behandling.ansvarligBeslutter
+                    ?: beslutter
+                    ?: error("Beslutter mangler ident for behandling: ${behandling.id}")
         }
     }
 
-    private fun hentBrevdata(behandling: Behandling,
-                             brevtypeIString: String?): Brevsporing? {
+    private fun hentBrevdata(
+        behandling: Behandling,
+        brevtypeIString: String?
+    ): Brevsporing? {
         val brevtype = brevtypeIString?.let { Brevtype.valueOf(it) }
         return brevtype?.let {
-            brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandling.id,
-                                                                                                   brevtype)
+            brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
+                behandling.id,
+                brevtype
+            )
         }
     }
 }

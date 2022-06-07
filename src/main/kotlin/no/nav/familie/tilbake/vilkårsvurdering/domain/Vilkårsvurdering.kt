@@ -12,77 +12,82 @@ import java.math.BigDecimal
 import java.util.UUID
 
 @Table("vilkarsvurdering")
-data class Vilkårsvurdering(@Id
-                            val id: UUID = UUID.randomUUID(),
-                            val behandlingId: UUID,
-                            val aktiv: Boolean = true,
-                            @MappedCollection(idColumn = "vilkarsvurdering_id")
-                            val perioder: Set<Vilkårsvurderingsperiode> = setOf(),
-                            @Version
-                            val versjon: Long = 0,
-                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                            val sporbar: Sporbar = Sporbar())
+data class Vilkårsvurdering(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val behandlingId: UUID,
+    val aktiv: Boolean = true,
+    @MappedCollection(idColumn = "vilkarsvurdering_id")
+    val perioder: Set<Vilkårsvurderingsperiode> = setOf(),
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 @Table("vilkarsvurderingsperiode")
-data class Vilkårsvurderingsperiode(@Id
-                                    val id: UUID = UUID.randomUUID(),
-                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                    val periode: Periode,
-                                    @Column("vilkarsvurderingsresultat")
-                                    val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
-                                    val begrunnelse: String,
-                                    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
-                                    val aktsomhet: VilkårsvurderingAktsomhet? = null,
-                                    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
-                                    val godTro: VilkårsvurderingGodTro? = null,
-                                    @Version
-                                    val versjon: Long = 0,
-                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                    val sporbar: Sporbar = Sporbar())
+data class Vilkårsvurderingsperiode(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val periode: Periode,
+    @Column("vilkarsvurderingsresultat")
+    val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
+    val begrunnelse: String,
+    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
+    val aktsomhet: VilkårsvurderingAktsomhet? = null,
+    @MappedCollection(idColumn = "vilkarsvurderingsperiode_id")
+    val godTro: VilkårsvurderingGodTro? = null,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 @Table("vilkarsvurdering_god_tro")
-data class VilkårsvurderingGodTro(@Id
-                                  val id: UUID = UUID.randomUUID(),
-                                  @Column("belop_er_i_behold")
-                                  val beløpErIBehold: Boolean,
-                                  @Column("belop_tilbakekreves")
-                                  val beløpTilbakekreves: BigDecimal? = null,
-                                  val begrunnelse: String,
-                                  @Version
-                                  val versjon: Long = 0,
-                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                  val sporbar: Sporbar = Sporbar()) {
+data class VilkårsvurderingGodTro(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @Column("belop_er_i_behold")
+    val beløpErIBehold: Boolean,
+    @Column("belop_tilbakekreves")
+    val beløpTilbakekreves: BigDecimal? = null,
+    val begrunnelse: String,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+) {
 
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
-
 }
 
-
 @Table("vilkarsvurdering_aktsomhet")
-data class VilkårsvurderingAktsomhet(@Id
-                                     val id: UUID = UUID.randomUUID(),
-                                     val aktsomhet: Aktsomhet,
-                                     val ileggRenter: Boolean? = null,
-                                     val andelTilbakekreves: BigDecimal? = null,
-                                     @Column("manuelt_satt_belop")
-                                     val manueltSattBeløp: BigDecimal? = null,
-                                     val begrunnelse: String,
-                                     @Column("serlige_grunner_til_reduksjon")
-                                     val særligeGrunnerTilReduksjon: Boolean = false,
-                                     @Column("tilbakekrev_smabelop")
-                                     val tilbakekrevSmåbeløp: Boolean = true,
-                                     @MappedCollection(idColumn = "vilkarsvurdering_aktsomhet_id")
-                                     val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
-                                     @Column("serlige_grunner_begrunnelse")
-                                     val særligeGrunnerBegrunnelse: String? = null,
-                                     @Version
-                                     val versjon: Long = 0,
-                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                     val sporbar: Sporbar = Sporbar()) {
+data class VilkårsvurderingAktsomhet(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val aktsomhet: Aktsomhet,
+    val ileggRenter: Boolean? = null,
+    val andelTilbakekreves: BigDecimal? = null,
+    @Column("manuelt_satt_belop")
+    val manueltSattBeløp: BigDecimal? = null,
+    val begrunnelse: String,
+    @Column("serlige_grunner_til_reduksjon")
+    val særligeGrunnerTilReduksjon: Boolean = false,
+    @Column("tilbakekrev_smabelop")
+    val tilbakekrevSmåbeløp: Boolean = true,
+    @MappedCollection(idColumn = "vilkarsvurdering_aktsomhet_id")
+    val vilkårsvurderingSærligeGrunner: Set<VilkårsvurderingSærligGrunn> = setOf(),
+    @Column("serlige_grunner_begrunnelse")
+    val særligeGrunnerBegrunnelse: String? = null,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+) {
 
     init {
-        require(!(andelTilbakekreves != null && manueltSattBeløp != null))
-        { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
+        require(!(andelTilbakekreves != null && manueltSattBeløp != null)) { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
         if (aktsomhet == Aktsomhet.FORSETT) {
             check(!særligeGrunnerTilReduksjon) { "Ved FORSETT skal ikke særligeGrunnerTilReduksjon settes her" }
             check(manueltSattBeløp == null) { "Ved FORSETT er beløp automatisk, og skal ikke settes her" }
@@ -98,19 +103,20 @@ data class VilkårsvurderingAktsomhet(@Id
         get() = Aktsomhet.GROV_UAKTSOMHET == aktsomhet || Aktsomhet.SIMPEL_UAKTSOMHET == aktsomhet && this.tilbakekrevSmåbeløp
 
     val særligeGrunner get() = vilkårsvurderingSærligeGrunner.map(VilkårsvurderingSærligGrunn::særligGrunn)
-
 }
 
 @Table("vilkarsvurdering_serlig_grunn")
-data class VilkårsvurderingSærligGrunn(@Id
-                                       val id: UUID = UUID.randomUUID(),
-                                       @Column("serlig_grunn")
-                                       val særligGrunn: SærligGrunn,
-                                       val begrunnelse: String?,
-                                       @Version
-                                       val versjon: Long = 0,
-                                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                       val sporbar: Sporbar = Sporbar())
+data class VilkårsvurderingSærligGrunn(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @Column("serlig_grunn")
+    val særligGrunn: SærligGrunn,
+    val begrunnelse: String?,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 enum class SærligGrunn(val navn: String) {
     GRAD_AV_UAKTSOMHET("Graden av uaktsomhet hos den kravet retter seg mot"),
@@ -139,11 +145,14 @@ enum class AnnenVurdering(override val navn: String) : Vurdering {
 
 enum class Vilkårsvurderingsresultat(val navn: String) {
     FORSTO_BURDE_FORSTÅTT("Ja, mottaker forsto eller burde forstått at utbetalingen skyldtes en feil (1. ledd, 1. punkt)"),
-    MANGELFULLE_OPPLYSNINGER_FRA_BRUKER("Ja, mottaker har forårsaket feilutbetalingen ved forsett " +
-                                        "eller uaktsomt gitt mangelfulle opplysninger (1. ledd, 2 punkt)"),
-    FEIL_OPPLYSNINGER_FRA_BRUKER("Ja, mottaker har forårsaket feilutbetalingen ved forsett eller " +
-                                 "uaktsomt gitt feilaktige opplysninger (1. ledd, 2 punkt)"),
+    MANGELFULLE_OPPLYSNINGER_FRA_BRUKER(
+        "Ja, mottaker har forårsaket feilutbetalingen ved forsett " +
+            "eller uaktsomt gitt mangelfulle opplysninger (1. ledd, 2 punkt)"
+    ),
+    FEIL_OPPLYSNINGER_FRA_BRUKER(
+        "Ja, mottaker har forårsaket feilutbetalingen ved forsett eller " +
+            "uaktsomt gitt feilaktige opplysninger (1. ledd, 2 punkt)"
+    ),
     GOD_TRO("Nei, mottaker har mottatt beløpet i god tro (1. ledd)"),
     UDEFINERT("Ikke Definert")
 }
-

@@ -18,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class TotrinnService(private val behandlingRepository: BehandlingRepository,
-                     private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
-                     private val totrinnsvurderingRepository: TotrinnsvurderingRepository) {
+class TotrinnService(
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository
+) {
 
     @Transactional(readOnly = true)
     fun hentTotrinnsvurderinger(behandlingId: UUID): TotrinnsvurderingDto {
@@ -40,22 +42,28 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
         eksisterendeTotrinnsvurdering.forEach { totrinnsvurderingRepository.update(it.copy(aktiv = false)) }
 
         totrinnsvurderinger.filter { finnOmStegKanBesluttes(it.behandlingssteg, behandlingsstegstilstand) }
-                .forEach {
-                    totrinnsvurderingRepository.insert(Totrinnsvurdering(behandlingId = behandlingId,
-                                                                         behandlingssteg = it.behandlingssteg,
-                                                                         godkjent = it.godkjent,
-                                                                         begrunnelse = it.begrunnelse))
-                }
+            .forEach {
+                totrinnsvurderingRepository.insert(
+                    Totrinnsvurdering(
+                        behandlingId = behandlingId,
+                        behandlingssteg = it.behandlingssteg,
+                        godkjent = it.godkjent,
+                        begrunnelse = it.begrunnelse
+                    )
+                )
+            }
     }
 
     @Transactional
     fun lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId: UUID) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         val totrinnsvurderinger = behandlingsstegstilstand.filter { it.behandlingssteg.kanBesluttes }.map {
-            Totrinnsvurdering(behandlingId = behandlingId,
-                              behandlingssteg = it.behandlingssteg,
-                              godkjent = true,
-                              begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE)
+            Totrinnsvurdering(
+                behandlingId = behandlingId,
+                behandlingssteg = it.behandlingssteg,
+                godkjent = true,
+                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+            )
         }
         totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }
     }
@@ -63,9 +71,11 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
     fun validerAnsvarligBeslutter(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.ansvarligSaksbehandler == ContextService.hentSaksbehandler()) {
-            throw Feil(message = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
-                       frontendFeilmelding = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
+                frontendFeilmelding = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -85,29 +95,34 @@ class TotrinnService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.update(behandling.copy(ansvarligBeslutter = null))
     }
 
-    private fun finnOmStegKanBesluttes(behandlingssteg: Behandlingssteg,
-                                       behandlingsstegstilstand: List<Behandlingsstegstilstand>): Boolean {
+    private fun finnOmStegKanBesluttes(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>
+    ): Boolean {
         return behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
-            it.behandlingssteg.kanBesluttes &&
-            it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingssteg.kanBesluttes &&
+                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
         }
     }
 
-    private fun validerOmAlleBesluttendeStegFinnes(totrinnsvurderinger: List<VurdertTotrinnDto>,
-                                                   behandlingsstegstilstand: List<Behandlingsstegstilstand>) {
+    private fun validerOmAlleBesluttendeStegFinnes(
+        totrinnsvurderinger: List<VurdertTotrinnDto>,
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>
+    ) {
         val stegSomBørVurderes: List<Behandlingssteg> = behandlingsstegstilstand.filter {
             it.behandlingssteg.kanBesluttes &&
-            it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
         }.map { it.behandlingssteg }
 
         val vurderteSteg: List<Behandlingssteg> = totrinnsvurderinger.map { it.behandlingssteg }
         val manglendeSteg = stegSomBørVurderes.minus(vurderteSteg)
         if (manglendeSteg.isNotEmpty()) {
-            throw Feil(message = "Stegene $manglendeSteg mangler totrinnsvurdering",
-                       frontendFeilmelding = "Stegene $manglendeSteg mangler totrinnsvurdering",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Stegene $manglendeSteg mangler totrinnsvurdering",
+                frontendFeilmelding = "Stegene $manglendeSteg mangler totrinnsvurdering",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
-
 }

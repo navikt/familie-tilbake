@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEvent
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
@@ -18,9 +19,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FaktaFeilutbetalingssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                               private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-                               private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class FaktaFeilutbetalingssteg(
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -32,11 +36,16 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg")
         val behandlingsstegFaktaDto: BehandlingsstegFaktaDto = behandlingsstegDto as BehandlingsstegFaktaDto
+
         faktaFeilutbetalingService.lagreFaktaomfeilutbetaling(behandlingId, behandlingsstegFaktaDto)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.SAKSBEHANDLER)
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+            Aktør.SAKSBEHANDLER
+        )
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
             flyttBehandlingVidere(behandlingId)
@@ -48,9 +57,11 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FAKTA} steg og behandler automatisk..")
         faktaFeilutbetalingService.lagreFastFaktaForAutomatiskSaksbehandling(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-                                              Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
+            Aktør.VEDTAKSLØSNING
+        )
 
         flyttBehandlingVidere(behandlingId)
     }
@@ -58,9 +69,13 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FAKTA} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
@@ -73,9 +88,13 @@ class FaktaFeilutbetalingssteg(private val behandlingskontrollService: Behandlin
     }
 
     private fun flyttBehandlingVidere(behandlingId: UUID) {
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FAKTA,
-                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 }

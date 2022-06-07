@@ -71,14 +71,15 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
-        dokumentBehandlingService = DokumentbehandlingService(behandlingRepository,
-                                                              fagsakRepository,
-                                                              behandlingskontrollService,
-                                                              kravgrunnlagRepository,
-                                                              taskService,
-                                                              mockManueltVarselBrevService,
-                                                              mockInnhentDokumentasjonbrevService)
-
+        dokumentBehandlingService = DokumentbehandlingService(
+            behandlingRepository,
+            fagsakRepository,
+            behandlingskontrollService,
+            kravgrunnlagRepository,
+            taskService,
+            mockManueltVarselBrevService,
+            mockInnhentDokumentasjonbrevService
+        )
     }
 
     @Test
@@ -102,58 +103,69 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
     fun `bestillBrev skal kunne bestille innhent dokumentasjon brev når grunnlag finnes`() {
         val behandlingId = opprettOgLagreKravgrunnlagPåBehandling()
 
-        dokumentBehandlingService.bestillBrev(behandlingId,
-                                              Dokumentmalstype.INNHENT_DOKUMENTASJON,
-                                              "Bestilt innhent dokumentasjon")
+        dokumentBehandlingService.bestillBrev(
+            behandlingId,
+            Dokumentmalstype.INNHENT_DOKUMENTASJON,
+            "Bestilt innhent dokumentasjon"
+        )
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
         tasks.first().type shouldBe InnhentDokumentasjonbrevTask.TYPE
-
     }
 
     @Test
     fun `bestillBrev skal ikke kunne bestille innhent dokumentasjonbrev når grunnlag ikke finnes`() {
         shouldThrow<java.lang.IllegalStateException> {
-            dokumentBehandlingService.bestillBrev(behandling.id,
-                                                  Dokumentmalstype.INNHENT_DOKUMENTASJON,
-                                                  "Bestilt innhent dokumentasjon")
+            dokumentBehandlingService.bestillBrev(
+                behandling.id,
+                Dokumentmalstype.INNHENT_DOKUMENTASJON,
+                "Bestilt innhent dokumentasjon"
+            )
         }.message shouldBe "Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = " +
-                "${behandling.id}"
+            "${behandling.id}"
     }
 
     private fun opprettOgLagreKravgrunnlagPåBehandling(): UUID {
-        val ytelBeløp = Kravgrunnlagsbeløp433(klassetype = Klassetype.YTEL,
-                                              klassekode = Klassekode.BATR,
-                                              nyttBeløp = BigDecimal.ZERO,
-                                              tilbakekrevesBeløp = BigDecimal.valueOf(1000),
-                                              opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
-                                              skatteprosent = BigDecimal.ZERO)
-        val feilBeløp = Kravgrunnlagsbeløp433(klassetype = Klassetype.FEIL,
-                                              klassekode = Klassekode.BATR,
-                                              nyttBeløp = BigDecimal.valueOf(1000),
-                                              tilbakekrevesBeløp = BigDecimal.ZERO,
-                                              opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
-                                              skatteprosent = BigDecimal.ZERO)
-        val periode = Kravgrunnlagsperiode432(periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
-                                              månedligSkattebeløp = BigDecimal.ZERO,
-                                              beløp = setOf(ytelBeløp, feilBeløp))
-        val kravgrunnlag431 = Kravgrunnlag431(behandlingId = behandling.id,
-                                              fagområdekode = Fagområdekode.BA,
-                                              vedtakId = BigInteger.valueOf(12342L),
-                                              eksternKravgrunnlagId = BigInteger.valueOf(1234),
-                                              kravstatuskode = Kravstatuskode.NYTT,
-                                              fagsystemId = "1234",
-                                              utbetalesTilId = "11323432111",
-                                              utbetIdType = GjelderType.PERSON,
-                                              gjelderVedtakId = "11323432111",
-                                              gjelderType = GjelderType.PERSON,
-                                              ansvarligEnhet = "enhet",
-                                              bostedsenhet = "enhet",
-                                              behandlingsenhet = "enhet",
-                                              kontrollfelt = "132323",
-                                              saksbehandlerId = "23454334",
-                                              referanse = "testverdi",
-                                              perioder = setOf(periode))
+        val ytelBeløp = Kravgrunnlagsbeløp433(
+            klassetype = Klassetype.YTEL,
+            klassekode = Klassekode.BATR,
+            nyttBeløp = BigDecimal.ZERO,
+            tilbakekrevesBeløp = BigDecimal.valueOf(1000),
+            opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
+            skatteprosent = BigDecimal.ZERO
+        )
+        val feilBeløp = Kravgrunnlagsbeløp433(
+            klassetype = Klassetype.FEIL,
+            klassekode = Klassekode.BATR,
+            nyttBeløp = BigDecimal.valueOf(1000),
+            tilbakekrevesBeløp = BigDecimal.ZERO,
+            opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
+            skatteprosent = BigDecimal.ZERO
+        )
+        val periode = Kravgrunnlagsperiode432(
+            periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
+            månedligSkattebeløp = BigDecimal.ZERO,
+            beløp = setOf(ytelBeløp, feilBeløp)
+        )
+        val kravgrunnlag431 = Kravgrunnlag431(
+            behandlingId = behandling.id,
+            fagområdekode = Fagområdekode.BA,
+            vedtakId = BigInteger.valueOf(12342L),
+            eksternKravgrunnlagId = BigInteger.valueOf(1234),
+            kravstatuskode = Kravstatuskode.NYTT,
+            fagsystemId = "1234",
+            utbetalesTilId = "11323432111",
+            utbetIdType = GjelderType.PERSON,
+            gjelderVedtakId = "11323432111",
+            gjelderType = GjelderType.PERSON,
+            ansvarligEnhet = "enhet",
+            bostedsenhet = "enhet",
+            behandlingsenhet = "enhet",
+            kontrollfelt = "132323",
+            saksbehandlerId = "23454334",
+            referanse = "testverdi",
+            perioder = setOf(periode)
+        )
         kravgrunnlagRepository.insert(kravgrunnlag431)
         return kravgrunnlag431.behandlingId
     }

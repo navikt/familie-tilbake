@@ -16,8 +16,10 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
-class MålerService(private val meldingstellingRepository: MeldingstellingRepository,
-                   private val taskService: TaskService) {
+class MålerService(
+    private val meldingstellingRepository: MeldingstellingRepository,
+    private val taskService: TaskService
+) {
 
     private val åpneBehandlingerGauge = MultiGauge.builder("UavsluttedeBehandlinger").register(Metrics.globalRegistry)
     private val klarTilBehandlingGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
@@ -37,13 +39,19 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Åpne behandlinger for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                            "fordelt på ${forekomster.size} uker.")
+                logger.info(
+                    "Åpne behandlinger for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
+                        "fordelt på ${forekomster.size} uker."
+                )
         }
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                ),
+                it.antall
+            )
         }
 
         åpneBehandlingerGauge.register(rows, true)
@@ -56,13 +64,19 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Behandlinger klar til saksbehandling for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                            "fordelt på ${forekomster.size} steg.")
+                logger.info(
+                    "Behandlinger klar til saksbehandling for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
+                        "fordelt på ${forekomster.size} steg."
+                )
         }
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "steg", it.behandlingssteg.name),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "steg", it.behandlingssteg.name
+                ),
+                it.antall
+            )
         }
 
         klarTilBehandlingGauge.register(rows, true)
@@ -75,14 +89,20 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Behandlinger på vent for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                            "fordelt på ${forekomster.size} steg.")
+                logger.info(
+                    "Behandlinger på vent for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
+                        "fordelt på ${forekomster.size} steg."
+                )
         }
 
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "steg", it.behandlingssteg.name),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "steg", it.behandlingssteg.name
+                ),
+                it.antall
+            )
         }
 
         ventendeBehandlingGauge.register(rows, true)
@@ -99,12 +119,16 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         }
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "brevtype", it.brevtype.name,
-                                      "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "brevtype", it.brevtype.name,
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                ),
+                it.antall
+            )
         }
-        sendteBrevGauge.register(rows,  true)
+        sendteBrevGauge.register(rows, true)
     }
 
     @Scheduled(initialDelay = 180000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -114,8 +138,10 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Vedtak for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                            "fordelt på ${forekomster.size} typer/uker.")
+                logger.info(
+                    "Vedtak for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
+                        "fordelt på ${forekomster.size} typer/uker."
+                )
         }
 
         val rows = data.map {
@@ -123,12 +149,16 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
             val vedtakstype = if (it.vedtakstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
                 Behandlingsresultatstype.HENLAGT.name else it.vedtakstype.name
 
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "vedtakstype", vedtakstype,
-                                      "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "vedtakstype", vedtakstype,
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                ),
+                it.antall
+            )
         }
-        vedtakGauge.register(rows,  true)
+        vedtakGauge.register(rows, true)
     }
 
     @Scheduled(initialDelay = 210000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -137,18 +167,24 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Mottatte kravgrunnlag koblet for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                            "fordelt på ${forekomster.size} fagsystem/dager.")
+                logger.info(
+                    "Mottatte kravgrunnlag koblet for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
+                        "fordelt på ${forekomster.size} fagsystem/dager."
+                )
         }
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "type", it.type.name,
-                                      "status", it.status.name,
-                                      "dato", it.dato.toString()),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "type", it.type.name,
+                    "status", it.status.name,
+                    "dato", it.dato.toString()
+                ),
+                it.antall
+            )
         }
-        mottatteKravgrunnlagGauge.register(rows,  true)
+        mottatteKravgrunnlagGauge.register(rows, true)
     }
 
     @Scheduled(initialDelay = 240000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -157,16 +193,22 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty())
-                logger.info("Mottatte statusmeldinger for ${fagsystem.name} " +
-                            "returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} fagsystem/dager.")
+                logger.info(
+                    "Mottatte statusmeldinger for ${fagsystem.name} " +
+                        "returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} fagsystem/dager."
+                )
         }
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.fagsystem.name,
-                                      "dato", it.dato.toString()),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "fagsystem", it.fagsystem.name,
+                    "dato", it.dato.toString()
+                ),
+                it.antall
+            )
         }
-        mottatteStatusmeldingerGauge.register(rows,  true)
+        mottatteStatusmeldingerGauge.register(rows, true)
     }
 
     @Scheduled(initialDelay = 270000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -175,13 +217,14 @@ class MålerService(private val meldingstellingRepository: MeldingstellingReposi
         val fagsystemTilTasker = data.groupBy { it.fagsystem() }
 
         val rows = Fagsystem.values().map {
-            MultiGauge.Row.of(Tags.of("fagsystem", it.name),
-                              (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0))
+            MultiGauge.Row.of(
+                Tags.of("fagsystem", it.name),
+                (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0)
+            )
         }
 
-        feiledeTasker.register(rows,  true)
+        feiledeTasker.register(rows, true)
     }
-
 
     companion object {
 

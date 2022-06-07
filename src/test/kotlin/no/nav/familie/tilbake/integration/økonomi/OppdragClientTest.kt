@@ -73,9 +73,11 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))
 
         val tilbakekrevingsvedtakRequestXml = readXml("/tilbakekrevingsvedtak/tilbakekrevingsvedtak.xml")
-        tilbakekrevingsvedtakRequest = TilbakekrevingsvedtakMarshaller.unmarshall(tilbakekrevingsvedtakRequestXml,
-                                                                                  behandling.id,
-                                                                                  UUID.randomUUID())
+        tilbakekrevingsvedtakRequest = TilbakekrevingsvedtakMarshaller.unmarshall(
+            tilbakekrevingsvedtakRequestXml,
+            behandling.id,
+            UUID.randomUUID()
+        )
         hentKravgrunnlagRequest = KravgrunnlagHentDetaljRequest().apply {
             hentkravgrunnlag = HentKravgrunnlagDetaljDto().apply {
                 kravgrunnlagId = kravgrunnlagId
@@ -94,8 +96,10 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                                       .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson())))
+        wireMockServer.stubFor(
+            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+                .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson()))
+        )
         val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
 
         iverksettVedtak shouldNotBe null
@@ -103,12 +107,16 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal ikke sende iverksettelse request til oppdrag når oppdrag har nedetid`() {
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                                       .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408)))
+        wireMockServer.stubFor(
+            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+                .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408))
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            oppdragClient.iverksettVedtak(behandling.id,
-                                          tilbakekrevingsvedtakRequest)
+            oppdragClient.iverksettVedtak(
+                behandling.id,
+                tilbakekrevingsvedtakRequest
+            )
         }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
@@ -117,12 +125,16 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `iverksettVedtak skal ikke iverksette behandling til oppdrag når økonomi ikke svarer`() {
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                                       .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")))
+        wireMockServer.stubFor(
+            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            oppdragClient.iverksettVedtak(behandling.id,
-                                          tilbakekrevingsvedtakRequest)
+            oppdragClient.iverksettVedtak(
+                behandling.id,
+                tilbakekrevingsvedtakRequest
+            )
         }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
@@ -133,11 +145,25 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal hente kravgrunnlag fra oppdrag`() {
 
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                                               kravgrunnlagId))
-                                       .willReturn(okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
-                                                                                                     "OK"))
-                                                                  .toJson())))
+        wireMockServer.stubFor(
+            post(
+                urlEqualTo(
+                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
+                        kravgrunnlagId
+                )
+            )
+                .willReturn(
+                    okJson(
+                        Ressurs.success(
+                            lagHentKravgrunnlagRespons(
+                                "00",
+                                "OK"
+                            )
+                        )
+                            .toJson()
+                    )
+                )
+        )
         val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
 
         hentKravgrunnlag shouldNotBe null
@@ -146,11 +172,25 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag ikke finnes i økonomi`() {
 
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                                               kravgrunnlagId))
-                                       .willReturn(okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
-                                                                                                     "B420010I"))
-                                                                  .toJson())))
+        wireMockServer.stubFor(
+            post(
+                urlEqualTo(
+                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
+                        kravgrunnlagId
+                )
+            )
+                .willReturn(
+                    okJson(
+                        Ressurs.success(
+                            lagHentKravgrunnlagRespons(
+                                "00",
+                                "B420010I"
+                            )
+                        )
+                            .toJson()
+                    )
+                )
+        )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
@@ -158,19 +198,33 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
         exception.cause?.message shouldBe "Fikk feil respons:{\"systemId\":null,\"kodeMelding\":\"B420010I\"," +
-                "\"alvorlighetsgrad\":\"00\",\"beskrMelding\":null,\"sqlKode\":null,\"sqlState\":null,\"sqlMelding\":null," +
-                "\"mqCompletionKode\":null,\"mqReasonKode\":null,\"programId\":null,\"sectionNavn\":null} fra økonomi " +
-                "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId."
+            "\"alvorlighetsgrad\":\"00\",\"beskrMelding\":null,\"sqlKode\":null,\"sqlState\":null,\"sqlMelding\":null," +
+            "\"mqCompletionKode\":null,\"mqReasonKode\":null,\"programId\":null,\"sectionNavn\":null} fra økonomi " +
+            "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId."
     }
 
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag er sperret i økonomi`() {
 
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                                               kravgrunnlagId))
-                                       .willReturn(okJson(Ressurs.success(lagHentKravgrunnlagRespons("00",
-                                                                                                     "B420012I"))
-                                                                  .toJson())))
+        wireMockServer.stubFor(
+            post(
+                urlEqualTo(
+                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
+                        kravgrunnlagId
+                )
+            )
+                .willReturn(
+                    okJson(
+                        Ressurs.success(
+                            lagHentKravgrunnlagRespons(
+                                "00",
+                                "B420012I"
+                            )
+                        )
+                            .toJson()
+                    )
+                )
+        )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
@@ -182,9 +236,15 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når økonomi ikke svarer`() {
 
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                                               kravgrunnlagId))
-                                       .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")))
+        wireMockServer.stubFor(
+            post(
+                urlEqualTo(
+                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
+                        kravgrunnlagId
+                )
+            )
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+        )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
         }
@@ -196,31 +256,45 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentFeilutbetalingerFraSimulering skal hente feilutbetalinger fra simulering`() {
-        val feilutbetaltPeriode = FeilutbetaltPeriode(fom = YearMonth.now().minusMonths(2).atDay(1),
-                                                      tom = YearMonth.now().minusMonths(1).atDay(1),
-                                                      feilutbetaltBeløp = BigDecimal("20000"),
-                                                      tidligereUtbetaltBeløp = BigDecimal("30000"),
-                                                      nyttBeløp = BigDecimal("10000"))
+        val feilutbetaltPeriode = FeilutbetaltPeriode(
+            fom = YearMonth.now().minusMonths(2).atDay(1),
+            tom = YearMonth.now().minusMonths(1).atDay(1),
+            feilutbetaltBeløp = BigDecimal("20000"),
+            tidligereUtbetaltBeløp = BigDecimal("30000"),
+            nyttBeløp = BigDecimal("10000")
+        )
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
-                                       .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())))
+        wireMockServer.stubFor(
+            post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
+                .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson()))
+        )
 
         val respons = oppdragClient
-                .hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
-                                                                                            "123",
-                                                                                            "1"))
+            .hentFeilutbetalingerFraSimulering(
+                HentFeilutbetalingerFraSimuleringRequest(
+                    Ytelsestype.OVERGANGSSTØNAD,
+                    "123",
+                    "1"
+                )
+            )
         respons shouldNotBe null
     }
 
     @Test
     fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
-        wireMockServer.stubFor(post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
-                                       .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")))
+        wireMockServer.stubFor(
+            post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+        )
 
         val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentFeilutbetalingerFraSimulering(HentFeilutbetalingerFraSimuleringRequest(Ytelsestype.OVERGANGSSTØNAD,
-                                                                                                     "123",
-                                                                                                     "1"))
+            oppdragClient.hentFeilutbetalingerFraSimulering(
+                HentFeilutbetalingerFraSimuleringRequest(
+                    Ytelsestype.OVERGANGSSTØNAD,
+                    "123",
+                    "1"
+                )
+            )
         }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
@@ -238,15 +312,17 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         return respons
     }
 
-    private fun lagHentKravgrunnlagRespons(alvorlighetsgrad: String,
-                                           kodeMelding: String): KravgrunnlagHentDetaljResponse {
+    private fun lagHentKravgrunnlagRespons(
+        alvorlighetsgrad: String,
+        kodeMelding: String
+    ): KravgrunnlagHentDetaljResponse {
         val mmelDto = lagMmmelDto(alvorlighetsgrad, kodeMelding)
 
         val respons = KravgrunnlagHentDetaljResponse()
         respons.mmel = mmelDto
         respons.detaljertkravgrunnlag = DetaljertKravgrunnlagDto()
         respons.detaljertkravgrunnlag = KravgrunnlagUtil
-                .unmarshalKravgrunnlag(readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml"))
+            .unmarshalKravgrunnlag(readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml"))
         return respons
     }
 
@@ -256,5 +332,4 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         mmelDto.kodeMelding = kodeMelding
         return mmelDto
     }
-
 }

@@ -13,13 +13,14 @@ internal class KravgrunnlagMottakerTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var taskRepository: TaskRepository
 
-
     @Test
     fun `verifiser at det er mulig å lagre en task`() {
-        taskRepository.save(Task(type = BehandleKravgrunnlagTask.TYPE,
-                                 payload = "kravgrunnlagFraOppdrag"))
+        taskRepository.save(
+            Task(
+                type = BehandleKravgrunnlagTask.TYPE,
+                payload = "kravgrunnlagFraOppdrag"
+            )
+        )
         taskRepository.count() shouldBeGreaterThan 0
     }
-
-
 }

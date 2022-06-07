@@ -13,4 +13,9 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     doedsfall {
         doedsdato
     }
+    folkeregisteridentifikator {
+        identifikasjonsnummer
+        status
+        type
+    }
 }}

@@ -33,5 +33,4 @@ object BrevmottagerUtil {
             verge?.navn ?: ""
         }
     }
-
 }

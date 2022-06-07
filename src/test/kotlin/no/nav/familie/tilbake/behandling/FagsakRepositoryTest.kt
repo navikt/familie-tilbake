@@ -37,5 +37,4 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         lagretFagsak.shouldBeEqualToComparingFieldsExcept(oppdatertFagsak, Fagsak::sporbar, Fagsak::versjon)
         lagretFagsak.versjon shouldBe 2
     }
-
 }

@@ -60,31 +60,37 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            mockOppgaveService.opprettOppgave(behandling.id,
-                                              Oppgavetype.BehandleSak,
-                                              "enhet",
-                                              Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
-                                              fristForFerdigstillelse,
-                                              null)
+            mockOppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "enhet",
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
+                fristForFerdigstillelse,
+                null
+            )
         }
     }
 
     @Test
     fun `doTask skal lage oppgave når behandling venter på grunnlag steg`() {
-        lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                    Behandlingsstegstatus.VENTER,
-                                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+        lagBehandlingsstegstilstand(
+            Behandlingssteg.GRUNNLAG,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
         val fristForFerdigstillelse = dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
 
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            mockOppgaveService.opprettOppgave(behandling.id,
-                                              Oppgavetype.BehandleSak,
-                                              "enhet",
-                                              Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
-                                              fristForFerdigstillelse,
-                                              null)
+            mockOppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "enhet",
+                Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
+                fristForFerdigstillelse,
+                null
+            )
         }
     }
 
@@ -95,36 +101,43 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         lagOppgaveTask.doTask(lagTask())
 
         verify {
-            mockOppgaveService.opprettOppgave(behandling.id,
-                                              Oppgavetype.BehandleSak,
-                                              "enhet",
-                                              null,
-                                              dagensDato,
-                                              null)
+            mockOppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "enhet",
+                null,
+                dagensDato,
+                null
+            )
         }
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
-                                            behandlingsstegsstatus: Behandlingsstegstatus,
-                                            venteårsak: Venteårsak? = null) {
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                                           behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegsstatus,
-                                                                           venteårsak = venteårsak,
-                                                                           tidsfrist = venteårsak?.let {
-                                                                               dagensDato.plusWeeks(it.defaultVenteTidIUker)
-                                                                           }))
+    private fun lagBehandlingsstegstilstand(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegsstatus: Behandlingsstegstatus,
+        venteårsak: Venteårsak? = null
+    ) {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegsstatus,
+                venteårsak = venteårsak,
+                tidsfrist = venteårsak?.let {
+                    dagensDato.plusWeeks(it.defaultVenteTidIUker)
+                }
+            )
+        )
     }
 
     private fun lagTask(): Task {
-        return Task(type = LagOppgaveTask.TYPE,
-                    payload = behandling.id.toString(),
-                    properties = Properties().apply {
-                        setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
-                        setProperty(PropertyName.ENHET, "enhet")
-                    })
+        return Task(
+            type = LagOppgaveTask.TYPE,
+            payload = behandling.id.toString(),
+            properties = Properties().apply {
+                setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
+                setProperty(PropertyName.ENHET, "enhet")
+            }
+        )
     }
-
-
 }
-

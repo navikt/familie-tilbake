@@ -6,9 +6,11 @@ import java.time.LocalDate
 
 data class VurdertForeldelseDto(val foreldetPerioder: List<VurdertForeldelsesperiodeDto>)
 
-data class VurdertForeldelsesperiodeDto(val periode: PeriodeDto,
-                                        val feilutbetaltBeløp: BigDecimal,
-                                        val begrunnelse: String? = null,
-                                        val foreldelsesvurderingstype: Foreldelsesvurderingstype? = null,
-                                        val foreldelsesfrist: LocalDate? = null,
-                                        val oppdagelsesdato: LocalDate? = null)
+data class VurdertForeldelsesperiodeDto(
+    val periode: PeriodeDto,
+    val feilutbetaltBeløp: BigDecimal,
+    val begrunnelse: String? = null,
+    val foreldelsesvurderingstype: Foreldelsesvurderingstype? = null,
+    val foreldelsesfrist: LocalDate? = null,
+    val oppdagelsesdato: LocalDate? = null
+)

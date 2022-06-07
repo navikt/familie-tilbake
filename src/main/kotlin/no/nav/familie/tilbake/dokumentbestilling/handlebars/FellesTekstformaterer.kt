@@ -37,7 +37,7 @@ object FellesTekstformaterer {
             return TEMPLATE_CACHE[språkstøttetFilsti]!!
         }
         TEMPLATE_CACHE[språkstøttetFilsti] =
-                opprettTemplate(språkstøttetFilsti)
+            opprettTemplate(språkstøttetFilsti)
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
@@ -46,8 +46,10 @@ object FellesTekstformaterer {
         if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
             return TEMPLATE_CACHE[språkstøttetFilsti]!!
         }
-        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
-                                                                        språkstøttetFilsti)
+        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(
+            lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
+            språkstøttetFilsti
+        )
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
@@ -66,14 +68,14 @@ object FellesTekstformaterer {
 
     private fun applyTemplate(data: Any, template: Template): String {
         return try {
-            //Går via JSON for å
-            //1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
-            //2. ha egen navngiving på variablene i template for enklere å lese template
-            //3. unngår at template feiler når variable endrer navn
+            // Går via JSON for å
+            // 1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
+            // 2. ha egen navngiving på variablene i template for enklere å lese template
+            // 3. unngår at template feiler når variable endrer navn
             val jsonNode: JsonNode = OM.valueToTree(data)
             val context = Context.newBuilder(jsonNode)
-                    .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
-                    .build()
+                .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
+                .build()
             template.apply(context).trim()
         } catch (e: IOException) {
             throw IllegalStateException("Feil ved tekstgenerering.")

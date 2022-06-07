@@ -35,7 +35,6 @@ class PdlClientTest {
             wiremockServerItem.start()
 
             pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
-
         }
 
         @AfterAll
@@ -52,8 +51,10 @@ class PdlClientTest {
 
     @Test
     fun `hentPersoninfo skal hente person info for barnetrygd med ok respons fra PDL`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlOkResponseEnkel.json")))
+        )
 
         val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
 
@@ -66,8 +67,10 @@ class PdlClientTest {
 
     @Test
     fun `hentPersoninfo skal hente info for en død person`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlOkResponseDødPerson.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlOkResponseDødPerson.json")))
+        )
 
         val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
 
@@ -80,15 +83,17 @@ class PdlClientTest {
 
     @Test
     fun `hentPersoninfo skal ikke hente person info når person ikke finnes`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json")))
+        )
 
-
-        val exception = shouldThrow<RuntimeException>(block =
-                                                      { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) })
+        val exception = shouldThrow<RuntimeException>(
+            block =
+            { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) }
+        )
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }
-
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/pdl/json/$filnavn").readText()

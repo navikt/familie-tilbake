@@ -14,7 +14,7 @@ class TilgangService(private val rolleConfig: RolleConfig) {
 
     fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
         val inloggetBrukerstilgang = ContextService
-                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+            .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
 
         val tilganger = inloggetBrukerstilgang.tilganger
         var behandlerrolle: Behandlerrolle? = Behandlerrolle.VEILEDER
@@ -29,5 +29,4 @@ class TilgangService(private val rolleConfig: RolleConfig) {
         }
         return behandlerrolle
     }
-
 }

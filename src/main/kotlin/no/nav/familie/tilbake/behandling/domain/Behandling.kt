@@ -14,34 +14,36 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class Behandling(@Id
-                      val id: UUID = UUID.randomUUID(),
-                      val fagsakId: UUID,
-                      val status: Behandlingsstatus = Behandlingsstatus.OPPRETTET,
-                      val type: Behandlingstype,
-                      val saksbehandlingstype: Saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
-                      val opprettetDato: LocalDate = LocalDate.now(),
-                      val avsluttetDato: LocalDate? = null,
-                      val ansvarligSaksbehandler: String,
-                      val ansvarligBeslutter: String? = null,
-                      val behandlendeEnhet: String,
-                      val behandlendeEnhetsNavn: String,
-                      val manueltOpprettet: Boolean,
-                      val eksternBrukId: UUID = UUID.randomUUID(),
-                      @MappedCollection(idColumn = "behandling_id")
-                      val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
-                      @MappedCollection(idColumn = "behandling_id")
-                      val varsler: Set<Varsel> = setOf(),
-                      @MappedCollection(idColumn = "behandling_id")
-                      val verger: Set<Verge> = setOf(),
-                      @MappedCollection(idColumn = "behandling_id")
-                      val resultater: Set<Behandlingsresultat> = setOf(),
-                      @MappedCollection(idColumn = "behandling_id")
-                      val årsaker: Set<Behandlingsårsak> = setOf(),
-                      @Version
-                      val versjon: Long = 0,
-                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar()) {
+data class Behandling(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fagsakId: UUID,
+    val status: Behandlingsstatus = Behandlingsstatus.OPPRETTET,
+    val type: Behandlingstype,
+    val saksbehandlingstype: Saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
+    val opprettetDato: LocalDate = LocalDate.now(),
+    val avsluttetDato: LocalDate? = null,
+    val ansvarligSaksbehandler: String,
+    val ansvarligBeslutter: String? = null,
+    val behandlendeEnhet: String,
+    val behandlendeEnhetsNavn: String,
+    val manueltOpprettet: Boolean,
+    val eksternBrukId: UUID = UUID.randomUUID(),
+    @MappedCollection(idColumn = "behandling_id")
+    val fagsystemsbehandling: Set<Fagsystemsbehandling> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val varsler: Set<Varsel> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val verger: Set<Verge> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val resultater: Set<Behandlingsresultat> = setOf(),
+    @MappedCollection(idColumn = "behandling_id")
+    val årsaker: Set<Behandlingsårsak> = setOf(),
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+) {
 
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
 
@@ -78,84 +80,95 @@ data class Behandling(@Id
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type
-               && this.årsaker.any {
-            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
-        }
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == this.type &&
+            this.årsaker.any {
+                Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
+            }
     }
-
 }
 
-data class Fagsystemsbehandling(@Id
-                                val id: UUID = UUID.randomUUID(),
-                                val eksternId: String,
-                                val aktiv: Boolean = true,
-                                val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
-                                val resultat: String,
-                                @Column("arsak")
-                                val årsak: String,
-                                val revurderingsvedtaksdato: LocalDate,
-                                @MappedCollection(idColumn = "fagsystemsbehandling_id")
-                                val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
-                                @Version
-                                val versjon: Long = 0,
-                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                val sporbar: Sporbar = Sporbar())
+data class Fagsystemsbehandling(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val eksternId: String,
+    val aktiv: Boolean = true,
+    val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
+    val resultat: String,
+    @Column("arsak")
+    val årsak: String,
+    val revurderingsvedtaksdato: LocalDate,
+    @MappedCollection(idColumn = "fagsystemsbehandling_id")
+    val konsekvenser: Set<Fagsystemskonsekvens> = setOf(),
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 @Table("fagsystemskonsekvens")
-data class Fagsystemskonsekvens(@Id
-                                val id: UUID = UUID.randomUUID(),
-                                val konsekvens: String,
-                                @Version
-                                val versjon: Long = 0,
-                                @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                val sporbar: Sporbar = Sporbar())
+data class Fagsystemskonsekvens(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val konsekvens: String,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
-data class Varsel(@Id
-                  val id: UUID = UUID.randomUUID(),
-                  val varseltekst: String,
-                  @Column("varselbelop")
-                  val varselbeløp: Long,
-                  @MappedCollection(idColumn = "varsel_id")
-                  val perioder: Set<Varselsperiode> = setOf(),
-                  val aktiv: Boolean = true,
-                  @Version
-                  val versjon: Long = 0,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar())
+data class Varsel(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val varseltekst: String,
+    @Column("varselbelop")
+    val varselbeløp: Long,
+    @MappedCollection(idColumn = "varsel_id")
+    val perioder: Set<Varselsperiode> = setOf(),
+    val aktiv: Boolean = true,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
-data class Varselsperiode(@Id
-                          val id: UUID = UUID.randomUUID(),
-                          val fom: LocalDate,
-                          val tom: LocalDate,
-                          @Version
-                          val versjon: Long = 0,
-                          @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar())
+data class Varselsperiode(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fom: LocalDate,
+    val tom: LocalDate,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
-data class Verge(@Id
-                 val id: UUID = UUID.randomUUID(),
-                 val ident: String? = null,
-                 val orgNr: String? = null,
-                 val aktiv: Boolean = true,
-                 val type: Vergetype,
-                 val navn: String,
-                 val kilde: String,
-                 val begrunnelse: String? = "",
-                 @Version
-                 val versjon: Long = 0,
-                 @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                 val sporbar: Sporbar = Sporbar())
+data class Verge(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val ident: String? = null,
+    val orgNr: String? = null,
+    val aktiv: Boolean = true,
+    val type: Vergetype,
+    val navn: String,
+    val kilde: String,
+    val begrunnelse: String? = "",
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 @Table("behandlingsarsak")
-data class Behandlingsårsak(@Id
-                            val id: UUID = UUID.randomUUID(),
-                            val originalBehandlingId: UUID?,
-                            val type: Behandlingsårsakstype,
-                            @Version
-                            val versjon: Long = 0,
-                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                            val sporbar: Sporbar = Sporbar())
+data class Behandlingsårsak(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val originalBehandlingId: UUID?,
+    val type: Behandlingsårsakstype,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 enum class Behandlingsårsakstype(val navn: String) {
     REVURDERING_KLAGE_NFP("Revurdering NFP omgjør vedtak basert på klage"),

@@ -15,14 +15,17 @@ import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
-
 @Component
-@TaskStepBeskrivelse(taskStepType = SendHenleggelsesbrevTask.TYPE,
-                     maxAntallFeil = 50,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Send henleggelsesbrev.")
-class SendHenleggelsesbrevTask(private val henleggelsesbrevService: HenleggelsesbrevService,
-                               private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = SendHenleggelsesbrevTask.TYPE,
+    maxAntallFeil = 50,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "Send henleggelsesbrev."
+)
+class SendHenleggelsesbrevTask(
+    private val henleggelsesbrevService: HenleggelsesbrevService,
+    private val behandlingRepository: BehandlingRepository
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
@@ -36,19 +39,23 @@ class SendHenleggelsesbrevTask(private val henleggelsesbrevService: Henleggelses
 
     companion object {
 
-        fun opprettTask(behandlingId: UUID,
-                        fagsystem: Fagsystem,
-                        fritekst: String?): Task =
-                Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
-                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) })
-                        .medTriggerTid(LocalDateTime.now().plusSeconds(15))
+        fun opprettTask(
+            behandlingId: UUID,
+            fagsystem: Fagsystem,
+            fritekst: String?
+        ): Task =
+            Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+            )
+                .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "distribuerHenleggelsesbrev"
     }
-
-
 }
 
-data class SendBrevTaskdata(val behandlingId: UUID,
-                            val fritekst: String?)
+data class SendBrevTaskdata(
+    val behandlingId: UUID,
+    val fritekst: String?
+)

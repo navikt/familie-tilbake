@@ -96,23 +96,27 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         lagSærligeGrunnerTekster(felles, Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER, Aktsomhet.GROV_UAKTSOMHET)
     }
 
-    private fun lagSærligeGrunnerTekster(felles: HbVedtaksbrevFelles,
-                                         forstoBurdeForstått: Vilkårsvurderingsresultat,
-                                         simpelUaktsom: Aktsomhet) {
+    private fun lagSærligeGrunnerTekster(
+        felles: HbVedtaksbrevFelles,
+        forstoBurdeForstått: Vilkårsvurderingsresultat,
+        simpelUaktsom: Aktsomhet
+    ) {
         val boolske = booleanArrayOf(false, true)
         for (sgNav in boolske) {
             for (sgBeløp in boolske) {
                 for (sgTid in boolske) {
                     for (reduksjon in boolske) {
                         for (sgAnnet in boolske) {
-                            lagSærligeGrunnerTekster(felles,
-                                                     forstoBurdeForstått,
-                                                     simpelUaktsom,
-                                                     sgNav,
-                                                     sgBeløp,
-                                                     sgTid,
-                                                     reduksjon,
-                                                     sgAnnet)
+                            lagSærligeGrunnerTekster(
+                                felles,
+                                forstoBurdeForstått,
+                                simpelUaktsom,
+                                sgNav,
+                                sgBeløp,
+                                sgTid,
+                                reduksjon,
+                                sgAnnet
+                            )
                         }
                     }
                 }
@@ -120,17 +124,21 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         }
     }
 
-    private fun lagSærligeGrunnerTekster(felles: HbVedtaksbrevFelles,
-                                         vilkårResultat: Vilkårsvurderingsresultat,
-                                         aktsomhet: Aktsomhet,
-                                         sgNav: Boolean,
-                                         sgBeløp: Boolean,
-                                         sgTid: Boolean,
-                                         reduksjon: Boolean,
-                                         sgAnnet: Boolean) {
+    private fun lagSærligeGrunnerTekster(
+        felles: HbVedtaksbrevFelles,
+        vilkårResultat: Vilkårsvurderingsresultat,
+        aktsomhet: Aktsomhet,
+        sgNav: Boolean,
+        sgBeløp: Boolean,
+        sgTid: Boolean,
+        reduksjon: Boolean,
+        sgAnnet: Boolean
+    ) {
         val periode: HbVedtaksbrevsperiode = lagPeriodeDel(vilkårResultat, aktsomhet, sgNav, sgBeløp, sgTid, sgAnnet, reduksjon)
-        val s: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevPeriodeOgFelles(felles, periode),
-                                                          AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
+        val s: String = FellesTekstformaterer.lagDeltekst(
+            HbVedtaksbrevPeriodeOgFelles(felles, periode),
+            AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER
+        )
         val overskrift = overskrift(sgNav, sgBeløp, sgTid, sgAnnet, reduksjon)
         val prettyPrint = prettyPrint(s, overskrift)
         println()
@@ -158,13 +166,15 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         return deler.joinToString(" - ", "*[ ", " ]*")
     }
 
-    private fun lagPeriodeDel(vilkårResultat: Vilkårsvurderingsresultat,
-                              aktsomhet: Aktsomhet,
-                              sgNav: Boolean,
-                              sgBeløp: Boolean,
-                              sgTid: Boolean,
-                              sgAnnet: Boolean,
-                              reduksjon: Boolean): HbVedtaksbrevsperiode {
+    private fun lagPeriodeDel(
+        vilkårResultat: Vilkårsvurderingsresultat,
+        aktsomhet: Aktsomhet,
+        sgNav: Boolean,
+        sgBeløp: Boolean,
+        sgTid: Boolean,
+        sgAnnet: Boolean,
+        reduksjon: Boolean
+    ): HbVedtaksbrevsperiode {
         val sg: MutableList<SærligGrunn> = ArrayList()
         if (sgNav) {
             sg.add(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL)
@@ -179,62 +189,75 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
             sg.add(SærligGrunn.ANNET)
         }
         val fritekstSærligeGrunnerAnnet = "[ fritekst her ]"
-        return HbVedtaksbrevsperiode(periode = januar,
-                                     vurderinger = HbVurderinger(
-                                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                             vilkårsvurderingsresultat = vilkårResultat,
-                                             aktsomhetsresultat = aktsomhet,
-                                             særligeGrunner = HbSærligeGrunner(sg, null, fritekstSærligeGrunnerAnnet)),
-                                     kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
-                                     resultat = HbResultat(tilbakekrevesBeløp =
-                                                           BigDecimal.valueOf(if (reduksjon) 500L else 1000L),
-                                                           tilbakekrevesBeløpUtenSkattMedRenter =
-                                                           BigDecimal.valueOf(if (reduksjon) 400L else 800L),
-                                                           rentebeløp = BigDecimal.ZERO),
-                                     fakta = HbFakta(Hendelsestype.BARNS_ALDER, Hendelsesundertype.BARN_OVER_6_ÅR))
+        return HbVedtaksbrevsperiode(
+            periode = januar,
+            vurderinger = HbVurderinger(
+                foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                vilkårsvurderingsresultat = vilkårResultat,
+                aktsomhetsresultat = aktsomhet,
+                særligeGrunner = HbSærligeGrunner(sg, null, fritekstSærligeGrunnerAnnet)
+            ),
+            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
+            resultat = HbResultat(
+                tilbakekrevesBeløp =
+                BigDecimal.valueOf(if (reduksjon) 500L else 1000L),
+                tilbakekrevesBeløpUtenSkattMedRenter =
+                BigDecimal.valueOf(if (reduksjon) 400L else 800L),
+                rentebeløp = BigDecimal.ZERO
+            ),
+            fakta = HbFakta(Hendelsestype.BARNS_ALDER, Hendelsesundertype.BARN_OVER_6_ÅR)
+        )
     }
 
     private fun lagFellesdel(språkkode: Språkkode): HbVedtaksbrevFelles {
-        val datoer = HbVedtaksbrevDatoer(LocalDate.of(2018, 3, 2),
-                                         LocalDate.of(2018, 3, 3),
-                                         LocalDate.of(2018, 3, 4))
+        val datoer = HbVedtaksbrevDatoer(
+            LocalDate.of(2018, 3, 2),
+            LocalDate.of(2018, 3, 3),
+            LocalDate.of(2018, 3, 4)
+        )
 
-        return HbVedtaksbrevFelles(brevmetadata = lagMetadata(språkkode),
-                                   fagsaksvedtaksdato = LocalDate.now(),
-                                   behandling = HbBehandling(),
-                                   hjemmel = HbHjemmel("Folketrygdloven"),
-                                   totalresultat = HbTotalresultat(hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
-                                                                   totaltRentebeløp = BigDecimal.valueOf(1000),
-                                                                   totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
-                                                                   totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
-                                                                   totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                                                                   BigDecimal.valueOf(6855)),
-                                   totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
-                                   varsel = HbVarsel(varsletBeløp = BigDecimal.valueOf(10000),
-                                                     varsletDato = LocalDate.now().minusDays(100)),
-                                   konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-                                   søker = HbPerson(navn = "Søker Søkersen"),
-                                   datoer = datoer,
-                                   vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR)
+        return HbVedtaksbrevFelles(
+            brevmetadata = lagMetadata(språkkode),
+            fagsaksvedtaksdato = LocalDate.now(),
+            behandling = HbBehandling(),
+            hjemmel = HbHjemmel("Folketrygdloven"),
+            totalresultat = HbTotalresultat(
+                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                totaltRentebeløp = BigDecimal.valueOf(1000),
+                totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
+                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
+                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                BigDecimal.valueOf(6855)
+            ),
+            totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
+            varsel = HbVarsel(
+                varsletBeløp = BigDecimal.valueOf(10000),
+                varsletDato = LocalDate.now().minusDays(100)
+            ),
+            konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+            søker = HbPerson(navn = "Søker Søkersen"),
+            datoer = datoer,
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+        )
     }
 
     private fun lagMetadata(språkkode: Språkkode): Brevmetadata {
 
-        return Brevmetadata(sakspartId = "",
-                            sakspartsnavn = "",
-                            mottageradresse = Adresseinfo("01020312345", "Bob"),
-                            behandlendeEnhetsNavn = "Oslo",
-                            ansvarligSaksbehandler = "Bob",
-                            språkkode = språkkode,
-                            saksnummer = "1232456",
-                            ytelsestype = Ytelsestype.BARNETRYGD)
-
+        return Brevmetadata(
+            sakspartId = "",
+            sakspartsnavn = "",
+            mottageradresse = Adresseinfo("01020312345", "Bob"),
+            behandlendeEnhetsNavn = "Oslo",
+            ansvarligSaksbehandler = "Bob",
+            språkkode = språkkode,
+            saksnummer = "1232456",
+            ytelsestype = Ytelsestype.BARNETRYGD
+        )
     }
-
 
     private fun prettyPrint(s: String, overskrift: String): String {
         return s.replace("__Er det særlige grunner til å redusere beløpet?", overskrift)
-                .replace("__Er det særlege grunnar til å redusere beløpet?", overskrift)
-                .replace(" 500\u00A0kroner", " <kravbeløp> kroner")
+            .replace("__Er det særlege grunnar til å redusere beløpet?", overskrift)
+            .replace(" 500\u00A0kroner", " <kravbeløp> kroner")
     }
 }

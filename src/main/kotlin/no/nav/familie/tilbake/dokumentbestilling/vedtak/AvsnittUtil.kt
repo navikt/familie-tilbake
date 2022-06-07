@@ -58,10 +58,12 @@ internal object AvsnittUtil {
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
         val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_slutt")
-        var avsnitt = Avsnitt(avsnittstype = Avsnittstype.PERIODE,
-                              fom = data.periode.periode.fom,
-                              tom = data.periode.periode.tom,
-                              overskrift = fjernOverskriftFormattering(overskrift))
+        var avsnitt = Avsnitt(
+            avsnittstype = Avsnittstype.PERIODE,
+            fom = data.periode.periode.fom,
+            tom = data.periode.periode.tom,
+            overskrift = fjernOverskriftFormattering(overskrift)
+        )
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
@@ -71,9 +73,11 @@ internal object AvsnittUtil {
         return avsnitt
     }
 
-    fun parseTekst(generertTekst: String,
-                   avsnitt: Avsnitt,
-                   underavsnittstype: Underavsnittstype?): Avsnitt {
+    fun parseTekst(
+        generertTekst: String,
+        avsnitt: Avsnitt,
+        underavsnittstype: Underavsnittstype?
+    ): Avsnitt {
         var lokaltAvsnitt = avsnitt
         var lokalUnderavsnittstype = underavsnittstype
         val splittet = generertTekst.split("\r?\n".toRegex()).filter { it.isNotBlank() }.toMutableList()
@@ -89,23 +93,29 @@ internal object AvsnittUtil {
         var brødtekst: String? = null
         val underavsnitt = mutableListOf<Underavsnitt>()
 
-
         for (linje in splittet) {
 
             fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
             fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) =
-                    brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
+                brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
 
             if (!leserFritekst &&
-                (fritekstTillatt
-                 || nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje)
-                 || avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje))) {
-                underavsnitt.add(Underavsnitt(overskrift,
-                                              brødtekst,
-                                              fritekst.joinToString("\n"),
-                                              fritekstTillatt,
-                                              fritekstPåkrevet,
-                                              lokalUnderavsnittstype))
+                (
+                    fritekstTillatt ||
+                        nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje) ||
+                        avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje)
+                    )
+            ) {
+                underavsnitt.add(
+                    Underavsnitt(
+                        overskrift,
+                        brødtekst,
+                        fritekst.joinToString("\n"),
+                        fritekstTillatt,
+                        fritekstPåkrevet,
+                        lokalUnderavsnittstype
+                    )
+                )
                 overskrift = null
                 brødtekst = null
                 fritekstTillatt = false
@@ -139,12 +149,16 @@ internal object AvsnittUtil {
 
         if (overskrift != null || brødtekst != null || fritekstTillatt) {
 
-            underavsnitt.add(Underavsnitt(overskrift,
-                                          brødtekst,
-                                          fritekst.joinToString("\n"),
-                                          fritekstTillatt,
-                                          fritekstPåkrevet,
-                                          lokalUnderavsnittstype))
+            underavsnitt.add(
+                Underavsnitt(
+                    overskrift,
+                    brødtekst,
+                    fritekst.joinToString("\n"),
+                    fritekstTillatt,
+                    fritekstPåkrevet,
+                    lokalUnderavsnittstype
+                )
+            )
         }
 
         return lokaltAvsnitt.copy(underavsnittsliste = lokaltAvsnitt.underavsnittsliste + underavsnitt)
@@ -152,9 +166,7 @@ internal object AvsnittUtil {
 
     private fun fjernFormattering(linje: String): String {
         return linje.removePrefix("{venstrejustert}").replace("{høyrejustert}", "\t\t\t")
-
     }
-
 
     private fun parseUnderavsnittstype(tekst: String): Underavsnittstype? {
         val rest = Vedtaksbrevsfritekst.fjernFritekstmarkering(tekst)

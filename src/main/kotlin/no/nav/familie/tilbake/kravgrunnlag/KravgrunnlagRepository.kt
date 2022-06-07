@@ -10,8 +10,9 @@ import java.util.UUID
 
 @Repository
 @Transactional
-interface KravgrunnlagRepository : RepositoryInterface<Kravgrunnlag431, UUID>,
-                                   InsertUpdateRepository<Kravgrunnlag431> {
+interface KravgrunnlagRepository :
+    RepositoryInterface<Kravgrunnlag431, UUID>,
+    InsertUpdateRepository<Kravgrunnlag431> {
 
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Kravgrunnlag431
 
@@ -26,5 +27,4 @@ interface KravgrunnlagRepository : RepositoryInterface<Kravgrunnlag431, UUID>,
     fun findByBehandlingId(behandlingId: UUID): List<Kravgrunnlag431>
 
     fun findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431?
-
 }

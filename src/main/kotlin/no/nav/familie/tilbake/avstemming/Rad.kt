@@ -6,28 +6,32 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class Rad(val avsender: String,
-          val vedtakId: String,
-          val fnr: String,
-          val vedtaksdato: LocalDate,
-          val fagsakYtelseType: Ytelsestype,
-          val tilbakekrevesBruttoUtenRenter: BigDecimal,
-          val skatt: BigDecimal,
-          val tilbakekrevesNettoUtenRenter: BigDecimal,
-          val renter: BigDecimal,
-          val erOmgjøringTilIngenTilbakekreving: Boolean = false) {
+class Rad(
+    val avsender: String,
+    val vedtakId: String,
+    val fnr: String,
+    val vedtaksdato: LocalDate,
+    val fagsakYtelseType: Ytelsestype,
+    val tilbakekrevesBruttoUtenRenter: BigDecimal,
+    val skatt: BigDecimal,
+    val tilbakekrevesNettoUtenRenter: BigDecimal,
+    val renter: BigDecimal,
+    val erOmgjøringTilIngenTilbakekreving: Boolean = false
+) {
 
     fun toCsvString(): String {
-        return (format(avsender)
-                + SKILLETEGN_KOLONNER + format(vedtakId)
-                + SKILLETEGN_KOLONNER + format(fnr)
-                + SKILLETEGN_KOLONNER + format(vedtaksdato)
-                + SKILLETEGN_KOLONNER + format(fagsakYtelseType)
-                + SKILLETEGN_KOLONNER + format(tilbakekrevesBruttoUtenRenter)
-                + SKILLETEGN_KOLONNER + format(skatt)
-                + SKILLETEGN_KOLONNER + format(tilbakekrevesNettoUtenRenter)
-                + SKILLETEGN_KOLONNER + format(renter)
-                + SKILLETEGN_KOLONNER + formatOmgjøring(erOmgjøringTilIngenTilbakekreving))
+        return (
+            format(avsender) +
+                SKILLETEGN_KOLONNER + format(vedtakId) +
+                SKILLETEGN_KOLONNER + format(fnr) +
+                SKILLETEGN_KOLONNER + format(vedtaksdato) +
+                SKILLETEGN_KOLONNER + format(fagsakYtelseType) +
+                SKILLETEGN_KOLONNER + format(tilbakekrevesBruttoUtenRenter) +
+                SKILLETEGN_KOLONNER + format(skatt) +
+                SKILLETEGN_KOLONNER + format(tilbakekrevesNettoUtenRenter) +
+                SKILLETEGN_KOLONNER + format(renter) +
+                SKILLETEGN_KOLONNER + formatOmgjøring(erOmgjøringTilIngenTilbakekreving)
+            )
     }
 
     private fun format(verdi: String): String {
@@ -54,8 +58,5 @@ class Rad(val avsender: String,
 
         const val SKILLETEGN_KOLONNER = ";"
         private val DATOFORMAT = DateTimeFormatter.ofPattern("yyyyMMdd")
-
-
     }
-
 }

@@ -96,25 +96,49 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsakRepository.insert(fagsak)
-        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
-        behandlingRepository.insert(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
-                                                    status = Behandlingsstatus.UTREDES))
+        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
+            tilbakekrevingsvalg = Tilbakekrevingsvalg
+                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+        )
+        behandlingRepository.insert(
+            behandling.copy(
+                fagsystemsbehandling = setOf(fagsystemsbehandling),
+                status = Behandlingsstatus.UTREDES
+            )
+        )
         val feilKravgrunnlagBeløp = Testdata.feilKravgrunnlagsbeløp433.copy(nyttBeløp = BigDecimal("100"))
         val ytelKravgrunnlagsbeløp433 =
-                Testdata.ytelKravgrunnlagsbeløp433.copy(opprinneligUtbetalingsbeløp = BigDecimal("100"),
-                                                        tilbakekrevesBeløp = BigDecimal("100"))
+            Testdata.ytelKravgrunnlagsbeløp433.copy(
+                opprinneligUtbetalingsbeløp = BigDecimal("100"),
+                tilbakekrevesBeløp = BigDecimal("100")
+            )
 
         val kravgrunnlag = Testdata.kravgrunnlag431
-                .copy(kontrollfelt = "2019-11-22-19.09.31.458065",
-                      perioder = setOf(Testdata.kravgrunnlagsperiode432.copy(beløp = setOf(feilKravgrunnlagBeløp,
-                                                                                           ytelKravgrunnlagsbeløp433))))
+            .copy(
+                kontrollfelt = "2019-11-22-19.09.31.458065",
+                perioder = setOf(
+                    Testdata.kravgrunnlagsperiode432.copy(
+                        beløp = setOf(
+                            feilKravgrunnlagBeløp,
+                            ytelKravgrunnlagsbeløp433
+                        )
+                    )
+                )
+            )
 
         kravgrunnlagRepository.insert(kravgrunnlag)
-        behandlingsstegstilstandRepository.insert(lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG,
-                                                                              Behandlingsstegstatus.UTFØRT))
-        behandlingsstegstilstandRepository.insert(lagBehandlingsstegstilstand(Behandlingssteg.FAKTA,
-                                                                              Behandlingsstegstatus.KLAR))
+        behandlingsstegstilstandRepository.insert(
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.GRUNNLAG,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
+        behandlingsstegstilstandRepository.insert(
+            lagBehandlingsstegstilstand(
+                Behandlingssteg.FAKTA,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     @Test
@@ -128,9 +152,11 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke behandle når behandling er på vent`() {
-        behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                        Venteårsak.ENDRE_TILKJENT_YTELSE,
-                                                        LocalDate.now().plusWeeks(2))
+        behandlingskontrollService.settBehandlingPåVent(
+            behandling.id,
+            Venteårsak.ENDRE_TILKJENT_YTELSE,
+            LocalDate.now().plusWeeks(2)
+        )
 
         val exception = shouldThrow<RuntimeException> { automatiskSaksbehandlingTask.doTask(lagTask()) }
         exception.message shouldBe "Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA"
@@ -162,7 +188,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
         faktaFeilutbetaling.perioder.shouldHaveSingleElement {
             Hendelsestype.ANNET == it.hendelsestype &&
-            Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
+                Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
         }
 
         foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
@@ -171,41 +197,51 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         vilkårsvurdering.shouldNotBeNull()
         vilkårsvurdering.perioder.shouldHaveSingleElement {
             Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE == it.begrunnelse &&
-            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
-            it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
+                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
+                it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
             !it.aktsomhet!!.tilbakekrevSmåbeløp
         }
 
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingssteg: Behandlingssteg,
-                                            behandlingsstegstatus: Behandlingsstegstatus): Behandlingsstegstilstand {
-        return Behandlingsstegstilstand(behandlingId = behandling.id,
-                                        behandlingssteg = behandlingssteg,
-                                        behandlingsstegsstatus = behandlingsstegstatus)
+    private fun lagBehandlingsstegstilstand(
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ): Behandlingsstegstilstand {
+        return Behandlingsstegstilstand(
+            behandlingId = behandling.id,
+            behandlingssteg = behandlingssteg,
+            behandlingsstegsstatus = behandlingsstegstatus
+        )
     }
 
     private fun lagTask(): Task {
         return Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString())
     }
 
-    private fun assertBehandlingsstegstilstand(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                                behandlingssteg: Behandlingssteg,
-                                                behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun assertBehandlingsstegstilstand(
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
-            behandlingsstegstatus == it.behandlingsstegsstatus
+                behandlingsstegstatus == it.behandlingsstegsstatus
         }.shouldBeTrue()
     }
 
     private fun mockTaskExecution() {
-        val sendVedtakTilØkonomiTask = Task(type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
-                                            payload = behandling.id.toString(),
-                                            properties = Properties().apply {
-                                                setProperty("ansvarligSaksbehandler",
-                                                            ContextService.hentSaksbehandler())
-                                            })
+        val sendVedtakTilØkonomiTask = Task(
+            type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
+            payload = behandling.id.toString(),
+            properties = Properties().apply {
+                setProperty(
+                    "ansvarligSaksbehandler",
+                    ContextService.hentSaksbehandler()
+                )
+            }
+        )
         every { taskService.save(sendVedtakTilØkonomiTask) }.run {
             sendØkonomiTilbakekrevingsvedtakTask.doTask(sendVedtakTilØkonomiTask)
         }

@@ -7,23 +7,27 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class HbVedtaksbrevFelles(val brevmetadata: Brevmetadata,
-                               val søker: HbPerson,
-                               val fagsaksvedtaksdato: LocalDate,
-                               val varsel: HbVarsel? = null,
-                               val totalresultat: HbTotalresultat,
-                               val hjemmel: HbHjemmel,
-                               val konfigurasjon: HbKonfigurasjon,
-                               val fritekstoppsummering: String? = null,
-                               val vedtaksbrevstype: Vedtaksbrevstype,
-                               val ansvarligBeslutter: String? = null,
-                               val behandling: HbBehandling,
-                               val erFeilutbetaltBeløpKorrigertNed: Boolean = false,
-                               val totaltFeilutbetaltBeløp: BigDecimal,
-                               val datoer: HbVedtaksbrevDatoer? = null) : BaseDokument(brevmetadata.ytelsestype,
-                                                                                       brevmetadata.språkkode,
-                                                                                       brevmetadata.behandlendeEnhetsNavn,
-                                                                                       brevmetadata.ansvarligSaksbehandler) {
+data class HbVedtaksbrevFelles(
+    val brevmetadata: Brevmetadata,
+    val søker: HbPerson,
+    val fagsaksvedtaksdato: LocalDate,
+    val varsel: HbVarsel? = null,
+    val totalresultat: HbTotalresultat,
+    val hjemmel: HbHjemmel,
+    val konfigurasjon: HbKonfigurasjon,
+    val fritekstoppsummering: String? = null,
+    val vedtaksbrevstype: Vedtaksbrevstype,
+    val ansvarligBeslutter: String? = null,
+    val behandling: HbBehandling,
+    val erFeilutbetaltBeløpKorrigertNed: Boolean = false,
+    val totaltFeilutbetaltBeløp: BigDecimal,
+    val datoer: HbVedtaksbrevDatoer? = null
+) : BaseDokument(
+    brevmetadata.ytelsestype,
+    brevmetadata.språkkode,
+    brevmetadata.behandlendeEnhetsNavn,
+    brevmetadata.ansvarligSaksbehandler
+) {
 
     @Suppress("unused") // Handlebars
     val opphørsdatoDødSøker = datoer?.opphørsdatoDødSøker
@@ -41,7 +45,6 @@ data class HbVedtaksbrevFelles(val brevmetadata: Brevmetadata,
 
     @Suppress("unused") // Handlebars
     val isSkalIkkeViseSkatt = Ytelsestype.OVERGANGSSTØNAD != brevmetadata.ytelsestype || !totalresultat.harSkattetrekk
-
 
     val harVedlegg = vedtaksbrevstype == Vedtaksbrevstype.ORDINÆR
     val hovedresultat = totalresultat.hovedresultat

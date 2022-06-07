@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -29,6 +30,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.person.PersonService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,28 +58,31 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private lateinit var integrasjonerClient: IntegrasjonerClient
 
     @Autowired
-    private lateinit var pdlClient: PdlClient
+    private lateinit var personService: PersonService
 
     private lateinit var vergeService: VergeService
 
     private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
 
-
-    private val vergeDto = VergeDto(orgNr = "987654321",
-                                    type = Vergetype.ADVOKAT,
-                                    navn = "Stor Herlig Straff",
-                                    begrunnelse = "Det var nødvendig")
+    private val vergeDto = VergeDto(
+        orgNr = "987654321",
+        type = Vergetype.ADVOKAT,
+        navn = "Stor Herlig Straff",
+        begrunnelse = "Det var nødvendig"
+    )
 
     @BeforeEach
     fun setUp() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        vergeService = VergeService(behandlingRepository,
-                                    fagsakRepository,
-                                    historikkTaskService,
-                                    behandlingskontrollService,
-                                    integrasjonerClient,
-                                    pdlClient)
+        vergeService = VergeService(
+            behandlingRepository,
+            fagsakRepository,
+            historikkTaskService,
+            behandlingskontrollService,
+            integrasjonerClient,
+            personService
+        )
         clearAllMocks(answers = false)
     }
 
@@ -114,9 +119,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
 
         verify {
-            historikkTaskService.lagHistorikkTask(behandling.id,
-                                                  TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                                                  Aktør.SAKSBEHANDLER)
+            historikkTaskService.lagHistorikkTask(
+                behandling.id,
+                TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
+                Aktør.SAKSBEHANDLER
+            )
         }
     }
 
@@ -130,12 +137,14 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVerge skal ikke lagre verge når organisasjonen ikke er gyldig`() {
         val mockIntegrasjonerClient = mockk<IntegrasjonerClient>()
-        val vergeService = VergeService(behandlingRepository,
-                                        fagsakRepository,
-                                        historikkTaskService,
-                                        behandlingskontrollService,
-                                        mockIntegrasjonerClient,
-                                        pdlClient)
+        val vergeService = VergeService(
+            behandlingRepository,
+            fagsakRepository,
+            historikkTaskService,
+            behandlingskontrollService,
+            mockIntegrasjonerClient,
+            personService
+        )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
 
@@ -153,12 +162,16 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVerge skal ikke lagre verge når personen ikke finnes i PDL`() {
         val mockPdlClient = mockk<PdlClient>()
-        val vergeService = VergeService(behandlingRepository,
-                                        fagsakRepository,
-                                        historikkTaskService,
-                                        behandlingskontrollService,
-                                        integrasjonerClient,
-                                        mockPdlClient)
+        val mockEndretPersonIdentEventPublisher: EndretPersonIdentEventPublisher = mockk()
+        val personService = PersonService(mockPdlClient, fagsakRepository, mockEndretPersonIdentEventPublisher)
+        val vergeService = VergeService(
+            behandlingRepository,
+            fagsakRepository,
+            historikkTaskService,
+            behandlingskontrollService,
+            integrasjonerClient,
+            personService
+        )
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
 
@@ -210,9 +223,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
         behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge.shouldBeFalse()
         verify {
-            historikkTaskService.lagHistorikkTask(behandlingFørOppdatering.id,
-                                                  TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                                                  Aktør.SAKSBEHANDLER)
+            historikkTaskService.lagHistorikkTask(
+                behandlingFørOppdatering.id,
+                TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
+                Aktør.SAKSBEHANDLER
+            )
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
@@ -274,9 +289,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     fun `opprettVergeSteg skal ikke opprette verge steg når behandling er på vent`() {
         val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
-        behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                        Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                                                        LocalDate.now().plusWeeks(4))
+        behandlingskontrollService.settBehandlingPåVent(
+            behandling.id,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            LocalDate.now().plusWeeks(4)
+        )
 
         val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
         exception.message shouldBe "Behandling med id=${behandling.id} er på vent."
@@ -297,22 +314,29 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         respons.orgNr shouldBe aktivVerge.orgNr
     }
 
-    private fun lagBehandlingsstegstilstand(behandlingId: UUID,
-                                            behandlingssteg: Behandlingssteg,
-                                            behandlingsstegstatus: Behandlingsstegstatus) {
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandlingId,
-                                                                           behandlingssteg = behandlingssteg,
-                                                                           behandlingsstegsstatus = behandlingsstegstatus))
+    private fun lagBehandlingsstegstilstand(
+        behandlingId: UUID,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandlingId,
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus
+            )
+        )
     }
 
-    private fun assertBehandlingssteg(behandlingsstegstilstand: List<Behandlingsstegstilstand>,
-                                      behandlingssteg: Behandlingssteg,
-                                      behandlingsstegstatus: Behandlingsstegstatus) {
+    private fun assertBehandlingssteg(
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
 
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
-            behandlingsstegstatus == it.behandlingsstegsstatus
+                behandlingsstegstatus == it.behandlingsstegsstatus
         }
     }
-
 }

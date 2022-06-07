@@ -9,24 +9,28 @@ import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.util.UUID
 
-data class Behandlingsstegstilstand(@Id
-                                    val id: UUID = UUID.randomUUID(),
-                                    val behandlingId: UUID,
-                                    val behandlingssteg: Behandlingssteg,
-                                    val behandlingsstegsstatus: Behandlingsstegstatus,
-                                    @Column("ventearsak")
-                                    val venteårsak: Venteårsak? = null,
-                                    val tidsfrist: LocalDate? = null,
-                                    @Version
-                                    val versjon: Long = 0,
-                                    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                    val sporbar: Sporbar = Sporbar())
+data class Behandlingsstegstilstand(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val behandlingId: UUID,
+    val behandlingssteg: Behandlingssteg,
+    val behandlingsstegsstatus: Behandlingsstegstatus,
+    @Column("ventearsak")
+    val venteårsak: Venteårsak? = null,
+    val tidsfrist: LocalDate? = null,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
-enum class Behandlingssteg(val sekvens: Int,
-                           val kanSaksbehandles: Boolean,
-                           val kanBesluttes: Boolean,
-                           val behandlingsstatus: Behandlingsstatus,
-                           private val beskrivelse: String) {
+enum class Behandlingssteg(
+    val sekvens: Int,
+    val kanSaksbehandles: Boolean,
+    val kanBesluttes: Boolean,
+    val behandlingsstatus: Behandlingsstatus,
+    private val beskrivelse: String
+) {
 
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
@@ -36,8 +40,10 @@ enum class Behandlingssteg(val sekvens: Int,
     VILKÅRSVURDERING(6, true, true, Behandlingsstatus.UTREDES, "Vurdere om og hva som skal tilbakekreves"),
     FORESLÅ_VEDTAK(7, true, true, Behandlingsstatus.UTREDES, "Foreslår vedtak"),
     FATTE_VEDTAK(8, true, false, Behandlingsstatus.FATTER_VEDTAK, "Fatter vedtak"),
-    IVERKSETT_VEDTAK(9, false, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
-                     "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"),
+    IVERKSETT_VEDTAK(
+        9, false, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
+        "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"
+    ),
     AVSLUTTET(10, false, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");
 
     companion object {
@@ -62,10 +68,9 @@ enum class Behandlingssteg(val sekvens: Int,
 
         fun fraNavn(navn: String): Behandlingssteg {
             return values().firstOrNull { it.name == navn }
-                   ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
+                ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
         }
     }
-
 }
 
 enum class Behandlingsstegstatus(private val beskrivelse: String) {
@@ -110,6 +115,4 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
             return venteårsak in listOf(VENT_PÅ_TILBAKEKREVINGSGRUNNLAG, VENT_PÅ_MULIG_MOTREGNING)
         }
     }
-
-
 }

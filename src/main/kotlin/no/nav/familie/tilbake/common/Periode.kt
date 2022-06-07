@@ -4,8 +4,10 @@ import no.nav.familie.tilbake.api.dto.PeriodeDto
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class Periode(val fom: YearMonth,
-                   val tom: YearMonth) : Comparable<Periode> {
+data class Periode(
+    val fom: YearMonth,
+    val tom: YearMonth
+) : Comparable<Periode> {
 
     constructor(fom: LocalDate, tom: LocalDate) : this(YearMonth.from(fom), YearMonth.from(tom))
 
@@ -33,8 +35,10 @@ data class Periode(val fom: YearMonth,
         } else if (this == annen) {
             this
         } else {
-            Periode(maxOf(fom, annen.fom),
-                    minOf(tom, annen.tom))
+            Periode(
+                maxOf(fom, annen.fom),
+                minOf(tom, annen.tom)
+            )
         }
     }
 
@@ -54,5 +58,4 @@ data class Periode(val fom: YearMonth,
     override fun compareTo(other: Periode): Int {
         return COMPARATOR.compare(this, other)
     }
-
 }

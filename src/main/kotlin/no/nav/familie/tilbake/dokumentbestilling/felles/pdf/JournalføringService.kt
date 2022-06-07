@@ -27,9 +27,11 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class JournalføringService(private val integrasjonerClient: IntegrasjonerClient,
-                           private val behandlingRepository: BehandlingRepository,
-                           private val fagsakRepository: FagsakRepository) {
+class JournalføringService(
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,71 +43,94 @@ class JournalføringService(private val integrasjonerClient: IntegrasjonerClient
         val behandling = behandlingRepository.findById(behandlingId).orElseThrow()
         val fagsak = behandling.let { fagsakRepository.findById(it.fagsakId).orElseThrow() }
         val journalposter = fagsak.let {
-            integrasjonerClient.hentJournalposterForBruker(JournalposterForBrukerRequest(antall = 1000,
-                                                                                         brukerId = Bruker(id = fagsak.bruker.ident,
-                                                                                                           type = BrukerIdType.FNR),
-                                                                                         tema = listOf(hentTema(fagsystem = fagsak.fagsystem))))
+            integrasjonerClient.hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    antall = 1000,
+                    brukerId = Bruker(
+                        id = fagsak.bruker.ident,
+                        type = BrukerIdType.FNR
+                    ),
+                    tema = listOf(hentTema(fagsystem = fagsak.fagsystem))
+                )
+            )
         }
         return journalposter.filter { it.sak?.fagsakId == fagsak.eksternFagsakId }
     }
 
-    fun journalførUtgåendeBrev(behandling: Behandling,
-                               fagsak: Fagsak,
-                               dokumentkategori: Dokumentkategori,
-                               brevmetadata: Brevmetadata,
-                               brevmottager: Brevmottager,
-                               vedleggPdf: ByteArray,
-                               eksternReferanseId: String?): JournalpostIdOgDokumentId {
+    fun journalførUtgåendeBrev(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        dokumentkategori: Dokumentkategori,
+        brevmetadata: Brevmetadata,
+        brevmottager: Brevmottager,
+        vedleggPdf: ByteArray,
+        eksternReferanseId: String?
+    ): JournalpostIdOgDokumentId {
         logger.info("Starter journalføring av {} til {} for behandlingId={}", dokumentkategori, brevmottager, behandling.id)
-        val dokument = Dokument(dokument = vedleggPdf,
-                                filtype = Filtype.PDFA,
-                                filnavn = if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) "vedtak.pdf" else "brev.pdf",
-                                tittel = brevmetadata.tittel,
-                                dokumenttype = velgDokumenttype(fagsak, dokumentkategori))
-        val request = ArkiverDokumentRequest(fnr = fagsak.bruker.ident,
-                                             forsøkFerdigstill = true,
-                                             hoveddokumentvarianter = listOf(dokument),
-                                             fagsakId = fagsak.eksternFagsakId,
-                                             journalførendeEnhet = behandling.behandlendeEnhet,
-                                             avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
-                                             eksternReferanseId = eksternReferanseId)
-
+        val dokument = Dokument(
+            dokument = vedleggPdf,
+            filtype = Filtype.PDFA,
+            filnavn = if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) "vedtak.pdf" else "brev.pdf",
+            tittel = brevmetadata.tittel,
+            dokumenttype = velgDokumenttype(fagsak, dokumentkategori)
+        )
+        val request = ArkiverDokumentRequest(
+            fnr = fagsak.bruker.ident,
+            forsøkFerdigstill = true,
+            hoveddokumentvarianter = listOf(dokument),
+            fagsakId = fagsak.eksternFagsakId,
+            journalførendeEnhet = behandling.behandlendeEnhet,
+            avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
+            eksternReferanseId = eksternReferanseId
+        )
 
         val response = integrasjonerClient.arkiver(request)
 
         val dokumentinfoId = response.dokumenter?.first()?.dokumentInfoId
-                             ?: error("Feil ved Journalføring av $dokumentkategori " +
-                                      "til $brevmottager for behandlingId=${behandling.id}")
-        logger.info("Journalførte utgående {} til {} for behandlingId={} med journalpostid={}",
-                    dokumentkategori,
-                    brevmottager,
-                    behandling.id,
-                    response.journalpostId)
+            ?: error(
+                "Feil ved Journalføring av $dokumentkategori " +
+                    "til $brevmottager for behandlingId=${behandling.id}"
+            )
+        logger.info(
+            "Journalførte utgående {} til {} for behandlingId={} med journalpostid={}",
+            dokumentkategori,
+            brevmottager,
+            behandling.id,
+            response.journalpostId
+        )
         return JournalpostIdOgDokumentId(response.journalpostId, dokumentinfoId)
     }
 
     private fun lagMottager(behandling: Behandling, mottager: Brevmottager, brevmetadata: Brevmetadata): AvsenderMottaker {
         val adresseinfo: Adresseinfo = brevmetadata.mottageradresse
         return when (mottager) {
-            Brevmottager.BRUKER -> AvsenderMottaker(id = adresseinfo.ident,
-                                                    idType = BrukerIdType.FNR,
-                                                    navn = adresseinfo.mottagernavn)
+            Brevmottager.BRUKER -> AvsenderMottaker(
+                id = adresseinfo.ident,
+                idType = BrukerIdType.FNR,
+                navn = adresseinfo.mottagernavn
+            )
             Brevmottager.VERGE -> lagVergemottager(behandling)
         }
     }
 
     private fun lagVergemottager(behandling: Behandling): AvsenderMottaker {
         val verge: Verge = behandling.aktivVerge
-                           ?: throw IllegalStateException("Brevmottager er verge, men verge finnes ikke. " +
-                                                          "Behandling ${behandling.id}")
+            ?: throw IllegalStateException(
+                "Brevmottager er verge, men verge finnes ikke. " +
+                    "Behandling ${behandling.id}"
+            )
         return if (verge.orgNr != null) {
-            AvsenderMottaker(idType = BrukerIdType.ORGNR,
-                             id = verge.orgNr,
-                             navn = verge.navn)
+            AvsenderMottaker(
+                idType = BrukerIdType.ORGNR,
+                id = verge.orgNr,
+                navn = verge.navn
+            )
         } else {
-            AvsenderMottaker(idType = BrukerIdType.FNR,
-                             id = verge.ident!!,
-                             navn = verge.navn)
+            AvsenderMottaker(
+                idType = BrukerIdType.FNR,
+                id = verge.ident!!,
+                navn = verge.navn
+            )
         }
     }
 

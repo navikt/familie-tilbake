@@ -62,15 +62,19 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     fun `findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc rerturnerer siste brevsporing`() {
         brevsporingRepository.insert(brevsporing)
         val nyesteBrevsporing = brevsporingRepository
-                .insert(brevsporing.copy(id = UUID.randomUUID(),
-                                         sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1))))
+            .insert(
+                brevsporing.copy(
+                    id = UUID.randomUUID(),
+                    sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1))
+                )
+            )
 
         val funnetBrevsporing =
-                brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(Testdata.behandling.id,
-                                                                                                       Brevtype.VARSEL)
+            brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
+                Testdata.behandling.id,
+                Brevtype.VARSEL
+            )
 
         funnetBrevsporing?.shouldBeEqualToComparingFieldsExcept(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)
-
     }
-
 }

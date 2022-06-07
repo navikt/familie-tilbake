@@ -21,13 +21,17 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvstemmingTask.TYPE,
-                     beskrivelse = "Avstemming av krav.")
-class AvstemmingTask(private val taskService: TaskService,
-                     private val avstemmingService: AvstemmingService,
-                     private val avstemmingsfilRepository: AvstemmingsfilRepository,
-                     private val integrasjonerClient: IntegrasjonerClient,
-                     private val environment: Environment) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = AvstemmingTask.TYPE,
+    beskrivelse = "Avstemming av krav."
+)
+class AvstemmingTask(
+    private val taskService: TaskService,
+    private val avstemmingService: AvstemmingService,
+    private val avstemmingsfilRepository: AvstemmingsfilRepository,
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val environment: Environment
+) : AsyncTaskStep {
 
     private val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
@@ -54,10 +58,12 @@ class AvstemmingTask(private val taskService: TaskService,
         if (environment.activeProfiles.contains("e2e")) return
 
         val dato = LocalDate.parse(task.payload)
-        val nesteAvstemming = Task(type = TYPE,
-                                   payload = dato.plusDays(1).toString(),
-                                   properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) })
-                .medTriggerTid(dato.plusDays(2).atTime(8, 0))
+        val nesteAvstemming = Task(
+            type = TYPE,
+            payload = dato.plusDays(1).toString(),
+            properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) }
+        )
+            .medTriggerTid(dato.plusDays(2).atTime(8, 0))
         taskService.save(nesteAvstemming)
     }
 

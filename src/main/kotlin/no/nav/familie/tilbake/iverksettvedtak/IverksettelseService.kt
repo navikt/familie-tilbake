@@ -28,13 +28,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class IverksettelseService(private val behandlingRepository: BehandlingRepository,
-                           private val kravgrunnlagRepository: KravgrunnlagRepository,
-                           private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
-                           private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
-                           private val beregningService: TilbakekrevingsberegningService,
-                           private val behandlingVedtakService: BehandlingsvedtakService,
-                           private val oppdragClient: OppdragClient) {
+class IverksettelseService(
+    private val behandlingRepository: BehandlingRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val økonomiXmlSendtRepository: ØkonomiXmlSendtRepository,
+    private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
+    private val beregningService: TilbakekrevingsberegningService,
+    private val behandlingVedtakService: BehandlingsvedtakService,
+    private val oppdragClient: OppdragClient
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -55,7 +57,7 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         // Send request til økonomi
         val respons = oppdragClient.iverksettVedtak(behandlingId, request)
 
-        //oppdater respons
+        // oppdater respons
         økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
         økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = objectMapper.writeValueAsString(respons.mmel)))
 
@@ -67,9 +69,11 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
         return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
     }
 
-    private fun lagIveksettelseRequest(ansvarligSaksbehandler: String,
-                                       kravgrunnlag: Kravgrunnlag431,
-                                       beregnetPerioder: List<Tilbakekrevingsperiode>): TilbakekrevingsvedtakRequest {
+    private fun lagIveksettelseRequest(
+        ansvarligSaksbehandler: String,
+        kravgrunnlag: Kravgrunnlag431,
+        beregnetPerioder: List<Tilbakekrevingsperiode>
+    ): TilbakekrevingsvedtakRequest {
         val request = TilbakekrevingsvedtakRequest()
         val vedtak = TilbakekrevingsvedtakDto()
         vedtak.apply {
@@ -129,19 +133,22 @@ class IverksettelseService(private val behandlingRepository: BehandlingRepositor
 
         // Beløpene beregnes for iverksettelse
         val beregnetTotatlTilbakekrevingsbeløpUtenRenter =
-                beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
+            beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.tilbakekrevesBeløp } }
         val beregnetTotalRenteBeløp = beregnetPerioder.sumOf { it.renter }
         val beregnetSkattBeløp = beregnetPerioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
 
         if (totalTilbakekrevingsbeløpUtenRenter != beregnetTotatlTilbakekrevingsbeløpUtenRenter ||
-            totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp) {
-            throw Feil(message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
-                                 "Beregnet beløp i vedtaksbrev er " +
-                                 "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
-                                 "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
-                                 "Beregnet beløp i iverksettelse er " +
-                                 "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
-                                 "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp")
+            totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp
+        ) {
+            throw Feil(
+                message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                    "Beregnet beløp i vedtaksbrev er " +
+                    "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
+                    "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
+                    "Beregnet beløp i iverksettelse er " +
+                    "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
+                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp"
+            )
         }
     }
 }

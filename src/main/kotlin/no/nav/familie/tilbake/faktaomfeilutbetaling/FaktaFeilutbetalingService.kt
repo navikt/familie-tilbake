@@ -16,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRepository,
-                                 private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
-                                 private val kravgrunnlagRepository: KravgrunnlagRepository) {
+class FaktaFeilutbetalingService(
+    private val behandlingRepository: BehandlingRepository,
+    private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository
+) {
 
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
@@ -26,11 +28,13 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
         val faktaFeilutbetaling = hentAktivFaktaOmFeilutbetaling(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         return FaktaFeilutbetalingMapper
-                .tilRespons(faktaFeilutbetaling = faktaFeilutbetaling,
-                            kravgrunnlag = kravgrunnlag,
-                            revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
-                            varsletData = behandling.aktivtVarsel,
-                            fagsystemsbehandling = behandling.aktivFagsystemsbehandling)
+            .tilRespons(
+                faktaFeilutbetaling = faktaFeilutbetaling,
+                kravgrunnlag = kravgrunnlag,
+                revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
+                varsletData = behandling.aktivtVarsel,
+                fagsystemsbehandling = behandling.aktivFagsystemsbehandling
+            )
     }
 
     @Transactional
@@ -38,26 +42,38 @@ class FaktaFeilutbetalingService(private val behandlingRepository: BehandlingRep
         deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> = behandlingsstegFaktaDto.feilutbetaltePerioder.map {
-            FaktaFeilutbetalingsperiode(periode = Periode(it.periode.fom, it.periode.tom),
-                                        hendelsestype = it.hendelsestype,
-                                        hendelsesundertype = it.hendelsesundertype)
+            FaktaFeilutbetalingsperiode(
+                periode = Periode(it.periode.fom, it.periode.tom),
+                hendelsestype = it.hendelsestype,
+                hendelsesundertype = it.hendelsesundertype
+            )
         }.toSet()
 
-        faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandlingId,
-                                                                 perioder = feilutbetaltePerioder,
-                                                                 begrunnelse = behandlingsstegFaktaDto.begrunnelse))
+        faktaFeilutbetalingRepository.insert(
+            FaktaFeilutbetaling(
+                behandlingId = behandlingId,
+                perioder = feilutbetaltePerioder,
+                begrunnelse = behandlingsstegFaktaDto.begrunnelse
+            )
+        )
     }
 
     @Transactional
     fun lagreFastFaktaForAutomatiskSaksbehandling(behandlingId: UUID) {
         val feilutbetaltePerioder = hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
-            FaktaFeilutbetalingsperiode(periode = Periode(it.periode),
-                                        hendelsestype = Hendelsestype.ANNET,
-                                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST)
+            FaktaFeilutbetalingsperiode(
+                periode = Periode(it.periode),
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+            )
         }.toSet()
-        faktaFeilutbetalingRepository.insert(FaktaFeilutbetaling(behandlingId = behandlingId,
-                                                                 perioder = feilutbetaltePerioder,
-                                                                 begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE))
+        faktaFeilutbetalingRepository.insert(
+            FaktaFeilutbetaling(
+                behandlingId = behandlingId,
+                perioder = feilutbetaltePerioder,
+                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+            )
+        )
     }
 
     fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID): FaktaFeilutbetaling? {

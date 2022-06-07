@@ -7,18 +7,22 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import java.time.LocalDate
 
-data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
-                               val beløp: Long,
-                               val revurderingsvedtaksdato: LocalDate,
-                               val feilutbetaltePerioder: List<Handlebarsperiode>,
-                               val varseltekstFraSaksbehandler: String? = null,
-                               val fristdatoForTilbakemelding: LocalDate,
-                               val varsletDato: LocalDate? = null,
-                               val varsletBeløp: Long? = null,
-                               val erKorrigert: Boolean = false) : BaseDokument(brevmetadata.ytelsestype,
-                                                                                brevmetadata.språkkode,
-                                                                                brevmetadata.behandlendeEnhetsNavn,
-                                                                                brevmetadata.ansvarligSaksbehandler) {
+data class Varselbrevsdokument(
+    val brevmetadata: Brevmetadata,
+    val beløp: Long,
+    val revurderingsvedtaksdato: LocalDate,
+    val feilutbetaltePerioder: List<Handlebarsperiode>,
+    val varseltekstFraSaksbehandler: String? = null,
+    val fristdatoForTilbakemelding: LocalDate,
+    val varsletDato: LocalDate? = null,
+    val varsletBeløp: Long? = null,
+    val erKorrigert: Boolean = false
+) : BaseDokument(
+    brevmetadata.ytelsestype,
+    brevmetadata.språkkode,
+    brevmetadata.behandlendeEnhetsNavn,
+    brevmetadata.ansvarligSaksbehandler
+) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
@@ -59,5 +63,4 @@ data class Varselbrevsdokument(val brevmetadata: Brevmetadata,
             requireNotNull(annenMottagersNavn) { "annenMottagersNavn" }
         }
     }
-
 }

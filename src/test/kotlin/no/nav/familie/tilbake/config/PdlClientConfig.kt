@@ -33,16 +33,19 @@ class PdlClientConfig {
             } else {
                 null
             }
-            Personinfo(ident = "32132132111",
-                       fødselsdato = LocalDate.now().minusYears(20),
-                       navn = "testverdi",
-                       kjønn = Kjønn.MANN,
-                       dødsdato = dødsdato,
+            Personinfo(
+                ident = ident.captured ?: "32132132111",
+                fødselsdato = LocalDate.now().minusYears(20),
+                navn = "testverdi",
+                kjønn = Kjønn.MANN,
+                dødsdato = dødsdato,
             )
         }
         every { pdlClient.hentIdenter(any(), any()) } answers {
-            PdlHentIdenterResponse(data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
-                                   errors = listOf())
+            PdlHentIdenterResponse(
+                data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
+                errors = listOf()
+            )
         }
         return pdlClient
     }

@@ -43,5 +43,4 @@ internal class PeriodeTest {
 
         periode1.omslutter(periode2).shouldBeTrue()
     }
-
 }

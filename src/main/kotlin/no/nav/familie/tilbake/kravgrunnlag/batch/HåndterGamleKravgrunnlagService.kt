@@ -38,14 +38,16 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HåndterGamleKravgrunnlagService(private val behandlingRepository: BehandlingRepository,
-                                      private val kravgrunnlagRepository: KravgrunnlagRepository,
-                                      private val behandlingService: BehandlingService,
-                                      private val behandlingskontrollService: BehandlingskontrollService,
-                                      private val økonomiXmlMottattService: ØkonomiXmlMottattService,
-                                      private val hentKravgrunnlagService: HentKravgrunnlagService,
-                                      private val stegService: StegService,
-                                      private val historikkService: HistorikkService) {
+class HåndterGamleKravgrunnlagService(
+    private val behandlingRepository: BehandlingRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val behandlingService: BehandlingService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val økonomiXmlMottattService: ØkonomiXmlMottattService,
+    private val hentKravgrunnlagService: HentKravgrunnlagService,
+    private val stegService: StegService,
+    private val historikkService: HistorikkService
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -60,11 +62,13 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
 
         logger.info("Sjekker om det finnes en aktiv behandling for fagsak=$eksternFagsakId og ytelsestype=$ytelsestype")
         if (behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null) {
-            throw UgyldigKravgrunnlagFeil(melding = "Kravgrunnlag med $mottattXmlId er ugyldig." +
-                                                    "Det finnes allerede en åpen behandling for " +
-                                                    "fagsak=$eksternFagsakId og ytelsestype=$ytelsestype. " +
-                                                    "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                                                    "ved å bruke forvaltningsrutine etter feilundersøkelse.")
+            throw UgyldigKravgrunnlagFeil(
+                melding = "Kravgrunnlag med $mottattXmlId er ugyldig." +
+                    "Det finnes allerede en åpen behandling for " +
+                    "fagsak=$eksternFagsakId og ytelsestype=$ytelsestype. " +
+                    "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
+                    "ved å bruke forvaltningsrutine etter feilundersøkelse."
+            )
         }
     }
 
@@ -84,20 +88,26 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
         if (diffs.isNotEmpty()) {
             logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag. Avvikene er $diffs")
         }
-        logger.info("Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                    "til behandling=$behandlingId")
+        logger.info(
+            "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
+                "til behandling=$behandlingId"
+        )
         val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
-        historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
-                                             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
-                                             aktør = Aktør.VEDTAKSLØSNING,
-                                             opprettetTidspunkt = LocalDateTime.now())
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
+            aktør = Aktør.VEDTAKSLØSNING,
+            opprettetTidspunkt = LocalDateTime.now()
+        )
 
         stegService.håndterSteg(behandlingId)
         if (erSperret) {
-            logger.info("Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                        "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi")
+            logger.info(
+                "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
+                    "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi"
+            )
             sperKravgrunnlag(behandlingId)
         }
     }
@@ -111,45 +121,54 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
 
     private fun hentKravgrunnlagFraØkonomi(mottattXml: ØkonomiXmlMottatt): Pair<DetaljertKravgrunnlagDto, Boolean> {
         return try {
-            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(mottattXml.eksternKravgrunnlagId!!,
-                                                               KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG) to false
+            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+                mottattXml.eksternKravgrunnlagId!!,
+                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
+            ) to false
         } catch (e: SperretKravgrunnlagFeil) {
             logger.warn(e.melding)
             KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding) to true
         }
     }
 
-    private fun opprettBehandling(hentetKravgrunnlag: DetaljertKravgrunnlagDto,
-                                  fagsystemsbehandlingData: HentFagsystemsbehandling): Behandling {
+    private fun opprettBehandling(
+        hentetKravgrunnlag: DetaljertKravgrunnlagDto,
+        fagsystemsbehandlingData: HentFagsystemsbehandling
+    ): Behandling {
         val opprettTilbakekrevingRequest =
-                lagOpprettBehandlingsrequest(eksternFagsakId = hentetKravgrunnlag.fagsystemId,
-                                             ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
-                                                     .ytelsestype,
-                                             eksternId = hentetKravgrunnlag.referanse,
-                                             fagsystemsbehandlingData = fagsystemsbehandlingData)
+            lagOpprettBehandlingsrequest(
+                eksternFagsakId = hentetKravgrunnlag.fagsystemId,
+                ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
+                    .ytelsestype,
+                eksternId = hentetKravgrunnlag.referanse,
+                fagsystemsbehandlingData = fagsystemsbehandlingData
+            )
         return behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
     }
 
-    private fun lagOpprettBehandlingsrequest(eksternFagsakId: String,
-                                             ytelsestype: Ytelsestype,
-                                             eksternId: String,
-                                             fagsystemsbehandlingData: HentFagsystemsbehandling)
-            : OpprettTilbakekrevingRequest {
-        return OpprettTilbakekrevingRequest(fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-                                            ytelsestype = ytelsestype,
-                                            eksternFagsakId = eksternFagsakId,
-                                            eksternId = eksternId,
-                                            behandlingstype = Behandlingstype.TILBAKEKREVING,
-                                            manueltOpprettet = false,
-                                            saksbehandlerIdent = "VL",
-                                            personIdent = fagsystemsbehandlingData.personIdent,
-                                            språkkode = fagsystemsbehandlingData.språkkode,
-                                            enhetId = fagsystemsbehandlingData.enhetId,
-                                            enhetsnavn = fagsystemsbehandlingData.enhetsnavn,
-                                            revurderingsvedtaksdato = fagsystemsbehandlingData.revurderingsvedtaksdato,
-                                            faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
-                                            verge = fagsystemsbehandlingData.verge,
-                                            varsel = null)
+    private fun lagOpprettBehandlingsrequest(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String,
+        fagsystemsbehandlingData: HentFagsystemsbehandling
+    ): OpprettTilbakekrevingRequest {
+        return OpprettTilbakekrevingRequest(
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+            ytelsestype = ytelsestype,
+            eksternFagsakId = eksternFagsakId,
+            eksternId = eksternId,
+            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            manueltOpprettet = false,
+            saksbehandlerIdent = "VL",
+            personIdent = fagsystemsbehandlingData.personIdent,
+            språkkode = fagsystemsbehandlingData.språkkode,
+            enhetId = fagsystemsbehandlingData.enhetId,
+            enhetsnavn = fagsystemsbehandlingData.enhetsnavn,
+            revurderingsvedtaksdato = fagsystemsbehandlingData.revurderingsvedtaksdato,
+            faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
+            verge = fagsystemsbehandlingData.verge,
+            varsel = null
+        )
     }
 
     private fun sperKravgrunnlag(behandlingId: UUID) {
@@ -157,23 +176,31 @@ class HåndterGamleKravgrunnlagService(private val behandlingRepository: Behandl
         kravgrunnlagRepository.update(kravgrunnlag.copy(sperret = true))
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         behandlingskontrollService
-                .tilbakehoppBehandlingssteg(behandlingId,
-                                            Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.GRUNNLAG,
-                                                                 behandlingsstegstatus = Behandlingsstegstatus.VENTER,
-                                                                 venteårsak = venteårsak,
-                                                                 tidsfrist = LocalDate.now()
-                                                                         .plusWeeks(venteårsak.defaultVenteTidIUker)))
-        historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
-                                             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-                                             aktør = Aktør.VEDTAKSLØSNING,
-                                             beskrivelse = venteårsak.beskrivelse,
-                                             opprettetTidspunkt = LocalDateTime.now())
+            .tilbakehoppBehandlingssteg(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    behandlingssteg = Behandlingssteg.GRUNNLAG,
+                    behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+                    venteårsak = venteårsak,
+                    tidsfrist = LocalDate.now()
+                        .plusWeeks(venteårsak.defaultVenteTidIUker)
+                )
+            )
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+            aktør = Aktør.VEDTAKSLØSNING,
+            beskrivelse = venteårsak.beskrivelse,
+            opprettetTidspunkt = LocalDateTime.now()
+        )
     }
 
     private fun setFaktainfo(faktainfo: Faktainfo): Faktainfo {
-        return Faktainfo(revurderingsresultat = faktainfo.revurderingsresultat,
-                         revurderingsårsak = faktainfo.revurderingsårsak,
-                         tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                         konsekvensForYtelser = faktainfo.konsekvensForYtelser)
+        return Faktainfo(
+            revurderingsresultat = faktainfo.revurderingsresultat,
+            revurderingsårsak = faktainfo.revurderingsårsak,
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+            konsekvensForYtelser = faktainfo.konsekvensForYtelser
+        )
     }
 }

@@ -13,19 +13,25 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 object VedtakHjemmel {
 
     private val Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER: List<Vilkårsvurderingsresultat> =
-            listOf(Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                   Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
+        listOf(
+            Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+        )
 
-    fun lagHjemmel(vedtaksresultatstype: Vedtaksresultat,
-                   vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-                   effektForBruker: EffektForBruker,
-                   språkkode: Språkkode,
-                   visHjemmelForRenter: Boolean,
-                   klagebehandling: Boolean): HbHjemmel {
+    fun lagHjemmel(
+        vedtaksresultatstype: Vedtaksresultat,
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
+        effektForBruker: EffektForBruker,
+        språkkode: Språkkode,
+        visHjemmelForRenter: Boolean,
+        klagebehandling: Boolean
+    ): HbHjemmel {
         val foreldetVanlig = erNoeSattTilVanligForeldet(vedtaksbrevgrunnlag.vurdertForeldelse)
         val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(vedtaksbrevgrunnlag.vurdertForeldelse)
-        val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(vedtaksresultatstype,
-                                                         vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
+        val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(
+            vedtaksresultatstype,
+            vedtaksbrevgrunnlag.vilkårsvurderingsperioder
+        )
         val renter = visHjemmelForRenter && erRenterBenyttet(vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
         val barnetrygd = Ytelsestype.BARNETRYGD == vedtaksbrevgrunnlag.ytelsestype
         val kontantstøtte = Ytelsestype.KONTANTSTØTTE == vedtaksbrevgrunnlag.ytelsestype
@@ -65,29 +71,33 @@ object VedtakHjemmel {
     }
 
     private fun erForsettOgAlltidRenter(v: Vilkårsvurderingsperiode): Boolean {
-        return Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER.contains(v.vilkårsvurderingsresultat)
-               && Aktsomhet.FORSETT == v.aktsomhet?.aktsomhet
+        return Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER.contains(v.vilkårsvurderingsresultat) &&
+            Aktsomhet.FORSETT == v.aktsomhet?.aktsomhet
     }
 
-    private fun heleVurderingPgaSmåbeløp(vedtakResultatType: Vedtaksresultat,
-                                         vilkårPerioder: Set<Vilkårsvurderingsperiode>): Boolean {
-        return Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType
-               && vilkårPerioder.any { false == it.aktsomhet?.tilbakekrevSmåbeløp }
+    private fun heleVurderingPgaSmåbeløp(
+        vedtakResultatType: Vedtaksresultat,
+        vilkårPerioder: Set<Vilkårsvurderingsperiode>
+    ): Boolean {
+        return Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType &&
+            vilkårPerioder.any { false == it.aktsomhet?.tilbakekrevSmåbeløp }
     }
 
     private fun erTilleggsfristBenyttet(foreldelse: VurdertForeldelse?): Boolean {
         return foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
-               ?: false
+            ?: false
     }
 
     private fun erNoeSattTilVanligForeldet(foreldelse: VurdertForeldelse?): Boolean {
         return foreldelse?.foreldelsesperioder?.any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.FORELDET }
-               ?: false
+            ?: false
     }
 
-    private fun join(elementer: List<Hjemler>,
-                     sisteSkille: String,
-                     lokale: Språkkode): String {
+    private fun join(
+        elementer: List<Hjemler>,
+        sisteSkille: String,
+        lokale: Språkkode
+    ): String {
         val lokalListe = elementer.map { it.hjemmelTekst(lokale) }
         if (lokalListe.size == 1) {
             return lokalListe.first()!!
@@ -112,12 +122,13 @@ object VedtakHjemmel {
         KONTANTSTØTTE_11("kontantstøtteloven § 11", "kontantstøttelova § 11"),
         BARNETRYGD_13("barnetrygdloven § 13", "barnetrygdlova § 13");
 
-        private val hjemmelTekster = mapOf(Språkkode.NB to bokmål,
-                                           Språkkode.NN to nynorsk)
+        private val hjemmelTekster = mapOf(
+            Språkkode.NB to bokmål,
+            Språkkode.NN to nynorsk
+        )
 
         fun hjemmelTekst(språkkode: Språkkode): String? {
             return hjemmelTekster.getOrDefault(språkkode, hjemmelTekster[Språkkode.NB])
         }
-
     }
 }

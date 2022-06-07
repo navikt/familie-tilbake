@@ -30,17 +30,18 @@ import java.util.UUID
 
 @Service
 @Transactional
-class BehandlingTilstandService(private val behandlingRepository: BehandlingRepository,
-                                private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
-                                private val fagsakRepository: FagsakRepository,
-                                private val taskService: TaskService,
-                                private val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
-
+class BehandlingTilstandService(
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val taskService: TaskService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService
+) {
 
     fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, info: Behandlingsstegsinfo) {
         val hendelsesbeskrivelse = "Ny behandlingsstegstilstand " +
-                                   "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
-                                   "for behandling $behandlingId"
+            "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
+            "for behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
         opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
@@ -54,15 +55,18 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
     }
 
     private fun opprettProsessTask(behandlingId: UUID, behandlingstilstand: Behandlingstilstand, hendelsesbeskrivelse: String) {
-        val task = Task(SendSakshendelseTilDvhTask.TASK_TYPE,
-                        behandlingId.toString(),
-                        Properties().apply {
-                            setProperty("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
-                            setProperty("beskrivelse", hendelsesbeskrivelse)
-                            setProperty(PropertyName.FAGSYSTEM,
-                                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name)
-
-                        })
+        val task = Task(
+            SendSakshendelseTilDvhTask.TASK_TYPE,
+            behandlingId.toString(),
+            Properties().apply {
+                setProperty("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
+                setProperty("beskrivelse", hendelsesbeskrivelse)
+                setProperty(
+                    PropertyName.FAGSYSTEM,
+                    FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name
+                )
+            }
+        )
         taskService.save(task)
     }
 
@@ -72,7 +76,7 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         val eksternBehandling = behandling.aktivFagsystemsbehandling.eksternId
         val behandlingsresultat = behandling.sisteResultat?.type ?: Behandlingsresultatstype.IKKE_FASTSATT
         val behandlingsstegstilstand = behandlingsstegstilstandRepository
-                .findByBehandlingIdAndBehandlingsstegsstatusIn(behandlingId, Behandlingsstegstatus.aktiveStegStatuser)
+            .findByBehandlingIdAndBehandlingsstegsstatusIn(behandlingId, Behandlingsstegstatus.aktiveStegStatuser)
         val venterPåBruker: Boolean = Venteårsak.venterPåBruker(behandlingsstegstilstand?.venteårsak)
         val venterPåØkonomi: Boolean = Venteårsak.venterPåØkonomi(behandlingsstegstilstand?.venteårsak)
         val behandlingsårsak = behandling.årsaker.firstOrNull()
@@ -81,12 +85,13 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
         var totalFeilutbetaltPeriode: Periode? = null
         var totalFeilutbetaltBeløp: BigDecimal? = null
         val erBehandlingsstegEtterGrunnlagSteg =
-                behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
+            behandlingsstegstilstand?.behandlingssteg?.sekvens?.let { it > Behandlingssteg.GRUNNLAG.sekvens } ?: false
+        val erBehandlingHenlagt = behandling.sisteResultat?.erBehandlingHenlagt() ?: false
         if (erBehandlingsstegEtterGrunnlagSteg) {
             val fakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId)
             totalFeilutbetaltPeriode = Periode(fakta.totalFeilutbetaltPeriode.fom, fakta.totalFeilutbetaltPeriode.tom)
             totalFeilutbetaltBeløp = fakta.totaltFeilutbetaltBeløp
-        } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL) {
+        } else if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.VARSEL && !erBehandlingHenlagt) {
             val varsel = behandling.aktivtVarsel ?: throw Feil("Behandling $behandlingId venter på varselssteg uten varsel data")
             val førsteDagIVarselsperiode = varsel.perioder.minOf { it.fom }
             val sisteDagIVarselsperiode = varsel.perioder.maxOf { it.tom }
@@ -95,24 +100,25 @@ class BehandlingTilstandService(private val behandlingRepository: BehandlingRepo
             totalFeilutbetaltPeriode = Periode(førsteDagIVarselsperiode, sisteDagIVarselsperiode)
         }
 
-        return Behandlingstilstand(ytelsestype = fagsak.ytelsestype,
-                                   saksnummer = fagsak.eksternFagsakId,
-                                   behandlingUuid = behandling.eksternBrukId,
-                                   referertFagsaksbehandling = eksternBehandling,
-                                   behandlingstype = behandling.type,
-                                   behandlingsstatus = behandling.status,
-                                   behandlingsresultat = behandlingsresultat,
-                                   ansvarligEnhet = behandling.behandlendeEnhet,
-                                   ansvarligBeslutter = behandling.ansvarligBeslutter,
-                                   ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                                   behandlingErManueltOpprettet = behandling.manueltOpprettet,
-                                   funksjoneltTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
-                                   venterPåBruker = venterPåBruker,
-                                   venterPåØkonomi = venterPåØkonomi,
-                                   forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
-                                   revurderingOpprettetÅrsak = behandlingsårsak?.type,
-                                   totalFeilutbetaltBeløp = totalFeilutbetaltBeløp,
-                                   totalFeilutbetaltPeriode = totalFeilutbetaltPeriode)
+        return Behandlingstilstand(
+            ytelsestype = fagsak.ytelsestype,
+            saksnummer = fagsak.eksternFagsakId,
+            behandlingUuid = behandling.eksternBrukId,
+            referertFagsaksbehandling = eksternBehandling,
+            behandlingstype = behandling.type,
+            behandlingsstatus = behandling.status,
+            behandlingsresultat = behandlingsresultat,
+            ansvarligEnhet = behandling.behandlendeEnhet,
+            ansvarligBeslutter = behandling.ansvarligBeslutter,
+            ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+            behandlingErManueltOpprettet = behandling.manueltOpprettet,
+            funksjoneltTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+            venterPåBruker = venterPåBruker,
+            venterPåØkonomi = venterPåØkonomi,
+            forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
+            revurderingOpprettetÅrsak = behandlingsårsak?.type,
+            totalFeilutbetaltBeløp = totalFeilutbetaltBeløp,
+            totalFeilutbetaltPeriode = totalFeilutbetaltPeriode
+        )
     }
-
 }

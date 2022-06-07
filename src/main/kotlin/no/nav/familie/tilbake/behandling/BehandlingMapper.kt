@@ -34,101 +34,120 @@ import no.nav.familie.tilbake.common.ContextService
 
 object BehandlingMapper {
 
-    fun tilDomeneBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-                            fagsystem: Fagsystem,
-                            fagsak: Fagsak,
-                            ansvarligSaksbehandler: Saksbehandler): Behandling {
+    fun tilDomeneBehandling(
+        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+        fagsystem: Fagsystem,
+        fagsak: Fagsak,
+        ansvarligSaksbehandler: Saksbehandler
+    ): Behandling {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         val fagsystemsbehandling =
-                Fagsystemsbehandling(eksternId = opprettTilbakekrevingRequest.eksternId,
-                                     tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
-                                     revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
-                                     resultat = faktainfo.revurderingsresultat,
-                                     årsak = faktainfo.revurderingsårsak,
-                                     konsekvenser = fagsystemskonsekvenser)
+            Fagsystemsbehandling(
+                eksternId = opprettTilbakekrevingRequest.eksternId,
+                tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg,
+                revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
+                resultat = faktainfo.revurderingsresultat,
+                årsak = faktainfo.revurderingsårsak,
+                konsekvenser = fagsystemskonsekvenser
+            )
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
 
-        return Behandling(fagsakId = fagsak.id,
-                          type = Behandlingstype.TILBAKEKREVING,
-                          ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
-                          behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
-                          behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
-                          manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
-                          fagsystemsbehandling = setOf(fagsystemsbehandling),
-                          varsler = varsler,
-                          verger = verger)
+        return Behandling(
+            fagsakId = fagsak.id,
+            type = Behandlingstype.TILBAKEKREVING,
+            ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
+            behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
+            behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
+            manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
+            fagsystemsbehandling = setOf(fagsystemsbehandling),
+            varsler = varsler,
+            verger = verger
+        )
     }
 
-    fun tilRespons(behandling: Behandling,
-                   erBehandlingPåVent: Boolean,
-                   kanHenleggeBehandling: Boolean,
-                   kanEndres: Boolean,
-                   kanRevurderingOpprettes: Boolean,
-                   behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
-                   varselSendt: Boolean,
-                   eksternFagsakId: String): BehandlingDto {
+    fun tilRespons(
+        behandling: Behandling,
+        erBehandlingPåVent: Boolean,
+        kanHenleggeBehandling: Boolean,
+        kanEndres: Boolean,
+        kanRevurderingOpprettes: Boolean,
+        behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
+        varselSendt: Boolean,
+        eksternFagsakId: String
+    ): BehandlingDto {
 
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
         }
 
-        return BehandlingDto(eksternBrukId = behandling.eksternBrukId,
-                             behandlingId = behandling.id,
-                             type = behandling.type,
-                             status = behandling.status,
-                             erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
-                             resultatstype = resultat?.resultatstypeTilFrontend(),
-                             enhetskode = behandling.behandlendeEnhet,
-                             enhetsnavn = behandling.behandlendeEnhetsNavn,
-                             ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
-                             ansvarligBeslutter = behandling.ansvarligBeslutter,
-                             opprettetDato = behandling.opprettetDato,
-                             avsluttetDato = behandling.avsluttetDato,
-                             vedtaksdato = behandling.sisteResultat?.behandlingsvedtak?.vedtaksdato,
-                             endretTidspunkt = behandling.endretTidspunkt,
-                             harVerge = behandling.harVerge,
-                             kanHenleggeBehandling = kanHenleggeBehandling,
-                             kanRevurderingOpprettes = kanRevurderingOpprettes,
-                             erBehandlingPåVent = erBehandlingPåVent,
-                             kanEndres = kanEndres,
-                             varselSendt = varselSendt,
-                             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
-                             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
-                             eksternFagsakId = eksternFagsakId,
-                             behandlingsårsakstype = behandling.sisteÅrsak?.type)
-
+        return BehandlingDto(
+            eksternBrukId = behandling.eksternBrukId,
+            behandlingId = behandling.id,
+            type = behandling.type,
+            status = behandling.status,
+            erBehandlingHenlagt = resultat?.erBehandlingHenlagt() ?: false,
+            resultatstype = resultat?.resultatstypeTilFrontend(),
+            enhetskode = behandling.behandlendeEnhet,
+            enhetsnavn = behandling.behandlendeEnhetsNavn,
+            ansvarligSaksbehandler = behandling.ansvarligSaksbehandler,
+            ansvarligBeslutter = behandling.ansvarligBeslutter,
+            opprettetDato = behandling.opprettetDato,
+            avsluttetDato = behandling.avsluttetDato,
+            vedtaksdato = behandling.sisteResultat?.behandlingsvedtak?.vedtaksdato,
+            endretTidspunkt = behandling.endretTidspunkt,
+            harVerge = behandling.harVerge,
+            kanHenleggeBehandling = kanHenleggeBehandling,
+            kanRevurderingOpprettes = kanRevurderingOpprettes,
+            erBehandlingPåVent = erBehandlingPåVent,
+            kanEndres = kanEndres,
+            varselSendt = varselSendt,
+            behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
+            fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
+            eksternFagsakId = eksternFagsakId,
+            behandlingsårsakstype = behandling.sisteÅrsak?.type
+        )
     }
 
     private fun tilBehandlingstegsinfoDto(behandlingsstegsinfoListe: List<Behandlingsstegsinfo>): List<BehandlingsstegsinfoDto> {
         return behandlingsstegsinfoListe.map {
-            BehandlingsstegsinfoDto(behandlingssteg = it.behandlingssteg,
-                                    behandlingsstegstatus = it.behandlingsstegstatus,
-                                    venteårsak = it.venteårsak,
-                                    tidsfrist = it.tidsfrist)
+            BehandlingsstegsinfoDto(
+                behandlingssteg = it.behandlingssteg,
+                behandlingsstegstatus = it.behandlingsstegstatus,
+                venteårsak = it.venteårsak,
+                tidsfrist = it.tidsfrist
+            )
         }
     }
 
     private fun tilDomeneVarsel(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Varsel> {
         return opprettTilbakekrevingRequest.varsel?.let {
             val varselsperioder =
-                    it.perioder.map { periode ->
-                        Varselsperiode(fom = periode.fom, tom = periode.tom)
-                    }.toSet()
-            return setOf(Varsel(varseltekst = it.varseltekst,
-                                varselbeløp = it.sumFeilutbetaling.longValueExact(),
-                                perioder = varselsperioder))
+                it.perioder.map { periode ->
+                    Varselsperiode(fom = periode.fom, tom = periode.tom)
+                }.toSet()
+            return setOf(
+                Varsel(
+                    varseltekst = it.varseltekst,
+                    varselbeløp = it.sumFeilutbetaling.longValueExact(),
+                    perioder = varselsperioder
+                )
+            )
         } ?: emptySet()
     }
 
     private fun tilDomeneVerge(fagsystem: Fagsystem, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
         opprettTilbakekrevingRequest.verge?.let {
-            return setOf(Verge(type = it.vergetype,
-                               kilde = fagsystem.name,
-                               navn = it.navn,
-                               orgNr = it.organisasjonsnummer,
-                               ident = it.personIdent))
+            return setOf(
+                Verge(
+                    type = it.vergetype,
+                    kilde = fagsystem.name,
+                    navn = it.navn,
+                    orgNr = it.organisasjonsnummer,
+                    ident = it.personIdent
+                )
+            )
         }
         return emptySet()
     }
@@ -137,14 +156,16 @@ object BehandlingMapper {
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
         }
-        return no.nav.familie.kontrakter.felles.tilbakekreving.Behandling(behandlingId = behandling.eksternBrukId,
-                                                                          opprettetTidspunkt = behandling.opprettetTidspunkt,
-                                                                          aktiv = !behandling.erAvsluttet,
-                                                                          type = mapType(behandling),
-                                                                          status = mapStatus(behandling),
-                                                                          årsak = mapÅrsak(behandling),
-                                                                          vedtaksdato = behandling.avsluttetDato?.atStartOfDay(),
-                                                                          resultat = mapResultat(resultat))
+        return no.nav.familie.kontrakter.felles.tilbakekreving.Behandling(
+            behandlingId = behandling.eksternBrukId,
+            opprettetTidspunkt = behandling.opprettetTidspunkt,
+            aktiv = !behandling.erAvsluttet,
+            type = mapType(behandling),
+            status = mapStatus(behandling),
+            årsak = mapÅrsak(behandling),
+            vedtaksdato = behandling.avsluttetDato?.atStartOfDay(),
+            resultat = mapResultat(resultat)
+        )
     }
 
     private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype {
@@ -178,8 +199,7 @@ object BehandlingMapper {
         }
     }
 
-    private fun mapResultat(resultat: Behandlingsresultat?)
-            : no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
+    private fun mapResultat(resultat: Behandlingsresultat?): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype? {
         return when (resultat?.type) {
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING -> DELVIS_TILBAKEBETALING
             Behandlingsresultatstype.FULL_TILBAKEBETALING -> FULL_TILBAKEBETALING
@@ -194,29 +214,39 @@ object BehandlingMapper {
         }
     }
 
-    fun tilDomeneBehandlingRevurdering(originalBehandling: Behandling,
-                                       behandlingsårsakstype: Behandlingsårsakstype): Behandling {
+    fun tilDomeneBehandlingRevurdering(
+        originalBehandling: Behandling,
+        behandlingsårsakstype: Behandlingsårsakstype
+    ): Behandling {
         val verger: Set<Verge> = kopiVerge(originalBehandling)?.let { setOf(it) } ?: emptySet()
-        return Behandling(fagsakId = originalBehandling.fagsakId,
-                          type = Behandlingstype.REVURDERING_TILBAKEKREVING,
-                          ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
-                          behandlendeEnhet = originalBehandling.behandlendeEnhet,
-                          behandlendeEnhetsNavn = originalBehandling.behandlendeEnhetsNavn,
-                          manueltOpprettet = false,
-                          årsaker = setOf(Behandlingsårsak(type = behandlingsårsakstype,
-                                                           originalBehandlingId = originalBehandling.id)),
-                          fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
-                          verger = verger)
+        return Behandling(
+            fagsakId = originalBehandling.fagsakId,
+            type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
+            behandlendeEnhet = originalBehandling.behandlendeEnhet,
+            behandlendeEnhetsNavn = originalBehandling.behandlendeEnhetsNavn,
+            manueltOpprettet = false,
+            årsaker = setOf(
+                Behandlingsårsak(
+                    type = behandlingsårsakstype,
+                    originalBehandlingId = originalBehandling.id
+                )
+            ),
+            fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
+            verger = verger
+        )
     }
 
     private fun kopiFagsystemsbehandling(originalBehandling: Behandling): Fagsystemsbehandling {
         val fagsystemsbehandling = originalBehandling.aktivFagsystemsbehandling
-        return Fagsystemsbehandling(eksternId = fagsystemsbehandling.eksternId,
-                                    årsak = fagsystemsbehandling.årsak,
-                                    resultat = fagsystemsbehandling.resultat,
-                                    tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
-                                    revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
-                                    konsekvenser = kopiFagsystemskonsekvenser(fagsystemsbehandling.konsekvenser))
+        return Fagsystemsbehandling(
+            eksternId = fagsystemsbehandling.eksternId,
+            årsak = fagsystemsbehandling.årsak,
+            resultat = fagsystemsbehandling.resultat,
+            tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
+            revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
+            konsekvenser = kopiFagsystemskonsekvenser(fagsystemsbehandling.konsekvenser)
+        )
     }
 
     private fun kopiFagsystemskonsekvenser(originalKonsekvenser: Set<Fagsystemskonsekvens>): Set<Fagsystemskonsekvens> {
@@ -226,12 +256,14 @@ object BehandlingMapper {
     private fun kopiVerge(originalBehandling: Behandling): Verge? {
         val verge = originalBehandling.aktivVerge
         return verge?.let {
-            Verge(type = it.type,
-                  ident = it.ident,
-                  orgNr = it.orgNr,
-                  navn = it.navn,
-                  begrunnelse = it.begrunnelse,
-                  kilde = it.kilde)
+            Verge(
+                type = it.type,
+                ident = it.ident,
+                orgNr = it.orgNr,
+                navn = it.navn,
+                begrunnelse = it.begrunnelse,
+                kilde = it.kilde
+            )
         }
     }
 }

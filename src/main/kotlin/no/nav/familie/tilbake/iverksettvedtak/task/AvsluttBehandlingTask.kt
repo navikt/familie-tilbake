@@ -21,12 +21,16 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvsluttBehandlingTask.TYPE,
-                     beskrivelse = "Avslutter behandling",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class AvsluttBehandlingTask(private val behandlingRepository: BehandlingRepository,
-                            private val behandlingskontrollService: BehandlingskontrollService,
-                            private val historikkTaskService: HistorikkTaskService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = AvsluttBehandlingTask.TYPE,
+    beskrivelse = "Avslutter behandling",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class AvsluttBehandlingTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val historikkTaskService: HistorikkTaskService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -41,17 +45,27 @@ class AvsluttBehandlingTask(private val behandlingRepository: BehandlingReposito
         }
 
         behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET,
-                                                    avsluttetDato = LocalDate.now()))
+        behandlingRepository.update(
+            behandling.copy(
+                status = Behandlingsstatus.AVSLUTTET,
+                avsluttetDato = LocalDate.now()
+            )
+        )
 
         behandlingskontrollService
-                .oppdaterBehandlingsstegsstaus(behandlingId,
-                                               Behandlingsstegsinfo(behandlingssteg = Behandlingssteg.AVSLUTTET,
-                                                                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT))
+            .oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    behandlingssteg = Behandlingssteg.AVSLUTTET,
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT
+                )
+            )
 
-        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
-                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
-                                              aktør = Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
+            aktør = Aktør.VEDTAKSLØSNING
+        )
     }
 
     companion object {
