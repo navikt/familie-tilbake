@@ -23,26 +23,32 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class HenleggelsesbrevService(private val behandlingRepository: BehandlingRepository,
-                              private val brevsporingService: BrevsporingService,
-                              private val fagsakRepository: FagsakRepository,
-                              private val eksterneDataForBrevService: EksterneDataForBrevService,
-                              private val pdfBrevService: PdfBrevService) {
+class HenleggelsesbrevService(
+    private val behandlingRepository: BehandlingRepository,
+    private val brevsporingService: BrevsporingService,
+    private val fagsakRepository: FagsakRepository,
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val pdfBrevService: PdfBrevService
+) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevData: Fritekstbrevsdata =
-                if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-                else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
-        pdfBrevService.sendBrev(behandling,
-                                fagsak,
-                                Brevtype.HENLEGGELSE,
-                                Brevdata(mottager = brevmottager,
-                                         metadata = fritekstbrevData.brevmetadata,
-                                         overskrift = fritekstbrevData.overskrift,
-                                         brevtekst = fritekstbrevData.brevtekst))
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+        pdfBrevService.sendBrev(
+            behandling,
+            fagsak,
+            Brevtype.HENLEGGELSE,
+            Brevdata(
+                mottager = brevmottager,
+                metadata = fritekstbrevData.brevmetadata,
+                overskrift = fritekstbrevData.overskrift,
+                brevtekst = fritekstbrevData.brevtekst
+            )
+        )
     }
 
     fun hentForhåndsvisningHenleggelsesbrev(behandlingUuid: UUID, fritekst: String?): ByteArray {
@@ -52,68 +58,88 @@ class HenleggelsesbrevService(private val behandlingRepository: BehandlingReposi
         val brevMottaker: Brevmottager = if (finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevMottaker)
         val fritekstbrevData: Fritekstbrevsdata =
-                if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-                else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
-        return pdfBrevService.genererForhåndsvisning(Brevdata(mottager = brevMottaker,
-                                                              metadata = fritekstbrevData.brevmetadata,
-                                                              overskrift = fritekstbrevData.overskrift,
-                                                              brevtekst = fritekstbrevData.brevtekst))
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+        return pdfBrevService.genererForhåndsvisning(
+            Brevdata(
+                mottager = brevMottaker,
+                metadata = fritekstbrevData.brevmetadata,
+                overskrift = fritekstbrevData.overskrift,
+                brevtekst = fritekstbrevData.brevtekst
+            )
+        )
     }
 
-    private fun lagHenleggelsebrev(behandling: Behandling,
-                                   fagsak: Fagsak,
-                                   fritekst: String?,
-                                   brevmottager: Brevmottager): Henleggelsesbrevsdokument {
+    private fun lagHenleggelsebrev(
+        behandling: Behandling,
+        fagsak: Fagsak,
+        fritekst: String?,
+        brevmottager: Brevmottager
+    ): Henleggelsesbrevsdokument {
 
         val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
-            throw IllegalStateException("Varselbrev er ikke sendt. Kan ikke forhåndsvise/sende " +
-                                        "henleggelsesbrev for behandlingId=${behandling.id} når varsel ikke er sendt.")
+            throw IllegalStateException(
+                "Varselbrev er ikke sendt. Kan ikke forhåndsvise/sende " +
+                    "henleggelsesbrev for behandlingId=${behandling.id} når varsel ikke er sendt."
+            )
         } else if (Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type && fritekst.isNullOrEmpty()) {
-            throw IllegalStateException("Kan ikke forhåndsvise/sende henleggelsesbrev uten fritekst for " +
-                                        "Tilbakekreving Revurdering med behandlingsid=${behandling.id}.")
+            throw IllegalStateException(
+                "Kan ikke forhåndsvise/sende henleggelsesbrev uten fritekst for " +
+                    "Tilbakekreving Revurdering med behandlingsid=${behandling.id}."
+            )
         }
 
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo,
-                                                                              brevmottager,
-                                                                              behandling.aktivVerge,
-                                                                              fagsak.fagsystem)
+        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
+            personinfo,
+            brevmottager,
+            behandling.aktivVerge,
+            fagsak.fagsystem
+        )
         val ansvarligSaksbehandler = if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             SIGNATUR_AUTOMATISK_HENLEGGELSESBREV
         } else {
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         }
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-        val metadata = Brevmetadata(behandlendeEnhetId = behandling.behandlendeEnhet,
-                                    behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                                    ytelsestype = fagsak.ytelsestype,
-                                    språkkode = fagsak.bruker.språkkode,
-                                    ansvarligSaksbehandler = ansvarligSaksbehandler,
-                                    sakspartId = personinfo.ident,
-                                    mottageradresse = adresseinfo,
-                                    saksnummer = fagsak.eksternFagsakId,
-                                    sakspartsnavn = personinfo.navn,
-                                    vergenavn = vergenavn,
-                                    finnesVerge = behandling.harVerge,
-                                    tittel = TITTEL_HENLEGGELSESBREV,
-                                    behandlingstype = behandling.type)
+        val metadata = Brevmetadata(
+            behandlendeEnhetId = behandling.behandlendeEnhet,
+            behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
+            ytelsestype = fagsak.ytelsestype,
+            språkkode = fagsak.bruker.språkkode,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            sakspartId = personinfo.ident,
+            mottageradresse = adresseinfo,
+            saksnummer = fagsak.eksternFagsakId,
+            sakspartsnavn = personinfo.navn,
+            vergenavn = vergenavn,
+            finnesVerge = behandling.harVerge,
+            tittel = TITTEL_HENLEGGELSESBREV,
+            behandlingstype = behandling.type
+        )
 
-        return Henleggelsesbrevsdokument(metadata,
-                                         brevSporing?.sporbar?.opprettetTid?.toLocalDate(),
-                                         fritekst)
+        return Henleggelsesbrevsdokument(
+            metadata,
+            brevSporing?.sporbar?.opprettetTid?.toLocalDate(),
+            fritekst
+        )
     }
 
     private fun lagHenleggelsesbrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata {
-        return Fritekstbrevsdata(TekstformatererHenleggelsesbrev.lagOverskrift(dokument.brevmetadata),
-                                 TekstformatererHenleggelsesbrev.lagFritekst(dokument),
-                                 dokument.brevmetadata)
+        return Fritekstbrevsdata(
+            TekstformatererHenleggelsesbrev.lagOverskrift(dokument.brevmetadata),
+            TekstformatererHenleggelsesbrev.lagFritekst(dokument),
+            dokument.brevmetadata
+        )
     }
 
     private fun lagRevurderingHenleggelsebrev(dokument: Henleggelsesbrevsdokument): Fritekstbrevsdata {
-        return Fritekstbrevsdata(TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(dokument.brevmetadata),
-                                 TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(dokument),
-                                 dokument.brevmetadata)
+        return Fritekstbrevsdata(
+            TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(dokument.brevmetadata),
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(dokument),
+            dokument.brevmetadata
+        )
     }
 
     companion object {

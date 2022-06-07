@@ -8,19 +8,21 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
-data class Fagsak(@Id
-                  val id: UUID = UUID.randomUUID(),
-                  @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val bruker: Bruker,
-                  val eksternFagsakId: String,
-                  val fagsystem: Fagsystem,
-                  val ytelsestype: Ytelsestype,
-                  @Version
-                  val versjon: Long = 0,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar()) {
+data class Fagsak(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val bruker: Bruker,
+    val eksternFagsakId: String,
+    val fagsystem: Fagsystem,
+    val ytelsestype: Ytelsestype,
+    @Version
+    val versjon: Long = 0,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+) {
 
     val ytelsesnavn
         get() = ytelsestype.navn[bruker.språkkode]
-                ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
+            ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
 }

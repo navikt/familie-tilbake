@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FerdigstillOppgaveTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Ferdigstiller oppgave for behandling",
-                     triggerTidVedFeilISekunder = 60 * 5L)
+@TaskStepBeskrivelse(
+    taskStepType = FerdigstillOppgaveTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Ferdigstiller oppgave for behandling",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -24,8 +26,10 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
         } else {
             null
         }
-        oppgaveService.ferdigstillOppgave(behandlingId = UUID.fromString(task.payload),
-                                          oppgavetype = oppgavetype)
+        oppgaveService.ferdigstillOppgave(
+            behandlingId = UUID.fromString(task.payload),
+            oppgavetype = oppgavetype
+        )
     }
 
     companion object {

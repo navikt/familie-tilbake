@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @ComponentScan(value = ["no.nav.familie.tilbake.kravgrunnlag"])
 @Profile("mock-økonomi")
-class OppdragClientLokalConfig(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                               private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository) {
+class OppdragClientLokalConfig(
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
+) {
 
     @Bean
     @Primary

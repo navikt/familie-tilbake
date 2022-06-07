@@ -31,7 +31,6 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var håndterGamleKravgrunnlagBatch: HåndterGamleKravgrunnlagBatch
 
-
     @Test
     fun `utfør skal ikke opprette tasker når det ikke finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
@@ -52,13 +51,17 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `utfør skal opprette tasker når det finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
-        val førsteXml = Testdata.økonomiXmlMottatt.copy(id = UUID.randomUUID(),
-                                                        sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)))
+        val førsteXml = Testdata.økonomiXmlMottatt.copy(
+            id = UUID.randomUUID(),
+            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9))
+        )
         mottattXmlRepository.insert(førsteXml)
 
-        val andreXml = Testdata.økonomiXmlMottatt.copy(id = UUID.randomUUID(),
-                                                       sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(7)),
-                                                       ytelsestype = Ytelsestype.SKOLEPENGER)
+        val andreXml = Testdata.økonomiXmlMottatt.copy(
+            id = UUID.randomUUID(),
+            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(7)),
+            ytelsestype = Ytelsestype.SKOLEPENGER
+        )
         mottattXmlRepository.insert(andreXml)
 
         val tredjeXml = Testdata.økonomiXmlMottatt

@@ -36,58 +36,74 @@ import java.util.TreeMap
 
 class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
-    private val januar = Handlebarsperiode(LocalDate.of(2019, 1, 1),
-                                           LocalDate.of(2019, 1, 31))
+    private val januar = Handlebarsperiode(
+        LocalDate.of(2019, 1, 1),
+        LocalDate.of(2019, 1, 31)
+    )
 
-    private val brevmetadata = Brevmetadata(sakspartId = "123456",
-                                            sakspartsnavn = "Test",
-                                            mottageradresse = Adresseinfo("ident", "bob"),
-                                            språkkode = Språkkode.NB,
-                                            ytelsestype = Ytelsestype.BARNETRYGD,
-                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-                                            saksnummer = "1232456",
-                                            ansvarligSaksbehandler = "Bob")
+    private val brevmetadata = Brevmetadata(
+        sakspartId = "123456",
+        sakspartsnavn = "Test",
+        mottageradresse = Adresseinfo("ident", "bob"),
+        språkkode = Språkkode.NB,
+        ytelsestype = Ytelsestype.BARNETRYGD,
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        saksnummer = "1232456",
+        ansvarligSaksbehandler = "Bob"
+    )
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG`() {
-        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
-                            Språkkode.NB,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.OVERGANGSSTØNAD,
+            Språkkode.NB,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFOG nynorsk`() {
-        lagTeksterOgValider(Ytelsestype.OVERGANGSSTØNAD,
-                            Språkkode.NN,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.OVERGANGSSTØNAD,
+            Språkkode.NN,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT`() {
-        lagTeksterOgValider(Ytelsestype.BARNETILSYN,
-                            Språkkode.NB,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.BARNETILSYN,
+            Språkkode.NB,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFBT nynorsk`() {
-        lagTeksterOgValider(Ytelsestype.BARNETILSYN,
-                            Språkkode.NN,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.BARNETILSYN,
+            Språkkode.NN,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP`() {
-        lagTeksterOgValider(Ytelsestype.SKOLEPENGER,
-                            Språkkode.NB,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.SKOLEPENGER,
+            Språkkode.NB,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
     fun `lagDeltekst skal støtte alle permutasjoner av fakta for EFSP nynorsk`() {
-        lagTeksterOgValider(Ytelsestype.SKOLEPENGER,
-                            Språkkode.NN,
-                            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING))
+        lagTeksterOgValider(
+            Ytelsestype.SKOLEPENGER,
+            Språkkode.NN,
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+        )
     }
 
     @Test
@@ -101,9 +117,11 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     }
 
     @SafeVarargs
-    private fun lagTeksterOgValider(ytelsestype: Ytelsestype,
-                                    språkkode: Språkkode,
-                                    vararg unntak: HendelseMedUndertype) {
+    private fun lagTeksterOgValider(
+        ytelsestype: Ytelsestype,
+        språkkode: Språkkode,
+        vararg unntak: HendelseMedUndertype
+    ) {
         val felles: HbVedtaksbrevFelles = lagFellesBuilder(språkkode, ytelsestype)
 
         val resultat = lagFaktatekster(felles, ytelsestype)
@@ -113,15 +131,15 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     private fun sjekkVerdier(verdier: Map<HendelseMedUndertype, String>, vararg unntattUnikhet: HendelseMedUndertype) {
         val tekstTilHendelsestyper = TreeMap<String, MutableSet<HendelseMedUndertype>>()
         verdier.filter { (key, _) -> key !in unntattUnikhet }
-                .forEach { (key, value) ->
-                    if (tekstTilHendelsestyper.containsKey(value)) {
-                        tekstTilHendelsestyper[value]!!.add(key)
-                    } else {
-                        val liste: MutableSet<HendelseMedUndertype> = HashSet()
-                        liste.add(key)
-                        tekstTilHendelsestyper[value] = liste
-                    }
+            .forEach { (key, value) ->
+                if (tekstTilHendelsestyper.containsKey(value)) {
+                    tekstTilHendelsestyper[value]!!.add(key)
+                } else {
+                    val liste: MutableSet<HendelseMedUndertype> = HashSet()
+                    liste.add(key)
+                    tekstTilHendelsestyper[value] = liste
                 }
+            }
         val feilmelding = tekstTilHendelsestyper.filter { (_, value) -> value.size > 1 }.map { (key, value) ->
             """$value mapper alle til "$key"""
         }.joinToString("\n")
@@ -143,42 +161,59 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     }
 
     private fun lagPeriodeBuilder(fakta: HbFakta): HbVedtaksbrevsperiode {
-        return HbVedtaksbrevsperiode(periode = januar,
-                                     kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                                                   utbetaltBeløp = BigDecimal.valueOf(33333),
-                                                                   riktigBeløp = BigDecimal.valueOf(23333)),
-                                     vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                                                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                                                                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                                                                 beløpIBehold = BigDecimal.valueOf(10000)),
-                                     resultat = HbResultat(tilbakekrevesBeløp = BigDecimal(10000),
-                                                           rentebeløp = BigDecimal(1000),
-                                                           tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)),
-                                     fakta = fakta)
+        return HbVedtaksbrevsperiode(
+            periode = januar,
+            kravgrunnlag = HbKravgrunnlag(
+                feilutbetaltBeløp = BigDecimal.valueOf(10000),
+                utbetaltBeløp = BigDecimal.valueOf(33333),
+                riktigBeløp = BigDecimal.valueOf(23333)
+            ),
+            vurderinger = HbVurderinger(
+                foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                aktsomhetsresultat = AnnenVurdering.GOD_TRO,
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                beløpIBehold = BigDecimal.valueOf(10000)
+            ),
+            resultat = HbResultat(
+                tilbakekrevesBeløp = BigDecimal(10000),
+                rentebeløp = BigDecimal(1000),
+                tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)
+            ),
+            fakta = fakta
+        )
     }
 
     private fun lagFellesBuilder(språkkode: Språkkode, ytelsestype: Ytelsestype) =
-            HbVedtaksbrevFelles(brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
-                                hjemmel = HbHjemmel("Folketrygdloven"),
-                                totalresultat = HbTotalresultat(hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
-                                                                totaltRentebeløp = BigDecimal.valueOf(1000),
-                                                                totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
-                                                                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
-                                                                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                                                                BigDecimal.valueOf(11000)),
-                                varsel = HbVarsel(varsletBeløp = BigDecimal.valueOf(10000),
-                                                  varsletDato = LocalDate.now().minusDays(100)),
-                                konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-                                søker = HbPerson(navn = "Søker Søkersen",
-                                                 dødsdato = LocalDate.of(2018, 3, 1)),
-                                fagsaksvedtaksdato = LocalDate.now(),
-                                behandling = HbBehandling(),
-                                totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-                                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-                                ansvarligBeslutter = "ansvarlig person sin signatur",
-                                datoer = HbVedtaksbrevDatoer(opphørsdatoDødSøker = LocalDate.of(2021, 5, 4),
-                                                             opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4)))
-
+        HbVedtaksbrevFelles(
+            brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
+            hjemmel = HbHjemmel("Folketrygdloven"),
+            totalresultat = HbTotalresultat(
+                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                totaltRentebeløp = BigDecimal.valueOf(1000),
+                totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
+                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
+                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                BigDecimal.valueOf(11000)
+            ),
+            varsel = HbVarsel(
+                varsletBeløp = BigDecimal.valueOf(10000),
+                varsletDato = LocalDate.now().minusDays(100)
+            ),
+            konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+            søker = HbPerson(
+                navn = "Søker Søkersen",
+                dødsdato = LocalDate.of(2018, 3, 1)
+            ),
+            fagsaksvedtaksdato = LocalDate.now(),
+            behandling = HbBehandling(),
+            totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+            ansvarligBeslutter = "ansvarlig person sin signatur",
+            datoer = HbVedtaksbrevDatoer(
+                opphørsdatoDødSøker = LocalDate.of(2021, 5, 4),
+                opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4)
+            )
+        )
 
     private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> {
         return HendelsestypePerYtelsestype.getHendelsestyper(ytelsestype).map { hendelsestype ->

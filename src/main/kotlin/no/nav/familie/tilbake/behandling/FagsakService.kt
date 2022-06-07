@@ -25,11 +25,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FagsakService(private val fagsakRepository: FagsakRepository,
-                    private val behandlingRepository: BehandlingRepository,
-                    private val taskRepository: TaskRepository,
-                    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-                    private val personService: PersonService) {
+class FagsakService(
+    private val fagsakRepository: FagsakRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val taskRepository: TaskRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
+    private val personService: PersonService
+) {
 
     fun hentFagsak(fagsakId: UUID): Fagsak {
         return fagsakRepository.findByIdOrThrow(fagsakId)
@@ -37,25 +39,35 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     @Transactional(readOnly = true)
     fun hentFagsak(fagsystem: Fagsystem, eksternFagsakId: String): FagsakDto {
-        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
-                                                                        eksternFagsakId = eksternFagsakId)
-                     ?: throw Feil(message = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
-                                   frontendFeilmelding = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
-                                   httpStatus = HttpStatus.BAD_REQUEST)
-        val personInfo = personService.hentPersoninfo(personIdent = fagsak.bruker.ident,
-                                                      fagsystem = fagsak.fagsystem)
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId
+        )
+            ?: throw Feil(
+                message = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
+                frontendFeilmelding = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
+        val personInfo = personService.hentPersoninfo(
+            personIdent = fagsak.bruker.ident,
+            fagsystem = fagsak.fagsystem
+        )
         val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
 
-        return FagsakMapper.tilRespons(fagsak = fagsak,
-                                       personinfo = personInfo,
-                                       behandlinger = behandlinger)
+        return FagsakMapper.tilRespons(
+            fagsak = fagsak,
+            personinfo = personInfo,
+            behandlinger = behandlinger
+        )
     }
 
     @Transactional
     fun finnFagsak(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak? {
-        return fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
-                                                                  eksternFagsakId = eksternFagsakId)
-   }
+        return fagsakRepository.findByFagsystemAndEksternFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId
+        )
+    }
 
     @Transactional
     fun finnFagsystem(fagsakId: UUID): Fagsystem {
@@ -67,35 +79,51 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         return fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
     }
     @Transactional
-    fun opprettFagsak(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-                      ytelsestype: Ytelsestype,
-                      fagsystem: Fagsystem): Fagsak {
-        val bruker = Bruker(ident = opprettTilbakekrevingRequest.personIdent,
-                            språkkode = opprettTilbakekrevingRequest.språkkode)
-        return fagsakRepository.insert(Fagsak(bruker = bruker,
-                                              eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
-                                              ytelsestype = ytelsestype,
-                                              fagsystem = fagsystem))
+    fun opprettFagsak(
+        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+        ytelsestype: Ytelsestype,
+        fagsystem: Fagsystem
+    ): Fagsak {
+        val bruker = Bruker(
+            ident = opprettTilbakekrevingRequest.personIdent,
+            språkkode = opprettTilbakekrevingRequest.språkkode
+        )
+        return fagsakRepository.insert(
+            Fagsak(
+                bruker = bruker,
+                eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
+                ytelsestype = ytelsestype,
+                fagsystem = fagsystem
+            )
+        )
     }
 
     @Transactional(readOnly = true)
     fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingResponse {
-        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
-                                                                        eksternFagsakId = eksternFagsakId)
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId
+        )
         var finnesÅpenBehandling = false
         if (fagsak != null) {
             finnesÅpenBehandling =
-                    behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype = fagsak.ytelsestype,
-                                                                           eksternFagsakId = eksternFagsakId) != null
+                behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                ytelsestype = fagsak.ytelsestype,
+                eksternFagsakId = eksternFagsakId
+            ) != null
         }
         return FinnesBehandlingResponse(finnesÅpenBehandling = finnesÅpenBehandling)
     }
 
     @Transactional(readOnly = true)
-    fun hentBehandlingerForFagsak(fagsystem: Fagsystem,
-                                  eksternFagsakId: String): List<no.nav.familie.kontrakter.felles.tilbakekreving.Behandling> {
-        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(fagsystem = fagsystem,
-                                                                        eksternFagsakId = eksternFagsakId)
+    fun hentBehandlingerForFagsak(
+        fagsystem: Fagsystem,
+        eksternFagsakId: String
+    ): List<no.nav.familie.kontrakter.felles.tilbakekreving.Behandling> {
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId
+        )
 
         return fagsak?.let {
             val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
@@ -104,51 +132,71 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     @Transactional(readOnly = true)
-    fun kanBehandlingOpprettesManuelt(eksternFagsakId: String,
-                                      ytelsestype: Ytelsestype): KanBehandlingOpprettesManueltRespons {
+    fun kanBehandlingOpprettesManuelt(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype
+    ): KanBehandlingOpprettesManueltRespons {
         val finnesÅpenTilbakekreving: Boolean =
-                behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
         if (finnesÅpenTilbakekreving) {
-            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes allerede en åpen tilbakekrevingsbehandling. " +
-                                                                  "Den ligger i saksoversikten.")
+            return KanBehandlingOpprettesManueltRespons(
+                kanBehandlingOpprettes = false,
+                melding = "Det finnes allerede en åpen tilbakekrevingsbehandling. " +
+                    "Den ligger i saksoversikten."
+            )
         }
         val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (kravgrunnlagene.isEmpty()) {
-            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes ingen feilutbetaling på saken, så du kan " +
-                                                                  "ikke opprette tilbakekrevingsbehandling.")
+            return KanBehandlingOpprettesManueltRespons(
+                kanBehandlingOpprettes = false,
+                melding = "Det finnes ingen feilutbetaling på saken, så du kan " +
+                    "ikke opprette tilbakekrevingsbehandling."
+            )
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
-                taskRepository.findByStatusIn(listOf(Status.UBEHANDLET, Status.BEHANDLER,
-                                                     Status.KLAR_TIL_PLUKK, Status.PLUKKET,
-                                                     Status.FEILET), Pageable.unpaged())
-                        .any {
-                            OpprettBehandlingManueltTask.TYPE == it.type &&
-                            eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
-                            ytelsestype.kode == it.metadata.getProperty("ytelsestype")
-                            kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
-                        }
+            taskRepository.findByStatusIn(
+                listOf(
+                    Status.UBEHANDLET, Status.BEHANDLER,
+                    Status.KLAR_TIL_PLUKK, Status.PLUKKET,
+                    Status.FEILET
+                ),
+                Pageable.unpaged()
+            )
+                .any {
+                    OpprettBehandlingManueltTask.TYPE == it.type &&
+                        eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
+                        ytelsestype.kode == it.metadata.getProperty("ytelsestype")
+                    kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
+                }
 
         if (harAlledeMottattForespørselen) {
-            return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false,
-                                                        melding = "Det finnes allerede en forespørsel om å opprette " +
-                                                                  "tilbakekrevingsbehandling. Behandlingen vil snart bli " +
-                                                                  "tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
-                                                                  "ta kontakt med brukerstøtte for å rapportere feilen.")
+            return KanBehandlingOpprettesManueltRespons(
+                kanBehandlingOpprettes = false,
+                melding = "Det finnes allerede en forespørsel om å opprette " +
+                    "tilbakekrevingsbehandling. Behandlingen vil snart bli " +
+                    "tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
+                    "ta kontakt med brukerstøtte for å rapportere feilen."
+            )
         }
-        return KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true,
-                                                    kravgrunnlagsreferanse = kravgrunnlagsreferanse,
-                                                    melding = "Det er mulig å opprette behandling manuelt.")
+        return KanBehandlingOpprettesManueltRespons(
+            kanBehandlingOpprettes = true,
+            kravgrunnlagsreferanse = kravgrunnlagsreferanse,
+            melding = "Det er mulig å opprette behandling manuelt."
+        )
     }
 
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun oppdaterPersonIdent(endretPersonIdentEvent: EndretPersonIdentEvent) {
         val fagsak = fagsakRepository.findByIdOrThrow(endretPersonIdentEvent.fagsakId)
-        fagsakRepository.update(fagsak.copy(bruker = Bruker(ident = endretPersonIdentEvent.source as String,
-                                                            språkkode = fagsak.bruker.språkkode)))
+        fagsakRepository.update(
+            fagsak.copy(
+                bruker = Bruker(
+                    ident = endretPersonIdentEvent.source as String,
+                    språkkode = fagsak.bruker.språkkode
+                )
+            )
+        )
     }
-
 }

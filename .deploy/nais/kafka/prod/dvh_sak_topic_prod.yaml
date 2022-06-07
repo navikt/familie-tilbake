@@ -21,3 +21,7 @@ spec:
     - team: ptsak
       application: pt-sak-famtilbake
       access: read
+    - team: teamfamilie
+      application: familie-tilbake-kafka-manager #forvalter
+      access: read   # read
+

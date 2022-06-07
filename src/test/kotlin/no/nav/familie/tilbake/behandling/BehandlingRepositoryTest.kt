@@ -31,10 +31,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        lagretBehandling.shouldBeEqualToComparingFieldsExcept(behandling,
-                                                              Behandling::endretTidspunkt,
-                                                              Behandling::sporbar,
-                                                              Behandling::versjon)
+        lagretBehandling.shouldBeEqualToComparingFieldsExcept(
+            behandling,
+            Behandling::endretTidspunkt,
+            Behandling::sporbar,
+            Behandling::versjon
+        )
         lagretBehandling.versjon shouldBe 1
     }
 
@@ -47,11 +49,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(oppdatertBehandling)
 
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        lagretBehandling.shouldBeEqualToComparingFieldsExcept(oppdatertBehandling,
-                                                              Behandling::endretTidspunkt,
-                                                              Behandling::sporbar,
-                                                              Behandling::versjon)
+        lagretBehandling.shouldBeEqualToComparingFieldsExcept(
+            oppdatertBehandling,
+            Behandling::endretTidspunkt,
+            Behandling::sporbar,
+            Behandling::versjon
+        )
         lagretBehandling.versjon shouldBe 2
     }
-
 }

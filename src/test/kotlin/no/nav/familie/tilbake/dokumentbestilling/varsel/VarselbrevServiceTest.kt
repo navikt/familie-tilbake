@@ -37,10 +37,12 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        varselbrevService = VarselbrevService(fagsakRepository,
-                                              eksterneDataForBrevService,
-                                              pdfBrevService,
-                                              varselbrevUtil)
+        varselbrevService = VarselbrevService(
+            fagsakRepository,
+            eksterneDataForBrevService,
+            pdfBrevService,
+            varselbrevUtil
+        )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
@@ -50,23 +52,31 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 
-
     @Test
     fun hentForhåndsvisningVarselbrev() {
         val forhåndsvisVarselbrevRequest =
-                ForhåndsvisVarselbrevRequest("Dette er et varsel!",
-                                             Ytelsestype.BARNETRYGD,
-                                             "1570",
-                                             "Bodø",
-                                             "321321",
-                                             Språkkode.NN,
-                                             LocalDate.now(),
-                                             FeilutbetaltePerioderDto(157468, listOf(Periode(LocalDate.of(2020, 5, 4),
-                                                                                             LocalDate.now()))),
-                                             Fagsystem.EF,
-                                             "321654",
-                                             Testdata.fagsak.bruker.ident,
-                                             null)
+            ForhåndsvisVarselbrevRequest(
+                "Dette er et varsel!",
+                Ytelsestype.BARNETRYGD,
+                "1570",
+                "Bodø",
+                "321321",
+                Språkkode.NN,
+                LocalDate.now(),
+                FeilutbetaltePerioderDto(
+                    157468,
+                    listOf(
+                        Periode(
+                            LocalDate.of(2020, 5, 4),
+                            LocalDate.now()
+                        )
+                    )
+                ),
+                Fagsystem.EF,
+                "321654",
+                Testdata.fagsak.bruker.ident,
+                null
+            )
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
 //        File("test.pdf").writeBytes(bytes)

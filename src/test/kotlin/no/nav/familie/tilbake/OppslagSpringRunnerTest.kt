@@ -56,7 +56,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 
-
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -95,7 +94,6 @@ abstract class OppslagSpringRunnerTest {
 
     protected fun lokalTestToken(): String = mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost").serialize()
 
-
     protected fun localhost(uri: String): String {
         return LOCALHOST + getPort() + uri
     }
@@ -111,47 +109,49 @@ abstract class OppslagSpringRunnerTest {
 
     private fun clearCaches() {
         cacheManager.cacheNames.mapNotNull { cacheManager.getCache(it) }
-                .forEach { it.clear() }
+            .forEach { it.clear() }
     }
 
     private fun resetDatabase() {
-        listOf(Fagsak::class,
-               Behandling::class,
-               Behandlingsårsak::class,
-               Fagsystemsbehandling::class,
-               Fagsystemskonsekvens::class,
-               Behandlingsstegstilstand::class,
-               Behandlingsresultat::class,
-               Behandlingsvedtak::class,
-               Totrinnsvurdering::class,
-               VurdertForeldelse::class,
-               Foreldelsesperiode::class,
-               Kravgrunnlag431::class,
-               Kravgrunnlagsperiode432::class,
-               Kravgrunnlagsbeløp433::class,
-               Vilkårsvurdering::class,
-               Vilkårsvurderingsperiode::class,
-               VilkårsvurderingAktsomhet::class,
-               VilkårsvurderingSærligGrunn::class,
-               VilkårsvurderingGodTro::class,
-               FaktaFeilutbetaling::class,
-               FaktaFeilutbetalingsperiode::class,
-               ØkonomiXmlMottatt::class,
-               Vedtaksbrevsoppsummering::class,
-               Vedtaksbrevsperiode::class,
-               ØkonomiXmlSendt::class,
-               Varsel::class,
-               Varselsperiode::class,
-               Brevsporing::class,
-               ØkonomiXmlMottattArkiv::class,
-               Verge::class,
-               Avstemmingsfil::class,
-               HentFagsystemsbehandlingRequestSendt::class,
-               Task::class,
-               TaskLogg::class,
-               Meldingstelling::class)
-                .reversed()
-                .forEach { jdbcAggregateOperations.deleteAll(it.java) }
+        listOf(
+            Fagsak::class,
+            Behandling::class,
+            Behandlingsårsak::class,
+            Fagsystemsbehandling::class,
+            Fagsystemskonsekvens::class,
+            Behandlingsstegstilstand::class,
+            Behandlingsresultat::class,
+            Behandlingsvedtak::class,
+            Totrinnsvurdering::class,
+            VurdertForeldelse::class,
+            Foreldelsesperiode::class,
+            Kravgrunnlag431::class,
+            Kravgrunnlagsperiode432::class,
+            Kravgrunnlagsbeløp433::class,
+            Vilkårsvurdering::class,
+            Vilkårsvurderingsperiode::class,
+            VilkårsvurderingAktsomhet::class,
+            VilkårsvurderingSærligGrunn::class,
+            VilkårsvurderingGodTro::class,
+            FaktaFeilutbetaling::class,
+            FaktaFeilutbetalingsperiode::class,
+            ØkonomiXmlMottatt::class,
+            Vedtaksbrevsoppsummering::class,
+            Vedtaksbrevsperiode::class,
+            ØkonomiXmlSendt::class,
+            Varsel::class,
+            Varselsperiode::class,
+            Brevsporing::class,
+            ØkonomiXmlMottattArkiv::class,
+            Verge::class,
+            Avstemmingsfil::class,
+            HentFagsystemsbehandlingRequestSendt::class,
+            Task::class,
+            TaskLogg::class,
+            Meldingstelling::class
+        )
+            .reversed()
+            .forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {

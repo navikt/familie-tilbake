@@ -9,26 +9,34 @@ import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 
 object FagsakMapper {
 
-    fun tilRespons(fagsak: Fagsak,
-                   personinfo: Personinfo,
-                   behandlinger: List<Behandling>): FagsakDto {
-        val bruker = BrukerDto(personIdent = fagsak.bruker.ident,
-                               navn = personinfo.navn,
-                               fødselsdato = personinfo.fødselsdato,
-                               kjønn = personinfo.kjønn,
-                               dødsdato = personinfo.dødsdato)
+    fun tilRespons(
+        fagsak: Fagsak,
+        personinfo: Personinfo,
+        behandlinger: List<Behandling>
+    ): FagsakDto {
+        val bruker = BrukerDto(
+            personIdent = fagsak.bruker.ident,
+            navn = personinfo.navn,
+            fødselsdato = personinfo.fødselsdato,
+            kjønn = personinfo.kjønn,
+            dødsdato = personinfo.dødsdato
+        )
 
         val behandlingListe = behandlinger.map {
-            BehandlingsoppsummeringDto(behandlingId = it.id,
-                                       eksternBrukId = it.eksternBrukId,
-                                       type = it.type,
-                                       status = it.status)
+            BehandlingsoppsummeringDto(
+                behandlingId = it.id,
+                eksternBrukId = it.eksternBrukId,
+                type = it.type,
+                status = it.status
+            )
         }
-        return FagsakDto(eksternFagsakId = fagsak.eksternFagsakId,
-                         ytelsestype = fagsak.ytelsestype,
-                         fagsystem = fagsak.fagsystem,
-                         språkkode = fagsak.bruker.språkkode,
-                         bruker = bruker,
-                         behandlinger = behandlingListe)
+        return FagsakDto(
+            eksternFagsakId = fagsak.eksternFagsakId,
+            ytelsestype = fagsak.ytelsestype,
+            fagsystem = fagsak.fagsystem,
+            språkkode = fagsak.bruker.språkkode,
+            bruker = bruker,
+            behandlinger = behandlingListe
+        )
     }
 }

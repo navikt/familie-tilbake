@@ -23,12 +23,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class VergeService(private val behandlingRepository: BehandlingRepository,
-                   private val fagsakRepository: FagsakRepository,
-                   private val historikkTaskService: HistorikkTaskService,
-                   private val behandlingskontrollService: BehandlingskontrollService,
-                   private val integrasjonerClient: IntegrasjonerClient,
-                   private val personService: PersonService) {
+class VergeService(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val historikkTaskService: HistorikkTaskService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val personService: PersonService
+) {
 
     @Transactional
     fun lagreVerge(behandlingId: UUID, vergeDto: VergeDto) {
@@ -40,9 +42,11 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
         val verge = tilDomene(vergeDto)
         val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet() + verge)
         behandlingRepository.update(oppdatertBehandling)
-        historikkTaskService.lagHistorikkTask(behandling.id,
-                                              TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                                              Aktør.SAKSBEHANDLER)
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
+            Aktør.SAKSBEHANDLER
+        )
     }
 
     @Transactional
@@ -60,13 +64,19 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
         if (finnesAktivVerge) {
             val oppdatertBehandling = behandling.copy(verger = behandling.verger.map { it.copy(aktiv = false) }.toSet())
             behandlingRepository.update(oppdatertBehandling)
-            historikkTaskService.lagHistorikkTask(behandling.id,
-                                                  TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                                                  Aktør.SAKSBEHANDLER)
+            historikkTaskService.lagHistorikkTask(
+                behandling.id,
+                TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
+                Aktør.SAKSBEHANDLER
+            )
         }
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.VERGE,
-                                                                                      Behandlingsstegstatus.TILBAKEFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.VERGE,
+                Behandlingsstegstatus.TILBAKEFØRT
+            )
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
@@ -78,14 +88,18 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
 
     private fun validerBehandling(behandling: Behandling) {
         if (behandling.erSaksbehandlingAvsluttet) {
-            throw Feil("Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                       frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
         if (behandlingskontrollService.erBehandlingPåVent(behandling.id)) {
-            throw Feil("Behandling med id=${behandling.id} er på vent.",
-                       frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Behandling med id=${behandling.id} er på vent.",
+                frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -95,33 +109,39 @@ class VergeService(private val behandlingRepository: BehandlingRepository,
                 requireNotNull(vergeDto.orgNr) { "orgNr kan ikke være null for ${Vergetype.ADVOKAT}" }
                 val erGyldig = integrasjonerClient.validerOrganisasjon(vergeDto.orgNr)
                 if (!erGyldig) {
-                    throw Feil(message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
-                               frontendFeilmelding = "Organisasjon ${vergeDto.orgNr} er ikke gyldig")
+                    throw Feil(
+                        message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
+                        frontendFeilmelding = "Organisasjon ${vergeDto.orgNr} er ikke gyldig"
+                    )
                 }
             }
             else -> {
                 requireNotNull(vergeDto.ident) { "ident kan ikke være null for ${vergeDto.type}" }
-                //Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
+                // Henter personen å verifisere om det finnes. Hvis det ikke finnes, kaster det en exception
                 personService.hentPersoninfo(vergeDto.ident, fagsystem)
             }
         }
     }
 
     private fun tilDomene(vergeDto: VergeDto): Verge {
-        return Verge(ident = vergeDto.ident,
-                     orgNr = vergeDto.orgNr,
-                     aktiv = true,
-                     type = vergeDto.type,
-                     navn = vergeDto.navn,
-                     kilde = Applikasjon.FAMILIE_TILBAKE.name,
-                     begrunnelse = vergeDto.begrunnelse)
+        return Verge(
+            ident = vergeDto.ident,
+            orgNr = vergeDto.orgNr,
+            aktiv = true,
+            type = vergeDto.type,
+            navn = vergeDto.navn,
+            kilde = Applikasjon.FAMILIE_TILBAKE.name,
+            begrunnelse = vergeDto.begrunnelse
+        )
     }
 
     private fun tilRespons(verge: Verge): VergeDto {
-        return VergeDto(ident = verge.ident,
-                        orgNr = verge.orgNr,
-                        type = verge.type,
-                        navn = verge.navn,
-                        begrunnelse = verge.begrunnelse)
+        return VergeDto(
+            ident = verge.ident,
+            orgNr = verge.orgNr,
+            type = verge.type,
+            navn = verge.navn,
+            begrunnelse = verge.begrunnelse
+        )
     }
 }

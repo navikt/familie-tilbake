@@ -6,13 +6,16 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformatere
 object TekstformatererHeader {
 
     fun lagHeader(brevmetadata: Brevmetadata, overskrift: String): String {
-        return lagHeader(HeaderData(brevmetadata.språkkode,
-                                    Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
-                                    Brev(overskrift)))
+        return lagHeader(
+            HeaderData(
+                brevmetadata.språkkode,
+                Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
+                Brev(overskrift)
+            )
+        )
     }
 
     private fun lagHeader(data: HeaderData): String {
         return FellesTekstformaterer.lagBrevtekst(data, "header")
     }
-
 }

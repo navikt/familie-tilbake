@@ -7,13 +7,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Table
-class Meldingstelling(@Id
-                      val id: UUID = UUID.randomUUID(),
-                      val fagsystem: Fagsystem,
-                      val type: Meldingstype,
-                      val status: Mottaksstatus,
-                      val antall: Int = 1,
-                      val dato: LocalDate = LocalDate.now())
+class Meldingstelling(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fagsystem: Fagsystem,
+    val type: Meldingstype,
+    val status: Mottaksstatus,
+    val antall: Int = 1,
+    val dato: LocalDate = LocalDate.now()
+)
 
 enum class Mottaksstatus {
     KOBLET,

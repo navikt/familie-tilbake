@@ -18,9 +18,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HentKravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                              private val oppdragClient: OppdragClient,
-                              private val historikkService: HistorikkService) {
+class HentKravgrunnlagService(
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val oppdragClient: OppdragClient,
+    private val historikkService: HistorikkService
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -42,26 +44,31 @@ class HentKravgrunnlagService(private val kravgrunnlagRepository: KravgrunnlagRe
 
     @Transactional
     fun opprettHistorikkinnslag(behandlingId: UUID) {
-        logger.info("Oppretter historikkinnslag ${TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT} " +
-                    "for behandling $behandlingId")
-        historikkService.lagHistorikkinnslag(behandlingId = behandlingId,
-                                             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
-                                             aktør = Aktør.VEDTAKSLØSNING,
-                                             opprettetTidspunkt = LocalDateTime.now())
+        logger.info(
+            "Oppretter historikkinnslag ${TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT} " +
+                "for behandling $behandlingId"
+        )
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
+            aktør = Aktør.VEDTAKSLØSNING,
+            opprettetTidspunkt = LocalDateTime.now()
+        )
     }
 
-    private fun lagRequest(kravgrunnlagId: BigInteger,
-                           kodeAksjon: KodeAksjon): KravgrunnlagHentDetaljRequest {
+    private fun lagRequest(
+        kravgrunnlagId: BigInteger,
+        kodeAksjon: KodeAksjon
+    ): KravgrunnlagHentDetaljRequest {
         val hentkravgrunnlag = HentKravgrunnlagDetaljDto()
         hentkravgrunnlag.kravgrunnlagId = kravgrunnlagId
         hentkravgrunnlag.kodeAksjon = kodeAksjon.kode
-        hentkravgrunnlag.enhetAnsvarlig = "8020" //fast verdi
-        hentkravgrunnlag.saksbehId = "K231B433" //fast verdi
+        hentkravgrunnlag.enhetAnsvarlig = "8020" // fast verdi
+        hentkravgrunnlag.saksbehId = "K231B433" // fast verdi
 
         val request = KravgrunnlagHentDetaljRequest()
         request.hentkravgrunnlag = hentkravgrunnlag
 
         return request
     }
-
 }

@@ -18,18 +18,23 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
-        logger.info("Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
-                    "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen")
+        logger.info(
+            "Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
+                "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen"
+        )
     }
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VARSEL} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.VARSEL,
-                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.VARSEL,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
-
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {

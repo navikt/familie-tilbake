@@ -95,8 +95,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
-    private val perioder = listOf(Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-                                  Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)))
+    private val perioder = listOf(
+        Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+        Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+    )
     private lateinit var kravgrunnlag431: Kravgrunnlag431
 
     @BeforeEach
@@ -112,13 +114,15 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         wireMockServer.start()
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))
 
-        iverksettelseService = IverksettelseService(behandlingRepository,
-                                                    kravgrunnlagRepository,
-                                                    økonomiXmlSendtRepository,
-                                                    tilbakekrevingsvedtakBeregningService,
-                                                    beregningService,
-                                                    behandlingVedtakService,
-                                                    oppdragClient)
+        iverksettelseService = IverksettelseService(
+            behandlingRepository,
+            kravgrunnlagRepository,
+            økonomiXmlSendtRepository,
+            tilbakekrevingsvedtakBeregningService,
+            beregningService,
+            behandlingVedtakService,
+            oppdragClient
+        )
     }
 
     @AfterEach
@@ -129,9 +133,19 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandlingId))
-                                       .willReturn(WireMock.okJson(Ressurs.success(lagRespons("00",
-                                                                                              "OK")).toJson())))
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandlingId))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            lagRespons(
+                                "00",
+                                "OK"
+                            )
+                        ).toJson()
+                    )
+                )
+        )
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
@@ -148,15 +162,25 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandlingId))
-                                       .willReturn(WireMock.okJson(Ressurs.success(lagRespons("10",
-                                                                                              "feil")).toJson())))
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandlingId))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            lagRespons(
+                                "10",
+                                "feil"
+                            )
+                        ).toJson()
+                    )
+                )
+        )
 
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
-                "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
+            "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         økonomiXmlSendt.shouldNotBeNull()
@@ -165,75 +189,99 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {
-        val feilPostering = lagKravgrunnlagsbeløp(klassetype = Klassetype.FEIL,
-                                                  klassekode = Klassekode.KL_KODE_FEIL_BA,
-                                                  nyttBeløp = BigDecimal(5000))
+        val feilPostering = lagKravgrunnlagsbeløp(
+            klassetype = Klassetype.FEIL,
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            nyttBeløp = BigDecimal(5000)
+        )
 
-        val ytelPostering = lagKravgrunnlagsbeløp(klassetype = Klassetype.YTEL,
-                                                  klassekode = Klassekode.BATR,
-                                                  utbetaltBeløp = BigDecimal(5000),
-                                                  tilbakekrevesBeløp = BigDecimal(5000))
+        val ytelPostering = lagKravgrunnlagsbeløp(
+            klassetype = Klassetype.YTEL,
+            klassekode = Klassekode.BATR,
+            utbetaltBeløp = BigDecimal(5000),
+            tilbakekrevesBeløp = BigDecimal(5000)
+        )
 
         val kravgrunnlagsperioder = perioder.map {
-            Kravgrunnlagsperiode432(periode = it,
-                                    månedligSkattebeløp = BigDecimal.ZERO,
-                                    beløp = setOf(feilPostering.copy(id = UUID.randomUUID()),
-                                                  ytelPostering.copy(id = UUID.randomUUID())))
+            Kravgrunnlagsperiode432(
+                periode = it,
+                månedligSkattebeløp = BigDecimal.ZERO,
+                beløp = setOf(
+                    feilPostering.copy(id = UUID.randomUUID()),
+                    ytelPostering.copy(id = UUID.randomUUID())
+                )
+            )
         }.toSet()
 
-        val kravgrunnlag = Kravgrunnlag431(behandlingId = behandlingId,
-                                           vedtakId = BigInteger.ZERO,
-                                           kravstatuskode = Kravstatuskode.NYTT,
-                                           fagområdekode = Fagområdekode.BA,
-                                           fagsystemId = fagsak.eksternFagsakId,
-                                           gjelderVedtakId = "testverdi",
-                                           gjelderType = GjelderType.PERSON,
-                                           utbetalesTilId = "testverdi",
-                                           utbetIdType = GjelderType.PERSON,
-                                           ansvarligEnhet = "testverdi",
-                                           bostedsenhet = "testverdi",
-                                           behandlingsenhet = "testverdi",
-                                           kontrollfelt = "testverdi",
-                                           referanse = behandling.aktivFagsystemsbehandling.eksternId,
-                                           eksternKravgrunnlagId = BigInteger.ZERO,
-                                           saksbehandlerId = "testverdi",
-                                           perioder = kravgrunnlagsperioder)
+        val kravgrunnlag = Kravgrunnlag431(
+            behandlingId = behandlingId,
+            vedtakId = BigInteger.ZERO,
+            kravstatuskode = Kravstatuskode.NYTT,
+            fagområdekode = Fagområdekode.BA,
+            fagsystemId = fagsak.eksternFagsakId,
+            gjelderVedtakId = "testverdi",
+            gjelderType = GjelderType.PERSON,
+            utbetalesTilId = "testverdi",
+            utbetIdType = GjelderType.PERSON,
+            ansvarligEnhet = "testverdi",
+            bostedsenhet = "testverdi",
+            behandlingsenhet = "testverdi",
+            kontrollfelt = "testverdi",
+            referanse = behandling.aktivFagsystemsbehandling.eksternId,
+            eksternKravgrunnlagId = BigInteger.ZERO,
+            saksbehandlerId = "testverdi",
+            perioder = kravgrunnlagsperioder
+        )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         return kravgrunnlag
     }
 
-    private fun lagKravgrunnlagsbeløp(klassetype: Klassetype,
-                                      klassekode: Klassekode,
-                                      nyttBeløp: BigDecimal = BigDecimal.ZERO,
-                                      utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-                                      tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO): Kravgrunnlagsbeløp433 {
-        return Kravgrunnlagsbeløp433(klassetype = klassetype,
-                                     klassekode = klassekode,
-                                     nyttBeløp = nyttBeløp,
-                                     opprinneligUtbetalingsbeløp = utbetaltBeløp,
-                                     tilbakekrevesBeløp = tilbakekrevesBeløp,
-                                     skatteprosent = BigDecimal.ZERO)
+    private fun lagKravgrunnlagsbeløp(
+        klassetype: Klassetype,
+        klassekode: Klassekode,
+        nyttBeløp: BigDecimal = BigDecimal.ZERO,
+        utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
+        tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO
+    ): Kravgrunnlagsbeløp433 {
+        return Kravgrunnlagsbeløp433(
+            klassetype = klassetype,
+            klassekode = klassekode,
+            nyttBeløp = nyttBeløp,
+            opprinneligUtbetalingsbeløp = utbetaltBeløp,
+            tilbakekrevesBeløp = tilbakekrevesBeløp,
+            skatteprosent = BigDecimal.ZERO
+        )
     }
 
     private fun lagVilkårsvurdering() {
         val vilkårsperioder = perioder.map {
-            VilkårsvurderingsperiodeDto(periode = PeriodeDto(it),
-                                        begrunnelse = "testverdi",
-                                        aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                                                                    begrunnelse = "testverdi",
-                                                                    særligeGrunnerTilReduksjon = false,
-                                                                    tilbakekrevSmåbeløp = true,
-                                                                    særligeGrunnerBegrunnelse = "testverdi",
-                                                                    særligeGrunner = listOf(SærligGrunnDto(særligGrunn = SærligGrunn.ANNET,
-                                                                                                           begrunnelse = "testverdi"))),
-                                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER)
+            VilkårsvurderingsperiodeDto(
+                periode = PeriodeDto(it),
+                begrunnelse = "testverdi",
+                aktsomhetDto = AktsomhetDto(
+                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                    begrunnelse = "testverdi",
+                    særligeGrunnerTilReduksjon = false,
+                    tilbakekrevSmåbeløp = true,
+                    særligeGrunnerBegrunnelse = "testverdi",
+                    særligeGrunner = listOf(
+                        SærligGrunnDto(
+                            særligGrunn = SærligGrunn.ANNET,
+                            begrunnelse = "testverdi"
+                        )
+                    )
+                ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+            )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
-    private fun lagRespons(alvorlighetsgrad: String,
-                           kodeMelding: String): TilbakekrevingsvedtakResponse {
+    private fun lagRespons(
+        alvorlighetsgrad: String,
+        kodeMelding: String
+    ): TilbakekrevingsvedtakResponse {
         val mmelDto = lagMmmelDto(alvorlighetsgrad, kodeMelding)
 
         val respons = TilbakekrevingsvedtakResponse()
@@ -250,9 +298,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         return mmelDto
     }
 
-    private fun assertRespons(kvittering: String?,
-                              alvorlighetsgrad: String,
-                              kodeMelding: String) {
+    private fun assertRespons(
+        kvittering: String?,
+        alvorlighetsgrad: String,
+        kodeMelding: String
+    ) {
         kvittering.shouldNotBeEmpty()
         val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
         mmelDto.alvorlighetsgrad shouldBe alvorlighetsgrad
@@ -274,50 +324,60 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         førstePeriode.periode.shouldNotBeNull()
         førstePeriode.belopRenter shouldBe BigDecimal.ZERO
         førstePeriode.tilbakekrevingsbelop.size shouldBe 2
-        assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.KL_KODE_FEIL_BA,
-                    nyttBeløp = BigDecimal(5000))
-        assertBeløp(beløpene = førstePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.BATR,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            beløpene = førstePeriode.tilbakekrevingsbelop,
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            nyttBeløp = BigDecimal(5000)
+        )
+        assertBeløp(
+            beløpene = førstePeriode.tilbakekrevingsbelop,
+            klassekode = Klassekode.BATR,
+            utbetaltBeløp = BigDecimal(5000),
+            tilbakekrevesBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING
+        )
 
         val andrePeriode = tilbakekrevingsvedtak.tilbakekrevingsperiode[0]
         andrePeriode.periode.shouldNotBeNull()
         andrePeriode.belopRenter shouldBe BigDecimal.ZERO
         andrePeriode.tilbakekrevingsbelop.size shouldBe 2
-        assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.KL_KODE_FEIL_BA,
-                    nyttBeløp = BigDecimal(5000))
-        assertBeløp(beløpene = andrePeriode.tilbakekrevingsbelop,
-                    klassekode = Klassekode.BATR,
-                    utbetaltBeløp = BigDecimal(5000),
-                    tilbakekrevesBeløp = BigDecimal(5000),
-                    kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
+        assertBeløp(
+            beløpene = andrePeriode.tilbakekrevingsbelop,
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            nyttBeløp = BigDecimal(5000)
+        )
+        assertBeløp(
+            beløpene = andrePeriode.tilbakekrevingsbelop,
+            klassekode = Klassekode.BATR,
+            utbetaltBeløp = BigDecimal(5000),
+            tilbakekrevesBeløp = BigDecimal(5000),
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING
+        )
     }
 
-    private fun assertBeløp(beløpene: List<TilbakekrevingsbelopDto>,
-                            klassekode: Klassekode,
-                            nyttBeløp: BigDecimal = BigDecimal.ZERO,
-                            utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-                            tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
-                            uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
-                            skattBeløp: BigDecimal = BigDecimal.ZERO,
-                            kodeResultat: KodeResultat? = null) {
+    private fun assertBeløp(
+        beløpene: List<TilbakekrevingsbelopDto>,
+        klassekode: Klassekode,
+        nyttBeløp: BigDecimal = BigDecimal.ZERO,
+        utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
+        tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
+        uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
+        skattBeløp: BigDecimal = BigDecimal.ZERO,
+        kodeResultat: KodeResultat? = null
+    ) {
         beløpene.any {
             klassekode.name == it.kodeKlasse &&
-            nyttBeløp == it.belopNy &&
-            utbetaltBeløp == it.belopOpprUtbet &&
-            tilbakekrevesBeløp == it.belopTilbakekreves &&
-            uinnkrevdBeløp == it.belopUinnkrevd
+                nyttBeløp == it.belopNy &&
+                utbetaltBeløp == it.belopOpprUtbet &&
+                tilbakekrevesBeløp == it.belopTilbakekreves &&
+                uinnkrevdBeløp == it.belopUinnkrevd
             skattBeløp == it.belopSkatt
         }.shouldBeTrue()
 
         beløpene.any {
             kodeResultat?.kode == it.kodeResultat &&
-            "ANNET" == it.kodeAarsak &&
-            "IKKE_FORDELT" == it.kodeSkyld
+                "ANNET" == it.kodeAarsak &&
+                "IKKE_FORDELT" == it.kodeSkyld
         }
     }
 }

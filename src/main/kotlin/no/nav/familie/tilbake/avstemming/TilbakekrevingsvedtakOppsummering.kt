@@ -3,16 +3,17 @@ package no.nav.familie.tilbake.avstemming
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import java.math.BigDecimal
 
-class TilbakekrevingsvedtakOppsummering(val økonomivedtakId: String,
-                                        val tilbakekrevesBruttoUtenRenter: BigDecimal,
-                                        val tilbakekrevesNettoUtenRenter: BigDecimal,
-                                        val renter: BigDecimal,
-                                        val skatt: BigDecimal) {
+class TilbakekrevingsvedtakOppsummering(
+    val økonomivedtakId: String,
+    val tilbakekrevesBruttoUtenRenter: BigDecimal,
+    val tilbakekrevesNettoUtenRenter: BigDecimal,
+    val renter: BigDecimal,
+    val skatt: BigDecimal
+) {
 
     fun harIngenTilbakekreving(): Boolean {
         return tilbakekrevesBruttoUtenRenter.signum() == 0
     }
-
 
     companion object {
 
@@ -27,11 +28,13 @@ class TilbakekrevingsvedtakOppsummering(val økonomivedtakId: String,
                     skatt = skatt.add(beløp.belopSkatt)
                 }
             }
-            return TilbakekrevingsvedtakOppsummering(renter = renter,
-                                                     skatt = skatt,
-                                                     tilbakekrevesBruttoUtenRenter = bruttoUtenRenter,
-                                                     tilbakekrevesNettoUtenRenter = bruttoUtenRenter.subtract(skatt),
-                                                     økonomivedtakId = tilbakekrevingsvedtak.vedtakId.toString())
+            return TilbakekrevingsvedtakOppsummering(
+                renter = renter,
+                skatt = skatt,
+                tilbakekrevesBruttoUtenRenter = bruttoUtenRenter,
+                tilbakekrevesNettoUtenRenter = bruttoUtenRenter.subtract(skatt),
+                økonomivedtakId = tilbakekrevingsvedtak.vedtakId.toString()
+            )
         }
     }
 }

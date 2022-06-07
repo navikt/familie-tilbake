@@ -15,21 +15,29 @@ import java.util.UUID
 
 object ForeldelseMapper {
 
-    fun tilRespons(logiskePerioder: List<LogiskPeriode>,
-                   kravgrunnlag431: Kravgrunnlag431,
-                   vurdertForeldelse: VurdertForeldelse?): VurdertForeldelseDto {
+    fun tilRespons(
+        logiskePerioder: List<LogiskPeriode>,
+        kravgrunnlag431: Kravgrunnlag431,
+        vurdertForeldelse: VurdertForeldelse?
+    ): VurdertForeldelseDto {
         val vurdertForeldelsesperioder: List<VurdertForeldelsesperiodeDto> = vurdertForeldelse?.foreldelsesperioder?.map {
-            VurdertForeldelsesperiodeDto(periode = PeriodeDto(it.periode),
-                                         feilutbetaltBeløp = KravgrunnlagsberegningService
-                                                 .beregnFeilutbetaltBeløp(kravgrunnlag431,
-                                                                          it.periode).setScale(0, RoundingMode.HALF_UP),
-                                         begrunnelse = it.begrunnelse,
-                                         foreldelsesvurderingstype = it.foreldelsesvurderingstype,
-                                         foreldelsesfrist = it.foreldelsesfrist,
-                                         oppdagelsesdato = it.oppdagelsesdato)
+            VurdertForeldelsesperiodeDto(
+                periode = PeriodeDto(it.periode),
+                feilutbetaltBeløp = KravgrunnlagsberegningService
+                    .beregnFeilutbetaltBeløp(
+                        kravgrunnlag431,
+                        it.periode
+                    ).setScale(0, RoundingMode.HALF_UP),
+                begrunnelse = it.begrunnelse,
+                foreldelsesvurderingstype = it.foreldelsesvurderingstype,
+                foreldelsesfrist = it.foreldelsesfrist,
+                oppdagelsesdato = it.oppdagelsesdato
+            )
         } ?: logiskePerioder.map {
-            VurdertForeldelsesperiodeDto(periode = PeriodeDto(it.periode),
-                                         feilutbetaltBeløp = it.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_UP))
+            VurdertForeldelsesperiodeDto(
+                periode = PeriodeDto(it.periode),
+                feilutbetaltBeløp = it.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_UP)
+            )
         }
 
         return VurdertForeldelseDto(foreldetPerioder = vurdertForeldelsesperioder)
@@ -37,13 +45,14 @@ object ForeldelseMapper {
 
     fun tilDomene(behandlingId: UUID, vurdertForeldetPerioder: List<ForeldelsesperiodeDto>): VurdertForeldelse {
         val foreldelsesperioder: Set<Foreldelsesperiode> = vurdertForeldetPerioder.map {
-            Foreldelsesperiode(periode = Periode(it.periode.fom, it.periode.tom),
-                               foreldelsesvurderingstype = it.foreldelsesvurderingstype,
-                               begrunnelse = it.begrunnelse,
-                               foreldelsesfrist = it.foreldelsesfrist,
-                               oppdagelsesdato = it.oppdagelsesdato)
+            Foreldelsesperiode(
+                periode = Periode(it.periode.fom, it.periode.tom),
+                foreldelsesvurderingstype = it.foreldelsesvurderingstype,
+                begrunnelse = it.begrunnelse,
+                foreldelsesfrist = it.foreldelsesfrist,
+                oppdagelsesdato = it.oppdagelsesdato
+            )
         }.toSet()
         return VurdertForeldelse(behandlingId = behandlingId, foreldelsesperioder = foreldelsesperioder)
     }
-
 }

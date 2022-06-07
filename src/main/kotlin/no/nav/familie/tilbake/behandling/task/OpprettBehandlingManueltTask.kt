@@ -13,12 +13,16 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OpprettBehandlingManueltTask.TYPE,
-                     beskrivelse = "oppretter behandling manuelt",
-                     maxAntallFeil = 10,
-                     triggerTidVedFeilISekunder = 5L)
-class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-                                   private val behManuellOpprService: BehandlingManuellOpprettelseService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = OpprettBehandlingManueltTask.TYPE,
+    beskrivelse = "oppretter behandling manuelt",
+    maxAntallFeil = 10,
+    triggerTidVedFeilISekunder = 5L
+)
+class OpprettBehandlingManueltTask(
+    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
+    private val behManuellOpprService: BehandlingManuellOpprettelseService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -38,38 +42,47 @@ class OpprettBehandlingManueltTask(private val hentFagsystemsbehandlingService: 
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
 
-        val requestSendt = requireNotNull(hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId,
-                                                                                                               ytelsestype,
-                                                                                                               eksternId))
+        val requestSendt = requireNotNull(
+            hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
+                eksternFagsakId,
+                ytelsestype,
+                eksternId
+            )
+        )
         // kaster exception inntil respons-en har mottatt
         val respons = requireNotNull(requestSendt.respons) {
             "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
-            "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
-            "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
+                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
+                "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
         }
 
         val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
         val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
         if (feilMelding != null) {
-            throw Feil("Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
-                       "Feiler med $feilMelding")
+            throw Feil(
+                "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
+                    "Feiler med $feilMelding"
+            )
         }
 
         // opprett behandling
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
-        log.info("Oppretter manuell tilbakekrevingsbehandling request for " +
-                 "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId.")
-        behManuellOpprService.opprettBehandlingManuell(eksternFagsakId = eksternFagsakId,
-                                                       ytelsestype = ytelsestype,
-                                                       eksternId = eksternId,
-                                                       ansvarligSaksbehandler = ansvarligSaksbehandler,
-                                                       fagsystemsbehandlingData = hentFagsystemsbehandlingRespons
-                                                               .hentFagsystemsbehandling!!)
+        log.info(
+            "Oppretter manuell tilbakekrevingsbehandling request for " +
+                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId."
+        )
+        behManuellOpprService.opprettBehandlingManuell(
+            eksternFagsakId = eksternFagsakId,
+            ytelsestype = ytelsestype,
+            eksternId = eksternId,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            fagsystemsbehandlingData = hentFagsystemsbehandlingRespons
+                .hentFagsystemsbehandling!!
+        )
     }
 
     companion object {
 
         const val TYPE = "opprettBehandlingManuelt"
     }
-
 }

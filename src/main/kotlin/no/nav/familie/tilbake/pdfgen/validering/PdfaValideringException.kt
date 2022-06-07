@@ -13,11 +13,11 @@ class PdfaValideringException : RuntimeException {
 
         private fun formater(result: ValidationResult): String {
             val feilmeldinger: List<String> = result.testAssertions.stream()
-                    .filter { ta -> ta.status !== TestAssertion.Status.PASSED }
-                    .map { ta -> ta.status.toString() + ":" + ta.message }
-                    .collect(Collectors.toList())
+                .filter { ta -> ta.status !== TestAssertion.Status.PASSED }
+                .map { ta -> ta.status.toString() + ":" + ta.message }
+                .collect(Collectors.toList())
             return "Validering av pdf feilet. Validerer versjon " + result.pdfaFlavour
-                    .toString() + " feil er: " + java.lang.String.join(", ", feilmeldinger)
+                .toString() + " feil er: " + java.lang.String.join(", ", feilmeldinger)
         }
     }
 }

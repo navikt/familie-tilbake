@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class StegService(val steg: List<IBehandlingssteg>,
-                  val behandlingRepository: BehandlingRepository,
-                  val behandlingskontrollService: BehandlingskontrollService) {
+class StegService(
+    val steg: List<IBehandlingssteg>,
+    val behandlingRepository: BehandlingRepository,
+    val behandlingskontrollService: BehandlingskontrollService
+) {
 
     fun håndterSteg(behandlingId: UUID) {
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
@@ -36,9 +38,11 @@ class StegService(val steg: List<IBehandlingssteg>,
         }
         val behandledeSteg: Behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
         if (behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
-            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
-                       frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
 
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
@@ -57,10 +61,13 @@ class StegService(val steg: List<IBehandlingssteg>,
         behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
 
-        //sjekk om aktivtBehandlingssteg kan autoutføres
+        // sjekk om aktivtBehandlingssteg kan autoutføres
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg in listOf(Behandlingssteg.FORELDELSE,
-                                            Behandlingssteg.VILKÅRSVURDERING)) {
+        if (aktivtBehandlingssteg in listOf(
+                Behandlingssteg.FORELDELSE,
+                Behandlingssteg.VILKÅRSVURDERING
+            )
+        ) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
         }
     }
@@ -76,8 +83,10 @@ class StegService(val steg: List<IBehandlingssteg>,
             throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg")
         }
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
-            throw Feil(message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
-                                 "Kan ikke saksbehandle den automatisk")
+            throw Feil(
+                message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
+                    "Kan ikke saksbehandle den automatisk"
+            )
         }
         while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
             hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
@@ -86,7 +95,6 @@ class StegService(val steg: List<IBehandlingssteg>,
             }
             aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         }
-
     }
 
     fun gjenopptaSteg(behandlingId: UUID) {
@@ -101,8 +109,10 @@ class StegService(val steg: List<IBehandlingssteg>,
         }
     }
 
-    fun kanAnsvarligSaksbehandlerOppdateres(behandlingId: UUID,
-                                            behandlingsstegDto: BehandlingsstegDto): Boolean {
+    fun kanAnsvarligSaksbehandlerOppdateres(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto
+    ): Boolean {
         val behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
         return when (behandlingssteg) {
             Behandlingssteg.IVERKSETT_VEDTAK, Behandlingssteg.FATTE_VEDTAK -> false
@@ -112,17 +122,22 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
-                                    ?: throw  Feil(message = "Behandling $behandlingId har ikke noe aktiv steg",
-                                                   frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg")
-        if (aktivtBehandlingssteg !in setOf(Behandlingssteg.VARSEL,
-                                            Behandlingssteg.GRUNNLAG,
-                                            Behandlingssteg.VERGE,
-                                            Behandlingssteg.FAKTA,
-                                            Behandlingssteg.FORELDELSE,
-                                            Behandlingssteg.VILKÅRSVURDERING,
-                                            Behandlingssteg.FORESLÅ_VEDTAK,
-                                            Behandlingssteg.FATTE_VEDTAK,
-                                            Behandlingssteg.IVERKSETT_VEDTAK)) {
+            ?: throw Feil(
+                message = "Behandling $behandlingId har ikke noe aktiv steg",
+                frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg"
+            )
+        if (aktivtBehandlingssteg !in setOf(
+                Behandlingssteg.VARSEL,
+                Behandlingssteg.GRUNNLAG,
+                Behandlingssteg.VERGE,
+                Behandlingssteg.FAKTA,
+                Behandlingssteg.FORELDELSE,
+                Behandlingssteg.VILKÅRSVURDERING,
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingssteg.IVERKSETT_VEDTAK
+            )
+        ) {
             throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")
         }
 
@@ -131,6 +146,6 @@ class StegService(val steg: List<IBehandlingssteg>,
 
     private fun hentStegInstans(behandlingssteg: Behandlingssteg): IBehandlingssteg {
         return steg.singleOrNull { it.getBehandlingssteg() == behandlingssteg }
-               ?: error("Finner ikke behandlingssteg $behandlingssteg")
+            ?: error("Finner ikke behandlingssteg $behandlingssteg")
     }
 }

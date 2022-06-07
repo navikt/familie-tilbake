@@ -15,25 +15,32 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
-                    private val behandlingskontrollService: BehandlingskontrollService,
-                    private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Grunnlagssteg(
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val historikkTaskService: HistorikkTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
-
 
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId)) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(Behandlingssteg.GRUNNLAG,
-                                                                                          Behandlingsstegstatus.UTFØRT))
+            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    Behandlingssteg.GRUNNLAG,
+                    Behandlingsstegstatus.UTFØRT
+                )
+            )
             behandlingskontrollService.fortsettBehandling(behandlingId)
-            historikkTaskService.lagHistorikkTask(behandlingId,
-                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-                                                  Aktør.VEDTAKSLØSNING,
-                                                  triggerTid = LocalDateTime.now().plusSeconds(2))
+            historikkTaskService.lagHistorikkTask(
+                behandlingId,
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
+                Aktør.VEDTAKSLØSNING,
+                triggerTid = LocalDateTime.now().plusSeconds(2)
+            )
         }
     }
 
@@ -46,5 +53,4 @@ class Grunnlagssteg(private val kravgrunnlagRepository: KravgrunnlagRepository,
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.GRUNNLAG
     }
-
 }

@@ -12,16 +12,20 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-class HistorikkTaskService(private val taskRepository: TaskRepository,
-                           private val fagsakService: FagsakService) {
+class HistorikkTaskService(
+    private val taskRepository: TaskRepository,
+    private val fagsakService: FagsakService
+) {
 
-    fun lagHistorikkTask(behandlingId: UUID,
-                         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-                         aktør: Aktør,
-                         triggerTid: LocalDateTime? = null,
-                         beskrivelse: String? = null,
-                         brevtype: Brevtype? = null,
-                         beslutter: String? = null) {
+    fun lagHistorikkTask(
+        behandlingId: UUID,
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        aktør: Aktør,
+        triggerTid: LocalDateTime? = null,
+        beskrivelse: String? = null,
+        brevtype: Brevtype? = null,
+        beslutter: String? = null
+    ) {
 
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
@@ -34,15 +38,17 @@ class HistorikkTaskService(private val taskRepository: TaskRepository,
             brevtype?.let { setProperty("brevtype", brevtype.name) }
         }
 
-        val task = Task(type = LagHistorikkinnslagTask.TYPE,
-                        payload = behandlingId.toString(),
-                        properties = properties)
+        val task = Task(
+            type = LagHistorikkinnslagTask.TYPE,
+            payload = behandlingId.toString(),
+            properties = properties
+        )
         triggerTid?.let { taskRepository.save(task.medTriggerTid(triggerTid)) } ?: taskRepository.save(task)
     }
 
     private fun fjernNewlinesFraString(tekst: String): String {
         return tekst
-                .replace("\r", "")
-                .replace("\n", " ")
+            .replace("\r", "")
+            .replace("\n", " ")
     }
 }

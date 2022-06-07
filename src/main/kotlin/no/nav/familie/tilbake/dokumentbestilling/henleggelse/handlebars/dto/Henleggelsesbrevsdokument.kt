@@ -7,12 +7,16 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
 import java.time.LocalDate
 import java.util.Objects
 
-data class Henleggelsesbrevsdokument(val brevmetadata: Brevmetadata,
-                                     val varsletDato: LocalDate?,
-                                     val fritekstFraSaksbehandler: String?) : BaseDokument(brevmetadata.ytelsestype,
-                                                                                           brevmetadata.språkkode,
-                                                                                           brevmetadata.behandlendeEnhetsNavn,
-                                                                                           brevmetadata.ansvarligSaksbehandler) {
+data class Henleggelsesbrevsdokument(
+    val brevmetadata: Brevmetadata,
+    val varsletDato: LocalDate?,
+    val fritekstFraSaksbehandler: String?
+) : BaseDokument(
+    brevmetadata.ytelsestype,
+    brevmetadata.språkkode,
+    brevmetadata.behandlendeEnhetsNavn,
+    brevmetadata.ansvarligSaksbehandler
+) {
 
     private val tilbakekrevingsrevurdering = Behandlingstype.REVURDERING_TILBAKEKREVING == brevmetadata.behandlingstype
 

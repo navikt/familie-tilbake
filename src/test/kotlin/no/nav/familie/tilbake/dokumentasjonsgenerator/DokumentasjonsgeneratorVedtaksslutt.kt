@@ -39,7 +39,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-//@Disabled("Kjøres ved behov for å regenerere dokumentasjon")
+// @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorVedtaksslutt {
 
     @Test
@@ -96,33 +96,39 @@ class DokumentasjonsgeneratorVedtaksslutt {
         }
     }
 
-    private fun lagVedtakSluttTekster(ytelsetype: Ytelsestype,
-                                      språkkode: Språkkode,
-                                      resultatType: Vedtaksresultat,
-                                      medSkattetrekk: Boolean) {
+    private fun lagVedtakSluttTekster(
+        ytelsetype: Ytelsestype,
+        språkkode: Språkkode,
+        resultatType: Vedtaksresultat,
+        medSkattetrekk: Boolean
+    ) {
         trueFalse.forEach { flerePerioder ->
             trueFalse.forEach { flereLovhjemler ->
                 trueFalse.forEach { medVerge ->
                     trueFalse.forEach { feilutbetaltBeløpBortfalt ->
-                        lagVedtakSluttTekster(ytelsetype,
-                                              språkkode,
-                                              resultatType,
-                                              flerePerioder,
-                                              medSkattetrekk,
-                                              flereLovhjemler,
-                                              medVerge,
-                                              feilutbetaltBeløpBortfalt,
-                                              false)
+                        lagVedtakSluttTekster(
+                            ytelsetype,
+                            språkkode,
+                            resultatType,
+                            flerePerioder,
+                            medSkattetrekk,
+                            flereLovhjemler,
+                            medVerge,
+                            feilutbetaltBeløpBortfalt,
+                            false
+                        )
                         if (Vedtaksresultat.INGEN_TILBAKEBETALING != resultatType) {
-                            lagVedtakSluttTekster(ytelsetype,
-                                                  språkkode,
-                                                  resultatType,
-                                                  flerePerioder,
-                                                  medSkattetrekk,
-                                                  flereLovhjemler,
-                                                  medVerge,
-                                                  feilutbetaltBeløpBortfalt,
-                                                  true)
+                            lagVedtakSluttTekster(
+                                ytelsetype,
+                                språkkode,
+                                resultatType,
+                                flerePerioder,
+                                medSkattetrekk,
+                                flereLovhjemler,
+                                medVerge,
+                                feilutbetaltBeløpBortfalt,
+                                true
+                            )
                         }
                     }
                 }
@@ -130,22 +136,27 @@ class DokumentasjonsgeneratorVedtaksslutt {
         }
     }
 
-    private fun lagVedtakSluttTekster(ytelsetype: Ytelsestype,
-                                      språkkode: Språkkode,
-                                      resultatType: Vedtaksresultat,
-                                      flerePerioder: Boolean,
-                                      medSkattetrekk: Boolean,
-                                      flereLovhjemler: Boolean,
-                                      medVerge: Boolean,
-                                      feilutbetaltBeløpBortfalt: Boolean, erRevurdering: Boolean) {
-        val felles: HbVedtaksbrevFelles = lagFellesdel(ytelsetype,
-                                                       språkkode,
-                                                       resultatType,
-                                                       medSkattetrekk,
-                                                       flereLovhjemler,
-                                                       medVerge,
-                                                       feilutbetaltBeløpBortfalt,
-                                                       erRevurdering)
+    private fun lagVedtakSluttTekster(
+        ytelsetype: Ytelsestype,
+        språkkode: Språkkode,
+        resultatType: Vedtaksresultat,
+        flerePerioder: Boolean,
+        medSkattetrekk: Boolean,
+        flereLovhjemler: Boolean,
+        medVerge: Boolean,
+        feilutbetaltBeløpBortfalt: Boolean,
+        erRevurdering: Boolean
+    ) {
+        val felles: HbVedtaksbrevFelles = lagFellesdel(
+            ytelsetype,
+            språkkode,
+            resultatType,
+            medSkattetrekk,
+            flereLovhjemler,
+            medVerge,
+            feilutbetaltBeløpBortfalt,
+            erRevurdering
+        )
         val perioder: List<HbVedtaksbrevsperiode> = lagPerioder(flerePerioder)
         val sluttTekst: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevsdata(felles, perioder), VEDTAK_SLUTT)
         println()
@@ -153,55 +164,68 @@ class DokumentasjonsgeneratorVedtaksslutt {
         println(prettyprint(sluttTekst))
     }
 
-    private fun lagFellesdel(ytelsetype: Ytelsestype,
-                             språkkode: Språkkode,
-                             vedtakResultatType: Vedtaksresultat,
-                             medSkattetrekk: Boolean,
-                             flereLovhjemler: Boolean,
-                             medVerge: Boolean,
-                             feilutbetaltBeløpBortfalt: Boolean,
-                             erRevurdering: Boolean): HbVedtaksbrevFelles {
-        return HbVedtaksbrevFelles(brevmetadata = lagMetadata(ytelsetype, språkkode, medVerge),
-                                   fagsaksvedtaksdato = LocalDate.now(),
-                                   totalresultat =
-                                   HbTotalresultat(hovedresultat = vedtakResultatType,
-                                                   totaltTilbakekrevesBeløp = BigDecimal.valueOf(1000),
-                                                   totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(1100),
-                                                   totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                                                   BigDecimal.valueOf(if (medSkattetrekk) 900 else 1100.toLong()),
-                                                   totaltRentebeløp = BigDecimal.valueOf(100)),
-                                   totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
-                                   hjemmel = if (flereLovhjemler)
-                                       HbHjemmel("<lovhjemler her>", true)
-                                   else HbHjemmel("<lovhjemmel her>"),
-                                   varsel = HbVarsel(varsletBeløp = BigDecimal.valueOf(1000),
-                                                     varsletDato = LocalDate.of(2020, 4, 4)),
-                                   konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
-                                   ansvarligBeslutter = "<Beslutters navn>",
-                                   søker = HbPerson(navn = "<Søkers navn>"),
-                                   vedtaksbrevstype = if (feilutbetaltBeløpBortfalt)
-                                       Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT else Vedtaksbrevstype.ORDINÆR,
-                                   behandling = HbBehandling(erRevurdering = erRevurdering,
-                                                             originalBehandlingsdatoFagsakvedtak = if (erRevurdering)
-                                                                 PERIODE1.fom else null))
+    private fun lagFellesdel(
+        ytelsetype: Ytelsestype,
+        språkkode: Språkkode,
+        vedtakResultatType: Vedtaksresultat,
+        medSkattetrekk: Boolean,
+        flereLovhjemler: Boolean,
+        medVerge: Boolean,
+        feilutbetaltBeløpBortfalt: Boolean,
+        erRevurdering: Boolean
+    ): HbVedtaksbrevFelles {
+        return HbVedtaksbrevFelles(
+            brevmetadata = lagMetadata(ytelsetype, språkkode, medVerge),
+            fagsaksvedtaksdato = LocalDate.now(),
+            totalresultat =
+            HbTotalresultat(
+                hovedresultat = vedtakResultatType,
+                totaltTilbakekrevesBeløp = BigDecimal.valueOf(1000),
+                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(1100),
+                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                BigDecimal.valueOf(if (medSkattetrekk) 900 else 1100.toLong()),
+                totaltRentebeløp = BigDecimal.valueOf(100)
+            ),
+            totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
+            hjemmel = if (flereLovhjemler)
+                HbHjemmel("<lovhjemler her>", true)
+            else HbHjemmel("<lovhjemmel her>"),
+            varsel = HbVarsel(
+                varsletBeløp = BigDecimal.valueOf(1000),
+                varsletDato = LocalDate.of(2020, 4, 4)
+            ),
+            konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
+            ansvarligBeslutter = "<Beslutters navn>",
+            søker = HbPerson(navn = "<Søkers navn>"),
+            vedtaksbrevstype = if (feilutbetaltBeløpBortfalt)
+                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT else Vedtaksbrevstype.ORDINÆR,
+            behandling = HbBehandling(
+                erRevurdering = erRevurdering,
+                originalBehandlingsdatoFagsakvedtak = if (erRevurdering)
+                    PERIODE1.fom else null
+            )
+        )
     }
 
-    private fun lagMetadata(ytelsestype: Ytelsestype,
-                            språkkode: Språkkode,
-                            medVerge: Boolean): Brevmetadata {
+    private fun lagMetadata(
+        ytelsestype: Ytelsestype,
+        språkkode: Språkkode,
+        medVerge: Boolean
+    ): Brevmetadata {
         val annenMottagersNavn = if (medVerge) "<annen mottaker>" else null
-        return Brevmetadata(sakspartId = "",
-                            sakspartsnavn = "<Søkers navn>",
-                            finnesVerge = medVerge,
-                            mottageradresse = Adresseinfo("01020312345", "<Søkers navn>", annenMottagersNavn),
-                            behandlendeEnhetsNavn = "<Behandlende enhets navn>",
-                            ansvarligSaksbehandler = "<Saksbehandlers navn>",
-                            vergenavn = "<annen mottaker>",
-                            språkkode = språkkode,
-                            saksnummer = "1232456",
-                            ytelsestype = ytelsestype)
+        return Brevmetadata(
+            sakspartId = "",
+            sakspartsnavn = "<Søkers navn>",
+            finnesVerge = medVerge,
+            mottageradresse = Adresseinfo("01020312345", "<Søkers navn>", annenMottagersNavn),
+            behandlendeEnhetsNavn = "<Behandlende enhets navn>",
+            ansvarligSaksbehandler = "<Saksbehandlers navn>",
+            vergenavn = "<annen mottaker>",
+            språkkode = språkkode,
+            saksnummer = "1232456",
+            ytelsestype = ytelsestype
+        )
     }
-
 
     private fun lagPerioder(flerePerioder: Boolean): List<HbVedtaksbrevsperiode> {
         if (flerePerioder) {
@@ -211,40 +235,50 @@ class DokumentasjonsgeneratorVedtaksslutt {
     }
 
     private fun lagPeriode(periode: Handlebarsperiode): HbVedtaksbrevsperiode {
-        return HbVedtaksbrevsperiode(periode = periode,
-                                     vurderinger = HbVurderinger(foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                                                                 vilkårsvurderingsresultat =
-                                                                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                                                                 aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                                                                 særligeGrunner = HbSærligeGrunner(emptyList(), null, null)),
-                                     kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
-                                     resultat = HbResultat(tilbakekrevesBeløp = BigDecimal.valueOf(1000),
-                                                           tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(800),
-                                                           rentebeløp = BigDecimal.ZERO),
-                                     fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST))
+        return HbVedtaksbrevsperiode(
+            periode = periode,
+            vurderinger = HbVurderinger(
+                foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                vilkårsvurderingsresultat =
+                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                særligeGrunner = HbSærligeGrunner(emptyList(), null, null)
+            ),
+            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
+            resultat = HbResultat(
+                tilbakekrevesBeløp = BigDecimal.valueOf(1000),
+                tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(800),
+                rentebeløp = BigDecimal.ZERO
+            ),
+            fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST)
+        )
     }
 
-    private fun overskrift(flerePerioder: Boolean,
-                           medSkattetrekk: Boolean,
-                           flereLovhjemler: Boolean,
-                           medVerge: Boolean,
-                           feilutbetaltBeløpBortfalt: Boolean,
-                           erRevurdering: Boolean): String {
-        return ("*[ " + (if (flerePerioder) "flere perioder" else "en periode")
-                + " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk")
-                + " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel")
-                + " - " + (if (medVerge) "med verge" else "uten verge")
-                + " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær")
-                + (if (erRevurdering) " - revurdering" else "")
-                + " ]*")
+    private fun overskrift(
+        flerePerioder: Boolean,
+        medSkattetrekk: Boolean,
+        flereLovhjemler: Boolean,
+        medVerge: Boolean,
+        feilutbetaltBeløpBortfalt: Boolean,
+        erRevurdering: Boolean
+    ): String {
+        return (
+            "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +
+                " - " + (if (medSkattetrekk) "med skattetrekk" else "uten skattetrekk") +
+                " - " + (if (flereLovhjemler) "flere lovhjemmel" else "en lovhjemmel") +
+                " - " + (if (medVerge) "med verge" else "uten verge") +
+                " - " + (if (feilutbetaltBeløpBortfalt) "feilutbetalt beløp bortfalt" else "ordinær") +
+                (if (erRevurdering) " - revurdering" else "") +
+                " ]*"
+            )
     }
 
     private fun prettyprint(s: String): String {
         return s.replace("{venstrejustert}", "")
-                .replace("{høyrejustert}", "\t\t")
-                .replace("4 uker", "<klagefrist> uker")
-                .replace("4 veker", "<klagefrist> veker")
-                .replace("(_.+)".toRegex(), "\n*$1*")
+            .replace("{høyrejustert}", "\t\t")
+            .replace("4 uker", "<klagefrist> uker")
+            .replace("4 veker", "<klagefrist> veker")
+            .replace("(_.+)".toRegex(), "\n*$1*")
     }
 
     companion object {

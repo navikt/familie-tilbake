@@ -18,12 +18,13 @@ object BeløpsberegningUtil {
         return BigDecimal.ZERO
     }
 
-    fun beregnBeløpForPeriode(tilbakekrevesBeløp: BigDecimal,
-                              vurderingsperiode: Periode,
-                              kravgrunnlagsperiode: Periode): BigDecimal {
+    fun beregnBeløpForPeriode(
+        tilbakekrevesBeløp: BigDecimal,
+        vurderingsperiode: Periode,
+        kravgrunnlagsperiode: Periode
+    ): BigDecimal {
         val grunnlagBeløpPerMåned: BigDecimal = beregnBeløpPerMåned(tilbakekrevesBeløp, kravgrunnlagsperiode)
         val ytelseBeløp: BigDecimal = beregnBeløp(vurderingsperiode, kravgrunnlagsperiode, grunnlagBeløpPerMåned)
         return ytelseBeløp.setScale(0, RoundingMode.HALF_UP)
     }
-
 }

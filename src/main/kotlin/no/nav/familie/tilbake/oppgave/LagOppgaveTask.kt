@@ -12,12 +12,16 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagOppgaveTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Lager oppgave for nye behandlinger",
-                     triggerTidVedFeilISekunder = 300L)
-class LagOppgaveTask(private val oppgaveService: OppgaveService,
-                     private val behandlingskontrollService: BehandlingskontrollService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = LagOppgaveTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Lager oppgave for nye behandlinger",
+    triggerTidVedFeilISekunder = 300L
+)
+class LagOppgaveTask(
+    private val oppgaveService: OppgaveService,
+    private val behandlingskontrollService: BehandlingskontrollService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -31,12 +35,14 @@ class LagOppgaveTask(private val oppgaveService: OppgaveService,
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
         val beskrivelse = behandlingsstegstilstand?.venteårsak?.beskrivelse
-        oppgaveService.opprettOppgave(UUID.fromString(task.payload),
-                                      oppgavetype,
-                                      enhet,
-                                      beskrivelse,
-                                      LocalDate.now().plusWeeks(fristeUker),
-                                      saksbehandler)
+        oppgaveService.opprettOppgave(
+            UUID.fromString(task.payload),
+            oppgavetype,
+            enhet,
+            beskrivelse,
+            LocalDate.now().plusWeeks(fristeUker),
+            saksbehandler
+        )
     }
 
     companion object {

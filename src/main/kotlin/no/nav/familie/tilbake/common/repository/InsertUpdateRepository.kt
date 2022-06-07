@@ -7,5 +7,4 @@ interface InsertUpdateRepository<T> {
 
     fun update(t: T): T
     fun updateAll(list: List<T>): List<T>
-
 }

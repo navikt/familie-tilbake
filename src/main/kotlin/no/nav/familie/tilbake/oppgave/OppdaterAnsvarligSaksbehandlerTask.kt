@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OppdaterAnsvarligSaksbehandlerTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Oppdaterer saksbehandler på oppgave",
-                     triggerTidVedFeilISekunder = 300L)
-class OppdaterAnsvarligSaksbehandlerTask(private val oppgaveService: OppgaveService,
-                                         private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = OppdaterAnsvarligSaksbehandlerTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Oppdaterer saksbehandler på oppgave",
+    triggerTidVedFeilISekunder = 300L
+)
+class OppdaterAnsvarligSaksbehandlerTask(
+    private val oppgaveService: OppgaveService,
+    private val behandlingRepository: BehandlingRepository
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 

@@ -27,10 +27,12 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
-                        "Oppretter verge steg på behandling",
-                        AuditLoggerEvent.CREATE,
-                        HenteParam.BEHANDLING_ID)
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Oppretter verge steg på behandling",
+        AuditLoggerEvent.CREATE,
+        HenteParam.BEHANDLING_ID
+    )
     fun opprettVergeSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.opprettVergeSteg(behandlingId)
         return Ressurs.success("OK")
@@ -38,10 +40,12 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Fjern verge")
     @PutMapping
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER,
-                        "Deaktiverer ev. eksisterende verge.",
-                        AuditLoggerEvent.UPDATE,
-                        HenteParam.BEHANDLING_ID)
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Deaktiverer ev. eksisterende verge.",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID
+    )
     fun fjernVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.fjernVerge(behandlingId)
         return Ressurs.success("OK")
@@ -49,12 +53,13 @@ class VergeController(private val vergeService: VergeService) {
 
     @Operation(summary = "Hent verge")
     @GetMapping
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER,
-                        "Henter verge informasjon",
-                        AuditLoggerEvent.ACCESS,
-                        HenteParam.BEHANDLING_ID)
+    @Rolletilgangssjekk(
+        Behandlerrolle.VEILEDER,
+        "Henter verge informasjon",
+        AuditLoggerEvent.ACCESS,
+        HenteParam.BEHANDLING_ID
+    )
     fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))
     }
-
 }

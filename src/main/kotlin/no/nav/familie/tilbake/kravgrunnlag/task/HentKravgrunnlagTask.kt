@@ -16,12 +16,16 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = HentKravgrunnlagTask.TYPE,
-                     beskrivelse = "Henter kravgrunnlag fra økonomi",
-                     triggerTidVedFeilISekunder = 300L)
-class HentKravgrunnlagTask(private val behandlingRepository: BehandlingRepository,
-                           private val hentKravgrunnlagService: HentKravgrunnlagService,
-                           private val stegService: StegService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = HentKravgrunnlagTask.TYPE,
+    beskrivelse = "Henter kravgrunnlag fra økonomi",
+    triggerTidVedFeilISekunder = 300L
+)
+class HentKravgrunnlagTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val hentKravgrunnlagService: HentKravgrunnlagService,
+    private val stegService: StegService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -36,8 +40,10 @@ class HentKravgrunnlagTask(private val behandlingRepository: BehandlingRepositor
         val originalBehandlingId = requireNotNull(behandling.sisteÅrsak?.originalBehandlingId)
 
         val tilbakekrevingsgrunnlag = hentKravgrunnlagService.hentTilbakekrevingskravgrunnlag(originalBehandlingId)
-        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
-                                                                                    KodeAksjon.HENT_GRUNNLAG_OMGJØRING)
+        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+            tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
+            KodeAksjon.HENT_GRUNNLAG_OMGJØRING
+        )
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
         hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId)

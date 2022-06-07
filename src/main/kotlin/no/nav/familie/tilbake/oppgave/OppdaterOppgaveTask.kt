@@ -11,14 +11,17 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-
 @Service
-@TaskStepBeskrivelse(taskStepType = OppdaterOppgaveTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Oppdaterer oppgave",
-                     triggerTidVedFeilISekunder = 300L)
-class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
-                          val environment: Environment) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = OppdaterOppgaveTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Oppdaterer oppgave",
+    triggerTidVedFeilISekunder = 300L
+)
+class OppdaterOppgaveTask(
+    private val oppgaveService: OppgaveService,
+    val environment: Environment
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -33,10 +36,12 @@ class OppdaterOppgaveTask(private val oppgaveService: OppgaveService,
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
 
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) +":" +
-                            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
-        var patchetOppgave = oppgave.copy(fristFerdigstillelse = frist,
-                                          beskrivelse = nyBeskrivelse)
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
+            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
+        var patchetOppgave = oppgave.copy(
+            fristFerdigstillelse = frist,
+            beskrivelse = nyBeskrivelse
+        )
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }

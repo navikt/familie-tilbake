@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleStatusmeldingTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Håndter mottatt statusmelding fra oppdrag",
-                     triggerTidVedFeilISekunder = 60 * 5L)
+@TaskStepBeskrivelse(
+    taskStepType = BehandleStatusmeldingTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Håndter mottatt statusmelding fra oppdrag",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
 class BehandleStatusmeldingTask(private val kravvedtakstatusService: KravvedtakstatusService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)

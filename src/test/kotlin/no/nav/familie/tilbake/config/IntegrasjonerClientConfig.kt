@@ -33,9 +33,11 @@ class IntegrasjonerClientConfig {
         val integrasjonerClient: IntegrasjonerClient = mockk(relaxed = true)
 
         every { integrasjonerClient.arkiver(any()) } answers {
-            ArkiverDokumentResponse("jpId",
-                                    false,
-                                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")))
+            ArkiverDokumentResponse(
+                "jpId",
+                false,
+                listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+            )
         }
 
         every { integrasjonerClient.distribuerJournalpost(any(), any()) } returns "42"
@@ -43,77 +45,156 @@ class IntegrasjonerClientConfig {
         every { integrasjonerClient.hentDokument(any(), any()) } returns readMockfileFromResources()
 
         every { integrasjonerClient.hentJournalposterForBruker(any()) }
-                .returns(listOf(Journalpost(journalpostId = "jpId1",
-                                            journalposttype = Journalposttype.I,
-                                            journalstatus = Journalstatus.FERDIGSTILT,
-                                            tittel = "Journalførte dokumenter 1",
-                                            relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(7),
-                                                                                  datotype = "DATO_REGISTRERT"),
-                                                                     RelevantDato(dato = LocalDateTime.now().minusDays(7),
-                                                                                  datotype = "DATO_JOURNALFOERT")),
-                                            dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
-                                                                             tittel = "Dokument 1.1"),
-                                                                DokumentInfo(dokumentInfoId = "dokId2",
-                                                                             tittel = "Dokument 1.2"))),
-                                Journalpost(journalpostId = "jpId2",
-                                            journalposttype = Journalposttype.U,
-                                            journalstatus = Journalstatus.FERDIGSTILT,
-                                            tittel = "Journalførte dokumenter 2",
-                                            relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(4),
-                                                                                  datotype = "DATO_EKSPEDERT"),
-                                                                     RelevantDato(dato = LocalDateTime.now().minusDays(4),
-                                                                                  datotype = "DATO_JOURNALFOERT")),
-                                            dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
-                                                                             tittel = "Dokument 2.1"),
-                                                                DokumentInfo(dokumentInfoId = "dokId2",
-                                                                             tittel = "Dokument 2.2"))),
-                                Journalpost(journalpostId = "jpId3",
-                                            journalposttype = Journalposttype.N,
-                                            journalstatus = Journalstatus.FERDIGSTILT,
-                                            tittel = "Journalførte dokumenter 3",
-                                            relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(2),
-                                                                                  datotype = "DATO_JOURNALFOERT")),
-                                            dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
-                                                                             tittel = "Dokument 3.1"),
-                                                                DokumentInfo(dokumentInfoId = "dokId2",
-                                                                             tittel = "Dokument 3.2"))),
-                                Journalpost(journalpostId = "jpId4",
-                                            journalposttype = Journalposttype.I,
-                                            journalstatus = Journalstatus.FERDIGSTILT,
-                                            tittel = "Journalførte dokumenter 4",
-                                            relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(3),
-                                                                                  datotype = "DATO_JOURNALFOERT")),
-                                            dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
-                                                                             tittel = "Dokument 4.1"))),
-                                Journalpost(journalpostId = "jpId5",
-                                            journalposttype = Journalposttype.U,
-                                            journalstatus = Journalstatus.FERDIGSTILT,
-                                            tittel = "Journalførte dokumenter 5",
-                                            relevanteDatoer = listOf(RelevantDato(dato = LocalDateTime.now().minusDays(1),
-                                                                                  datotype = "DATO_JOURNALFOERT")),
-                                            dokumenter = listOf(DokumentInfo(dokumentInfoId = "dokId1",
-                                                                             tittel = "Dokument 5.1")))))
+            .returns(
+                listOf(
+                    Journalpost(
+                        journalpostId = "jpId1",
+                        journalposttype = Journalposttype.I,
+                        journalstatus = Journalstatus.FERDIGSTILT,
+                        tittel = "Journalførte dokumenter 1",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(7),
+                                datotype = "DATO_REGISTRERT"
+                            ),
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(7),
+                                datotype = "DATO_JOURNALFOERT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 1.1"
+                            ),
+                            DokumentInfo(
+                                dokumentInfoId = "dokId2",
+                                tittel = "Dokument 1.2"
+                            )
+                        )
+                    ),
+                    Journalpost(
+                        journalpostId = "jpId2",
+                        journalposttype = Journalposttype.U,
+                        journalstatus = Journalstatus.FERDIGSTILT,
+                        tittel = "Journalførte dokumenter 2",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(4),
+                                datotype = "DATO_EKSPEDERT"
+                            ),
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(4),
+                                datotype = "DATO_JOURNALFOERT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 2.1"
+                            ),
+                            DokumentInfo(
+                                dokumentInfoId = "dokId2",
+                                tittel = "Dokument 2.2"
+                            )
+                        )
+                    ),
+                    Journalpost(
+                        journalpostId = "jpId3",
+                        journalposttype = Journalposttype.N,
+                        journalstatus = Journalstatus.FERDIGSTILT,
+                        tittel = "Journalførte dokumenter 3",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(2),
+                                datotype = "DATO_JOURNALFOERT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 3.1"
+                            ),
+                            DokumentInfo(
+                                dokumentInfoId = "dokId2",
+                                tittel = "Dokument 3.2"
+                            )
+                        )
+                    ),
+                    Journalpost(
+                        journalpostId = "jpId4",
+                        journalposttype = Journalposttype.I,
+                        journalstatus = Journalstatus.FERDIGSTILT,
+                        tittel = "Journalførte dokumenter 4",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(3),
+                                datotype = "DATO_JOURNALFOERT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 4.1"
+                            )
+                        )
+                    ),
+                    Journalpost(
+                        journalpostId = "jpId5",
+                        journalposttype = Journalposttype.U,
+                        journalstatus = Journalstatus.FERDIGSTILT,
+                        tittel = "Journalførte dokumenter 5",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(1),
+                                datotype = "DATO_JOURNALFOERT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 5.1"
+                            )
+                        )
+                    )
+                )
+            )
 
-        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon("987654321",
-                                                                                   "Bobs Burgers")
+        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon(
+            "987654321",
+            "Bobs Burgers"
+        )
 
         every { integrasjonerClient.validerOrganisasjon(any()) } returns true
 
-        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(),
-                                                                                     "bb1234",
-                                                                                     "Bob",
-                                                                                     "Burger")
+        every { integrasjonerClient.hentSaksbehandler(any()) } returns Saksbehandler(
+            UUID.randomUUID(),
+            "bb1234",
+            "Bob",
+            "Burger"
+        )
         every { integrasjonerClient.finnOppgaver(any()) } answers {
-            FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                                   oppgaver = listOf(Oppgave(id = 1)))
+            if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
+                FinnOppgaveResponseDto(
+                    antallTreffTotalt = 0,
+                    oppgaver = emptyList()
+                )
+            } else {
+                FinnOppgaveResponseDto(
+                    antallTreffTotalt = 1,
+                    oppgaver = listOf(Oppgave(id = 1))
+                )
+            }
         }
 
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
 
-        every { integrasjonerClient.hentNavkontor(any()) } returns NavKontorEnhet(enhetId = 4806,
-                                                                                  navn = "Mock NAV Drammen",
-                                                                                  enhetNr = "mock",
-                                                                                  status = "mock")
+        every { integrasjonerClient.hentNavkontor(any()) } returns NavKontorEnhet(
+            enhetId = 4806,
+            navn = "Mock NAV Drammen",
+            enhetNr = "mock",
+            status = "mock"
+        )
 
         return integrasjonerClient
     }

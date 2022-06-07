@@ -11,10 +11,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagHistorikkinnslagTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Lag historikkinnslag og sender det til kafka",
-                     triggerTidVedFeilISekunder = 60 * 5L)
+@TaskStepBeskrivelse(
+    taskStepType = LagHistorikkinnslagTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Lag historikkinnslag og sender det til kafka",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
 class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -24,20 +26,22 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
 
         val behandlingId: UUID = UUID.fromString(task.payload)
         val historikkinnslagstype =
-                TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
+            TilbakekrevingHistorikkinnslagstype.valueOf(task.metadata.getProperty("historikkinnslagstype"))
         val aktør = Aktør.valueOf(task.metadata.getProperty("aktør"))
         val opprettetTidspunkt = LocalDateTime.parse(task.metadata.getProperty("opprettetTidspunkt"))
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val brevtype = task.metadata.getProperty("brevtype")
         val beslutter = task.metadata.getProperty(PropertyName.BESLUTTER)
 
-        historikkService.lagHistorikkinnslag(behandlingId,
-                                             historikkinnslagstype,
-                                             aktør,
-                                             opprettetTidspunkt,
-                                             beskrivelse,
-                                             brevtype,
-                                             beslutter)
+        historikkService.lagHistorikkinnslag(
+            behandlingId,
+            historikkinnslagstype,
+            aktør,
+            opprettetTidspunkt,
+            beskrivelse,
+            brevtype,
+            beslutter
+        )
     }
 
     companion object {

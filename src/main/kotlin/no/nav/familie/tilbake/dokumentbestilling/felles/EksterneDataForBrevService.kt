@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 
 @Service
-class EksterneDataForBrevService(private val personService: PersonService,
-                                 private val integrasjonerClient: IntegrasjonerClient) {
+class EksterneDataForBrevService(
+    private val personService: PersonService,
+    private val integrasjonerClient: IntegrasjonerClient
+) {
 
     fun hentPerson(ident: String, fagsystem: Fagsystem): Personinfo {
         return personService.hentPersoninfo(ident, fagsystem)
@@ -34,44 +36,54 @@ class EksterneDataForBrevService(private val personService: PersonService,
         return Adresseinfo(personinfo.ident, personinfo.navn)
     }
 
-    fun hentAdresse(personinfo: Personinfo,
-                    brevmottager: Brevmottager,
-                    verge: Verge?,
-                    fagsystem: Fagsystem): Adresseinfo {
+    fun hentAdresse(
+        personinfo: Personinfo,
+        brevmottager: Brevmottager,
+        verge: Verge?,
+        fagsystem: Fagsystem
+    ): Adresseinfo {
 
         return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
-               ?: hentAdresse(personinfo)
+            ?: hentAdresse(personinfo)
     }
 
-    fun hentAdresse(personinfo: Personinfo,
-                    brevmottager: Brevmottager,
-                    vergeDto: VergeDto?,
-                    fagsystem: Fagsystem): Adresseinfo {
+    fun hentAdresse(
+        personinfo: Personinfo,
+        brevmottager: Brevmottager,
+        vergeDto: VergeDto?,
+        fagsystem: Fagsystem
+    ): Adresseinfo {
 
         return vergeDto?.let {
-            hentAdresse(it.vergetype,
-                        it.organisasjonsnummer,
-                        it.navn,
-                        personinfo,
-                        brevmottager,
-                        it.personIdent,
-                        fagsystem)
+            hentAdresse(
+                it.vergetype,
+                it.organisasjonsnummer,
+                it.navn,
+                personinfo,
+                brevmottager,
+                it.personIdent,
+                fagsystem
+            )
         } ?: hentAdresse(personinfo)
     }
 
-    private fun hentAdresse(vergeType: Vergetype,
-                            organisasjonsnummer: String?,
-                            navn: String,
-                            personinfo: Personinfo,
-                            brevmottager: Brevmottager,
-                            personIdent: String?,
-                            fagsystem: Fagsystem): Adresseinfo {
+    private fun hentAdresse(
+        vergeType: Vergetype,
+        organisasjonsnummer: String?,
+        navn: String,
+        personinfo: Personinfo,
+        brevmottager: Brevmottager,
+        personIdent: String?,
+        fagsystem: Fagsystem
+    ): Adresseinfo {
 
         if (Vergetype.ADVOKAT == vergeType) {
-            return hentOrganisasjonsadresse(organisasjonsnummer ?: error("organisasjonsnummer er påkrevd for $vergeType"),
-                                            navn,
-                                            personinfo,
-                                            brevmottager)
+            return hentOrganisasjonsadresse(
+                organisasjonsnummer ?: error("organisasjonsnummer er påkrevd for $vergeType"),
+                navn,
+                personinfo,
+                brevmottager
+            )
         } else if (Brevmottager.VERGE == brevmottager) {
             val person = hentPerson(personIdent ?: error("personIdent er påkrevd for $vergeType"), fagsystem)
             return hentAdresse(person)
@@ -79,19 +91,23 @@ class EksterneDataForBrevService(private val personService: PersonService,
         return hentAdresse(personinfo)
     }
 
-    private fun hentOrganisasjonsadresse(organisasjonsnummer: String,
-                                         vergenavn: String,
-                                         personinfo: Personinfo,
-                                         brevmottager: Brevmottager): Adresseinfo {
+    private fun hentOrganisasjonsadresse(
+        organisasjonsnummer: String,
+        vergenavn: String,
+        personinfo: Personinfo,
+        brevmottager: Brevmottager
+    ): Adresseinfo {
 
         val organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
         return lagAdresseinfo(organisasjon, vergenavn, personinfo, brevmottager)
     }
 
-    private fun lagAdresseinfo(organisasjon: Organisasjon,
-                               vergeNavn: String,
-                               personinfo: Personinfo,
-                               brevmottager: Brevmottager): Adresseinfo {
+    private fun lagAdresseinfo(
+        organisasjon: Organisasjon,
+        vergeNavn: String,
+        personinfo: Personinfo,
+        brevmottager: Brevmottager
+    ): Adresseinfo {
         val organisasjonsnavn: String = organisasjon.navn
         val vedVergeNavn = "v/ $vergeNavn"
         val annenMottagersNavn = "$organisasjonsnavn $vedVergeNavn"
