@@ -37,9 +37,11 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
 
-        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(totrinnsvurdering,
-                                                                     Totrinnsvurdering::sporbar,
-                                                                     Totrinnsvurdering::versjon)
+        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
+            totrinnsvurdering,
+            Totrinnsvurdering::sporbar,
+            Totrinnsvurdering::versjon
+        )
         lagretTotrinnsvurdering.versjon shouldBe 1
     }
 
@@ -52,10 +54,11 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         totrinnsvurderingRepository.update(oppdatertTotrinnsvurdering)
 
         lagretTotrinnsvurdering = totrinnsvurderingRepository.findByIdOrThrow(totrinnsvurdering.id)
-        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(oppdatertTotrinnsvurdering,
-                                                                     Totrinnsvurdering::sporbar,
-                                                                     Totrinnsvurdering::versjon)
+        lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
+            oppdatertTotrinnsvurdering,
+            Totrinnsvurdering::sporbar,
+            Totrinnsvurdering::versjon
+        )
         lagretTotrinnsvurdering.versjon shouldBe 2
     }
-
 }

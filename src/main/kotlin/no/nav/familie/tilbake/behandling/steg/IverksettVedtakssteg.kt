@@ -16,9 +16,11 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-class IverksettVedtakssteg(private val behandlingsvedtakService: BehandlingsvedtakService,
-                           private val fagsakRepository: FagsakRepository,
-                           private val taskService: TaskService) : IBehandlingssteg {
+class IverksettVedtakssteg(
+    private val behandlingsvedtakService: BehandlingsvedtakService,
+    private val fagsakRepository: FagsakRepository,
+    private val taskService: TaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -31,10 +33,13 @@ class IverksettVedtakssteg(private val behandlingsvedtakService: Behandlingsvedt
             setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
         }
-        taskService.save(Task(type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
-                              payload = behandlingId.toString(),
-                              properties = properties))
-
+        taskService.save(
+            Task(
+                type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties
+            )
+        )
     }
 
     override fun utførStegAutomatisk(behandlingId: UUID) {

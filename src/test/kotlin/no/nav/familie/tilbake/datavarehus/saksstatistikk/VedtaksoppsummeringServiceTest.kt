@@ -85,16 +85,20 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        vedtaksoppsummeringService = VedtaksoppsummeringService(behandlingRepository,
-                                                                fagsakRepository,
-                                                                vilkårsvurderingRepository,
-                                                                foreldelseRepository,
-                                                                faktaFeilutbetalingRepository,
-                                                                beregningService)
+        vedtaksoppsummeringService = VedtaksoppsummeringService(
+            behandlingRepository,
+            fagsakRepository,
+            vilkårsvurderingRepository,
+            foreldelseRepository,
+            faktaFeilutbetalingRepository,
+            beregningService
+        )
 
-        behandling = Testdata.behandling.copy(ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
-                                              ansvarligBeslutter = ANSVARLIG_BESLUTTER,
-                                              behandlendeEnhet = "8020")
+        behandling = Testdata.behandling.copy(
+            ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
+            ansvarligBeslutter = ANSVARLIG_BESLUTTER,
+            behandlendeEnhet = "8020"
+        )
         fagsakRepository.insert(Testdata.fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
         behandling = behandlingRepository.insert(behandling)
         saksnummer = Testdata.fagsak.eksternFagsakId
@@ -187,102 +191,132 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagFakta() {
         val faktaFeilutbetalingPeriode =
-                FaktaFeilutbetalingsperiode(periode = periode,
-                                            hendelsestype = Hendelsestype.BOSATT_I_RIKET,
-                                            hendelsesundertype = Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE)
-        val faktaFeilutbetaling = FaktaFeilutbetaling(behandlingId = behandling.id,
-                                                      perioder = setOf(faktaFeilutbetalingPeriode),
-                                                      begrunnelse = "fakta begrunnelse")
+            FaktaFeilutbetalingsperiode(
+                periode = periode,
+                hendelsestype = Hendelsestype.BOSATT_I_RIKET,
+                hendelsesundertype = Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE
+            )
+        val faktaFeilutbetaling = FaktaFeilutbetaling(
+            behandlingId = behandling.id,
+            perioder = setOf(faktaFeilutbetalingPeriode),
+            begrunnelse = "fakta begrunnelse"
+        )
 
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
     }
 
     private fun lagForeldelse() {
-        val foreldelsePeriode = Foreldelsesperiode(periode = periode,
-                                                   foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
-                                                   begrunnelse = "foreldelse begrunnelse",
-                                                   foreldelsesfrist = periode.fomDato.plusMonths(8))
-        val vurdertForeldelse = VurdertForeldelse(behandlingId = behandling.id,
-                                                  foreldelsesperioder = setOf(foreldelsePeriode))
+        val foreldelsePeriode = Foreldelsesperiode(
+            periode = periode,
+            foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
+            begrunnelse = "foreldelse begrunnelse",
+            foreldelsesfrist = periode.fomDato.plusMonths(8)
+        )
+        val vurdertForeldelse = VurdertForeldelse(
+            behandlingId = behandling.id,
+            foreldelsesperioder = setOf(foreldelsePeriode)
+        )
 
         foreldelseRepository.insert(vurdertForeldelse)
     }
 
     private fun lagVilkårMedAktsomhet() {
         val særligGrunn =
-                VilkårsvurderingSærligGrunn(særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
-                                            begrunnelse = "særlig grunner begrunnelse")
-        val vilkårVurderingAktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                                                                 ileggRenter = true,
-                                                                 særligeGrunnerTilReduksjon = false,
-                                                                 begrunnelse = "aktsomhet begrunnelse",
-                                                                 vilkårsvurderingSærligeGrunner = setOf(særligGrunn))
+            VilkårsvurderingSærligGrunn(
+                særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
+                begrunnelse = "særlig grunner begrunnelse"
+            )
+        val vilkårVurderingAktsomhet = VilkårsvurderingAktsomhet(
+            aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+            ileggRenter = true,
+            særligeGrunnerTilReduksjon = false,
+            begrunnelse = "aktsomhet begrunnelse",
+            vilkårsvurderingSærligeGrunner = setOf(særligGrunn)
+        )
         val vilkårVurderingPeriode =
-                Vilkårsvurderingsperiode(periode = periode,
-                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                                         begrunnelse = "vilkår begrunnelse",
-                                         aktsomhet = vilkårVurderingAktsomhet)
+            Vilkårsvurderingsperiode(
+                periode = periode,
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                begrunnelse = "vilkår begrunnelse",
+                aktsomhet = vilkårVurderingAktsomhet
+            )
         val vilkårVurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
 
         vilkårsvurderingRepository.insert(vilkårVurdering)
     }
 
     private fun lagVilkårMedGodTro() {
-        val vilkårVurderingGodTro = VilkårsvurderingGodTro(beløpTilbakekreves = BigDecimal.valueOf(1000),
-                                                           beløpErIBehold = false,
-                                                           begrunnelse = "god tro begrunnelse")
+        val vilkårVurderingGodTro = VilkårsvurderingGodTro(
+            beløpTilbakekreves = BigDecimal.valueOf(1000),
+            beløpErIBehold = false,
+            begrunnelse = "god tro begrunnelse"
+        )
         val vilkårVurderingPeriode =
-                Vilkårsvurderingsperiode(periode = periode,
-                                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                                         begrunnelse = "vilkår begrunnelse",
-                                         godTro = vilkårVurderingGodTro)
+            Vilkårsvurderingsperiode(
+                periode = periode,
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                begrunnelse = "vilkår begrunnelse",
+                godTro = vilkårVurderingGodTro
+            )
         val vilkårsvurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
         vilkårsvurderingRepository.insert(vilkårsvurdering)
     }
 
     private fun lagBehandlingVedtak() {
-        val behandlingVedtak = Behandlingsvedtak(iverksettingsstatus = Iverksettingsstatus.IVERKSATT,
-                                                 vedtaksdato = LocalDate.now())
-        val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
-                                                      behandlingsvedtak = behandlingVedtak)
+        val behandlingVedtak = Behandlingsvedtak(
+            iverksettingsstatus = Iverksettingsstatus.IVERKSATT,
+            vedtaksdato = LocalDate.now()
+        )
+        val behandlingsresultat = Behandlingsresultat(
+            type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
+            behandlingsvedtak = behandlingVedtak
+        )
 
         val behandling = behandling.copy(resultater = setOf(behandlingsresultat))
         behandlingRepository.update(behandling)
     }
 
     private fun lagKravgrunnlag() {
-        val ytelPostering = Kravgrunnlagsbeløp433(klassekode = Klassekode.EFOG,
-                                                  klassetype = Klassetype.YTEL,
-                                                  tilbakekrevesBeløp = BigDecimal.valueOf(1000),
-                                                  opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
-                                                  nyttBeløp = BigDecimal.ZERO,
-                                                  skatteprosent = BigDecimal.valueOf(10))
-        val feilPostering = Kravgrunnlagsbeløp433(klassekode = Klassekode.EFOG,
-                                                  klassetype = Klassetype.FEIL,
-                                                  nyttBeløp = BigDecimal.valueOf(1000),
-                                                  skatteprosent = BigDecimal.valueOf(10),
-                                                  tilbakekrevesBeløp = BigDecimal.valueOf(1000),
-                                                  opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000))
-        val kravgrunnlagPeriode432 = Kravgrunnlagsperiode432(periode = periode,
-                                                             månedligSkattebeløp = BigDecimal.valueOf(100),
-                                                             beløp = setOf(feilPostering, ytelPostering))
-        val kravgrunnlag431 = Kravgrunnlag431(behandlingId = behandling.id,
-                                              eksternKravgrunnlagId = 12345L.toBigInteger(),
-                                              vedtakId = 12345L.toBigInteger(),
-                                              behandlingsenhet = "8020",
-                                              bostedsenhet = "8020",
-                                              ansvarligEnhet = "8020",
-                                              fagområdekode = Fagområdekode.EFOG,
-                                              kravstatuskode = Kravstatuskode.NYTT,
-                                              utbetalesTilId = "1234567890",
-                                              utbetIdType = GjelderType.PERSON,
-                                              gjelderVedtakId = "1234567890",
-                                              gjelderType = GjelderType.PERSON,
-                                              kontrollfelt = "2020",
-                                              saksbehandlerId = ANSVARLIG_SAKSBEHANDLER,
-                                              fagsystemId = saksnummer + "100",
-                                              referanse = "1",
-                                              perioder = setOf(kravgrunnlagPeriode432))
+        val ytelPostering = Kravgrunnlagsbeløp433(
+            klassekode = Klassekode.EFOG,
+            klassetype = Klassetype.YTEL,
+            tilbakekrevesBeløp = BigDecimal.valueOf(1000),
+            opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
+            nyttBeløp = BigDecimal.ZERO,
+            skatteprosent = BigDecimal.valueOf(10)
+        )
+        val feilPostering = Kravgrunnlagsbeløp433(
+            klassekode = Klassekode.EFOG,
+            klassetype = Klassetype.FEIL,
+            nyttBeløp = BigDecimal.valueOf(1000),
+            skatteprosent = BigDecimal.valueOf(10),
+            tilbakekrevesBeløp = BigDecimal.valueOf(1000),
+            opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000)
+        )
+        val kravgrunnlagPeriode432 = Kravgrunnlagsperiode432(
+            periode = periode,
+            månedligSkattebeløp = BigDecimal.valueOf(100),
+            beløp = setOf(feilPostering, ytelPostering)
+        )
+        val kravgrunnlag431 = Kravgrunnlag431(
+            behandlingId = behandling.id,
+            eksternKravgrunnlagId = 12345L.toBigInteger(),
+            vedtakId = 12345L.toBigInteger(),
+            behandlingsenhet = "8020",
+            bostedsenhet = "8020",
+            ansvarligEnhet = "8020",
+            fagområdekode = Fagområdekode.EFOG,
+            kravstatuskode = Kravstatuskode.NYTT,
+            utbetalesTilId = "1234567890",
+            utbetIdType = GjelderType.PERSON,
+            gjelderVedtakId = "1234567890",
+            gjelderType = GjelderType.PERSON,
+            kontrollfelt = "2020",
+            saksbehandlerId = ANSVARLIG_SAKSBEHANDLER,
+            fagsystemId = saksnummer + "100",
+            referanse = "1",
+            perioder = setOf(kravgrunnlagPeriode432)
+        )
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }
 

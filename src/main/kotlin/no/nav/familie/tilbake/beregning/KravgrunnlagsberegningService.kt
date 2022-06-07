@@ -21,37 +21,42 @@ object KravgrunnlagsberegningService {
 
     private val feilutbetaltYtelsesbeløputleder: (Kravgrunnlagsperiode432) -> BigDecimal = { kgPeriode: Kravgrunnlagsperiode432 ->
         kgPeriode.beløp
-                .filter { it.klassetype == Klassetype.FEIL }
-                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+            .filter { it.klassetype == Klassetype.FEIL }
+            .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
     }
 
     private val utbetaltYtelsesbeløputleder = { kgPeriode: Kravgrunnlagsperiode432 ->
         kgPeriode.beløp
-                .filter { it.klassetype == Klassetype.YTEL }
-                .sumOf(Kravgrunnlagsbeløp433::opprinneligUtbetalingsbeløp)
+            .filter { it.klassetype == Klassetype.YTEL }
+            .sumOf(Kravgrunnlagsbeløp433::opprinneligUtbetalingsbeløp)
     }
 
     private val riktigYteslesbeløputleder = { kgPeriode: Kravgrunnlagsperiode432 ->
         kgPeriode.beløp
-                .filter { it.klassetype == Klassetype.YTEL }
-                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+            .filter { it.klassetype == Klassetype.YTEL }
+            .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
     }
 
-
-    fun fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag: Kravgrunnlag431,
-                                          vurderingsperioder: List<Periode>): Map<Periode, FordeltKravgrunnlagsbeløp> {
+    fun fordelKravgrunnlagBeløpPåPerioder(
+        kravgrunnlag: Kravgrunnlag431,
+        vurderingsperioder: List<Periode>
+    ): Map<Periode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
-            FordeltKravgrunnlagsbeløp(beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
-                                      beregnBeløp(kravgrunnlag, it, utbetaltYtelsesbeløputleder),
-                                      beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder))
+            FordeltKravgrunnlagsbeløp(
+                beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
+                beregnBeløp(kravgrunnlag, it, utbetaltYtelsesbeløputleder),
+                beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder)
+            )
         }
     }
 
     fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Periode, FordeltKravgrunnlagsbeløp> {
         return kravgrunnlag.perioder.associate {
-            it.periode to FordeltKravgrunnlagsbeløp(feilutbetaltYtelsesbeløputleder(it),
-                                                    utbetaltYtelsesbeløputleder(it),
-                                                    riktigYteslesbeløputleder(it))
+            it.periode to FordeltKravgrunnlagsbeløp(
+                feilutbetaltYtelsesbeløputleder(it),
+                utbetaltYtelsesbeløputleder(it),
+                riktigYteslesbeløputleder(it)
+            )
         }
     }
 
@@ -62,32 +67,34 @@ object KravgrunnlagsberegningService {
     fun validatePerioder(perioder: List<PeriodeDto>) {
         val perioderSomIkkeErHeleMåneder = perioder.filter {
             it.fom.dayOfMonth != 1 ||
-            it.tom.dayOfMonth != YearMonth.from(it.tom).lengthOfMonth()
+                it.tom.dayOfMonth != YearMonth.from(it.tom).lengthOfMonth()
         }
 
         if (perioderSomIkkeErHeleMåneder.isNotEmpty()) {
-            throw Feil(message = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
-                       frontendFeilmelding = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
+                frontendFeilmelding = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
-
     }
 
-    private fun beregnBeløp(kravgrunnlag: Kravgrunnlag431,
-                            vurderingsperiode: Periode,
-                            beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>): BigDecimal {
+    private fun beregnBeløp(
+        kravgrunnlag: Kravgrunnlag431,
+        vurderingsperiode: Periode,
+        beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>
+    ): BigDecimal {
         val sum = kravgrunnlag.perioder
-                .sortedBy { it.periode.fom }
-                .sumOf {
-                    val beløp = beløpsummerer.apply(it)
-                    if (beløp.isNotZero()) {
-                        val beløpPerMåned: BigDecimal = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode)
-                        BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
-                    } else {
-                        BigDecimal.ZERO
-                    }
+            .sortedBy { it.periode.fom }
+            .sumOf {
+                val beløp = beløpsummerer.apply(it)
+                if (beløp.isNotZero()) {
+                    val beløpPerMåned: BigDecimal = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode)
+                    BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
+                } else {
+                    BigDecimal.ZERO
                 }
+            }
         return sum.setScale(0, RoundingMode.HALF_UP)
     }
-
 }

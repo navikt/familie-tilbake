@@ -52,7 +52,6 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
-
     private val behandling = Testdata.behandling
 
     @BeforeEach
@@ -64,13 +63,23 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til varselssteg etter behandling er opprettet med varsel`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val varsel = Varsel(varseltekst = "testverdi",
-                            varselbeløp = 1000L,
-                            perioder = setOf(Varselsperiode(fom = LocalDate.now().minusMonths(2),
-                                                            tom = LocalDate.now())))
+        val varsel = Varsel(
+            varseltekst = "testverdi",
+            varselbeløp = 1000L,
+            perioder = setOf(
+                Varselsperiode(
+                    fom = LocalDate.now().minusMonths(2),
+                    tom = LocalDate.now()
+                )
+            )
+        )
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
-                                                          varsler = setOf(varsel)))
+        behandlingRepository.update(
+            lagretBehandling.copy(
+                fagsystemsbehandling = setOf(fagsystemsbehandling),
+                varsler = setOf(varsel)
+            )
+        )
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -105,13 +114,16 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         nyStegstilstand.tidsfrist shouldBe behandling.opprettetDato.plusWeeks(3)
     }
 
-
     @Test
     fun `fortsettBehandling skal oppdatere til grunnlagssteg etter behandling er opprettet uten varsel`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
-                                                          varsler = emptySet()))
+        behandlingRepository.update(
+            lagretBehandling.copy(
+                fagsystemsbehandling = setOf(fagsystemsbehandling),
+                varsler = emptySet()
+            )
+        )
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -188,8 +200,12 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     fun `fortsettBehandling skal oppdatere til fakta steg etter behandling er opprettet uten varsel og mottok kravgrunnlag`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandlingRepository.update(lagretBehandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling),
-                                                          varsler = emptySet()))
+        behandlingRepository.update(
+            lagretBehandling.copy(
+                fagsystemsbehandling = setOf(fagsystemsbehandling),
+                varsler = emptySet()
+            )
+        )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
@@ -224,8 +240,12 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal oppdatere til vilkårsvurderingssteg etter foreldelse steg er utført`() {
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT),
-                                          Behandlingsstegsinfo(FORELDELSE, UTFØRT)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(FAKTA, UTFØRT),
+                Behandlingsstegsinfo(FORELDELSE, UTFØRT)
+            )
+        )
 
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
@@ -243,9 +263,13 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal ikke oppdatere til foreldelsessteg når fakta steg ikke er utført`() {
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
-                                          Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
-                                          Behandlingsstegsinfo(FAKTA, KLAR)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, UTFØRT),
+                Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
+                Behandlingsstegsinfo(FAKTA, KLAR)
+            )
+        )
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -261,11 +285,15 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fortsettBehandling skal oppdatere til fakta steg etter mottok endr melding`() {
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
-                                          Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
-                                          Behandlingsstegsinfo(FAKTA, AVBRUTT),
-                                          Behandlingsstegsinfo(FORELDELSE, AVBRUTT),
-                                          Behandlingsstegsinfo(VILKÅRSVURDERING, AVBRUTT)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, UTFØRT),
+                Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
+                Behandlingsstegsinfo(FAKTA, AVBRUTT),
+                Behandlingsstegsinfo(FORELDELSE, AVBRUTT),
+                Behandlingsstegsinfo(VILKÅRSVURDERING, AVBRUTT)
+            )
+        )
 
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
@@ -285,16 +313,22 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når manuelt varsel sendt og behandling er i vilkår steg `() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
-                                          Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
-                                          Behandlingsstegsinfo(FAKTA, UTFØRT),
-                                          Behandlingsstegsinfo(FORELDELSE, AUTOUTFØRT),
-                                          Behandlingsstegsinfo(VILKÅRSVURDERING, KLAR)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, UTFØRT),
+                Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
+                Behandlingsstegsinfo(FAKTA, UTFØRT),
+                Behandlingsstegsinfo(FORELDELSE, AUTOUTFØRT),
+                Behandlingsstegsinfo(VILKÅRSVURDERING, KLAR)
+            )
+        )
 
         behandlingskontrollService
-                .tilbakehoppBehandlingssteg(behandlingId = behandling.id,
-                                            behandlingsstegsinfo =
-                                            lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING))
+            .tilbakehoppBehandlingssteg(
+                behandlingId = behandling.id,
+                behandlingsstegsinfo =
+                lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING)
+            )
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 5
 
@@ -315,16 +349,22 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når mottok sper melding og behandling er i vilkår steg `() {
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
-                                          Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
-                                          Behandlingsstegsinfo(FAKTA, UTFØRT),
-                                          Behandlingsstegsinfo(FORELDELSE, AUTOUTFØRT),
-                                          Behandlingsstegsinfo(VILKÅRSVURDERING, KLAR)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, UTFØRT),
+                Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
+                Behandlingsstegsinfo(FAKTA, UTFØRT),
+                Behandlingsstegsinfo(FORELDELSE, AUTOUTFØRT),
+                Behandlingsstegsinfo(VILKÅRSVURDERING, KLAR)
+            )
+        )
 
         behandlingskontrollService
-                .tilbakehoppBehandlingssteg(behandlingId = behandling.id,
-                                            behandlingsstegsinfo =
-                                            lagBehandlingsstegsinfo(GRUNNLAG, Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG))
+            .tilbakehoppBehandlingssteg(
+                behandlingId = behandling.id,
+                behandlingsstegsinfo =
+                lagBehandlingsstegsinfo(GRUNNLAG, Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG)
+            )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 5
@@ -346,13 +386,19 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `settBehandlingPåVent skal sette behandling på vent med avventer dokumentasjon når behandling er i fakta steg`() {
         val tidsfrist: LocalDate = LocalDate.now().plusWeeks(2)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT),
-                                          Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
-                                          Behandlingsstegsinfo(FAKTA, KLAR)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, UTFØRT),
+                Behandlingsstegsinfo(GRUNNLAG, UTFØRT),
+                Behandlingsstegsinfo(FAKTA, KLAR)
+            )
+        )
 
-        behandlingskontrollService.settBehandlingPåVent(behandlingId = behandling.id,
-                                                        venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
-                                                        tidsfrist = tidsfrist)
+        behandlingskontrollService.settBehandlingPåVent(
+            behandlingId = behandling.id,
+            venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
+            tidsfrist = tidsfrist
+        )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 3
@@ -369,13 +415,19 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `settBehandlingPåVent skal ikke sette behandling på vent med avventer dokumentasjon når behandling er avsluttet`() {
         val tidsfrist: LocalDate = LocalDate.now().plusWeeks(2)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, AVBRUTT),
-                                          Behandlingsstegsinfo(AVSLUTTET, UTFØRT)))
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(VARSEL, AVBRUTT),
+                Behandlingsstegsinfo(AVSLUTTET, UTFØRT)
+            )
+        )
 
         val exception = shouldThrow<RuntimeException>(block = {
-            behandlingskontrollService.settBehandlingPåVent(behandlingId = behandling.id,
-                                                            venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                            tidsfrist = tidsfrist.minusDays(5))
+            behandlingskontrollService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                tidsfrist = tidsfrist.minusDays(5)
+            )
         })
         exception.message shouldBe "Behandling ${behandling.id} har ikke aktivt steg"
     }
@@ -383,14 +435,22 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `settBehandlingPåVent skal utvide fristen med brukerstilbakemelding når behandling er i varsel steg`() {
         val tidsfrist: LocalDate =
-                behandling.opprettetDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
-        lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, VENTER,
-                                                               venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                               tidsfrist = tidsfrist)))
+            behandling.opprettetDato.plusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
+        lagBehandlingsstegstilstand(
+            setOf(
+                Behandlingsstegsinfo(
+                    VARSEL, VENTER,
+                    venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                    tidsfrist = tidsfrist
+                )
+            )
+        )
 
-        behandlingskontrollService.settBehandlingPåVent(behandlingId = behandling.id,
-                                                        venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                        tidsfrist = tidsfrist.plusWeeks(2))
+        behandlingskontrollService.settBehandlingPåVent(
+            behandlingId = behandling.id,
+            venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+            tidsfrist = tidsfrist.plusWeeks(2)
+        )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 1
@@ -406,31 +466,39 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagBehandlingsstegstilstand(stegMetadata: Set<Behandlingsstegsinfo>) {
         stegMetadata.map {
-            behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandling.id,
-                                                                               behandlingssteg = it.behandlingssteg,
-                                                                               behandlingsstegsstatus = it.behandlingsstegstatus,
-                                                                               venteårsak = it.venteårsak,
-                                                                               tidsfrist = it.tidsfrist))
+            behandlingsstegstilstandRepository.insert(
+                Behandlingsstegstilstand(
+                    behandlingId = behandling.id,
+                    behandlingssteg = it.behandlingssteg,
+                    behandlingsstegsstatus = it.behandlingsstegstatus,
+                    venteårsak = it.venteårsak,
+                    tidsfrist = it.tidsfrist
+                )
+            )
         }
-
     }
-
 
     private fun lagFagsystemsbehandling(tilbakekrevingsvalg: Tilbakekrevingsvalg): Fagsystemsbehandling {
-        return Fagsystemsbehandling(eksternId = "123",
-                                    tilbakekrevingsvalg = tilbakekrevingsvalg,
-                                    resultat = "testverdi",
-                                    årsak = "testverdi",
-                                    revurderingsvedtaksdato = LocalDate.now().minusDays(1))
+        return Fagsystemsbehandling(
+            eksternId = "123",
+            tilbakekrevingsvalg = tilbakekrevingsvalg,
+            resultat = "testverdi",
+            årsak = "testverdi",
+            revurderingsvedtaksdato = LocalDate.now().minusDays(1)
+        )
     }
 
-    private fun lagBehandlingsstegsinfo(behandlingssteg: Behandlingssteg,
-                                        venteårsak: Venteårsak): Behandlingsstegsinfo {
+    private fun lagBehandlingsstegsinfo(
+        behandlingssteg: Behandlingssteg,
+        venteårsak: Venteårsak
+    ): Behandlingsstegsinfo {
 
-        return Behandlingsstegsinfo(behandlingssteg = behandlingssteg,
-                                    behandlingsstegstatus = VENTER,
-                                    venteårsak = venteårsak,
-                                    tidsfrist = behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker))
+        return Behandlingsstegsinfo(
+            behandlingssteg = behandlingssteg,
+            behandlingsstegstatus = VENTER,
+            venteårsak = venteårsak,
+            tidsfrist = behandling.opprettetDato.plusWeeks(venteårsak.defaultVenteTidIUker)
+        )
     }
 
     private fun assertBehandlingsstatus(behandlingId: UUID, behandlingsstatus: Behandlingsstatus) {

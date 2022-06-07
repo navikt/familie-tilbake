@@ -13,31 +13,35 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class SwaggerConfig(@Value("\${AUTHORIZATION_URL}")
-                    val authorizationUrl: String,
-                    @Value("\${TOKEN_URL}")
-                    val tokenUrl: String,
-                    @Value("\${API_SCOPE}")
-                    val apiScope: String) {
+class SwaggerConfig(
+    @Value("\${AUTHORIZATION_URL}")
+    val authorizationUrl: String,
+    @Value("\${TOKEN_URL}")
+    val tokenUrl: String,
+    @Value("\${API_SCOPE}")
+    val apiScope: String
+) {
 
     @Bean
     fun tilbakekrevingApi(): OpenAPI {
         return OpenAPI().info(Info().title("Tilbakekreving API").version("v1"))
-                .components(Components().addSecuritySchemes("oauth2", securitySchemes()))
-                .addSecurityItem(SecurityRequirement().addList("oauth2", listOf("read", "write")))
+            .components(Components().addSecuritySchemes("oauth2", securitySchemes()))
+            .addSecurityItem(SecurityRequirement().addList("oauth2", listOf("read", "write")))
     }
 
     private fun securitySchemes(): SecurityScheme {
         return SecurityScheme()
-                .name("oauth2")
-                .type(SecurityScheme.Type.OAUTH2)
-                .scheme("oauth2")
-                .`in`(SecurityScheme.In.HEADER)
-                .flows(OAuthFlows()
-                               .authorizationCode(OAuthFlow().authorizationUrl(authorizationUrl)
-                                                          .tokenUrl(tokenUrl)
-                                                          .scopes(Scopes().addString(apiScope, "read,write"))))
-
+            .name("oauth2")
+            .type(SecurityScheme.Type.OAUTH2)
+            .scheme("oauth2")
+            .`in`(SecurityScheme.In.HEADER)
+            .flows(
+                OAuthFlows()
+                    .authorizationCode(
+                        OAuthFlow().authorizationUrl(authorizationUrl)
+                            .tokenUrl(tokenUrl)
+                            .scopes(Scopes().addString(apiScope, "read,write"))
+                    )
+            )
     }
-
 }

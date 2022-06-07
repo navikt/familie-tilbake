@@ -9,5 +9,4 @@ object ØkonomiKvitteringTolk {
     fun erKvitteringOK(kvittering: MmelDto): Boolean {
         return KVITTERING_OK_KODER.contains(kvittering.alvorlighetsgrad)
     }
-
 }

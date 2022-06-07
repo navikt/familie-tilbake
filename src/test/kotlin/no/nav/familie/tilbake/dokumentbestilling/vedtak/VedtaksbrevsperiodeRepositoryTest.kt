@@ -37,9 +37,11 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
 
-        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(vedtaksbrevsperiode,
-                                                                       Vedtaksbrevsperiode::sporbar,
-                                                                       Vedtaksbrevsperiode::versjon)
+        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
+            vedtaksbrevsperiode,
+            Vedtaksbrevsperiode::sporbar,
+            Vedtaksbrevsperiode::versjon
+        )
         lagretVedtaksbrevsperiode.versjon shouldBe 1
     }
 
@@ -52,10 +54,11 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         vedtaksbrevsperiodeRepository.update(oppdatertVedtaksbrevsperiode)
 
         lagretVedtaksbrevsperiode = vedtaksbrevsperiodeRepository.findByIdOrThrow(vedtaksbrevsperiode.id)
-        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(oppdatertVedtaksbrevsperiode,
-                                                                       Vedtaksbrevsperiode::sporbar,
-                                                                       Vedtaksbrevsperiode::versjon)
+        lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
+            oppdatertVedtaksbrevsperiode,
+            Vedtaksbrevsperiode::sporbar,
+            Vedtaksbrevsperiode::versjon
+        )
         lagretVedtaksbrevsperiode.versjon shouldBe 2
     }
-
 }

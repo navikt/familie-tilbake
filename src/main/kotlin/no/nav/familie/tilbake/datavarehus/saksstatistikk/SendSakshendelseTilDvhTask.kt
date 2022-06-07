@@ -14,8 +14,10 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendSakshendelseTilDvhTask.TASK_TYPE,
-                     beskrivelse = "Sending av sakshendelser til datavarehus")
+@TaskStepBeskrivelse(
+    taskStepType = SendSakshendelseTilDvhTask.TASK_TYPE,
+    beskrivelse = "Sending av sakshendelser til datavarehus"
+)
 class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -24,8 +26,10 @@ class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : Asy
         log.info("SendSakshendelseTilDvhTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
         val behandlingstilstand: Behandlingstilstand = objectMapper.readValue(task.metadata.getProperty("behandlingstilstand"))
-        kafkaProducer.sendSaksdata(behandlingId,
-                                   behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC)))
+        kafkaProducer.sendSaksdata(
+            behandlingId,
+            behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC))
+        )
     }
 
     companion object {

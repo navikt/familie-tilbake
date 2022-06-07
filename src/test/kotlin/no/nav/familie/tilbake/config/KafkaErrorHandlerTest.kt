@@ -33,23 +33,25 @@ class KafkaErrorHandlerTest {
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en tom liste med records`() {
         shouldThrow<RuntimeException> { errorHandler.handle(RuntimeException("Feil i test"), emptyList(), consumer, container) }
-                .message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
+            .message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
     }
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en liste med records`() {
         val consumerRecord = ConsumerRecord("topic", 1, 1, 1, "record")
         shouldThrow<RuntimeException> {
-            errorHandler.handle(RuntimeException("Feil i test"),
-                                listOf(consumerRecord),
-                                consumer,
-                                container)
+            errorHandler.handle(
+                RuntimeException("Feil i test"),
+                listOf(consumerRecord),
+                consumer,
+                container
+            )
         }.message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
     }
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil hvor liste med records er null`() {
         shouldThrow<RuntimeException> { errorHandler.handle(RuntimeException("Feil i test"), null, consumer, container) }
-                .message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
+            .message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
     }
 }

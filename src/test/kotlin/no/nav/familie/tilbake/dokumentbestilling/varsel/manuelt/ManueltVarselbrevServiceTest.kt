@@ -60,15 +60,17 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
-        manueltVarselbrevService = ManueltVarselbrevService(behandlingRepository,
-                                                            fagsakRepository,
-                                                            mockEksterneDataForBrevService,
-                                                            spyPdfBrevService,
-                                                            mockFeilutbetalingService,
-                                                            varselbrevUtil)
+        manueltVarselbrevService = ManueltVarselbrevService(
+            behandlingRepository,
+            fagsakRepository,
+            mockEksterneDataForBrevService,
+            spyPdfBrevService,
+            mockFeilutbetalingService,
+            varselbrevUtil
+        )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
-                .returns(lagFeilutbetaling())
+            .returns(lagFeilutbetaling())
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident: String = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
@@ -84,12 +86,14 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendManueltVarselBrev skal sende manuelt varselbrev`() {
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
         verify {
-            spyPdfBrevService.sendBrev(eq(behandling),
-                                       eq(fagsak),
-                                       eq(Brevtype.VARSEL),
-                                       any(),
-                                       eq(9000L),
-                                       any())
+            spyPdfBrevService.sendBrev(
+                eq(behandling),
+                eq(fagsak),
+                eq(Brevtype.VARSEL),
+                any(),
+                eq(9000L),
+                any()
+            )
         }
     }
 
@@ -97,19 +101,27 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
-                                                                    varselbeløp = 100L)))
+        val behandlingCopy = behandling.copy(
+            varsler = setOf(
+                Varsel(
+                    varseltekst = varseltekst,
+                    varselbeløp = 100L
+                )
+            )
+        )
         val behandling = behandlingRepository.update(behandlingCopy)
 
         manueltVarselbrevService.sendKorrigertVarselBrev(behandling, korrigertVarseltekst, Brevmottager.BRUKER)
 
         verify {
-            spyPdfBrevService.sendBrev(eq(behandling),
-                                       eq(fagsak),
-                                       eq(Brevtype.KORRIGERT_VARSEL),
-                                       any(),
-                                       eq(9000L),
-                                       any())
+            spyPdfBrevService.sendBrev(
+                eq(behandling),
+                eq(fagsak),
+                eq(Brevtype.KORRIGERT_VARSEL),
+                any(),
+                eq(9000L),
+                any()
+            )
         }
     }
 
@@ -117,58 +129,86 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
-                                                                    varselbeløp = 100L)),
-                                             verger = setOf(Testdata.verge))
+        val behandlingCopy = behandling.copy(
+            varsler = setOf(
+                Varsel(
+                    varseltekst = varseltekst,
+                    varselbeløp = 100L
+                )
+            ),
+            verger = setOf(Testdata.verge)
+        )
         val behandling = behandlingRepository.update(behandlingCopy)
 
         manueltVarselbrevService.sendKorrigertVarselBrev(behandling, varseltekst, Brevmottager.VERGE)
 
         verify {
-            spyPdfBrevService.sendBrev(eq(behandling),
-                                       eq(fagsak),
-                                       eq(Brevtype.KORRIGERT_VARSEL),
-                                       any(),
-                                       eq(9000L),
-                                       any())
+            spyPdfBrevService.sendBrev(
+                eq(behandling),
+                eq(fagsak),
+                eq(Brevtype.KORRIGERT_VARSEL),
+                any(),
+                eq(9000L),
+                any()
+            )
         }
     }
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise manuelt varselbrev`() {
-        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
-                                                                                 Dokumentmalstype.VARSEL,
-                                                                                 varseltekst)
+        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+            behandling.id,
+            Dokumentmalstype.VARSEL,
+            varseltekst
+        )
 
         PdfaValidator.validatePdf(data)
     }
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
-        val behandlingCopy = behandling.copy(varsler = setOf(Varsel(varseltekst = varseltekst,
-                                                                    varselbeløp = 100L)))
+        val behandlingCopy = behandling.copy(
+            varsler = setOf(
+                Varsel(
+                    varseltekst = varseltekst,
+                    varselbeløp = 100L
+                )
+            )
+        )
         behandlingRepository.update(behandlingCopy)
 
-        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(behandling.id,
-                                                                                 Dokumentmalstype.KORRIGERT_VARSEL,
-                                                                                 varseltekst)
+        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+            behandling.id,
+            Dokumentmalstype.KORRIGERT_VARSEL,
+            varseltekst
+        )
 
         PdfaValidator.validatePdf(data)
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
-        val periode = Periode(LocalDate.of(2019, 10, 1),
-                              LocalDate.of(2019, 10, 30))
+        val periode = Periode(
+            LocalDate.of(2019, 10, 1),
+            LocalDate.of(2019, 10, 30)
+        )
 
-        return FaktaFeilutbetalingDto(totaltFeilutbetaltBeløp = BigDecimal(9000),
-                                      totalFeilutbetaltPeriode = PeriodeDto(periode),
-                                      feilutbetaltePerioder = listOf(FeilutbetalingsperiodeDto(PeriodeDto(periode),
-                                                                                               BigDecimal(9000))),
-                                      revurderingsvedtaksdato = LocalDate.now().minusDays(1),
-                                      begrunnelse = "",
-                                      faktainfo = Faktainfo(revurderingsårsak = "testverdi",
-                                                            revurderingsresultat = "testverdi",
-                                                            tilbakekrevingsvalg =
-                                                            Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL))
+        return FaktaFeilutbetalingDto(
+            totaltFeilutbetaltBeløp = BigDecimal(9000),
+            totalFeilutbetaltPeriode = PeriodeDto(periode),
+            feilutbetaltePerioder = listOf(
+                FeilutbetalingsperiodeDto(
+                    PeriodeDto(periode),
+                    BigDecimal(9000)
+                )
+            ),
+            revurderingsvedtaksdato = LocalDate.now().minusDays(1),
+            begrunnelse = "",
+            faktainfo = Faktainfo(
+                revurderingsårsak = "testverdi",
+                revurderingsresultat = "testverdi",
+                tilbakekrevingsvalg =
+                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            )
+        )
     }
 }

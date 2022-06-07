@@ -24,12 +24,16 @@ import java.util.UUID
 class VilkårsvurderingController(val vilkårsvurderingService: VilkårsvurderingService) {
 
     @Operation(summary = "Hent vilkårsvurdering")
-    @GetMapping(path = ["{behandlingId}/vilkarsvurdering/v1"],
-                produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER,
-                        "Henter vilkårsvurdering for en gitt behandling",
-                        AuditLoggerEvent.ACCESS,
-                        HenteParam.BEHANDLING_ID)
+    @GetMapping(
+        path = ["{behandlingId}/vilkarsvurdering/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.VEILEDER,
+        "Henter vilkårsvurdering for en gitt behandling",
+        AuditLoggerEvent.ACCESS,
+        HenteParam.BEHANDLING_ID
+    )
     fun hentVurdertVilkårsvurdering(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VurdertVilkårsvurderingDto> {
         return Ressurs.success(vilkårsvurderingService.hentVilkårsvurdering(behandlingId))
     }

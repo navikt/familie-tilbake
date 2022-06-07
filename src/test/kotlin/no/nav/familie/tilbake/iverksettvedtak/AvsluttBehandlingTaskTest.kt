@@ -53,9 +53,13 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal avslutte behandling`() {
         var behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK))
-        behandlingsstegstilstandRepository.insert(Behandlingsstegstilstand(behandlingId = behandlingId,
-                                                                           behandlingssteg = Behandlingssteg.AVSLUTTET,
-                                                                           behandlingsstegsstatus = Behandlingsstegstatus.KLAR))
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandlingId,
+                behandlingssteg = Behandlingssteg.AVSLUTTET,
+                behandlingsstegsstatus = Behandlingsstegstatus.KLAR
+            )
+        )
 
         avsluttBehandlingTask.doTask(Task(type = AvsluttBehandlingTask.TYPE, payload = behandlingId.toString()))
 

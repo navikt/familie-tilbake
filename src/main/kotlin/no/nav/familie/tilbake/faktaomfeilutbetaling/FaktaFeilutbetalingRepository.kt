@@ -7,8 +7,9 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface FaktaFeilutbetalingRepository : RepositoryInterface<FaktaFeilutbetaling, UUID>,
-                                          InsertUpdateRepository<FaktaFeilutbetaling> {
+interface FaktaFeilutbetalingRepository :
+    RepositoryInterface<FaktaFeilutbetaling, UUID>,
+    InsertUpdateRepository<FaktaFeilutbetaling> {
 
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling?
 

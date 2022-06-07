@@ -37,9 +37,11 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
 
-        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(vurdertForeldelse,
-                                                                     VurdertForeldelse::sporbar,
-                                                                     VurdertForeldelse::versjon)
+        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
+            vurdertForeldelse,
+            VurdertForeldelse::sporbar,
+            VurdertForeldelse::versjon
+        )
         lagretVurdertForeldelse.versjon shouldBe 1
     }
 
@@ -52,10 +54,11 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         vurdertForeldelseRepository.update(oppdatertVurdertForeldelse)
 
         lagretVurdertForeldelse = vurdertForeldelseRepository.findByIdOrThrow(vurdertForeldelse.id)
-        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(oppdatertVurdertForeldelse,
-                                                                     VurdertForeldelse::sporbar,
-                                                                     VurdertForeldelse::versjon)
+        lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
+            oppdatertVurdertForeldelse,
+            VurdertForeldelse::sporbar,
+            VurdertForeldelse::versjon
+        )
         lagretVurdertForeldelse.versjon shouldBe 2
     }
-
 }

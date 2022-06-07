@@ -15,11 +15,13 @@ import javax.servlet.http.HttpServletRequest
  * disse logges til cs3,cs5,cs6 då cs1,cs2 og cs4 er til internt bruk
  * Kan brukes med eks CustomKeyValue(key=fagsak, value=fagsakId)
  */
-data class Sporingsdata(val event: AuditLoggerEvent,
-                        val personIdent: String,
-                        val custom1: CustomKeyValue? = null,
-                        val custom2: CustomKeyValue? = null,
-                        val custom3: CustomKeyValue? = null)
+data class Sporingsdata(
+    val event: AuditLoggerEvent,
+    val personIdent: String,
+    val custom1: CustomKeyValue? = null,
+    val custom2: CustomKeyValue? = null,
+    val custom3: CustomKeyValue? = null
+)
 
 enum class AuditLoggerEvent(val type: String) {
     CREATE("create"),
@@ -48,28 +50,30 @@ class AuditLogger(@Value("\${NAIS_APP_NAME:appName}") private val applicationNam
 
     private fun getRequest(): HttpServletRequest? {
         return RequestContextHolder.getRequestAttributes()
-                ?.takeIf { it is ServletRequestAttributes }
-                ?.let { it as ServletRequestAttributes }
-                ?.request
+            ?.takeIf { it is ServletRequestAttributes }
+            ?.let { it as ServletRequestAttributes }
+            ?.request
     }
 
     private fun createAuditLogString(data: Sporingsdata, request: HttpServletRequest): String {
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
         return "CEF:0|$applicationName|auditLog|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
-               "suid=${ContextService.hentSaksbehandler()} " +
-               "duid=${data.personIdent} " +
-               "sproc=${getCallId()} " +
-               "requestMethod=${request.method} " +
-               "request=${request.requestURI} " +
-               createCustomString(data)
+            "suid=${ContextService.hentSaksbehandler()} " +
+            "duid=${data.personIdent} " +
+            "sproc=${getCallId()} " +
+            "requestMethod=${request.method} " +
+            "request=${request.requestURI} " +
+            createCustomString(data)
     }
 
     private fun createCustomString(data: Sporingsdata): String {
-        return listOfNotNull(data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },
-                             data.custom2?.let { "cs5Label=${it.key} cs5=${it.value}" },
-                             data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" })
-                .joinToString(" ")
+        return listOfNotNull(
+            data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },
+            data.custom2?.let { "cs5Label=${it.key} cs5=${it.value}" },
+            data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" }
+        )
+            .joinToString(" ")
     }
 
     private fun getCallId(): String {

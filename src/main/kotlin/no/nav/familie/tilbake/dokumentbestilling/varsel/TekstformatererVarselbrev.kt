@@ -21,5 +21,4 @@ object TekstformatererVarselbrev {
     fun lagVarselbrevsvedleggHtml(vedleggsdata: Vedleggsdata): String {
         return FellesTekstformaterer.lagBrevtekst(vedleggsdata, "varsel/vedlegg")
     }
-
 }

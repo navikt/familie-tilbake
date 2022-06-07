@@ -25,14 +25,17 @@ import javax.validation.constraints.NotNull
 class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
 
     @Operation(summary = "Hent fakta om feilutbetaling")
-    @GetMapping(path = ["/behandling/{behandlingId}/fakta/v1"],
-                produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Rolletilgangssjekk(Behandlerrolle.VEILEDER,
-                        "Henter fakta om feilutbetaling for en gitt behandling",
-                        AuditLoggerEvent.ACCESS,
-                        HenteParam.BEHANDLING_ID)
+    @GetMapping(
+        path = ["/behandling/{behandlingId}/fakta/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.VEILEDER,
+        "Henter fakta om feilutbetaling for en gitt behandling",
+        AuditLoggerEvent.ACCESS,
+        HenteParam.BEHANDLING_ID
+    )
     fun hentFaktaomfeilutbetaling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }
-
 }

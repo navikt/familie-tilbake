@@ -15,20 +15,23 @@ class TekstformatererHenleggelsesbrevTest {
 
     private val niendeMars = LocalDate.of(2019, 3, 9)
 
-    private val brevmetadata = Brevmetadata(sakspartId = "12345678901",
-                                            sakspartsnavn = "Test",
-                                            mottageradresse = Adresseinfo("12345678901", "Test"),
-                                            vergenavn = "John Doe",
-                                            språkkode = Språkkode.NB,
-                                            ytelsestype = Ytelsestype.BARNETILSYN,
-                                            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-                                            saksnummer = "1232456",
-                                            ansvarligSaksbehandler = "Bob")
+    private val brevmetadata = Brevmetadata(
+        sakspartId = "12345678901",
+        sakspartsnavn = "Test",
+        mottageradresse = Adresseinfo("12345678901", "Test"),
+        vergenavn = "John Doe",
+        språkkode = Språkkode.NB,
+        ytelsestype = Ytelsestype.BARNETILSYN,
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        saksnummer = "1232456",
+        ansvarligSaksbehandler = "Bob"
+    )
 
-
-    private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(brevmetadata,
-                                                                      niendeMars,
-                                                                      REVURDERING_HENLEGGELSESBREV_FRITEKST)
+    private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(
+        brevmetadata,
+        niendeMars,
+        REVURDERING_HENLEGGELSESBREV_FRITEKST
+    )
 
     @Test
     fun `lagFritekst skal generere henleggelsesbrev`() {
@@ -40,7 +43,7 @@ class TekstformatererHenleggelsesbrevTest {
     @Test
     fun `lagRevurderingsfritekst skal generere henleggelsesbrev for tilbakekreving revurdering`() {
         val generertBrev: String =
-                TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering.txt")
         generertBrev shouldBe fasit
     }
@@ -60,7 +63,7 @@ class TekstformatererHenleggelsesbrevTest {
         val brevmetadata = brevmetadata.copy(finnesVerge = true)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String =
-                TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering.txt")
         val vergeTekst = les("/varselbrev/verge.txt")
 
@@ -81,7 +84,7 @@ class TekstformatererHenleggelsesbrevTest {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String =
-                TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering_nn.txt")
         generertBrev shouldBe fasit
     }
@@ -96,7 +99,7 @@ class TekstformatererHenleggelsesbrevTest {
     @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift for tilbakekreving revurdering`() {
         val overskrift: String =
-                TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(brevmetadata)
+            TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(brevmetadata)
         val fasit = "Tilbakebetaling stønad til barnetilsyn"
         overskrift shouldBe fasit
     }

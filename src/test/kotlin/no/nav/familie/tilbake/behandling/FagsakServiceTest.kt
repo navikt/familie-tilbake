@@ -51,15 +51,16 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
-
     @Test
     fun test() {
         headers.setBearerAuth(lokalTestToken())
         val uriHentSaksnummer = UriComponentsBuilder.fromHttpUrl(localhost("/api/fagsystem/EF/fagsak/123456/v1")).toUriString()
 
-        val response: ResponseEntity<Ressurs<Map<String, String>>> = restTemplate.exchange(uriHentSaksnummer,
-                                                                                           HttpMethod.GET,
-                                                                                           HttpEntity<String>(headers))
+        val response: ResponseEntity<Ressurs<Map<String, String>>> = restTemplate.exchange(
+            uriHentSaksnummer,
+            HttpMethod.GET,
+            HttpEntity<String>(headers)
+        )
 
         println(response)
     }
@@ -77,7 +78,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         fagsakDto.fagsystem shouldBe Fagsystem.BA
 
         val brukerDto = fagsakDto.bruker
-        brukerDto.personIdent shouldBe "123"
+        brukerDto.personIdent shouldBe "32132132111"
         brukerDto.navn shouldBe "testverdi"
         brukerDto.kjønn shouldBe Kjønn.MANN
         brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
@@ -118,6 +119,28 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
         behandlingsoppsummeringtDto.status shouldBe behandling.status
         behandlingsoppsummeringtDto.type shouldBe behandling.type
+    }
+
+    @Test
+    fun `hentFagsak skal hente og oppdatere fagsak for barnetrygd`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId, "12345678910")
+
+        // Antar mock PDL client returnerer 32132132111
+        // første kall mot PDL får differanse på ident og kaster endretPersonIdentPublisher event
+        fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
+
+        fagsakDto.eksternFagsakId shouldBe eksternFagsakId
+        fagsakDto.språkkode shouldBe Språkkode.NB
+        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        fagsakDto.fagsystem shouldBe Fagsystem.BA
+
+        val brukerDto = fagsakDto.bruker
+        brukerDto.personIdent shouldBe "12345678910"
+        brukerDto.navn shouldBe "testverdi"
+        brukerDto.kjønn shouldBe Kjønn.MANN
+        brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
     }
 
     @Test
@@ -187,9 +210,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.kanBehandlingOpprettes.shouldBeFalse()
         respons.kravgrunnlagsreferanse.shouldBeNull()
         respons.melding shouldBe "Det finnes allerede en forespørsel om å opprette tilbakekrevingsbehandling. " +
-                "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
-                "ta kontakt med brukerstøtte for å rapportere feilen."
-
+            "Behandlingen vil snart bli tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
+            "ta kontakt med brukerstøtte for å rapportere feilen."
     }
 
     @Test
@@ -203,19 +225,23 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
-    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String = "123"): Behandling {
-        val fagsak = Fagsak(eksternFagsakId = eksternFagsakId,
-                            bruker = Bruker(personIdent, Språkkode.NB),
-                            ytelsestype = ytelsestype,
-                            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
+    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String = "32132132111"): Behandling {
+        val fagsak = Fagsak(
+            eksternFagsakId = eksternFagsakId,
+            bruker = Bruker(personIdent, Språkkode.NB),
+            ytelsestype = ytelsestype,
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+        )
         fagsakRepository.insert(fagsak)
 
-        val behandling = Behandling(fagsakId = fagsak.id,
-                                    type = Behandlingstype.TILBAKEKREVING,
-                                    ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                                    behandlendeEnhet = "8020",
-                                    behandlendeEnhetsNavn = "Oslo",
-                                    manueltOpprettet = false)
+        val behandling = Behandling(
+            fagsakId = fagsak.id,
+            type = Behandlingstype.TILBAKEKREVING,
+            ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+            behandlendeEnhet = "8020",
+            behandlendeEnhetsNavn = "Oslo",
+            manueltOpprettet = false
+        )
         behandlingRepository.insert(behandling)
         return behandling
     }

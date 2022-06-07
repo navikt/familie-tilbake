@@ -25,12 +25,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository,
-                         private val behandlingskontrollService: BehandlingskontrollService,
-                         private val vedtaksbrevService: VedtaksbrevService,
-                         private val oppgaveTaskService: OppgaveTaskService,
-                         private val totrinnService: TotrinnService,
-                         private val historikkTaskService: HistorikkTaskService) : IBehandlingssteg {
+class Foreslåvedtakssteg(
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val totrinnService: TotrinnService,
+    private val historikkTaskService: HistorikkTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,46 +48,58 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
 
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.SAKSBEHANDLER)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
+            Aktør.SAKSBEHANDLER
+        )
 
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         håndterOppgave(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
-                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
-                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
-                                              aktør = Aktør.SAKSBEHANDLER,
-                                              triggerTid = LocalDateTime.now().plusSeconds(2))
+        historikkTaskService.lagHistorikkTask(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                .BEHANDLING_SENDT_TIL_BESLUTTER,
+            aktør = Aktør.SAKSBEHANDLER,
+            triggerTid = LocalDateTime.now().plusSeconds(2)
+        )
     }
 
     @Transactional
     override fun utførStegAutomatisk(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg og behandler automatisk..")
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-                                              Aktør.VEDTAKSLØSNING)
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
+            Aktør.VEDTAKSLØSNING
+        )
         flyttBehandlingVidere(behandlingId)
 
         // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
         håndterOppgave(behandlingId)
 
-        historikkTaskService.lagHistorikkTask(behandlingId = behandlingId,
-                                              historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
-                                                      .BEHANDLING_SENDT_TIL_BESLUTTER,
-                                              aktør = Aktør.VEDTAKSLØSNING,
-                                              triggerTid = LocalDateTime.now().plusSeconds(2))
+        historikkTaskService.lagHistorikkTask(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
+                .BEHANDLING_SENDT_TIL_BESLUTTER,
+            aktør = Aktør.VEDTAKSLØSNING,
+            triggerTid = LocalDateTime.now().plusSeconds(2)
+        )
     }
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     @EventListener
@@ -94,9 +108,13 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
     }
 
     private fun flyttBehandlingVidere(behandlingId: UUID) {
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK,
-                                                                                      Behandlingsstegstatus.UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FORESLÅ_VEDTAK,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
@@ -106,7 +124,7 @@ class Foreslåvedtakssteg(private val behandlingRepository: BehandlingRepository
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
-        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, oppgavetype.name)
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {

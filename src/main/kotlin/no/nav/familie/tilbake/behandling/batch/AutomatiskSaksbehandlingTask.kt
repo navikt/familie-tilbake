@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AutomatiskSaksbehandlingTask.TYPE,
-                     beskrivelse = "behandler behandling automatisk",
-                     maxAntallFeil = 3,
-                     triggerTidVedFeilISekunder = 60 * 5L)
+@TaskStepBeskrivelse(
+    taskStepType = AutomatiskSaksbehandlingTask.TYPE,
+    beskrivelse = "behandler behandling automatisk",
+    maxAntallFeil = 3,
+    triggerTidVedFeilISekunder = 60 * 5L
+)
 class AutomatiskSaksbehandlingTask(private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

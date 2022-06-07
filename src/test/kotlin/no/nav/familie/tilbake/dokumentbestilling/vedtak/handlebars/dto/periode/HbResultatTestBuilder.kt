@@ -9,8 +9,10 @@ object HbResultatTestBuilder {
     }
 
     fun forTilbakekrevesBeløpOgRenter(tilbakekrevesBeløp: Int, renter: Int): HbResultat {
-        return HbResultat(tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekrevesBeløp.toLong()),
-                          rentebeløp = BigDecimal.valueOf(renter.toLong()),
-                          tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(tilbakekrevesBeløp.toLong()))
+        return HbResultat(
+            tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekrevesBeløp.toLong()),
+            rentebeløp = BigDecimal.valueOf(renter.toLong()),
+            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(tilbakekrevesBeløp.toLong())
+        )
     }
 }

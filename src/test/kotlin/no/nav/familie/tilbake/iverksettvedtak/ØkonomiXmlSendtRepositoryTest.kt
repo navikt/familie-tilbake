@@ -40,20 +40,20 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
 
         val lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
 
-        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(økonomiXmlSendt,
-                                                                   ØkonomiXmlSendt::sporbar,
-                                                                   ØkonomiXmlSendt::versjon)
+        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
+            økonomiXmlSendt,
+            ØkonomiXmlSendt::sporbar,
+            ØkonomiXmlSendt::versjon
+        )
         lagretØkonomiXmlSendt.versjon shouldBe 1
     }
-
 
     @Test
     fun `findByMeldingstypeAndSporbarOpprettetTidAfter skal finne forekomster hvis det finnes for søkekriterier`() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
 
         val lagretØkonomiXmlSendt =
-                økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now())
-
+            økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now())
 
         lagretØkonomiXmlSendt.shouldNotBeEmpty()
     }
@@ -63,11 +63,10 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.insert(økonomiXmlSendt)
 
         val lagretØkonomiXmlSendt =
-                økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now().plusDays(1))
+            økonomiXmlSendtRepository.findByOpprettetPåDato(LocalDate.now().plusDays(1))
 
         lagretØkonomiXmlSendt.shouldBeEmpty()
     }
-
 
     @Test
     fun `update med gyldige verdier skal oppdatere en forekomst av ØkonomiXmlSendt i basen`() {
@@ -78,10 +77,11 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         økonomiXmlSendtRepository.update(oppdatertØkonomiXmlSendt)
 
         lagretØkonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(oppdatertØkonomiXmlSendt,
-                                                                   ØkonomiXmlSendt::sporbar,
-                                                                   ØkonomiXmlSendt::versjon)
+        lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
+            oppdatertØkonomiXmlSendt,
+            ØkonomiXmlSendt::sporbar,
+            ØkonomiXmlSendt::versjon
+        )
         lagretØkonomiXmlSendt.versjon shouldBe 2
     }
-
 }

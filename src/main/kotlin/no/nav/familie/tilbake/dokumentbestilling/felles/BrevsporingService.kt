@@ -8,31 +8,34 @@ import java.util.UUID
 @Service
 class BrevsporingService(private val brevsporingRepository: BrevsporingRepository) {
 
-
-    fun lagreInfoOmUtsendtBrev(behandlingId: UUID,
-                               dokumentId: String,
-                               journalpostId: String,
-                               brevtype: Brevtype) {
-        val brevSporing = Brevsporing(behandlingId = behandlingId,
-                                      dokumentId = dokumentId,
-                                      journalpostId = journalpostId,
-                                      brevtype = brevtype)
+    fun lagreInfoOmUtsendtBrev(
+        behandlingId: UUID,
+        dokumentId: String,
+        journalpostId: String,
+        brevtype: Brevtype
+    ) {
+        val brevSporing = Brevsporing(
+            behandlingId = behandlingId,
+            dokumentId = dokumentId,
+            journalpostId = journalpostId,
+            brevtype = brevtype
+        )
         brevsporingRepository.insert(brevSporing)
     }
 
     fun finnSisteVarsel(behandlingId: UUID): Brevsporing? {
         val varselbrev = brevsporingRepository
-                .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.VARSEL)
+            .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.VARSEL)
         val korrigertVarselbrev = brevsporingRepository
-                .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.KORRIGERT_VARSEL)
+            .findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId, Brevtype.KORRIGERT_VARSEL)
 
         return korrigertVarselbrev ?: varselbrev
     }
 
     fun erVarselSendt(behandlingId: UUID): Boolean {
-        return brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(behandlingId,
-                                                                       setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL))
-
+        return brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(
+            behandlingId,
+            setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL)
+        )
     }
-
 }

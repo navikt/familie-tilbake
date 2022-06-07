@@ -21,14 +21,18 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendManueltVarselbrevTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Sender manuelt varselbrev",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepository,
-                                private val manueltVarselBrevService: ManueltVarselbrevService,
-                                private val behandlingskontrollService: BehandlingskontrollService,
-                                private val oppgaveTaskService: OppgaveTaskService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = SendManueltVarselbrevTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Sender manuelt varselbrev",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class SendManueltVarselbrevTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val manueltVarselBrevService: ManueltVarselbrevService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: SendManueltVarselbrevTaskdata = objectMapper.readValue(task.payload)
@@ -42,7 +46,6 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
                 manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
             manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
-
         } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
             if (behandling.harVerge) {
                 manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
@@ -51,31 +54,44 @@ class SendManueltVarselbrevTask(private val behandlingRepository: BehandlingRepo
         }
 
         val fristTid = Constants.saksbehandlersTidsfrist()
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
-                                                       .ansvarligSaksbehandler} har sendt varselbrev til bruker",
-                                               frist = fristTid)
+        oppgaveTaskService.oppdaterOppgaveTask(
+            behandlingId = behandling.id,
+            beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
+                .ansvarligSaksbehandler} har sendt varselbrev til bruker",
+            frist = fristTid,
+            saksbehandler = behandling.ansvarligSaksbehandler
+        )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
-            behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                            fristTid)
+            behandlingskontrollService.settBehandlingPåVent(
+                behandling.id,
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                fristTid
+            )
         }
     }
 
     companion object {
 
         fun opprettTask(behandlingId: UUID, fagsystem: Fagsystem, maltype: Dokumentmalstype, fritekst: String): Task =
-                Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(SendManueltVarselbrevTaskdata(behandlingId = behandlingId,
-                                                                                             maltype = maltype,
-                                                                                             fritekst = fritekst)),
-                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }                )
+            Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(
+                    SendManueltVarselbrevTaskdata(
+                        behandlingId = behandlingId,
+                        maltype = maltype,
+                        fritekst = fritekst
+                    )
+                ),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+            )
 
         const val TYPE = "brev.sendManueltVarsel"
     }
 }
 
-data class SendManueltVarselbrevTaskdata(val behandlingId: UUID,
-                                         val maltype: Dokumentmalstype,
-                                         val fritekst: String)
+data class SendManueltVarselbrevTaskdata(
+    val behandlingId: UUID,
+    val maltype: Dokumentmalstype,
+    val fritekst: String
+)

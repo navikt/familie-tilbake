@@ -11,15 +11,19 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Vergessteg(private val behandlingRepository: BehandlingRepository,
-                 private val vergeService: VergeService,
-                 private val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
+class Vergessteg(
+    private val behandlingRepository: BehandlingRepository,
+    private val vergeService: VergeService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -28,8 +32,13 @@ class Vergessteg(private val behandlingRepository: BehandlingRepository,
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE,
-                                                                                                        AUTOUTFØRT))
+            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    Behandlingssteg.VERGE,
+                    AUTOUTFØRT
+                )
+            )
         }
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -38,21 +47,29 @@ class Vergessteg(private val behandlingRepository: BehandlingRepository,
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE,
-                                                                                                    UTFØRT))
+
+        oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
+
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT)
+        )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VERGE} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.VERGE,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.VERGE,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.VERGE
     }
-
 }

@@ -24,9 +24,11 @@ object VilkårsvurderingValidator {
 
     private fun validerAndelTilbakekrevesBeløp(aktsomhetDto: AktsomhetDto?) {
         if (aktsomhetDto?.andelTilbakekreves?.compareTo(BigDecimal(100)) == 1) {
-            throw Feil(message = "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent",
-                       frontendFeilmelding = "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                message = "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent",
+                frontendFeilmelding = "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -35,37 +37,47 @@ object VilkårsvurderingValidator {
             val særligGrunner = aktsomhetDto.særligeGrunner
             when {
                 særligGrunner.any { SærligGrunn.ANNET != it.særligGrunn && it.begrunnelse != null } -> {
-                    throw Feil(message = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
-                               frontendFeilmelding = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
-                               httpStatus = HttpStatus.BAD_REQUEST)
+                    throw Feil(
+                        message = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
+                        frontendFeilmelding = "Begrunnelse kan fylles ut kun for ANNET begrunnelse",
+                        httpStatus = HttpStatus.BAD_REQUEST
+                    )
                 }
                 særligGrunner.any { SærligGrunn.ANNET == it.særligGrunn && it.begrunnelse == null } -> {
-                    throw Feil(message = "ANNET særlig grunner må ha ANNET begrunnelse",
-                               frontendFeilmelding = "ANNET særlig grunner må ha ANNET begrunnelse",
-                               httpStatus = HttpStatus.BAD_REQUEST)
+                    throw Feil(
+                        message = "ANNET særlig grunner må ha ANNET begrunnelse",
+                        frontendFeilmelding = "ANNET særlig grunner må ha ANNET begrunnelse",
+                        httpStatus = HttpStatus.BAD_REQUEST
+                    )
                 }
             }
         }
     }
 
-    private fun validerBeløp(kravgrunnlag431: Kravgrunnlag431,
-                             periode: Periode,
-                             vilkårsvurderingsperiode: VilkårsvurderingsperiodeDto) {
+    private fun validerBeløp(
+        kravgrunnlag431: Kravgrunnlag431,
+        periode: Periode,
+        vilkårsvurderingsperiode: VilkårsvurderingsperiodeDto
+    ) {
         val feilMelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
         if (vilkårsvurderingsperiode.godTroDto?.beløpTilbakekreves != null) {
             val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             if (vilkårsvurderingsperiode.godTroDto.beløpTilbakekreves > feilutbetalteBeløp) {
-                throw Feil(message = feilMelding,
-                           frontendFeilmelding = feilMelding,
-                           httpStatus = HttpStatus.BAD_REQUEST)
+                throw Feil(
+                    message = feilMelding,
+                    frontendFeilmelding = feilMelding,
+                    httpStatus = HttpStatus.BAD_REQUEST
+                )
             }
         }
         if (vilkårsvurderingsperiode.aktsomhetDto?.beløpTilbakekreves != null) {
             val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             if (vilkårsvurderingsperiode.aktsomhetDto.beløpTilbakekreves > feilutbetalteBeløp) {
-                throw Feil(message = feilMelding,
-                           frontendFeilmelding = feilMelding,
-                           httpStatus = HttpStatus.BAD_REQUEST)
+                throw Feil(
+                    message = feilMelding,
+                    frontendFeilmelding = feilMelding,
+                    httpStatus = HttpStatus.BAD_REQUEST
+                )
             }
         }
     }

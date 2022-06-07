@@ -29,7 +29,6 @@ import org.springframework.core.env.Environment
 import java.time.LocalDate
 import java.util.Properties
 
-
 class OppgaveServiceTest {
 
     private val behandlingRepository: BehandlingRepository = mockk(relaxed = true)
@@ -39,44 +38,48 @@ class OppgaveServiceTest {
     private val environment: Environment = mockk(relaxed = true)
     private val taskRepository: TaskRepository = mockk(relaxed = true)
 
-
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
-    private val finnMappeResponseDto = listOf(MappeDto(mappeIdGodkjenneVedtak, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
-                                              MappeDto(mappeIdBehandleSak, "EF Sak - 50 Behandle sak", enhetsnr = "4489"))
+    private val finnMappeResponseDto = listOf(
+        MappeDto(mappeIdGodkjenneVedtak, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
+        MappeDto(mappeIdBehandleSak, "EF Sak - 50 Behandle sak", enhetsnr = "4489")
+    )
 
     private lateinit var oppgaveService: OppgaveService
 
     @BeforeEach
     fun setUp() {
         clearAllMocks(answers = false)
-        oppgaveService = OppgaveService(behandlingRepository,
-                                        fagsakRepository,
-                                        integrasjonerClient,
-                                        personService,
-                                        taskRepository,
-                                        environment,)
+        oppgaveService = OppgaveService(
+            behandlingRepository,
+            fagsakRepository,
+            integrasjonerClient,
+            personService,
+            taskRepository,
+            environment,
+        )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
         every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(0L, emptyList())
-        every { taskRepository.findByStatusInAndType(any(),any(),any()) } returns emptyList()
+        every { taskRepository.findByStatusInAndType(any(), any(), any()) } returns emptyList()
     }
 
     @Nested
     inner class OpprettOppgave {
 
-
         @Test
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4489`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
 
-            oppgaveService.opprettOppgave(behandling.id,
-                                          Oppgavetype.GodkjenneVedtak,
-                                          "4489",
-                                          "",
-                                          LocalDate.now().plusDays(5),
-                                          "bob")
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
             slot.captured.mappeId shouldBe mappeIdGodkjenneVedtak
@@ -86,12 +89,14 @@ class OppgaveServiceTest {
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4483`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
 
-            oppgaveService.opprettOppgave(behandling.id,
-                                          Oppgavetype.GodkjenneVedtak,
-                                          "4483",
-                                          "",
-                                          LocalDate.now().plusDays(5),
-                                          "bob")
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4483",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
             slot.captured.mappeId shouldBe mappeIdGodkjenneVedtak
@@ -102,12 +107,14 @@ class OppgaveServiceTest {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
-            oppgaveService.opprettOppgave(behandling.id,
-                                          Oppgavetype.BehandleSak,
-                                          "4489",
-                                          "",
-                                          LocalDate.now().plusDays(5),
-                                          "bob")
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
             slot.captured.mappeId shouldBe mappeIdBehandleSak
@@ -118,12 +125,14 @@ class OppgaveServiceTest {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
-            oppgaveService.opprettOppgave(behandling.id,
-                                          Oppgavetype.BehandleSak,
-                                          "4483",
-                                          "",
-                                          LocalDate.now().plusDays(5),
-                                          "bob")
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "4483",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
             slot.captured.mappeId shouldBe mappeIdBehandleSak
@@ -134,12 +143,14 @@ class OppgaveServiceTest {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
-            oppgaveService.opprettOppgave(behandling.id,
-                                          Oppgavetype.BehandleSak,
-                                          "1578",
-                                          "",
-                                          LocalDate.now().plusDays(5),
-                                          "bob")
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "1578",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
             slot.captured.mappeId shouldBe null
@@ -151,16 +162,18 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
 
             val exception = shouldThrow<RuntimeException> {
-                oppgaveService.opprettOppgave(behandling.id,
-                                              Oppgavetype.GodkjenneVedtak,
-                                              "4483",
-                                              "",
-                                              LocalDate.now().plusDays(5),
-                                              "bob")
+                oppgaveService.opprettOppgave(
+                    behandling.id,
+                    Oppgavetype.GodkjenneVedtak,
+                    "4483",
+                    "",
+                    LocalDate.now().plusDays(5),
+                    "bob"
+                )
             }
             exception.message shouldBe "Det finnes allerede en oppgave ${Oppgavetype.GodkjenneVedtak} " +
-                    "for behandling ${behandling.id} og finnes ikke noen ferdigstilleoppgaver. " +
-                    "Eksisterende oppgaven ${Oppgavetype.GodkjenneVedtak} må lukke først."
+                "for behandling ${behandling.id} og finnes ikke noen ferdigstilleoppgaver. " +
+                "Eksisterende oppgaven ${Oppgavetype.GodkjenneVedtak} må lukke først."
         }
 
         @Test
@@ -171,15 +184,17 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
             val properties = Properties().apply { setProperty("oppgavetype", Oppgavetype.GodkjenneVedtak.name) }
             every { taskRepository.findByStatusInAndType(any(), any(), any()) } returns
-                    listOf(Task(type = FerdigstillOppgaveTask.TYPE, payload = behandling.id.toString(), properties = properties))
+                listOf(Task(type = FerdigstillOppgaveTask.TYPE, payload = behandling.id.toString(), properties = properties))
 
             shouldNotThrow<RuntimeException> {
-                oppgaveService.opprettOppgave(behandling.id,
-                                              Oppgavetype.GodkjenneVedtak,
-                                              "4483",
-                                              "",
-                                              LocalDate.now().plusDays(5),
-                                              "bob")
+                oppgaveService.opprettOppgave(
+                    behandling.id,
+                    Oppgavetype.GodkjenneVedtak,
+                    "4483",
+                    "",
+                    LocalDate.now().plusDays(5),
+                    "bob"
+                )
             }
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }

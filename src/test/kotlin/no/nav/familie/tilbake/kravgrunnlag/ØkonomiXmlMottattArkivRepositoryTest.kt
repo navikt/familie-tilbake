@@ -22,9 +22,11 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
 
         val lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
 
-        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(økonomiXmlMottattArkiv,
-                                                                          ØkonomiXmlMottattArkiv::sporbar,
-                                                                          ØkonomiXmlMottattArkiv::versjon)
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
+            økonomiXmlMottattArkiv,
+            ØkonomiXmlMottattArkiv::sporbar,
+            ØkonomiXmlMottattArkiv::versjon
+        )
         lagretØkonomiXmlMottattArkiv.versjon shouldBe 1
     }
 
@@ -37,10 +39,11 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
         økonomiXmlMottattArkivRepository.update(oppdatertØkonomiXmlMottattArkiv)
 
         lagretØkonomiXmlMottattArkiv = økonomiXmlMottattArkivRepository.findByIdOrThrow(økonomiXmlMottattArkiv.id)
-        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(oppdatertØkonomiXmlMottattArkiv,
-                                                                          ØkonomiXmlMottattArkiv::sporbar,
-                                                                          ØkonomiXmlMottattArkiv::versjon)
+        lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
+            oppdatertØkonomiXmlMottattArkiv,
+            ØkonomiXmlMottattArkiv::sporbar,
+            ØkonomiXmlMottattArkiv::versjon
+        )
         lagretØkonomiXmlMottattArkiv.versjon shouldBe 2
     }
-
 }

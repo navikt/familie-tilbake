@@ -6,18 +6,20 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import javax.validation.constraints.Size
 
-class Vedtaksoppsummering(@Size(min = 1, max = 20)
-                          val saksnummer: String,
-                          val ytelsestype: Ytelsestype,
-                          val behandlingUuid: UUID,
-                          val behandlingstype: Behandlingstype,
-                          val erBehandlingManueltOpprettet: Boolean = false,
-                          val behandlingOpprettetTidspunkt: OffsetDateTime,
-                          val vedtakFattetTidspunkt: OffsetDateTime,
-                          val referertFagsaksbehandling: String,
-                          val forrigeBehandling: UUID? = null,
-                          val ansvarligSaksbehandler: String,
-                          val ansvarligBeslutter: String,
-                          val behandlendeEnhet: String,
-                          @Size(min = 1, max = 100)
-                          val perioder: List<VedtakPeriode>)
+class Vedtaksoppsummering(
+    @Size(min = 1, max = 20)
+    val saksnummer: String,
+    val ytelsestype: Ytelsestype,
+    val behandlingUuid: UUID,
+    val behandlingstype: Behandlingstype,
+    val erBehandlingManueltOpprettet: Boolean = false,
+    val behandlingOpprettetTidspunkt: OffsetDateTime,
+    val vedtakFattetTidspunkt: OffsetDateTime,
+    val referertFagsaksbehandling: String,
+    val forrigeBehandling: UUID? = null,
+    val ansvarligSaksbehandler: String,
+    val ansvarligBeslutter: String,
+    val behandlendeEnhet: String,
+    @Size(min = 1, max = 100)
+    val perioder: List<VedtakPeriode>
+)

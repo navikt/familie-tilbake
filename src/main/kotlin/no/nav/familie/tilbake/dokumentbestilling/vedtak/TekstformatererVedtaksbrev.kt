@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformatere
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 
-
 internal object TekstformatererVedtaksbrev {
 
     fun lagVedtaksbrevsfritekst(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
@@ -26,5 +25,4 @@ internal object TekstformatererVedtaksbrev {
     fun lagVedtaksbrevsoverskrift(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
         return FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, "vedtak/vedtak_overskrift")
     }
-
 }

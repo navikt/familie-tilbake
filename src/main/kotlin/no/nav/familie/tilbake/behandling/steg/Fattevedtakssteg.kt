@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -22,12 +21,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class Fattevedtakssteg(private val behandlingskontrollService: BehandlingskontrollService,
-                       private val behandlingRepository: BehandlingRepository,
-                       private val totrinnService: TotrinnService,
-                       private val oppgaveTaskService: OppgaveTaskService,
-                       private val historikkTaskService: HistorikkTaskService,
-                       private val behandlingsvedtakService: BehandlingsvedtakService) : IBehandlingssteg {
+class Fattevedtakssteg(
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val behandlingRepository: BehandlingRepository,
+    private val totrinnService: TotrinnService,
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val historikkTaskService: HistorikkTaskService,
+    private val behandlingsvedtakService: BehandlingsvedtakService
+) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -48,30 +49,38 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         // step3: lukk Godkjenne vedtak oppgaver
-        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
-        }
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = Oppgavetype.GodkjenneVedtak.name)
 
         // step4: flytter behandling tilbake til Foreslå Vedtak om beslutter underkjente noen steg
         val finnesUnderkjenteSteg = fatteVedtaksstegDto.totrinnsvurderinger.any { !it.godkjent }
         if (finnesUnderkjenteSteg) {
             behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
 
-            historikkTaskService.lagHistorikkTask(behandlingId,
-                                                  TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
-                                                  Aktør.BESLUTTER,
-                                                  beslutter = behandling.ansvarligBeslutter)
+            historikkTaskService.lagHistorikkTask(
+                behandlingId,
+                TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
+                Aktør.BESLUTTER,
+                beslutter = behandling.ansvarligBeslutter
+            )
             totrinnService.fjernAnsvarligBeslutter(behandlingId)
-            oppgaveTaskService.opprettOppgaveTask(behandling,
-                                                  Oppgavetype.BehandleUnderkjentVedtak,
-                                                  behandling.ansvarligSaksbehandler)
+            oppgaveTaskService.opprettOppgaveTask(
+                behandling,
+                Oppgavetype.BehandleUnderkjentVedtak,
+                behandling.ansvarligSaksbehandler
+            )
         } else {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                     Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
-                                                                                          Behandlingsstegstatus.UTFØRT))
-            historikkTaskService.lagHistorikkTask(behandlingId,
-                                                  TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                                                  Aktør.BESLUTTER)
+            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    Behandlingssteg.FATTE_VEDTAK,
+                    Behandlingsstegstatus.UTFØRT
+                )
+            )
+            historikkTaskService.lagHistorikkTask(
+                behandlingId,
+                TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
+                Aktør.BESLUTTER
+            )
             // step 5: opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         }
@@ -84,12 +93,18 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
         totrinnService.lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
-                                                                                      Behandlingsstegstatus.UTFØRT))
-        historikkTaskService.lagHistorikkTask(behandlingId,
-                                              TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                                              Aktør.BESLUTTER)
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingsstegstatus.UTFØRT
+            )
+        )
+        historikkTaskService.lagHistorikkTask(
+            behandlingId,
+            TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
+            Aktør.BESLUTTER
+        )
         behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -97,13 +112,16 @@ class Fattevedtakssteg(private val behandlingskontrollService: Behandlingskontro
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId,
-                                                                 Behandlingsstegsinfo(Behandlingssteg.FATTE_VEDTAK,
-                                                                                      Behandlingsstegstatus.KLAR))
+        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingId,
+            Behandlingsstegsinfo(
+                Behandlingssteg.FATTE_VEDTAK,
+                Behandlingsstegstatus.KLAR
+            )
+        )
     }
 
     override fun getBehandlingssteg(): Behandlingssteg {
         return Behandlingssteg.FATTE_VEDTAK
     }
-
 }

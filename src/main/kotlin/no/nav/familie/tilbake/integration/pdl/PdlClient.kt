@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.integration.pdl
 
-
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
@@ -24,48 +23,63 @@ import java.net.URI
 import java.time.LocalDate
 
 @Service
-class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("azureClientCredential") restTemplate: RestOperations)
-    : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+class PdlClient(
+    private val pdlConfig: PdlConfig,
+    @Qualifier("azureClientCredential") restTemplate: RestOperations
+) :
+    AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-
     fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = PdlConfig.hentEnkelPersonQuery)
-        val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(pdlConfig.pdlUri,
-                                                                      pdlPersonRequest,
-                                                                      httpHeaders(fagsystem))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident),
+            query = PdlConfig.hentEnkelPersonQuery
+        )
+        val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders(fagsystem)
+        )
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
-                Personinfo(ident = ident,
-                           fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
-                           navn = it.navn.first().fulltNavn(),
-                           kjønn = it.kjønn.first().kjønn,
-                           dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) })
+                val aktivtIdent = it.identer.first().identifikasjonsnummer ?: error("Kan ikke hente aktivt ident fra PDL")
+                Personinfo(
+                    ident = aktivtIdent,
+                    fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
+                    navn = it.navn.first().fulltNavn(),
+                    kjønn = it.kjønn.first().kjønn,
+                    dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) }
+                )
             }
         } else {
             logger.warn("Respons fra PDL:${objectMapper.writeValueAsString(respons)}")
-            throw Feil(message = "Feil ved oppslag på person: ${respons.errorMessages()}",
-                       frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            throw Feil(
+                message = "Feil ved oppslag på person: ${respons.errorMessages()}",
+                frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
     }
 
     fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.hentIdenterQuery)
-        val response = postForEntity<PdlHentIdenterResponse>(pdlConfig.pdlUri,
-                                                             pdlPersonRequest,
-                                                             httpHeaders(fagsystem))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = PdlConfig.hentIdenterQuery
+        )
+        val response = postForEntity<PdlHentIdenterResponse>(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders(fagsystem)
+        )
 
         if (!response.harFeil()) return response
-        throw Feil(message = "Feil mot pdl: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Feil mot pdl: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
-
 
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
 
@@ -85,4 +99,3 @@ class PdlClient(val pdlConfig: PdlConfig,
         operations.optionsForAllow(pingUri)
     }
 }
-

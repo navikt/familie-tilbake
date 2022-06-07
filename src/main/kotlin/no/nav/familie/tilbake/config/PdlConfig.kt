@@ -19,8 +19,8 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
         val hentIdenterQuery = graphqlQuery("hentIdenter")
 
         private fun graphqlQuery(pdlResource: String) = PdlConfig::class.java.getResource("/pdl/$pdlResource.graphql")
-                .readText()
-                .graphqlCompatible()
+            .readText()
+            .graphqlCompatible()
 
         private fun String.graphqlCompatible(): String {
             return StringUtils.normalizeSpace(this.replace("\n", ""))

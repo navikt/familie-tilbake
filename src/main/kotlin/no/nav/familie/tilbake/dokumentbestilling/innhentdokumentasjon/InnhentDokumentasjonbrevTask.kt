@@ -21,14 +21,18 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = InnhentDokumentasjonbrevTask.TYPE,
-                     maxAntallFeil = 3,
-                     beskrivelse = "Sender innhent dokumentasjonsbrev",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingRepository,
-                                   private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
-                                   private val behandlingskontrollService: BehandlingskontrollService,
-                                   private val oppgaveTaskService: OppgaveTaskService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = InnhentDokumentasjonbrevTask.TYPE,
+    maxAntallFeil = 3,
+    beskrivelse = "Sender innhent dokumentasjonsbrev",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class InnhentDokumentasjonbrevTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val oppgaveTaskService: OppgaveTaskService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
@@ -40,32 +44,42 @@ class InnhentDokumentasjonbrevTask(private val behandlingRepository: BehandlingR
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
 
         val fristTid = Constants.saksbehandlersTidsfrist()
-        oppgaveTaskService.oppdaterOppgaveTask(behandlingId = behandling.id,
-                                               beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
-                                                       .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
-                                               frist = fristTid)
+        oppgaveTaskService.oppdaterOppgaveTask(
+            behandlingId = behandling.id,
+            beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
+                .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
+            frist = fristTid,
+            saksbehandler = behandling.ansvarligSaksbehandler
+        )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
-            behandlingskontrollService.settBehandlingPåVent(behandling.id,
-                                                            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                                                            fristTid)
+            behandlingskontrollService.settBehandlingPåVent(
+                behandling.id,
+                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                fristTid
+            )
         }
-
     }
 
     companion object {
 
-        fun opprettTask(behandlingId: UUID,
-                        fagsystem: Fagsystem,
-                        fritekst: String): Task =
-                Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
-                     properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) })
-                        .medTriggerTid(LocalDateTime.now().plusSeconds(15))
+        fun opprettTask(
+            behandlingId: UUID,
+            fagsystem: Fagsystem,
+            fritekst: String
+        ): Task =
+            Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+            )
+                .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
         const val TYPE = "brev.sendInnhentDokumentasjon"
     }
 }
 
-data class InnhentDokumentasjonbrevTaskdata(val behandlingId: UUID,
-                                            val fritekst: String)
+data class InnhentDokumentasjonbrevTaskdata(
+    val behandlingId: UUID,
+    val fritekst: String
+)

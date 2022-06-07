@@ -7,18 +7,22 @@ import java.math.BigDecimal
 
 /* Brukes bare for iverksettelse */
 
-data class Tilbakekrevingsperiode(val periode: Periode,
-                                  val renter: BigDecimal = BigDecimal.ZERO,
-                                  val beløp: List<Tilbakekrevingsbeløp> = listOf())
+data class Tilbakekrevingsperiode(
+    val periode: Periode,
+    val renter: BigDecimal = BigDecimal.ZERO,
+    val beløp: List<Tilbakekrevingsbeløp> = listOf()
+)
 
-data class Tilbakekrevingsbeløp(val klassetype: Klassetype,
-                                val klassekode: Klassekode,
-                                val nyttBeløp: BigDecimal,
-                                val utbetaltBeløp: BigDecimal,
-                                val tilbakekrevesBeløp: BigDecimal,
-                                val uinnkrevdBeløp: BigDecimal,
-                                val skattBeløp: BigDecimal,
-                                val kodeResultat: KodeResultat)
+data class Tilbakekrevingsbeløp(
+    val klassetype: Klassetype,
+    val klassekode: Klassekode,
+    val nyttBeløp: BigDecimal,
+    val utbetaltBeløp: BigDecimal,
+    val tilbakekrevesBeløp: BigDecimal,
+    val uinnkrevdBeløp: BigDecimal,
+    val skattBeløp: BigDecimal,
+    val kodeResultat: KodeResultat
+)
 
 enum class KodeResultat(val kode: String) {
 

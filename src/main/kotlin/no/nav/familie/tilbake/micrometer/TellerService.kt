@@ -20,40 +20,52 @@ import java.time.LocalDate
 
 @Service
 @Transactional
-class TellerService(private val fagsakRepository: FagsakRepository,
-                    private val meldingstellingRepository: MeldingstellingRepository) {
+class TellerService(
+    private val fagsakRepository: FagsakRepository,
+    private val meldingstellingRepository: MeldingstellingRepository
+) {
 
     fun tellKobletKravgrunnlag(fagsystem: Fagsystem) =
-            tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
+        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
 
     fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) =
-            tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
+        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
 
     fun tellKobletStatusmelding(fagsystem: Fagsystem) =
-            tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
+        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
 
     fun tellUkobletStatusmelding(fagsystem: Fagsystem) =
-            tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
+        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
 
     fun tellMelding(fagsystem: Fagsystem, type: Meldingstype, status: Mottaksstatus) {
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(fagsystem,
-                                                                                               type,
-                                                                                               status,
-                                                                                               LocalDate.now())
+        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+            fagsystem,
+            type,
+            status,
+            LocalDate.now()
+        )
         if (meldingstelling == null) {
-            meldingstellingRepository.insert(Meldingstelling(fagsystem = fagsystem,
-                                                             type = type,
-                                                             status = status))
+            meldingstellingRepository.insert(
+                Meldingstelling(
+                    fagsystem = fagsystem,
+                    type = type,
+                    status = status
+                )
+            )
         } else {
             meldingstellingRepository.oppdaterTeller(fagsystem, type, status)
         }
     }
 
     fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
-        Metrics.counter("Brevteller",
-                        Tags.of("fagsystem", fagsak.fagsystem.name,
-                                "brevtype", brevtype.name)).increment()
+        Metrics.counter(
+            "Brevteller",
+            Tags.of(
+                "fagsystem", fagsak.fagsystem.name,
+                "brevtype", brevtype.name
+            )
+        ).increment()
     }
 
     fun tellVedtak(behandlingsresultatstype: Behandlingsresultatstype, behandling: Behandling) {
@@ -61,9 +73,12 @@ class TellerService(private val fagsakRepository: FagsakRepository,
         val vedtakstype = if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
             Behandlingsresultatstype.HENLAGT.name else behandlingsresultatstype.name
 
-        Metrics.counter("Vedtaksteller",
-                        Tags.of("fagsystem", fagsak.fagsystem.name,
-                                "vedtakstype", vedtakstype)).increment()
+        Metrics.counter(
+            "Vedtaksteller",
+            Tags.of(
+                "fagsystem", fagsak.fagsystem.name,
+                "vedtakstype", vedtakstype
+            )
+        ).increment()
     }
-
 }

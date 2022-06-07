@@ -15,16 +15,20 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FinnKravgrunnlagTask.TYPE,
-                     beskrivelse = "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
-                                   "og kobler dem til behandling",
-                     triggerTidVedFeilISekunder = 60 * 5L)
-class FinnKravgrunnlagTask(private val behandlingRepository: BehandlingRepository,
-                           private val fagsakRepository: FagsakRepository,
-                           private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-                           private val kravgrunnlagRepository: KravgrunnlagRepository,
-                           private val kravgrunnlagService: KravgrunnlagService,
-                           private val kravvedtakstatusService: KravvedtakstatusService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = FinnKravgrunnlagTask.TYPE,
+    beskrivelse = "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
+        "og kobler dem til behandling",
+    triggerTidVedFeilISekunder = 60 * 5L
+)
+class FinnKravgrunnlagTask(
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val kravgrunnlagService: KravgrunnlagService,
+    private val kravvedtakstatusService: KravvedtakstatusService
+) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -35,8 +39,8 @@ class FinnKravgrunnlagTask(private val behandlingRepository: BehandlingRepositor
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         val mottattKravgrunnlagene = økonomiXmlMottattRepository
-                .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-                .sortedBy { it.sporbar.opprettetTid }
+            .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
+            .sortedBy { it.sporbar.opprettetTid }
         mottattKravgrunnlagene.forEach { mottattKravgrunnlag ->
             kravgrunnlagService.håndterMottattKravgrunnlag(mottattKravgrunnlag.melding)
             if (mottattKravgrunnlag.sperret) {
