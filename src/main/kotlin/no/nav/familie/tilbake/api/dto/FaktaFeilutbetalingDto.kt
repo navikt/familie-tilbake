@@ -14,7 +14,9 @@ data class FaktaFeilutbetalingDto(
     val revurderingsvedtaksdato: LocalDate,
     val begrunnelse: String,
     val faktainfo: Faktainfo
-)
+) {
+    val gjelderDødsfall get() = feilutbetaltePerioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
+}
 
 data class FeilutbetalingsperiodeDto(
     val periode: PeriodeDto,

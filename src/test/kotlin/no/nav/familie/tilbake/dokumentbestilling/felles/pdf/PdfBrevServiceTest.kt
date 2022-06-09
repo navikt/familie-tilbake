@@ -42,10 +42,11 @@ internal class PdfBrevServiceTest {
                 mottageradresse = Adresseinfo(" ", ""),
                 behandlendeEnhetsNavn = "",
                 ansvarligSaksbehandler = "Bob",
+                saksnummer = "1232456",
                 språkkode = Språkkode.NB,
                 ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                saksnummer = "1232456",
-                behandlingstype = Behandlingstype.TILBAKEKREVING
+                behandlingstype = Behandlingstype.TILBAKEKREVING,
+                gjelderDødsfall = false
             ),
             overskrift = "",
             mottager = Brevmottager.BRUKER,
