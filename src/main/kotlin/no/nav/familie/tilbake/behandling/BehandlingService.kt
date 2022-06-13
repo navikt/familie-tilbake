@@ -251,6 +251,11 @@ class BehandlingService(
             Aktør.SAKSBEHANDLER
         )
 
+        gjenopptaBehandling(behandlingId)
+    }
+
+    // tatt ut det i egen metode slik at den kan gjenbrukes for AutomatiskGjenopptaBehandlingBatch
+    fun gjenopptaBehandling(behandlingId: UUID) {
         stegService.gjenopptaSteg(behandlingId)
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandlingId,
@@ -423,7 +428,8 @@ class BehandlingService(
 
         // oppretter fagsak hvis det ikke finnes ellers bruker det eksisterende
         val eksisterendeFagsak = fagsakService.finnFagsak(fagsystem, eksternFagsakId)
-        val fagsak = eksisterendeFagsak ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
+        val fagsak = eksisterendeFagsak
+            ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
         val behandling =
             BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
