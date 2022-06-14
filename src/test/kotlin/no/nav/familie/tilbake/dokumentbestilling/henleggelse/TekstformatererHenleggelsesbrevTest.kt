@@ -18,13 +18,14 @@ class TekstformatererHenleggelsesbrevTest {
     private val brevmetadata = Brevmetadata(
         sakspartId = "12345678901",
         sakspartsnavn = "Test",
-        mottageradresse = Adresseinfo("12345678901", "Test"),
         vergenavn = "John Doe",
+        mottageradresse = Adresseinfo("12345678901", "Test"),
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        ansvarligSaksbehandler = "Bob",
+        saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETILSYN,
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        saksnummer = "1232456",
-        ansvarligSaksbehandler = "Bob"
+        gjelderDødsfall = false
     )
 
     private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(

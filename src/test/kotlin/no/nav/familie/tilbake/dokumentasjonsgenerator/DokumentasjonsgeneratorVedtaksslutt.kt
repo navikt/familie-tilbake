@@ -217,13 +217,14 @@ class DokumentasjonsgeneratorVedtaksslutt {
             sakspartId = "",
             sakspartsnavn = "<Søkers navn>",
             finnesVerge = medVerge,
+            vergenavn = "<annen mottaker>",
             mottageradresse = Adresseinfo("01020312345", "<Søkers navn>", annenMottagersNavn),
             behandlendeEnhetsNavn = "<Behandlende enhets navn>",
             ansvarligSaksbehandler = "<Saksbehandlers navn>",
-            vergenavn = "<annen mottaker>",
-            språkkode = språkkode,
             saksnummer = "1232456",
-            ytelsestype = ytelsestype
+            språkkode = språkkode,
+            ytelsestype = ytelsestype,
+            gjelderDødsfall = false
         )
     }
 

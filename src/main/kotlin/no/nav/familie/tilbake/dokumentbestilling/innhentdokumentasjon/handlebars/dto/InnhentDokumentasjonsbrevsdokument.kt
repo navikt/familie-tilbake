@@ -15,7 +15,8 @@ data class InnhentDokumentasjonsbrevsdokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler
+    brevmetadata.ansvarligSaksbehandler,
+    brevmetadata.gjelderDødsfall
 ) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge

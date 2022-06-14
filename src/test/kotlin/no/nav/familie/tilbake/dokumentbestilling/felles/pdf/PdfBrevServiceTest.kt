@@ -37,6 +37,7 @@ internal class PdfBrevServiceTest {
         val fritekst = "Dette er en \n\nfritekst med \n\nlinjeskift"
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot)) } returns mockk()
+
         val brevdata = lagBrevdata()
 
         pdfBrevService.sendBrev(
@@ -102,7 +103,8 @@ internal class PdfBrevServiceTest {
             språkkode = Språkkode.NB,
             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
             saksnummer = "1232456",
-            behandlingstype = Behandlingstype.TILBAKEKREVING
+            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            gjelderDødsfall = false
         ),
         overskrift = "",
         mottager = Brevmottager.BRUKER,

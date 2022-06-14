@@ -26,7 +26,8 @@ data class HbVedtaksbrevFelles(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler
+    brevmetadata.ansvarligSaksbehandler,
+    brevmetadata.gjelderDødsfall
 ) {
 
     @Suppress("unused") // Handlebars

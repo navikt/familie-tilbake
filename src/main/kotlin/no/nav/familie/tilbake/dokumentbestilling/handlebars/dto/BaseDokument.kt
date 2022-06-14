@@ -11,7 +11,8 @@ open class BaseDokument(
     val ytelsestype: Ytelsestype,
     override val språkkode: Språkkode,
     val behandlendeEnhetsNavn: String,
-    val ansvarligSaksbehandler: String
+    val ansvarligSaksbehandler: String,
+    val gjelderDødsfall: Boolean
 ) : Språkstøtte {
 
     val avsenderenhet =
