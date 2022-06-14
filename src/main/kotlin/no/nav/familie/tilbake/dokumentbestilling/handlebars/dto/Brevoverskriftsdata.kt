@@ -6,5 +6,6 @@ data class Brevoverskriftsdata(val brevmetadata: Brevmetadata) : BaseDokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler
+    brevmetadata.ansvarligSaksbehandler,
+    brevmetadata.gjelderDødsfall
 )

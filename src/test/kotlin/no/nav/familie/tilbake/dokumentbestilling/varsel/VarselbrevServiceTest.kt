@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
@@ -33,6 +34,9 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var varselbrevUtil: VarselbrevUtil
 
+    @Autowired
+    private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
+
     private lateinit var varselbrevService: VarselbrevService
 
     @BeforeEach
@@ -40,6 +44,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         varselbrevService = VarselbrevService(
             fagsakRepository,
             eksterneDataForBrevService,
+            faktaFeilutbetalingService,
             pdfBrevService,
             varselbrevUtil
         )

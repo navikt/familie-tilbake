@@ -301,9 +301,10 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             mottageradresse = Adresseinfo("01020312345", "Bob"),
             behandlendeEnhetsNavn = "Oslo",
             ansvarligSaksbehandler = "Bob",
-            språkkode = språkkode,
             saksnummer = "1232456",
-            ytelsestype = ytelsestype
+            språkkode = språkkode,
+            ytelsestype = ytelsestype,
+            gjelderDødsfall = false
         )
     }
 

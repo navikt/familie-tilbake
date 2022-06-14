@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 class VarselbrevService(
     private val fagsakRepository: FagsakRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val pdfBrevService: PdfBrevService,
     private val varselbrevUtil: VarselbrevUtil
 ) {
@@ -66,10 +68,12 @@ class VarselbrevService(
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
+        val faktaFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandling.id)
 
         return varselbrevUtil.sammenstillInfoFraFagsystemerForSending(
             fagsak,
             behandling,
+            faktaFeilutbetaling,
             adresseinfo,
             personinfo,
             behandling.aktivtVarsel,

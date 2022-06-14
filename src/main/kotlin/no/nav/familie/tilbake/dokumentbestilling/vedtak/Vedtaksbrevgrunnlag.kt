@@ -74,6 +74,7 @@ data class Vedtaksbrevgrunnlag(
     val vilkårsvurderingsperioder get() = behandling.vilkårsvurdering.firstOrNull { it.aktiv }?.perioder ?: emptySet()
     val vurdertForeldelse get() = behandling.vurderteForeldelser.firstOrNull { it.aktiv }
     val faktaFeilutbetaling get() = behandling.faktaFeilutbetaling.firstOrNull { it.aktiv }
+    val gjelderDødsfall get() = faktaFeilutbetaling?.gjelderDødsfall ?: false
 
     val aktivtSteg
         get() = behandling.behandlingsstegstilstander.firstOrNull {
