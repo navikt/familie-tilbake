@@ -21,7 +21,10 @@ class AutomatiskGjenopptaBehandlingService(
 
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> {
         return behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(
-            LocalDate.now().minusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker)
+            // behandlinger som venter på VENT_PÅ_BRUKERTILBAKEMELDING og har tidsfrist som er gamle enn defaultVenteTid
+            fristDato = LocalDate.now().minusWeeks(Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.defaultVenteTidIUker),
+            // behandlinger som venter på andre årsak og har tidsfrist som er gamle enn dagens dato
+            dagensdato = LocalDate.now()
         )
     }
 

@@ -141,4 +141,44 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
                 it.metadata["beskrivelse"] == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
         }.shouldBeTrue()
     }
+
+    @Test
+    fun `skal gjenoppta behandling som venter på avvent dokumentasjon`() {
+        fagsakRepository.insert(Testdata.fagsak)
+        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        behandlingsstegstilstandRepository.insert(
+            Testdata.behandlingsstegstilstand.copy(
+                behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
+                behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
+                tidsfrist = LocalDate.now().minusWeeks(1)
+            )
+        )
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
+
+        behandlingRepository.findByIdOrThrow(behandling.id).ansvarligSaksbehandler.shouldBe("VL")
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        behandlingsstegstilstand.any {
+            it.behandlingssteg == Behandlingssteg.VILKÅRSVURDERING &&
+                it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
+            it.venteårsak == null && it.tidsfrist == null
+        }.shouldBeTrue()
+
+        taskRepository.findAll().any {
+            it.type == LagHistorikkinnslagTask.TYPE &&
+                it.payload == behandling.id.toString() &&
+                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
+                it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
+        }.shouldBeTrue()
+
+        taskRepository.findAll().any {
+            it.type == OppdaterOppgaveTask.TYPE &&
+                it.payload == behandling.id.toString() &&
+                it.metadata["beskrivelse"] == "Behandling er tatt av vent" &&
+                it.metadata["frist"] == LocalDate.now().toString() &&
+                it.metadata["saksbehandler"] == "VL"
+        }.shouldBeTrue()
+    }
 }
