@@ -15,6 +15,8 @@ import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.junit.jupiter.api.AfterEach
@@ -79,7 +81,12 @@ internal class IntegrasjonerClientTest {
                 .willReturn(okJson(success("id").toJson()))
         )
         // Vil gi resultat
-        integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF).shouldNotBeNull()
+        integrasjonerClient.distribuerJournalpost(
+            "3216354",
+            Fagsystem.EF,
+            Distribusjonstype.VIKTIG,
+            Distribusjonstidspunkt.KJERNETID
+        ).shouldNotBeNull()
     }
 
     @Test
@@ -90,7 +97,12 @@ internal class IntegrasjonerClientTest {
         )
 
         shouldThrow<IllegalStateException> {
-            integrasjonerClient.distribuerJournalpost("3216354", Fagsystem.EF)
+            integrasjonerClient.distribuerJournalpost(
+                "3216354",
+                Fagsystem.EF,
+                Distribusjonstype.VIKTIG,
+                Distribusjonstidspunkt.KJERNETID
+            )
         }
     }
 

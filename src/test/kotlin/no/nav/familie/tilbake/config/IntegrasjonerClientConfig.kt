@@ -40,7 +40,7 @@ class IntegrasjonerClientConfig {
             )
         }
 
-        every { integrasjonerClient.distribuerJournalpost(any(), any()) } returns "42"
+        every { integrasjonerClient.distribuerJournalpost(any(), any(), any(), any()) } returns "42"
 
         every { integrasjonerClient.hentDokument(any(), any()) } returns readMockfileFromResources()
 
