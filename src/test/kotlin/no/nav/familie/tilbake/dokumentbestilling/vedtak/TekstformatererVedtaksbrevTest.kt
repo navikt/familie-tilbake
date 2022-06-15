@@ -53,11 +53,12 @@ class TekstformatererVedtaksbrevTest {
         sakspartId = "123456",
         sakspartsnavn = "Test",
         mottageradresse = Adresseinfo("ident", "bob"),
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
+        saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        saksnummer = "1232456",
-        ansvarligSaksbehandler = "Ansvarlig Saksbehandler"
+        gjelderDødsfall = false
     )
 
     private val felles =

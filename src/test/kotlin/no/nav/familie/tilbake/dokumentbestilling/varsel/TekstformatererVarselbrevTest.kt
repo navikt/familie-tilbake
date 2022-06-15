@@ -22,11 +22,12 @@ class TekstformatererVarselbrevTest {
         sakspartId = "123456",
         sakspartsnavn = "Test",
         mottageradresse = lagAdresseinfo(),
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        ansvarligSaksbehandler = "Bob",
+        saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        saksnummer = "1232456",
-        ansvarligSaksbehandler = "Bob"
+        gjelderDødsfall = false
     )
 
     private val varselbrevsdokument =
@@ -56,6 +57,26 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal generere varseltekst i tredje person ved dødsfall nynorsk`() {
+        val metadata = metadata.copy(gjelderDødsfall = true, språkkode = Språkkode.NN)
+        val varselbrevsdokument =
+            varselbrevsdokument.copy(brevmetadata = metadata, feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/OS_flere_perioder_dødsfall.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal generere varseltekst i tredje person ved dødsfall bokmål`() {
+        val metadata = metadata.copy(gjelderDødsfall = true)
+        val varselbrevsdokument =
+            varselbrevsdokument.copy(brevmetadata = metadata, feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/OS_en_periode_dødsfall.txt")
         generertBrev shouldBe fasit
     }
 
