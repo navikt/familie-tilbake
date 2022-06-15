@@ -251,11 +251,6 @@ class BehandlingService(
             Aktør.SAKSBEHANDLER
         )
 
-        gjenopptaBehandling(behandlingId)
-    }
-
-    // tatt ut det i egen metode slik at den kan gjenbrukes for AutomatiskGjenopptaBehandlingBatch
-    fun gjenopptaBehandling(behandlingId: UUID) {
         stegService.gjenopptaSteg(behandlingId)
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandlingId,

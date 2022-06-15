@@ -81,10 +81,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             SELECT beh.* FROM behandling beh JOIN behandlingsstegstilstand tilstand ON tilstand.behandling_id = beh.id
             WHERE beh.type='TILBAKEKREVING' AND beh.status='UTREDES' AND
             tilstand.behandlingsstegsstatus='VENTER' AND tilstand.behandlingssteg<>'GRUNNLAG' AND 
-            CASE (ventearsak) WHEN 'VENT_PÅ_BRUKERTILBAKEMELDING' THEN tilstand.tidsfrist < :fristDato
-            else tilstand.tidsfrist < :dagensdato 
-            END
+            tilstand.tidsfrist < :dagensdato
     """
     )
-    fun finnAlleBehandlingerKlarForGjenoppta(fristDato: LocalDate, dagensdato: LocalDate): List<Behandling>
+    fun finnAlleBehandlingerKlarForGjenoppta(dagensdato: LocalDate): List<Behandling>
 }
