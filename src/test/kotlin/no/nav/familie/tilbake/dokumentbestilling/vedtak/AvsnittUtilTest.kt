@@ -44,11 +44,12 @@ class AvsnittUtilTest {
         sakspartId = "123456",
         sakspartsnavn = "Test",
         mottageradresse = Adresseinfo("ident", "bob"),
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        ansvarligSaksbehandler = "Bob",
+        saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETRYGD,
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        saksnummer = "1232456",
-        ansvarligSaksbehandler = "Bob"
+        gjelderDødsfall = false
     )
 
     private val vedtaksbrevFelles = HbVedtaksbrevFelles(
