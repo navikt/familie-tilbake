@@ -7,6 +7,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -129,9 +131,17 @@ class IntegrasjonerClient(
 
     fun distribuerJournalpost(
         journalpostId: String,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
+        distribusjonstype: Distribusjonstype,
+        distribusjonstidspunkt: Distribusjonstidspunkt
     ): String {
-        val request = DistribuerJournalpostRequest(journalpostId, fagsystem, integrasjonerConfig.applicationName)
+        val request = DistribuerJournalpostRequest(
+            journalpostId,
+            fagsystem,
+            integrasjonerConfig.applicationName,
+            distribusjonstype,
+            distribusjonstidspunkt
+        )
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
 

@@ -2,11 +2,12 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -21,8 +22,7 @@ import org.springframework.stereotype.Service
 )
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
-    private val taskService: TaskService,
-    private val historikkTaskService: HistorikkTaskService
+    private val taskService: TaskService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -33,7 +33,9 @@ class PubliserJournalpostTask(
         try {
             integrasjonerClient.distribuerJournalpost(
                 task.metadata.getProperty("journalpostId"),
-                Fagsystem.valueOf(task.metadata.getProperty("fagsystem"))
+                Fagsystem.valueOf(task.metadata.getProperty("fagsystem")),
+                Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
+                Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt"))
             )
         } catch (ressursException: RessursException) {
             if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)) {

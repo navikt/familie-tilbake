@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -67,6 +69,8 @@ class PdfBrevService(
             setProperty("mottager", brevdata.mottager.name)
             setProperty("brevtype", brevtype.name)
             setProperty("ansvarligSaksbehandler", behandling.ansvarligSaksbehandler)
+            setProperty("distribusjonstype", utledDistribusjonstype(brevtype).name)
+            setProperty("distribusjonstidspunkt", distribusjonstidspunkt)
             varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
             fritekst?.also { setProperty("fritekst", Base64.getEncoder().encodeToString(fritekst.toByteArray())) }
             brevdata.tittel?.also { setProperty("tittel", it) }
@@ -126,6 +130,15 @@ class PdfBrevService(
     private fun lagHeader(data: Brevdata): String {
         return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
     }
+
+    private fun utledDistribusjonstype(brevtype: Brevtype): Distribusjonstype {
+        return when (brevtype) {
+            Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL, Brevtype.INNHENT_DOKUMENTASJON -> Distribusjonstype.VIKTIG
+            Brevtype.VEDTAK -> Distribusjonstype.VEDTAK
+            Brevtype.HENLEGGELSE -> Distribusjonstype.ANNET
+        }
+    }
+    private val distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID.name
 
     companion object {
 
