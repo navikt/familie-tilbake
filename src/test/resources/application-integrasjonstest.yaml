@@ -2,6 +2,16 @@ server:
   port: 9093
 
 
+prosessering:
+  continuousRunning.enabled: false
+  maxantall: 1
+  fixedDelayString:
+    in:
+      milliseconds: 4000
+  delete:
+    after:
+      weeks: 4
+
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration

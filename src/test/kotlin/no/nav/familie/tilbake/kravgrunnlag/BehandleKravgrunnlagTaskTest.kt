@@ -60,6 +60,7 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -771,7 +772,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOppdaterFaktainfoTask(referanse: String) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskRepository.findAll().any {
             OppdaterFaktainfoTask.TYPE == it.type &&
                 fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
                 fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
@@ -783,7 +784,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         beskrivelse: String,
         fristDato: LocalDate
     ) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskRepository.findAll().any {
             OppdaterOppgaveTask.TYPE == it.type &&
                 behandling.id.toString() == it.payload
             beskrivelse == it.metadata["beskrivelse"] &&

@@ -41,6 +41,7 @@ import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 
 internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
@@ -450,7 +451,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null
     ) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskRepository.findByStatusIn(listOf(
+            Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
+            Status.BEHANDLER, Status.FERDIG
+        ), page = Pageable.unpaged()).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&
