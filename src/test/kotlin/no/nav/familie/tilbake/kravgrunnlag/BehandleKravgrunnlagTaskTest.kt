@@ -11,7 +11,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -60,7 +59,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
