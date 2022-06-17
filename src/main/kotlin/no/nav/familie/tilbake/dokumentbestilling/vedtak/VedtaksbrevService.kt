@@ -56,7 +56,20 @@ class VedtaksbrevService(
     }
 
     @Transactional
+    fun lagreUtkastAvFritekster(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
+        lagreFriteksterFraSaksbehandler(behandlingId, fritekstavsnittDto, false)
+    }
+
+    @Transactional
     fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
+        lagreFriteksterFraSaksbehandler(behandlingId, fritekstavsnittDto, true)
+    }
+
+    private fun lagreFriteksterFraSaksbehandler(
+        behandlingId: UUID,
+        fritekstavsnittDto: FritekstavsnittDto,
+        validerPåkrevetFritekster: Boolean = false
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
@@ -73,7 +86,8 @@ class VedtaksbrevService(
             vedtaksbrevFritekstPerioder = vedtaksbrevsperioder,
             avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
             vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
-            vedtaksbrevstype = vedtaksbrevstype
+            vedtaksbrevstype = vedtaksbrevstype,
+            validerPåkrevetFritekster = validerPåkrevetFritekster,
         )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)

@@ -19,6 +19,8 @@ import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
+import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.Periode
@@ -53,6 +55,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
@@ -408,6 +411,103 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         tilleggsavsnitt.shouldNotBeNull()
     }
 
+    @Test
+    fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for alle fakta perioder`() {
+        lagFakta()
+        lagVilkårsvurdering()
+
+        val fritekstAvsnittDto = lagFritekstAvsnittDto(
+            oppsummeringstekst = "oppsummering fritekst",
+            særligGrunnerAnnetFritekst = "særliggrunner annet fritekst"
+        )
+        vedtaksbrevService.lagreUtkastAvFritekster(
+            behandlingId = behandling.id,
+            fritekstAvsnittDto
+        )
+
+        val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
+        avsnittene.shouldNotBeEmpty()
+        avsnittene.size shouldBe 3
+    }
+
+    @Test
+    fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for ANNET særliggrunner begrunnelse`() {
+        lagFakta()
+        lagVilkårsvurdering()
+
+        val fritekstAvsnittDto = lagFritekstAvsnittDto(
+            faktaFritekst = "fakta fritekst",
+            oppsummeringstekst = "oppsummering fritekst",
+        )
+
+        vedtaksbrevService.lagreUtkastAvFritekster(
+            behandlingId = behandling.id,
+            fritekstavsnittDto = fritekstAvsnittDto
+        )
+
+        val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
+        avsnittene.shouldNotBeEmpty()
+        avsnittene.size shouldBe 3
+    }
+
+    @Test
+    fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for oppsummering`() {
+        var lokalBehandling = Testdata.revurdering.copy(
+            id = UUID.randomUUID(), eksternBrukId = UUID.randomUUID(),
+            årsaker = setOf(
+                Behandlingsårsak(
+                    originalBehandlingId = behandling.id,
+                    type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
+                )
+            ),
+        )
+        lokalBehandling = behandlingRepository.insert(lokalBehandling)
+
+        lagFakta(lokalBehandling.id)
+        lagVilkårsvurdering(lokalBehandling.id)
+
+        val fritekstAvsnittDto = lagFritekstAvsnittDto(
+            faktaFritekst = "fakta fritekst",
+            særligGrunnerAnnetFritekst = "særliggrunner annet fritekst"
+        )
+
+        vedtaksbrevService.lagreUtkastAvFritekster(
+            behandlingId = lokalBehandling.id,
+            fritekstavsnittDto = fritekstAvsnittDto
+        )
+
+        val avsnittene = vedtaksbrevService.hentVedtaksbrevSomTekst(lokalBehandling.id)
+        avsnittene.shouldNotBeEmpty()
+        avsnittene.size shouldBe 3
+    }
+
+    @Test
+    fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når påkrevet oppsummeringstekst mangler`() {
+        var lokalBehandling = Testdata.revurdering.copy(
+            id = UUID.randomUUID(), eksternBrukId = UUID.randomUUID(),
+            årsaker = setOf(
+                Behandlingsårsak(
+                    originalBehandlingId = behandling.id,
+                    type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
+                )
+            ),
+        )
+        lokalBehandling = behandlingRepository.insert(lokalBehandling)
+        lagFakta(lokalBehandling.id)
+        lagVilkårsvurdering(lokalBehandling.id)
+
+        val exception = shouldThrow<RuntimeException> {
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = lokalBehandling.id,
+                lagFritekstAvsnittDto(
+                    faktaFritekst = "fakta",
+                    særligGrunnerAnnetFritekst = "test",
+                )
+            )
+        }
+        exception.message shouldBe "oppsummering fritekst påkrevet for revurdering ${lokalBehandling.id}"
+    }
+
     private fun lagFritekstAvsnittDto(
         faktaFritekst: String? = null,
         oppsummeringstekst: String? = null,
@@ -429,7 +529,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagFakta() {
+    private fun lagFakta(behandlingId: UUID = behandling.id) {
 
         val faktaFeilutbetaltePerioder =
             setOf(
@@ -439,17 +539,17 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
                 )
             )
-        faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandling.id)
+        faktaFeilutbetalingService.deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
         faktaRepository.insert(
             FaktaFeilutbetaling(
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
                 begrunnelse = "fakta begrrunnelse",
                 perioder = faktaFeilutbetaltePerioder
             )
         )
     }
 
-    private fun lagVilkårsvurdering() {
+    private fun lagVilkårsvurdering(behandlingId: UUID = behandling.id) {
         val aktsomhet =
             VilkårsvurderingAktsomhet(
                 aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
@@ -471,10 +571,10 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 begrunnelse = "Vilkårsvurdering begrunnelse",
                 aktsomhet = aktsomhet
             )
-        vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandling.id)
+        vilkårsvurderingService.deaktiverEksisterendeVilkårsvurdering(behandlingId)
         vilkårsvurderingRepository.insert(
             Vilkårsvurdering(
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
                 perioder = setOf(vilkårsvurderingPeriode)
             )
         )
