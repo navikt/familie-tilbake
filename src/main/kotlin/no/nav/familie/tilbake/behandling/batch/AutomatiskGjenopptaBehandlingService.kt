@@ -35,12 +35,12 @@ class AutomatiskGjenopptaBehandlingService(
         val tidsfrist = behandlingsstegstilstand.tidsfrist
             ?: error("Behandling $behandlingId er på vent uten tidsfrist")
 
-        stegService.gjenopptaSteg(behandlingId)
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
             Aktør.VEDTAKSLØSNING
         )
+        stegService.gjenopptaSteg(behandlingId)
 
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandlingId,

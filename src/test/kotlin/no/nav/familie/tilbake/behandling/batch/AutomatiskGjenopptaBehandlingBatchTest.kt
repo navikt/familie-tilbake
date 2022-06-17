@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -27,9 +26,6 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
-
-    @Autowired
-    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var taskRepository: TaskRepository
