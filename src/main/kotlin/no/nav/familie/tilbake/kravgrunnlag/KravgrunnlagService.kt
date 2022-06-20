@@ -186,7 +186,6 @@ class KravgrunnlagService(
         ) {
             return
         }
-        // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
         val forrigeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(endretKravgrunnlag.behandlingId)
         val harSammeAntallPerioder = forrigeKravgrunnlag.perioder.size == endretKravgrunnlag.perioder.size
         val perioderIForrigeKravgrunnlag = forrigeKravgrunnlag.perioder.sortedBy { it.periode }
