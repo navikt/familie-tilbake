@@ -23,7 +23,7 @@ kor lang tid det har gått sidan overgangsstønaden blei feilutbetalt
 kor stort det feilutbetalte beløpet er
 om feilen kan vere NAV si skuld-*
 
-Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi krevje at du betaler tilbake pengane.
+Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at du betaler tilbake pengane.
 
 Dersom du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon, kan vi krevje at du betaler eit rentetillegg på ti prosent av beløpet du skuldar.
 

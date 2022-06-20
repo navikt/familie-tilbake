@@ -17,7 +17,7 @@ hvor lang tid det har gått siden barnetrygden ble feilutbetalt
 hvor stort det feilutbetalte beløpet er
 om feilen kan skyldes NAV-*
 
-Selv om det er NAV som er skyld i feilutbetalingen, kan vi kreve at du betaler tilbake pengene.
+Selv om det er NAV som er skyld i feilutbetalingen, kan vi likevel kreve at du betaler tilbake pengene.
 
 Dette går fram av barnetrygdloven §13.
 _Slik uttaler du deg
