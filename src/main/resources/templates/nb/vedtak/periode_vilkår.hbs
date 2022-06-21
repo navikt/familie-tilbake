@@ -8,9 +8,9 @@
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og hvor mye du har rett til. Selv om du burde forstått at beløpet var feil, er beløpet lavere enn {{{kroner konfigurasjon.fireRettsgebyr}}}. Du må derfor ikke betale tilbake beløpet.
 {{/inline}}
 {{#if (not vurderinger.harForeldelsesavsnitt) }}
-__Hvordan har vi kommet fram til at {{#if gjelderFødsfall}}{{{ytelsesnavnBestemt}}}{{else}}du{{/if}} {{#if (not resultat.tilbakekrevesBeløp)}}ikke {{/if}}må betale{{#if gjelderFødsfall}}s{{/if}} tilbake?
+__Hvordan har vi kommet fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestemt}}}{{else}}du{{/if}} {{#if (not resultat.tilbakekrevesBeløp)}}ikke {{/if}}må betale{{#if gjelderDødsfall}}s{{/if}} tilbake?
 {{/if}}
-{{#if gjelderFødsfall}}
+{{#if gjelderDødsfall}}
     {{#if resultat.tilbakekrevesBeløp}}
 Det burde vært oppdaget og meldt ifra om at {{{ytelsesnavnUbestemt}}} ble utbetalt etter at {{{søker.navn}}} døde.
     {{else}}
