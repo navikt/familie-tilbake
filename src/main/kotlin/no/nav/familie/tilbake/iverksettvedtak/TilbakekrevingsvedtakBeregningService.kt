@@ -218,7 +218,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                     val justerSkattOpp = differanse.isLessThanZero() &&
                         grunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
                     val justerSkattNed = differanse.isGreaterThanZero() &&
-                        beløp.skattBeløp >= BigDecimal.ONE
+                        beløp.skattBeløp.compareTo(BigDecimal.ONE) >= 1
                     if (justerSkattOpp || justerSkattNed) {
                         val justering = BigDecimal(differanse.signum()).negate()
                         grunnlagsperioderMedSkatt[periode] = grunnlagsperioderMedSkatt.getNotNull(periode).add(justering)
