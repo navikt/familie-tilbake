@@ -1,6 +1,9 @@
-{{#* inline "pronomen"}}{{#if gjelderDødsfall}}dykk{{else}}du{{/if}}{{/inline}}{{#* inline "Pronomen"}}{{#if gjelderDødsfall}}Dykk{{else}}Du{{/if}}{{/inline}}{{#* inline "eiepronomen"}}{{#if gjelderDødsfall}}dykkar{{else}}ditt{{/if}}{{/inline}}
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}dykk{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}Dykk{{else}}Du{{/if}}{{~/inline~}}
+{{~#* inline "eiepronomen"~}}{{#if gjelderDødsfall}}dykkar{{else}}ditt{{/if}}{{~/inline~}}
 {{#if (neq 1 antallPerioder)}}_{{#if hjemmel.lovhjemmelFlertall}}Lovheimlene{{else}}Lovheimelen{{/if}} vi har brukt
 {{else}}
+
 {{/if}}
 Vedtaket er gjort etter {{{hjemmel.lovhjemmelVedtak}}}.
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
