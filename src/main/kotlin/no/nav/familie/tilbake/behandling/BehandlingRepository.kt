@@ -84,7 +84,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             AND beh.status='UTREDES' 
             AND tilstand.behandlingsstegsstatus='VENTER' 
             AND tilstand.behandlingssteg<>'GRUNNLAG' 
-            AND tilstand.tidsfrist < :dagensdato
+            AND tilstand.tidsfrist <= :dagensdato
     """
     )
     fun finnAlleBehandlingerKlarForGjenoppta(dagensdato: LocalDate): List<Behandling>
