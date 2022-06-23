@@ -451,10 +451,13 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null
     ) {
-        taskRepository.findByStatusIn(listOf(
-            Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-            Status.BEHANDLER, Status.FERDIG
-        ), page = Pageable.unpaged()).any {
+        taskRepository.findByStatusIn(
+            listOf(
+                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
+                Status.BEHANDLER, Status.FERDIG
+            ),
+            page = Pageable.unpaged()
+        ).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 Aktør.VEDTAKSLØSNING.name == it.metadata["aktør"] &&

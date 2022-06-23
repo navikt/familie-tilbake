@@ -27,22 +27,31 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
-        vedtaksbrevstype: Vedtaksbrevstype
+        vedtaksbrevstype: Vedtaksbrevstype,
+        validerPåkrevetFritekster: Boolean
     ) {
 
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
         vilkårsvurdering?.let {
             validerFritekstISærligGrunnerAnnetAvsnitt(
                 it,
-                vedtaksbrevFritekstPerioder
+                vedtaksbrevFritekstPerioder,
+                validerPåkrevetFritekster
             )
         }
 
         if (ORDINÆR == vedtaksbrevstype) {
-            validerFritekstIFaktaAvsnitt(faktaFeilutbetaling, vedtaksbrevFritekstPerioder, avsnittMedPerioder)
+            validerFritekstIFaktaAvsnitt(
+                faktaFeilutbetaling,
+                vedtaksbrevFritekstPerioder,
+                avsnittMedPerioder,
+                validerPåkrevetFritekster
+            )
         }
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)
-        validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering)
+        if (validerPåkrevetFritekster) {
+            validerNårOppsummeringsfritekstErPåkrevd(behandling, vedtaksbrevsoppsummering)
+        }
     }
 
     private fun validerPerioder(
@@ -107,7 +116,8 @@ object VedtaksbrevFritekstValidator {
     private fun validerFritekstIFaktaAvsnitt(
         faktaFeilutbetaling: FaktaFeilutbetaling,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
-        avsnittMedPerioder: List<PeriodeMedTekstDto>
+        avsnittMedPerioder: List<PeriodeMedTekstDto>,
+        validerPåkrevetFritekster: Boolean
     ) {
         faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
             .forEach { faktaFeilutbetalingsperiode ->
@@ -116,7 +126,7 @@ object VedtaksbrevFritekstValidator {
                     faktaFeilutbetalingsperiode.periode,
                     Friteksttype.FAKTA
                 )
-                if (perioder.isEmpty()) {
+                if (perioder.isEmpty() && validerPåkrevetFritekster) {
                     throw Feil(
                         message = "Mangler fakta fritekst for alle fakta perioder",
                         frontendFeilmelding = "Mangler Fakta fritekst for alle fakta perioder",
@@ -128,7 +138,7 @@ object VedtaksbrevFritekstValidator {
                     faktaFeilutbetalingsperiode.periode.omslutter(Periode(it.periode))
                 }
                 omsluttetPerioder.forEach {
-                    if (it.faktaAvsnitt.isNullOrBlank()) {
+                    if (it.faktaAvsnitt.isNullOrBlank() && validerPåkrevetFritekster) {
                         throw Feil(
                             message = "Mangler fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
                             frontendFeilmelding = "Mangler Fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
@@ -141,7 +151,8 @@ object VedtaksbrevFritekstValidator {
 
     private fun validerFritekstISærligGrunnerAnnetAvsnitt(
         vilkårsvurdering: Vilkårsvurdering,
-        vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>
+        vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
+        validerPåkrevetFritekster: Boolean
     ) {
         vilkårsvurdering.perioder.filter {
             it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
@@ -154,7 +165,7 @@ object VedtaksbrevFritekstValidator {
                 Friteksttype.SÆRLIGE_GRUNNER_ANNET
             )
 
-            if (perioder.isEmpty()) {
+            if (perioder.isEmpty() && validerPåkrevetFritekster) {
                 throw Feil(
                     message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
                     frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
