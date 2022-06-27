@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.common.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -73,4 +74,18 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """
     )
     fun finnAlleBehandlingerKlarForSaksbehandling(): List<Behandling>
+
+    // language=PostgreSQL
+    @Query(
+        """
+            SELECT beh.* FROM behandling beh 
+            JOIN behandlingsstegstilstand tilstand ON tilstand.behandling_id = beh.id
+            WHERE beh.type='TILBAKEKREVING' 
+            AND beh.status='UTREDES' 
+            AND tilstand.behandlingsstegsstatus='VENTER' 
+            AND tilstand.behandlingssteg<>'GRUNNLAG' 
+            AND tilstand.tidsfrist <= :dagensdato
+    """
+    )
+    fun finnAlleBehandlingerKlarForGjenoppta(dagensdato: LocalDate): List<Behandling>
 }
