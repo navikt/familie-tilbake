@@ -1,20 +1,9 @@
 {{~#* inline "førSkatt"}}{{#if ytelseMedSkatt}} før skatt{{/if}}{{~/inline~}}
-Vi varslet deg {{{dato varsletDato}}} om at du hadde fått utbetalt {{{kroner varsletBeløp}}} for mye i {{{ytelsesnavnUbestemt}}}{{> førSkatt}}.
+Vi varslet {{#if (not gjelderDødsfall)}}deg {{/if}}{{{dato varsletDato}}} om at {{#if gjelderDødsfall}}det var{{else}}du hadde fått{{/if}} utbetalt {{{kroner varsletBeløp}}} for mye i {{{ytelsesnavnUbestemt}}}{{> førSkatt}}.
 
 Riktig beløp som er utbetalt for mye er {{{kroner beløp}}}{{> førSkatt}}.
 
-{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} du har fått for mye utbetalt for, er:
+{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} for mye utbetalt for, er:
 *-{{#each feilutbetaltePerioder }}
 Fra og med {{{dato fom}}} til og med {{{dato tom}}}.{{/each}}-*
-Før vi avgjør om du skal betale tilbake, kan du uttale deg innen {{{dato fristdatoForTilbakemelding}}}.
-{{#if ytelseMedSkatt}}
-
-Hvis du må betale tilbake, reduserer vi beløpet med trukket skatt.
-{{/if}}
-_Dette har skjedd
-{{{storForbokstav ytelsesnavnEiendomsform}}} ble endret {{{dato revurderingsvedtaksdato}}}, og endringen har ført til at du har fått utbetalt for mye.
-{{#if varseltekstFraSaksbehandler}}
-
-{{{varseltekstFraSaksbehandler}}}
-{{/if}}
 {{> nb/varsel/varsel_slutt}}
