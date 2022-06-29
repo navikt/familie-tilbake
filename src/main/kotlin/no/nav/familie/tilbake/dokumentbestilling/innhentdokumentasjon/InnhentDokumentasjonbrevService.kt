@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -28,7 +27,6 @@ class InnhentDokumentasjonbrevService(
     private val behandlingRepository: BehandlingRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -94,7 +92,7 @@ class InnhentDokumentasjonbrevService(
         val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
-        val gjelderDødsfall = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandling.id)?.gjelderDødsfall ?: false
+        val gjelderDødsfall = personinfo.dødsdato != null
 
         val brevmetadata = Brevmetadata(
             sakspartId = personinfo.ident,
@@ -126,6 +124,7 @@ class InnhentDokumentasjonbrevService(
     companion object {
 
         const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG = "Innhent dokumentasjon Tilbakekreving"
-        const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE = "Innhent dokumentasjon Tilbakekreving til verge"
+        const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE =
+            "Innhent dokumentasjon Tilbakekreving til verge"
     }
 }
