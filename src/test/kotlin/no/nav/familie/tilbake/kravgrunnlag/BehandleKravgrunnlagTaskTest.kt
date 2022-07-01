@@ -246,6 +246,45 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 med en YTEL postering som er større enn differansen`() {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandling.id,
+                behandlingssteg = Behandlingssteg.VARSEL,
+                behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                tidsfrist = LocalDate.now().plusWeeks(3)
+            )
+        )
+
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_belop_storre_enn_diff.xml")
+        val task = opprettTask(kravgrunnlagXml)
+
+        behandleKravgrunnlagTask.doTask(task)
+
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+        kravgrunnlag.shouldNotBeNull()
+        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
+        kravgrunnlag.fagsystemId shouldBe fagsak.eksternFagsakId
+        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.BARNETRYGD
+
+        assertPerioder(kravgrunnlag)
+
+        val kravgrunnlagsbeløp = kravgrunnlag.perioder.toList()[0].beløp
+        kravgrunnlagsbeløp.size shouldBe 3
+        kravgrunnlagsbeløp.any { Klassetype.YTEL == it.klassetype }.shouldBeTrue()
+        kravgrunnlagsbeløp.any { Klassetype.FEIL == it.klassetype }.shouldBeTrue()
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        // behandling venter fortsatt på brukerstilbakemelding, oppretter ikke grunnlagssteg
+        assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.VENTER)
+        behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
+
+        assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
+        taskRepository.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
+    }
+
+    @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
         lagGrunnlagssteg()
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
@@ -645,10 +684,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "For perioden 2020-08-01-2020-08-31 " +
-            "finnes YTEL-postering med tilbakekrevesBeløp 2108.00 " +
-            "som er større enn differanse mellom nyttBeløp 0.00 " +
-            "og opprinneligBeløp 1000.00"
+                "Har en eller flere perioder med YTEL-postering med tilbakekrevesBeløp " +
+                "som er større enn differanse mellom nyttBeløp og opprinneligBeløp"
     }
 
     @Test
