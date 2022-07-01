@@ -1,7 +1,7 @@
 {{~#* inline "førSkatt"}}{{#if ytelseMedSkatt}} før skatt{{/if}}{{~/inline~}}
 Vi varslet {{#if (not gjelderDødsfall)}}deg {{/if}}{{{dato varsletDato}}} om at {{#if gjelderDødsfall}}det var{{else}}du hadde fått{{/if}} utbetalt {{{kroner varsletBeløp}}} for mye i {{{ytelsesnavnUbestemt}}}{{> førSkatt}}.
 
-Riktig beløp som er utbetalt for mye er {{{kroner beløp}}}{{> førSkatt}}.
+Riktig beløp som er utbetalt for mye, er {{{kroner beløp}}}{{> førSkatt}}.
 
 {{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodene{{/eq}} {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} for mye utbetalt for, er:
 *-{{#each feilutbetaltePerioder }}
