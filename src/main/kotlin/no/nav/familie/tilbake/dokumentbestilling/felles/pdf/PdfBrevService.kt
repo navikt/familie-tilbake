@@ -95,15 +95,17 @@ class PdfBrevService(
             data.metadata,
             data.mottager,
             pdf,
-            lagEksternReferanseId(behandling, brevtype)
+            lagEksternReferanseId(behandling, brevtype, data.mottager)
         )
     }
 
-    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype): String? {
+    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String? {
         // varsel må håndteres spesifikt, siden automatisk varselbrev ellers ville få samme eksternReferanseId som vedtaksbrev i
         // fagsystem. For dei andre er default logikk riktig.
         return if (brevtype == Brevtype.VARSEL) {
             "${behandling.eksternBrukId}_varsel"
+        } else if (brevtype == Brevtype.VEDTAK) {
+            "${behandling.eksternBrukId}_vedtak_${mottager.name.lowercase()}"
         } else {
             null
         }
