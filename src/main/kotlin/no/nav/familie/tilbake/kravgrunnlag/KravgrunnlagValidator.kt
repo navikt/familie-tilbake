@@ -197,22 +197,32 @@ object KravgrunnlagValidator {
     }
 
     private fun validerYtelsesPosteringTilbakekrevesMotNyttOgOpprinneligUtbetalt(kravgrunnlag: DetaljertKravgrunnlagDto) {
+
+        var harPeriodeMedBeløpMindreEnnDiff = false
+        var harPeriodeMedBeløpStørreEnnDiff = false
+
         for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
             for (kgBeløp in kravgrunnlagsperiode.tilbakekrevingsBelop) {
                 if (finnesYtelsespostering(kgBeløp.typeKlasse)) {
                     val diff: BigDecimal = kgBeløp.belopOpprUtbet.subtract(kgBeløp.belopNy)
                     if (kgBeløp.belopTilbakekreves > diff) {
-                        throw UgyldigKravgrunnlagFeil(
-                            "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                                "For perioden ${kravgrunnlagsperiode.periode.fom}-" +
-                                "${kravgrunnlagsperiode.periode.tom} finnes YTEL-postering " +
-                                "med tilbakekrevesBeløp ${kgBeløp.belopTilbakekreves} som er " +
-                                "større enn differanse mellom nyttBeløp ${kgBeløp.belopNy} " +
-                                "og opprinneligBeløp ${kgBeløp.belopOpprUtbet}"
-                        )
+                        harPeriodeMedBeløpStørreEnnDiff = true
+                    } else {
+                        harPeriodeMedBeløpMindreEnnDiff = true
                     }
                 }
             }
+        }
+
+        // Hvis vi kun har YTEL-posteringer som er sørre enn diferansen mellom nyttBeløp og opprinneligBeløp
+        // vil vi kaste en valideringsfeil
+        if (harPeriodeMedBeløpStørreEnnDiff && !harPeriodeMedBeløpMindreEnnDiff) {
+            throw UgyldigKravgrunnlagFeil(
+                "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
+                        "Har en eller flere perioder med YTEL-postering " +
+                        "med tilbakekrevesBeløp som er større enn differanse mellom " +
+                        "nyttBeløp og opprinneligBeløp"
+            )
         }
     }
 
