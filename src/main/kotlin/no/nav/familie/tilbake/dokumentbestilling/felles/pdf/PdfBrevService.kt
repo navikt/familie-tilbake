@@ -60,7 +60,6 @@ class PdfBrevService(
         brevdata: Brevdata,
         dokumentreferanse: JournalpostIdOgDokumentId
     ) {
-
         val idString = behandling.id.toString()
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
@@ -99,16 +98,9 @@ class PdfBrevService(
         )
     }
 
-    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String? {
-        // varsel må håndteres spesifikt, siden automatisk varselbrev ellers ville få samme eksternReferanseId som vedtaksbrev i
-        // fagsystem. For dei andre er default logikk riktig.
-        return if (brevtype == Brevtype.VARSEL) {
-            "${behandling.eksternBrukId}_varsel"
-        } else if (brevtype == Brevtype.VEDTAK) {
-            "${behandling.eksternBrukId}_vedtak_${mottager.name.lowercase()}"
-        } else {
-            null
-        }
+    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String {
+        // alle brev kan potensielt bli sendt til både bruker og kopi verge
+        return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}"
     }
 
     private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {
