@@ -5,7 +5,9 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.tilbake.api.dto.BestillBrevDto
 import no.nav.familie.tilbake.api.dto.ForhåndsvisningHenleggelsesbrevDto
+import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
+import no.nav.familie.tilbake.behandling.LagreUtkastVedtaksbrevService
 import no.nav.familie.tilbake.dokumentbestilling.DokumentbehandlingService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
@@ -34,7 +36,8 @@ class DokumentController(
     private val varselbrevService: VarselbrevService,
     private val dokumentbehandlingService: DokumentbehandlingService,
     private val henleggelsesbrevService: HenleggelsesbrevService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
 ) {
 
     @Operation(summary = "Bestill brevsending")
@@ -96,5 +99,24 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
+    }
+
+    @Operation(summary = "Lagre utkast av vedtaksbrev")
+    @PostMapping(
+        "/vedtaksbrevtekst/{behandlingId}/utkast",
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Lagrer utkast av vedtaksbrev",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID
+    )
+    fun lagreUtkastVedtaksbrev(
+        @PathVariable behandlingId: UUID,
+        @RequestBody fritekstavsnitt: FritekstavsnittDto
+    ): Ressurs<String> {
+        lagreUtkastVedtaksbrevService.lagreUtkast(behandlingId, fritekstavsnitt)
+        return Ressurs.success("OK")
     }
 }

@@ -5,6 +5,8 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -35,26 +37,77 @@ internal class PdfBrevServiceTest {
         val fritekst = "Dette er en \n\nfritekst med \n\nlinjeskift"
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot)) } returns mockk()
-        val brevdata = Brevdata(
-            metadata = Brevmetadata(
-                sakspartId = "",
-                sakspartsnavn = "",
-                mottageradresse = Adresseinfo(" ", ""),
-                behandlendeEnhetsNavn = "",
-                ansvarligSaksbehandler = "Bob",
-                språkkode = Språkkode.NB,
-                ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-                saksnummer = "1232456",
-                behandlingstype = Behandlingstype.TILBAKEKREVING
-            ),
-            overskrift = "",
-            mottager = Brevmottager.BRUKER,
-            brevtekst = ""
+
+        val brevdata = lagBrevdata()
+
+        pdfBrevService.sendBrev(
+            Testdata.behandling, Testdata.fagsak,
+            brevtype = Brevtype.VARSEL,
+            brevdata,
+            5L,
+            fritekst
         )
 
-        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.VARSEL, brevdata, 5L, fritekst)
-
-        val base64fritekst = slot.captured.metadata.getProperty("fritekst")
+        val task = slot.captured
+        val base64fritekst = task.metadata.getProperty("fritekst")
         Base64.getDecoder().decode(base64fritekst.toByteArray()).decodeToString() shouldBe fritekst
+
+        val distribusjonstype = task.metadata.getProperty("distribusjonstype")
+        distribusjonstype.shouldBe(Distribusjonstype.VIKTIG.name)
+
+        val distribusjonstidspunkt = task.metadata.getProperty("distribusjonstidspunkt")
+        distribusjonstidspunkt.shouldBe(Distribusjonstidspunkt.KJERNETID.name)
     }
+
+    @Test
+    fun `sendBrev sender vedtaksbrev med riktig distribusjonstype og distribusjonstidspunkt`() {
+        val slot = CapturingSlot<Task>()
+        every { taskService.save(capture(slot)) } returns mockk()
+        val brevdata = lagBrevdata()
+
+        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.VEDTAK, brevdata)
+
+        val task = slot.captured
+
+        val distribusjonstype = task.metadata.getProperty("distribusjonstype")
+        distribusjonstype.shouldBe(Distribusjonstype.VEDTAK.name)
+
+        val distribusjonstidspunkt = task.metadata.getProperty("distribusjonstidspunkt")
+        distribusjonstidspunkt.shouldBe(Distribusjonstidspunkt.KJERNETID.name)
+    }
+
+    @Test
+    fun `sendBrev sender henleggelsesbrev med riktig distribusjonstype og distribusjonstidspunkt`() {
+        val slot = CapturingSlot<Task>()
+        every { taskService.save(capture(slot)) } returns mockk()
+        val brevdata = lagBrevdata()
+
+        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+
+        val task = slot.captured
+
+        val distribusjonstype = task.metadata.getProperty("distribusjonstype")
+        distribusjonstype.shouldBe(Distribusjonstype.ANNET.name)
+
+        val distribusjonstidspunkt = task.metadata.getProperty("distribusjonstidspunkt")
+        distribusjonstidspunkt.shouldBe(Distribusjonstidspunkt.KJERNETID.name)
+    }
+
+    private fun lagBrevdata() = Brevdata(
+        metadata = Brevmetadata(
+            sakspartId = "",
+            sakspartsnavn = "",
+            mottageradresse = Adresseinfo(" ", ""),
+            behandlendeEnhetsNavn = "",
+            ansvarligSaksbehandler = "Bob",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            saksnummer = "1232456",
+            behandlingstype = Behandlingstype.TILBAKEKREVING,
+            gjelderDødsfall = false
+        ),
+        overskrift = "",
+        mottager = Brevmottager.BRUKER,
+        brevtekst = ""
+    )
 }

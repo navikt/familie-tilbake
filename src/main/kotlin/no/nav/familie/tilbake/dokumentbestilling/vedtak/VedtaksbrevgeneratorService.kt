@@ -304,18 +304,19 @@ class VedtaksbrevgeneratorService(
             eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
         }
         return Brevmetadata(
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            behandlendeEnhetId = vedtaksbrevgrunnlag.behandling.behandlendeEnhet,
-            behandlendeEnhetsNavn = vedtaksbrevgrunnlag.behandling.behandlendeEnhetsNavn,
-            mottageradresse = adresseinfo,
-            ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
-            saksnummer = vedtaksbrevgrunnlag.eksternFagsakId,
             sakspartId = personinfo.ident,
             sakspartsnavn = personinfo.navn,
-            språkkode = språkkode,
-            tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
             finnesVerge = vedtaksbrevgrunnlag.harVerge,
-            vergenavn = vergeNavn
+            vergenavn = vergeNavn,
+            mottageradresse = adresseinfo,
+            behandlendeEnhetId = vedtaksbrevgrunnlag.behandling.behandlendeEnhet,
+            behandlendeEnhetsNavn = vedtaksbrevgrunnlag.behandling.behandlendeEnhetsNavn,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            saksnummer = vedtaksbrevgrunnlag.eksternFagsakId,
+            språkkode = språkkode,
+            ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
+            tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
+            gjelderDødsfall = vedtaksbrevgrunnlag.gjelderDødsfall
         )
     }
 

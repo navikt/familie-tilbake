@@ -1,22 +1,32 @@
 _Dette legger vi vekt på i vurderinga vår
-For å avgjere om vi kan krevje tilbake, tek vi først stilling til dei tre øvste punkta i denne lista. Dersom resultatet blir at vi kan krevje tilbake, vurderer vi om du skal betale tilbake heile eller delar av beløpet.
+For å avgjere om vi kan krevje tilbake, tek vi først stilling til dei {{#if gjelderDødsfall}}to{{else}}tre{{/if}} øvste punkta i denne lista. Dersom resultatet blir at vi kan krevje tilbake, vurderer vi om {{#if (not gjelderDødsfall)}}du skal betale tilbake {{/if}}heile eller delar av beløpet{{#if gjelderDødsfall}} skal betales tilbake{{/if}}.
 
 Vi legger vekt på
 
-*-om du forstod eller burde forstått at beløpet du fekk utbetalt var feil
-om du har gitt riktig informasjon til NAV
-om du har gitt all informasjon til NAV i rett tid
+*-om {{#if gjelderDødsfall}}dykk{{else}}du{{/if}} forstod eller burde forstått at beløpet {{#if gjelderDødsfall}}som er{{else}}du fekk{{/if}} utbetalt var feil
+{{#if gjelderDødsfall}}om vi har fått informasjon fra dykk{{else}}om du har gitt riktig informasjon til NAV
+om du har gitt all informasjon til NAV i rett tid{{/if}}
 kor lang tid det har gått sidan {{{ytelsesnavnBestemt}}} blei feilutbetalt
 kor stort det feilutbetalte beløpet er
 om feilen kan vere NAV si skuld-*
 
-Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi krevje at du betaler tilbake pengane.
+Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at {{#if gjelderDødsfall}}feilutbetalt beløp betales tilbake{{else}}du betaler tilbake pengane{{/if}}.
 
 {{#if rentepliktig}}
-Dersom du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon, kan vi krevje at du betaler eit rentetillegg på ti prosent av beløpet du skuldar.
+Dersom {{#if gjelderDødsfall}}dykk{{else}}du{{/if}} må betale tilbake, og {{#if gjelderDødsfall}}dykk{{else}}du{{/if}} har gitt oss feil eller mangelfull informasjon, kan vi krevje at {{#if gjelderDødsfall}}dykk{{else}}du{{/if}} betaler eit rentetillegg på ti prosent av beløpet {{#if gjelderDødsfall}}dykk{{else}}du{{/if}} skuldar.
 
 {{/if}}
 Dette går fram av {{#if rentepliktig}}folketrygdlova §§ 22-15 og 22-17a{{else}}barnetrygdlova §13{{/if}}.
+{{#if gjelderDødsfall}}
+    _Rett til uttale
+    Dykk kan sende uttalen til oss i posten. Adressa finn dykk på nav.no/ettersendelser.
+    Dykk kan også ta kontakt med oss på nav.no/kontakt.
+    _Rett til innsyn
+    Dykk kan be om innsyn ved å ta kontakt med oss.
+    _Har dykk spørsmål?
+    Dykk finn nyttig informasjon på {{{ytelseUrl}}}
+    Om dykk ikkje finn svar på spørsmåla dykkar, kontakt oss på nav.no/kontakt.
+{{else}}
 _Slik uttaler du deg
 Du kan sende uttalen din ved å logge deg inn på nav.no/beskjedtilnav og velje «Send beskjed til NAV». Du kan også sende uttalen din til oss i posten. Adressa finn du på
 nav.no/ettersendelser.
@@ -25,6 +35,7 @@ På nav.no/dittnav kan du sjå dokumenta i saka di.
 _Har du spørsmål?
 Du finn nyttig informasjon på {{{ytelseUrl}}}
 Om du ikkje finn svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+{{/if}}
 
 Med vennleg helsing
 {{{avsenderenhet}}}

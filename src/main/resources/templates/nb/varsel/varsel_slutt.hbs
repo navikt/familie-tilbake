@@ -1,22 +1,32 @@
 _Dette legger vi vekt på i vurderingen vår
-For å avgjøre om vi kan kreve tilbake, tar vi først stilling til de tre øverste punktene i denne listen. Hvis resultatet blir at vi kan kreve tilbake, vurderer vi om du skal betale tilbake hele eller deler av beløpet.
+For å avgjøre om vi kan kreve tilbake, tar vi først stilling til de {{#if gjelderDødsfall}}to{{else}}tre{{/if}} øverste punktene i denne listen. Hvis resultatet blir at vi kan kreve tilbake, vurderer vi om {{#if (not gjelderDødsfall)}}du skal betale tilbake {{/if}}hele eller deler av beløpet{{#if gjelderDødsfall}} skal betales tilbake{{/if}}.
 
 Vi legger vekt på
 
-*-om du forstod eller burde forstått at beløpet du fikk utbetalt var feil
-om du har gitt riktig informasjon til NAV
-om du har gitt all informasjon til NAV i rett tid
+*-om {{#if gjelderDødsfall}}dere{{else}}du{{/if}} forstod eller burde forstått at beløpet {{#if gjelderDødsfall}}som er{{else}}du fikk{{/if}} utbetalt var feil
+{{#if gjelderDødsfall}}om vi har fått informasjon fra dere{{else}}om du har gitt riktig informasjon til NAV
+om du har gitt all informasjon til NAV i rett tid{{/if}}
 hvor lang tid det har gått siden {{{ytelsesnavnBestemt}}} ble feilutbetalt
 hvor stort det feilutbetalte beløpet er
 om feilen kan skyldes NAV-*
 
-Selv om det er NAV som er skyld i feilutbetalingen, kan vi kreve at du betaler tilbake pengene.
+Selv om det er NAV som er skyld i feilutbetalingen, kan vi likevel kreve at {{#if gjelderDødsfall}}feilutbetalt beløp betales tilbake{{else}}du betaler tilbake pengene{{/if}}.
 
 {{#if rentepliktig}}
-Hvis du må betale tilbake, og du har gitt oss feil eller mangelfull informasjon, kan vi kreve at du betaler et rentetillegg på ti prosent av beløpet.
+Hvis {{#if gjelderDødsfall}}dere{{else}}du{{/if}} må betale tilbake, og {{#if gjelderDødsfall}}dere{{else}}du{{/if}} har gitt oss feil eller mangelfull informasjon, kan vi kreve at {{#if gjelderDødsfall}}dere{{else}}du{{/if}} betaler et rentetillegg på ti prosent av beløpet.
 
 {{/if}}
 Dette går fram av {{#if rentepliktig}}folketrygdloven §§ 22-15 og 22-17a{{else}}barnetrygdloven §13{{/if}}.
+{{#if gjelderDødsfall}}
+_Rett til uttalelse
+Dere kan sende uttalelsen til oss i posten. Adressen finner dere på nav.no/ettersendelser.
+Dere kan også ta kontakt med oss på nav.no/kontakt.
+_Rett til innsyn
+Dere kan be om innsyn ved å ta kontakt med oss.
+_Har dere spørsmål?
+Dere finner nyttig informasjon på {{{ytelseUrl}}}
+Hvis dere ikke finner svar på spørsmålene deres, kontakt oss på nav.no/kontakt.
+{{else}}
 _Slik uttaler du deg
 Du kan sende uttalelsen din ved å logge deg inn på nav.no/beskjedtilnav og velge «Send beskjed til NAV». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på
 nav.no/ettersendelser.
@@ -25,6 +35,7 @@ På nav.no/dittnav kan du se dokumentene i saken din.
 _Har du spørsmål?
 Du finner nyttig informasjon på {{{ytelseUrl}}}
 Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+{{/if}}
 
 Med vennlig hilsen
 {{{avsenderenhet}}}

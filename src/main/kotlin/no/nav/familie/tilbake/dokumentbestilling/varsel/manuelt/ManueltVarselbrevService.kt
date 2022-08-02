@@ -106,7 +106,8 @@ class ManueltVarselbrevService(
             adresseinfo,
             fagsak,
             vergenavn,
-            erKorrigert
+            erKorrigert,
+            feilutbetalingsfakta.gjelderDødsfall
         )
 
         return varselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(

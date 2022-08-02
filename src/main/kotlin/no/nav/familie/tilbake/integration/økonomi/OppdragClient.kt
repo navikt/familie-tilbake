@@ -132,7 +132,7 @@ class DefaultOppdragClient(
             return respons.detaljertkravgrunnlag
         } catch (exception: Exception) {
             logger.error(
-                "Kravgrunnlag kan ikke hentes fra økonomi for behandling=$kravgrunnlagId. " +
+                "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$kravgrunnlagId. " +
                     "Feiler med ${exception.message}"
             )
             throw IntegrasjonException(
@@ -168,7 +168,7 @@ class DefaultOppdragClient(
             logger.info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
         } catch (exception: Exception) {
             logger.error(
-                "Kravgrunnlag kan ikke hentes fra økonomi for behandling=$eksternKravgrunnlagId. " +
+                "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$eksternKravgrunnlagId. " +
                     "Feiler med ${exception.message}"
             )
             throw IntegrasjonException(

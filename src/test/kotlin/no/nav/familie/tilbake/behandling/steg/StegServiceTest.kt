@@ -1000,7 +1000,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør
     ) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskRepository.findByStatusIn(
+            listOf(
+                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
+                Status.BEHANDLER, Status.FERDIG
+            ),
+            page = Pageable.unpaged()
+        ).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&

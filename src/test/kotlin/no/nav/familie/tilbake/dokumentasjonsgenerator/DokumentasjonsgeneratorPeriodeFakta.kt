@@ -200,7 +200,8 @@ class DokumentasjonsgeneratorPeriodeFakta {
             ansvarligSaksbehandler = "Bob",
             saksnummer = "1232456",
             språkkode = språkkode,
-            ytelsestype = ytelsestype
+            ytelsestype = ytelsestype,
+            gjelderDødsfall = false
         )
     }
 

@@ -178,12 +178,14 @@ class KravgrunnlagService(
     }
 
     private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
-        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET) {
+        if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET ||
+            // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
+            behandling.aktivtVarsel != null ||
+            // sjekker ikke identisk kravgrunnlag når behandling ikke har koblet med et NYTT kravgrunnlag
+            !kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(endretKravgrunnlag.behandlingId)
+        ) {
             return
         }
-        // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
-        if (behandling.aktivtVarsel != null) return
-        // Antar økonomi sender alltid et NYTT kravgrunnlag før ENDR kravgrunnlag
         val forrigeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(endretKravgrunnlag.behandlingId)
         val harSammeAntallPerioder = forrigeKravgrunnlag.perioder.size == endretKravgrunnlag.perioder.size
         val perioderIForrigeKravgrunnlag = forrigeKravgrunnlag.perioder.sortedBy { it.periode }

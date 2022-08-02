@@ -18,5 +18,6 @@ data class Brevmetadata(
     override val språkkode: Språkkode,
     val ytelsestype: Ytelsestype,
     val behandlingstype: Behandlingstype? = null,
-    val tittel: String? = null
+    val tittel: String? = null,
+    val gjelderDødsfall: Boolean
 ) : Språkstøtte

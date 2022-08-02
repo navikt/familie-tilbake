@@ -45,11 +45,12 @@ class TekstformatererVedtaksbrevVedleggTest {
         sakspartId = "123456",
         sakspartsnavn = "Test",
         mottageradresse = Adresseinfo("ident", "bob"),
+        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+        ansvarligSaksbehandler = "Bob",
+        saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        saksnummer = "1232456",
-        ansvarligSaksbehandler = "Bob"
+        gjelderDødsfall = false
     )
 
     @Test

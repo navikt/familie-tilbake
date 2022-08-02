@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiod
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -44,6 +45,7 @@ class VarselbrevUtil(
     fun sammenstillInfoFraFagsystemerForSending(
         fagsak: Fagsak,
         behandling: Behandling,
+        faktaFeilutbetaling: FaktaFeilutbetaling?,
         adresseinfo: Adresseinfo,
         personinfo: Personinfo,
         varsel: Varsel?,
@@ -55,7 +57,8 @@ class VarselbrevUtil(
             adresseinfo,
             fagsak,
             vergenavn,
-            false
+            false,
+            faktaFeilutbetaling?.gjelderDødsfall ?: false
         )
 
         return Varselbrevsdokument(
@@ -80,18 +83,19 @@ class VarselbrevUtil(
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(ContextService.hentSaksbehandler())
 
         val metadata = Brevmetadata(
-            behandlendeEnhetId = request.behandlendeEnhetId,
-            behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
             sakspartId = personinfo.ident,
-            mottageradresse = adresseinfo,
-            saksnummer = request.eksternFagsakId,
             sakspartsnavn = personinfo.navn,
             finnesVerge = request.verge != null,
             vergenavn = vergenavn,
-            ytelsestype = request.ytelsestype,
-            språkkode = request.språkkode,
+            mottageradresse = adresseinfo,
+            behandlendeEnhetId = request.behandlendeEnhetId,
+            behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
-            tittel = tittel
+            saksnummer = request.eksternFagsakId,
+            språkkode = request.språkkode,
+            ytelsestype = request.ytelsestype,
+            tittel = tittel,
+            gjelderDødsfall = personinfo.dødsdato != null
         )
 
         return Varselbrevsdokument(
@@ -110,7 +114,8 @@ class VarselbrevUtil(
         adresseinfo: Adresseinfo,
         fagsak: Fagsak,
         vergenavn: String?,
-        erKorrigert: Boolean
+        erKorrigert: Boolean,
+        gjelderDødsfall: Boolean
     ): Brevmetadata {
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
@@ -127,7 +132,8 @@ class VarselbrevUtil(
             saksnummer = fagsak.eksternFagsakId,
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
-            tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert)
+            tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
+            gjelderDødsfall = gjelderDødsfall
         )
     }
 

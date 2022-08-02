@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
@@ -40,6 +41,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val fagsakRepository: FagsakRepository = mockk()
     private val brevsporingService: BrevsporingService = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
@@ -48,6 +50,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             behandlingRepository,
             brevsporingService,
             fagsakRepository,
+            faktaFeilutbetalingService,
             eksterneDataForBrevService,
             spyPdfBrevService
         )

@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -27,6 +28,7 @@ class HenleggelsesbrevService(
     private val behandlingRepository: BehandlingRepository,
     private val brevsporingService: BrevsporingService,
     private val fagsakRepository: FagsakRepository,
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService
 ) {
@@ -103,20 +105,23 @@ class HenleggelsesbrevService(
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         }
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+        val gjelderDødsfall = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandling.id)?.gjelderDødsfall ?: false
+
         val metadata = Brevmetadata(
+            sakspartId = personinfo.ident,
+            sakspartsnavn = personinfo.navn,
+            finnesVerge = behandling.harVerge,
+            vergenavn = vergenavn,
+            mottageradresse = adresseinfo,
             behandlendeEnhetId = behandling.behandlendeEnhet,
             behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-            ytelsestype = fagsak.ytelsestype,
-            språkkode = fagsak.bruker.språkkode,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
-            sakspartId = personinfo.ident,
-            mottageradresse = adresseinfo,
             saksnummer = fagsak.eksternFagsakId,
-            sakspartsnavn = personinfo.navn,
-            vergenavn = vergenavn,
-            finnesVerge = behandling.harVerge,
+            språkkode = fagsak.bruker.språkkode,
+            ytelsestype = fagsak.ytelsestype,
+            behandlingstype = behandling.type,
             tittel = TITTEL_HENLEGGELSESBREV,
-            behandlingstype = behandling.type
+            gjelderDødsfall = gjelderDødsfall
         )
 
         return Henleggelsesbrevsdokument(
