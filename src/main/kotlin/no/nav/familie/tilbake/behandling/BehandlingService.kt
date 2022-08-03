@@ -32,6 +32,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -75,7 +77,8 @@ class BehandlingService(
     private val tilgangService: TilgangService,
     @Value("\${OPPRETTELSE_DAGER_BEGRENSNING:6}")
     private val opprettelseDagerBegrensning: Long,
-    private val integrasjonerClient: IntegrasjonerClient
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -481,18 +484,21 @@ class BehandlingService(
         }
 
         // hvis behandlingen er henlagt, kan det opprettes ny behandling
-        val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
-        if (avsluttetBehandlinger.isNotEmpty()) {
-            val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
-            val erSisteBehandlingHenlagt: Boolean =
-                sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
-            if (!erSisteBehandlingHenlagt) {
-                val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
-                    "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
-                throw Feil(
-                    message = feilMelding, frontendFeilmelding = feilMelding,
-                    httpStatus = HttpStatus.BAD_REQUEST
-                )
+        // hvis toggelen KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK er på,
+        // sjekker ikke om det finnes en avsluttet tilbakekreving for eksternId
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK)) {
+            val avsluttetBehandlinger = behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(eksternId)
+            if (avsluttetBehandlinger.isNotEmpty()) {
+                val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
+                val erSisteBehandlingHenlagt: Boolean =
+                    sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
+                if (!erSisteBehandlingHenlagt) {
+                    val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
+                        "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
+                    throw Feil(
+                        message = feilMelding, frontendFeilmelding = feilMelding, httpStatus = HttpStatus.BAD_REQUEST
+                    )
+                }
             }
         }
 
