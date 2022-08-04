@@ -12,7 +12,6 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
@@ -29,7 +28,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     lateinit var pdfBrevService: PdfBrevService
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService = mockk(relaxed = true)
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
 
     @BeforeEach
@@ -38,8 +36,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository,
             behandlingRepository,
             mockEksterneDataForBrevService,
-            pdfBrevService,
-            faktaFeilutbetalingService
+            pdfBrevService
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
