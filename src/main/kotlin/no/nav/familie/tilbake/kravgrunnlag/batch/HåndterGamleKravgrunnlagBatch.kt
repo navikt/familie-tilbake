@@ -61,7 +61,8 @@ class HåndterGamleKravgrunnlagBatch(
             val alleFeiledeTasker = taskService.finnTasksMedStatus(
                 listOf(
                     Status.FEILET,
-                    Status.KLAR_TIL_PLUKK
+                    Status.KLAR_TIL_PLUKK,
+                    Status.MANUELL_OPPFØLGING
                 ),
                 Pageable.unpaged()
             )

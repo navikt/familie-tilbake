@@ -58,7 +58,7 @@ class VarselbrevUtil(
             fagsak,
             vergenavn,
             false,
-            faktaFeilutbetaling?.gjelderDødsfall ?: false
+            personinfo.dødsdato != null
         )
 
         return Varselbrevsdokument(
@@ -249,8 +249,8 @@ class VarselbrevUtil(
     ) {
         if (feilutbetaltePerioder.sumOf { it.feilutbetaltBeløp.toLong() } != varsletTotalFeilutbetaltBeløp) {
             throw Feil(
-                message = "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra simulering " +
-                    "for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId"
+                "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra " +
+                    "simulering for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId"
             )
         }
     }

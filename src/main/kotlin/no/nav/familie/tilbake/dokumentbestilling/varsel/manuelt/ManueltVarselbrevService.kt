@@ -41,8 +41,10 @@ class ManueltVarselbrevService(
 
     fun sendVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager, erKorrigert: Boolean) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val varselbrevsdokument = lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, behandling.aktivtVarsel)
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
+        val varselbrevsdokument =
+            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, behandling.aktivtVarsel)
+        val overskrift =
+            TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, erKorrigert)
         val varsletFeilutbetaling = varselbrevsdokument.beløp
         val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandling.id)
@@ -62,14 +64,20 @@ class ManueltVarselbrevService(
         )
     }
 
-    fun hentForhåndsvisningManueltVarselbrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
+    fun hentForhåndsvisningManueltVarselbrev(
+        behandlingId: UUID,
+        maltype: Dokumentmalstype,
+        fritekst: String
+    ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val erKorrigert = maltype == Dokumentmalstype.KORRIGERT_VARSEL
 
-        val varselbrevsdokument = lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, behandling.aktivtVarsel)
-        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
+        val varselbrevsdokument =
+            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, behandling.aktivtVarsel)
+        val overskrift =
+            TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, erKorrigert)
         val vedlegg = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandlingId)
         return pdfBrevService.genererForhåndsvisning(
@@ -107,7 +115,7 @@ class ManueltVarselbrevService(
             fagsak,
             vergenavn,
             erKorrigert,
-            feilutbetalingsfakta.gjelderDødsfall
+            personinfo.dødsdato != null
         )
 
         return varselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(

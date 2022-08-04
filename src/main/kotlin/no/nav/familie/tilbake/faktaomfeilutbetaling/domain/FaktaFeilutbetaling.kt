@@ -19,7 +19,4 @@ data class FaktaFeilutbetaling(
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
-) {
-
-    val gjelderDødsfall get() = perioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
-}
+)

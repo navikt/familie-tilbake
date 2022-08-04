@@ -152,7 +152,8 @@ class VedtaksbrevgeneratorService(
         brevmetadata: Brevmetadata
     ): HbVedtaksbrevsdata {
         val vedtaksbrevtype = vedtaksbrevgrunnlag.utledVedtaksbrevstype()
-        val effektForBruker: VedtakHjemmel.EffektForBruker = utledEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat)
+        val effektForBruker: VedtakHjemmel.EffektForBruker =
+            utledEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat)
         val klagebehandling = vedtaksbrevgrunnlag.klagebehandling
         val hbHjemmel = VedtakHjemmel.lagHjemmel(
             beregningsresultat.vedtaksresultat,
@@ -167,7 +168,8 @@ class VedtaksbrevgeneratorService(
             beregningsresultat,
             perioderFritekst
         )
-        val hbTotalresultat: HbTotalresultat = lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
+        val hbTotalresultat: HbTotalresultat =
+            lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
         val hbBehandling: HbBehandling = lagHbBehandling(vedtaksbrevgrunnlag)
         val varsletBeløp = vedtaksbrevgrunnlag.varsletBeløp
         val varsletDato = vedtaksbrevgrunnlag.sisteVarsel?.sporbar?.opprettetTid?.toLocalDate()
@@ -177,7 +179,8 @@ class VedtaksbrevgeneratorService(
                 Behandlingssteg.AVSLUTTET
             )
         ) {
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
+            eksterneDataForBrevService
+                .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligBeslutter)
         } else {
             null
         }
@@ -264,7 +267,8 @@ class VedtaksbrevgeneratorService(
         val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.originalBehandlingId!!)
         val originalBeregningsresultatsperioder = originaltBeregnetResultat.beregningsresultatsperioder
 
-        val originalBehandlingTotaltMedRenter: BigDecimal = originalBeregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp }
+        val originalBehandlingTotaltMedRenter: BigDecimal =
+            originalBeregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp }
         val positivtForBruker: Boolean = totaltTilbakekrevesMedRenter < originalBehandlingTotaltMedRenter
         return if (positivtForBruker) {
             VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER
@@ -316,7 +320,7 @@ class VedtaksbrevgeneratorService(
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
-            gjelderDødsfall = vedtaksbrevgrunnlag.gjelderDødsfall
+            gjelderDødsfall = personinfo.dødsdato != null
         )
     }
 
@@ -375,7 +379,11 @@ class VedtaksbrevgeneratorService(
             if (vilkårsvurderingAktsomhet?.skalHaSærligeGrunner == true) {
                 val fritekstSærligeGrunner = fritekst?.særligeGrunnerAvsnitt
                 val fritekstSærligGrunnAnnet = fritekst?.særligeGrunnerAnnetAvsnitt
-                HbSærligeGrunner(vilkårsvurderingAktsomhet.særligeGrunner, fritekstSærligeGrunner, fritekstSærligGrunnAnnet)
+                HbSærligeGrunner(
+                    vilkårsvurderingAktsomhet.særligeGrunner,
+                    fritekstSærligeGrunner,
+                    fritekstSærligGrunnAnnet
+                )
             } else {
                 null
             }

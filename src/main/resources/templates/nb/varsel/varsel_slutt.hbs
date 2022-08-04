@@ -1,3 +1,14 @@
+Før vi avgjør om {{#if gjelderDødsfall}}pengene skal betales{{else}}du skal betale{{/if}} tilbake, kan {{#if gjelderDødsfall}}dere uttale dere{{else}}du uttale deg{{/if}} innen {{{dato fristdatoForTilbakemelding}}}.
+{{#if ytelseMedSkatt}}
+
+Hvis {{#if gjelderDødsfall}}det må betales{{else}}du må betale{{/if}} tilbake, reduserer vi beløpet med trukket skatt.
+{{/if}}
+_Dette har skjedd
+{{#if gjelderDødsfall}}{{{storForbokstav ytelsesnavnBestemt}}}{{else}}{{{storForbokstav ytelsesnavnEiendomsform}}}{{/if}} ble endret {{{dato revurderingsvedtaksdato}}}, og endringen har ført til at {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} utbetalt for mye.
+{{#if varseltekstFraSaksbehandler}}
+
+{{{varseltekstFraSaksbehandler}}}
+{{/if}}
 _Dette legger vi vekt på i vurderingen vår
 For å avgjøre om vi kan kreve tilbake, tar vi først stilling til de {{#if gjelderDødsfall}}to{{else}}tre{{/if}} øverste punktene i denne listen. Hvis resultatet blir at vi kan kreve tilbake, vurderer vi om {{#if (not gjelderDødsfall)}}du skal betale tilbake {{/if}}hele eller deler av beløpet{{#if gjelderDødsfall}} skal betales tilbake{{/if}}.
 

@@ -423,7 +423,8 @@ class BehandlingService(
 
         // oppretter fagsak hvis det ikke finnes ellers bruker det eksisterende
         val eksisterendeFagsak = fagsakService.finnFagsak(fagsystem, eksternFagsakId)
-        val fagsak = eksisterendeFagsak ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
+        val fagsak = eksisterendeFagsak
+            ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
         val behandling =
             BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
