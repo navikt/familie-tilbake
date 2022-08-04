@@ -72,7 +72,7 @@ class HåndterGamleKravgrunnlagService(
         }
     }
 
-    @Transactional(rollbackFor = [RuntimeException::class])
+    @Transactional(rollbackFor = [Exception::class])
     fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
         val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> = hentKravgrunnlagFraØkonomi(mottattXml)
