@@ -90,4 +90,4 @@ API_SCOPE: api://${TILBAKE_CLIENT_ID}/.default
 prosessering:
   fixedDelayString:
     in:
-      milliseconds: 2500
+      milliseconds: 7000
