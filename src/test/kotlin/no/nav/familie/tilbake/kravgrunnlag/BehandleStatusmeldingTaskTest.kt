@@ -222,6 +222,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         settBehandlingTilForeslåVedtakSteg()
 
+        kravgrunnlagRepository.findByBehandlingId(behandling.id) // skrevet for å fikse Optimistic Lock Exception
         val statusmeldingXml = readXml("/kravvedtakstatusxml/statusmelding_SPER_BA.xml")
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
