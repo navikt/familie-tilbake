@@ -151,7 +151,14 @@ abstract class OppslagSpringRunnerTest {
             Meldingstelling::class
         )
             .reversed()
-            .forEach { jdbcAggregateOperations.deleteAll(it.java) }
+            .forEach {
+                if (it.java == Task::class.java && jdbcAggregateOperations.count(TaskLogg::class.java) > 0) {
+                    while (jdbcAggregateOperations.count(TaskLogg::class.java) > 0) {
+                        jdbcAggregateOperations.deleteAll(TaskLogg::class.java)
+                    }
+                }
+                jdbcAggregateOperations.deleteAll(it.java)
+            }
     }
 
     protected fun getPort(): String {

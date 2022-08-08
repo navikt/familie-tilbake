@@ -386,6 +386,8 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml, BehandleKravgrunnlagTask.TYPE)
         behandleKravgrunnlagTask.doTask(task)
+
+        kravgrunnlagRepository.findByBehandlingId(behandling.id) // skrevet for å fikse Optimistic Lock Exception
     }
 
     private fun lagBehandlingsstegstilstand(
