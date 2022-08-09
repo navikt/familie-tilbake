@@ -87,7 +87,7 @@ class DistribuerDokumentVedDødsfallTask(
 
     companion object {
 
-        const val TYPE = "distribuerDokumentPåFagsak"
+        const val TYPE = "distribuerDokumentVedDødsfallPåFagsak"
 
         // 410 GONE er unikt for bruker død og ingen dødsboadresse mot Dokdist
         // https://nav-it.slack.com/archives/C6W9E5GPJ/p1647956660364779?thread_ts=1647936835.099329&cid=C6W9E5GPJ
