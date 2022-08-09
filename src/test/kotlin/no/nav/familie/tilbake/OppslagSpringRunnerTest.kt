@@ -84,7 +84,7 @@ abstract class OppslagSpringRunnerTest {
     private var port: Int? = 0
 
     @AfterEach
-    @Transactional(noRollbackFor = [Throwable::class])
+    @Transactional
     fun reset() {
         loggingEvents.clear()
         resetDatabase()
