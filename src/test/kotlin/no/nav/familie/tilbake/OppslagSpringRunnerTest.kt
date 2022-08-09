@@ -50,6 +50,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -152,12 +153,14 @@ abstract class OppslagSpringRunnerTest {
         )
             .reversed()
             .forEach {
-                if (it.java == Task::class.java && jdbcAggregateOperations.count(TaskLogg::class.java) > 0) {
+                try {
+                    jdbcAggregateOperations.deleteAll(it.java)
+                } catch (e: DbActionExecutionException) {
                     while (jdbcAggregateOperations.count(TaskLogg::class.java) > 0) {
                         jdbcAggregateOperations.deleteAll(TaskLogg::class.java)
                     }
+                    jdbcAggregateOperations.deleteAll(it.java)
                 }
-                jdbcAggregateOperations.deleteAll(it.java)
             }
     }
 
