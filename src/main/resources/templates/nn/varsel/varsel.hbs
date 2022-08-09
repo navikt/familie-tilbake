@@ -1,22 +1,12 @@
+{{~#* inline "førSkatt"}}{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}{{~/inline~}}
 {{#if datoerHvisSammenhengendePeriode.fom}}
-{{#if gjelderDødsfall}}Det er utbetalt {{{kroner beløp}}} for mykje{{else}}Du har fått {{{kroner beløp}}} for mykje utbetalt{{/if}} i {{{ytelsesnavnUbestemt}}} frå og med {{{dato datoerHvisSammenhengendePeriode.fom }}} til og med {{{dato datoerHvisSammenhengendePeriode.tom}}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
+{{#if gjelderDødsfall}}Det er utbetalt {{{kroner beløp}}} for mykje{{else}}Du har fått {{{kroner beløp}}} for mykje utbetalt{{/if}} i {{{ytelsesnavnUbestemt}}} frå og med {{{dato datoerHvisSammenhengendePeriode.fom }}} til og med {{{dato datoerHvisSammenhengendePeriode.tom}}}.{{> førSkatt}}
 
 {{else}}
 {{#if gjelderDødsfall}}Det er utbetalt {{{kroner beløp}}} for mykje{{else}}Du har fått {{{kroner beløp}}} for mykje utbetalt{{/if}} i {{{ytelsesnavnUbestemt}}}.{{#if ytelseMedSkatt}} Dette er før skatt.{{/if}}
 
-{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodane{{/eq}} {{#if gjelderDødsfall}}det er utbetalt for mykje{{else}}du har fått for mykje utbetalt{{/if}} for, er:
+{{#eq feilutbetaltePerioder.length 1}}Perioden{{else}}Periodane{{/eq}} {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} for mykje utbetalt for, er:
 *-{{#each feilutbetaltePerioder}}
 Frå og med {{{dato fom}}} til og med {{{dato tom}}}.{{/each}}-*
-{{/if}}
-Før vi avgjer om {{#if gjelderDødsfall}}pengane skal betales{{else}}du skal betale{{/if}} tilbake, kan {{#if gjelderDødsfall}}dykk uttale dykk{{else}}du uttale deg{{/if}} innan {{{dato fristdatoForTilbakemelding}}}.
-{{#if ytelseMedSkatt}}
-
-Dersom {{#if gjelderDødsfall}}det må betales{{else}}du må betale{{/if}} tilbake, reduserer vi beløpet med trekt skatt.
-{{/if}}
-_Dette har skjedd
-{{#if gjelderDødsfall}}{{{storForbokstav ytelsesnavnBestemt}}}{{else}}{{{storForbokstav ytelsesnavnEiendomsform}}}{{/if}} blei endra {{{dato revurderingsvedtaksdato}}}, og endringa har ført til at {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} utbetalt for mykje.
-{{#if varseltekstFraSaksbehandler}}
-
-{{{varseltekstFraSaksbehandler}}}
 {{/if}}
 {{> nn/varsel/varsel_slutt}}

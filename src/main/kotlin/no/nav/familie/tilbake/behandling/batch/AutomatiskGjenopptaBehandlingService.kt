@@ -5,11 +5,13 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -23,6 +25,8 @@ class AutomatiskGjenopptaBehandlingService(
     private val stegService: StegService,
     private val oppgaveTaskService: OppgaveTaskService
 ) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> {
         return behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
@@ -41,6 +45,17 @@ class AutomatiskGjenopptaBehandlingService(
             Aktør.VEDTAKSLØSNING
         )
         stegService.gjenopptaSteg(behandlingId)
+
+        val behandlingsnystegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+        if (behandlingsnystegstilstand?.behandlingssteg == Behandlingssteg.GRUNNLAG &&
+            behandlingsnystegstilstand.behandlingsstegsstatus == Behandlingsstegstatus.VENTER
+        ) {
+            logger.warn(
+                "Behandling $behandlingId har ikke fått kravgrunnlag ennå " +
+                    "eller mottok kravgrunnlag er sperret/avsluttet. " +
+                    "Behandlingen bør analyseres og henlegges ved behov"
+            )
+        }
 
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandlingId,

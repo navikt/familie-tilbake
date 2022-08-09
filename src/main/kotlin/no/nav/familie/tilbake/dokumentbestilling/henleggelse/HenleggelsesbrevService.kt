@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -28,7 +27,6 @@ class HenleggelsesbrevService(
     private val behandlingRepository: BehandlingRepository,
     private val brevsporingService: BrevsporingService,
     private val fagsakRepository: FagsakRepository,
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService
 ) {
@@ -105,7 +103,7 @@ class HenleggelsesbrevService(
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         }
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-        val gjelderDødsfall = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandling.id)?.gjelderDødsfall ?: false
+        val gjelderDødsfall = personinfo.dødsdato != null
 
         val metadata = Brevmetadata(
             sakspartId = personinfo.ident,

@@ -30,23 +30,22 @@ import java.time.LocalDate
 import java.util.UUID
 
 /**
- * Alternativ spring-visualisering av fagsak-tabellen med tilhørende behandlinger. Tilpasset databehovet for vedtaksbrev.
+ * Alternativ spring-visualisering av fagsak-tabellen med tilhørende behandlinger.
+ * Tilpasset databehovet for vedtaksbrev.
  */
 @Table("fagsak")
 data class Vedtaksbrevgrunnlag(
-    @Id
-    val id: UUID,
-    @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val bruker: Bruker,
+    @Id val id: UUID,
+    @Embedded(prefix = "bruker_", onEmpty = Embedded.OnEmpty.USE_EMPTY) val bruker: Bruker,
     val eksternFagsakId: String,
     val fagsystem: Fagsystem,
     val ytelsestype: Ytelsestype,
-    @MappedCollection(idColumn = "fagsak_id")
-    val behandlinger: Set<Vedtaksbrevbehandling>
+    @MappedCollection(idColumn = "fagsak_id") val behandlinger: Set<Vedtaksbrevbehandling>
 ) {
 
     val behandling
-        get() = behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX } ?: error("Behandling finnes ikke for vedtak")
+        get() = behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX }
+            ?: error("Behandling finnes ikke for vedtak")
 
     val klagebehandling get() = behandling.sisteÅrsak?.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
 
@@ -68,13 +67,13 @@ data class Vedtaksbrevgrunnlag(
     val aktivFagsystemsbehandling get() = behandling.fagsystemsbehandling.first { it.aktiv }
 
     val erRevurderingEtterKlageNfp
-        get() =
-            behandling.erRevurdering && behandling.årsaker.any { it.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP }
+        get() = behandling.erRevurdering && behandling.årsaker.any {
+            it.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+        }
 
     val vilkårsvurderingsperioder get() = behandling.vilkårsvurdering.firstOrNull { it.aktiv }?.perioder ?: emptySet()
     val vurdertForeldelse get() = behandling.vurderteForeldelser.firstOrNull { it.aktiv }
     val faktaFeilutbetaling get() = behandling.faktaFeilutbetaling.firstOrNull { it.aktiv }
-    val gjelderDødsfall get() = faktaFeilutbetaling?.gjelderDødsfall ?: false
 
     val aktivtSteg
         get() = behandling.behandlingsstegstilstander.firstOrNull {
@@ -82,19 +81,18 @@ data class Vedtaksbrevgrunnlag(
         }?.behandlingssteg
 
     val sisteVarsel
-        get() = behandling.brevsporing
-            .filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
+        get() = behandling.brevsporing.filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
             .maxByOrNull { it.sporbar.opprettetTid }
 
     fun finnOriginalBehandlingVedtaksdato(): LocalDate? {
         return if (erRevurdering) {
             val behandlingÅrsak = behandling.årsaker.first()
-            behandlingÅrsak.originalBehandlingId ?: error("Mangler originalBehandlingId for behandling: ${behandling.id}")
+            behandlingÅrsak.originalBehandlingId
+                ?: error("Mangler originalBehandlingId for behandling: ${behandling.id}")
 
-            behandlinger.first { it.id == behandlingÅrsak.originalBehandlingId }
-                .sisteResultat
-                ?.behandlingsvedtak
-                ?.vedtaksdato
+            behandlinger.first {
+                it.id == behandlingÅrsak.originalBehandlingId
+            }.sisteResultat?.behandlingsvedtak?.vedtaksdato
                 ?: error("Mangler vedtaksdato for original behandling med id : ${behandlingÅrsak.originalBehandlingId}")
         } else {
             null
@@ -110,10 +108,9 @@ data class Vedtaksbrevgrunnlag(
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
-            behandling.årsaker.any {
-                Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
-            }
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type && behandling.årsaker.any {
+            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
+        }
     }
 }
 
