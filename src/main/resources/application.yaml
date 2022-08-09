@@ -114,6 +114,13 @@ management:
     db:
       enabled: true
 
+funksjonsbrytere:
+  enabled: true
+  unleash:
+    uri: https://unleash.nais.io/api/
+    cluster: ${NAIS_CLUSTER_NAME}
+    applicationName: ${NAIS_APP_NAME}
+
 prosessering:
   continuousRunning.enabled: true
   maxantall: 1

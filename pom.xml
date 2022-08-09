@@ -183,7 +183,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.0</version>
+            <version>42.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -274,6 +274,11 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.6.9</version>
+        </dependency>
+        <dependency>
+            <groupId>no.finn.unleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>4.4.1</version>
         </dependency>
         <!-- Test -->
         <dependency>
