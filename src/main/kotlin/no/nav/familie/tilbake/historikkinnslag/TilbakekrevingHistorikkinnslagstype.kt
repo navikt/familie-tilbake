@@ -112,5 +112,20 @@ enum class TilbakekrevingHistorikkinnslagstype(
         tittel = "Bruker har ukjent adresse, brev ikke sendt",
         tekst = "",
         type = Historikkinnslagstype.BREV
+    ),
+    BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE(
+        tittel = "Brev ikke distribuert. Ukjent dødsbo",
+        tekst = "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt",
+        type = Historikkinnslagstype.BREV
+    ),
+    DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND(
+        tittel = "Distribusjon av brev til dødsbo feilet",
+        tekst = "Mottaker har ikke fått dødsboadresse etter 6 måneder",
+        type = Historikkinnslagstype.HENDELSE
+    ),
+    DISTRIBUSJON_BREV_DØDSBO_SUKSESS(
+        tittel = "Distribusjon av brev til dødsbo fullført",
+        tekst = "",
+        type = Historikkinnslagstype.BREV
     )
 }

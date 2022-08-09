@@ -41,6 +41,10 @@ class PubliserJournalpostTask(
             if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)) {
                 // ta med info om ukjent adresse
                 task.metadata["ukjentAdresse"] = "true"
+            } else if (DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException)) {
+                // ta med info om ukjent adresse for dødsbo
+                task.metadata["dødsboUkjentAdresse"] = "true"
+                taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, task.payload, task.metadata))
             } else {
                 throw ressursException
             }

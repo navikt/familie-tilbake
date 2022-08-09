@@ -161,6 +161,26 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             }
     }
 
+    @Test
+    fun `onCompletion skal lage historikk task for vedtaksbrev når adresse til dødsbo er ukjent`() {
+        lagreBrevsporingTask.onCompletion(
+            opprettTask(behandlingId, Brevtype.VEDTAK).also { task ->
+                task.metadata.also { it["dødsboUkjentAdresse"] = "true" }
+            }
+        )
+
+        assertHistorikkTask(
+            TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE,
+            Aktør.VEDTAKSLØSNING,
+            Brevtype.VEDTAK
+        )
+        taskRepository.findByStatus(Status.UBEHANDLET)
+            .shouldHaveSingleElement {
+                it.type == LagHistorikkinnslagTask.TYPE &&
+                    TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
+            }
+    }
+
     private fun opprettTask(
         behandlingId: UUID,
         brevtype: Brevtype,
