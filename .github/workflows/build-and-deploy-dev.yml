@@ -11,6 +11,8 @@ jobs:
     if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - uses: actions/checkout@v2
         with:
