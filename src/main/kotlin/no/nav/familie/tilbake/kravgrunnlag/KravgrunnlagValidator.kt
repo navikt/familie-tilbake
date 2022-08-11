@@ -219,9 +219,9 @@ object KravgrunnlagValidator {
         if (harPeriodeMedBeløpStørreEnnDiff && !harPeriodeMedBeløpMindreEnnDiff) {
             throw UgyldigKravgrunnlagFeil(
                 "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +
-                        "Har en eller flere perioder med YTEL-postering " +
-                        "med tilbakekrevesBeløp som er større enn differanse mellom " +
-                        "nyttBeløp og opprinneligBeløp"
+                    "Har en eller flere perioder med YTEL-postering " +
+                    "med tilbakekrevesBeløp som er større enn differanse mellom " +
+                    "nyttBeløp og opprinneligBeløp"
             )
         }
     }
