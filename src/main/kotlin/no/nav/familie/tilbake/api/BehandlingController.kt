@@ -111,11 +111,13 @@ class BehandlingController(
         @PathVariable("behandlingId") behandlingId: UUID,
         @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto
     ): Ressurs<String> {
-        stegService.håndterSteg(behandlingId, behandlingsstegDto)
-
+        // Oppdaterer ansvarlig saksbehandler først slik at historikkinnslag får riktig saksbehandler
+        // Hvis det feiler noe,bør det rullet tilbake helt siden begge 2 er på samme transaksjon
         if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }
+        stegService.håndterSteg(behandlingId, behandlingsstegDto)
+
         return Ressurs.success("OK")
     }
 
