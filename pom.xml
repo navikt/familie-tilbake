@@ -21,10 +21,10 @@
         <java.version>17</java.version>
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.7.0</kotlin.version>
-        <felles.version>1.20220610091149_ae616c5</felles.version>
+        <kotlin.version>1.7.10</kotlin.version>
+        <felles.version>1.20220811104902_c1860ff</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20220811104906_7505ebf</kontrakter.version>
+        <kontrakter.version>2.0_20220815121819_74be055</kontrakter.version>
         <kotest.version>5.3.1</kotest.version>
         <token-validation-spring.version>2.1.3</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
@@ -40,7 +40,7 @@
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>3.1.3</spring.cloud-contract>
-        <testcontainers.version>1.17.2</testcontainers.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2594.7c3ac50</tjenestespesifikasjoner.version>
         <kafka.version>3.2.1</kafka.version>
     </properties>
@@ -155,7 +155,6 @@
             <version>1.20.1</version>
         </dependency>
 
-
         <!-- MQ -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -164,7 +163,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.allclient</artifactId>
-            <version>9.2.5.0</version>
+            <version>9.3.0.0</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
