@@ -157,13 +157,6 @@ rolle:
   teamfamilie:
     forvalter: ""
 
-AUTOMATISK_SAKSBEHANDLING_BATCH:
-  BARNETRYGD: 8
-  BARNETILSYN: 6
-  OVERGANGSSTØNAD: 6
-  SKOLEPENGER: 6
-  KONTANTSTØTTE: 8
-
 BA_SAK_CLIENT_ID: ""
 EF_SAK_CLIENT_ID: ""
 SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/ # brukes kun av integrasjonstester
