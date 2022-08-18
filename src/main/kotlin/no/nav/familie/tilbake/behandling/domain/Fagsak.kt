@@ -20,7 +20,7 @@ data class Fagsak(
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
-    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
+    @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL)
     val institusjon: Institusjon? = null
 ) {
 
