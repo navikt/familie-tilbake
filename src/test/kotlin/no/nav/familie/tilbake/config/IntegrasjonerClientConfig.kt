@@ -4,7 +4,11 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
+import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -20,6 +24,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -32,15 +38,47 @@ class IntegrasjonerClientConfig {
     fun integrasjonerClient(): IntegrasjonerClient {
         val integrasjonerClient: IntegrasjonerClient = mockk(relaxed = true)
 
-        every { integrasjonerClient.arkiver(any()) } answers {
-            ArkiverDokumentResponse(
-                "jpId",
-                false,
-                listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
-            )
+        val arkiverRequest = slot<ArkiverDokumentRequest>()
+        every { integrasjonerClient.arkiver(capture(arkiverRequest)) } answers {
+            when (arkiverRequest.captured.fnr) {
+                "12345678901" -> ArkiverDokumentResponse(
+                    "jpUkjentDødsbo",
+                    false,
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                )
+                "04098203010" -> ArkiverDokumentResponse(
+                    "jpUkjentDødsbo",
+                    false,
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                )
+                else -> ArkiverDokumentResponse(
+                    "jpId",
+                    false,
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                )
+            }
         }
 
-        every { integrasjonerClient.distribuerJournalpost(any(), any(), any(), any()) } returns "42"
+        val journalpostId = slot<String>()
+        every { integrasjonerClient.distribuerJournalpost(capture(journalpostId), any(), any(), any()) } answers {
+            when (
+                journalpostId.captured
+            ) {
+                "jpUkjentDødsbo" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.GONE,
+                        ressurs = Ressurs.failure("Ukjent adresse dødsbo"),
+                        cause = RestClientResponseException("Ukjent adresse dødsbo", 410, "gone", null, null, null)
+                    )
+                "jpUkjentAdresse" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.BAD_REQUEST,
+                        ressurs = Ressurs.failure("Mottaker har ukjent adresse"),
+                        cause = RestClientResponseException("Mottaker har ukjent adresse", 401, "not there", null, null, null)
+                    )
+                else -> "42"
+            }
+        }
 
         every { integrasjonerClient.hentDokument(any(), any()) } returns readMockfileFromResources()
 
@@ -156,7 +194,26 @@ class IntegrasjonerClientConfig {
                                 tittel = "Dokument 5.1"
                             )
                         )
+                    ),
+                    Journalpost(
+                        journalpostId = "jpId6",
+                        journalposttype = Journalposttype.N,
+                        journalstatus = Journalstatus.UNDER_ARBEID,
+                        tittel = "Journalførte dokumenter 6",
+                        relevanteDatoer = listOf(
+                            RelevantDato(
+                                dato = LocalDateTime.now().minusDays(6),
+                                datotype = "DATO_DOKUMENT"
+                            )
+                        ),
+                        dokumenter = listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dokId1",
+                                tittel = "Dokument 6.1"
+                            )
+                        )
                     )
+
                 )
             )
 

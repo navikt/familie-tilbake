@@ -7,7 +7,7 @@ prosessering:
   maxantall: 1
   fixedDelayString:
     in:
-      milliseconds: 4000
+      milliseconds: 7000
   delete:
     after:
       weeks: 4
@@ -17,6 +17,13 @@ no.nav.security.jwt:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
+
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: integrasjonstest
+    applicationName: familie-tilbake
 
 AZURE_APP_WELL_KNOWN_URL: testverdi
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: testverdi

@@ -14,7 +14,10 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
@@ -101,6 +104,9 @@ class HistorikkService(
             }
             ENDRET_ENHET -> historikkinnslagstype.tekst + behandling.behandlendeEnhet + ", Begrunnelse: " + beskrivelse
             BREV_IKKE_SENDT_UKJENT_ADRESSE -> "$beskrivelse er ikke sendt"
+            BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE -> "$beskrivelse er ikke sendt"
+            DISTRIBUSJON_BREV_DØDSBO_SUKSESS -> "$beskrivelse er sendt"
+            DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND -> "${historikkinnslagstype.tekst}. $beskrivelse er ikke sendt"
             else -> historikkinnslagstype.tekst
         }
     }

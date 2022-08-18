@@ -38,6 +38,13 @@ spring:
       database:
         role: familie
 
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: localhost
+    applicationName: familie-tilbake
+
 ACCEPTED_CLIENTS: ${BA_SAK_CLIENT_ID}, ${EF_SAK_CLIENT_ID}, ${FAMILIE_TILBAKE_FRONTEND_CLIENT_ID}
 STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/

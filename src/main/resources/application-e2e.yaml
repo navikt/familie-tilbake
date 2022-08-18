@@ -91,3 +91,10 @@ prosessering:
   fixedDelayString:
     in:
       milliseconds: 2500
+
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: localhost
+    applicationName: familie-tilbake

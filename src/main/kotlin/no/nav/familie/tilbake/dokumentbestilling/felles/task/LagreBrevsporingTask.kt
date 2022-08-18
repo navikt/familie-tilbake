@@ -50,12 +50,21 @@ class LagreBrevsporingTask(
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
         val ukjentAdresse = (task.metadata.getOrDefault("ukjentAdresse", "false") as String).toBoolean()
+        val dødsboUkjentAdresse = (task.metadata.getOrDefault("dødsboUkjentAdresse", "false") as String).toBoolean()
         val opprinneligHistorikkinnslagstype = utledHistorikkinnslagType(brevtype, mottager)
 
         if (ukjentAdresse) {
             historikkTaskService.lagHistorikkTask(
                 behandlingId = UUID.fromString(task.payload),
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
+                aktør = utledAktør(brevtype, ansvarligSaksbehandler),
+                beskrivelse = opprinneligHistorikkinnslagstype.tekst,
+                brevtype = brevtype
+            )
+        } else if (dødsboUkjentAdresse) {
+            historikkTaskService.lagHistorikkTask(
+                behandlingId = UUID.fromString(task.payload),
+                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE,
                 aktør = utledAktør(brevtype, ansvarligSaksbehandler),
                 beskrivelse = opprinneligHistorikkinnslagstype.tekst,
                 brevtype = brevtype
@@ -80,39 +89,39 @@ class LagreBrevsporingTask(
         }
     }
 
-    private fun utledHistorikkinnslagType(brevtype: Brevtype, mottager: Brevmottager): TilbakekrevingHistorikkinnslagstype {
-        if (Brevmottager.VERGE == mottager) {
+    companion object {
+
+        fun utledHistorikkinnslagType(brevtype: Brevtype, mottager: Brevmottager): TilbakekrevingHistorikkinnslagstype {
+            if (Brevmottager.VERGE == mottager) {
+                return when (brevtype) {
+                    Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT_TIL_VERGE
+                    Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT_TIL_VERGE
+                    Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE
+                    Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT_TIL_VERGE
+                    Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT_TIL_VERGE
+                }
+            }
             return when (brevtype) {
-                Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT_TIL_VERGE
-                Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT_TIL_VERGE
-                Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT_TIL_VERGE
-                Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT_TIL_VERGE
-                Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT_TIL_VERGE
+                Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT
+                Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT
+                Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
+                Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
+                Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT
             }
         }
-        return when (brevtype) {
-            Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT
-            Brevtype.KORRIGERT_VARSEL -> TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT
-            Brevtype.INNHENT_DOKUMENTASJON -> TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT
-            Brevtype.HENLEGGELSE -> TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT
-            Brevtype.VEDTAK -> TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT
-        }
-    }
 
-    private fun utledAktør(
-        brevtype: Brevtype,
-        ansvarligSaksbehandler: String?
-    ): Aktør {
-        return when {
-            brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
-            brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
-            !ansvarligSaksbehandler.isNullOrEmpty() && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
-                Aktør.SAKSBEHANDLER
-            else -> Aktør.VEDTAKSLØSNING
+        fun utledAktør(
+            brevtype: Brevtype,
+            ansvarligSaksbehandler: String?
+        ): Aktør {
+            return when {
+                brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER
+                brevtype == Brevtype.KORRIGERT_VARSEL -> Aktør.SAKSBEHANDLER
+                !ansvarligSaksbehandler.isNullOrEmpty() && ansvarligSaksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
+                    Aktør.SAKSBEHANDLER
+                else -> Aktør.VEDTAKSLØSNING
+            }
         }
-    }
-
-    companion object {
 
         const val TYPE = "lagreBrevsporing"
     }
