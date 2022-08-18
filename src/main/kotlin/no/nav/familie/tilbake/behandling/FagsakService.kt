@@ -10,6 +10,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEvent
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -78,6 +79,7 @@ class FagsakService(
     fun finnFagsystemForBehandlingId(behandlingId: UUID): Fagsystem {
         return fagsakRepository.finnFagsakForBehandlingId(behandlingId).fagsystem
     }
+
     @Transactional
     fun opprettFagsak(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
@@ -88,12 +90,19 @@ class FagsakService(
             ident = opprettTilbakekrevingRequest.personIdent,
             språkkode = opprettTilbakekrevingRequest.språkkode
         )
+        val institusjon = opprettTilbakekrevingRequest.institusjon?.let {
+            Institusjon(
+                it.organisasjonsnummer,
+                it.navn
+            )
+        }
         return fagsakRepository.insert(
             Fagsak(
                 bruker = bruker,
                 eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
                 ytelsestype = ytelsestype,
-                fagsystem = fagsystem
+                fagsystem = fagsystem,
+                institusjon = institusjon
             )
         )
     }
@@ -157,8 +166,10 @@ class FagsakService(
         val harAlledeMottattForespørselen: Boolean =
             taskRepository.findByStatusIn(
                 listOf(
-                    Status.UBEHANDLET, Status.BEHANDLER,
-                    Status.KLAR_TIL_PLUKK, Status.PLUKKET,
+                    Status.UBEHANDLET,
+                    Status.BEHANDLER,
+                    Status.KLAR_TIL_PLUKK,
+                    Status.PLUKKET,
                     Status.FEILET
                 ),
                 Pageable.unpaged()
