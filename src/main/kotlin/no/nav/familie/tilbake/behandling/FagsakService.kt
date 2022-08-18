@@ -92,8 +92,8 @@ class FagsakService(
         )
         val institusjon = opprettTilbakekrevingRequest.institusjon?.let {
             Institusjon(
-                it.organisasjonsnummer,
-                it.navn
+                organisasjonsnummer = it.organisasjonsnummer,
+                navn = it.navn
             )
         }
         return fagsakRepository.insert(

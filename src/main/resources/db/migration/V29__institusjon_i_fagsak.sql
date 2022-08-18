@@ -1,8 +1,8 @@
 
 ALTER TABLE fagsak
-    ADD COLUMN institusjon_org_nr VARCHAR;
+    ADD COLUMN institusjon_organisasjonsnummer VARCHAR;
 
-COMMENT ON COLUMN fagsak.institusjon_org_nr
+COMMENT ON COLUMN fagsak.institusjon_organisasjonsnummer
     IS 'Organisasjonsnummer for institusjon';
 
 ALTER TABLE fagsak
