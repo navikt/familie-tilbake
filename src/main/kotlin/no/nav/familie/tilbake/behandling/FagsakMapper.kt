@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.api.dto.BehandlingsoppsummeringDto
 import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
+import no.nav.familie.tilbake.api.dto.InstitusjonDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -30,13 +31,17 @@ object FagsakMapper {
                 status = it.status
             )
         }
+
+        val institusjon = fagsak.institusjon?.let { InstitusjonDto(it.organisasjonsnummer, it.navn) }
+
         return FagsakDto(
             eksternFagsakId = fagsak.eksternFagsakId,
             ytelsestype = fagsak.ytelsestype,
             fagsystem = fagsak.fagsystem,
             språkkode = fagsak.bruker.språkkode,
             bruker = bruker,
-            behandlinger = behandlingListe
+            behandlinger = behandlingListe,
+            institusjon = institusjon
         )
     }
 }
