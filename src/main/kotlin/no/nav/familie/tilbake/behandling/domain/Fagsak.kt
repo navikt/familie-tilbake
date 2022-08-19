@@ -19,7 +19,9 @@ data class Fagsak(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
+    @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL)
+    val institusjon: Institusjon? = null
 ) {
 
     val ytelsesnavn
