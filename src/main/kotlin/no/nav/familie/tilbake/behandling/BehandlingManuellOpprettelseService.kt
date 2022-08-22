@@ -50,7 +50,8 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
             revurderingsvedtaksdato = fagsystemsbehandlingData.revurderingsvedtaksdato,
             faktainfo = fagsystemsbehandlingData.faktainfo,
             verge = fagsystemsbehandlingData.verge,
-            varsel = null
+            varsel = null,
+            institusjon = fagsystemsbehandlingData.institusjon
         )
     }
 }
