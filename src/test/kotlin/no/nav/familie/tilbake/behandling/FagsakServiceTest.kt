@@ -5,6 +5,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
@@ -17,6 +18,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -76,6 +78,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         fagsakDto.språkkode shouldBe Språkkode.NB
         fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.institusjon shouldBe null
 
         val brukerDto = fagsakDto.bruker
         brukerDto.personIdent shouldBe "32132132111"
@@ -141,6 +144,41 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         brukerDto.navn shouldBe "testverdi"
         brukerDto.kjønn shouldBe Kjønn.MANN
         brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+    }
+
+    @Test
+    fun `hentFagsak skal hente fagsak for barnetrygd med institusjon`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        val behandling = opprettBehandling(
+            ytelsestype = Ytelsestype.BARNETRYGD,
+            eksternFagsakId = eksternFagsakId,
+            institusjon = Institusjon(organisasjonsnummer = "987654321", navn = "Testinstitusjon")
+        )
+
+        val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
+
+        fagsakDto.eksternFagsakId shouldBe eksternFagsakId
+        fagsakDto.språkkode shouldBe Språkkode.NB
+        fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
+        fagsakDto.fagsystem shouldBe Fagsystem.BA
+        fagsakDto.institusjon shouldNotBe null
+        fagsakDto.institusjon!!.organisasjonsnummer shouldBe "987654321"
+        fagsakDto.institusjon!!.navn shouldBe "Testinstitusjon"
+
+        val brukerDto = fagsakDto.bruker
+        brukerDto.personIdent shouldBe "32132132111"
+        brukerDto.navn shouldBe "testverdi"
+        brukerDto.kjønn shouldBe Kjønn.MANN
+        brukerDto.fødselsdato shouldBe LocalDate.now().minusYears(20)
+        brukerDto.dødsdato shouldBe null
+
+        val behandlinger = fagsakDto.behandlinger
+        behandlinger.size shouldBe 1
+        val behandlingsoppsummeringtDto = behandlinger.toList()[0]
+        behandlingsoppsummeringtDto.behandlingId shouldBe behandling.id
+        behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
+        behandlingsoppsummeringtDto.status shouldBe behandling.status
+        behandlingsoppsummeringtDto.type shouldBe behandling.type
     }
 
     @Test
@@ -225,12 +263,18 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
     }
 
-    private fun opprettBehandling(ytelsestype: Ytelsestype, eksternFagsakId: String, personIdent: String = "32132132111"): Behandling {
+    private fun opprettBehandling(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+        personIdent: String = "32132132111",
+        institusjon: Institusjon? = null
+    ): Behandling {
         val fagsak = Fagsak(
             eksternFagsakId = eksternFagsakId,
             bruker = Bruker(personIdent, Språkkode.NB),
             ytelsestype = ytelsestype,
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+            institusjon = institusjon
         )
         fagsakRepository.insert(fagsak)
 

@@ -10,6 +10,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -19,6 +20,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
@@ -224,6 +226,37 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             Behandlingssteg.GRUNNLAG,
             Behandlingsstegstatus.VENTER,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+        )
+    }
+
+    @Test
+    fun `opprettBehandling skal opprette automatisk behandling fagsak med institusjon`() {
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                finnesVerge = false,
+                finnesVarsel = true,
+                manueltOpprettet = false,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                finnesInstitusjon = true
+            )
+
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+
+        assertBehandling(behandling, opprettTilbakekrevingRequest)
+        assertFagsak(behandling, opprettTilbakekrevingRequest, true)
+        assertFagsystemsbehandling(behandling, opprettTilbakekrevingRequest)
+        assertVarselData(behandling, opprettTilbakekrevingRequest)
+        behandling.verger.shouldBeEmpty()
+        assertHistorikkTask(behandling.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
+        assertFinnKravgrunnlagTask(behandling.id)
+        assertOppgaveTask(behandling.id, LagOppgaveTask.TYPE)
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(
+            behandlingsstegstilstand,
+            Behandlingssteg.VARSEL,
+            Behandlingsstegstatus.VENTER,
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
         )
     }
 
@@ -475,7 +508,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         aktivFagsystemsbehandling.resultat shouldBe behandling.aktivFagsystemsbehandling.resultat
         assertHistorikkTask(revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET, Aktør.SAKSBEHANDLER)
         assertHistorikkTask(
-            revurdering.id, TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, Aktør.VEDTAKSLØSNING,
+            revurdering.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
+            Aktør.VEDTAKSLØSNING,
             "Venter på kravgrunnlag fra økonomi"
         )
         taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
@@ -1346,7 +1381,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     private fun assertFagsak(
         behandling: Behandling,
-        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest
+        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+        finnesInstitusjon: Boolean = false
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.eksternFagsakId shouldBe opprettTilbakekrevingRequest.eksternFagsakId
@@ -1354,6 +1390,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         fagsak.fagsystem shouldBe opprettTilbakekrevingRequest.fagsystem
         fagsak.bruker.språkkode shouldBe opprettTilbakekrevingRequest.språkkode
         fagsak.bruker.ident shouldBe opprettTilbakekrevingRequest.personIdent
+        if (finnesInstitusjon) {
+            fagsak.institusjon shouldNotBe null
+            fagsak.institusjon!!.organisasjonsnummer shouldBe opprettTilbakekrevingRequest.institusjon!!.organisasjonsnummer
+            fagsak.institusjon!!.navn shouldBe opprettTilbakekrevingRequest.institusjon!!.navn
+        } else {
+            fagsak.institusjon shouldBe null
+        }
     }
 
     private fun assertBehandling(
@@ -1419,7 +1462,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         finnesVerge: Boolean,
         finnesVarsel: Boolean,
         manueltOpprettet: Boolean,
-        tilbakekrevingsvalg: Tilbakekrevingsvalg
+        tilbakekrevingsvalg: Tilbakekrevingsvalg,
+        finnesInstitusjon: Boolean = false
     ): OpprettTilbakekrevingRequest {
         val varsel = if (finnesVarsel) Varsel(
             varseltekst = "testverdi",
@@ -1437,6 +1481,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             revurderingsresultat = "testresultat",
             tilbakekrevingsvalg = tilbakekrevingsvalg
         )
+        val institusjon =
+            if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testinstitusjon") else null
 
         return OpprettTilbakekrevingRequest(
             ytelsestype = BARNETRYGD,
@@ -1452,7 +1498,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             revurderingsvedtaksdato = fom,
             verge = verge,
             faktainfo = faktainfo,
-            saksbehandlerIdent = "Z0000"
+            saksbehandlerIdent = "Z0000",
+            institusjon = institusjon
         )
     }
 
