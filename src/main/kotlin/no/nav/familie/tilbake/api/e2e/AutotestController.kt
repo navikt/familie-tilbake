@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.util.Properties
@@ -98,12 +100,13 @@ class AutotestController(
 
     @PostMapping(path = ["/publiser/fagsystemsbehandling"])
     fun publishFagsystemsbehandlingsdata(
-        @Valid @RequestBody opprettManueltTilbakekrevingRequest:
-            OpprettManueltTilbakekrevingRequest
+        @Valid @RequestBody opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
+        @RequestParam(required = false, name = "erInstitusjon") erInstitusjon: Boolean = false
     ): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
+        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testorganisasjon") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,
@@ -118,7 +121,8 @@ class AutotestController(
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
                     .IGNORER_TILBAKEKREVING
-            )
+            ),
+            institusjon = institusjon
         )
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
             eksternFagsakId,

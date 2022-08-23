@@ -5,6 +5,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -16,6 +17,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
@@ -203,6 +205,52 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
         fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
+        fagsak.institusjon shouldBe null
+    }
+
+    @Test
+    fun `doTask skal opprette behandling for institusjon når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
+        opprettBehandlingManueltTask.preCondition(lagTask())
+
+        val requestSendt = requestSendtRepository
+            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                eksternFagsakId,
+                ytelsestype,
+                eksternId
+            )
+        val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
+        requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
+
+        val økonomiXmlMottatt = Testdata.økonomiXmlMottatt
+        økonomiXmlMottattRepository.insert(økonomiXmlMottatt.copy(eksternFagsakId = eksternFagsakId, referanse = eksternId))
+
+        opprettBehandlingManueltTask.doTask(lagTask())
+
+        taskRepository.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
+
+        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
+        behandling.shouldNotBeNull()
+        behandling.manueltOpprettet.shouldBeTrue()
+        behandling.aktivtVarsel.shouldBeNull()
+        behandling.aktivVerge.shouldBeNull()
+        behandling.aktivFagsystemsbehandling.eksternId shouldBe eksternId
+
+        val fagsystemsbehandling = respons.hentFagsystemsbehandling
+        fagsystemsbehandling.shouldNotBeNull()
+        behandling.aktivFagsystemsbehandling.resultat shouldBe fagsystemsbehandling.faktainfo.revurderingsresultat
+        behandling.aktivFagsystemsbehandling.årsak shouldBe fagsystemsbehandling.faktainfo.revurderingsårsak
+        behandling.behandlendeEnhet shouldBe fagsystemsbehandling.enhetId
+        behandling.behandlendeEnhetsNavn shouldBe fagsystemsbehandling.enhetsnavn
+        behandling.ansvarligSaksbehandler shouldBe "bb1234"
+        behandling.ansvarligBeslutter.shouldBeNull()
+        behandling.status shouldBe Behandlingsstatus.UTREDES
+
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
+        fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
+        fagsak.institusjon shouldNotBe null
+        fagsak.institusjon!!.organisasjonsnummer shouldBe "987654321"
+        fagsak.institusjon!!.navn shouldBe "Testorganisajon"
     }
 
     private fun lagTask(): Task {
@@ -218,7 +266,8 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagHentFagsystemsbehandlingRespons(): HentFagsystemsbehandlingRespons {
+    private fun lagHentFagsystemsbehandlingRespons(erInstitusjon: Boolean = false): HentFagsystemsbehandlingRespons {
+        var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testorganisajon") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,
@@ -233,7 +282,8 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
                     .IGNORER_TILBAKEKREVING
-            )
+            ),
+            institusjon = institusjon
         )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling)
     }
