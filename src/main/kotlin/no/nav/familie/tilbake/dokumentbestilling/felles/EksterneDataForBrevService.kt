@@ -32,7 +32,7 @@ class EksterneDataForBrevService(
         return saksbehandler.fornavn + " " + saksbehandler.etternavn
     }
 
-    fun hentAdresse(personinfo: Personinfo): Adresseinfo {
+    private fun hentAdresse(personinfo: Personinfo): Adresseinfo {
         return Adresseinfo(personinfo.ident, personinfo.navn)
     }
 

@@ -191,13 +191,14 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         val fritekstSærligeGrunnerAnnet = "[ fritekst her ]"
         return HbVedtaksbrevsperiode(
             periode = januar,
+            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
+            fakta = HbFakta(Hendelsestype.BARNS_ALDER, Hendelsesundertype.BARN_OVER_6_ÅR),
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 vilkårsvurderingsresultat = vilkårResultat,
                 aktsomhetsresultat = aktsomhet,
                 særligeGrunner = HbSærligeGrunner(sg, null, fritekstSærligeGrunnerAnnet)
             ),
-            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
             resultat = HbResultat(
                 tilbakekrevesBeløp =
                 BigDecimal.valueOf(if (reduksjon) 500L else 1000L),
@@ -205,7 +206,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
                 BigDecimal.valueOf(if (reduksjon) 400L else 800L),
                 rentebeløp = BigDecimal.ZERO
             ),
-            fakta = HbFakta(Hendelsestype.BARNS_ALDER, Hendelsesundertype.BARN_OVER_6_ÅR)
+            førstePeriode = true
         )
     }
 

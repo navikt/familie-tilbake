@@ -7,5 +7,6 @@ data class HbVedtaksbrevsperiode(
     val kravgrunnlag: HbKravgrunnlag,
     val fakta: HbFakta,
     val vurderinger: HbVurderinger,
-    val resultat: HbResultat
+    val resultat: HbResultat,
+    val førstePeriode: Boolean
 )

@@ -151,7 +151,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                         BigDecimal.valueOf((tilbakekreves - skatt).toLong()),
                         tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
                         rentebeløp = BigDecimal.valueOf(renter.toLong())
-                    )
+                    ),
+                    førstePeriode = true
                 )
             )
         return HbVedtaksbrevsdata(vedtaksbrevData, perioder)
@@ -233,7 +234,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                         tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(16015),
                         tilbakekrevesBeløp = BigDecimal(20002),
                         rentebeløp = BigDecimal.ZERO
-                    )
+                    ),
+                    førstePeriode = true
                 ),
                 HbVedtaksbrevsperiode(
                     periode = februar,
@@ -257,7 +259,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                         tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.ZERO,
                         tilbakekrevesBeløp = BigDecimal.ZERO,
                         rentebeløp = BigDecimal.ZERO
-                    )
+                    ),
+                    førstePeriode = true
                 ),
                 HbVedtaksbrevsperiode(
                     periode = mars,
@@ -281,7 +284,8 @@ class TekstformatererVedtaksbrevVedleggTest {
                         tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(2222),
                         tilbakekrevesBeløp = BigDecimal(3000),
                         rentebeløp = BigDecimal(300)
-                    )
+                    ),
+                    førstePeriode = true
                 )
             )
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)

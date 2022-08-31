@@ -239,15 +239,16 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         val periodeBuilder =
             HbVedtaksbrevsperiode(
                 periode = JANUAR,
+                kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.ZERO),
+                fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
+                vurderinger = vurderinger,
                 resultat = HbResultat(
                     tilbakekrevesBeløp = BigDecimal.valueOf(9999),
                     rentebeløp = BigDecimal.ZERO,
                     tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(9999),
                     foreldetBeløp = BigDecimal.valueOf(2999)
                 ),
-                vurderinger = vurderinger,
-                kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.ZERO),
-                fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST)
+                førstePeriode = true
             )
         return HbVedtaksbrevPeriodeOgFelles(fellesBuilder, periodeBuilder)
     }

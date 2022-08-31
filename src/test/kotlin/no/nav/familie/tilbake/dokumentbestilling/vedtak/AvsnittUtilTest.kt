@@ -56,8 +56,7 @@ class AvsnittUtilTest {
         brevmetadata = brevmetadata,
         konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
         søker = HbPerson(
-            navn = "Søker Søkersen",
-            dødsdato = LocalDate.of(2018, 3, 1)
+            navn = "Søker Søkersen"
         ),
         fagsaksvedtaksdato = LocalDate.now(),
         behandling = HbBehandling(erRevurdering = false),
@@ -119,10 +118,17 @@ class AvsnittUtilTest {
                             "Fritekst særlige grunner annet"
                         )
                     ),
-                    resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002)
+                    resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
+                    førstePeriode = true
                 ),
                 HbVedtaksbrevsperiode(
                     periode = februar,
+                    kravgrunnlag = HbKravgrunnlag(
+                        feilutbetaltBeløp = BigDecimal(3000),
+                        riktigBeløp = BigDecimal(3000),
+                        utbetaltBeløp = BigDecimal(6000)
+                    ),
+                    fakta = HbFakta(Hendelsestype.BOR_MED_SØKER, Hendelsesundertype.BOR_IKKE_MED_BARN),
                     vurderinger =
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -137,13 +143,8 @@ class AvsnittUtilTest {
                             )
                         )
                     ),
-                    fakta = HbFakta(Hendelsestype.BOR_MED_SØKER, Hendelsesundertype.BOR_IKKE_MED_BARN),
-                    kravgrunnlag = HbKravgrunnlag(
-                        feilutbetaltBeløp = BigDecimal(3000),
-                        riktigBeløp = BigDecimal(3000),
-                        utbetaltBeløp = BigDecimal(6000)
-                    ),
-                    resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(3000)
+                    resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(3000),
+                    førstePeriode = true
                 )
             )
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
