@@ -42,7 +42,7 @@ class OppgaveServiceTest {
     private val mappeIdBehandleSak = 200
     private val finnMappeResponseDto = listOf(
         MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
-        MappeDto(mappeIdBehandleSak, "50 Behandle sak", enhetsnr = "4489"),
+        MappeDto(mappeIdBehandleSak, "50 Tilbakekreving - Klar til behandling", enhetsnr = "4489"),
         MappeDto(mappeIdGodkjenneVedtak, "70 Godkjennevedtak", enhetsnr = "4489"),
         MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
     )

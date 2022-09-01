@@ -148,7 +148,7 @@ class OppgaveService(
 
     private fun lagSøkeuttrykk(oppgavetype: Oppgavetype): Regex? {
         val s = when (oppgavetype) {
-            Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Behandle sak?.+"
+            Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Tilbakekreving?.+"
             Oppgavetype.GodkjenneVedtak -> "70 Godkjenne?.vedtak?.+"
             else -> {
                 logger.error("Ukjent oppgavetype = $oppgavetype")
