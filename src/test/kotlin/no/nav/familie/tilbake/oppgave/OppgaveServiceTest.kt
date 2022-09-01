@@ -3,16 +3,8 @@ package no.nav.familie.tilbake.oppgave
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
-import no.nav.familie.kontrakter.felles.oppgave.MappeDto
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import io.mockk.*
+import no.nav.familie.kontrakter.felles.oppgave.*
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -27,7 +19,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.core.env.Environment
 import java.time.LocalDate
-import java.util.Properties
+import java.util.*
 
 class OppgaveServiceTest {
 
@@ -41,8 +33,10 @@ class OppgaveServiceTest {
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
     private val finnMappeResponseDto = listOf(
-        MappeDto(mappeIdGodkjenneVedtak, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
-        MappeDto(mappeIdBehandleSak, "EF Sak - 50 Behandle sak", enhetsnr = "4489")
+        MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
+        MappeDto(mappeIdBehandleSak, "50 Behandle sak", enhetsnr = "4489"),
+        MappeDto(mappeIdGodkjenneVedtak, "70 Godkjennevedtak", enhetsnr = "4489"),
+        MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
     )
 
     private lateinit var oppgaveService: OppgaveService
@@ -123,7 +117,7 @@ class OppgaveServiceTest {
         @Test
         fun `skal legge behandleSak i EF-Sak-50-mappe for 4483`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
-            every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
+            every { integrasjonerClient.finnMapper("4483") } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
                 behandling.id,
@@ -155,6 +149,55 @@ class OppgaveServiceTest {
 
             slot.captured.mappeId shouldBe null
         }
+
+        @Test
+        fun `skal ikke legge behandleSak i noen mappe når ingen mapper matcher`() {
+
+            val kunMapperSomIkkeKanBrukes = listOf(
+                MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
+                MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
+            )
+
+            val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper("4489") } returns kunMapperSomIkkeKanBrukes
+
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
+            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
+
+            slot.captured.mappeId shouldBe null
+        }
+
+        @Test
+        fun `skal fungere også etter rettet skrivefeil i gosys `() {
+
+            val mapperMedOrdelingsfeilRettet = listOf(
+                MappeDto(300, "50 Behandle sak", enhetsnr = "4489"),
+                MappeDto(400, "70 Godkjenne vedtak ", enhetsnr = "4489") // ligger i gosys som Godkjennevedtak 2022-09-01
+            )
+
+            val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper("4489") } returns mapperMedOrdelingsfeilRettet
+
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
+            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
+
+            slot.captured.mappeId shouldBe 400
+        }
+
 
         @Test
         fun `skal ikke legge godkjenneVedtak oppgaver i EF-Sak-50-mappe når det allerede finnes en`() {
