@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentasjonsgenerator
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.AvsnittUtil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.HendelseMedUndertype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
@@ -46,7 +46,7 @@ import java.time.YearMonth
 @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorPeriodeFakta {
 
-    private val januar = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+    private val januar = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
     @Test
     fun `list ut permutasjoner for BA bokmål`() {

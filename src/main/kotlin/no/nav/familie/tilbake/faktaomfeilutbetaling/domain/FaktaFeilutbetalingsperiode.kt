@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling.domain
 
-import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -11,7 +11,7 @@ data class FaktaFeilutbetalingsperiode(
     @Id
     val id: UUID = UUID.randomUUID(),
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val periode: Periode,
+    val periode: Månedsperiode,
     val hendelsestype: Hendelsestype,
     val hendelsesundertype: Hendelsesundertype,
     @Version

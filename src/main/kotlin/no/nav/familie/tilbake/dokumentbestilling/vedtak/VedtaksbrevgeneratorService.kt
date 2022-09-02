@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -10,7 +11,6 @@ import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
@@ -332,9 +331,10 @@ class VedtaksbrevgeneratorService(
         perioderFritekst: List<PeriodeMedTekstDto>
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode) == periode }
+        val fritekster: PeriodeMedTekstDto? =
+            perioderFritekst.firstOrNull { Månedsperiode(it.periode.fom, it.periode.tom) == periode }
         return HbVedtaksbrevsperiode(
-            periode = Handlebarsperiode(periode),
+            periode = periode.toDatoperiode(),
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
@@ -350,22 +350,22 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    private fun utledFakta(periode: Periode, fakta: FaktaFeilutbetaling, fritekst: PeriodeMedTekstDto?): HbFakta {
-        return fakta.perioder.first { it.periode.omslutter(periode) }
+    private fun utledFakta(periode: Månedsperiode, fakta: FaktaFeilutbetaling, fritekst: PeriodeMedTekstDto?): HbFakta {
+        return fakta.perioder.first { it.periode.inneholder(periode) }
             .let {
                 HbFakta(it.hendelsestype, it.hendelsesundertype, fritekst?.faktaAvsnitt)
             }
     }
 
     private fun utledVurderinger(
-        periode: Periode,
+        periode: Månedsperiode,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
         fritekst: PeriodeMedTekstDto?
     ): HbVurderinger {
 
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
-        val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.omslutter(periode) }
+        val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
         val vilkårsvurderingAktsomhet = vilkårsvurdering?.aktsomhet
         val godTro = vilkårsvurdering?.godTro
         val beløpSomErIBehold = godTro?.beløpSomErIBehold
@@ -418,11 +418,11 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Periode): Foreldelsesperiode? {
+    private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Månedsperiode): Foreldelsesperiode? {
         return if (foreldelse == null) {
             null
         } else foreldelse.foreldelsesperioder
-            .firstOrNull { p -> p.periode.omslutter(periode) }
+            .firstOrNull { p -> p.periode.inneholder(periode) }
             ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
     }
 

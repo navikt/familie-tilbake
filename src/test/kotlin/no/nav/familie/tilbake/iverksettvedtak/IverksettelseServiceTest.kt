@@ -10,12 +10,12 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.SærligGrunnDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -23,7 +23,6 @@ import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -96,8 +95,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
     private val perioder = listOf(
-        Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-        Periode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
     )
     private lateinit var kravgrunnlag431: Kravgrunnlag431
 
@@ -257,7 +256,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurdering() {
         val vilkårsperioder = perioder.map {
             VilkårsvurderingsperiodeDto(
-                periode = PeriodeDto(it),
+                periode = it.toDatoperiode(),
                 begrunnelse = "testverdi",
                 aktsomhetDto = AktsomhetDto(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,

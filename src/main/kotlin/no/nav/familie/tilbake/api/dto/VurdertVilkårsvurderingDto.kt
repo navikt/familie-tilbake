@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
@@ -12,7 +13,7 @@ data class VurdertVilkårsvurderingDto(
 )
 
 data class VurdertVilkårsvurderingsperiodeDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     val feilutbetaltBeløp: BigDecimal,
     val hendelsestype: Hendelsestype,
     val reduserteBeløper: List<RedusertBeløpDto> = listOf(),

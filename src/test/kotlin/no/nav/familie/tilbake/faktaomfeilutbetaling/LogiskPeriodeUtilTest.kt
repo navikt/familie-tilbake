@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -16,8 +16,8 @@ internal class LogiskPeriodeUtilTest {
 
     @Test
     fun `utledLogiskPeriode skal returnere én logisk periode når perioder kan slås sammen`() {
-        val periode1 = Periode(januar, februar)
-        val periode2 = Periode(mars, mai)
+        val periode1 = Månedsperiode(januar, februar)
+        val periode2 = Månedsperiode(mars, mai)
 
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
             mapOf(
@@ -34,8 +34,8 @@ internal class LogiskPeriodeUtilTest {
 
     @Test
     fun `utledLogiskPeriode skal returner flere logiske periode når perioder som er skilt med måned ikke kan slås sammen`() {
-        val periode1 = Periode(januar, februar)
-        val periode2 = Periode(april, mai)
+        val periode1 = Månedsperiode(januar, februar)
+        val periode2 = Månedsperiode(april, mai)
 
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
             mapOf(

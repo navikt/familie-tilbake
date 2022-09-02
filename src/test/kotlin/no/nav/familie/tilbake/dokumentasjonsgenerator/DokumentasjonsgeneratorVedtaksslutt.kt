@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentasjonsgenerator
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
@@ -235,7 +235,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         return listOf(lagPeriode(PERIODE1))
     }
 
-    private fun lagPeriode(periode: Handlebarsperiode): HbVedtaksbrevsperiode {
+    private fun lagPeriode(periode: Datoperiode): HbVedtaksbrevsperiode {
         return HbVedtaksbrevsperiode(
             periode = periode,
             vurderinger = HbVurderinger(
@@ -284,8 +284,8 @@ class DokumentasjonsgeneratorVedtaksslutt {
 
     companion object {
 
-        private val PERIODE1 = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
-        private val PERIODE2 = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+        private val PERIODE1 = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+        private val PERIODE2 = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
         private val trueFalse = booleanArrayOf(true, false)
         const val VEDTAK_SLUTT = "vedtak/vedtak_slutt"
     }

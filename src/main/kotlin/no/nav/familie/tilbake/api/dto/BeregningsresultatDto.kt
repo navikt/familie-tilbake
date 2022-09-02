@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
 import java.math.BigDecimal
@@ -10,7 +11,7 @@ data class BeregningsresultatDto(
 )
 
 data class BeregningsresultatsperiodeDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     val vurdering: Vurdering? = null,
     val feilutbetaltBeløp: BigDecimal,
     val andelAvBeløp: BigDecimal? = null,

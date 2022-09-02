@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -16,7 +17,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
@@ -81,7 +81,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandling: Behandling
     private lateinit var saksnummer: String
 
-    private val periode: Periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
+    private val periode: Månedsperiode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
 
     @BeforeEach
     fun setup() {

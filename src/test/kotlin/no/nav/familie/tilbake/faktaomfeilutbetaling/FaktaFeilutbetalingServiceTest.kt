@@ -3,13 +3,12 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -43,7 +42,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private val behandling = Testdata.behandling
-    private val periode = Periode(
+    private val periode = Månedsperiode(
         fom = YearMonth.now().minusMonths(2),
         tom = YearMonth.now()
     )
@@ -151,13 +150,13 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         hendelsestype: Hendelsestype?,
         hendelsesundertype: Hendelsesundertype?
     ) {
-        faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe PeriodeDto(periode)
+        faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe periode.toDatoperiode()
         faktaFeilutbetalingDto.totaltFeilutbetaltBeløp shouldBe BigDecimal.valueOf(1000000, 2)
 
         faktaFeilutbetalingDto.feilutbetaltePerioder.size shouldBe 1
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()
         feilutbetaltePeriode.hendelsestype shouldBe hendelsestype
         feilutbetaltePeriode.hendelsesundertype shouldBe hendelsesundertype
-        feilutbetaltePeriode.periode shouldBe PeriodeDto(periode)
+        feilutbetaltePeriode.periode shouldBe periode.toDatoperiode()
     }
 }
