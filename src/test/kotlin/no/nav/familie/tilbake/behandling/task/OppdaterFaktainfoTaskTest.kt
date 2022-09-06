@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.task
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -69,7 +70,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                     eksternFagsakId = fagsak.eksternFagsakId,
                     eksternId = "1",
                     ytelsestype = fagsak.ytelsestype,
-                    respons = objectMapper.writeValueAsString(lagRespons())
+                    respons = objectMapper.writeValueAsString(lagRespons(eksternId = "1"))
                 )
             )
 
@@ -97,10 +98,26 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
             "Task kan kjøre på nytt manuelt når respons er mottatt."
     }
 
-    private fun lagRespons(): HentFagsystemsbehandlingRespons {
+    @Test
+    fun `doTask skal ikke oppdatere fakta info når tilbakekrevingsbehandling allerede er tilkoblet med riktig fagsak`() {
+        requestSendtRepository.insert(
+            HentFagsystemsbehandlingRequestSendt(
+                eksternFagsakId = fagsak.eksternFagsakId,
+                eksternId = behandling.aktivFagsystemsbehandling.eksternId,
+                ytelsestype = fagsak.ytelsestype,
+                respons = objectMapper.writeValueAsString(lagRespons(eksternId = behandling.aktivFagsystemsbehandling.eksternId))
+            )
+        )
+        shouldNotThrowAny { oppdaterFaktainfoTask.doTask(lagTask(eksternId = behandling.aktivFagsystemsbehandling.eksternId)) }
+        val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
+        oppdatertBehandling.endretTidspunkt.isEqual(behandling.endretTidspunkt)
+        oppdatertBehandling.aktivFagsystemsbehandling.sporbar.endret.endretTid.isEqual(behandling.aktivFagsystemsbehandling.sporbar.endret.endretTid)
+    }
+
+    private fun lagRespons(eksternId: String): HentFagsystemsbehandlingRespons {
         val hentFagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = fagsak.eksternFagsakId,
-            eksternId = "1",
+            eksternId = eksternId,
             ytelsestype = fagsak.ytelsestype,
             personIdent = fagsak.bruker.ident,
             språkkode = fagsak.bruker.språkkode,
@@ -117,14 +134,14 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
-    private fun lagTask(): Task {
+    private fun lagTask(eksternId: String = "1"): Task {
         return Task(
             type = OppdaterFaktainfoTask.TYPE,
             payload = "",
             properties = Properties().apply {
                 setProperty("eksternFagsakId", fagsak.eksternFagsakId)
                 setProperty("ytelsestype", fagsak.ytelsestype.name)
-                setProperty("eksternId", "1")
+                setProperty("eksternId", eksternId)
             }
         )
     }
