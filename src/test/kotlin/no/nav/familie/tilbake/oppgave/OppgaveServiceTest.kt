@@ -3,8 +3,16 @@ package no.nav.familie.tilbake.oppgave
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.*
-import no.nav.familie.kontrakter.felles.oppgave.*
+import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -19,7 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.core.env.Environment
 import java.time.LocalDate
-import java.util.*
+import java.util.Properties
 
 class OppgaveServiceTest {
 
