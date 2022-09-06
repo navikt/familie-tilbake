@@ -132,7 +132,7 @@ class OppgaveService(
     }
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if (enhetsnummer == NAY_ENSLIG_FORSØRGER || enhetsnummer == NAY_EGNE_ANSATTE) {
+        if (enhetsnummer == NAY_ENSLIG_FORSØRGER) {
             val søkemønster = lagSøkeuttrykk(oppgavetype) ?: return null
             val mapper = integrasjonerClient.finnMapper(enhetsnummer)
 
@@ -147,7 +147,7 @@ class OppgaveService(
     }
 
     private fun lagSøkeuttrykk(oppgavetype: Oppgavetype): Regex? {
-        val s = when (oppgavetype) {
+        val pattern = when (oppgavetype) {
             Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Tilbakekreving?.+"
             Oppgavetype.GodkjenneVedtak -> "70 Godkjenne?.vedtak?.+"
             else -> {
@@ -155,7 +155,7 @@ class OppgaveService(
                 return null
             }
         }
-        return Regex(s, RegexOption.IGNORE_CASE)
+        return Regex(pattern, RegexOption.IGNORE_CASE)
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
