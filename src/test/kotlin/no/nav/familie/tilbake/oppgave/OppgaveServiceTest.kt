@@ -41,8 +41,10 @@ class OppgaveServiceTest {
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
     private val finnMappeResponseDto = listOf(
-        MappeDto(mappeIdGodkjenneVedtak, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
-        MappeDto(mappeIdBehandleSak, "EF Sak - 50 Behandle sak", enhetsnr = "4489")
+        MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
+        MappeDto(mappeIdBehandleSak, "50 Tilbakekreving - Klar til behandling", enhetsnr = "4489"),
+        MappeDto(mappeIdGodkjenneVedtak, "70 Godkjennevedtak", enhetsnr = "4489"),
+        MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
     )
 
     private lateinit var oppgaveService: OppgaveService
@@ -86,7 +88,7 @@ class OppgaveServiceTest {
         }
 
         @Test
-        fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4483`() {
+        fun `skal ikke legge oppgave for enhet 4483 i mappe`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
 
             oppgaveService.opprettOppgave(
@@ -99,7 +101,7 @@ class OppgaveServiceTest {
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
-            slot.captured.mappeId shouldBe mappeIdGodkjenneVedtak
+            slot.captured.mappeId shouldBe null
         }
 
         @Test
@@ -121,25 +123,7 @@ class OppgaveServiceTest {
         }
 
         @Test
-        fun `skal legge behandleSak i EF-Sak-50-mappe for 4483`() {
-            val slot = CapturingSlot<OpprettOppgaveRequest>()
-            every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
-
-            oppgaveService.opprettOppgave(
-                behandling.id,
-                Oppgavetype.BehandleSak,
-                "4483",
-                "",
-                LocalDate.now().plusDays(5),
-                "bob"
-            )
-            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
-
-            slot.captured.mappeId shouldBe mappeIdBehandleSak
-        }
-
-        @Test
-        fun `skal ikke legge behandleSak i EF-Sak-50-mappe for verdi ulik 4483 og 4489`() {
+        fun `skal ikke legge behandleSak i EF-Sak-50-mappe for verdi ulik 4489`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
 
@@ -154,6 +138,54 @@ class OppgaveServiceTest {
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
             slot.captured.mappeId shouldBe null
+        }
+
+        @Test
+        fun `skal ikke legge behandleSak i noen mappe når ingen mapper matcher`() {
+
+            val kunMapperSomIkkeKanBrukes = listOf(
+                MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
+                MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
+            )
+
+            val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper("4489") } returns kunMapperSomIkkeKanBrukes
+
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
+            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
+
+            slot.captured.mappeId shouldBe null
+        }
+
+        @Test
+        fun `skal fungere også etter rettet skrivefeil i gosys `() {
+
+            val mapperMedOrdelingsfeilRettet = listOf(
+                MappeDto(300, "50 Behandle sak", enhetsnr = "4489"),
+                MappeDto(400, "70 Godkjenne vedtak ", enhetsnr = "4489") // ligger i gosys som Godkjennevedtak 2022-09-01
+            )
+
+            val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper("4489") } returns mapperMedOrdelingsfeilRettet
+
+            oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.GodkjenneVedtak,
+                "4489",
+                "",
+                LocalDate.now().plusDays(5),
+                "bob"
+            )
+            verify { integrasjonerClient.opprettOppgave(capture(slot)) }
+
+            slot.captured.mappeId shouldBe 400
         }
 
         @Test
@@ -190,7 +222,7 @@ class OppgaveServiceTest {
                 oppgaveService.opprettOppgave(
                     behandling.id,
                     Oppgavetype.GodkjenneVedtak,
-                    "4483",
+                    "4489",
                     "",
                     LocalDate.now().plusDays(5),
                     "bob"
