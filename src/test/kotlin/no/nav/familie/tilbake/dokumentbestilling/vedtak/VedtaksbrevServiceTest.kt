@@ -11,10 +11,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -23,7 +24,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -170,7 +170,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             "Dette er en stor og gild oppsummeringstekst",
             listOf(
                 PeriodeMedTekstDto(
-                    PeriodeDto(
+                    Datoperiode(
                         LocalDate.now().minusDays(1),
                         LocalDate.now()
                     ),
@@ -196,7 +196,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             "Dette er en stor og gild oppsummeringstekst",
             listOf(
                 PeriodeMedTekstDto(
-                    PeriodeDto(
+                    Datoperiode(
                         LocalDate.now().minusDays(1),
                         LocalDate.now()
                     ),
@@ -227,12 +227,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         lagFakta()
         val perioderMedTekst = listOf(
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                periode = Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                 faktaAvsnitt = "fakta fritekst",
                 vilkårAvsnitt = "vilkår fritekst"
             ),
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 10), YearMonth.of(2021, 10)),
+                periode = Datoperiode(YearMonth.of(2021, 10), YearMonth.of(2021, 10)),
                 faktaAvsnitt = "ugyldig",
                 vilkårAvsnitt = "ugyldig"
             )
@@ -277,7 +277,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         }
         exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
-            "${Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
+            "${Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
     }
 
     @Test
@@ -297,17 +297,17 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         lagFakta()
         val perioderMedTekst = listOf(
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+                periode = Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
                 faktaAvsnitt = "fakta fritekst",
                 vilkårAvsnitt = "vilkår fritekst"
             ),
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+                periode = Datoperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
                 faktaAvsnitt = "fakta fritekst",
                 vilkårAvsnitt = "vilkår fritekst"
             ),
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
+                periode = Datoperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
                 vilkårAvsnitt = "vilkår fritekst"
             )
         )
@@ -515,7 +515,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     ): FritekstavsnittDto {
         val perioderMedTekst = listOf(
             PeriodeMedTekstDto(
-                periode = PeriodeDto(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                periode = Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                 faktaAvsnitt = faktaFritekst,
                 vilkårAvsnitt = "vilkår fritekst",
                 foreldelseAvsnitt = "foreldelse fritekst",
@@ -534,7 +534,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val faktaFeilutbetaltePerioder =
             setOf(
                 FaktaFeilutbetalingsperiode(
-                    periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                    periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                     hendelsestype = Hendelsestype.ANNET,
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
                 )
@@ -566,7 +566,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         val vilkårsvurderingPeriode =
             Vilkårsvurderingsperiode(
-                periode = Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 begrunnelse = "Vilkårsvurdering begrunnelse",
                 aktsomhet = aktsomhet

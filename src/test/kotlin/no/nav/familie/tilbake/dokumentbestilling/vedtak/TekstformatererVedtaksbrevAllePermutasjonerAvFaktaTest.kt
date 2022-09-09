@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
@@ -36,7 +36,7 @@ import java.util.TreeMap
 
 class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
-    private val januar = Handlebarsperiode(
+    private val januar = Datoperiode(
         LocalDate.of(2019, 1, 1),
         LocalDate.of(2019, 1, 31)
     )

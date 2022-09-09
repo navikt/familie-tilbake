@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
@@ -72,7 +73,7 @@ data class BehandlingsstegFaktaDto(
 }
 
 data class FaktaFeilutbetalingsperiodeDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     val hendelsestype: Hendelsestype,
     val hendelsesundertype: Hendelsesundertype
 )
@@ -91,7 +92,7 @@ data class BehandlingsstegForeldelseDto(val foreldetPerioder: List<Foreldelsespe
 }
 
 data class ForeldelsesperiodeDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     @Size(max = 1500, message = "begrunnelse er for lang")
     val begrunnelse: String,
     val foreldelsesvurderingstype: Foreldelsesvurderingstype,
@@ -114,7 +115,7 @@ data class BehandlingsstegVilkårsvurderingDto(val vilkårsvurderingsperioder: L
 }
 
 data class VilkårsvurderingsperiodeDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
     @Size(max = 1500, message = "begrunnelse er for lang")
     val begrunnelse: String,

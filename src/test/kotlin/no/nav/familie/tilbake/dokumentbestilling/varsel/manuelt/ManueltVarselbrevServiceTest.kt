@@ -5,17 +5,16 @@ import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -187,17 +186,17 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
-        val periode = Periode(
+        val periode = Månedsperiode(
             LocalDate.of(2019, 10, 1),
             LocalDate.of(2019, 10, 30)
         )
 
         return FaktaFeilutbetalingDto(
             totaltFeilutbetaltBeløp = BigDecimal(9000),
-            totalFeilutbetaltPeriode = PeriodeDto(periode),
+            totalFeilutbetaltPeriode = periode.toDatoperiode(),
             feilutbetaltePerioder = listOf(
                 FeilutbetalingsperiodeDto(
-                    PeriodeDto(periode),
+                    periode.toDatoperiode(),
                     BigDecimal(9000)
                 )
             ),

@@ -3,10 +3,10 @@ package no.nav.familie.tilbake.beregning
 import com.google.common.collect.Lists
 import io.kotest.matchers.bigdecimal.shouldBeZero
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
@@ -29,7 +29,7 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                periode = Periode(
+                periode = Månedsperiode(
                     LocalDate.of(2019, 5, 1),
                     LocalDate.of(2019, 5, 3)
                 ),
@@ -38,7 +38,7 @@ class TilbakekrevingsberegningVilkårTest {
         forstoBurdeForstattVurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                periode = Periode(
+                periode = Månedsperiode(
                     LocalDate.of(2019, 5, 1),
                     LocalDate.of(2019, 5, 3)
                 ),
@@ -70,7 +70,7 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
         resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
         resultat.vurdering shouldBe Aktsomhet.FORSETT
-        resultat.periode shouldBe Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
+        resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         resultat.manueltSattTilbakekrevingsbeløp shouldBe null
     }
 
@@ -101,7 +101,7 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
         resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
         resultat.vurdering shouldBe Aktsomhet.FORSETT
-        resultat.periode shouldBe Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
+        resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         resultat.manueltSattTilbakekrevingsbeløp shouldBe null
     }
 
@@ -132,7 +132,7 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
         resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
         resultat.vurdering shouldBe Aktsomhet.FORSETT
-        resultat.periode shouldBe Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
+        resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         resultat.manueltSattTilbakekrevingsbeløp shouldBe null
     }
 
@@ -356,7 +356,7 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
         resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
         resultat.vurdering shouldBe Aktsomhet.FORSETT
-        resultat.periode shouldBe Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
+        resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         resultat.manueltSattTilbakekrevingsbeløp shouldBe null
         resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
         resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
@@ -385,7 +385,7 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
         resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
         resultat.vurdering shouldBe Aktsomhet.FORSETT
-        resultat.periode shouldBe Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
+        resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         resultat.manueltSattTilbakekrevingsbeløp shouldBe null
         resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
         resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(9000)

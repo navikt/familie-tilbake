@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.foreldelse
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -37,7 +37,7 @@ class ForeldelseService(
         return foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
-    fun erPeriodeForeldet(behandlingId: UUID, periode: Periode): Boolean {
+    fun erPeriodeForeldet(behandlingId: UUID, periode: Månedsperiode): Boolean {
         return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
             ?.any { periode == it.periode && it.erForeldet() }
             ?: false

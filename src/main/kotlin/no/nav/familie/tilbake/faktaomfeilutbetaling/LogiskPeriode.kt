@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
-import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.SortedMap
 
 data class LogiskPeriode(
-    val periode: Periode,
+    val periode: Månedsperiode,
     val feilutbetaltBeløp: BigDecimal
 ) {
 
@@ -16,7 +16,7 @@ data class LogiskPeriode(
 
 object LogiskPeriodeUtil {
 
-    fun utledLogiskPeriode(feilutbetalingPrPeriode: SortedMap<Periode, BigDecimal>): List<LogiskPeriode> {
+    fun utledLogiskPeriode(feilutbetalingPrPeriode: SortedMap<Månedsperiode, BigDecimal>): List<LogiskPeriode> {
         var førsteMåned: YearMonth? = null
         var sisteMåned: YearMonth? = null
         var logiskPeriodeBeløp = BigDecimal.ZERO
@@ -29,7 +29,7 @@ object LogiskPeriodeUtil {
                 if (harOppholdMellom(sisteMåned!!, periode.fom)) {
                     resultat.add(
                         LogiskPeriode(
-                            periode = Periode(førsteMåned!!, sisteMåned),
+                            periode = Månedsperiode(førsteMåned!!, sisteMåned),
                             feilutbetaltBeløp = logiskPeriodeBeløp
                         )
                     )
@@ -43,7 +43,7 @@ object LogiskPeriodeUtil {
         if (BigDecimal.ZERO.compareTo(logiskPeriodeBeløp) != 0) {
             resultat.add(
                 LogiskPeriode(
-                    periode = Periode(førsteMåned!!, sisteMåned!!),
+                    periode = Månedsperiode(førsteMåned!!, sisteMåned!!),
                     feilutbetaltBeløp = logiskPeriodeBeløp
                 )
             )
