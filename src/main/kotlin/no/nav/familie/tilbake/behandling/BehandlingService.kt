@@ -353,6 +353,13 @@ class BehandlingService(
             )
         val faktainfo = respons.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
+        if (behandling.aktivFagsystemsbehandling.eksternId == eksternId) {
+            logger.info(
+                "Det trenger ikke å oppdatere fakta info siden tilbakekrevingsbehandling " +
+                    "er allerede koblet med riktig fagsystemsbehandling"
+            )
+            return
+        }
         val gammelFagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(aktiv = false)
         val nyFagsystemsbehandling = Fagsystemsbehandling(
             eksternId = eksternId,
@@ -478,7 +485,8 @@ class BehandlingService(
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
                 "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
             throw Feil(
-                message = feilMelding, frontendFeilmelding = feilMelding,
+                message = feilMelding,
+                frontendFeilmelding = feilMelding,
                 httpStatus = HttpStatus.BAD_REQUEST
             )
         }
@@ -496,7 +504,9 @@ class BehandlingService(
                     val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
                         "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."
                     throw Feil(
-                        message = feilMelding, frontendFeilmelding = feilMelding, httpStatus = HttpStatus.BAD_REQUEST
+                        message = feilMelding,
+                        frontendFeilmelding = feilMelding,
+                        httpStatus = HttpStatus.BAD_REQUEST
                     )
                 }
             }
