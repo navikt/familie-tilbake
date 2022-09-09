@@ -13,6 +13,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -119,7 +120,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService
         )
 
-        fagsak = fagsakRepository.insert(Testdata.fagsak)
+        fagsak = fagsakRepository.insert(Testdata.fagsak.copy(ytelsestype = Ytelsestype.BARNETILSYN))
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         vilkårsvurderingRepository.insert(

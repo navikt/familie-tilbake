@@ -365,6 +365,52 @@ class TekstformatererVedtaksbrevTest {
     }
 
     @Test
+    fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for BT med inntekt over 6G og en periode`() {
+        val vedtaksbrevData = felles
+            .copy(
+                brevmetadata = brevmetadata.copy(ytelsestype = Ytelsestype.BARNETILSYN),
+                fagsaksvedtaksdato = LocalDate.now(),
+                totalresultat = HbTotalresultat(
+                    hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                    totaltTilbakekrevesBeløp = BigDecimal(10000),
+                    totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
+                    totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
+                    totaltRentebeløp = BigDecimal(1000)
+                ),
+                hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                varsel = HbVarsel(
+                    varsletBeløp = BigDecimal(10000),
+                    varsletDato = LocalDate.of(2020, 4, 4)
+                ),
+                konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            )
+        val perioder = listOf(
+            HbVedtaksbrevsperiode(
+                januar,
+                HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                HbFakta(
+                    Hendelsestype.STØNAD_TIL_BARNETILSYN,
+                    Hendelsesundertype.INNTEKT_OVER_6G
+                ),
+                HbVurderinger(
+                    foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                    aktsomhetsresultat = Aktsomhet.FORSETT
+                ),
+                HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000)
+            )
+        )
+        val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+        val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+        val fasit = les("/vedtaksbrev/OS_forsett.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for_KS_og forsett`() {
         val vedtaksbrevData = felles
             .copy(

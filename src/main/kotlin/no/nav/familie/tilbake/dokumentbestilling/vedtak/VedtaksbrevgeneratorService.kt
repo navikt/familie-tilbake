@@ -11,6 +11,8 @@ import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
+import no.nav.familie.tilbake.common.Grunnbeløp
+import no.nav.familie.tilbake.common.finnGrunnbeløpsPerioder
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -18,6 +20,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
+import no.nav.familie.tilbake.dokumentbestilling.handlebars.KroneFormattererMedTusenskille
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
@@ -28,6 +31,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløp
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
@@ -42,6 +46,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Service
 class VedtaksbrevgeneratorService(
@@ -323,6 +329,34 @@ class VedtaksbrevgeneratorService(
         )
     }
 
+    private fun lagHbGrunnbeløp(periode: Månedsperiode): HbGrunnbeløp {
+        val grunnbeløpsperioder = finnGrunnbeløpsPerioder(periode)
+
+        if (grunnbeløpsperioder.size == 1) {
+            return HbGrunnbeløp(innskuddstekst = formatterBeløpX6(grunnbeløpsperioder.first()))
+        }
+
+        val siste = grunnbeløpsperioder.last()
+        val grunnbeløpstekst =
+            finnGrunnbeløpsPerioder(periode).dropLast(1).joinToString(prefix = "Seks ganger grunnbeløpet er ") {
+                formatterGrunnbeløp(it, periode)
+            } + " og ${formatterGrunnbeløp(siste, periode)}"
+
+        return HbGrunnbeløp("seks ganger grunnbeløpet", grunnbeløpstekst)
+    }
+
+    private fun formatterGrunnbeløp(grunnbeløp: Grunnbeløp, periode: Månedsperiode): String {
+        val format = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+        return "${formatterBeløpX6(grunnbeløp)} for perioden fra ${format.format(periode.fomDato)}" +
+            if (periode.fomDato == LocalDate.MAX) "" else "til ${format.format(periode.fomDato)}"
+    }
+
+    private fun formatterBeløpX6(grunnbeløp: Grunnbeløp): String {
+        val grunnbeløpX6 = grunnbeløp.grunnbeløp.multiply(BigDecimal.valueOf(6L))
+        return KroneFormattererMedTusenskille.medTusenskille(grunnbeløpX6, '\u00A0')
+    }
+
     private fun lagBrevdataPeriode(
         resultatPeriode: Beregningsresultatsperiode,
         fakta: FaktaFeilutbetaling,
@@ -338,7 +372,8 @@ class VedtaksbrevgeneratorService(
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
-            resultat = utledResultat(resultatPeriode, foreldelse)
+            resultat = utledResultat(resultatPeriode, foreldelse),
+            grunnbeløp = lagHbGrunnbeløp(periode)
         )
     }
 
