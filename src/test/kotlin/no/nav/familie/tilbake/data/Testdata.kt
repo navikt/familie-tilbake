@@ -278,8 +278,8 @@ object Testdata {
     private val faktaFeilutbetalingsperiode =
         FaktaFeilutbetalingsperiode(
             periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
-            hendelsestype = Hendelsestype.STØNAD_TIL_BARNETILSYN,
-            hendelsesundertype = Hendelsesundertype.INNTEKT_OVER_6G
+            hendelsestype = Hendelsestype.ANNET,
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
         )
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(
@@ -289,9 +289,10 @@ object Testdata {
         perioder = setOf(
             FaktaFeilutbetalingsperiode(
                 periode = Månedsperiode("2020-04" to "2022-08"),
-                hendelsestype = Hendelsestype.STØNAD_TIL_BARNETILSYN,
-                hendelsesundertype = Hendelsesundertype.INNTEKT_OVER_6G
-            ), faktaFeilutbetalingsperiode
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+            ),
+            faktaFeilutbetalingsperiode
         )
     )
 

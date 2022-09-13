@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløp
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultatTestBuilder
@@ -399,7 +400,8 @@ class TekstformatererVedtaksbrevTest {
                     Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                     aktsomhetsresultat = Aktsomhet.FORSETT
                 ),
-                HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000)
+                HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                HbGrunnbeløp("714 000", "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
             )
         )
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)

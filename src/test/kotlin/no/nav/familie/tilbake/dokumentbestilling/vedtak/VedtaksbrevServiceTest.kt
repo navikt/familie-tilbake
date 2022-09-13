@@ -120,7 +120,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService
         )
 
-        fagsak = fagsakRepository.insert(Testdata.fagsak.copy(ytelsestype = Ytelsestype.BARNETILSYN))
+        fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         vilkårsvurderingRepository.insert(

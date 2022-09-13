@@ -1,9 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode
 
-import no.nav.familie.tilbake.common.Grunnbeløp
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
-import java.math.BigDecimal
 
 data class HbVedtaksbrevsperiode(
     val periode: Datoperiode,
@@ -15,11 +13,10 @@ data class HbVedtaksbrevsperiode(
 ) {
 
     init {
-        if(fakta.hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G) {
-            require(grunnbeløp != null) { "${Hendelsesundertype.INNTEKT_OVER_6G} krever verdi for grunnbeløp."}
+        if (fakta.hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G) {
+            require(grunnbeløp != null) { "${Hendelsesundertype.INNTEKT_OVER_6G} krever verdi for grunnbeløp." }
         }
     }
-
 }
 
 data class HbGrunnbeløp(val innskuddstekst: String, val tilleggstekst: String? = null)

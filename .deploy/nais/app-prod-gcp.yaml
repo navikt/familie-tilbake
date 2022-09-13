@@ -59,6 +59,9 @@ spec:
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: prod-gcp
+        - application: familie-ks-sak
+          namespace: teamfamilie
+          cluster: prod-gcp
         - application: familie-ef-sak
           namespace: teamfamilie
           cluster: prod-gcp
