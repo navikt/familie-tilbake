@@ -31,6 +31,8 @@ spec:
       cluster: dev-gcp
     - application: familie-ba-sak-lokal
       cluster: dev-fss
+    - application: familie-ba-sak-lokal
+      cluster: dev-gcp
       namespace: teamfamilie
     - application: familie-ef-sak-lokal
       cluster: dev-gcp
