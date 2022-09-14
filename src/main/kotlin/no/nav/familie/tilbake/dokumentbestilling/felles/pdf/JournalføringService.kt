@@ -110,7 +110,20 @@ class JournalføringService(
                 navn = adresseinfo.mottagernavn
             )
             Brevmottager.VERGE -> lagVergemottager(behandling)
+            Brevmottager.INSTITUSJON -> lagInstitusjonmottager(behandling, brevmetadata)
         }
+    }
+
+    private fun lagInstitusjonmottager(behandling: Behandling, brevmetadata: Brevmetadata): AvsenderMottaker {
+        val institusjon = brevmetadata.institusjon ?: throw IllegalStateException(
+            "Brevmottager er institusjon, men institusjon finnes ikke. " +
+                "Fagsak ${behandling.fagsakId} og behandling ${behandling.id}"
+        )
+        return AvsenderMottaker(
+            idType = BrukerIdType.ORGNR,
+            id = institusjon.organisasjonsnummer,
+            navn = institusjon.navn
+        )
     }
 
     private fun lagVergemottager(behandling: Behandling): AvsenderMottaker {

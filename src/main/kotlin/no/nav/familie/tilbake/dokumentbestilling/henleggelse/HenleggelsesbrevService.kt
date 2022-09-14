@@ -54,8 +54,7 @@ class HenleggelsesbrevService(
     fun hentForhåndsvisningHenleggelsesbrev(behandlingUuid: UUID, fritekst: String?): ByteArray {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingUuid)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val finnesVerge: Boolean = behandling.harVerge
-        val brevMottaker: Brevmottager = if (finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevMottaker: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevMottaker)
         val fritekstbrevData: Fritekstbrevsdata =
             if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
@@ -76,7 +75,6 @@ class HenleggelsesbrevService(
         fritekst: String?,
         brevmottager: Brevmottager
     ): Henleggelsesbrevsdokument {
-
         val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
             throw IllegalStateException(
@@ -119,7 +117,8 @@ class HenleggelsesbrevService(
             ytelsestype = fagsak.ytelsestype,
             behandlingstype = behandling.type,
             tittel = TITTEL_HENLEGGELSESBREV,
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon
         )
 
         return Henleggelsesbrevsdokument(

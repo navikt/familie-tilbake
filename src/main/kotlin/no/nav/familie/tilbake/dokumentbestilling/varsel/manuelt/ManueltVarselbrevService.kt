@@ -71,7 +71,7 @@ class ManueltVarselbrevService(
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val erKorrigert = maltype == Dokumentmalstype.KORRIGERT_VARSEL
 
         val varselbrevsdokument =

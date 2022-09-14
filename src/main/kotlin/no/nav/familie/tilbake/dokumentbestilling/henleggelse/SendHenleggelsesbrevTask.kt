@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -24,7 +25,8 @@ import java.util.UUID
 )
 class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -34,7 +36,9 @@ class SendHenleggelsesbrevTask(
         if (behandling.harVerge) {
             henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.VERGE)
         }
-        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.BRUKER)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, brevmottager)
     }
 
     companion object {

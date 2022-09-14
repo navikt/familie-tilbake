@@ -53,7 +53,6 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
@@ -77,7 +76,6 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -209,9 +207,9 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat
     ): VedtakHjemmel.EffektForBruker {
-        return if (vedtaksbrevgrunnlag.erRevurdering)
+        return if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
-        else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        } else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
     }
 
     private fun lagHbTotalresultat(
@@ -319,7 +317,8 @@ class VedtaksbrevgeneratorService(
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
-            gjelderDødsfall = personinfo.dødsdato != null
+            gjelderDødsfall = personinfo.dødsdato != null,
+            institusjon = vedtaksbrevgrunnlag.institusjon
         )
     }
 
@@ -363,7 +362,6 @@ class VedtaksbrevgeneratorService(
         foreldelse: VurdertForeldelse?,
         fritekst: PeriodeMedTekstDto?
     ): HbVurderinger {
-
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
         val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
         val vilkårsvurderingAktsomhet = vilkårsvurdering?.aktsomhet
