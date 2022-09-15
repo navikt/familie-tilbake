@@ -230,8 +230,9 @@ Du har fått stønad til barnetilsyn for barn som har fullført fjerde skuleår.
                         kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt i denne perioden.
             {{/case}}
             {{#case "INNTEKT_OVER_6G" }}
-Du har fått stønad til barnetilsyn. Fordi inntekta di er over [6 x grunnbeløpet], har du ikkje lengre rett til stønaden. Derfor har du fått {{kroner
+Du har fått stønad til barnetilsyn. Fordi inntekta di er over {{grunnbeløp.innskuddstekst}}, har du ikkje lengre rett til stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mykje utbetalt i denne perioden.
+{{#if grunnbeløp.tilleggstekst}}{{grunnbeløp.tilleggstekst}}{{/if}}
             {{/case}}
             {{#case "KONTANTSTØTTE" }}
 Du har fått stønad til barnetilsyn og kontantstøtte. Kontantstøtte skal trekkast frå tilsynsutgiftene før stønad til barnetilsyn blir berekna. Fordi stønaden ikkje har blitt redusert med kontantstøtta, har du fått {{kroner

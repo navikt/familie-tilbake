@@ -401,14 +401,78 @@ class TekstformatererVedtaksbrevTest {
                     aktsomhetsresultat = Aktsomhet.FORSETT
                 ),
                 HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                HbGrunnbeløp("714 000", "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
+                HbGrunnbeløp("714 000"),
             )
         )
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
         val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
 
-        val fasit = les("/vedtaksbrev/OS_forsett.txt")
+        val fasit = les("/vedtaksbrev/BT_over_6G.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagVedtaksbrevFritekst skal generere vedtaksbrev for BT med inntekt over 6G og flere perioder`() {
+        val vedtaksbrevData = felles
+            .copy(
+                brevmetadata = brevmetadata.copy(ytelsestype = Ytelsestype.BARNETILSYN),
+                fagsaksvedtaksdato = LocalDate.now(),
+                totalresultat = HbTotalresultat(
+                    hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                    totaltTilbakekrevesBeløp = BigDecimal(10000),
+                    totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
+                    totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
+                    totaltRentebeløp = BigDecimal(1000)
+                ),
+                hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                varsel = HbVarsel(
+                    varsletBeløp = BigDecimal(10000),
+                    varsletDato = LocalDate.of(2020, 4, 4)
+                ),
+                konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            )
+        val perioder = listOf(
+            HbVedtaksbrevsperiode(
+                januar,
+                HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                HbFakta(
+                    Hendelsestype.STØNAD_TIL_BARNETILSYN,
+                    Hendelsesundertype.INNTEKT_OVER_6G
+                ),
+                HbVurderinger(
+                    foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                    aktsomhetsresultat = Aktsomhet.FORSETT
+                ),
+                HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                HbGrunnbeløp("seks ganger grunnbeløpet", "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
+            ),
+            HbVedtaksbrevsperiode(
+                februar,
+                HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                HbFakta(
+                    Hendelsestype.STØNAD_TIL_BARNETILSYN,
+                    Hendelsesundertype.INNTEKT_OVER_6G
+                ),
+                HbVurderinger(
+                    foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                    aktsomhetsresultat = Aktsomhet.FORSETT
+                ),
+                HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                HbGrunnbeløp("seks ganger grunnbeløpet", "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
+            )
+
+        )
+        val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+        val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+        val fasit = les("/vedtaksbrev/BT_over_6G_flere periode.txt")
         generertBrev shouldBe fasit
     }
 
