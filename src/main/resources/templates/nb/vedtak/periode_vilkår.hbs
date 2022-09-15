@@ -1,3 +1,5 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}dere{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}Dere{{else}}Du{{/if}}{{~/inline~}}
 {{#* inline "fritekst"}}
 {{#if vurderinger.fritekst}}
 
@@ -5,7 +7,7 @@
 {{/if}}
 {{/inline}}
 {{#* inline "ikke-krev-småbeløp"}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og hvor mye du har rett til. Selv om du burde forstått at beløpet var feil, er beløpet lavere enn {{{kroner konfigurasjon.fireRettsgebyr}}}. Du må derfor ikke betale tilbake beløpet.
+{{> Pronomen}} har fått vite om {{> pronomen}} har rett til {{{ytelsesnavnUbestemt}}} og hvor mye {{> pronomen}} har rett til. Selv om {{> pronomen}} burde forstått at beløpet var feil, er beløpet lavere enn {{{kroner konfigurasjon.fireRettsgebyr}}}. {{> Pronomen}} må derfor ikke betale tilbake beløpet.
 {{/inline}}
 {{#if (not vurderinger.harForeldelsesavsnitt) }}
 __Hvordan har vi kommet fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestemt}}}{{else}}du{{/if}} {{#if (not resultat.tilbakekrevesBeløp)}}ikke {{/if}}må betale{{#if gjelderDødsfall}}s{{/if}} tilbake?
@@ -14,7 +16,11 @@ __Hvordan har vi kommet fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestem
     {{#if resultat.tilbakekrevesBeløp}}
 Det burde vært oppdaget og meldt ifra om at {{{ytelsesnavnUbestemt}}} ble utbetalt etter at {{{søker.navn}}} døde.
     {{else}}
+        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+            {{> ikke-krev-småbeløp}}
+        {{else}}
 Dere har ikke fått den informasjonen dere trengte for å forstå at beløpet som ble utbetalt var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikke betales tilbake.
+        {{/if}}
     {{/if}}
 {{> fritekst}}
 {{else}}

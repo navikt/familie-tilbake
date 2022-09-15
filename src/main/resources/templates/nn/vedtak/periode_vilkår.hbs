@@ -1,3 +1,5 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}De{{else}}Du{{/if}}{{~/inline~}}
 {{#* inline "fritekst"}}
 {{#if vurderinger.fritekst}}
 
@@ -5,16 +7,16 @@
 {{/if}}
 {{/inline}}
 {{#* inline "ikke-krev-småbeløp"}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du burde forstått at beløpet var feil, er beløpet lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}. Du må derfor ikkje betale tilbake beløpet.
+{{> Pronomen}} har fått vite om {{> pronomen}} har rett til {{{ytelsesnavnUbestemt}}} og kor mykje {{> pronomen}} har rett til. Sjølv om {{> pronomen}} burde forstått at beløpet var feil, er beløpet lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}. {{> Pronomen}} må derfor ikkje betale tilbake beløpet.
 {{/inline}}
 {{#if (not vurderinger.harForeldelsesavsnitt) }}
 __Korleis har vi kome fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestemt}}}{{else}}du{{/if}} {{#if (not resultat.tilbakekrevesBeløp)}}ikkje {{/if}}må {{#if gjelderDødsfall}}betalast{{else}}betale{{/if}} tilbake?
 {{/if}}
 {{#if gjelderDødsfall}}
     {{#if resultat.tilbakekrevesBeløp}}
-Det burde blitt oppdaga og meldt ifrå om at {{{ytelsesnavnUbestemt}}} blei utbetala etter at {{{søker.navn}}} døydde.
+Det burde blitt oppdaga og meldt ifrå om at {{{ytelsesnavnUbestemt}}} blei utbetalt etter at {{{søker.navn}}} døydde.
     {{else}}
-Dykk har ikkje fått den informasjonen dykk trong for å forstå at beløpet som blei utbetala var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikkje betalast tilbake.
+De har ikkje fått den informasjonen de trong for å forstå at beløpet som blei utbetalt var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikkje betalast tilbake.
     {{/if}}
 {{> fritekst}}
 {{else}}

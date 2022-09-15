@@ -19,7 +19,7 @@
     {{#if (eq fakta.hendelsesundertype "ANNET_FRITEKST")}}
 {{{fakta.fritekstFakta}}}
 
-Du har fått {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mykje utbetalt.
+{{#if gjelderDødsfall}}De{{else}}Du{{/if}} har fått {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mykje utbetalt.
     {{else}}
 
 {{{fakta.fritekstFakta}}}
