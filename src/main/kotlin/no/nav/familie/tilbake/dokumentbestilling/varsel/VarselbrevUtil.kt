@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.common.ContextService
@@ -76,7 +77,6 @@ class VarselbrevUtil(
         request: ForhåndsvisVarselbrevRequest,
         personinfo: Personinfo
     ): Varselbrevsdokument {
-
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
         val ansvarligSaksbehandler =
@@ -95,7 +95,13 @@ class VarselbrevUtil(
             språkkode = request.språkkode,
             ytelsestype = request.ytelsestype,
             tittel = tittel,
-            gjelderDødsfall = personinfo.dødsdato != null
+            gjelderDødsfall = personinfo.dødsdato != null,
+            institusjon = request.institusjon?.let {
+                Institusjon(
+                    organisasjonsnummer = it.organisasjonsnummer,
+                    navn = it.navn
+                )
+            }
         )
 
         return Varselbrevsdokument(
@@ -133,7 +139,8 @@ class VarselbrevUtil(
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon
         )
     }
 
@@ -143,7 +150,6 @@ class VarselbrevUtil(
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
         varsel: Varsel?
     ): Varselbrevsdokument {
-
         return Varselbrevsdokument(
             brevmetadata = metadata,
             beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
@@ -162,7 +168,6 @@ class VarselbrevUtil(
         eksternBehandlingId: String,
         varsletTotalbeløp: Long
     ): Vedleggsdata {
-
         val request = HentFeilutbetalingerFraSimuleringRequest(
             varselbrevsdokument.ytelsestype,
             varselbrevsdokument.brevmetadata.saksnummer,

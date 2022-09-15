@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
@@ -18,7 +19,8 @@ import java.util.UUID
 )
 class SendVarselbrevTask(
     private val varselbrevService: VarselbrevService,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -27,7 +29,9 @@ class SendVarselbrevTask(
         if (behandling.harVerge) {
             varselbrevService.sendVarselbrev(behandling, Brevmottager.VERGE)
         }
-        varselbrevService.sendVarselbrev(behandling, Brevmottager.BRUKER)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        varselbrevService.sendVarselbrev(behandling, brevmottager)
     }
 
     companion object {

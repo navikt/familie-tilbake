@@ -68,7 +68,9 @@ class SendVedtaksbrevTask(
         if (behandling.harVerge) {
             vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
         }
-        vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.BRUKER)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        vedtaksbrevService.sendVedtaksbrev(behandling, brevmottager)
         log.info("Utført for behandling: {}", behandlingId)
     }
 

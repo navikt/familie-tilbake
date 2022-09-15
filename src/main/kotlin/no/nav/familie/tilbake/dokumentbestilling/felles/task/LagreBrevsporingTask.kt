@@ -78,13 +78,13 @@ class LagreBrevsporingTask(
             )
         }
 
-        if (brevtype.gjelderVarsel() && mottager == Brevmottager.BRUKER) {
+        if (brevtype.gjelderVarsel() && mottager != Brevmottager.VERGE) {
             taskService.save(Task(LagreVarselbrevsporingTask.TYPE, task.payload, task.metadata))
         }
 
         // Behandling bør avsluttes etter å sende vedtaksbrev
         // AvsluttBehandlingTask må kalles kun en gang selv om behandling har verge
-        if (brevtype == Brevtype.VEDTAK && mottager == Brevmottager.BRUKER) {
+        if (brevtype == Brevtype.VEDTAK && mottager != Brevmottager.VERGE) {
             taskService.save(Task(type = AvsluttBehandlingTask.TYPE, payload = task.payload, task.metadata))
         }
     }

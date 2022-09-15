@@ -26,7 +26,7 @@ class InnhentDokumentasjonbrevService(
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val pdfBrevService: PdfBrevService,
+    private val pdfBrevService: PdfBrevService
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -53,8 +53,8 @@ class InnhentDokumentasjonbrevService(
         fritekst: String
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val brevmottager: Brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
 
@@ -85,7 +85,6 @@ class InnhentDokumentasjonbrevService(
         fritekst: String,
         brevmottager: Brevmottager
     ): InnhentDokumentasjonsbrevsdokument {
-
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
             eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
@@ -107,7 +106,8 @@ class InnhentDokumentasjonbrevService(
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB],
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon
         )
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata,

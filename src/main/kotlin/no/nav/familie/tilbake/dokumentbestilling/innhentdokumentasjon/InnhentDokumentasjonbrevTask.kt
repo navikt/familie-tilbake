@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -31,7 +32,8 @@ class InnhentDokumentasjonbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val fagsakRepository: FagsakRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -41,7 +43,9 @@ class InnhentDokumentasjonbrevTask(
         if (behandling.harVerge) {
             innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
         }
-        innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(
