@@ -7,6 +7,8 @@ import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class TekstformatererHeaderTest {
 
@@ -40,7 +42,7 @@ class TekstformatererHeaderTest {
     }
 
     private fun personHeader(): String {
-        return """<div id="dato">Dato: 14.09.2022</div>
+        return """<div id="dato">Dato: ${dagensDato()}</div>
 <h1 id="hovedoverskrift">Dette er en header</h1>
 <div id="person">
 Navn: Test<br/>
@@ -49,7 +51,7 @@ Fødselsnummer: 12345678901
     }
 
     private fun institusjonHeader(): String {
-        return """<div id="dato">Dato: 14.09.2022</div>
+        return """<div id="dato">Dato: ${dagensDato()}</div>
 <h1 id="hovedoverskrift">Dette er en header</h1>
 <div id="institusjon">
 Navn: Testinstitusjon<br/>
@@ -59,5 +61,10 @@ Organisasjonsnummer: 987654321
 Gjelder: Test<br/>
 Fødselsnummer: 12345678901
 </div>"""
+    }
+
+    private val format = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    private fun dagensDato(): String {
+        return format.format(LocalDate.now())
     }
 }
