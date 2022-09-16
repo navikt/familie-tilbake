@@ -62,7 +62,9 @@ class VedtaksbrevgeneratorService(
         )
         val vedleggHtml = if (vedtaksbrevsdata.vedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
         return Brevdata(
             mottager = brevmottager,
             metadata = data.brevmetadata,
@@ -86,7 +88,9 @@ class VedtaksbrevgeneratorService(
 
         val vedleggHtml = if (hbVedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
 
         return Brevdata(
             mottager = vedtaksbrevgrunnlag.brevmottager,
@@ -209,7 +213,9 @@ class VedtaksbrevgeneratorService(
     ): VedtakHjemmel.EffektForBruker {
         return if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
-        } else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        } else {
+            VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        }
     }
 
     private fun lagHbTotalresultat(
@@ -412,16 +418,20 @@ class VedtaksbrevgeneratorService(
             foreldetBeløp =
             if (foreldetPeriode) {
                 resultatPeriode.feilutbetaltBeløp.subtract(resultatPeriode.tilbakekrevingsbeløp)
-            } else null
+            } else {
+                null
+            }
         )
     }
 
     private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Månedsperiode): Foreldelsesperiode? {
         return if (foreldelse == null) {
             null
-        } else foreldelse.foreldelsesperioder
-            .firstOrNull { p -> p.periode.inneholder(periode) }
-            ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        } else {
+            foreldelse.foreldelsesperioder
+                .firstOrNull { p -> p.periode.inneholder(periode) }
+                ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        }
     }
 
     private fun finnTittelVedtaksbrev(ytelsesnavn: String, tilbakekreves: Boolean): String {

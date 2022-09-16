@@ -36,8 +36,11 @@ class HenleggelsesbrevService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevData: Fritekstbrevsdata =
-            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) {
+                lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            } else {
+                lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            }
         pdfBrevService.sendBrev(
             behandling,
             fagsak,
@@ -57,8 +60,11 @@ class HenleggelsesbrevService(
         val brevMottaker: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevMottaker)
         val fritekstbrevData: Fritekstbrevsdata =
-            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) {
+                lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            } else {
+                lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            }
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
                 mottager = brevMottaker,

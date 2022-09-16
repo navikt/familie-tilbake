@@ -33,11 +33,15 @@ internal object TilbakekrevingsberegningVilkår {
         val manueltBeløp: BigDecimal? = finnManueltSattBeløp(vilkårVurdering)
         val ignoreresPgaLavtBeløp = false == vilkårVurdering.aktsomhet?.tilbakekrevSmåbeløp
         val beløpUtenRenter: BigDecimal =
-            if (ignoreresPgaLavtBeløp) BigDecimal.ZERO else finnBeløpUtenRenter(
-                delresultat.feilutbetaltBeløp,
-                andel,
-                manueltBeløp
-            )
+            if (ignoreresPgaLavtBeløp) {
+                BigDecimal.ZERO
+            } else {
+                finnBeløpUtenRenter(
+                    delresultat.feilutbetaltBeløp,
+                    andel,
+                    manueltBeløp
+                )
+            }
         val rentebeløp: BigDecimal = beregnRentebeløp(beløpUtenRenter, renter)
         val tilbakekrevingBeløp: BigDecimal = beløpUtenRenter.add(rentebeløp)
         val skattBeløp: BigDecimal =
@@ -127,7 +131,9 @@ internal object TilbakekrevingsberegningVilkår {
             BigDecimal.ZERO
         } else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
             HUNDRE_PROSENT
-        } else aktsomhet.andelTilbakekreves
+        } else {
+            aktsomhet.andelTilbakekreves
+        }
     }
 
     private fun finnManueltSattBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {

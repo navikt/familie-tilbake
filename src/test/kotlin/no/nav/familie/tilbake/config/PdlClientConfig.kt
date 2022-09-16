@@ -38,7 +38,7 @@ class PdlClientConfig {
                 fødselsdato = LocalDate.now().minusYears(20),
                 navn = "testverdi",
                 kjønn = Kjønn.MANN,
-                dødsdato = dødsdato,
+                dødsdato = dødsdato
             )
         }
         every { pdlClient.hentIdenter(any(), any()) } answers {

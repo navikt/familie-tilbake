@@ -219,21 +219,33 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 vilkårsvurderingsresultat = vilkårResultat,
                 beløpIBehold = if (AnnenVurdering.GOD_TRO === vurdering) {
                     if (pengerIBehold) BigDecimal.valueOf(3999) else BigDecimal.ZERO
-                } else null,
+                } else {
+                    null
+                },
                 foreldelsesfrist = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
                         Foreldelsesvurderingstype.TILLEGGSFRIST
                     )
-                )
-                    FORELDELSESFRIST else null,
+                ) {
+                    FORELDELSESFRIST
+                } else {
+                    null
+                },
                 fritekstForeldelse = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
                         Foreldelsesvurderingstype.TILLEGGSFRIST
                     ) &&
                     fritekst
-                ) "[ fritekst her ]" else null,
-                oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering)
-                    OPPDAGELSES_DATO else null
+                ) {
+                    "[ fritekst her ]"
+                } else {
+                    null
+                },
+                oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering) {
+                    OPPDAGELSES_DATO
+                } else {
+                    null
+                }
             )
 
         val periodeBuilder =
@@ -294,7 +306,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode
     ): Brevmetadata {
-
         return Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",

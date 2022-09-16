@@ -117,7 +117,8 @@ object KravgrunnlagUtil {
                     .append("$periode->belopNy", beløp.first.belopNy, beløp.second.belopNy)
                     .append("$periode->belopUinnkrevd", beløp.first.belopUinnkrevd, beløp.second.belopUinnkrevd)
                     .append(
-                        "$periode->belopTilbakekreves", beløp.first.belopTilbakekreves,
+                        "$periode->belopTilbakekreves",
+                        beløp.first.belopTilbakekreves,
                         beløp.second.belopTilbakekreves
                     )
                     .append("$periode->skattProsent", beløp.first.skattProsent, beløp.second.skattProsent)

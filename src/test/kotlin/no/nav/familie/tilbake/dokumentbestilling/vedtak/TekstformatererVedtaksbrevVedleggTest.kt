@@ -292,7 +292,8 @@ class TekstformatererVedtaksbrevVedleggTest {
         generertBrev shouldBe fasit
     }
 
-    @Throws(IOException::class) private fun les(filnavn: String): String? {
+    @Throws(IOException::class)
+    private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->
             Scanner(resource, "UTF-8").use { scanner ->
                 scanner.useDelimiter("\\A")

@@ -261,8 +261,11 @@ class VarselbrevUtil(
     }
 
     private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {
-        return if (erKorrigert) TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
-        else TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+        return if (erKorrigert) {
+            TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
+        } else {
+            TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+        }
     }
 
     private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> {

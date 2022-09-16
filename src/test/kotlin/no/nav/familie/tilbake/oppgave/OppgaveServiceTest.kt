@@ -58,7 +58,7 @@ class OppgaveServiceTest {
             integrasjonerClient,
             personService,
             taskRepository,
-            environment,
+            environment
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
@@ -142,7 +142,6 @@ class OppgaveServiceTest {
 
         @Test
         fun `skal ikke legge behandleSak i noen mappe når ingen mapper matcher`() {
-
             val kunMapperSomIkkeKanBrukes = listOf(
                 MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
                 MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
@@ -166,7 +165,6 @@ class OppgaveServiceTest {
 
         @Test
         fun `skal fungere også etter rettet skrivefeil i gosys `() {
-
             val mapperMedOrdelingsfeilRettet = listOf(
                 MappeDto(300, "50 Behandle sak", enhetsnr = "4489"),
                 MappeDto(400, "70 Godkjenne vedtak ", enhetsnr = "4489") // ligger i gosys som Godkjennevedtak 2022-09-01

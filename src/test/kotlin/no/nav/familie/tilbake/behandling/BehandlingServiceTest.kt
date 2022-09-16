@@ -1465,16 +1465,24 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         tilbakekrevingsvalg: Tilbakekrevingsvalg,
         finnesInstitusjon: Boolean = false
     ): OpprettTilbakekrevingRequest {
-        val varsel = if (finnesVarsel) Varsel(
-            varseltekst = "testverdi",
-            sumFeilutbetaling = BigDecimal.valueOf(1500L),
-            perioder = listOf(Periode(fom, tom))
-        ) else null
-        val verge = if (finnesVerge) Verge(
-            vergetype = Vergetype.VERGE_FOR_BARN,
-            navn = "Andy",
-            personIdent = "321321321"
-        ) else null
+        val varsel = if (finnesVarsel) {
+            Varsel(
+                varseltekst = "testverdi",
+                sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                perioder = listOf(Periode(fom, tom))
+            )
+        } else {
+            null
+        }
+        val verge = if (finnesVerge) {
+            Verge(
+                vergetype = Vergetype.VERGE_FOR_BARN,
+                navn = "Andy",
+                personIdent = "321321321"
+            )
+        } else {
+            null
+        }
 
         val faktainfo = Faktainfo(
             revurderingsårsak = "testverdi",

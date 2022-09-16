@@ -87,7 +87,7 @@ class VedtaksbrevService(
             avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
             vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
             vedtaksbrevstype = vedtaksbrevstype,
-            validerPåkrevetFritekster = validerPåkrevetFritekster,
+            validerPåkrevetFritekster = validerPåkrevetFritekster
         )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)

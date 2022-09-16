@@ -41,7 +41,7 @@ enum class Hendelsestype {
     SATSER,
     SMÅBARNSTILLEGG,
     MEDLEMSKAP_BA,
-    UTVIDET,
+    UTVIDET
 }
 
 enum class Hendelsesundertype {
@@ -130,5 +130,5 @@ enum class Hendelsesundertype {
     EKTEFELLE_AVSLUTTET_SONING,
     SAMBOER_AVSLUTTET_SONING,
     EKTEFELLE_INSTITUSJON,
-    SAMBOER_INSTITUSJON,
+    SAMBOER_INSTITUSJON
 }

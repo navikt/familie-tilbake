@@ -185,7 +185,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
     }
 
     private fun lagTask(behandlingId: UUID) = Task(
-        type = AutomatiskGjenopptaBehandlingTask.TYPE, payload = behandlingId.toString(),
+        type = AutomatiskGjenopptaBehandlingTask.TYPE,
+        payload = behandlingId.toString(),
         Properties().apply {
             setProperty(
                 PropertyName.FAGSYSTEM,

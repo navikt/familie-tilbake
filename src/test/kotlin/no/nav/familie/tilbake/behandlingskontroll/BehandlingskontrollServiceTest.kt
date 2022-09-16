@@ -439,7 +439,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(
             setOf(
                 Behandlingsstegsinfo(
-                    VARSEL, VENTER,
+                    VARSEL,
+                    VENTER,
                     venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
                     tidsfrist = tidsfrist
                 )
@@ -492,7 +493,6 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         venteårsak: Venteårsak
     ): Behandlingsstegsinfo {
-
         return Behandlingsstegsinfo(
             behandlingssteg = behandlingssteg,
             behandlingsstegstatus = VENTER,

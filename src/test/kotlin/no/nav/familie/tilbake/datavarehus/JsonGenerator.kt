@@ -43,7 +43,6 @@ class JsonGenerator {
     @Disabled
     @Test
     fun genererSkjemaTilDatavarehus() {
-
         val jsonSchemaGenerator = JsonSchemaGenerator(objectMapper)
         val behandlingstilstandSchema: JsonNode = jsonSchemaGenerator.generateJsonSchema(Behandlingstilstand::class.java)
         val vedtaksoppsummeringSchema: JsonNode = jsonSchemaGenerator.generateJsonSchema(Vedtaksoppsummering::class.java)
@@ -134,8 +133,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             if (ref != null) {
                 if (workInProgress != null) {
                     // this is a recursive polymorphism call
-                    if (clazz != workInProgress!!.classInProgress)
+                    if (clazz != workInProgress!!.classInProgress) {
                         throw Exception("Wrong class - working on ${workInProgress!!.classInProgress} - got $clazz")
+                    }
                     return DefinitionInfo(null, objectDefinitionBuilder(workInProgress!!.nodeInProgress))
                 }
                 return DefinitionInfo(ref, null)
@@ -164,8 +164,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         fun getFinalDefinitionsNode(): ObjectNode? {
-            if (class2Ref.isEmpty())
+            if (class2Ref.isEmpty()) {
                 return null
+            }
             return definitionsNode
         }
     }
@@ -196,7 +197,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
                 prop: BeanProperty?,
                 jsonPropertyRequired: Boolean
             ) {
-
                 if (propertiesNode.get(propertyName) != null) {
                     return
                 }
@@ -330,7 +330,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         override fun expectNumberFormat(type: JavaType?): JsonNumberFormatVisitor {
-
             node.put("type", "number")
 
             // Look for @Min, @Max => minumum, maximum
@@ -361,7 +360,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         override fun expectMapFormat(type: JavaType?): JsonMapFormatVisitor {
-
             // There is no way to specify map in jsonSchema,
             // So we're going to treat it as type=object with additionalProperties = true,
             // so that it can hold whatever the map can hold
@@ -418,7 +416,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         }
 
         override fun expectBooleanFormat(type: JavaType?): JsonBooleanFormatVisitor {
-
             node.put("type", "boolean")
 
             return object : JsonBooleanFormatVisitor, EnumSupport() {
@@ -434,8 +431,9 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
         private fun getRequiredArrayNode(objectNode: ObjectNode): ArrayNode {
             if (objectNode.has("required")) {
                 val node = objectNode.get("required")
-                if (node is ArrayNode)
+                if (node is ArrayNode) {
                     return node
+                }
             }
             val rn = JsonNodeFactory.instance.arrayNode()
             objectNode.set<JsonNode>("required", rn)
@@ -448,10 +446,12 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             val jsonTypeInfo: JsonTypeInfo? = ac.annotations?.get(JsonTypeInfo::class.java)
 
             if (jsonTypeInfo != null) {
-                if (jsonTypeInfo.include != JsonTypeInfo.As.PROPERTY)
+                if (jsonTypeInfo.include != JsonTypeInfo.As.PROPERTY) {
                     throw Exception("We only support polymorphism using jsonTypeInfo.include() == JsonTypeInfo.As.PROPERTY")
-                if (jsonTypeInfo.use != JsonTypeInfo.Id.NAME)
+                }
+                if (jsonTypeInfo.use != JsonTypeInfo.Id.NAME) {
                     throw Exception("We only support polymorphism using jsonTypeInfo.use == JsonTypeInfo.Id.NAME")
+                }
 
                 val propertyName = jsonTypeInfo.property
                 val subTypeName: String = objectMapper.subtypeResolver
@@ -473,7 +473,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
             }
 
             if (subTypes.isNotEmpty()) {
-
                 val anyOfArrayNode = JsonNodeFactory.instance.arrayNode()
                 node.set<JsonNode>("oneOf", anyOfArrayNode)
 
@@ -492,7 +491,6 @@ class JsonSchemaGenerator(private val rootObjectMapper: ObjectMapper) {
 
                 return null // Returning null to stop jackson from visiting this object since we have done it manually
             } else {
-
                 val objectBuilder: (ObjectNode) -> JsonObjectFormatVisitor? = { thisObjectNode ->
 
                     thisObjectNode.put("type", "object")
