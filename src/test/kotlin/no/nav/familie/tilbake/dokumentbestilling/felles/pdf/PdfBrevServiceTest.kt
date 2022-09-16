@@ -41,7 +41,8 @@ internal class PdfBrevServiceTest {
         val brevdata = lagBrevdata()
 
         pdfBrevService.sendBrev(
-            Testdata.behandling, Testdata.fagsak,
+            Testdata.behandling,
+            Testdata.fagsak,
             brevtype = Brevtype.VARSEL,
             brevdata,
             5L,

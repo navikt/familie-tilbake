@@ -215,7 +215,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevSomTekst genererer avsnitt med tekst for forhåndsvisning av vedtaksbrev`() {
-
         val avsnitt = vedtaksbrevService.hentVedtaksbrevSomTekst(Testdata.behandling.id)
 
         avsnitt.shouldHaveSize(3)
@@ -437,7 +436,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val fritekstAvsnittDto = lagFritekstAvsnittDto(
             faktaFritekst = "fakta fritekst",
-            oppsummeringstekst = "oppsummering fritekst",
+            oppsummeringstekst = "oppsummering fritekst"
         )
 
         vedtaksbrevService.lagreUtkastAvFritekster(
@@ -453,13 +452,14 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for oppsummering`() {
         var lokalBehandling = Testdata.revurdering.copy(
-            id = UUID.randomUUID(), eksternBrukId = UUID.randomUUID(),
+            id = UUID.randomUUID(),
+            eksternBrukId = UUID.randomUUID(),
             årsaker = setOf(
                 Behandlingsårsak(
                     originalBehandlingId = behandling.id,
                     type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
                 )
-            ),
+            )
         )
         lokalBehandling = behandlingRepository.insert(lokalBehandling)
 
@@ -484,13 +484,14 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når påkrevet oppsummeringstekst mangler`() {
         var lokalBehandling = Testdata.revurdering.copy(
-            id = UUID.randomUUID(), eksternBrukId = UUID.randomUUID(),
+            id = UUID.randomUUID(),
+            eksternBrukId = UUID.randomUUID(),
             årsaker = setOf(
                 Behandlingsårsak(
                     originalBehandlingId = behandling.id,
                     type = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
                 )
-            ),
+            )
         )
         lokalBehandling = behandlingRepository.insert(lokalBehandling)
         lagFakta(lokalBehandling.id)
@@ -501,7 +502,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = lokalBehandling.id,
                 lagFritekstAvsnittDto(
                     faktaFritekst = "fakta",
-                    særligGrunnerAnnetFritekst = "test",
+                    særligGrunnerAnnetFritekst = "test"
                 )
             )
         }
@@ -530,7 +531,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFakta(behandlingId: UUID = behandling.id) {
-
         val faktaFeilutbetaltePerioder =
             setOf(
                 FaktaFeilutbetalingsperiode(

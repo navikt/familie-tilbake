@@ -214,7 +214,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val feilutbetalt1 = utbetalt1.subtract(nyttBeløp1)
         val grunnlagPeriode1: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
-                periode1, 1000,
+                periode1,
+                1000,
                 setOf(
                     lagYtelBeløp(utbetalt1, nyttBeløp1, skatteprosent),
                     lagFeilBeløp(feilutbetalt1)
@@ -222,7 +223,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
             )
         val grunnlagPeriode2: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
-                periode2, 1000,
+                periode2,
+                1000,
                 setOf(
                     lagYtelBeløp(utbetalt2, nyttBeløp2, skatteprosent),
                     lagFeilBeløp(feilutbetalt2)

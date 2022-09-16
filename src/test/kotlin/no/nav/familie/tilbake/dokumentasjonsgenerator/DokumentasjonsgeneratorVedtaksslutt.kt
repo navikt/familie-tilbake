@@ -187,9 +187,11 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 totaltRentebeløp = BigDecimal.valueOf(100)
             ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
-            hjemmel = if (flereLovhjemler)
+            hjemmel = if (flereLovhjemler) {
                 HbHjemmel("<lovhjemler her>", true)
-            else HbHjemmel("<lovhjemmel her>"),
+            } else {
+                HbHjemmel("<lovhjemmel her>")
+            },
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(1000),
                 varsletDato = LocalDate.of(2020, 4, 4)
@@ -197,12 +199,18 @@ class DokumentasjonsgeneratorVedtaksslutt {
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
             ansvarligBeslutter = "<Beslutters navn>",
             søker = HbPerson(navn = "<Søkers navn>"),
-            vedtaksbrevstype = if (feilutbetaltBeløpBortfalt)
-                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT else Vedtaksbrevstype.ORDINÆR,
+            vedtaksbrevstype = if (feilutbetaltBeløpBortfalt) {
+                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
+            } else {
+                Vedtaksbrevstype.ORDINÆR
+            },
             behandling = HbBehandling(
                 erRevurdering = erRevurdering,
-                originalBehandlingsdatoFagsakvedtak = if (erRevurdering)
-                    PERIODE1.fom else null
+                originalBehandlingsdatoFagsakvedtak = if (erRevurdering) {
+                    PERIODE1.fom
+                } else {
+                    null
+                }
             )
         )
     }

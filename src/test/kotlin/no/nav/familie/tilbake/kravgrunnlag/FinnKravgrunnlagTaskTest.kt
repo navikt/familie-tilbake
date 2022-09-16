@@ -229,11 +229,15 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
         )
 
-        val verge = if (finnesVerge) no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
-            vergetype = Vergetype.VERGE_FOR_BARN,
-            navn = "Andy",
-            personIdent = "321321321"
-        ) else null
+        val verge = if (finnesVerge) {
+            no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
+                vergetype = Vergetype.VERGE_FOR_BARN,
+                navn = "Andy",
+                personIdent = "321321321"
+            )
+        } else {
+            null
+        }
 
         val request = OpprettTilbakekrevingRequest(
             ytelsestype = Ytelsestype.BARNETRYGD,

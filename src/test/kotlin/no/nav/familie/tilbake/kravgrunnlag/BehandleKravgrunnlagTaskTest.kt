@@ -418,7 +418,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             Behandlingsstegstatus.TILBAKEFØRT
         )
         assertBehandlingsstegstilstand(
-            behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING,
+            behandlingsstegstilstand,
+            Behandlingssteg.VILKÅRSVURDERING,
             Behandlingsstegstatus.TILBAKEFØRT
         )
 
