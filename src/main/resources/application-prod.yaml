@@ -11,7 +11,7 @@ oppdrag.mq:
   queuemanager: MPLS02
   kravgrunnlag: QA.P_FAMILIE_TILBAKE.KRAVGRUNNLAG
   channel: P_FAMILIE_TILBAKE
-  hostname: a01apvl269.adeo.no
+  hostname: mpls02.adeo.no
   port: 1414
   enabled: false
 
