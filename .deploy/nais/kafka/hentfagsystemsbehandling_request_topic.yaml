@@ -22,6 +22,9 @@ spec:
       application: familie-ba-sak #owner
       access: read   # readwrite
     - team: teamfamilie
+      application: familie-ks-sak
+      access: read # read
+    - team: teamfamilie
       application: familie-ef-iverksett #owner
       access: read   # readwrite
     - team: teamfamilie

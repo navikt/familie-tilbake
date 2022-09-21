@@ -20,8 +20,10 @@ class VarselService(
         val varselsperioder: Set<Varselsperiode> = if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
             val perioder = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder
             perioder.map { Varselsperiode(fom = it.periode.fom, tom = it.periode.tom) }.toSet()
-        } else behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
-            ?: error("Aktivt varsel har ikke med varselsperioder")
+        } else {
+            behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
+                ?: error("Aktivt varsel har ikke med varselsperioder")
+        }
 
         val varsler = behandling.varsler.map { it.copy(aktiv = false) } +
             Varsel(

@@ -949,7 +949,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus
     ) {
-
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
                 behandlingsstegstatus == it.behandlingsstegsstatus
@@ -986,8 +985,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private fun assertOppgave(tasktype: String, forventet: Int = 1) {
         val taskene = taskRepository.findByStatusIn(
             status = listOf(
-                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                Status.BEHANDLER, Status.FERDIG
+                Status.KLAR_TIL_PLUKK,
+                Status.UBEHANDLET,
+                Status.BEHANDLER,
+                Status.FERDIG
             ),
             page = Pageable.unpaged()
         )
@@ -1002,8 +1003,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     ) {
         taskRepository.findByStatusIn(
             listOf(
-                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                Status.BEHANDLER, Status.FERDIG
+                Status.KLAR_TIL_PLUKK,
+                Status.UBEHANDLET,
+                Status.BEHANDLER,
+                Status.FERDIG
             ),
             page = Pageable.unpaged()
         ).any {

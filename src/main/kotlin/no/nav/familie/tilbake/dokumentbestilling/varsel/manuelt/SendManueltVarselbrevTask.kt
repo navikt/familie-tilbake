@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -31,7 +32,8 @@ class SendManueltVarselbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
+    private val fagsakRepository: FagsakRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -39,25 +41,30 @@ class SendManueltVarselbrevTask(
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         val maltype = taskdata.maltype
         val fritekst = taskdata.fritekst
-        // sjekk om behandlingen har verge
 
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+
+        // sjekk om behandlingen har verge
         if (Dokumentmalstype.VARSEL == maltype) {
             if (behandling.harVerge) {
                 manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
-            manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
+            manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
         } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
             if (behandling.harVerge) {
                 manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
             }
-            manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.BRUKER)
+            manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
         }
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandling.id,
-            beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
-                .ansvarligSaksbehandler} har sendt varselbrev til bruker",
+            beskrivelse = "Frist er oppdatert. Saksbehandler ${
+            behandling
+                .ansvarligSaksbehandler
+            } har sendt varselbrev til bruker",
             frist = fristTid,
             saksbehandler = behandling.ansvarligSaksbehandler
         )

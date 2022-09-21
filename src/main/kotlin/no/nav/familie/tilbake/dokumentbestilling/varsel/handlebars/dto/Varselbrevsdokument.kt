@@ -31,7 +31,9 @@ data class Varselbrevsdokument(
 
     private val datoerHvisSammenhengendePeriode: Datoperiode? = if (feilutbetaltePerioder.size == 1) {
         Datoperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
-    } else null
+    } else {
+        null
+    }
 
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 

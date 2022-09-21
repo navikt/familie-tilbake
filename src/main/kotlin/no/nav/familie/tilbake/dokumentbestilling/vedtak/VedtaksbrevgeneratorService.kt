@@ -59,7 +59,6 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
@@ -69,7 +68,9 @@ class VedtaksbrevgeneratorService(
         )
         val vedleggHtml = if (vedtaksbrevsdata.vedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
         return Brevdata(
             mottager = brevmottager,
             metadata = data.brevmetadata,
@@ -83,7 +84,6 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -94,7 +94,9 @@ class VedtaksbrevgeneratorService(
 
         val vedleggHtml = if (hbVedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
 
         return Brevdata(
             mottager = vedtaksbrevgrunnlag.brevmottager,
@@ -215,9 +217,11 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat
     ): VedtakHjemmel.EffektForBruker {
-        return if (vedtaksbrevgrunnlag.erRevurdering)
+        return if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
-        else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        } else {
+            VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        }
     }
 
     private fun lagHbTotalresultat(
@@ -325,7 +329,8 @@ class VedtaksbrevgeneratorService(
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
-            gjelderDødsfall = personinfo.dødsdato != null
+            gjelderDødsfall = personinfo.dødsdato != null,
+            institusjon = vedtaksbrevgrunnlag.institusjon
         )
     }
 
@@ -398,7 +403,6 @@ class VedtaksbrevgeneratorService(
         foreldelse: VurdertForeldelse?,
         fritekst: PeriodeMedTekstDto?
     ): HbVurderinger {
-
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
         val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
         val vilkårsvurderingAktsomhet = vilkårsvurdering?.aktsomhet
@@ -449,16 +453,20 @@ class VedtaksbrevgeneratorService(
             foreldetBeløp =
             if (foreldetPeriode) {
                 resultatPeriode.feilutbetaltBeløp.subtract(resultatPeriode.tilbakekrevingsbeløp)
-            } else null
+            } else {
+                null
+            }
         )
     }
 
     private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Månedsperiode): Foreldelsesperiode? {
         return if (foreldelse == null) {
             null
-        } else foreldelse.foreldelsesperioder
-            .firstOrNull { p -> p.periode.inneholder(periode) }
-            ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        } else {
+            foreldelse.foreldelsesperioder
+                .firstOrNull { p -> p.periode.inneholder(periode) }
+                ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        }
     }
 
     private fun finnTittelVedtaksbrev(ytelsesnavn: String, tilbakekreves: Boolean): String {

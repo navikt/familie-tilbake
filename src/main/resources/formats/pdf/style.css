@@ -54,6 +54,11 @@ body.utkast {
     margin-bottom: 10mm;
 }
 
+#institusjon {
+    color: #807d7c;
+    margin-bottom: 5mm;
+}
+
 #content {
     margin: 0;
 }

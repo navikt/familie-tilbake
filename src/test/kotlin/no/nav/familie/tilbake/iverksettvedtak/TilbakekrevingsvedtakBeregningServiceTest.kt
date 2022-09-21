@@ -108,7 +108,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 )
             ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-            andelTilbakreves = BigDecimal(50), særligeGrunnerTilReduksjon = true
+            andelTilbakreves = BigDecimal(50),
+            særligeGrunnerTilReduksjon = true
         )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
@@ -156,7 +157,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 )
             ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-            andelTilbakreves = BigDecimal(33), særligeGrunnerTilReduksjon = true
+            andelTilbakreves = BigDecimal(33),
+            særligeGrunnerTilReduksjon = true
         )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
@@ -296,7 +298,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     YearMonth.of(2021, 2)
                 )
             ),
-            beløpErIBehold = true, beløpTilbakekreves = BigDecimal(3000)
+            beløpErIBehold = true,
+            beløpTilbakekreves = BigDecimal(3000)
         )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
@@ -343,7 +346,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                     YearMonth.of(2021, 2)
                 )
             ),
-            beløpErIBehold = true, beløpTilbakekreves = BigDecimal(1999)
+            beløpErIBehold = true,
+            beløpTilbakekreves = BigDecimal(1999)
         )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
@@ -411,7 +415,8 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
                 )
             ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-            andelTilbakreves = BigDecimal(50), særligeGrunnerTilReduksjon = true
+            andelTilbakreves = BigDecimal(50),
+            særligeGrunnerTilReduksjon = true
         )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)

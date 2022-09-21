@@ -41,7 +41,10 @@ enum class Behandlingssteg(
     FORESLÅ_VEDTAK(7, true, true, Behandlingsstatus.UTREDES, "Foreslår vedtak"),
     FATTE_VEDTAK(8, true, false, Behandlingsstatus.FATTER_VEDTAK, "Fatter vedtak"),
     IVERKSETT_VEDTAK(
-        9, false, false, Behandlingsstatus.IVERKSETTER_VEDTAK,
+        9,
+        false,
+        false,
+        Behandlingsstatus.IVERKSETTER_VEDTAK,
         "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"
     ),
     AVSLUTTET(10, false, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");

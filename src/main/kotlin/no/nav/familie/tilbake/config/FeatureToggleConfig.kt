@@ -28,9 +28,9 @@ class FeatureToggleConfig(
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-        if (enabled)
+        if (enabled) {
             lagUnleashFeatureToggleService()
-        else {
+        } else {
             logger.warn(
                 "Unleash feature toggle er skrudd AV. Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
             )

@@ -45,7 +45,7 @@ class PdfBrevService(
     ) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
-        if (data.mottager == Brevmottager.BRUKER) { // Ikke tell kopier sendt til verge
+        if (data.mottager != Brevmottager.VERGE) { // Ikke tell kopier sendt til verge
             tellerService.tellBrevSendt(fagsak, brevtype)
         }
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)

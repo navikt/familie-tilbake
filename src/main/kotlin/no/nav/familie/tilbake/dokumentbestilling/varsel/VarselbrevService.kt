@@ -90,7 +90,7 @@ class VarselbrevService(
             brevtekst = brevtekst,
             brevmetadata = varselbrevsdokument.brevmetadata
         )
-        val brevmottager = if (varselbrevsdokument.brevmetadata.finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevmottager = utledBrevmottager(forhåndsvisVarselbrevRequest)
         val vedlegg = varselbrevUtil.lagVedlegg(
             varselbrevsdokument,
             forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
@@ -108,8 +108,7 @@ class VarselbrevService(
     }
 
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {
-
-        val brevmottager = if (request.verge != null) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevmottager = utledBrevmottager(request)
         val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem)
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
             personinfo,
@@ -123,5 +122,9 @@ class VarselbrevService(
             request,
             personinfo
         )
+    }
+
+    private fun utledBrevmottager(request: ForhåndsvisVarselbrevRequest): Brevmottager {
+        return if (request.verge != null) Brevmottager.VERGE else if (request.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
     }
 }

@@ -151,7 +151,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for fattet behandling`() {
         val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING)
         val fattetBehandling = behandling.copy(
-            behandlendeEnhet = "1234", behandlendeEnhetsNavn = "foo bar",
+            behandlendeEnhet = "1234",
+            behandlendeEnhetsNavn = "foo bar",
             ansvarligSaksbehandler = "Z111111",
             ansvarligBeslutter = "Z111112",
             resultater = setOf(behandlingsresultat)
@@ -229,11 +230,15 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val fom = YearMonth.now().minusMonths(1).atDay(1)
         val tom = YearMonth.now().atEndOfMonth()
 
-        val varsel = if (finnesVarsel) Varsel(
-            varseltekst = "testverdi",
-            sumFeilutbetaling = BigDecimal.valueOf(1500L),
-            perioder = listOf(Periode(fom, tom))
-        ) else null
+        val varsel = if (finnesVarsel) {
+            Varsel(
+                varseltekst = "testverdi",
+                sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                perioder = listOf(Periode(fom, tom))
+            )
+        } else {
+            null
+        }
 
         val faktainfo = Faktainfo(
             revurderingsårsak = "testverdi",

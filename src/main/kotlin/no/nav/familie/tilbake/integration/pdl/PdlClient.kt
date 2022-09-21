@@ -82,7 +82,6 @@ class PdlClient(
     }
 
     private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
-
         return HttpHeaders().apply {
             add("Tema", hentTema(fagsystem).name)
         }

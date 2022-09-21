@@ -38,17 +38,20 @@ class MålerService(
         val behandlinger = meldingstellingRepository.finnÅpneBehandlinger()
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Åpne behandlinger for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
                         "fordelt på ${forekomster.size} uker."
                 )
+            }
         }
         val rows = behandlinger.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "uke",
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
                 ),
                 it.antall
             )
@@ -63,17 +66,20 @@ class MålerService(
         val behandlinger = meldingstellingRepository.finnKlarTilBehandling()
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Behandlinger klar til saksbehandling for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
                         "fordelt på ${forekomster.size} steg."
                 )
+            }
         }
         val rows = behandlinger.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "steg", it.behandlingssteg.name
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "steg",
+                    it.behandlingssteg.name
                 ),
                 it.antall
             )
@@ -88,18 +94,21 @@ class MålerService(
         val behandlinger = meldingstellingRepository.finnVentendeBehandlinger()
         Fagsystem.values().map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Behandlinger på vent for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
                         "fordelt på ${forekomster.size} steg."
                 )
+            }
         }
 
         val rows = behandlinger.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "steg", it.behandlingssteg.name
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "steg",
+                    it.behandlingssteg.name
                 ),
                 it.antall
             )
@@ -114,16 +123,20 @@ class MålerService(
         val data = meldingstellingRepository.finnSendteBrev()
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info("Sendte brev for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} typer/uker.")
+            }
         }
 
         val rows = data.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "brevtype", it.brevtype.name,
-                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "brevtype",
+                    it.brevtype.name,
+                    "uke",
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
                 ),
                 it.antall
             )
@@ -137,23 +150,29 @@ class MålerService(
         val data = meldingstellingRepository.finnVedtak()
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Vedtak for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
                         "fordelt på ${forekomster.size} typer/uker."
                 )
+            }
         }
 
         val rows = data.map {
-
-            val vedtakstype = if (it.vedtakstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER)
-                Behandlingsresultatstype.HENLAGT.name else it.vedtakstype.name
+            val vedtakstype = if (it.vedtakstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER) {
+                Behandlingsresultatstype.HENLAGT.name
+            } else {
+                it.vedtakstype.name
+            }
 
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "vedtakstype", vedtakstype,
-                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "vedtakstype",
+                    vedtakstype,
+                    "uke",
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
                 ),
                 it.antall
             )
@@ -166,20 +185,25 @@ class MålerService(
         val data = meldingstellingRepository.findByType(Meldingstype.KRAVGRUNNLAG)
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Mottatte kravgrunnlag koblet for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
                         "fordelt på ${forekomster.size} fagsystem/dager."
                 )
+            }
         }
 
         val rows = data.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "type", it.type.name,
-                    "status", it.status.name,
-                    "dato", it.dato.toString()
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "type",
+                    it.type.name,
+                    "status",
+                    it.status.name,
+                    "dato",
+                    it.dato.toString()
                 ),
                 it.antall
             )
@@ -192,18 +216,21 @@ class MålerService(
         val data = meldingstellingRepository.summerAntallForType(Meldingstype.STATUSMELDING)
         Fagsystem.values().map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
-            if (forekomster.isNotEmpty())
+            if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Mottatte statusmeldinger for ${fagsystem.name} " +
                         "returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} fagsystem/dager."
                 )
+            }
         }
 
         val rows = data.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "fagsystem", it.fagsystem.name,
-                    "dato", it.dato.toString()
+                    "fagsystem",
+                    it.fagsystem.name,
+                    "dato",
+                    it.dato.toString()
                 ),
                 it.antall
             )
