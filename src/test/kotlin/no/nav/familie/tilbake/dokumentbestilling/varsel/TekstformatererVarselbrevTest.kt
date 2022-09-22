@@ -142,7 +142,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på bokmål`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NB,
             false,
@@ -164,7 +163,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på nynorsk`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NN,
             false,
@@ -186,7 +184,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på bokmål`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NB,
             true,
@@ -208,7 +205,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på nynorsk`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NN,
             true,

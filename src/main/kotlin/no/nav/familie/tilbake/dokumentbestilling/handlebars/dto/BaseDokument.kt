@@ -112,7 +112,8 @@ open class BaseDokument(
     @Suppress("unused") // Handlebars
     val ytelsesnavnUbestemt = ytelsesnavn.ubestemt
 
-    @Suppress("unused") open // Handlebars
+    @Suppress("unused")
+    open // Handlebars
     val ytelsesnavnBestemt = ytelsesnavn.bestemt
 
     @Suppress("unused") // Handlebars

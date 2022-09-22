@@ -65,7 +65,6 @@ class HistorikkService(
         brevtype: String?,
         beslutter: String?
     ): OpprettHistorikkinnslagRequest {
-
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevdata = hentBrevdata(behandling, brevtype)

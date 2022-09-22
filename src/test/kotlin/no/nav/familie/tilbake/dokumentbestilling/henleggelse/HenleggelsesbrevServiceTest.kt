@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevServi
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,6 +41,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val fagsakRepository: FagsakRepository = mockk()
     private val brevsporingService: BrevsporingService = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
+    private val organisasjonService: OrganisasjonService = mockk()
 
     @BeforeEach
     fun setup() {
@@ -49,7 +51,8 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             brevsporingService,
             fagsakRepository,
             eksterneDataForBrevService,
-            spyPdfBrevService
+            spyPdfBrevService,
+            organisasjonService
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling

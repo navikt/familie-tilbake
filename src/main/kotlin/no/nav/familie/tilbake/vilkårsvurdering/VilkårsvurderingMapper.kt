@@ -40,7 +40,6 @@ object VilkårsvurderingMapper {
         faktaFeilutbetaling: FaktaFeilutbetaling,
         kravgrunnlag431: Kravgrunnlag431
     ): VurdertVilkårsvurderingDto {
-
         // allerede behandlet perioder uten perioder som er foreldet
         val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
             ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }

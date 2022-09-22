@@ -38,6 +38,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
@@ -46,7 +47,8 @@ import java.math.BigDecimal
 @Service
 class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
-    private val eksterneDataForBrevService: EksterneDataForBrevService
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun genererVedtaksbrevForSending(
@@ -324,7 +326,7 @@ class VedtaksbrevgeneratorService(
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
             gjelderDødsfall = personinfo.dødsdato != null,
-            institusjon = vedtaksbrevgrunnlag.institusjon
+            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) }
         )
     }
 

@@ -242,7 +242,6 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
     }
 
     private fun lagMetadata(språkkode: Språkkode): Brevmetadata {
-
         return Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",

@@ -30,7 +30,6 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevstype: Vedtaksbrevstype,
         validerPåkrevetFritekster: Boolean
     ) {
-
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
         vilkårsvurdering?.let {
             validerFritekstISærligGrunnerAnnetAvsnitt(
