@@ -37,13 +37,16 @@ class DokumentController(
     private val dokumentbehandlingService: DokumentbehandlingService,
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
+    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService
 ) {
 
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Sender brev", AuditLoggerEvent.CREATE)
-    fun bestillBrev(@RequestBody @Valid bestillBrevDto: BestillBrevDto): Ressurs<Nothing?> {
+    fun bestillBrev(
+        @RequestBody @Valid
+        bestillBrevDto: BestillBrevDto
+    ): Ressurs<Nothing?> {
         val maltype: Dokumentmalstype = bestillBrevDto.brevmalkode
         dokumentbehandlingService.bestillBrev(bestillBrevDto.behandlingId, maltype, bestillBrevDto.fritekst)
         return Ressurs.success(null)
@@ -52,7 +55,10 @@ class DokumentController(
     @Operation(summary = "Forhåndsvis brev")
     @PostMapping("/forhandsvis")
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
-    fun forhåndsvisBrev(@RequestBody @Valid bestillBrevDto: BestillBrevDto): Ressurs<ByteArray> {
+    fun forhåndsvisBrev(
+        @RequestBody @Valid
+        bestillBrevDto: BestillBrevDto
+    ): Ressurs<ByteArray> {
         val dokument: ByteArray = dokumentbehandlingService.forhåndsvisBrev(
             bestillBrevDto.behandlingId,
             bestillBrevDto.brevmalkode,
@@ -67,7 +73,10 @@ class DokumentController(
         produces = [MediaType.APPLICATION_PDF_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
-    fun hentForhåndsvisningVarselbrev(@Valid @RequestBody forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
+    fun hentForhåndsvisningVarselbrev(
+        @Valid @RequestBody
+        forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest
+    ): ByteArray {
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
 
@@ -77,7 +86,10 @@ class DokumentController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser henleggelsesbrev", AuditLoggerEvent.ACCESS)
-    fun hentForhåndsvisningHenleggelsesbrev(@Valid @RequestBody dto: ForhåndsvisningHenleggelsesbrevDto): Ressurs<ByteArray> {
+    fun hentForhåndsvisningHenleggelsesbrev(
+        @Valid @RequestBody
+        dto: ForhåndsvisningHenleggelsesbrevDto
+    ): Ressurs<ByteArray> {
         return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
 
@@ -87,7 +99,10 @@ class DokumentController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
-    fun hentForhåndsvisningVedtaksbrev(@Valid @RequestBody dto: HentForhåndvisningVedtaksbrevPdfDto): Ressurs<ByteArray> {
+    fun hentForhåndsvisningVedtaksbrev(
+        @Valid @RequestBody
+        dto: HentForhåndvisningVedtaksbrevPdfDto
+    ): Ressurs<ByteArray> {
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
     }
 

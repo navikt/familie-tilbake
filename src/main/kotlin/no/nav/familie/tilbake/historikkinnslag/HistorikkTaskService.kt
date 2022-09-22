@@ -26,7 +26,6 @@ class HistorikkTaskService(
         brevtype: Brevtype? = null,
         beslutter: String? = null
     ) {
-
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty("historikkinnslagstype", historikkinnslagstype.name)

@@ -55,7 +55,6 @@ class DokumentbehandlingService(
     }
 
     private fun håndterManueltSendVarsel(behandling: Behandling, maltype: Dokumentmalstype, fritekst: String) {
-
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }

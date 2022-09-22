@@ -191,7 +191,6 @@ class DokumentasjonsgeneratorPeriodeFakta {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode
     ): Brevmetadata {
-
         return Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
