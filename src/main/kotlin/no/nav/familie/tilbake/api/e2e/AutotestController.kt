@@ -107,7 +107,7 @@ class AutotestController(
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testorganisasjon") else null
+        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,

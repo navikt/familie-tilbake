@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHe
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
@@ -24,7 +25,8 @@ import java.util.Properties
 class PdfBrevService(
     private val journalføringService: JournalføringService,
     private val tellerService: TellerService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
@@ -122,7 +124,11 @@ class PdfBrevService(
     }
 
     private fun lagHeader(data: Brevdata): String {
-        return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
+        return TekstformatererHeader.lagHeader(
+            brevmetadata = data.metadata,
+            overskrift = data.overskrift,
+            organisasjonService = organisasjonService
+        )
     }
 
     private fun utledDistribusjonstype(brevtype: Brevtype): Distribusjonstype {
@@ -132,6 +138,7 @@ class PdfBrevService(
             Brevtype.HENLEGGELSE -> Distribusjonstype.ANNET
         }
     }
+
     private val distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID.name
 
     companion object {

@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.person.PersonService
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
@@ -31,7 +32,8 @@ class FagsakService(
     private val behandlingRepository: BehandlingRepository,
     private val taskRepository: TaskRepository,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-    private val personService: PersonService
+    private val personService: PersonService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun hentFagsak(fagsakId: UUID): Fagsak {
@@ -58,7 +60,8 @@ class FagsakService(
         return FagsakMapper.tilRespons(
             fagsak = fagsak,
             personinfo = personInfo,
-            behandlinger = behandlinger
+            behandlinger = behandlinger,
+            organisasjonService = organisasjonService
         )
     }
 
@@ -92,8 +95,7 @@ class FagsakService(
         )
         val institusjon = opprettTilbakekrevingRequest.institusjon?.let {
             Institusjon(
-                organisasjonsnummer = it.organisasjonsnummer,
-                navn = it.navn
+                organisasjonsnummer = it.organisasjonsnummer
             )
         }
         return fagsakRepository.insert(

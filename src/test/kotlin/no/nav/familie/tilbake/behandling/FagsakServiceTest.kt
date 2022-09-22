@@ -152,7 +152,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val behandling = opprettBehandling(
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = eksternFagsakId,
-            institusjon = Institusjon(organisasjonsnummer = "987654321", navn = "Testinstitusjon")
+            institusjon = Institusjon(organisasjonsnummer = "998765432")
         )
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
@@ -162,7 +162,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         fagsakDto.ytelsestype shouldBe Ytelsestype.BARNETRYGD
         fagsakDto.fagsystem shouldBe Fagsystem.BA
         fagsakDto.institusjon shouldNotBe null
-        fagsakDto.institusjon!!.organisasjonsnummer shouldBe "987654321"
+        fagsakDto.institusjon!!.organisasjonsnummer shouldBe "998765432"
         fagsakDto.institusjon!!.navn shouldBe "Testinstitusjon"
 
         val brukerDto = fagsakDto.bruker

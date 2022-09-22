@@ -98,8 +98,7 @@ class VarselbrevUtil(
             gjelderDødsfall = personinfo.dødsdato != null,
             institusjon = request.institusjon?.let {
                 Institusjon(
-                    organisasjonsnummer = it.organisasjonsnummer,
-                    navn = it.navn
+                    organisasjonsnummer = it.organisasjonsnummer
                 )
             }
         )

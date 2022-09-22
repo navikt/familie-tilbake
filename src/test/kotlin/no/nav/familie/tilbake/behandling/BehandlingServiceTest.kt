@@ -1393,7 +1393,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         if (finnesInstitusjon) {
             fagsak.institusjon shouldNotBe null
             fagsak.institusjon!!.organisasjonsnummer shouldBe opprettTilbakekrevingRequest.institusjon!!.organisasjonsnummer
-            fagsak.institusjon!!.navn shouldBe opprettTilbakekrevingRequest.institusjon!!.navn
         } else {
             fagsak.institusjon shouldBe null
         }
@@ -1490,7 +1489,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             tilbakekrevingsvalg = tilbakekrevingsvalg
         )
         val institusjon =
-            if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testinstitusjon") else null
+            if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
 
         return OpprettTilbakekrevingRequest(
             ytelsestype = BARNETRYGD,

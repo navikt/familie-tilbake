@@ -250,7 +250,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
         fagsak.institusjon shouldNotBe null
         fagsak.institusjon!!.organisasjonsnummer shouldBe "987654321"
-        fagsak.institusjon!!.navn shouldBe "Testorganisajon"
     }
 
     private fun lagTask(): Task {
@@ -267,7 +266,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagHentFagsystemsbehandlingRespons(erInstitusjon: Boolean = false): HentFagsystemsbehandlingRespons {
-        var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testorganisajon") else null
+        var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,
