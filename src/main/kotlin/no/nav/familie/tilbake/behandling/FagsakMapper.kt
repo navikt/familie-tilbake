@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.api.dto.BehandlingsoppsummeringDto
 import no.nav.familie.tilbake.api.dto.BrukerDto
 import no.nav.familie.tilbake.api.dto.FagsakDto
-import no.nav.familie.tilbake.api.dto.InstitusjonDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -35,10 +34,7 @@ object FagsakMapper {
         }
 
         val institusjon = fagsak.institusjon?.let {
-            InstitusjonDto(
-                it.organisasjonsnummer,
-                organisasjonService.hentOrganisasjonNavn(it.organisasjonsnummer)
-            )
+            organisasjonService.mapTilInstitusjonDto(orgnummer = it.organisasjonsnummer)
         }
 
         return FagsakDto(

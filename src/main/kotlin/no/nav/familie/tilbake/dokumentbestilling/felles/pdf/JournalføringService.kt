@@ -22,7 +22,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -31,8 +30,7 @@ import java.util.UUID
 class JournalføringService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val organisasjonService: OrganisasjonService
+    private val fagsakRepository: FagsakRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -124,7 +122,7 @@ class JournalføringService(
         return AvsenderMottaker(
             idType = BrukerIdType.ORGNR,
             id = institusjon.organisasjonsnummer,
-            navn = organisasjonService.hentOrganisasjonNavn(institusjon.organisasjonsnummer)
+            navn = institusjon.navn
         )
     }
 

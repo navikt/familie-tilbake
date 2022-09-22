@@ -5,18 +5,13 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformatere
 
 object TekstformatererHeader {
 
-    fun lagHeader(brevmetadata: Brevmetadata, overskrift: String, organisasjonsnavn: String? = null): String {
+    fun lagHeader(brevmetadata: Brevmetadata, overskrift: String): String {
         return lagHeader(
             HeaderData(
                 språkkode = brevmetadata.språkkode,
                 person = Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
                 brev = Brev(overskrift),
-                institusjon = brevmetadata.institusjon?.let {
-                    Institusjon(
-                        organisasjonsnummer = it.organisasjonsnummer,
-                        navn = organisasjonsnavn!!
-                    )
-                }
+                institusjon = brevmetadata.institusjon
             )
         )
     }

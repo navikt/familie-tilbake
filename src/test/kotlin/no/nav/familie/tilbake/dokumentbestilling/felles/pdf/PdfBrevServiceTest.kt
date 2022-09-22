@@ -31,8 +31,7 @@ internal class PdfBrevServiceTest {
     private val pdfBrevService = PdfBrevService(
         journalføringService,
         tellerService,
-        taskService,
-        organisasjonService
+        taskService
     )
 
     @Test

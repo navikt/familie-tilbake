@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -28,7 +29,8 @@ class HenleggelsesbrevService(
     private val brevsporingService: BrevsporingService,
     private val fagsakRepository: FagsakRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val pdfBrevService: PdfBrevService
+    private val pdfBrevService: PdfBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager) {
@@ -124,7 +126,9 @@ class HenleggelsesbrevService(
             behandlingstype = behandling.type,
             tittel = TITTEL_HENLEGGELSESBREV,
             gjelderDødsfall = gjelderDødsfall,
-            institusjon = fagsak.institusjon
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
 
         return Henleggelsesbrevsdokument(
