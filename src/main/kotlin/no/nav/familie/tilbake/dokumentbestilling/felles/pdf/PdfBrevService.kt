@@ -127,7 +127,7 @@ class PdfBrevService(
         return TekstformatererHeader.lagHeader(
             brevmetadata = data.metadata,
             overskrift = data.overskrift,
-            organisasjonService = organisasjonService
+            organisasjonsnavn = data.metadata.institusjon?.let { organisasjonService.hentOrganisasjonNavn(it.organisasjonsnummer) }
         )
     }
 
