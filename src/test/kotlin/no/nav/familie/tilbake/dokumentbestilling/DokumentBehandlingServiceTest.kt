@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -12,7 +13,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.InnhentDokumentasjonbrevService
@@ -143,7 +143,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             skatteprosent = BigDecimal.ZERO
         )
         val periode = Kravgrunnlagsperiode432(
-            periode = Periode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
+            periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
             månedligSkattebeløp = BigDecimal.ZERO,
             beløp = setOf(ytelBeløp, feilBeløp)
         )

@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
@@ -98,8 +98,8 @@ object KravgrunnlagValidator {
     }
 
     private fun validerOverlappendePerioder(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        val sortertePerioder: List<Periode> = kravgrunnlag.tilbakekrevingsPeriode
-            .map { p -> Periode(p.periode.fom, p.periode.tom) }
+        val sortertePerioder: List<Månedsperiode> = kravgrunnlag.tilbakekrevingsPeriode
+            .map { p -> Månedsperiode(p.periode.fom, p.periode.tom) }
             .sorted()
         for (i in 1 until sortertePerioder.size) {
             val forrigePeriode = sortertePerioder[i - 1]
@@ -197,7 +197,6 @@ object KravgrunnlagValidator {
     }
 
     private fun validerYtelsesPosteringTilbakekrevesMotNyttOgOpprinneligUtbetalt(kravgrunnlag: DetaljertKravgrunnlagDto) {
-
         var harPeriodeMedBeløpMindreEnnDiff = false
         var harPeriodeMedBeløpStørreEnnDiff = false
 

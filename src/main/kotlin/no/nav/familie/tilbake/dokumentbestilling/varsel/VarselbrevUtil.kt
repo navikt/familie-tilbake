@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
@@ -16,7 +17,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
@@ -24,6 +24,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -33,7 +34,8 @@ import java.util.UUID
 class VarselbrevUtil(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val oppdragClient: OppdragClient,
-    private val kravgrunnlagRepository: KravgrunnlagRepository
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     companion object {
@@ -76,7 +78,6 @@ class VarselbrevUtil(
         request: ForhåndsvisVarselbrevRequest,
         personinfo: Personinfo
     ): Varselbrevsdokument {
-
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
         val ansvarligSaksbehandler =
@@ -95,7 +96,10 @@ class VarselbrevUtil(
             språkkode = request.språkkode,
             ytelsestype = request.ytelsestype,
             tittel = tittel,
-            gjelderDødsfall = personinfo.dødsdato != null
+            gjelderDødsfall = personinfo.dødsdato != null,
+            institusjon = request.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
 
         return Varselbrevsdokument(
@@ -133,7 +137,10 @@ class VarselbrevUtil(
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
     }
 
@@ -143,7 +150,6 @@ class VarselbrevUtil(
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
         varsel: Varsel?
     ): Varselbrevsdokument {
-
         return Varselbrevsdokument(
             brevmetadata = metadata,
             beløp = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong(),
@@ -162,7 +168,6 @@ class VarselbrevUtil(
         eksternBehandlingId: String,
         varsletTotalbeløp: Long
     ): Vedleggsdata {
-
         val request = HentFeilutbetalingerFraSimuleringRequest(
             varselbrevsdokument.ytelsestype,
             varselbrevsdokument.brevmetadata.saksnummer,
@@ -256,19 +261,22 @@ class VarselbrevUtil(
     }
 
     private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {
-        return if (erKorrigert) TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
-        else TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+        return if (erKorrigert) {
+            TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
+        } else {
+            TITTEL_VARSEL_TILBAKEBETALING + ytelsesnavn
+        }
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Handlebarsperiode> {
-        return feilutbetaltePerioderDto.perioder.map { Handlebarsperiode(it.fom, it.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> {
+        return feilutbetaltePerioderDto.perioder.map { Datoperiode(it.fom, it.tom) }
     }
 
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Handlebarsperiode> {
-        return varsel?.perioder?.map { Handlebarsperiode(it.fom, it.tom) } ?: emptyList()
+    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> {
+        return varsel?.perioder?.map { Datoperiode(it.fom, it.tom) } ?: emptyList()
     }
 
-    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Handlebarsperiode> {
-        return feilutbetalingsfakta.feilutbetaltePerioder.map { Handlebarsperiode(it.periode.fom, it.periode.tom) }
+    private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Datoperiode> {
+        return feilutbetalingsfakta.feilutbetaltePerioder.map { Datoperiode(it.periode.fom, it.periode.tom) }
     }
 }

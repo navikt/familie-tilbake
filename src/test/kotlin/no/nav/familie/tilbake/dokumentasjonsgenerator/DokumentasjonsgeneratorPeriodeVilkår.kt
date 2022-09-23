@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentasjonsgenerator
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.AvsnittUtil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
@@ -219,21 +219,33 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 vilkårsvurderingsresultat = vilkårResultat,
                 beløpIBehold = if (AnnenVurdering.GOD_TRO === vurdering) {
                     if (pengerIBehold) BigDecimal.valueOf(3999) else BigDecimal.ZERO
-                } else null,
+                } else {
+                    null
+                },
                 foreldelsesfrist = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
                         Foreldelsesvurderingstype.TILLEGGSFRIST
                     )
-                )
-                    FORELDELSESFRIST else null,
+                ) {
+                    FORELDELSESFRIST
+                } else {
+                    null
+                },
                 fritekstForeldelse = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
                         Foreldelsesvurderingstype.TILLEGGSFRIST
                     ) &&
                     fritekst
-                ) "[ fritekst her ]" else null,
-                oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering)
-                    OPPDAGELSES_DATO else null
+                ) {
+                    "[ fritekst her ]"
+                } else {
+                    null
+                },
+                oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering) {
+                    OPPDAGELSES_DATO
+                } else {
+                    null
+                }
             )
 
         val periodeBuilder =
@@ -295,7 +307,6 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode
     ): Brevmetadata {
-
         return Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",
@@ -357,7 +368,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             Aktsomhet.FORSETT
         )
         private val trueFalse = booleanArrayOf(true, false)
-        private val JANUAR = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+        private val JANUAR = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
         private val FORELDELSESFRIST = LocalDate.of(2019, 12, 1)
         private val OPPDAGELSES_DATO = LocalDate.of(2019, 3, 1)
     }

@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
@@ -30,7 +30,6 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevstype: Vedtaksbrevstype,
         validerPåkrevetFritekster: Boolean
     ) {
-
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
         vilkårsvurdering?.let {
             validerFritekstISærligGrunnerAnnetAvsnitt(
@@ -60,7 +59,10 @@ object VedtaksbrevFritekstValidator {
         faktaFeilutbetaling: FaktaFeilutbetaling
     ) {
         avsnittMedPerioder.forEach {
-            if (!faktaFeilutbetaling.perioder.any { faktaPeriode -> faktaPeriode.periode.omslutter(Periode(it.periode)) }) {
+            if (!faktaFeilutbetaling.perioder.any { faktaPeriode ->
+                faktaPeriode.periode.inneholder(it.periode.toMånedsperiode())
+            }
+            ) {
                 throw Feil(
                     message = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig for behandling ${behandling.id}",
                     frontendFeilmelding = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
@@ -135,7 +137,7 @@ object VedtaksbrevFritekstValidator {
                 }
                 // Hvis en av de periodene mangler fritekst
                 val omsluttetPerioder = avsnittMedPerioder.filter {
-                    faktaFeilutbetalingsperiode.periode.omslutter(Periode(it.periode))
+                    faktaFeilutbetalingsperiode.periode.inneholder(it.periode.toMånedsperiode())
                 }
                 omsluttetPerioder.forEach {
                     if (it.faktaAvsnitt.isNullOrBlank() && validerPåkrevetFritekster) {
@@ -177,12 +179,12 @@ object VedtaksbrevFritekstValidator {
 
     private fun finnFritekstPerioder(
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
-        vurdertPeriode: Periode,
+        vurdertPeriode: Månedsperiode,
         friteksttype: Friteksttype
     ): List<Vedtaksbrevsperiode> {
         return vedtaksbrevFritekstPerioder.filter {
             friteksttype == it.fritekststype &&
-                vurdertPeriode.omslutter(it.periode)
+                vurdertPeriode.inneholder(it.periode)
         }
     }
 }

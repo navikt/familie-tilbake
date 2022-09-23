@@ -1393,7 +1393,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         if (finnesInstitusjon) {
             fagsak.institusjon shouldNotBe null
             fagsak.institusjon!!.organisasjonsnummer shouldBe opprettTilbakekrevingRequest.institusjon!!.organisasjonsnummer
-            fagsak.institusjon!!.navn shouldBe opprettTilbakekrevingRequest.institusjon!!.navn
         } else {
             fagsak.institusjon shouldBe null
         }
@@ -1465,16 +1464,24 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         tilbakekrevingsvalg: Tilbakekrevingsvalg,
         finnesInstitusjon: Boolean = false
     ): OpprettTilbakekrevingRequest {
-        val varsel = if (finnesVarsel) Varsel(
-            varseltekst = "testverdi",
-            sumFeilutbetaling = BigDecimal.valueOf(1500L),
-            perioder = listOf(Periode(fom, tom))
-        ) else null
-        val verge = if (finnesVerge) Verge(
-            vergetype = Vergetype.VERGE_FOR_BARN,
-            navn = "Andy",
-            personIdent = "321321321"
-        ) else null
+        val varsel = if (finnesVarsel) {
+            Varsel(
+                varseltekst = "testverdi",
+                sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                perioder = listOf(Periode(fom, tom))
+            )
+        } else {
+            null
+        }
+        val verge = if (finnesVerge) {
+            Verge(
+                vergetype = Vergetype.VERGE_FOR_BARN,
+                navn = "Andy",
+                personIdent = "321321321"
+            )
+        } else {
+            null
+        }
 
         val faktainfo = Faktainfo(
             revurderingsårsak = "testverdi",
@@ -1482,7 +1489,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             tilbakekrevingsvalg = tilbakekrevingsvalg
         )
         val institusjon =
-            if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testinstitusjon") else null
+            if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
 
         return OpprettTilbakekrevingRequest(
             ytelsestype = BARNETRYGD,

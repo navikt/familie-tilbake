@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.isGreaterThanZero
 import no.nav.familie.tilbake.common.isLessThanZero
 import no.nav.familie.tilbake.common.isZero
@@ -185,8 +185,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
     private fun oppdaterGjenståendeSkattetrekk(
         perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Periode, BigDecimal>
-    ): Map<Periode, BigDecimal> {
+        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>
+    ): Map<Månedsperiode, BigDecimal> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         perioder.forEach {
             val skattBeløp = it.beløp
@@ -201,7 +201,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     private fun justerAvrundingSkatt(
         beregnetPeriode: Beregningsresultatsperiode,
         perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Periode, BigDecimal>
+        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>
     ): List<Tilbakekrevingsperiode> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         val totalSkattBeløp = perioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
@@ -249,7 +249,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return periode.beløp.sumOf { it.tilbakekrevesBeløp }
     }
 
-    private fun Map<Periode, BigDecimal>.getNotNull(key: Periode) = requireNotNull(this[key])
+    private fun Map<Månedsperiode, BigDecimal>.getNotNull(key: Månedsperiode) = requireNotNull(this[key])
 
     private fun beregnRenter(
         beregnetPeriode: Beregningsresultatsperiode,

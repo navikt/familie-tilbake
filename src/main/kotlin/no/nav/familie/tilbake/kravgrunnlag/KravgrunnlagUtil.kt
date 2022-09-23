@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -27,8 +27,8 @@ object KravgrunnlagUtil {
     private val jaxbContext: JAXBContext = JAXBContext.newInstance(DetaljertKravgrunnlagMelding::class.java)
     private val statusmeldingJaxbContext: JAXBContext = JAXBContext.newInstance(EndringKravOgVedtakstatus::class.java)
 
-    fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Periode, BigDecimal> {
-        val feilutbetalingPrPeriode = mutableMapOf<Periode, BigDecimal>()
+    fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Månedsperiode, BigDecimal> {
+        val feilutbetalingPrPeriode = mutableMapOf<Månedsperiode, BigDecimal>()
         for (kravgrunnlagPeriode432 in kravgrunnlag.perioder) {
             val feilutbetaltBeløp = kravgrunnlagPeriode432.beløp
                 .filter { Klassetype.FEIL == it.klassetype }
@@ -37,7 +37,7 @@ object KravgrunnlagUtil {
                 feilutbetalingPrPeriode[kravgrunnlagPeriode432.periode] = feilutbetaltBeløp
             }
         }
-        return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Periode::fom).thenComparing(Periode::tom))
+        return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Månedsperiode::fom).thenComparing(Månedsperiode::tom))
     }
 
     fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto {
@@ -117,7 +117,8 @@ object KravgrunnlagUtil {
                     .append("$periode->belopNy", beløp.first.belopNy, beløp.second.belopNy)
                     .append("$periode->belopUinnkrevd", beløp.first.belopUinnkrevd, beløp.second.belopUinnkrevd)
                     .append(
-                        "$periode->belopTilbakekreves", beløp.first.belopTilbakekreves,
+                        "$periode->belopTilbakekreves",
+                        beløp.first.belopTilbakekreves,
                         beløp.second.belopTilbakekreves
                     )
                     .append("$periode->skattProsent", beløp.first.skattProsent, beløp.second.skattProsent)
@@ -127,8 +128,8 @@ object KravgrunnlagUtil {
         return differanseBuilder.append(builder.build().toString()).toString()
     }
 
-    private fun konvertPeriode(periodeDto: DetaljertKravgrunnlagPeriodeDto): Periode {
-        return Periode(periodeDto.periode.fom, periodeDto.periode.tom)
+    private fun konvertPeriode(periodeDto: DetaljertKravgrunnlagPeriodeDto): Månedsperiode {
+        return Månedsperiode(periodeDto.periode.fom, periodeDto.periode.tom)
     }
 
     private fun sammenlignPerioder(

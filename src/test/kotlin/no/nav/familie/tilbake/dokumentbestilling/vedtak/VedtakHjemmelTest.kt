@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -19,7 +19,7 @@ import java.util.UUID
 
 class VedtakHjemmelTest {
 
-    var periode: Periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
+    var periode: Månedsperiode = Månedsperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
 
     @Test
     fun `laghbHjemmel skal gi riktig hjemmel når det ikke er foreldelse eller renter bokmål`() {
@@ -376,7 +376,7 @@ class VedtakHjemmelTest {
     }
 
     private fun lagForeldelseperiode(
-        periode: Periode,
+        periode: Månedsperiode,
         oppsett: (Foreldelsesperiode) -> Foreldelsesperiode
     ): VurdertForeldelse {
         val periodeBuilder = Foreldelsesperiode(
@@ -391,7 +391,7 @@ class VedtakHjemmelTest {
     }
 
     private fun aktsomhet(
-        periode: Periode,
+        periode: Månedsperiode,
         oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet
     ): Set<Vilkårsvurderingsperiode> {
         return aktsomhet(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, periode, oppsett)
@@ -399,7 +399,7 @@ class VedtakHjemmelTest {
 
     private fun aktsomhet(
         resultat: Vilkårsvurderingsresultat,
-        periode: Periode,
+        periode: Månedsperiode,
         oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet
     ): Set<Vilkårsvurderingsperiode> {
         val aktsomhet: VilkårsvurderingAktsomhet =

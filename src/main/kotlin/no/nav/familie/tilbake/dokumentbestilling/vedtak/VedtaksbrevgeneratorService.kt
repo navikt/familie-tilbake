@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
@@ -10,7 +11,6 @@ import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
@@ -39,6 +38,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
@@ -47,14 +47,14 @@ import java.math.BigDecimal
 @Service
 class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
-    private val eksterneDataForBrevService: EksterneDataForBrevService
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
@@ -64,7 +64,9 @@ class VedtaksbrevgeneratorService(
         )
         val vedleggHtml = if (vedtaksbrevsdata.vedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
         return Brevdata(
             mottager = brevmottager,
             metadata = data.brevmetadata,
@@ -78,7 +80,6 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
-
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -89,7 +90,9 @@ class VedtaksbrevgeneratorService(
 
         val vedleggHtml = if (hbVedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
-        } else ""
+        } else {
+            ""
+        }
 
         return Brevdata(
             mottager = vedtaksbrevgrunnlag.brevmottager,
@@ -210,9 +213,11 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat
     ): VedtakHjemmel.EffektForBruker {
-        return if (vedtaksbrevgrunnlag.erRevurdering)
+        return if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
-        else VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        } else {
+            VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK
+        }
     }
 
     private fun lagHbTotalresultat(
@@ -321,7 +326,8 @@ class VedtaksbrevgeneratorService(
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
-            gjelderDødsfall = personinfo.dødsdato != null
+            gjelderDødsfall = personinfo.dødsdato != null,
+            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) }
         )
     }
 
@@ -334,9 +340,10 @@ class VedtaksbrevgeneratorService(
         førstePeriode: Boolean
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { Periode(it.periode) == periode }
+        val fritekster: PeriodeMedTekstDto? =
+            perioderFritekst.firstOrNull { Månedsperiode(it.periode.fom, it.periode.tom) == periode }
         return HbVedtaksbrevsperiode(
-            periode = Handlebarsperiode(periode),
+            periode = periode.toDatoperiode(),
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
@@ -353,22 +360,21 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    private fun utledFakta(periode: Periode, fakta: FaktaFeilutbetaling, fritekst: PeriodeMedTekstDto?): HbFakta {
-        return fakta.perioder.first { it.periode.omslutter(periode) }
+    private fun utledFakta(periode: Månedsperiode, fakta: FaktaFeilutbetaling, fritekst: PeriodeMedTekstDto?): HbFakta {
+        return fakta.perioder.first { it.periode.inneholder(periode) }
             .let {
                 HbFakta(it.hendelsestype, it.hendelsesundertype, fritekst?.faktaAvsnitt)
             }
     }
 
     private fun utledVurderinger(
-        periode: Periode,
+        periode: Månedsperiode,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
         fritekst: PeriodeMedTekstDto?
     ): HbVurderinger {
-
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
-        val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.omslutter(periode) }
+        val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
         val vilkårsvurderingAktsomhet = vilkårsvurdering?.aktsomhet
         val godTro = vilkårsvurdering?.godTro
         val beløpSomErIBehold = godTro?.beløpSomErIBehold
@@ -417,16 +423,20 @@ class VedtaksbrevgeneratorService(
             foreldetBeløp =
             if (foreldetPeriode) {
                 resultatPeriode.feilutbetaltBeløp.subtract(resultatPeriode.tilbakekrevingsbeløp)
-            } else null
+            } else {
+                null
+            }
         )
     }
 
-    private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Periode): Foreldelsesperiode? {
+    private fun finnForeldelsePeriode(foreldelse: VurdertForeldelse?, periode: Månedsperiode): Foreldelsesperiode? {
         return if (foreldelse == null) {
             null
-        } else foreldelse.foreldelsesperioder
-            .firstOrNull { p -> p.periode.omslutter(periode) }
-            ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        } else {
+            foreldelse.foreldelsesperioder
+                .firstOrNull { p -> p.periode.inneholder(periode) }
+                ?: error("Fant ikke VurdertForeldelse-periode som omslutter periode $periode")
+        }
     }
 
     private fun finnTittelVedtaksbrev(ytelsesnavn: String, tilbakekreves: Boolean): String {

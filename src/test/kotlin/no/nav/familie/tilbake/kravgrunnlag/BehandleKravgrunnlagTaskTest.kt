@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -22,7 +23,6 @@ import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -345,7 +345,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             BehandlingsstegFaktaDto(
                 listOf(
                     FaktaFeilutbetalingsperiodeDto(
-                        PeriodeDto(
+                        Datoperiode(
                             YearMonth.of(2020, 8),
                             YearMonth.of(2020, 8)
                         ),
@@ -362,7 +362,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        PeriodeDto(
+                        Datoperiode(
                             YearMonth.of(2020, 8),
                             YearMonth.of(2020, 8)
                         ),
@@ -418,7 +418,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             Behandlingsstegstatus.TILBAKEFØRT
         )
         assertBehandlingsstegstilstand(
-            behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING,
+            behandlingsstegstilstand,
+            Behandlingssteg.VILKÅRSVURDERING,
             Behandlingsstegstatus.TILBAKEFØRT
         )
 
@@ -438,7 +439,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
-        val periode = PeriodeDto(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
+        val periode = Datoperiode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
         // Håndter fakta steg
         stegService.håndterSteg(
             behandling.id,
@@ -627,7 +628,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Overlappende perioder Periode(fom=2020-08, tom=2020-08) og Periode(fom=2020-08, tom=2020-08)."
+            "Overlappende perioder Månedsperiode(fom=2020-08, tom=2020-08) og Månedsperiode(fom=2020-08, tom=2020-08)."
     }
 
     @Test

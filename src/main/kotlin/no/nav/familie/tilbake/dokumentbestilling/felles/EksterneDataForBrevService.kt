@@ -42,7 +42,6 @@ class EksterneDataForBrevService(
         verge: Verge?,
         fagsystem: Fagsystem
     ): Adresseinfo {
-
         return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
             ?: hentAdresse(personinfo)
     }
@@ -53,7 +52,6 @@ class EksterneDataForBrevService(
         vergeDto: VergeDto?,
         fagsystem: Fagsystem
     ): Adresseinfo {
-
         return vergeDto?.let {
             hentAdresse(
                 it.vergetype,
@@ -76,7 +74,6 @@ class EksterneDataForBrevService(
         personIdent: String?,
         fagsystem: Fagsystem
     ): Adresseinfo {
-
         if (Vergetype.ADVOKAT == vergeType) {
             return hentOrganisasjonsadresse(
                 organisasjonsnummer ?: error("organisasjonsnummer er påkrevd for $vergeType"),
@@ -97,7 +94,6 @@ class EksterneDataForBrevService(
         personinfo: Personinfo,
         brevmottager: Brevmottager
     ): Adresseinfo {
-
         val organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
         return lagAdresseinfo(organisasjon, vergenavn, personinfo, brevmottager)
     }

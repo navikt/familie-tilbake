@@ -253,7 +253,9 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                 varsletBeløp = BigDecimal.valueOf(1000L),
                 varsletDato = JANUAR_15
             )
-        } else null
+        } else {
+            null
+        }
 
         val behandling = HbBehandling(
             erRevurdering = erRevurdering,
@@ -291,7 +293,6 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode
     ): Brevmetadata {
-
         return Brevmetadata(
             sakspartId = "",
             sakspartsnavn = "",

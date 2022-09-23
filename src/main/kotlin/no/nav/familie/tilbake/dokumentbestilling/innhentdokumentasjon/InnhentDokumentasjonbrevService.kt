@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -27,6 +28,7 @@ class InnhentDokumentasjonbrevService(
     private val behandlingRepository: BehandlingRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -53,8 +55,8 @@ class InnhentDokumentasjonbrevService(
         fritekst: String
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val brevmottager: Brevmottager = if (behandling.harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+        val brevmottager: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
 
@@ -85,7 +87,6 @@ class InnhentDokumentasjonbrevService(
         fritekst: String,
         brevmottager: Brevmottager
     ): InnhentDokumentasjonsbrevsdokument {
-
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
             eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
@@ -107,7 +108,10 @@ class InnhentDokumentasjonbrevService(
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB],
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata,
@@ -117,8 +121,11 @@ class InnhentDokumentasjonbrevService(
     }
 
     private fun getTittel(brevmottager: Brevmottager): String {
-        return if (Brevmottager.VERGE == brevmottager) TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE
-        else TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG
+        return if (Brevmottager.VERGE == brevmottager) {
+            TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE
+        } else {
+            TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG
+        }
     }
 
     companion object {

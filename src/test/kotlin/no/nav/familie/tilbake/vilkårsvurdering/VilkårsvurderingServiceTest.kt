@@ -8,12 +8,13 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktivitetDto
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.SærligGrunnDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -22,7 +23,6 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
@@ -84,7 +84,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val førstePeriode = Testdata.kravgrunnlagsperiode432
             .copy(
                 id = UUID.randomUUID(),
-                periode = Periode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
+                periode = Månedsperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
@@ -93,7 +93,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val andrePeriode = Testdata.kravgrunnlagsperiode432
             .copy(
                 id = UUID.randomUUID(),
-                periode = Periode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
+                periode = Månedsperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
@@ -104,7 +104,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(kravgrunnlag431)
 
         val periode = FaktaFeilutbetalingsperiode(
-            periode = Periode(førstePeriode.periode.fom, andrePeriode.periode.tom),
+            periode = Månedsperiode(førstePeriode.periode.fom, andrePeriode.periode.tom),
             hendelsestype = Hendelsestype.ANNET,
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
         )
@@ -130,7 +130,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         vurdertPeriode.reduserteBeløper.shouldBeEmpty()
@@ -154,7 +154,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.size shouldBe 2
 
         val foreldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        foreldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        foreldetPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         foreldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         foreldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         foreldetPeriode.foreldet.shouldBeTrue()
@@ -165,7 +165,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         foreldetPeriode.vilkårsvurderingsresultatInfo.shouldBeNull()
 
         val ikkeForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        ikkeForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        ikkeForeldetPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         ikkeForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         ikkeForeldetPeriode.foreldet.shouldBeFalse()
         ikkeForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
@@ -179,8 +179,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente vilkårsvurdering når perioder er delt opp`() {
         // delt opp i to perioder
-        val periode1 = PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
-        val periode2 = PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        val periode1 = Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        val periode2 = Datoperiode(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         val behandlingsstegVilkårsvurderingDto = lagVilkårsvurderingMedGodTro(perioder = listOf(periode1, periode2))
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
 
@@ -259,7 +259,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
@@ -296,7 +296,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
@@ -327,7 +327,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVilkårsvurdering skal hente allerede lagret god tro vilkårsvurdering`() {
         val behandlingsstegVilkårsvurderingDto =
-            lagVilkårsvurderingMedGodTro(perioder = listOf(PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
+            lagVilkårsvurderingMedGodTro(perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
             behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto
@@ -338,7 +338,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.shouldNotBeEmpty()
         vurdertVilkårsvurderingDto.perioder.size shouldBe 1
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("20000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
@@ -376,7 +376,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 behandling.id,
                 lagVilkårsvurderingMedGodTro(
                     perioder = listOf(
-                        PeriodeDto(
+                        Datoperiode(
                             YearMonth.of(2020, 2),
                             YearMonth.of(2020, 2)
                         )
@@ -400,7 +400,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.count { !it.foreldet } shouldBe 2
 
         val ikkeVurdertPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        ikkeVurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        ikkeVurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         ikkeVurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         ikkeVurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         ikkeVurdertPeriode.reduserteBeløper.shouldBeEmpty()
@@ -410,7 +410,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         ikkeVurdertPeriode.begrunnelse.shouldBeNull()
 
         val vurdertPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        vurdertPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        vurdertPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         vurdertPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         vurdertPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         assertAktiviteter(vurdertPeriode.aktiviteter)
@@ -447,7 +447,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 behandling.id,
                 lagVilkårsvurderingMedGodTro(
                     perioder = listOf(
-                        PeriodeDto(
+                        Datoperiode(
                             YearMonth.of(2020, 2),
                             YearMonth.of(2020, 2)
                         )
@@ -467,7 +467,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vurdertVilkårsvurderingDto.perioder.count { it.foreldet } shouldBe 2
 
         val førsteForeldetPeriode = vurdertVilkårsvurderingDto.perioder[0]
-        førsteForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+        førsteForeldetPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         førsteForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         førsteForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         førsteForeldetPeriode.reduserteBeløper.shouldBeEmpty()
@@ -477,7 +477,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         førsteForeldetPeriode.begrunnelse shouldBe "foreldelse begrunnelse 1"
 
         val andreForeldetPeriode = vurdertVilkårsvurderingDto.perioder[1]
-        andreForeldetPeriode.periode shouldBe PeriodeDto(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
+        andreForeldetPeriode.periode shouldBe Datoperiode(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29))
         andreForeldetPeriode.hendelsestype shouldBe Hendelsestype.ANNET
         andreForeldetPeriode.feilutbetaltBeløp shouldBe BigDecimal("10000")
         andreForeldetPeriode.reduserteBeløper.shouldBeEmpty()
@@ -537,7 +537,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 behandling.id,
                 lagVilkårsvurderingMedGodTro(
                     listOf(
-                        PeriodeDto(
+                        Datoperiode(
                             YearMonth.of(2020, 1),
                             YearMonth.of(2020, 2)
                         )
@@ -568,7 +568,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurdering.perioder.shouldNotBeEmpty()
         vilkårsvurdering.perioder.size shouldBe 1
         val vurdertPeriode = vilkårsvurdering.perioder.toList()[0]
-        vurdertPeriode.periode shouldBe Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
+        vurdertPeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
         vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         vurdertPeriode.aktsomhet.shouldNotBeNull()
@@ -636,7 +636,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         særligGrunn: SærligGrunnDto
     ): BehandlingsstegVilkårsvurderingDto {
         val periode = VilkårsvurderingsperiodeDto(
-            periode = PeriodeDto(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
+            periode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             begrunnelse = "Vilkårsvurdering begrunnelse",
             aktsomhetDto = AktsomhetDto(
@@ -655,7 +655,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagVilkårsvurderingMedGodTro(
-        perioder: List<PeriodeDto>,
+        perioder: List<Datoperiode>,
         beløpTilbakekreves: BigDecimal? = null
     ): BehandlingsstegVilkårsvurderingDto {
         return BehandlingsstegVilkårsvurderingDto(
@@ -678,12 +678,12 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperioder =
             setOf(
                 Foreldelsesperiode(
-                    periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                    periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
                     begrunnelse = "foreldelse begrunnelse 1"
                 ),
                 Foreldelsesperiode(
-                    periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                    periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                     begrunnelse = "foreldelse begrunnelse 2"
                 )
@@ -697,12 +697,12 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     ) {
         val foreldelsesperioder = setOf(
             Foreldelsesperiode(
-                periode = Periode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                 foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
                 begrunnelse = "foreldelse begrunnelse 1"
             ),
             Foreldelsesperiode(
-                periode = Periode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                 foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                 begrunnelse = "foreldelse begrunnelse 2"
             )

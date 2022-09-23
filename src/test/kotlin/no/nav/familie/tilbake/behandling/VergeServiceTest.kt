@@ -333,7 +333,6 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus
     ) {
-
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
                 behandlingsstegstatus == it.behandlingsstegsstatus

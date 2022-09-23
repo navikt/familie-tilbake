@@ -77,7 +77,6 @@ object BehandlingMapper {
         varselSendt: Boolean,
         eksternFagsakId: String
     ): BehandlingDto {
-
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
         }

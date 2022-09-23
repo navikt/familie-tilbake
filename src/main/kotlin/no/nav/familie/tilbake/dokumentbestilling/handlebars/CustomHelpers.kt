@@ -16,7 +16,6 @@ import java.util.Locale
 class SwitchHelper : Helper<Any> {
 
     override fun apply(variabel: Any, options: Options): Any {
-
         val variabelnavn: MutableList<String> = ArrayList()
         val variabelverdier: MutableList<Any> = ArrayList()
         variabelnavn.add("__condition_fulfilled")
@@ -40,6 +39,7 @@ class CaseHelper : Helper<Any?> {
 
     override fun apply(caseKonstant: Any?, options: Options): Any {
         val konstant = if (options.hash.isEmpty()) caseKonstant else options.hash
+
         @Suppress("UNCHECKED_CAST")
         val model = options.context.model() as MutableMap<String, Any>
         val conditionVariable = model["__condition_variable"]

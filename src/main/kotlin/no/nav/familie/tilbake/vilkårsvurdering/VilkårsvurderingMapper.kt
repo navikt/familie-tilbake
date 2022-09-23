@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.AktivitetDto
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.RedusertBeløpDto
 import no.nav.familie.tilbake.api.dto.SærligGrunnDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.familie.tilbake.beregning.BeløpsberegningUtil
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -36,18 +35,17 @@ object VilkårsvurderingMapper {
 
     fun tilRespons(
         vilkårsvurdering: Vilkårsvurdering?,
-        perioder: List<Periode>,
-        foreldetPerioderMedBegrunnelse: Map<Periode, String>,
+        perioder: List<Månedsperiode>,
+        foreldetPerioderMedBegrunnelse: Map<Månedsperiode, String>,
         faktaFeilutbetaling: FaktaFeilutbetaling,
         kravgrunnlag431: Kravgrunnlag431
     ): VurdertVilkårsvurderingDto {
-
         // allerede behandlet perioder uten perioder som er foreldet
         val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
             ?.filter { it.periode !in foreldetPerioderMedBegrunnelse }
             ?.map {
                 VurdertVilkårsvurderingsperiodeDto(
-                    periode = PeriodeDto(it.periode),
+                    periode = it.periode.toDatoperiode(),
                     feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
                     hendelsestype = hentHendelsestype(
                         faktaFeilutbetaling.perioder,
@@ -63,7 +61,7 @@ object VilkårsvurderingMapper {
 
         val ikkeBehandletPerioder = perioder.map {
             VurdertVilkårsvurderingsperiodeDto(
-                periode = PeriodeDto(it),
+                periode = it.toDatoperiode(),
                 feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it),
                 hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
                 reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
@@ -74,7 +72,7 @@ object VilkårsvurderingMapper {
 
         val foreldetPerioder = foreldetPerioderMedBegrunnelse.map { (periode, begrunnelse) ->
             VurdertVilkårsvurderingsperiodeDto(
-                periode = PeriodeDto(periode),
+                periode = periode.toDatoperiode(),
                 feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, periode),
                 hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, periode),
                 reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
@@ -101,7 +99,7 @@ object VilkårsvurderingMapper {
     ): Vilkårsvurdering {
         val vilkårsvurderingsperiode = vilkårsvurderingsperioder.map {
             Vilkårsvurderingsperiode(
-                periode = Periode(it.periode.fom, it.periode.tom),
+                periode = Månedsperiode(it.periode.fom, it.periode.tom),
                 begrunnelse = it.begrunnelse,
                 vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
                 godTro = tilDomeneGodTro(it.godTroDto),
@@ -197,19 +195,19 @@ object VilkårsvurderingMapper {
             )
         }?.toSet() ?: emptySet()
 
-    private fun beregnFeilutbetaltBeløp(kravgrunnlag431: Kravgrunnlag431, periode: Periode): BigDecimal =
+    private fun beregnFeilutbetaltBeløp(kravgrunnlag431: Kravgrunnlag431, periode: Månedsperiode): BigDecimal =
         KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             .setScale(0, RoundingMode.HALF_UP)
 
     private fun hentHendelsestype(
         faktaPerioder: Set<FaktaFeilutbetalingsperiode>,
-        vurdertVilkårsperiode: Periode
+        vurdertVilkårsperiode: Månedsperiode
     ): Hendelsestype =
         faktaPerioder.first { it.periode.overlapper(vurdertVilkårsperiode) }.hendelsestype
 
     private fun utledReduserteBeløp(
         kravgrunnlag431: Kravgrunnlag431,
-        vurdertVilkårsperiode: Periode
+        vurdertVilkårsperiode: Månedsperiode
     ): List<RedusertBeløpDto> {
         val perioder = kravgrunnlag431.perioder.filter { vurdertVilkårsperiode.overlapper(it.periode) }
         val redusertBeløper = mutableListOf<RedusertBeløpDto>()
@@ -232,7 +230,7 @@ object VilkårsvurderingMapper {
 
     private fun hentAktiviteter(
         kravgrunnlag431: Kravgrunnlag431,
-        vurdertVilkårsperiode: Periode
+        vurdertVilkårsperiode: Månedsperiode
     ): List<AktivitetDto> {
         val perioder = kravgrunnlag431.perioder.filter { vurdertVilkårsperiode.overlapper(it.periode) }
         val aktiviteter = mutableListOf<AktivitetDto>()

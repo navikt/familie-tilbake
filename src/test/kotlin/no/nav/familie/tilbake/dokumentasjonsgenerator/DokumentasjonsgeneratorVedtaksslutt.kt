@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentasjonsgenerator
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
@@ -187,9 +187,11 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 totaltRentebeløp = BigDecimal.valueOf(100)
             ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
-            hjemmel = if (flereLovhjemler)
+            hjemmel = if (flereLovhjemler) {
                 HbHjemmel("<lovhjemler her>", true)
-            else HbHjemmel("<lovhjemmel her>"),
+            } else {
+                HbHjemmel("<lovhjemmel her>")
+            },
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(1000),
                 varsletDato = LocalDate.of(2020, 4, 4)
@@ -197,12 +199,18 @@ class DokumentasjonsgeneratorVedtaksslutt {
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
             ansvarligBeslutter = "<Beslutters navn>",
             søker = HbPerson(navn = "<Søkers navn>"),
-            vedtaksbrevstype = if (feilutbetaltBeløpBortfalt)
-                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT else Vedtaksbrevstype.ORDINÆR,
+            vedtaksbrevstype = if (feilutbetaltBeløpBortfalt) {
+                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
+            } else {
+                Vedtaksbrevstype.ORDINÆR
+            },
             behandling = HbBehandling(
                 erRevurdering = erRevurdering,
-                originalBehandlingsdatoFagsakvedtak = if (erRevurdering)
-                    PERIODE1.fom else null
+                originalBehandlingsdatoFagsakvedtak = if (erRevurdering) {
+                    PERIODE1.fom
+                } else {
+                    null
+                }
             )
         )
     }
@@ -235,7 +243,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         return listOf(lagPeriode(PERIODE1))
     }
 
-    private fun lagPeriode(periode: Handlebarsperiode): HbVedtaksbrevsperiode {
+    private fun lagPeriode(periode: Datoperiode): HbVedtaksbrevsperiode {
         return HbVedtaksbrevsperiode(
             periode = periode,
             kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
@@ -285,8 +293,8 @@ class DokumentasjonsgeneratorVedtaksslutt {
 
     companion object {
 
-        private val PERIODE1 = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
-        private val PERIODE2 = Handlebarsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+        private val PERIODE1 = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
+        private val PERIODE2 = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
         private val trueFalse = booleanArrayOf(true, false)
         const val VEDTAK_SLUTT = "vedtak/vedtak_slutt"
     }

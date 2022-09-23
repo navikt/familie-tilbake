@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -40,7 +41,8 @@ data class Vedtaksbrevgrunnlag(
     val eksternFagsakId: String,
     val fagsystem: Fagsystem,
     val ytelsestype: Ytelsestype,
-    @MappedCollection(idColumn = "fagsak_id") val behandlinger: Set<Vedtaksbrevbehandling>
+    @MappedCollection(idColumn = "fagsak_id") val behandlinger: Set<Vedtaksbrevbehandling>,
+    @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL) val institusjon: Institusjon? = null
 ) {
 
     val behandling
@@ -51,7 +53,7 @@ data class Vedtaksbrevgrunnlag(
 
     val harVerge get() = behandling.verger.any { it.aktiv }
 
-    val brevmottager get() = if (harVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+    val brevmottager get() = if (harVerge) Brevmottager.VERGE else if (institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
 
     val aktivVerge get() = behandling.verger.firstOrNull { it.aktiv }
 

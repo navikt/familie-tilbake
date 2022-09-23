@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
@@ -142,7 +142,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på bokmål`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NB,
             false,
@@ -164,7 +163,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet uten skatt på nynorsk`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NN,
             false,
@@ -186,7 +184,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på bokmål`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NB,
             true,
@@ -208,7 +205,6 @@ class TekstformatererVarselbrevTest {
 
     @Test
     fun `lagVarselbrevsvedleggHtml skal lage oversikt over varselet med skatt på nynorsk`() {
-
         val vedleggsdata = Vedleggsdata(
             Språkkode.NN,
             true,
@@ -228,21 +224,21 @@ class TekstformatererVarselbrevTest {
         html shouldBe fasit
     }
 
-    private fun lagFeilutbetalingerMedFlerePerioder(): List<Handlebarsperiode> {
-        val periode1 = Handlebarsperiode(
+    private fun lagFeilutbetalingerMedFlerePerioder(): List<Datoperiode> {
+        val periode1 = Datoperiode(
             LocalDate.of(2019, 3, 3),
             LocalDate.of(2020, 3, 3)
         )
-        val periode2 = Handlebarsperiode(
+        val periode2 = Datoperiode(
             LocalDate.of(2022, 3, 3),
             LocalDate.of(2024, 3, 3)
         )
         return listOf(periode1, periode2)
     }
 
-    private fun lagFeilutbetalingerMedKunEnPeriode(): List<Handlebarsperiode> {
+    private fun lagFeilutbetalingerMedKunEnPeriode(): List<Datoperiode> {
         return listOf(
-            Handlebarsperiode(
+            Datoperiode(
                 LocalDate.of(2019, 3, 3),
                 LocalDate.of(2020, 3, 3)
             )

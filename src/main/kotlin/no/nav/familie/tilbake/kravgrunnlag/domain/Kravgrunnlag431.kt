@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag.domain
 
-import no.nav.familie.tilbake.common.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -53,7 +53,7 @@ data class Kravgrunnlagsperiode432(
     @Id
     val id: UUID = UUID.randomUUID(),
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val periode: Periode,
+    val periode: Månedsperiode,
     @Column("manedlig_skattebelop")
     val månedligSkattebeløp: BigDecimal,
     @MappedCollection(idColumn = "kravgrunnlagsperiode432_id")

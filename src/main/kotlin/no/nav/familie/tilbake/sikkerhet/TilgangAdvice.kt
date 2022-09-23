@@ -62,7 +62,6 @@ class TilgangAdvice(
 
     @Before("@annotation(rolletilgangssjekk) ")
     fun sjekkTilgang(joinpoint: JoinPoint, rolletilgangssjekk: Rolletilgangssjekk) {
-
         if (ContextService.hentSaksbehandler() == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
             return
@@ -262,7 +261,6 @@ class TilgangAdvice(
         fagsak: Fagsak?,
         handling: String
     ) {
-
         val brukerRolleOgFagsystemstilgang =
             ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
 
@@ -293,7 +291,6 @@ class TilgangAdvice(
     }
 
     fun logAccess(rolletilgangssjekk: Rolletilgangssjekk, fagsak: Fagsak?, behandling: Behandling? = null) {
-
         fagsak?.let {
             auditLogger.log(
                 Sporingsdata(
@@ -303,7 +300,7 @@ class TilgangAdvice(
                     behandling?.let {
                         CustomKeyValue("behandlingEksternBrukId", behandling.eksternBrukId.toString())
                     }
-                ),
+                )
             )
         }
     }
@@ -312,7 +309,6 @@ class TilgangAdvice(
         fagsak: Fagsak?,
         handling: String
     ) {
-
         val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: return
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
         if (tilganger.any { !it.harTilgang }) {

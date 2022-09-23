@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
@@ -38,8 +38,8 @@ class VilkårsvurderingService(
             )
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val perioder = mutableListOf<Periode>()
-        val foreldetPerioderMedBegrunnelse = mutableMapOf<Periode, String>()
+        val perioder = mutableListOf<Månedsperiode>()
+        val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
         if (vurdertForeldelse == null) {
             // fakta perioder
@@ -76,7 +76,7 @@ class VilkårsvurderingService(
         )
         // filter bort perioder som er foreldet
         val ikkeForeldetPerioder = behandlingsstegVilkårsvurderingDto.vilkårsvurderingsperioder
-            .filter { !foreldelseService.erPeriodeForeldet(behandlingId, Periode(it.periode.fom, it.periode.tom)) }
+            .filter { !foreldelseService.erPeriodeForeldet(behandlingId, Månedsperiode(it.periode.fom, it.periode.tom)) }
         deaktiverEksisterendeVilkårsvurdering(behandlingId)
         vilkårsvurderingRepository.insert(
             VilkårsvurderingMapper.tilDomene(
@@ -121,7 +121,7 @@ class VilkårsvurderingService(
         }
     }
 
-    private fun erPeriodeAlleredeVurdert(vilkårsvurdering: Vilkårsvurdering?, periode: Periode): Boolean {
-        return vilkårsvurdering?.perioder?.any { periode.omslutter(it.periode) } == true
+    private fun erPeriodeAlleredeVurdert(vilkårsvurdering: Vilkårsvurdering?, periode: Månedsperiode): Boolean {
+        return vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
     }
 }

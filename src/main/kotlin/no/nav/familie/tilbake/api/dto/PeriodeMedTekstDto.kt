@@ -1,9 +1,10 @@
 package no.nav.familie.tilbake.api.dto
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import javax.validation.constraints.Size
 
 class PeriodeMedTekstDto(
-    val periode: PeriodeDto,
+    val periode: Datoperiode,
     @Size(max = 4000, message = "Fritekst for fakta er for lang")
     val faktaAvsnitt: String? = null,
     @Size(max = 4000, message = "Fritekst for foreldelse er for lang")

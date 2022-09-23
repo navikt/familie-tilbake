@@ -455,8 +455,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     ) {
         taskRepository.findByStatusIn(
             listOf(
-                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                Status.BEHANDLER, Status.FERDIG
+                Status.KLAR_TIL_PLUKK,
+                Status.UBEHANDLET,
+                Status.BEHANDLER,
+                Status.FERDIG
             ),
             page = Pageable.unpaged()
         ).any {

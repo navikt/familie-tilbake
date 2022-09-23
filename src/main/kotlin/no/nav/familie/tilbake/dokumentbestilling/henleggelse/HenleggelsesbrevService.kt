@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -28,7 +29,8 @@ class HenleggelsesbrevService(
     private val brevsporingService: BrevsporingService,
     private val fagsakRepository: FagsakRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val pdfBrevService: PdfBrevService
+    private val pdfBrevService: PdfBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager) {
@@ -36,8 +38,11 @@ class HenleggelsesbrevService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager)
         val fritekstbrevData: Fritekstbrevsdata =
-            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) {
+                lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            } else {
+                lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            }
         pdfBrevService.sendBrev(
             behandling,
             fagsak,
@@ -54,12 +59,14 @@ class HenleggelsesbrevService(
     fun hentForhåndsvisningHenleggelsesbrev(behandlingUuid: UUID, fritekst: String?): ByteArray {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingUuid)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val finnesVerge: Boolean = behandling.harVerge
-        val brevMottaker: Brevmottager = if (finnesVerge) Brevmottager.VERGE else Brevmottager.BRUKER
+        val brevMottaker: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevMottaker)
         val fritekstbrevData: Fritekstbrevsdata =
-            if (Behandlingstype.TILBAKEKREVING == behandling.type) lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-            else lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            if (Behandlingstype.TILBAKEKREVING == behandling.type) {
+                lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+            } else {
+                lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+            }
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
                 mottager = brevMottaker,
@@ -76,7 +83,6 @@ class HenleggelsesbrevService(
         fritekst: String?,
         brevmottager: Brevmottager
     ): Henleggelsesbrevsdokument {
-
         val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
             throw IllegalStateException(
@@ -119,7 +125,10 @@ class HenleggelsesbrevService(
             ytelsestype = fagsak.ytelsestype,
             behandlingstype = behandling.type,
             tittel = TITTEL_HENLEGGELSESBREV,
-            gjelderDødsfall = gjelderDødsfall
+            gjelderDødsfall = gjelderDødsfall,
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
 
         return Henleggelsesbrevsdokument(

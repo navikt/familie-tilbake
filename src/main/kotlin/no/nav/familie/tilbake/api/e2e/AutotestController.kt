@@ -100,13 +100,14 @@ class AutotestController(
 
     @PostMapping(path = ["/publiser/fagsystemsbehandling"])
     fun publishFagsystemsbehandlingsdata(
-        @Valid @RequestBody opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
+        @Valid @RequestBody
+        opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
         @RequestParam(required = false, name = "erInstitusjon") erInstitusjon: Boolean = false
     ): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
-        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321", navn = "Testorganisasjon") else null
+        val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,

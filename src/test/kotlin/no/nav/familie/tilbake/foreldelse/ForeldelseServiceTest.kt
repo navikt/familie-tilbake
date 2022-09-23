@@ -4,13 +4,13 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -55,7 +55,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
         val førsteKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
             .copy(
-                periode = Periode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
+                periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
                     yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
@@ -64,7 +64,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val andreKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
             .copy(
                 id = UUID.randomUUID(),
-                periode = Periode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
+                periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
                     yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
@@ -168,7 +168,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         vurdertForeldelsesperiode.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.FORELDET
         vurdertForeldelsesperiode.foreldelsesfrist shouldBe LocalDate.of(2017, 2, 28)
         vurdertForeldelsesperiode.oppdagelsesdato.shouldBeNull()
-        vurdertForeldelsesperiode.periode shouldBe Periode(YearMonth.of(2017, 1), YearMonth.of(2017, 1))
+        vurdertForeldelsesperiode.periode shouldBe Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1))
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         foreldelsesvurderingstype: Foreldelsesvurderingstype
     ): ForeldelsesperiodeDto {
         return ForeldelsesperiodeDto(
-            periode = PeriodeDto(fom, tom),
+            periode = Datoperiode(fom, tom),
             begrunnelse = "foreldelses begrunnelse",
             foreldelsesvurderingstype = foreldelsesvurderingstype,
             foreldelsesfrist = LocalDate.of(2017, 2, 28)

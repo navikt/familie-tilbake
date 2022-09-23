@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
@@ -37,9 +37,9 @@ import java.util.Scanner
 
 class TekstformatererVedtaksbrevVedleggTest {
 
-    private val januar = Handlebarsperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
-    private val februar = Handlebarsperiode(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 28))
-    private val mars = Handlebarsperiode(LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31))
+    private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
+    private val februar = Datoperiode(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 28))
+    private val mars = Datoperiode(LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31))
 
     private val brevmetadata = Brevmetadata(
         sakspartId = "123456",
@@ -296,7 +296,8 @@ class TekstformatererVedtaksbrevVedleggTest {
         generertBrev shouldBe fasit
     }
 
-    @Throws(IOException::class) private fun les(filnavn: String): String? {
+    @Throws(IOException::class)
+    private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->
             Scanner(resource, "UTF-8").use { scanner ->
                 scanner.useDelimiter("\\A")

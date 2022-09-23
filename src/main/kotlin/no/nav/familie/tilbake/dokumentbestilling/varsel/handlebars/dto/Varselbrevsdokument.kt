@@ -1,17 +1,17 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.BaseDokument
-import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Handlebarsperiode
 import java.time.LocalDate
 
 data class Varselbrevsdokument(
     val brevmetadata: Brevmetadata,
     val beløp: Long,
     val revurderingsvedtaksdato: LocalDate,
-    val feilutbetaltePerioder: List<Handlebarsperiode>,
+    val feilutbetaltePerioder: List<Datoperiode>,
     val varseltekstFraSaksbehandler: String? = null,
     val fristdatoForTilbakemelding: LocalDate,
     val varsletDato: LocalDate? = null,
@@ -29,9 +29,11 @@ data class Varselbrevsdokument(
 
     val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)
 
-    private val datoerHvisSammenhengendePeriode: Handlebarsperiode? = if (feilutbetaltePerioder.size == 1) {
-        Handlebarsperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
-    } else null
+    private val datoerHvisSammenhengendePeriode: Datoperiode? = if (feilutbetaltePerioder.size == 1) {
+        Datoperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
+    } else {
+        null
+    }
 
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 

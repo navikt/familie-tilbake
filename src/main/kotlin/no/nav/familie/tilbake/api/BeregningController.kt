@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.BeregnetPerioderDto
 import no.nav.familie.tilbake.api.dto.BeregningsresultatDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -41,7 +41,8 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
     )
     fun beregnBeløp(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody perioder: List<PeriodeDto>
+        @Valid @RequestBody
+        perioder: List<Datoperiode>
     ): Ressurs<BeregnetPerioderDto> {
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
     }

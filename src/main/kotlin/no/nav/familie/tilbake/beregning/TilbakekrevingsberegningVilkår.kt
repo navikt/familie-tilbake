@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.isZero
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
@@ -26,18 +26,22 @@ internal object TilbakekrevingsberegningVilkår {
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
         beregnRenter: Boolean
     ): Beregningsresultatsperiode {
-        val periode: Periode = vilkårVurdering.periode
+        val periode: Månedsperiode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
         val renter = beregnRenter && finnRenter(vilkårVurdering)
         val andel: BigDecimal? = finnAndelAvBeløp(vilkårVurdering)
         val manueltBeløp: BigDecimal? = finnManueltSattBeløp(vilkårVurdering)
         val ignoreresPgaLavtBeløp = false == vilkårVurdering.aktsomhet?.tilbakekrevSmåbeløp
         val beløpUtenRenter: BigDecimal =
-            if (ignoreresPgaLavtBeløp) BigDecimal.ZERO else finnBeløpUtenRenter(
-                delresultat.feilutbetaltBeløp,
-                andel,
-                manueltBeløp
-            )
+            if (ignoreresPgaLavtBeløp) {
+                BigDecimal.ZERO
+            } else {
+                finnBeløpUtenRenter(
+                    delresultat.feilutbetaltBeløp,
+                    andel,
+                    manueltBeløp
+                )
+            }
         val rentebeløp: BigDecimal = beregnRentebeløp(beløpUtenRenter, renter)
         val tilbakekrevingBeløp: BigDecimal = beløpUtenRenter.add(rentebeløp)
         val skattBeløp: BigDecimal =
@@ -69,7 +73,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun beregnSkattBeløp(
-        periode: Periode,
+        periode: Månedsperiode,
         bruttoTilbakekrevesBeløp: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>
     ): BigDecimal {
@@ -127,7 +131,9 @@ internal object TilbakekrevingsberegningVilkår {
             BigDecimal.ZERO
         } else if (Aktsomhet.FORSETT == aktsomhet.aktsomhet || !aktsomhet.særligeGrunnerTilReduksjon) {
             HUNDRE_PROSENT
-        } else aktsomhet.andelTilbakekreves
+        } else {
+            aktsomhet.andelTilbakekreves
+        }
     }
 
     private fun finnManueltSattBeløp(vurdering: Vilkårsvurderingsperiode): BigDecimal? {

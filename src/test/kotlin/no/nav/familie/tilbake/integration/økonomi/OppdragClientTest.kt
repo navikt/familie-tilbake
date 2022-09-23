@@ -144,7 +144,6 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentKravgrunnlag skal hente kravgrunnlag fra oppdrag`() {
-
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
@@ -171,7 +170,6 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag ikke finnes i økonomi`() {
-
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
@@ -205,7 +203,6 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når kravgrunnlag er sperret i økonomi`() {
-
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
@@ -235,7 +232,6 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentKravgrunnlag skal ikke hente kravgrunnlag fra oppdrag når økonomi ikke svarer`() {
-
         wireMockServer.stubFor(
             post(
                 urlEqualTo(

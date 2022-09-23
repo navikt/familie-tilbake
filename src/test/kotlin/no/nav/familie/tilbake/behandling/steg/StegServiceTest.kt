@@ -12,6 +12,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.prosessering.domene.Status
@@ -27,7 +29,6 @@ import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.GodTroDto
-import no.nav.familie.tilbake.api.dto.PeriodeDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.api.dto.VergeDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
@@ -45,7 +46,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.common.Periode
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -261,7 +261,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     perioder =
                     setOf(
                         grunnlagsperiode.copy(
-                            periode = Periode(
+                            periode = Månedsperiode(
                                 fom = LocalDate.of(2010, 1, 1),
                                 tom = LocalDate.of(2010, 1, 31)
                             )
@@ -271,7 +271,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
         val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(
-            periode = PeriodeDto(
+            periode = Datoperiode(
                 LocalDate.of(2010, 1, 1),
                 LocalDate.of(2010, 1, 31)
             ),
@@ -312,7 +312,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     perioder =
                     setOf(
                         grunnlagsperiode.copy(
-                            periode = Periode(
+                            periode = Månedsperiode(
                                 fom = LocalDate.of(2010, 1, 1),
                                 tom = LocalDate.of(2010, 1, 31)
                             )
@@ -325,7 +325,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        PeriodeDto(
+                        Datoperiode(
                             LocalDate.of(2010, 1, 1),
                             LocalDate.of(2010, 1, 31)
                         ),
@@ -361,7 +361,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val førstePeriode = Testdata.kravgrunnlagsperiode432
             .copy(
                 id = UUID.randomUUID(),
-                periode = Periode(
+                periode = Månedsperiode(
                     fom = LocalDate.of(2018, 1, 1),
                     tom = LocalDate.of(2018, 1, 31)
                 ),
@@ -373,7 +373,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val andrePeriode = Testdata.kravgrunnlagsperiode432
             .copy(
                 id = UUID.randomUUID(),
-                periode = Periode(
+                periode = Månedsperiode(
                     fom = LocalDate.of(2018, 2, 1),
                     tom = LocalDate.of(2018, 2, 28)
                 ),
@@ -389,12 +389,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        PeriodeDto(førstePeriode.periode),
+                        førstePeriode.periode.toDatoperiode(),
                         "foreldelses begrunnelse",
                         Foreldelsesvurderingstype.FORELDET
                     ),
                     ForeldelsesperiodeDto(
-                        PeriodeDto(andrePeriode.periode),
+                        andrePeriode.periode.toDatoperiode(),
                         "foreldelses begrunnelse",
                         Foreldelsesvurderingstype.IKKE_FORELDET
                     )
@@ -426,7 +426,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 kravgrunnlag431.copy(
                     perioder = setOf(
                         grunnlagsperiode.copy(
-                            periode = Periode(
+                            periode = Månedsperiode(
                                 LocalDate.of(2010, 1, 1),
                                 LocalDate.of(2010, 1, 31)
                             )
@@ -440,7 +440,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        PeriodeDto(
+                        Datoperiode(
                             LocalDate.of(2010, 1, 1),
                             LocalDate.of(2010, 1, 31)
                         ),
@@ -455,7 +455,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         // behandle vilkårsvurderingssteg
         val behandlingsstegVilkårsvurderingDto = lagBehandlingsstegVilkårsvurderingDto(
-            PeriodeDto(
+            Datoperiode(
                 LocalDate.of(2010, 1, 1),
                 LocalDate.of(2010, 1, 31)
             )
@@ -471,7 +471,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        PeriodeDto(
+                        Datoperiode(
                             LocalDate.of(2010, 1, 1),
                             LocalDate.of(2010, 1, 31)
                         ),
@@ -504,13 +504,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(Datoperiode(FOM, TOM)))
 
         val fritekstavsnitt =
             FritekstavsnittDto(
                 perioderMedTekst = listOf(
                     PeriodeMedTekstDto(
-                        periode = PeriodeDto(FOM, TOM),
+                        periode = Datoperiode(FOM, TOM),
                         faktaAvsnitt = "fakta tekst"
                     )
                 )
@@ -540,12 +540,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         stegService.håndterSteg(behandlingId, lagBehandlingsstegFaktaDto())
 
         // behandle vilkårsvurderingssteg
-        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(PeriodeDto(FOM, TOM)))
+        stegService.håndterSteg(behandlingId, lagBehandlingsstegVilkårsvurderingDto(Datoperiode(FOM, TOM)))
 
         val fritekstavsnitt = FritekstavsnittDto(
             perioderMedTekst = listOf(
                 PeriodeMedTekstDto(
-                    periode = PeriodeDto(FOM, TOM),
+                    periode = Datoperiode(FOM, TOM),
                     faktaAvsnitt = "fakta tekst"
                 )
             )
@@ -862,7 +862,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.KLAR)
 
         val behandlingsstegDto = lagBehandlingsstegVilkårsvurderingDto(
-            PeriodeDto(
+            Datoperiode(
                 LocalDate.of(2021, 1, 1),
                 LocalDate.of(2021, 1, 31)
             )
@@ -890,7 +890,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagBehandlingsstegFaktaDto(): BehandlingsstegFaktaDto {
         val faktaFeilutbetaltePerioderDto = FaktaFeilutbetalingsperiodeDto(
-            periode = PeriodeDto(FOM, TOM),
+            periode = Datoperiode(FOM, TOM),
             hendelsestype = Hendelsestype.ANNET,
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
         )
@@ -900,7 +900,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagBehandlingsstegVilkårsvurderingDto(periode: PeriodeDto): BehandlingsstegVilkårsvurderingDto {
+    private fun lagBehandlingsstegVilkårsvurderingDto(periode: Datoperiode): BehandlingsstegVilkårsvurderingDto {
         return BehandlingsstegVilkårsvurderingDto(
             listOf(
                 VilkårsvurderingsperiodeDto(
@@ -949,7 +949,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus
     ) {
-
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
                 behandlingsstegstatus == it.behandlingsstegsstatus
@@ -962,7 +961,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val faktaFeilutbetalingsperioder = faktaFeilutbetaling.perioder.toList()
         faktaFeilutbetalingsperioder.size shouldBe 1
         val faktaFeilutbetaltePerioderDto: FaktaFeilutbetalingsperiodeDto = behandlingsstegFaktaDto.feilutbetaltePerioder[0]
-        PeriodeDto(faktaFeilutbetalingsperioder[0].periode) shouldBe faktaFeilutbetaltePerioderDto.periode
+        faktaFeilutbetalingsperioder[0].periode.toDatoperiode() shouldBe faktaFeilutbetaltePerioderDto.periode
         faktaFeilutbetalingsperioder[0].hendelsestype shouldBe faktaFeilutbetaltePerioderDto.hendelsestype
         faktaFeilutbetalingsperioder[0].hendelsesundertype shouldBe faktaFeilutbetaltePerioderDto.hendelsesundertype
         "testverdi" shouldBe faktaFeilutbetaling.begrunnelse
@@ -986,8 +985,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private fun assertOppgave(tasktype: String, forventet: Int = 1) {
         val taskene = taskRepository.findByStatusIn(
             status = listOf(
-                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                Status.BEHANDLER, Status.FERDIG
+                Status.KLAR_TIL_PLUKK,
+                Status.UBEHANDLET,
+                Status.BEHANDLER,
+                Status.FERDIG
             ),
             page = Pageable.unpaged()
         )
@@ -1002,8 +1003,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     ) {
         taskRepository.findByStatusIn(
             listOf(
-                Status.KLAR_TIL_PLUKK, Status.UBEHANDLET,
-                Status.BEHANDLER, Status.FERDIG
+                Status.KLAR_TIL_PLUKK,
+                Status.UBEHANDLET,
+                Status.BEHANDLER,
+                Status.FERDIG
             ),
             page = Pageable.unpaged()
         ).any {

@@ -41,7 +41,8 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
 
         lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
             faktaFeilutbetaling,
-            FaktaFeilutbetaling::sporbar, FaktaFeilutbetaling::versjon
+            FaktaFeilutbetaling::sporbar,
+            FaktaFeilutbetaling::versjon
         )
         lagretFaktaFeilutbetaling.versjon shouldBe 1
     }

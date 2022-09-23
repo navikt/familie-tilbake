@@ -11,7 +11,6 @@ object Vedtaksbrevsfritekst {
     private const val FRITEKST_MARKERING_SLUTT = "\\\\FRITEKST_SLUTT"
 
     fun settInnMarkeringForFritekst(vedtaksbrevsdata: HbVedtaksbrevsdata): HbVedtaksbrevsdata {
-
         val perioder = vedtaksbrevsdata.perioder.map { periode ->
             val fritekstTypeForFakta = utledFritekstTypeFakta(periode.fakta.hendelsesundertype)
             val fakta = periode.fakta.copy(
@@ -63,13 +62,19 @@ object Vedtaksbrevsfritekst {
 
     private fun utledFritekstTypeForOppsummering(vedtaksbrevsdata: HbVedtaksbrevsdata): FritekstType {
         val hbBehandling = vedtaksbrevsdata.felles.behandling
-        return if (hbBehandling.erRevurdering && !hbBehandling.erRevurderingEtterKlage) FritekstType.PÅKREVET
-        else FritekstType.VALGFRI
+        return if (hbBehandling.erRevurdering && !hbBehandling.erRevurderingEtterKlage) {
+            FritekstType.PÅKREVET
+        } else {
+            FritekstType.VALGFRI
+        }
     }
 
     private fun utledFritekstTypeFakta(underType: Hendelsesundertype): FritekstType {
-        return if (underType in VedtaksbrevFritekstKonfigurasjon.UNDERTYPER_MED_PÅKREVD_FRITEKST)
-            FritekstType.PÅKREVET else FritekstType.VALGFRI
+        return if (underType in VedtaksbrevFritekstKonfigurasjon.UNDERTYPER_MED_PÅKREVD_FRITEKST) {
+            FritekstType.PÅKREVET
+        } else {
+            FritekstType.VALGFRI
+        }
     }
 
     @JvmOverloads fun markerValgfriFritekst(
