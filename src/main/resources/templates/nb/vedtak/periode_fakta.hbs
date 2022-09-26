@@ -19,7 +19,7 @@
     {{#if (eq fakta.hendelsesundertype "ANNET_FRITEKST")}}
 {{{fakta.fritekstFakta}}}
 
-{{#if gjelderDødsfall}}Dere{{else}}Du{{/if}} har fått {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mye utbetalt.
+{{#if gjelderDødsfall}}Det er utbetalt {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mye.{{else}}Du har fått {{{kroner kravgrunnlag.feilutbetaltBeløp}}} for mye utbetalt.{{/if}}
     {{else}}
 
 {{{fakta.fritekstFakta}}}

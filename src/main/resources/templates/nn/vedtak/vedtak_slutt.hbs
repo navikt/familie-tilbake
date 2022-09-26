@@ -10,7 +10,7 @@ Vedtaket er gjort etter {{{hjemmel.lovhjemmelVedtak}}}.
     {{#if skattepliktig}}
 _Skatt
     {{#if totalresultat.harSkattetrekk }}
-Beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake etter skatt er trekt frå, er berekna etter {{#if gjelderDødsfall}}gjennomsnittleg{{else}}ditt gjennomsnittlege{{/if}} skattetrekk per månad. {{#if (not gjelderDødsfall)}}Det gjer at beløpet du skal betale tilbake etter skatt, ikkje alltid er likt med det beløpet du mottok på konto.{{/if}}
+Beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake etter skatt er trekt frå, er berekna etter {{#if gjelderDødsfall}}gjennomsnittleg{{else}}ditt gjennomsnittlege{{/if}} skattetrekk per månad.{{#if (not gjelderDødsfall)}} Det gjer at beløpet du skal betale tilbake etter skatt, ikkje alltid er likt med det beløpet du mottok på konto.{{/if}}
 
     {{/if}}
 NAV gjev opplysningar til Skatteetaten{{#if totalresultat.harSkattetrekk }} om skattebeløpet og om beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake før skatt er trekt frå{{/if}}. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
@@ -43,7 +43,7 @@ _Har {{> pronomen}} spørsmål?
 {{> Pronomen}} finn nyttig informasjon på {{{ytelseUrl}}}
 Om {{> pronomen}} ikkje finn svar på spørsmålet {{> eiepronomen}}, kontakt oss på nav.no/kontakt.
 
-Med vennleg helsing
+Med venleg helsing
 {{{avsenderenhet}}}
 
 {venstrejustert}{{{ansvarligSaksbehandler}}}{høyrejustert}{{{ansvarligBeslutter}}}{{#if brevmetadata.finnesVerge}}

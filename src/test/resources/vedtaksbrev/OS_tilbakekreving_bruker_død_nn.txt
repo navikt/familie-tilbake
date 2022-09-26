@@ -9,7 +9,7 @@ Det burde blitt oppdaga og meldt ifrå om at overgangsstønad blei utbetalt ette
 
 Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Skatt
-Beløpet som skal betalast tilbake etter skatt er trekt frå, er berekna etter gjennomsnittleg skattetrekk per månad. 
+Beløpet som skal betalast tilbake etter skatt er trekt frå, er berekna etter gjennomsnittleg skattetrekk per månad.
 
 NAV gjev opplysningar til Skatteetaten om skattebeløpet og om beløpet som skal betalast tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
 _Korleis betale tilbake
@@ -24,7 +24,7 @@ _Har de spørsmål?
 De finn nyttig informasjon på nav.no/familie/alene-med-barn
 Om de ikkje finn svar på spørsmålet dykkar, kontakt oss på nav.no/kontakt.
 
-Med vennleg helsing
+Med venleg helsing
 NAV Arbeid og ytelser
 
 {venstrejustert}Ansvarlig Saksbehandler{høyrejustert}Ansvarlig Beslutter
