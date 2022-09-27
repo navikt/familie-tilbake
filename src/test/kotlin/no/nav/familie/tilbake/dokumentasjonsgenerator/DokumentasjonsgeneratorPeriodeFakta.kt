@@ -148,7 +148,8 @@ class DokumentasjonsgeneratorPeriodeFakta {
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(4002),
                 rentebeløp = BigDecimal.ZERO
             ),
-            fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype)
+            fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype),
+            førstePeriode = true
         )
     }
 

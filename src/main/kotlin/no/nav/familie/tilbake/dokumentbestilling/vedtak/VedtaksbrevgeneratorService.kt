@@ -252,13 +252,14 @@ class VedtaksbrevgeneratorService(
         return if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
             emptyList()
         } else {
-            beregningsresultat.beregningsresultatsperioder.map {
+            beregningsresultat.beregningsresultatsperioder.mapIndexed { index, it ->
                 lagBrevdataPeriode(
-                    it,
-                    fakta,
-                    vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
-                    vedtaksbrevgrunnlag.vurdertForeldelse,
-                    perioderFritekst
+                    resultatPeriode = it,
+                    fakta = fakta,
+                    vilkårPerioder = vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
+                    foreldelse = vedtaksbrevgrunnlag.vurdertForeldelse,
+                    perioderFritekst = perioderFritekst,
+                    førstePeriode = index == 0
                 )
             }
         }
@@ -335,7 +336,8 @@ class VedtaksbrevgeneratorService(
         fakta: FaktaFeilutbetaling,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
-        perioderFritekst: List<PeriodeMedTekstDto>
+        perioderFritekst: List<PeriodeMedTekstDto>,
+        førstePeriode: Boolean
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
         val fritekster: PeriodeMedTekstDto? =
@@ -345,7 +347,8 @@ class VedtaksbrevgeneratorService(
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
-            resultat = utledResultat(resultatPeriode, foreldelse)
+            resultat = utledResultat(resultatPeriode, foreldelse),
+            førstePeriode = førstePeriode
         )
     }
 

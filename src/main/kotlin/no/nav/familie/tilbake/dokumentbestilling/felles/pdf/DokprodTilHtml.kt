@@ -114,6 +114,6 @@ object DokprodTilHtml {
 
     private fun ekstraLinjeskiftFørHilsing(s: String): String {
         return s.replace("<p>Med vennlig hilsen", "<p class=\"hilsen\">Med vennlig hilsen")
-            .replace("<p>Med vennleg helsing", "<p class=\"hilsen\">Med vennleg helsing")
+            .replace("<p>Med venleg helsing", "<p class=\"hilsen\">Med venleg helsing")
     }
 }

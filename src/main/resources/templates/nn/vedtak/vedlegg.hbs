@@ -1,3 +1,4 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
 <h4>Oversikt over resultatet av tilbakebetalingssaka</h4>
     <table>
         <thead>
@@ -10,9 +11,9 @@
         {{/if}}
         {{#if totalresultat.harSkattetrekk}}
             <th>Beløp før skatt</th>
-            <th class="sum">Beløp du skal betale tilbake etter at skatt er trekt frå</th>
+            <th class="sum">Beløp {{> pronomen}} skal betale tilbake etter at skatt er trekt frå</th>
         {{else}}
-            <th class="sum">Beløp du skal betale tilbake</th>
+            <th class="sum">Beløp {{> pronomen}} skal betale tilbake</th>
         {{/if}}
         </tr>
         </thead>

@@ -1,3 +1,5 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}De{{else}}Du{{/if}}{{~/inline~}}
 {{#* inline "fritekst"}}
 {{#if vurderinger.fritekst}}
 
@@ -5,78 +7,87 @@
 {{/if}}
 {{/inline}}
 {{#* inline "ikke-krev-småbeløp"}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du burde forstått at beløpet var feil, er beløpet lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}. Du må derfor ikkje betale tilbake beløpet.
+{{> Pronomen}} har fått vite om {{> pronomen}} har rett til {{{ytelsesnavnUbestemt}}} og kor mykje {{> pronomen}} har rett til. Sjølv om {{> pronomen}} burde forstått at beløpet var feil, er beløpet lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}. {{> Pronomen}} må derfor ikkje betale tilbake beløpet.
 {{/inline}}
 {{#if (not vurderinger.harForeldelsesavsnitt) }}
-__Korleis har vi kome fram til at du {{#if resultat.tilbakekrevesBeløp}}{{else}}ikkje {{/if}}må betale tilbake?
+__Korleis har vi kome fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestemt}}}{{else}}du{{/if}} {{#if (not resultat.tilbakekrevesBeløp)}}ikkje {{/if}}må {{#if gjelderDødsfall}}betalast{{else}}betale{{/if}} tilbake?
 {{/if}}
-{{#if (eq vurderinger.vilkårsvurderingsresultat "FORSTO_BURDE_FORSTÅTT")}}
-    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
-        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
-        {{> ikke-krev-småbeløp}}
-        {{else}}
+{{#if gjelderDødsfall}}
+    {{#if resultat.tilbakekrevesBeløp}}
+Det burde blitt oppdaga og meldt ifrå om at {{{ytelsesnavnUbestemt}}} blei utbetalt etter at {{{søker.navn}}} døydde.
+    {{else}}
+De har ikkje fått den informasjonen de trong for å forstå at beløpet som blei utbetalt var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikkje betalast tilbake.
+    {{/if}}
+{{> fritekst}}
+{{else}}
+    {{#if (eq vurderinger.vilkårsvurderingsresultat "FORSTO_BURDE_FORSTÅTT")}}
+        {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+            {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+            {{> ikke-krev-småbeløp}}
+            {{else}}
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du burde forstått at beløpet var feil.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, burde du etter vår vurdering forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
+            {{/if}}
         {{/if}}
-    {{/if}}
-    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+        {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du må ha forstått at beløpet var feil.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, må du etter vår vurdering ha forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
+        {{/if}}
     {{/if}}
-{{/if}}
-{{#if (eq vurderinger.vilkårsvurderingsresultat "FEIL_OPPLYSNINGER_FRA_BRUKER")}}
-    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
-        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
-        {{> ikke-krev-småbeløp}}
-        {{else}}
+    {{#if (eq vurderinger.vilkårsvurderingsresultat "FEIL_OPPLYSNINGER_FRA_BRUKER")}}
+        {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+            {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+            {{> ikke-krev-småbeløp}}
+            {{else}}
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
+            {{/if}}
         {{/if}}
-    {{/if}}
-    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+        {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
+        {{/if}}
     {{/if}}
-{{/if}}
-{{#if (eq vurderinger.vilkårsvurderingsresultat "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER")}}
-    {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
-        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
-        {{> ikke-krev-småbeløp}}
-        {{else}}
+    {{#if (eq vurderinger.vilkårsvurderingsresultat "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER")}}
+        {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
+            {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+            {{> ikke-krev-småbeløp}}
+            {{else}}
 Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du burde ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
+{{> fritekst}}
+            {{/if}}
+        {{/if}}
+        {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
 {{> fritekst}}
         {{/if}}
     {{/if}}
-    {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Vi vurderer det slik at du må ha forstått at du ikkje gav oss alle opplysningane vi trong, tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
-{{> fritekst}}
-    {{/if}}
-{{/if}}
-{{#if (eq vurderinger.vilkårsvurderingsresultat "GOD_TRO")}}
-    {{#if vurderinger.beløpIBehold}}
+    {{#if (eq vurderinger.vilkårsvurderingsresultat "GOD_TRO")}}
+        {{#if vurderinger.beløpIBehold}}
 Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du fekk utbetalt var feil. Du har opplyst at du ikkje har brukt {{{kroner vurderinger.beløpIBehold}}}. Desse kan vi krevje betale, sjølv om du ikkje forstod at utbetalinga var feil.
-    {{else}}
+        {{else}}
 Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du fekk utbetalt var feil. Du må ikkje betale tilbake fordi vi ikkje har opplysningar om at du framleis har noko igjen av pengane.
-    {{/if}}
+        {{/if}}
 {{> fritekst}}
-{{/if}}
-{{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
+    {{/if}}
+    {{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
 Du har fått informasjon om kor mykje du har rett til å få i {{{ytelsesnavnUbestemt}}}, og at du må melde frå om endringer til NAV. Informasjonen du har fått forklarer om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til å få utbetalt.
 {{>fritekst}}
 
-    {{#switch vurderinger.vilkårsvurderingsresultat}}
-    {{#case "FORSTO_BURDE_FORSTÅTT"}}
+        {{#switch vurderinger.vilkårsvurderingsresultat}}
+        {{#case "FORSTO_BURDE_FORSTÅTT"}}
 Vi meiner at du forstod at beløpet du fekk utbetalt var feil. Derfor må du betale tilbake det du har fått for mykje.
-    {{/case}}
-    {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
+        {{/case}}
+        {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
 Vi vurderer det slik at du forsto at du gav oss uriktige opplysningar. Derfor må du betale tilbake det du har fått for mykje.
-    {{/case}}
-    {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
+        {{/case}}
+        {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
 Vi vurderer at du forsto at du ikkje gav oss alle nødvendige opplysningar i saka di. Du må derfor betale tilbake det du har fått for mykje.
-    {{/case}}
-    {{/switch}}
+        {{/case}}
+        {{/switch}}
+    {{/if}}
 {{/if}}

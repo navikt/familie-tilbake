@@ -246,6 +246,8 @@ class DokumentasjonsgeneratorVedtaksslutt {
     private fun lagPeriode(periode: Datoperiode): HbVedtaksbrevsperiode {
         return HbVedtaksbrevsperiode(
             periode = periode,
+            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
+            fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 vilkårsvurderingsresultat =
@@ -253,13 +255,12 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                 særligeGrunner = HbSærligeGrunner(emptyList(), null, null)
             ),
-            kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.valueOf(1000)),
             resultat = HbResultat(
                 tilbakekrevesBeløp = BigDecimal.valueOf(1000),
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(800),
                 rentebeløp = BigDecimal.ZERO
             ),
-            fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST)
+            førstePeriode = true
         )
     }
 

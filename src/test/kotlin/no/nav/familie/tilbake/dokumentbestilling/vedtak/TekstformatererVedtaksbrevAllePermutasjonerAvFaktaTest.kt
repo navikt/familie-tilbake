@@ -169,6 +169,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 utbetaltBeløp = BigDecimal.valueOf(33333),
                 riktigBeløp = BigDecimal.valueOf(23333)
             ),
+            fakta = fakta,
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,
@@ -180,7 +181,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 rentebeløp = BigDecimal(1000),
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)
             ),
-            fakta = fakta
+            førstePeriode = true
         )
     }
 
