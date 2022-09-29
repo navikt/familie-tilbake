@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.HbGrunnbeløpsperiodeUtil.utledGrunnbeløpsperioder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
@@ -373,11 +374,6 @@ class VedtaksbrevgeneratorService(
                 )
             }
     }
-
-    private fun utledGrunnbeløpsperioder(periode: Månedsperiode) =
-        finnGrunnbeløpsperioderForPeriode(periode).sortedBy { it.periode }.map {
-            HbGrunnbeløpsperiode(it.periode.fomDato, it.periode.tomDato, it.grunnbeløp.multiply(6.toBigDecimal()))
-        }
 
     private fun utledVurderinger(
         periode: Månedsperiode,
