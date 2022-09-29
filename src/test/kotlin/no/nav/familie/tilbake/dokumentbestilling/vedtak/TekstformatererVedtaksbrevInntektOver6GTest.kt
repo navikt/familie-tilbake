@@ -113,6 +113,26 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     }
 
     @Test
+    fun `skal generere tekst når perioden overlapper to grunnbeløpsperioder`() {
+        val data = HbVedtaksbrevPeriodeOgFelles(felles, periode.copy(fakta = fakta.copy(grunnbeløpsperioder = listOf(
+            HbGrunnbeløpsperiode(
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2020, 4, 30),
+                BigDecimal(99_858)
+            ),
+            HbGrunnbeløpsperiode(
+                LocalDate.of(2020, 5, 1),
+                LocalDate.of(2021, 4, 30),
+                BigDecimal(101_351)
+            )
+        ))))
+
+        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
+
+        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_to_grunnbeløpsperioder.txt")
+    }
+
+    @Test
     fun `skal generere tekst når perioden overlapper flere grunnbeløpsperioder`() {
         val data = HbVedtaksbrevPeriodeOgFelles(felles, periode.copy(fakta = fakta.copy(grunnbeløpsperioder = listOf(
             HbGrunnbeløpsperiode(

@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.handlebars
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Handlebars
-import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.JsonNodeValueResolver
 import com.github.jknack.handlebars.Template
 import com.github.jknack.handlebars.context.JavaBeanValueResolver
@@ -104,11 +103,6 @@ object FellesTekstformaterer {
             registerHelper("case", CaseHelper())
             registerHelper("var", VariableHelper())
             registerHelper("lookup-map", MapLookupHelper())
-            registerHelper("kommaOg", Helper<Any> { context, options ->
-                //val rows = options.fn(this).split("\n")
-                //rows
-                options.fn(this)
-            })
         }
     }
 
