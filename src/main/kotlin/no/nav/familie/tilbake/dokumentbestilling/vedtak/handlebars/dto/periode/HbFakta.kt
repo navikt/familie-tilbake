@@ -7,10 +7,18 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsesundertypePer
 data class HbFakta(
     val hendelsestype: Hendelsestype,
     val hendelsesundertype: Hendelsesundertype,
-    val fritekstFakta: String? = null
+    val fritekstFakta: String? = null,
+    val grunnbeløpsperioder: List<HbGrunnbeløpsperiode> = emptyList()
 ) {
 
     init {
         require(HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).contains(hendelsesundertype))
+        validerInntektOver6G()
+    }
+
+    private fun validerInntektOver6G() {
+        if (hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G) {
+            require(grunnbeløpsperioder.isNotEmpty()) { "Grunnbeløpsperioder er påkrevd hendelsesundertype=$hendelsesundertype" }
+        }
     }
 }

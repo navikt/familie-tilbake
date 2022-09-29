@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.HbUtils.hbGrunnbeløpsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
@@ -153,7 +154,8 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     private fun lagFaktatekster(felles: HbVedtaksbrevFelles, ytelsestype: Ytelsestype): Map<HendelseMedUndertype, String> {
         val resultat: MutableMap<HendelseMedUndertype, String> = LinkedHashMap()
         for (undertype in getFeilutbetalingsårsaker(ytelsestype)) {
-            val periode: HbVedtaksbrevsperiode = lagPeriodeBuilder(HbFakta(undertype.hendelsestype, undertype.hendelsesundertype))
+            val periode: HbVedtaksbrevsperiode =
+                lagPeriodeBuilder(HbFakta(undertype.hendelsestype, undertype.hendelsesundertype, null, hbGrunnbeløpsperiode))
             val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
             val tekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
             resultat[undertype] = tekst

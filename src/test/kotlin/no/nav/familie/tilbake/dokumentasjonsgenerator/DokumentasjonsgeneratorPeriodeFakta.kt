@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.AvsnittUtil
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.HbUtils.hbGrunnbeløpsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.HendelseMedUndertype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbHjemmel
@@ -148,7 +149,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(4002),
                 rentebeløp = BigDecimal.ZERO
             ),
-            fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype),
+            fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype, null, hbGrunnbeløpsperiode),
             førstePeriode = true
         )
     }
