@@ -31,7 +31,7 @@
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <jaxb-impl.version>2.3.6</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <mockk.version>1.12.5</mockk.version>
+        <mockk.version>1.13.2</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
