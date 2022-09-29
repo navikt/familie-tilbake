@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbTotalre
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVarsel
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløpsperiode
@@ -31,6 +32,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
@@ -38,6 +40,75 @@ import java.time.LocalDate
 import java.util.Scanner
 
 class TekstformatererVedtaksbrevInntektOver6GTest {
+
+    @Test
+    fun `skal generere tekst når perioden overlapper en grunnbeløpsperiode`() {
+        val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
+
+        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
+
+        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g.txt")
+    }
+
+    @Test
+    fun `skal generere tekst når perioden overlapper to grunnbeløpsperioder`() {
+        val data = HbVedtaksbrevPeriodeOgFelles(felles, periodeMedToBeløpsperioder)
+
+        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
+
+        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_to_grunnbeløpsperioder.txt")
+    }
+
+    @Test
+    fun `skal generere tekst når perioden overlapper flere grunnbeløpsperioder`() {
+        val data = HbVedtaksbrevPeriodeOgFelles(
+            felles, periodeMedTreBeløpsperioder
+        )
+
+        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
+
+        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_flere_grunnbeløpsperioder.txt")
+    }
+
+    @Nested
+    inner class HeltBrev {
+
+        @Test
+        internal fun `en periode, en beløpsperiode`() {
+            val data = HbVedtaksbrevsdata(felles, listOf(periode))
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+            val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_helt_brev_en_periode.txt")
+
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        internal fun `en periode, to beløpsperioder`() {
+            val data = HbVedtaksbrevsdata(felles, listOf(periodeMedToBeløpsperioder))
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+            val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_helt_brev_en_periode_flere_beløp.txt")
+
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        internal fun `flere periode, en beløpsperiode`() {
+            val data = HbVedtaksbrevsdata(felles, listOf(periode, periode))
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+            val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_helt_brev_flere_perioder.txt")
+
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        internal fun `flere periode, flere beløpsperioder`() {
+            val data = HbVedtaksbrevsdata(felles, listOf(periodeMedToBeløpsperioder, periodeMedToBeløpsperioder))
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+            val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_helt_brev_flere_perioder_flere_beløp.txt")
+
+            generertBrev shouldBe fasit
+        }
+    }
 
     private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
 
@@ -79,7 +150,8 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             ansvarligBeslutter = "Ansvarlig Beslutter"
         )
 
-    private val fakta = HbFakta(Hendelsestype.STØNAD_TIL_BARNETILSYN, Hendelsesundertype.INNTEKT_OVER_6G, null, hbGrunnbeløpsperiode)
+    private val fakta =
+        HbFakta(Hendelsestype.STØNAD_TIL_BARNETILSYN, Hendelsesundertype.INNTEKT_OVER_6G, null, hbGrunnbeløpsperiode)
 
     private val periode =
         HbVedtaksbrevsperiode(
@@ -103,59 +175,32 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             førstePeriode = true
         )
 
-    @Test
-    fun `skal generere tekst når perioden overlapper en grunnbeløpsperiode`() {
-        val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
+    private val toGrunnbeløpsperioder = listOf(
+        HbGrunnbeløpsperiode(
+            LocalDate.of(2020, 1, 1),
+            LocalDate.of(2020, 4, 30),
+            BigDecimal(99_858)
+        ),
+        HbGrunnbeløpsperiode(
+            LocalDate.of(2020, 5, 1),
+            LocalDate.of(2021, 4, 30),
+            BigDecimal(101_351)
+        )
+    )
 
-        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
+    private val periodeMedToBeløpsperioder =
+        periode.copy(fakta = fakta.copy(grunnbeløpsperioder = toGrunnbeløpsperioder))
 
-        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g.txt")
-    }
-
-    @Test
-    fun `skal generere tekst når perioden overlapper to grunnbeløpsperioder`() {
-        val data = HbVedtaksbrevPeriodeOgFelles(felles, periode.copy(fakta = fakta.copy(grunnbeløpsperioder = listOf(
-            HbGrunnbeløpsperiode(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2020, 4, 30),
-                BigDecimal(99_858)
-            ),
-            HbGrunnbeløpsperiode(
-                LocalDate.of(2020, 5, 1),
-                LocalDate.of(2021, 4, 30),
-                BigDecimal(101_351)
-            )
-        ))))
-
-        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
-
-        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_to_grunnbeløpsperioder.txt")
-    }
-
-    @Test
-    fun `skal generere tekst når perioden overlapper flere grunnbeløpsperioder`() {
-        val data = HbVedtaksbrevPeriodeOgFelles(felles, periode.copy(fakta = fakta.copy(grunnbeløpsperioder = listOf(
-            HbGrunnbeløpsperiode(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2020, 4, 30),
-                BigDecimal(99_858)
-            ),
-            HbGrunnbeløpsperiode(
-                LocalDate.of(2020, 5, 1),
-                LocalDate.of(2021, 4, 30),
-                BigDecimal(101_351)
-            ),
-            HbGrunnbeløpsperiode(
-                LocalDate.of(2021, 5, 1),
-                LocalDate.of(2021, 5, 31),
-                BigDecimal(104_716)
-            )
-        ))))
-
-        val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
-
-        generertTekst shouldBe les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6g_flere_grunnbeløpsperioder.txt")
-    }
+    private val periodeMedTreBeløpsperioder = periode.copy(
+        fakta = fakta.copy(
+            grunnbeløpsperioder = toGrunnbeløpsperioder +
+                    HbGrunnbeløpsperiode(
+                        LocalDate.of(2021, 5, 1),
+                        LocalDate.of(2021, 5, 31),
+                        BigDecimal(104_716)
+                    )
+        )
+    )
 
     private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->
