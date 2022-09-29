@@ -42,10 +42,29 @@ class TekstformatererHenleggelsesbrevTest {
     }
 
     @Test
+    fun `lagFritekst skal generere henleggelsesbrev dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(gjelderDødsfall = true)
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagRevurderingsfritekst skal generere henleggelsesbrev for tilbakekreving revurdering`() {
         val generertBrev: String =
             TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagRevurderingsfritekst skal generere henleggelsesbrev for tilbakekreving revurdering dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(gjelderDødsfall = true)
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String =
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering_død_bruker.txt")
         generertBrev shouldBe fasit
     }
 
@@ -81,6 +100,15 @@ class TekstformatererHenleggelsesbrevTest {
     }
 
     @Test
+    fun `lagFritekst skal generere henleggelsesbrev nynorsk dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_nn_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagRevurderingsfritekst skal generere henleggelsesbrev nynorsk for tilbakekreving revurderning`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
@@ -91,9 +119,27 @@ class TekstformatererHenleggelsesbrevTest {
     }
 
     @Test
+    fun `lagRevurderingsfritekst skal generere henleggelsesbrev nynorsk for tilbakekreving revurderning dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String =
+            TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_revurdering_nn_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift`() {
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avsluttet saken din om tilbakebetaling"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagOverskrift skal generere henleggelsesbrev overskrift dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(gjelderDødsfall = true)
+        val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
+        val fasit = "NAV har avsluttet saken om tilbakebetaling"
         overskrift shouldBe fasit
     }
 
@@ -110,6 +156,14 @@ class TekstformatererHenleggelsesbrevTest {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avslutta saka di om tilbakebetaling"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagOverskrift skal generere henleggelsesbrev overskrift nynorsk dødsfall bruker`() {
+        val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
+        val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
+        val fasit = "NAV har avslutta saka om tilbakebetaling"
         overskrift shouldBe fasit
     }
 

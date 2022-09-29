@@ -33,15 +33,19 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev`() {
-        val dokument = InnhentDokumentasjonsbrevsdokument(
-            brevmetadata = metadata,
-            fritekstFraSaksbehandler = "Dette er ein fritekst.",
-            fristdato = LocalDate.of(2020, 3, 2)
-        )
-
-        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(innhentDokumentasjonsbrevsdokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev dødsfall bruker`() {
+        val metadata = metadata.copy(gjelderDødsfall = true)
+        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = metadata)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
+
+        val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_død_bruker.txt")
         generertBrev shouldBe fasit
     }
 
@@ -86,6 +90,18 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk dødsfall bruker`() {
+        val brevMetadata = metadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
+        val dokument =
+            innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD))
+
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
+
+        val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn_død_bruker.txt")
         generertBrev shouldBe fasit
     }
 
