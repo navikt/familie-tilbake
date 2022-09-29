@@ -233,12 +233,11 @@ Du har fått stønad til barnetilsyn for barn som har fullført fjerde skoleår.
 Du har fått stønad til barnetilsyn. Fordi inntekten din er over seks ganger grunnbeløpet, har du ikke lenger rett til stønaden. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
 
-                {{#if (eq fakta.grunnbeløpsperioder.length 1)}}
-Seks ganger grunnbeløpet er {{kroner fakta.grunnbeløpsperioder.[0].seksGangerBeløp}} for perioden {{dato fakta.grunnbeløpsperioder.[0].fom}} til {{dato fakta.grunnbeløpsperioder.[0].tom}}.
-                {{else}}
-Seks ganger grunnbeløpet er {{#each fakta.grunnbeløpsperioder~}}{{#if @last}} og {{/if}}{{#unless
-                            (or @first @last)}}, {{/unless}}{{kroner seksGangerBeløp}} for perioden {{dato fom}} til {{dato tom}}{{~/each}}.
-                {{/if}}
+Seks ganger grunnbeløpet er {{#each fakta.grunnbeløpsperioder}}
+    {{~#and @last (not @first)}} og {{/and}}
+    {{~#not (or @first @last)}}, {{/not}}
+    {{~kroner seksGangerBeløp}} for perioden {{dato fom}} til {{dato tom}}
+{{~/each}}.
             {{/case}}
             {{#case "KONTANTSTØTTE" }}
 Du har fått stønad til barnetilsyn og kontantstøtte. Kontantstøtte skal trekkes fra tilsynsutgiftene før stønad til barnetilsyn beregnes. Fordi stønaden ikke er blitt redusert med kontantstøtten, har du fått {{kroner
