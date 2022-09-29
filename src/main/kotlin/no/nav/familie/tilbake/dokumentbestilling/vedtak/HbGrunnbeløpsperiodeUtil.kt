@@ -6,9 +6,17 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 
 object HbGrunnbeløpsperiodeUtil {
 
-    fun utledGrunnbeløpsperioder(periode: Månedsperiode) =
-        Grunnbeløpsperioder.finnGrunnbeløpsperioderForPeriode(periode).sortedBy { it.periode }.map {
-            val snitt = it.periode.snitt(periode) ?: error("Finner ikke snitt for $periode og $it")
-            HbGrunnbeløpsperiode(snitt.fomDato, snitt.tomDato, it.grunnbeløp.multiply(6.toBigDecimal()))
+    fun utledGrunnbeløpsperioder(periode: Månedsperiode): List<HbGrunnbeløpsperiode> {
+        val perioder = Grunnbeløpsperioder.finnGrunnbeløpsperioderForPeriode(periode).sortedBy { it.periode }
+        return perioder.mapIndexed { index, beløpsperiode ->
+            val snitt = beløpsperiode.periode.snitt(periode) ?: error("Finner ikke snitt for $periode og $beløpsperiode")
+            HbGrunnbeløpsperiode(
+                snitt.fomDato,
+                snitt.tomDato,
+                beløpsperiode.grunnbeløp.multiply(6.toBigDecimal()),
+                index == 0,
+                index == perioder.size - 1
+            )
         }
+    }
 }

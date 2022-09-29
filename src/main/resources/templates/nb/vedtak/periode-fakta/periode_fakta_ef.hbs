@@ -234,8 +234,8 @@ Du har fått stønad til barnetilsyn. Fordi inntekten din er over seks ganger gr
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
 
 Seks ganger grunnbeløpet er {{#each fakta.grunnbeløpsperioder}}
-    {{~#and @last (not @first)}} og {{/and}}
-    {{~#not (or @first @last)}}, {{/not}}
+    {{~#and erSiste (not erFørste)}} og {{/and}}
+    {{~#not (or erFørste erSiste)}}, {{/not}}
     {{~kroner seksGangerBeløp}} for perioden {{dato fom}} til {{dato tom}}
 {{~/each}}.
             {{/case}}

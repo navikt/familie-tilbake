@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -175,16 +176,10 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             førstePeriode = true
         )
 
-    private val toGrunnbeløpsperioder = listOf(
-        HbGrunnbeløpsperiode(
+    private val toGrunnbeløpsperioder = HbGrunnbeløpsperiodeUtil.utledGrunnbeløpsperioder(
+        Månedsperiode(
             LocalDate.of(2020, 1, 1),
-            LocalDate.of(2020, 4, 30),
-            BigDecimal(99_858)
-        ),
-        HbGrunnbeløpsperiode(
-            LocalDate.of(2020, 5, 1),
             LocalDate.of(2021, 4, 30),
-            BigDecimal(101_351)
         )
     )
 
@@ -193,12 +188,12 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
     private val periodeMedTreBeløpsperioder = periode.copy(
         fakta = fakta.copy(
-            grunnbeløpsperioder = toGrunnbeløpsperioder +
-                    HbGrunnbeløpsperiode(
-                        LocalDate.of(2021, 5, 1),
-                        LocalDate.of(2021, 5, 31),
-                        BigDecimal(104_716)
-                    )
+            grunnbeløpsperioder = HbGrunnbeløpsperiodeUtil.utledGrunnbeløpsperioder(
+                Månedsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 5, 31),
+                )
+            )
         )
     )
 
