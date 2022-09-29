@@ -9,13 +9,13 @@ object Grunnbeløpsperioder {
         require(periode.tom <= grunnbeløpsperioderMaksTom) {
             "Har ikke lagt inn grunnbeløpsperiode frem til ${periode.tom}"
         }
-        val filter = grunnbeløpsperioder.filter {
+        val perioder = grunnbeløpsperioder.filter {
             it.periode.overlapper(periode)
         }
-        require(filter.isNotEmpty()) {
+        require(perioder.isNotEmpty()) {
             "Forventer å finne treff for ${periode.fom} - ${periode.tom} i grunnbeløpsperioder"
         }
-        return filter
+        return perioder
     }
 
 }
