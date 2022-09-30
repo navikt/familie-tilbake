@@ -138,7 +138,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             ),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.of(2022, 6, 21)
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(
