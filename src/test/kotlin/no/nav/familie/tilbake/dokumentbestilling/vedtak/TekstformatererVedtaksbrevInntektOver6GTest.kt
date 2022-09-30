@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
-import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløpsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultatTestBuilder
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbSærligeGrunner
@@ -63,7 +62,8 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     @Test
     fun `skal generere tekst når perioden overlapper flere grunnbeløpsperioder`() {
         val data = HbVedtaksbrevPeriodeOgFelles(
-            felles, periodeMedTreBeløpsperioder
+            felles,
+            periodeMedTreBeløpsperioder
         )
 
         val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
@@ -179,7 +179,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     private val toGrunnbeløpsperioder = HbGrunnbeløpsperiodeUtil.utledGrunnbeløpsperioder(
         Månedsperiode(
             LocalDate.of(2020, 1, 1),
-            LocalDate.of(2021, 4, 30),
+            LocalDate.of(2021, 4, 30)
         )
     )
 
@@ -191,7 +191,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             grunnbeløpsperioder = HbGrunnbeløpsperiodeUtil.utledGrunnbeløpsperioder(
                 Månedsperiode(
                     LocalDate.of(2020, 1, 1),
-                    LocalDate.of(2021, 5, 31),
+                    LocalDate.of(2021, 5, 31)
                 )
             )
         )

@@ -16,10 +16,9 @@ internal class HbGrunnbeløpsperiodeUtilTest {
 
         result shouldHaveSize 1
         result[0].fom shouldBe LocalDate.of(2021, 3, 1)
-        result[0].tom shouldBe  LocalDate.of(2021, 3, 31)
+        result[0].tom shouldBe LocalDate.of(2021, 3, 31)
         result[0].erFørste shouldBe true
         result[0].erSiste shouldBe true
-
     }
 
     @Test
@@ -36,12 +35,12 @@ internal class HbGrunnbeløpsperiodeUtilTest {
 
         result shouldHaveSize 2
         result[0].fom shouldBe LocalDate.of(2021, 3, 1)
-        result[0].tom shouldBe  LocalDate.of(2021, 4, 30)
+        result[0].tom shouldBe LocalDate.of(2021, 4, 30)
         result[0].erFørste shouldBe true
         result[0].erSiste shouldBe false
 
         result[1].fom shouldBe LocalDate.of(2021, 5, 1)
-        result[1].tom shouldBe  LocalDate.of(2021, 6, 30)
+        result[1].tom shouldBe LocalDate.of(2021, 6, 30)
         result[1].erFørste shouldBe false
         result[1].erSiste shouldBe true
     }
@@ -52,10 +51,10 @@ internal class HbGrunnbeløpsperiodeUtilTest {
 
         result shouldHaveSize 2
         result[0].fom shouldBe LocalDate.of(2021, 4, 1)
-        result[0].tom shouldBe  LocalDate.of(2021, 4, 30)
+        result[0].tom shouldBe LocalDate.of(2021, 4, 30)
 
         result[1].fom shouldBe LocalDate.of(2021, 5, 1)
-        result[1].tom shouldBe  LocalDate.of(2021, 5, 31)
+        result[1].tom shouldBe LocalDate.of(2021, 5, 31)
     }
 
     @Test
@@ -64,7 +63,7 @@ internal class HbGrunnbeløpsperiodeUtilTest {
 
         result shouldHaveSize 1
         result[0].fom shouldBe LocalDate.of(2021, 5, 1)
-        result[0].tom shouldBe  LocalDate.of(2022, 4, 30)
+        result[0].tom shouldBe LocalDate.of(2022, 4, 30)
     }
 
     @Test
@@ -73,17 +72,17 @@ internal class HbGrunnbeløpsperiodeUtilTest {
 
         result shouldHaveSize 3
         result[0].fom shouldBe LocalDate.of(2021, 3, 1)
-        result[0].tom shouldBe  LocalDate.of(2021, 4, 30)
+        result[0].tom shouldBe LocalDate.of(2021, 4, 30)
         result[0].erFørste shouldBe true
         result[0].erSiste shouldBe false
 
         result[1].fom shouldBe LocalDate.of(2021, 5, 1)
-        result[1].tom shouldBe  LocalDate.of(2022, 4, 30)
+        result[1].tom shouldBe LocalDate.of(2022, 4, 30)
         result[1].erFørste shouldBe false
         result[1].erSiste shouldBe false
 
         result[2].fom shouldBe LocalDate.of(2022, 5, 1)
-        result[2].tom shouldBe  LocalDate.of(2022, 6, 30)
+        result[2].tom shouldBe LocalDate.of(2022, 6, 30)
         result[2].erFørste shouldBe false
         result[2].erSiste shouldBe true
     }

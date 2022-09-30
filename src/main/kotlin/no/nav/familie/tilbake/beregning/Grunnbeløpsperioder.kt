@@ -17,7 +17,6 @@ object Grunnbeløpsperioder {
         }
         return perioder
     }
-
 }
 
 data class Grunnbeløp(
