@@ -60,7 +60,6 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
             generertBrev shouldBe fasit
         }
-
     }
 
     private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
