@@ -5,6 +5,22 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
+object Grunnbeløpsperioder {
+
+    fun finnGrunnbeløpsperioder(periode: Månedsperiode): List<Grunnbeløp> {
+        require(periode.tom <= grunnbeløpsperioderMaksTom) {
+            "Har ikke lagt inn grunnbeløpsperiode frem til ${periode.tom}"
+        }
+        val perioder = grunnbeløpsperioder.filter {
+            it.periode.overlapper(periode)
+        }
+        require(perioder.isNotEmpty()) {
+            "Forventer å finne treff for ${periode.fom} - ${periode.tom} i grunnbeløpsperioder"
+        }
+        return perioder.sortedBy { it.periode }
+    }
+}
+
 data class Grunnbeløp(
     val periode: Månedsperiode,
     val grunnbeløp: BigDecimal,
@@ -12,16 +28,11 @@ data class Grunnbeløp(
     val gjennomsnittPerÅr: BigDecimal? = null
 )
 
-fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Grunnbeløp> {
-    return grunnbeløpsperioder
-        .filter { it.periode.overlapper(periode) }
-        .sortedBy { it.periode }
-}
-
-val grunnbeløpsperioder: List<Grunnbeløp> =
+// Kopiert inn fra https://github.com/navikt/g
+private val grunnbeløpsperioder: List<Grunnbeløp> =
     listOf(
         Grunnbeløp(
-            periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.from(LocalDate.MAX)),
+            periode = Månedsperiode("2022-05" to "2023-04"), // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
             grunnbeløp = 111_477.toBigDecimal(),
             perMnd = 9_290.toBigDecimal(),
             gjennomsnittPerÅr = 109_784.toBigDecimal()
@@ -101,3 +112,5 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
 
         )
     )
+
+private val grunnbeløpsperioderMaksTom = grunnbeløpsperioder.maxOf { it.periode.tom }

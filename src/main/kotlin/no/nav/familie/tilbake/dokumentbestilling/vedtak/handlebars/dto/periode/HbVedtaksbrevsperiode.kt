@@ -20,4 +20,4 @@ data class HbVedtaksbrevsperiode(
     }
 }
 
-data class HbGrunnbeløp(val innskuddstekst: String, val tilleggstekst: String? = null)
+data class HbGrunnbeløp(val tekst6GangerGrunnbeløp: String? = null)
