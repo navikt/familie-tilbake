@@ -124,7 +124,8 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
                 )
             ),
             resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
-            grunnbeløp = grunnbeløp
+            grunnbeløp = grunnbeløp,
+            førstePeriode = true
         )
 
     private val periodeMedEnBeløpsperiode = lagPeriode(
