@@ -9,6 +9,7 @@ data class HbVedtaksbrevsperiode(
     val fakta: HbFakta,
     val vurderinger: HbVurderinger,
     val resultat: HbResultat,
+    val førstePeriode: Boolean,
     val grunnbeløp: HbGrunnbeløp? = null
 ) {
 

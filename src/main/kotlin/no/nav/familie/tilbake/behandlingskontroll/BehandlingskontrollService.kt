@@ -373,7 +373,6 @@ class BehandlingskontrollService(
         venteårsak: Venteårsak? = null,
         tidsfrist: LocalDate? = null
     ): Behandlingsstegsinfo {
-
         return Behandlingsstegsinfo(
             behandlingssteg = behandlingssteg,
             behandlingsstegstatus = behandlingsstegstatus,

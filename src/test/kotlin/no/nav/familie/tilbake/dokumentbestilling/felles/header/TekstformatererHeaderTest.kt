@@ -35,8 +35,8 @@ class TekstformatererHeaderTest {
     fun `lagHeader brev til institusjon`() {
         val generertHeader: String =
             TekstformatererHeader.lagHeader(
-                brevmetadata.copy(institusjon = Institusjon("987654321", "Testinstitusjon")),
-                "Dette er en header"
+                brevmetadata = brevmetadata.copy(institusjon = Institusjon("987654321", "Testinstitusjon")),
+                overskrift = "Dette er en header"
             )
         generertHeader shouldBe institusjonHeader()
     }

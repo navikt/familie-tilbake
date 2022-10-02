@@ -42,6 +42,7 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.AnnenVurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import org.springframework.stereotype.Service
@@ -52,7 +53,8 @@ import java.time.format.DateTimeFormatter
 @Service
 class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
-    private val eksterneDataForBrevService: EksterneDataForBrevService
+    private val eksterneDataForBrevService: EksterneDataForBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun genererVedtaksbrevForSending(
@@ -256,13 +258,14 @@ class VedtaksbrevgeneratorService(
         return if (vedtaksbrevgrunnlag.utledVedtaksbrevstype() == Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT) {
             emptyList()
         } else {
-            beregningsresultat.beregningsresultatsperioder.map {
+            beregningsresultat.beregningsresultatsperioder.mapIndexed { index, it ->
                 lagBrevdataPeriode(
-                    it,
-                    fakta,
-                    vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
-                    vedtaksbrevgrunnlag.vurdertForeldelse,
-                    perioderFritekst
+                    resultatPeriode = it,
+                    fakta = fakta,
+                    vilkårPerioder = vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
+                    foreldelse = vedtaksbrevgrunnlag.vurdertForeldelse,
+                    perioderFritekst = perioderFritekst,
+                    førstePeriode = index == 0
                 )
             }
         }
@@ -330,7 +333,7 @@ class VedtaksbrevgeneratorService(
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
             gjelderDødsfall = personinfo.dødsdato != null,
-            institusjon = vedtaksbrevgrunnlag.institusjon
+            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) }
         )
     }
 
@@ -367,7 +370,8 @@ class VedtaksbrevgeneratorService(
         fakta: FaktaFeilutbetaling,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
-        perioderFritekst: List<PeriodeMedTekstDto>
+        perioderFritekst: List<PeriodeMedTekstDto>,
+        førstePeriode: Boolean
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
         val fritekster: PeriodeMedTekstDto? =
@@ -378,6 +382,7 @@ class VedtaksbrevgeneratorService(
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
             resultat = utledResultat(resultatPeriode, foreldelse),
+            førstePeriode = førstePeriode,
             grunnbeløp = lagHbGrunnbeløp(periode)
         )
     }

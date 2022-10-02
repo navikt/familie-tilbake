@@ -35,7 +35,11 @@ class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutb
         AuditLoggerEvent.ACCESS,
         HenteParam.BEHANDLING_ID
     )
-    fun hentFaktaomfeilutbetaling(@NotNull @PathVariable("behandlingId") behandlingId: UUID): Ressurs<FaktaFeilutbetalingDto> {
+    fun hentFaktaomfeilutbetaling(
+        @NotNull
+        @PathVariable("behandlingId")
+        behandlingId: UUID
+    ): Ressurs<FaktaFeilutbetalingDto> {
         return Ressurs.success(faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId))
     }
 }

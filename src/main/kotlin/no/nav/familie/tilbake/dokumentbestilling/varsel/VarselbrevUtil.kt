@@ -8,7 +8,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.common.ContextService
@@ -25,6 +24,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -34,7 +34,8 @@ import java.util.UUID
 class VarselbrevUtil(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val oppdragClient: OppdragClient,
-    private val kravgrunnlagRepository: KravgrunnlagRepository
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     companion object {
@@ -97,10 +98,7 @@ class VarselbrevUtil(
             tittel = tittel,
             gjelderDødsfall = personinfo.dødsdato != null,
             institusjon = request.institusjon?.let {
-                Institusjon(
-                    organisasjonsnummer = it.organisasjonsnummer,
-                    navn = it.navn
-                )
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
             }
         )
 
@@ -140,7 +138,9 @@ class VarselbrevUtil(
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
             gjelderDødsfall = gjelderDødsfall,
-            institusjon = fagsak.institusjon
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
     }
 

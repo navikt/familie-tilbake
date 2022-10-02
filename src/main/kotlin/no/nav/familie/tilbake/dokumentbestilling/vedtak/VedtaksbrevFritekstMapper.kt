@@ -35,7 +35,6 @@ object VedtaksbrevFritekstMapper {
     }
 
     fun mapFritekstFraDb(fritekstPerioder: Set<Vedtaksbrevsperiode>): List<PeriodeMedTekstDto> {
-
         val perioderTilMap = HashMap<Månedsperiode, MutableMap<Friteksttype, String>>()
 
         fritekstPerioder.forEach {

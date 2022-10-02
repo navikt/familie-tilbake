@@ -170,6 +170,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 utbetaltBeløp = BigDecimal.valueOf(33333),
                 riktigBeløp = BigDecimal.valueOf(23333)
             ),
+            fakta = fakta,
             grunnbeløp = HbGrunnbeløp("714 000", "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
@@ -182,7 +183,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 rentebeløp = BigDecimal(1000),
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)
             ),
-            fakta = fakta
+            førstePeriode = true
         )
     }
 

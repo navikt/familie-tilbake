@@ -197,7 +197,6 @@ object KravgrunnlagValidator {
     }
 
     private fun validerYtelsesPosteringTilbakekrevesMotNyttOgOpprinneligUtbetalt(kravgrunnlag: DetaljertKravgrunnlagDto) {
-
         var harPeriodeMedBeløpMindreEnnDiff = false
         var harPeriodeMedBeløpStørreEnnDiff = false
 

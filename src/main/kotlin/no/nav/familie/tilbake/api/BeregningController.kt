@@ -41,7 +41,8 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
     )
     fun beregnBeløp(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody perioder: List<Datoperiode>
+        @Valid @RequestBody
+        perioder: List<Datoperiode>
     ): Ressurs<BeregnetPerioderDto> {
         return Ressurs.success(tilbakekrevingsberegningService.beregnBeløp(behandlingId, perioder))
     }

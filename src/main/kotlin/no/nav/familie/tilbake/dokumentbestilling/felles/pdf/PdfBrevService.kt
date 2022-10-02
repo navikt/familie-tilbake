@@ -122,7 +122,10 @@ class PdfBrevService(
     }
 
     private fun lagHeader(data: Brevdata): String {
-        return TekstformatererHeader.lagHeader(data.metadata, data.overskrift)
+        return TekstformatererHeader.lagHeader(
+            brevmetadata = data.metadata,
+            overskrift = data.overskrift
+        )
     }
 
     private fun utledDistribusjonstype(brevtype: Brevtype): Distribusjonstype {
@@ -132,6 +135,7 @@ class PdfBrevService(
             Brevtype.HENLEGGELSE -> Distribusjonstype.ANNET
         }
     }
+
     private val distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID.name
 
     companion object {

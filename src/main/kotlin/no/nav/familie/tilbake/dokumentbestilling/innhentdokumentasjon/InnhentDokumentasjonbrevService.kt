@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -26,7 +27,8 @@ class InnhentDokumentasjonbrevService(
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val pdfBrevService: PdfBrevService
+    private val pdfBrevService: PdfBrevService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -107,7 +109,9 @@ class InnhentDokumentasjonbrevService(
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB],
             gjelderDødsfall = gjelderDødsfall,
-            institusjon = fagsak.institusjon
+            institusjon = fagsak.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+            }
         )
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata,

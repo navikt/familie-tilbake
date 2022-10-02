@@ -86,7 +86,6 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         saksbehandler: String?
     ): OppgaveResponse {
-
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)

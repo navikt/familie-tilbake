@@ -79,7 +79,6 @@ class VedtaksoppsummeringService(
         beregningsresultat: Beregningsresultat,
         vilkårsvurdering: Vilkårsvurdering
     ): List<VedtakPeriode> {
-
         return vilkårsvurdering.perioder.map { periode ->
             val beregningsresultatsperiode: Beregningsresultatsperiode =
                 beregningsresultat.beregningsresultatsperioder.first { it.periode == periode.periode }
@@ -108,7 +107,6 @@ class VedtaksoppsummeringService(
         beregningsresultat: Beregningsresultat,
         vurdertForeldelse: VurdertForeldelse
     ): List<VedtakPeriode> {
-
         return vurdertForeldelse.foreldelsesperioder.mapNotNull { periode ->
             if (periode.erForeldet()) {
                 val resultatPeriode: Beregningsresultatsperiode =

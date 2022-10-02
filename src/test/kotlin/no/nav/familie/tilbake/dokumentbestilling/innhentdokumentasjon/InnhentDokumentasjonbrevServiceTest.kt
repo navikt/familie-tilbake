@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,6 +30,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
+    private val organisasjonService: OrganisasjonService = mockk()
 
     @BeforeEach
     fun setup() {
@@ -36,7 +38,8 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository,
             behandlingRepository,
             mockEksterneDataForBrevService,
-            pdfBrevService
+            pdfBrevService,
+            organisasjonService
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling

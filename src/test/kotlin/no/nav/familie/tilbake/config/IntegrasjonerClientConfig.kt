@@ -217,10 +217,23 @@ class IntegrasjonerClientConfig {
                 )
             )
 
-        every { integrasjonerClient.hentOrganisasjon(any()) } returns Organisasjon(
-            "987654321",
-            "Bobs Burgers"
-        )
+        val organisasjonsnummer = slot<String>()
+        every { integrasjonerClient.hentOrganisasjon(capture(organisasjonsnummer)) } answers {
+            when (organisasjonsnummer.captured) {
+                "998765432" -> Organisasjon(
+                    "998765432",
+                    "Testinstitusjon"
+                )
+                "999876543" -> Organisasjon(
+                    "999876543",
+                    "Testinstitusjon med langt navn for test i frontend"
+                )
+                else -> Organisasjon(
+                    "987654321",
+                    "Bobs Burgers"
+                )
+            }
+        }
 
         every { integrasjonerClient.validerOrganisasjon(any()) } returns true
 
@@ -230,19 +243,21 @@ class IntegrasjonerClientConfig {
             "Bob",
             "Burger"
         )
-        every { integrasjonerClient.finnOppgaver(any()) } answers {
-            if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
-                FinnOppgaveResponseDto(
-                    antallTreffTotalt = 0,
-                    oppgaver = emptyList()
-                )
-            } else {
-                FinnOppgaveResponseDto(
-                    antallTreffTotalt = 1,
-                    oppgaver = listOf(Oppgave(id = 1))
-                )
+
+        every { integrasjonerClient.finnOppgaver(any()) } answers
+            {
+                if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
+                    FinnOppgaveResponseDto(
+                        antallTreffTotalt = 0,
+                        oppgaver = emptyList()
+                    )
+                } else {
+                    FinnOppgaveResponseDto(
+                        antallTreffTotalt = 1,
+                        oppgaver = listOf(Oppgave(id = 1))
+                    )
+                }
             }
-        }
 
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
 

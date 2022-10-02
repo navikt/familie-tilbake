@@ -619,7 +619,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(true))
         every { mockJoinpoint.args } returns
             arrayOf(object {
-                @Suppress("unused") val eksternBrukId = behandling.eksternBrukId
+                @Suppress("unused")
+                val eksternBrukId = behandling.eksternBrukId
             })
         val rolletilgangssjekk =
             Rolletilgangssjekk(
