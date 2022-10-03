@@ -1,8 +1,14 @@
-Vi sendte deg et varsel {{{dato varsletDato}}} om at du hadde fått for mye utbetalt i {{{ytelsesnavnUbestemt}}}. Vi har i ettertid avsluttet saken om tilbakebetaling fordi det ikke lenger er et feilutbetalt beløp å betale tilbake.
+Vi sendte {{#if (not gjelderDødsfall)}}deg {{/if}}et varsel {{{dato varsletDato}}} om at {{#if gjelderDødsfall}}det var utbetalt for mye{{else}}du hadde fått for mye utbetalt{{/if}} i {{{ytelsesnavnUbestemt}}}. Vi har i ettertid avsluttet saken om tilbakebetaling fordi det ikke lenger er et feilutbetalt beløp å betale tilbake.
 
+{{#if gjelderDødsfall}}
+_Har dere spørsmål?
+Dere finner nyttig informasjon på {{{ytelseUrl}}}.
+Hvis dere ikke finner svar på spørsmålet deres, kontakt oss på nav.no/kontakt.
+{{else}}
 _Har du spørsmål?
-Du finner nyttig informasjon på {{{ytelseUrl}}}
+Du finner nyttig informasjon på {{{ytelseUrl}}}.
 Hvis du ikke finner svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+{{/if}}
 
 Med vennlig hilsen
 {{{avsenderenhet}}}
