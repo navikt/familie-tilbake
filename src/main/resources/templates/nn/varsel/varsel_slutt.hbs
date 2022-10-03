@@ -1,4 +1,4 @@
-Før vi avgjer om {{#if gjelderDødsfall}}pengane skal betales{{else}}du skal betale{{/if}} tilbake, kan {{#if gjelderDødsfall}}de uttale de{{else}}du uttale deg{{/if}} innan {{{dato fristdatoForTilbakemelding}}}.
+Før vi avgjer om {{#if gjelderDødsfall}}pengane skal betalast{{else}}du skal betale{{/if}} tilbake, kan {{#if gjelderDødsfall}}de uttale dykk{{else}}du uttale deg{{/if}} innan {{{dato fristdatoForTilbakemelding}}}.
 {{#if ytelseMedSkatt}}
 
 Dersom {{#if gjelderDødsfall}}det må betalast{{else}}du må betale{{/if}} tilbake, reduserer vi beløpet med trekt skatt.
@@ -9,19 +9,19 @@ _Dette har skjedd
 
 {{{varseltekstFraSaksbehandler}}}
 {{/if}}
-_Dette legger vi vekt på i vurderinga vår
-For å avgjere om vi kan krevje tilbake, tek vi først stilling til dei {{#if gjelderDødsfall}}to{{else}}tre{{/if}} øvste punkta i denne lista. Dersom resultatet blir at vi kan krevje tilbake, vurderer vi om {{#if (not gjelderDødsfall)}}du skal betale tilbake {{/if}}heile eller delar av beløpet{{#if gjelderDødsfall}} skal betales tilbake{{/if}}.
+_Dette legg vi vekt på i vurderinga vår
+For å avgjere om vi kan krevje tilbake, tek vi først stilling til dei {{#if gjelderDødsfall}}to{{else}}tre{{/if}} øvste punkta i denne lista. Dersom resultatet blir at vi kan krevje tilbake, vurderer vi om {{#if (not gjelderDødsfall)}}du skal betale tilbake {{/if}}heile eller delar av beløpet{{#if gjelderDødsfall}} skal betalast tilbake{{/if}}.
 
-Vi legger vekt på
+Vi legg vekt på
 
 *-om {{#if gjelderDødsfall}}de{{else}}du{{/if}} forstod eller burde forstått at beløpet {{#if gjelderDødsfall}}som er{{else}}du fekk{{/if}} utbetalt var feil
-{{#if gjelderDødsfall}}om vi har fått informasjon fra de{{else}}om du har gitt riktig informasjon til NAV
+{{#if gjelderDødsfall}}om vi har fått informasjon frå dykk{{else}}om du har gitt riktig informasjon til NAV
 om du har gitt all informasjon til NAV i rett tid{{/if}}
 kor lang tid det har gått sidan {{{ytelsesnavnBestemt}}} blei feilutbetalt
 kor stort det feilutbetalte beløpet er
 om feilen kan vere NAV si skuld-*
 
-Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at {{#if gjelderDødsfall}}feilutbetalt beløp betalast tilbake{{else}}du betaler tilbake pengane{{/if}}.
+Sjølv om det er NAV som er skuld i feilutbetalinga, kan vi likevel krevje at {{#if gjelderDødsfall}}feilutbetalt beløp vert betalt tilbake{{else}}du betaler tilbake pengane{{/if}}.
 
 {{#if rentepliktig}}
 Dersom {{#if gjelderDødsfall}}de{{else}}du{{/if}} må betale tilbake, og {{#if gjelderDødsfall}}de{{else}}du{{/if}} har gitt oss feil eller mangelfull informasjon, kan vi krevje at {{#if gjelderDødsfall}}de{{else}}du{{/if}} betaler eit rentetillegg på ti prosent av beløpet {{#if gjelderDødsfall}}de{{else}}du{{/if}} skuldar.
@@ -35,7 +35,7 @@ De kan også ta kontakt med oss på nav.no/kontakt.
 _Rett til innsyn
 De kan be om innsyn ved å ta kontakt med oss.
 _Har de spørsmål?
-De finn nyttig informasjon på {{{ytelseUrl}}}
+De finn nyttig informasjon på {{{ytelseUrl}}}.
 Om de ikkje finn svar på spørsmåla dykkar, kontakt oss på nav.no/kontakt.
 {{else}}
 _Slik uttaler du deg
@@ -44,7 +44,7 @@ nav.no/ettersendelser.
 _Du har rett til innsyn
 På nav.no/dittnav kan du sjå dokumenta i saka di.
 _Har du spørsmål?
-Du finn nyttig informasjon på {{{ytelseUrl}}}
+Du finn nyttig informasjon på {{{ytelseUrl}}}.
 Om du ikkje finn svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
 {{/if}}
 
