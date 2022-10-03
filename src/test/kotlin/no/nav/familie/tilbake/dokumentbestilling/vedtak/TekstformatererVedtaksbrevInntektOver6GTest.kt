@@ -60,6 +60,17 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
             generertBrev shouldBe fasit
         }
+
+        @Test
+        internal fun `nynorsk - flere perioder, en beløpsperiode og tre beløpsperioder`() {
+            val data = HbVedtaksbrevsdata(felles.copy(brevmetadata.copy(språkkode = Språkkode.NN))
+
+                                          , listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder))
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+            val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6G_helt_brev_flere_perioder_flere_beløp_nn.txt")
+
+            generertBrev shouldBe fasit
+        }
     }
 
     private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))

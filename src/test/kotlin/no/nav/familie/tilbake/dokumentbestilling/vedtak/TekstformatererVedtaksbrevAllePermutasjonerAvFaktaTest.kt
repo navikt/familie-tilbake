@@ -171,7 +171,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 riktigBeløp = BigDecimal.valueOf(23333)
             ),
             fakta = fakta,
-            grunnbeløp = HbGrunnbeløp("Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
+            grunnbeløp = HbGrunnbeløp(null, "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,

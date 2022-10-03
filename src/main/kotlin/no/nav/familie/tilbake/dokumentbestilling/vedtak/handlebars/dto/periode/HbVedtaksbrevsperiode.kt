@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode
 
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
+import java.math.BigDecimal
 
 data class HbVedtaksbrevsperiode(
     val periode: Datoperiode,
@@ -20,4 +21,4 @@ data class HbVedtaksbrevsperiode(
     }
 }
 
-data class HbGrunnbeløp(val tekst6GangerGrunnbeløp: String? = null)
+data class HbGrunnbeløp(val grunnbeløpGanger6: String?, val tekst6GangerGrunnbeløp: String?)

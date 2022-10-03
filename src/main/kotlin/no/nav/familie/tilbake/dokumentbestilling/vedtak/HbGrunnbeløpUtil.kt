@@ -18,13 +18,16 @@ object HbGrunnbeløpUtil {
             formatterGrunnbeløp(it, periode)
         }
 
-        val perioder = if (grunnbeløpsperioder.size > 1) {
-            formattertPerioder.dropLast(1).joinToString(", ") + " og ${formattertPerioder.last()}"
+        return if (grunnbeløpsperioder.size > 1) {
+            val kommaSeparertePerioder = formattertPerioder.dropLast(1).joinToString(", ")
+            HbGrunnbeløp(
+                null,
+                "$kommaSeparertePerioder og ${formattertPerioder.last()}"
+            )
         } else {
-            formattertPerioder.single()
+            HbGrunnbeløp(KroneFormattererMedTusenskille.medTusenskille(grunnbeløpX6(grunnbeløpsperioder.single())), null)
         }
 
-        return HbGrunnbeløp("Seks ganger grunnbeløpet er $perioder.")
     }
 
     private fun formatterGrunnbeløp(grunnbeløp: Grunnbeløp, periode: Månedsperiode): String {
@@ -36,7 +39,10 @@ object HbGrunnbeløpUtil {
     }
 
     private fun formatterBeløpX6(grunnbeløp: Grunnbeløp): String {
-        val grunnbeløpX6 = grunnbeløp.grunnbeløp.multiply(BigDecimal.valueOf(6L))
+        val grunnbeløpX6 = grunnbeløpX6(grunnbeløp)
         return KroneFormattererMedTusenskille.formatterKronerMedTusenskille(grunnbeløpX6, utf8nonBreakingSpace)
     }
+
+    private fun grunnbeløpX6(grunnbeløp: Grunnbeløp) =
+        grunnbeløp.grunnbeløp.multiply(BigDecimal.valueOf(6L))
 }
