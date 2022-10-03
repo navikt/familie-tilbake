@@ -135,7 +135,7 @@ class KroneFormattererMedTusenskille : Helper<Any> {
             return beløpMedTusenskille + space + benevning
         }
 
-        fun medTusenskille(verdi: BigDecimal, tusenskille: Char = utf8nonBreakingSpace): String {
+        fun medTusenskille(verdi: BigDecimal, tusenskille: Char): String {
             val symbols = DecimalFormatSymbols.getInstance()
             symbols.groupingSeparator = tusenskille
             val formatter = DecimalFormat("###,###", symbols)

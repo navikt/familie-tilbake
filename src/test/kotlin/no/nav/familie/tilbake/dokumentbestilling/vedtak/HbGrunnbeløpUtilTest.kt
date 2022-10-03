@@ -13,7 +13,7 @@ internal class HbGrunnbeløpUtilTest {
         val result = lagHbGrunnbeløp(Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)))
 
         result.tekst6GangerGrunnbeløp shouldBe null
-        result.grunnbeløpGanger6 shouldBe "608 106"
+        result.grunnbeløpGanger6 shouldBe 608_106.toBigDecimal()
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class HbGrunnbeløpUtilTest {
         val result = lagHbGrunnbeløp(Månedsperiode(YearMonth.of(2021, 5), YearMonth.of(2022, 4)))
 
         result.tekst6GangerGrunnbeløp shouldBe null
-        result.grunnbeløpGanger6 shouldBe "638 394"
+        result.grunnbeløpGanger6 shouldBe 638_394.toBigDecimal()
 
     }
 

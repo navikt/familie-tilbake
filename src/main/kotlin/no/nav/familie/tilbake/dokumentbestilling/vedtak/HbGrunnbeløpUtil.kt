@@ -25,7 +25,7 @@ object HbGrunnbeløpUtil {
                 "$kommaSeparertePerioder og ${formattertPerioder.last()}"
             )
         } else {
-            HbGrunnbeløp(KroneFormattererMedTusenskille.medTusenskille(grunnbeløpX6(grunnbeløpsperioder.single())), null)
+            HbGrunnbeløp(grunnbeløpX6(grunnbeløpsperioder.single()), null)
         }
 
     }
