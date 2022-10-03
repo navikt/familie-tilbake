@@ -567,6 +567,126 @@ class TekstformatererVedtaksbrevTest {
         }
 
         @Test
+        fun `skal generere vedtaksbrev for revurdering med OS og ett barn og forsett og bruker død`() {
+            val perioder = listOf(
+                HbVedtaksbrevsperiode(
+                    januar,
+                    HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                    HbFakta(
+                        Hendelsestype.DØDSFALL,
+                        Hendelsesundertype.BRUKER_DØD
+                    ),
+                    HbVurderinger(
+                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                        vilkårsvurderingsresultat =
+                        Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                        aktsomhetsresultat = Aktsomhet.FORSETT
+                    ),
+                    HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                    true
+                )
+            )
+            val vedtaksbrevData = felles
+                .copy(
+                    fagsaksvedtaksdato = LocalDate.now(),
+                    totalresultat = HbTotalresultat(
+                        hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                        totaltTilbakekrevesBeløp = BigDecimal(10000),
+                        totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
+                        totaltRentebeløp = BigDecimal(1000)
+                    ),
+                    behandling = HbBehandling(
+                        erRevurdering = true,
+                        originalBehandlingsdatoFagsakvedtak = LocalDate.of(
+                            2019,
+                            1,
+                            1
+                        )
+                    ),
+                    hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                    varsel = HbVarsel(
+                        varsletBeløp = BigDecimal(10000),
+                        varsletDato = LocalDate.of(2020, 4, 4)
+                    ),
+                    konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                    brevmetadata = brevmetadata.copy(gjelderDødsfall = true),
+                    søker = HbPerson(
+                        navn = "Søker Søkersen",
+                        dødsdato = LocalDate.of(2018, 3, 1)
+                    ),
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                )
+            val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+            val fasit = les("/vedtaksbrev/OS_revurdering_bruker_død.txt")
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        fun `skal generere vedtaksbrev for revurdering med OS og ett barn og forsett og bruker død nynorsk`() {
+            val perioder = listOf(
+                HbVedtaksbrevsperiode(
+                    januar,
+                    HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
+                    HbFakta(
+                        Hendelsestype.DØDSFALL,
+                        Hendelsesundertype.BRUKER_DØD
+                    ),
+                    HbVurderinger(
+                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                        vilkårsvurderingsresultat =
+                        Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                        aktsomhetsresultat = Aktsomhet.FORSETT
+                    ),
+                    HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
+                    true
+                )
+            )
+            val vedtaksbrevData = felles
+                .copy(
+                    fagsaksvedtaksdato = LocalDate.now(),
+                    totalresultat = HbTotalresultat(
+                        hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                        totaltTilbakekrevesBeløp = BigDecimal(10000),
+                        totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
+                        totaltRentebeløp = BigDecimal(1000)
+                    ),
+                    behandling = HbBehandling(
+                        erRevurdering = true,
+                        originalBehandlingsdatoFagsakvedtak = LocalDate.of(
+                            2019,
+                            1,
+                            1
+                        )
+                    ),
+                    hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                    varsel = HbVarsel(
+                        varsletBeløp = BigDecimal(10000),
+                        varsletDato = LocalDate.of(2020, 4, 4)
+                    ),
+                    konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                    brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true),
+                    søker = HbPerson(
+                        navn = "Søker Søkersen",
+                        dødsdato = LocalDate.of(2018, 3, 1)
+                    ),
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                )
+            val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+            val fasit = les("/vedtaksbrev/OS_revurdering_bruker_død_nynorsk.txt")
+            generertBrev shouldBe fasit
+        }
+
+        @Test
         fun `skal generere vedtaksbrev for_KS_og forsett`() {
             val vedtaksbrevData = felles
                 .copy(
@@ -789,7 +909,7 @@ class TekstformatererVedtaksbrevTest {
         }
 
         @Test
-        fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev for OS med full tilbakebetaling`() {
+        fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev revurdering for OS med full tilbakebetaling`() {
             val fritekstVedtaksbrevsdata: HbVedtaksbrevsdata =
                 lagFritekstVedtaksbrevData(Ytelsestype.OVERGANGSSTØNAD, Vedtaksresultat.FULL_TILBAKEBETALING)
 
@@ -801,7 +921,7 @@ class TekstformatererVedtaksbrevTest {
         }
 
         @Test
-        fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev for KS med ingen tilbakebetaling`() {
+        fun `lagVedtaksbrevFritekst skal generere fritekst og uten perioder vedtaksbrev revurdering for KS med ingen tilbakebetaling`() {
             val fritekstVedtaksbrevsdata: HbVedtaksbrevsdata =
                 lagFritekstVedtaksbrevData(Ytelsestype.KONTANTSTØTTE, Vedtaksresultat.INGEN_TILBAKEBETALING)
 

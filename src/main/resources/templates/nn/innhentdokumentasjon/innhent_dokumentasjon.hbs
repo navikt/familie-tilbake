@@ -1,16 +1,25 @@
 Vi har fått nye opplysningar i saka om tilbakebetaling av {{{ytelsesnavnUbestemt}}}, men trenger meir dokumentasjon for å kunne handsame saka.
-_Du må sende oss
+_{{#if gjelderDødsfall}}De{{else}}Du{{/if}} må sende oss
 {{{fritekstFraSaksbehandler}}}
 _Saka blir behandlet etter frist har gått ut
 Dersom vi ikkje får opplysningane innan {{{dato fristdato}}}, behandlar vi saka med dei opplysningane vi har.
 
 Dette går fram av {{#if rentepliktig}}folketrygdlova § 21-3{{else}}barnetrygdlova §§ 17 og 18{{/if}}.
+{{#if gjelderDødsfall}}
+_Rett til uttale
+De kan sende uttalen til oss i posten. Adressa finn de på nav.no/ettersendelser.
+De kan også ta kontakt med oss på nav.no/kontakt.
+_Har de spørsmål?
+De finn nyttig informasjon på {{{ytelseUrl}}}.
+Om de ikkje finn svar på spørsmålet dykkar, kontakt oss på nav.no/kontakt.
+{{else}}
 _Slik uttaler du deg
 Du kan sende uttalen din ved å logge deg inn på nav.no/beskjedtilnav og velje «Send beskjed til NAV». Du kan også sende uttalen din til oss i posten. Adressa finn du på
 nav.no/ettersendelser.
 _Har du spørsmål?
-Du finn nyttig informasjon på {{{ytelseUrl}}}
+Du finn nyttig informasjon på {{{ytelseUrl}}}.
 Om du ikkje finn svar på spørsmålet ditt, kontakt oss på nav.no/kontakt.
+{{/if}}
 
 Med venleg helsing
 {{{avsenderenhet}}}

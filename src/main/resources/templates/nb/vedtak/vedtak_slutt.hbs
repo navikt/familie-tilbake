@@ -10,14 +10,14 @@ Vedtaket er gjort etter {{{hjemmel.lovhjemmelVedtak}}}.
     {{#if skattepliktig}}
 _Skatt
     {{#if totalresultat.harSkattetrekk }}
-Beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake etter skatt er trukket fra, er beregnet etter {{#if gjelderDødsfall}}gjennomsnittlig{{else}}ditt gjennomsnittlige{{/if}} skattetrekk per måned. {{#if (not gjelderDødsfall)}}Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.{{/if}}
+Beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake etter skatt er trukket fra, er beregnet etter {{#if gjelderDødsfall}}gjennomsnittlig{{else}}ditt gjennomsnittlige{{/if}} skattetrekk per måned.{{#if (not gjelderDødsfall)}} Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.{{/if}}
 
     {{/if}}
 NAV gir opplysninger til Skatteetaten{{#if totalresultat.harSkattetrekk }} om skattebeløpet og om beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake før skatt er trukket fra{{/if}}. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
     {{/if}}
 _Hvordan betale tilbake{{#if (not gjelderDødsfall)}} pengene du skylder{{/if}}
     {{#if behandling.erRevurdering}}
-NAV Innkreving vil korrigere beløpet du skal betale tilbake. Du finner mer informasjon på
+NAV Innkreving vil korrigere beløpet {{> pronomen}} skal betale tilbake. {{> Pronomen}} finner mer informasjon på
 nav.no/innkreving.
     {{else}}
 {{> Pronomen}} vil motta krav fra NAV Innkreving på det beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake. {{> Pronomen}} finner mer informasjon på nav.no/innkreving.
