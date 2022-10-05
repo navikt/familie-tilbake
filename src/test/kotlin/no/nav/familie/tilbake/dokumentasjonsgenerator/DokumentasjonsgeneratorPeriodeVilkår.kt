@@ -287,8 +287,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             ),
             konfigurasjon = HbKonfigurasjon(
                 fireRettsgebyr = BigDecimal.valueOf(4321),
-                klagefristIUker = 4,
-                halvtGrunnbeløp = BigDecimal.ZERO
+                klagefristIUker = 4
             ),
             totalresultat = HbTotalresultat(
                 hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
