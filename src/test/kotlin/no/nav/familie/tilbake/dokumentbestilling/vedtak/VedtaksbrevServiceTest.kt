@@ -347,10 +347,17 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         val oppsummeringsavsnitt = avsnittene.firstOrNull { Avsnittstype.OPPSUMMERING == it.avsnittstype }
         oppsummeringsavsnitt.shouldNotBeNull()
-        oppsummeringsavsnitt.underavsnittsliste.size shouldBe 1
-        val oppsummeringsunderavsnitt = oppsummeringsavsnitt.underavsnittsliste[0]
+        oppsummeringsavsnitt.underavsnittsliste.size shouldBe 2
+        val oppsummeringsunderavsnitt1 = oppsummeringsavsnitt.underavsnittsliste[0]
         assertUnderavsnitt(
-            underavsnitt = oppsummeringsunderavsnitt,
+            underavsnitt = oppsummeringsunderavsnitt1,
+            fritekst = "",
+            fritekstTillatt = false,
+            fritekstPåkrevet = false
+        )
+        val oppsummeringsunderavsnitt2 = oppsummeringsavsnitt.underavsnittsliste[1]
+        assertUnderavsnitt(
+            underavsnitt = oppsummeringsunderavsnitt2,
             fritekst = "oppsummering fritekst",
             fritekstTillatt = true,
             fritekstPåkrevet = false
@@ -361,7 +368,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         periodeAvsnitter.fom shouldBe LocalDate.of(2021, 1, 1)
         periodeAvsnitter.tom shouldBe LocalDate.of(2021, 3, 31)
 
-        periodeAvsnitter.underavsnittsliste.size shouldBe 6
+        periodeAvsnitter.underavsnittsliste.size shouldBe 7
         val faktaUnderavsnitt = periodeAvsnitter.underavsnittsliste
             .firstOrNull { Underavsnittstype.FAKTA == it.underavsnittstype }
         faktaUnderavsnitt.shouldNotBeNull()
@@ -376,11 +383,18 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             .firstOrNull { Underavsnittstype.FORELDELSE == it.underavsnittstype }
         foreldelseUnderavsnitt.shouldBeNull() // periodene er ikke foreldet
 
-        val vilkårUnderavsnitt = periodeAvsnitter.underavsnittsliste
-            .firstOrNull { Underavsnittstype.VILKÅR == it.underavsnittstype }
-        vilkårUnderavsnitt.shouldNotBeNull()
+        val vilkårUnderavsnitter = periodeAvsnitter.underavsnittsliste.filter { Underavsnittstype.VILKÅR == it.underavsnittstype }
+        vilkårUnderavsnitter.size shouldBe 2
+        val vilkårUnderavsnitt1 = vilkårUnderavsnitter[0]
         assertUnderavsnitt(
-            underavsnitt = vilkårUnderavsnitt,
+            underavsnitt = vilkårUnderavsnitt1,
+            fritekst = "",
+            fritekstTillatt = false,
+            fritekstPåkrevet = false
+        )
+        val vilkårUnderavsnitt2 = vilkårUnderavsnitter[1]
+        assertUnderavsnitt(
+            underavsnitt = vilkårUnderavsnitt2,
             fritekst = "vilkår fritekst",
             fritekstTillatt = true,
             fritekstPåkrevet = false
