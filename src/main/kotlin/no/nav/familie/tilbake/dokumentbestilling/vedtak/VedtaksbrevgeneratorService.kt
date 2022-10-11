@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.Fritekstbrevsdata
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.HbGrunnbeløpUtil.lagHbGrunnbeløp
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbBehandling
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbKonfigurasjon
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbPerson
@@ -348,7 +349,8 @@ class VedtaksbrevgeneratorService(
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
             resultat = utledResultat(resultatPeriode, foreldelse),
-            førstePeriode = førstePeriode
+            førstePeriode = førstePeriode,
+            grunnbeløp = lagHbGrunnbeløp(periode)
         )
     }
 
