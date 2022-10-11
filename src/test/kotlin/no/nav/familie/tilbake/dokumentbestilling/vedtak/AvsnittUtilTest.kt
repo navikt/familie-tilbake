@@ -153,13 +153,14 @@ class AvsnittUtilTest {
 
         resultat.shouldHaveSize(4)
         resultat[0].avsnittstype shouldBe Avsnittstype.OPPSUMMERING
-        resultat[0].underavsnittsliste.shouldHaveSize(1)
-        resultat[0].underavsnittsliste[0].fritekstTillatt shouldBe true
+        resultat[0].underavsnittsliste.shouldHaveSize(2)
+        resultat[0].underavsnittsliste[0].fritekstTillatt shouldBe false
+        resultat[1].underavsnittsliste[0].fritekstTillatt shouldBe true
         resultat[1].avsnittstype shouldBe Avsnittstype.PERIODE
-        resultat[1].underavsnittsliste.shouldHaveSize(6)
+        resultat[1].underavsnittsliste.shouldHaveSize(7)
         resultat[1].underavsnittsliste.filter { it.fritekstTillatt }.size shouldBe 4
         resultat[2].avsnittstype shouldBe Avsnittstype.PERIODE
-        resultat[2].underavsnittsliste.shouldHaveSize(5)
+        resultat[2].underavsnittsliste.shouldHaveSize(7)
         resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size shouldBe 3
         resultat[3].avsnittstype shouldBe Avsnittstype.TILLEGGSINFORMASJON
         resultat[3].underavsnittsliste.shouldHaveSize(11)
@@ -207,16 +208,19 @@ class AvsnittUtilTest {
 
         resultat.overskrift shouldBe "Hovedoverskrift i brevet"
         val underavsnitt: List<Underavsnitt> = resultat.underavsnittsliste
-        underavsnitt.shouldHaveSize(3)
+        underavsnitt.shouldHaveSize(4)
         underavsnitt[0].overskrift shouldBe null
         underavsnitt[0].brødtekst shouldBe "Brødtekst første avsnitt"
-        underavsnitt[0].fritekstTillatt.shouldBeTrue()
-        underavsnitt[1].overskrift shouldBe "underoverskrift"
-        underavsnitt[1].brødtekst shouldBe "Brødtekst andre avsnitt"
-        underavsnitt[1].fritekstTillatt.shouldBeFalse()
-        underavsnitt[2].overskrift shouldBe "Avsluttende overskrift uten etterfølgende tekst"
-        underavsnitt[2].brødtekst shouldBe null
+        underavsnitt[0].fritekstTillatt.shouldBeFalse()
+        underavsnitt[1].overskrift shouldBe null
+        underavsnitt[1].brødtekst shouldBe null
+        underavsnitt[1].fritekstTillatt.shouldBeTrue()
+        underavsnitt[2].overskrift shouldBe "underoverskrift"
+        underavsnitt[2].brødtekst shouldBe "Brødtekst andre avsnitt"
         underavsnitt[2].fritekstTillatt.shouldBeFalse()
+        underavsnitt[3].overskrift shouldBe "Avsluttende overskrift uten etterfølgende tekst"
+        underavsnitt[3].brødtekst shouldBe null
+        underavsnitt[3].fritekstTillatt.shouldBeFalse()
     }
 
     @Test

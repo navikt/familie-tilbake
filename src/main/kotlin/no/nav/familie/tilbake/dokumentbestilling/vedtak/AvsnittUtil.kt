@@ -80,7 +80,7 @@ internal object AvsnittUtil {
     ): Avsnitt {
         var lokaltAvsnitt = avsnitt
         var lokalUnderavsnittstype = underavsnittstype
-        val splittet = generertTekst.split("\r?\n".toRegex()).filter { it.isNotBlank() }.toMutableList()
+        val splittet = generertTekst.split("\r?\n".toRegex()).toMutableList()
         if (avsnitt.overskrift.isNullOrBlank() && erOverskrift(splittet.first())) {
             val linje: String = splittet.removeAt(0)
             lokaltAvsnitt = avsnitt.copy(overskrift = fjernOverskriftFormattering(linje))
@@ -94,7 +94,6 @@ internal object AvsnittUtil {
         val underavsnitt = mutableListOf<Underavsnitt>()
 
         for (linje in splittet) {
-
             fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
             fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) =
                 brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
@@ -148,7 +147,6 @@ internal object AvsnittUtil {
         }
 
         if (overskrift != null || brødtekst != null || fritekstTillatt) {
-
             underavsnitt.add(
                 Underavsnitt(
                     overskrift,
