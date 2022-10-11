@@ -170,7 +170,7 @@ Du har hatt arbeidsinntekt uten at {{{ytelsesnavnBestemt}}} har blitt redusert. 
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
             {{#case "ARBEIDSINNTEKT_ENDRET_INNTEKT" }}
-Du har fått {{{ytelsesnavnBestemt}}} redusert etter arbeidsinntekt. Arbeidsinntekten din har endret seg vesentlig. Derfor har du fått {{kroner
+Du har fått {{{ytelsesnavnBestemt}}} redusert etter arbeidsinntekt. Arbeidsinntekten din har økt med mer enn 10 prosent. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
             {{#case "ANDRE_FOLKETRYGDYTELSER" }}
@@ -182,7 +182,7 @@ Du har hatt næringsinntekt uten at {{{ytelsesnavnBestemt}}} har blitt redusert.
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
             {{#case "SELVSTENDIG_NÆRINGSDRIVENDE_ENDRET_INNTEKT" }}
-                Du har fått {{{ytelsesnavnUbestemt}}} redusert etter næringsinntekt. Næringsinntekten din har endret seg vesentlig. Derfor har du fått {{kroner
+Du har fått {{{ytelsesnavnUbestemt}}} redusert etter næringsinntekt. Næringsinntekten din har økt med mer enn 10 prosent. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
         {{/switch}}
@@ -230,8 +230,12 @@ Du har fått stønad til barnetilsyn for barn som har fullført fjerde skoleår.
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
             {{#case "INNTEKT_OVER_6G" }}
-Du har fått stønad til barnetilsyn. Fordi inntekten din er over [6 x grunnbeløpet], har du ikke lenger rett til stønaden. Derfor har du fått {{kroner
-                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+Du har fått stønad til barnetilsyn. Fordi inntekten din er over {{#if grunnbeløp.grunnbeløpGanger6}}{{kroner grunnbeløp.grunnbeløpGanger6}}{{else}}seks ganger grunnbeløpet{{/if}}, har du ikke lenger rett til stønaden. Derfor har du fått {{kroner
+        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+{{#if grunnbeløp.tekst6GangerGrunnbeløp}}
+
+Seks ganger grunnbeløpet er {{grunnbeløp.tekst6GangerGrunnbeløp}}.
+{{/if}}
             {{/case}}
             {{#case "KONTANTSTØTTE" }}
 Du har fått stønad til barnetilsyn og kontantstøtte. Kontantstøtte skal trekkes fra tilsynsutgiftene før stønad til barnetilsyn beregnes. Fordi stønaden ikke er blitt redusert med kontantstøtten, har du fått {{kroner

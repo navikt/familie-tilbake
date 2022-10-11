@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevPeriodeOgFelles
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløp
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
@@ -170,6 +171,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 riktigBeløp = BigDecimal.valueOf(23333)
             ),
             fakta = fakta,
+            grunnbeløp = HbGrunnbeløp(null, "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
             vurderinger = HbVurderinger(
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,

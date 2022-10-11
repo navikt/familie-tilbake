@@ -37,3 +37,8 @@ Master-branchen blir automatisk bygget ved merge og deployet til prod.
 ## Kontaktinformasjon
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie-tilbakekreving på slack.
 Ellers kan man opprette et issue her på github.
+
+# Generering av dokumetnasjon
+https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
+
+[Filer for generering av dokumentasjon](/src/test/kotlin/no/nav/familie/tilbake/dokumentasjonsgenerator)
