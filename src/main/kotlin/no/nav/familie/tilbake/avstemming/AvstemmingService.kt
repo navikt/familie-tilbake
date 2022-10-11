@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
@@ -68,7 +69,9 @@ class AvstemmingService(
         }
         return if (rader.isEmpty()) {
             null
-        } else FilMapper(rader).tilFlatfil()
+        } else {
+            FilMapper(rader).tilFlatfil()
+        }
     }
 
     private fun erFørstegangsvedtakUtenTilbakekreving(
@@ -87,7 +90,7 @@ class AvstemmingService(
         return Rad(
             avsender = integrasjonerConfig.applicationName,
             vedtakId = oppsummering.økonomivedtakId,
-            fnr = fagsak.bruker.ident,
+            fnr = if (fagsak.institusjon != null) padOrganisasjonsnummer(fagsak.institusjon) else fagsak.bruker.ident,
             vedtaksdato = vedtaksdato,
             fagsakYtelseType = fagsak.ytelsestype,
             tilbakekrevesBruttoUtenRenter = oppsummering.tilbakekrevesBruttoUtenRenter,
@@ -96,6 +99,10 @@ class AvstemmingService(
             renter = oppsummering.renter,
             erOmgjøringTilIngenTilbakekreving = erOmgjøringTilIngenTilbakekreving(oppsummering, behandling)
         )
+    }
+
+    private fun padOrganisasjonsnummer(institusjon: Institusjon): String {
+        return "00" + institusjon.organisasjonsnummer
     }
 
     private fun erOmgjøringTilIngenTilbakekreving(
