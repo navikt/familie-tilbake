@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.tilbake.common.DatoUtil.DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
 import org.apache.commons.lang3.StringUtils
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -78,7 +79,7 @@ class MapLookupHelper : Helper<Any> {
 
 class DatoHelper : Helper<Any> {
 
-    private val format = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale("no"))
+    private val format = DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
 
     override fun apply(context: Any, options: Options?): Any {
         val date = objectMapper.convertValue(context, LocalDate::class.java)
@@ -120,14 +121,19 @@ class KroneFormattererMedTusenskille : Helper<Any> {
             return "ERROR"
         }
         val key = context.toString()
-        val utf8nonBreakingSpace = '\u00A0'
-        val beløp = BigDecimal(key)
-        val beløpMedTusenskille = medTusenskille(beløp, utf8nonBreakingSpace)
-        val benevning = if (beløp.compareTo(BigDecimal.ONE) == 0) "krone" else "kroner"
-        return beløpMedTusenskille + utf8nonBreakingSpace + benevning
+
+        return formatterKronerMedTusenskille(BigDecimal(key), utf8nonBreakingSpace)
     }
 
     companion object {
+        val utf8nonBreakingSpace = '\u00A0'
+
+        fun formatterKronerMedTusenskille(verdi: BigDecimal, space: Char): String {
+            val beløp = verdi
+            val beløpMedTusenskille = medTusenskille(beløp, space)
+            val benevning = if (beløp.compareTo(BigDecimal.ONE) == 0) "krone" else "kroner"
+            return beløpMedTusenskille + space + benevning
+        }
 
         fun medTusenskille(verdi: BigDecimal, tusenskille: Char): String {
             val symbols = DecimalFormatSymbols.getInstance()

@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaksbrevsdata
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbFakta
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbGrunnbeløp
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbKravgrunnlag
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultat
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbResultatTestBuilder
@@ -90,6 +91,7 @@ class TekstformatererVedtaksbrevTest {
 
     @Nested
     inner class LagVedtaksbrevFritekst {
+
         @Test
         fun `skal generere vedtaksbrev for OS og god tro uten tilbakekreving uten varsel`() {
             val perioder: List<HbVedtaksbrevsperiode> =
@@ -415,7 +417,7 @@ class TekstformatererVedtaksbrevTest {
                             Hendelsestype.ANNET,
                             Hendelsesundertype.ANNET_FRITEKST,
                             "Ingen vet riktig hva som har skjedd, " +
-                                "men du har fått utbetalt alt for mye penger."
+                                    "men du har fått utbetalt alt for mye penger."
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -433,9 +435,9 @@ class TekstformatererVedtaksbrevTest {
                                     SærligGrunn.ANNET
                                 ),
                                 "Gratulerer, du fikk norgesrekord i feilutbetalt" +
-                                    " beløp! Du skal slippe å betale renter!",
+                                        " beløp! Du skal slippe å betale renter!",
                                 "at du jobber med OVERGANGSSTØNAD " +
-                                    "og dermed vet hvordan dette fungerer!"
+                                        "og dermed vet hvordan dette fungerer!"
                             )
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1234567890),
@@ -459,7 +461,7 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
                             fritekst = "Vi skjønner at du ikke har oppdaget beløpet, " +
-                                "siden du hadde så mye annet på konto.",
+                                    "siden du hadde så mye annet på konto.",
                             beløpIBehold = BigDecimal(1)
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1),
@@ -956,6 +958,7 @@ class TekstformatererVedtaksbrevTest {
 
     @Nested
     inner class LagVedtaksbrevOverskrift {
+
         @Test
         fun `skal generere vedtaksbrev overskrift_OVERGANGSSTØNAD_full tilbakebetaling`() {
             val data: HbVedtaksbrevsdata =
@@ -1059,8 +1062,8 @@ class TekstformatererVedtaksbrevTest {
             )
 
             generertTekst shouldContain "Vi har lagt vekt på at du ikkje har gitt oss alle nødvendige opplysningar tidsnok " +
-                "til at vi kunne unngå feilutbetalinga. Vi vurderer likevel at aktløysa di har vore så lita at vi har " +
-                "redusert beløpet du må betale tilbake."
+                    "til at vi kunne unngå feilutbetalinga. Vi vurderer likevel at aktløysa di har vore så lita at vi har " +
+                    "redusert beløpet du må betale tilbake."
             generertTekst shouldContain "Du må betale 500 kroner"
         }
 
@@ -1114,7 +1117,7 @@ class TekstformatererVedtaksbrevTest {
             val generertTekst = FellesTekstformaterer.lagDeltekst(data, AvsnittUtil.PARTIAL_PERIODE_FAKTA)
 
             val fasit = "Du har fått overgangsstønad for barn som ikke bor fast hos deg. Du har derfor fått 30 001 kroner " +
-                "for mye utbetalt i denne perioden."
+                    "for mye utbetalt i denne perioden."
             generertTekst shouldBe fasit
         }
 
@@ -1199,8 +1202,8 @@ class TekstformatererVedtaksbrevTest {
                 AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER
             )
             generertTekst shouldContain "Vi har vurdert om det er grunner til å redusere beløpet. " +
-                "Vi har lagt vekt på at du ikke har gitt oss alle nødvendige opplysninger tidsnok " +
-                "til at vi kunne unngå feilutbetalingen. Derfor må du betale tilbake hele beløpet."
+                    "Vi har lagt vekt på at du ikke har gitt oss alle nødvendige opplysninger tidsnok " +
+                    "til at vi kunne unngå feilutbetalingen. Derfor må du betale tilbake hele beløpet."
         }
     }
 

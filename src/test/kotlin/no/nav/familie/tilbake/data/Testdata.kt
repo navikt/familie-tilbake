@@ -286,7 +286,14 @@ object Testdata {
         begrunnelse = "testverdi",
         aktiv = true,
         behandlingId = behandling.id,
-        perioder = setOf(faktaFeilutbetalingsperiode)
+        perioder = setOf(
+            FaktaFeilutbetalingsperiode(
+                periode = Månedsperiode("2020-04" to "2022-08"),
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+            ),
+            faktaFeilutbetalingsperiode
+        )
     )
 
     val økonomiXmlMottatt = ØkonomiXmlMottatt(
