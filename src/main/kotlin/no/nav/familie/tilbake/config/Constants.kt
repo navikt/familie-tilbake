@@ -13,8 +13,6 @@ object Constants {
         Datobeløp(LocalDate.of(2022, 1, 1), 1223)
     )
 
-    private val grunnbeløpForDato = listOf(Datobeløp(LocalDate.of(2021, 5, 1), 106399))
-
     private val brukersSvarfrist: Period = Period.ofWeeks(2)
 
     fun brukersSvarfrist(): LocalDate = LocalDate.now().plus(brukersSvarfrist)
@@ -27,8 +25,6 @@ object Constants {
     const val statusmeldingXmlRootElement: String = "urn:endringKravOgVedtakstatus"
 
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
-
-    val grunnbeløp = grunnbeløpForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
