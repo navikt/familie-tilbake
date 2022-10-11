@@ -41,4 +41,4 @@ Ellers kan man opprette et issue her på github.
 # Generering av dokumetnasjon
 https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
 
-[Filter for generering av dokumentasjon](/src/test/kotlin/no/nav/familie/tilbake/dokumentasjonsgenerator)
+[Filer for generering av dokumentasjon](/src/test/kotlin/no/nav/familie/tilbake/dokumentasjonsgenerator)
