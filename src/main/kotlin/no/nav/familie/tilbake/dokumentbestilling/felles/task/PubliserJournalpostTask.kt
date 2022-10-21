@@ -53,8 +53,7 @@ class PubliserJournalpostTask(
                 }
                 dokumentetErAlleredeDistribuert(ressursException) -> {
                     log.warn(
-                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
-                            if (behandlingId != null) " BehandlingId=$behandlingId." else ""
+                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId."
                     )
                 }
                 else -> throw ressursException
