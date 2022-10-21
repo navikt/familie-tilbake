@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -30,23 +31,32 @@ class PubliserJournalpostTask(
     override fun doTask(task: Task) {
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
+        val journalpostId = task.metadata.getProperty("journalpostId")
+        val behandlingId = UUID.fromString(task.payload)
         try {
             integrasjonerClient.distribuerJournalpost(
-                task.metadata.getProperty("journalpostId"),
+                journalpostId,
                 Fagsystem.valueOf(task.metadata.getProperty("fagsystem")),
                 Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
                 Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt"))
             )
         } catch (ressursException: RessursException) {
-            if (mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException)) {
-                // ta med info om ukjent adresse
-                task.metadata["ukjentAdresse"] = "true"
-            } else if (DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException)) {
-                // ta med info om ukjent adresse for dødsbo
-                task.metadata["dødsboUkjentAdresse"] = "true"
-                taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, task.payload, task.metadata))
-            } else {
-                throw ressursException
+            when {
+                mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) -> {
+                    // ta med info om ukjent adresse
+                    task.metadata["ukjentAdresse"] = "true"
+                }
+                DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException) -> {
+                    // ta med info om ukjent adresse for dødsbo
+                    task.metadata["dødsboUkjentAdresse"] = "true"
+                    taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, task.payload, task.metadata))
+                }
+                dokumentetErAlleredeDistribuert(ressursException) -> {
+                    log.warn(
+                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId."
+                    )
+                }
+                else -> throw ressursException
             }
         }
     }
@@ -60,6 +70,10 @@ class PubliserJournalpostTask(
     fun mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException: RessursException) =
         ressursException.httpStatus == HttpStatus.BAD_REQUEST &&
             ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+
+    // 409 Conflict betyr duplikatdistribusjon
+    // https://nav-it.slack.com/archives/C6W9E5GPJ/p1657610907144549?thread_ts=1657610829.116619&cid=C6W9E5GPJ
+    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) = ressursException.httpStatus == HttpStatus.CONFLICT
 
     companion object {
 

@@ -51,6 +51,15 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
         opprettetTask.metadata["dødsboUkjentAdresse"] shouldBe "true"
     }
 
+    @Test
+    fun `skal kjøre OK når dokdist sender kode 409`() {
+        val opprettetTask = opprettTask("jpDuplikatDistribusjon")
+        publiserJournalpostTask.doTask(opprettetTask)
+
+        opprettetTask.metadata["ukjentAdresse"] shouldBe null
+        opprettetTask.metadata["dødsboUkjentAdresse"] shouldBe null
+    }
+
     private fun opprettTask(journalpostId: String): Task {
         return Task(
             type = PubliserJournalpostTask.TYPE,
