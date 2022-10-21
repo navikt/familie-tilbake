@@ -76,6 +76,12 @@ class IntegrasjonerClientConfig {
                         ressurs = Ressurs.failure("Mottaker har ukjent adresse"),
                         cause = RestClientResponseException("Mottaker har ukjent adresse", 401, "not there", null, null, null)
                     )
+                "jpDuplikatDistribusjon" ->
+                    throw RessursException(
+                        httpStatus = HttpStatus.CONFLICT,
+                        ressurs = Ressurs.failure("Dokumentet er allerede distribuert"),
+                        cause = RestClientResponseException("Dokumentet er allerede distribuert", 409, "conflict", null, null, null)
+                    )
                 else -> "42"
             }
         }
