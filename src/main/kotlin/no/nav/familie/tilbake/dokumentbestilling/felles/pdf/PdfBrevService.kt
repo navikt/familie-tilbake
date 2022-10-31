@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -16,6 +17,7 @@ import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.util.Base64
 import java.util.Properties
@@ -99,8 +101,9 @@ class PdfBrevService(
     }
 
     private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String {
-        // alle brev kan potensielt bli sendt til både bruker og kopi verge
-        return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}"
+        // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
+        val callId = MDC.get(MDCConstants.MDC_CALL_ID)
+        return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
     }
 
     private fun mapBrevtypeTilDokumentkategori(brevtype: Brevtype): Dokumentkategori {
