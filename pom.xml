@@ -41,7 +41,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>3.1.4</spring.cloud-contract>
         <testcontainers.version>1.17.5</testcontainers.version>
-        <tjenestespesifikasjoner.version>2600.3800cc4</tjenestespesifikasjoner.version>
+        <tjenestespesifikasjoner.version>2606.1f6354e</tjenestespesifikasjoner.version>
         <kafka.version>3.2.3</kafka.version>
     </properties>
 
