@@ -499,7 +499,7 @@ class BehandlingService(
             if (avsluttetBehandlinger.isNotEmpty()) {
                 val sisteAvsluttetBehandling: Behandling = avsluttetBehandlinger.first()
                 val erSisteBehandlingHenlagt: Boolean =
-                    sisteAvsluttetBehandling.resultater.any { Behandlingsresultat().erBehandlingHenlagt() }
+                    sisteAvsluttetBehandling.resultater.any { it.erBehandlingHenlagt() }
                 if (!erSisteBehandlingHenlagt) {
                     val feilMelding = "Det finnes allerede en avsluttet behandling for ytelsestype=$ytelsestype " +
                         "og eksternFagsakId=$eksternFagsakId som ikke er henlagt, kan ikke opprette en ny."

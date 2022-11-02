@@ -378,7 +378,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         )
         every { featureToggleService.isEnabled(any()) } returns false // default toggelen er av
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
-        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling)
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
