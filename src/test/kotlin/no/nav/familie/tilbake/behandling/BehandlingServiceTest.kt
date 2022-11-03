@@ -346,6 +346,48 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `opprettBehandling skal opprette behandling når siste tilbakekreving er henlagt og toggelen er av`() {
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                finnesVerge = true,
+                finnesVarsel = true,
+                manueltOpprettet = false,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+            )
+        val behandlingRepository = mockk<BehandlingRepository>()
+        val fagsakService = mockk<FagsakService>()
+        val taskService = mockk<TaskService>(relaxed = true)
+        val brevSporingService = mockk<BrevsporingService>(relaxed = true)
+        val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
+        val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
+        val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
+        val behandlingstilstandService = mockk<BehandlingTilstandService>(relaxed = true)
+        val tellerService = mockk<TellerService>(relaxed = true)
+        val stegService = mockk<StegService>(relaxed = true)
+        val oppgaveTaskService = mockk<OppgaveTaskService>(relaxed = true)
+        val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
+        val tilgangService = mockk<TilgangService>(relaxed = true)
+        val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
+        val featureToggleService = mockk<FeatureToggleService>()
+
+        val behandlingServiceMock = BehandlingService(
+            behandlingRepository, fagsakService,
+            taskService, brevSporingService, kravgrunnlagRepository, økonomiXmlMottattRepository,
+            behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
+            historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService
+        )
+        every { featureToggleService.isEnabled(any()) } returns false // default toggelen er av
+        every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
+        every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
+        every { fagsakService.finnFagsak(any(), any()) } returns null
+        every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
+
+        val behandling = shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }
+        behandling.shouldNotBeNull()
+    }
+
+    @Test
     fun `opprettBehandling skal opprette automatisk når det allerede finnes avsluttet behandling for samme fagsak`() {
         val forrigeOpprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
             finnesVerge = false,
