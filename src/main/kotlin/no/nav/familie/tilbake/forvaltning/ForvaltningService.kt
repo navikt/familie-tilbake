@@ -181,6 +181,26 @@ class ForvaltningService(
         )
     }
 
+    fun deaktiverKopletKravgrunnlag(behandlingId: UUID, kravgrunnlagId: UUID) {
+        val kravgrunnlagPåBehandling = kravgrunnlagRepository.findByBehandlingId(behandlingId)
+        val kravgrunnlag431 = kravgrunnlagRepository.findById(kravgrunnlagId).get()
+        if (!kravgrunnlagPåBehandling.contains(kravgrunnlag431)) {
+            throw Feil(
+                "Fant ikke kravgrunnlag med id $kravgrunnlagId på behandling med id $behandlingId",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
+        }
+        if (kravgrunnlagPåBehandling.size < 2) {
+            throw Feil(
+                "Kan ikke deaktivere kravgrunnlag med id $kravgrunnlagId på behandling med id $behandlingId. Behandling vil ikke lengre ha aktive kravgrunnlag",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlag431.copy(aktiv = false)
+        kravgrunnlagRepository.update(oppdatertKravgrunnlag)
+    }
+
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
         if (behandling.erAvsluttet) {
             throw Feil(

@@ -140,6 +140,22 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     ): Ressurs<Forvaltningsinfo> {
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
+
+    @Operation(summary = "Deaktiver koplet kravgrunnlag (ved feilsituasjonen når 2 aktive kravgrunnlag er koplet mot behandling)")
+    @PutMapping(
+        path = ["/deaktiver/kravgrunnlag/{behandlingId}/{kravgrunnlagId}/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.FORVALTER,
+        "Deaktiver koplet kravgrunnlag",
+        AuditLoggerEvent.NONE,
+        HenteParam.BEHANDLING_ID
+    )
+    fun deaktiverKopletKravgrunnlag(@PathVariable behandlingId: UUID, @PathVariable kravgrunnlagId: UUID): Ressurs<String> {
+        forvaltningService.deaktiverKopletKravgrunnlag(behandlingId, kravgrunnlagId)
+        return Ressurs.success("OK")
+    }
 }
 
 data class Forvaltningsinfo(val eksternKravgrunnlagId: BigInteger, val mottattXmlId: UUID?, val eksternId: String)
