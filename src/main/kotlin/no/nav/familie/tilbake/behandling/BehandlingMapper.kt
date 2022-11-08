@@ -49,7 +49,8 @@ object BehandlingMapper {
                 revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
                 resultat = faktainfo.revurderingsresultat,
                 årsak = faktainfo.revurderingsårsak,
-                konsekvenser = fagsystemskonsekvenser
+                konsekvenser = fagsystemskonsekvenser,
+                regelverk = opprettTilbakekrevingRequest.regelverk
             )
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)

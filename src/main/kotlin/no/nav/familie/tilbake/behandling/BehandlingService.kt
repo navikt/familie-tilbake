@@ -369,7 +369,8 @@ class BehandlingService(
             tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
                 ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
             revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
-            konsekvenser = fagsystemskonsekvenser
+            konsekvenser = fagsystemskonsekvenser,
+            regelverk = respons.regelverk
         )
         behandlingRepository.update(
             behandling.copy(
