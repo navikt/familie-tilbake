@@ -981,6 +981,120 @@ class TekstformatererVedtaksbrevTest {
         }
 
         @Test
+        fun `skal generere vedtaksbrev for BA ingen tilbakekreving pga lavt beløp død bruker`() {
+            val perioder: List<HbVedtaksbrevsperiode> =
+                listOf(
+                    HbVedtaksbrevsperiode(
+                        periode = januar,
+                        kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(500)),
+                        fakta = HbFakta(
+                            Hendelsestype.DØDSFALL,
+                            Hendelsesundertype.BRUKER_DØD,
+                            "foo bar baz"
+                        ),
+                        vurderinger =
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            unntasInnkrevingPgaLavtBeløp = true
+                        ),
+                        resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
+                        førstePeriode = true
+                    )
+                )
+            val vedtaksbrevData = felles
+                .copy(
+                    brevmetadata = brevmetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD, gjelderDødsfall = true),
+                    fagsaksvedtaksdato = LocalDate.now(),
+                    totalresultat = HbTotalresultat(
+                        hovedresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
+                        totaltTilbakekrevesBeløp = BigDecimal.ZERO,
+                        totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
+                        totaltRentebeløp = BigDecimal.ZERO,
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                    ),
+                    hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
+                    varsel = HbVarsel(
+                        varsletBeløp = BigDecimal(500),
+                        varsletDato = LocalDate.of(2020, 4, 4)
+                    ),
+                    søker = HbPerson(
+                        navn = "Søker Søkersen",
+                        dødsdato = LocalDate.of(2018, 3, 1)
+                    ),
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                )
+            val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+            val fasit = les("/vedtaksbrev/BA_ikke_tilbakekreves_pga_lavt_beløp_død_bruker.txt")
+            generertBrev shouldBe fasit
+        }
+
+        @Test
+        fun `skal generere vedtaksbrev for BA ingen tilbakekreving pga lavt beløp fritekst død bruker nynorsk`() {
+            val perioder: List<HbVedtaksbrevsperiode> =
+                listOf(
+                    HbVedtaksbrevsperiode(
+                        periode = januar,
+                        kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(500)),
+                        fakta = HbFakta(
+                            Hendelsestype.DØDSFALL,
+                            Hendelsesundertype.BRUKER_DØD
+                        ),
+                        vurderinger =
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            unntasInnkrevingPgaLavtBeløp = true,
+                            fritekst = "foo bar baz"
+                        ),
+                        resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
+                        førstePeriode = true
+                    )
+                )
+            val vedtaksbrevData = felles
+                .copy(
+                    brevmetadata = brevmetadata.copy(
+                        ytelsestype = Ytelsestype.BARNETRYGD,
+                        gjelderDødsfall = true,
+                        språkkode = Språkkode.NN
+                    ),
+                    fagsaksvedtaksdato = LocalDate.now(),
+                    totalresultat = HbTotalresultat(
+                        hovedresultat = Vedtaksresultat.INGEN_TILBAKEBETALING,
+                        totaltTilbakekrevesBeløp = BigDecimal.ZERO,
+                        totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
+                        totaltRentebeløp = BigDecimal.ZERO,
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                    ),
+                    hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
+                    varsel = HbVarsel(
+                        varsletBeløp = BigDecimal(500),
+                        varsletDato = LocalDate.of(2020, 4, 4)
+                    ),
+                    søker = HbPerson(
+                        navn = "Søker Søkersen",
+                        dødsdato = LocalDate.of(2018, 3, 1)
+                    ),
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                )
+            val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
+
+            val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
+
+            val fasit = les("/vedtaksbrev/BA_ikke_tilbakekreves_pga_lavt_beløp_død_bruker_nynorsk.txt")
+            generertBrev shouldBe fasit
+        }
+
+        @Test
         fun `skal generere vedtaksbrev for OS ingen tilbakekreving pga lavt beløp med korrigert beløp`() {
             val vedtaksbrevData = felles
                 .copy(

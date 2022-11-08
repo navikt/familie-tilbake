@@ -6,11 +6,11 @@
 {{{vurderinger.fritekst}}}
 {{/if}}
 {{/inline}}
-{{#* inline "fritekst-brukerdød"}}
+{{#* inline "fritekst-brukerdød-tilbakekreves"}}
 {{#if vurderinger.fritekst}}
-{{~#if (eq fakta.hendelsesundertype "BRUKER_DØD") ~}}
+{{#if (eq fakta.hendelsesundertype "BRUKER_DØD") }}
 
-{{~/if~}}
+{{/if}}
 {{{vurderinger.fritekst}}}
 {{/if}}
 {{/inline}}
@@ -25,10 +25,15 @@ __Korleis har vi kome fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestemt}
         {{#if (eq fakta.hendelsesundertype "BRUKER_DØD") }}
 Det burde blitt oppdaga og meldt ifrå om at {{{ytelsesnavnUbestemt}}} blei utbetalt etter at {{{søker.navn}}} døydde.
         {{/if}}
+{{> fritekst-brukerdød-tilbakekreves}}
     {{else}}
+        {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
+Sjølv om de burde ha forstått at {{{ytelsesnavnUbestemt}}} er utbetalt ved ein feil, vert ikkje pengane krevd tilbake. Det er fordi feilutbetalt beløp er lågare enn {{{kroner konfigurasjon.fireRettsgebyr}}}.
+        {{else}}
 De har ikkje fått den informasjonen de trong for å forstå at beløpet som blei utbetalt var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikkje betalast tilbake.
+        {{/if}}
+{{> fritekst}}
     {{/if}}
-{{> fritekst-brukerdød}}
 {{else}}
     {{#if (eq vurderinger.vilkårsvurderingsresultat "FORSTO_BURDE_FORSTÅTT")}}
         {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
