@@ -6,6 +6,14 @@
 {{{vurderinger.fritekst}}}
 {{/if}}
 {{/inline}}
+{{#* inline "fritekst-brukerdød-tilbakekreves"}}
+{{#if vurderinger.fritekst}}
+{{#if (eq fakta.hendelsesundertype "BRUKER_DØD") }}
+
+{{/if}}
+{{{vurderinger.fritekst}}}
+{{/if}}
+{{/inline}}
 {{#* inline "ikke-krev-småbeløp"}}
 {{> Pronomen}} har fått vite om {{> pronomen}} har rett til {{{ytelsesnavnUbestemt}}} og hvor mye {{> pronomen}} har rett til. Selv om {{> pronomen}} burde forstått at beløpet var feil, er beløpet lavere enn {{{kroner konfigurasjon.fireRettsgebyr}}}. {{> Pronomen}} må derfor ikke betale tilbake beløpet.
 {{/inline}}
@@ -14,15 +22,18 @@ __Hvordan har vi kommet fram til at {{#if gjelderDødsfall}}{{{ytelsesnavnBestem
 {{/if}}
 {{#if gjelderDødsfall}}
     {{#if resultat.tilbakekrevesBeløp}}
+        {{#if (eq fakta.hendelsesundertype "BRUKER_DØD") }}
 Det burde vært oppdaget og meldt ifra om at {{{ytelsesnavnUbestemt}}} ble utbetalt etter at {{{søker.navn}}} døde.
+        {{/if}}
+{{> fritekst-brukerdød-tilbakekreves}}
     {{else}}
         {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
-            {{> ikke-krev-småbeløp}}
+Selv om dere burde forstått at {{{ytelsesnavnUbestemt}}} er utbetalt ved en feil, kreves ikke pengene tilbake. Det er fordi feilutbetalt beløp er lavere enn  {{{kroner konfigurasjon.fireRettsgebyr}}}.
         {{else}}
 Dere har ikke fått den informasjonen dere trengte for å forstå at beløpet som ble utbetalt var feil. {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner skal derfor ikke betales tilbake.
         {{/if}}
-    {{/if}}
 {{> fritekst}}
+    {{/if}}
 {{else}}
     {{#if (eq vurderinger.vilkårsvurderingsresultat "FORSTO_BURDE_FORSTÅTT")}}
         {{#if (eq vurderinger.aktsomhetsresultat "SIMPEL_UAKTSOMHET")}}
