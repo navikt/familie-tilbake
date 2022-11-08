@@ -5,8 +5,8 @@ CREATE TABLE regelverk(
 INSERT INTO regelverk (regelverk) VALUES ('NASJONAL');
 INSERT INTO regelverk (regelverk) VALUES ('EØS');
 
-ALTER TABLE fagsystemsbehandling
+ALTER TABLE behandling
     ADD COLUMN regelverk VARCHAR;
 
-ALTER TABLE fagsystemsbehandling
+ALTER TABLE behandling
     ADD CONSTRAINT fagsystemsbehandling_regelverk_fkey FOREIGN KEY (regelverk) REFERENCES regelverk;

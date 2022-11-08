@@ -369,15 +369,15 @@ class BehandlingService(
             tilbakekrevingsvalg = faktainfo.tilbakekrevingsvalg
                 ?: gammelFagsystemsbehandling.tilbakekrevingsvalg,
             revurderingsvedtaksdato = respons.revurderingsvedtaksdato,
-            konsekvenser = fagsystemskonsekvenser,
-            regelverk = respons.regelverk
+            konsekvenser = fagsystemskonsekvenser
         )
         behandlingRepository.update(
             behandling.copy(
                 fagsystemsbehandling = setOf(
                     gammelFagsystemsbehandling,
                     nyFagsystemsbehandling
-                )
+                ),
+                regelverk = respons.regelverk
             )
         )
     }
