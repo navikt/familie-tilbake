@@ -9,4 +9,4 @@ ALTER TABLE behandling
     ADD COLUMN regelverk VARCHAR;
 
 ALTER TABLE behandling
-    ADD CONSTRAINT fagsystemsbehandling_regelverk_fkey FOREIGN KEY (regelverk) REFERENCES regelverk;
+    ADD CONSTRAINT behandling_regelverk_fkey FOREIGN KEY (regelverk) REFERENCES regelverk;
