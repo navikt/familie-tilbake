@@ -233,7 +233,8 @@ object BehandlingMapper {
                 )
             ),
             fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
-            verger = verger
+            verger = verger,
+            regelverk = originalBehandling.regelverk
         )
     }
 
