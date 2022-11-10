@@ -51,7 +51,7 @@ class OppgaveServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearAllMocks(answers = false)
+        clearAllMocks()
         oppgaveService = OppgaveService(
             behandlingRepository,
             fagsakRepository,
@@ -62,8 +62,6 @@ class OppgaveServiceTest {
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
-        every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
-        every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(0L, emptyList())
         every { taskService.finnTasksMedStatus(any(), any()) } returns emptyList()
     }
 
@@ -73,6 +71,7 @@ class OppgaveServiceTest {
         @Test
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4489`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
                 behandling.id,
