@@ -10,7 +10,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -44,7 +44,7 @@ import javax.validation.Valid
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("e2e", "local", "integrasjonstest")
 class AutotestController(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val behandlingRepository: BehandlingRepository,
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaTemplate: KafkaTemplate<String, String>,
@@ -53,7 +53,7 @@ class AutotestController(
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
     fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
-        taskRepository.save(
+        taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
                 payload = kravgrunnlag,
@@ -67,7 +67,7 @@ class AutotestController(
 
     @PostMapping(path = ["/opprett/statusmelding/"])
     fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
-        taskRepository.save(
+        taskService.save(
             Task(
                 type = BehandleStatusmeldingTask.TYPE,
                 payload = statusmelding,

@@ -75,7 +75,10 @@ class BehandlingController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekrevingsrevurdering", AuditLoggerEvent.CREATE)
-    fun opprettRevurdering(@Valid @RequestBody opprettRevurderingDto: OpprettRevurderingDto): Ressurs<String> {
+    fun opprettRevurdering(
+        @Valid @RequestBody
+        opprettRevurderingDto: OpprettRevurderingDto
+    ): Ressurs<String> {
         val behandling = behandlingService.opprettRevurdering(opprettRevurderingDto)
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Revurdering er opprettet.")
     }
@@ -109,7 +112,8 @@ class BehandlingController(
     )
     fun utførBehandlingssteg(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody behandlingsstegDto: BehandlingsstegDto
+        @Valid @RequestBody
+        behandlingsstegDto: BehandlingsstegDto
     ): Ressurs<String> {
         // Oppdaterer ansvarlig saksbehandler først slik at historikkinnslag får riktig saksbehandler
         // Hvis det feiler noe,bør det rullet tilbake helt siden begge 2 er på samme transaksjon
@@ -134,7 +138,8 @@ class BehandlingController(
     )
     fun settBehandlingPåVent(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody behandlingPåVentDto: BehandlingPåVentDto
+        @Valid @RequestBody
+        behandlingPåVentDto: BehandlingPåVentDto
     ): Ressurs<String> {
         behandlingService.settBehandlingPåVent(behandlingId, behandlingPåVentDto)
         return Ressurs.success("OK")
@@ -169,7 +174,8 @@ class BehandlingController(
     )
     fun henleggBehandling(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto
+        @Valid @RequestBody
+        henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto
     ): Ressurs<String> {
         behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
         return Ressurs.success("OK")
@@ -188,7 +194,8 @@ class BehandlingController(
     )
     fun byttEnhet(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody byttEnhetDto: ByttEnhetDto
+        @Valid @RequestBody
+        byttEnhetDto: ByttEnhetDto
     ): Ressurs<String> {
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
         return Ressurs.success("OK")

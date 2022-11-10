@@ -11,7 +11,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -62,7 +62,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -177,7 +177,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT, venteårsak.beskrivelse)
-        taskRepository.findAll().none {
+        taskService.findAll().none {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == venteårsak.beskrivelse &&
@@ -441,7 +441,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTask(xml: String, taskType: String): Task {
-        return taskRepository.save(
+        return taskService.save(
             Task(
                 type = taskType,
                 payload = xml
@@ -453,7 +453,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null
     ) {
-        taskRepository.findByStatusIn(
+        taskService.finnTasksMedStatus(
             listOf(
                 Status.KLAR_TIL_PLUKK,
                 Status.UBEHANDLET,
@@ -471,7 +471,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOppgaveTask(beskrivelse: String, fristTid: LocalDate) {
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == beskrivelse &&

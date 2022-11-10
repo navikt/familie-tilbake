@@ -63,9 +63,10 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
         @Test
         internal fun `nynorsk - flere perioder, en beløpsperiode og tre beløpsperioder`() {
-            val data = HbVedtaksbrevsdata(felles.copy(brevmetadata.copy(språkkode = Språkkode.NN))
-
-                                          , listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder))
+            val data = HbVedtaksbrevsdata(
+                felles.copy(brevmetadata.copy(språkkode = Språkkode.NN)),
+                listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder)
+            )
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
             val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6G_helt_brev_flere_perioder_flere_beløp_nn.txt")
 

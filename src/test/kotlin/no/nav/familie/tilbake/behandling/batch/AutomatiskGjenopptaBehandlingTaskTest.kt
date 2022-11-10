@@ -5,7 +5,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -41,7 +41,7 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var automatiskGjenopptaBehandlingTask: AutomatiskGjenopptaBehandlingTask
@@ -72,14 +72,14 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 it.behandlingsstegsstatus == Behandlingsstegstatus.KLAR
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
@@ -114,21 +114,21 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 it.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&
@@ -137,7 +137,7 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
         }.shouldBeTrue()
 
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == venteårsak.beskrivelse
@@ -168,14 +168,14 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
             it.venteårsak == null && it.tidsfrist == null
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }.shouldBeTrue()
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["beskrivelse"] == "Behandling er tatt av vent automatisk" &&

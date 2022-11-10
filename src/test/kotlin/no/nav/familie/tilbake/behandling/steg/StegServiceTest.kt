@@ -17,7 +17,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
@@ -93,7 +93,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     private lateinit var totrinnsvurderingRepository: TotrinnsvurderingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
@@ -608,7 +608,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
         behandlingsvedtak.shouldNotBeNull()
         behandlingsvedtak.iverksettingsstatus shouldBe Iverksettingsstatus.UNDER_IVERKSETTING
-        taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }.shouldBeTrue()
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }.shouldBeTrue()
     }
 
     @Test
@@ -983,7 +983,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOppgave(tasktype: String, forventet: Int = 1) {
-        val taskene = taskRepository.findByStatusIn(
+        val taskene = taskService.finnTasksMedStatus(
             status = listOf(
                 Status.KLAR_TIL_PLUKK,
                 Status.UBEHANDLET,
@@ -1001,7 +1001,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør
     ) {
-        taskRepository.findByStatusIn(
+        taskService.finnTasksMedStatus(
             listOf(
                 Status.KLAR_TIL_PLUKK,
                 Status.UBEHANDLET,

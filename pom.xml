@@ -207,8 +207,8 @@
         <!-- NAV interne avhengigheter-->
         <dependency>
             <groupId>no.nav.familie</groupId>
-            <artifactId>prosessering-jdbc</artifactId>
-            <version>1.20220624132237_7f5ba9c</version>
+            <artifactId>prosessering-core</artifactId>
+            <version>1.20221107161505_a52c041</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>

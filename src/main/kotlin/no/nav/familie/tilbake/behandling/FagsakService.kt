@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesMan
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.dto.FagsakDto
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -30,7 +30,7 @@ import java.util.UUID
 class FagsakService(
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val personService: PersonService,
     private val organisasjonService: OrganisasjonService
@@ -166,7 +166,7 @@ class FagsakService(
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
         val harAlledeMottattForespørselen: Boolean =
-            taskRepository.findByStatusIn(
+            taskService.finnTasksMedStatus(
                 listOf(
                     Status.UBEHANDLET,
                     Status.BEHANDLER,

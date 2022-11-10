@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSingleElement
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -45,7 +45,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
@@ -110,7 +110,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `behandleAutomatisk skal opprette tasker når det finnes en behandling klar for automatisk saksbehandling`() {
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().shouldHaveSingleElement {
+        taskService.findAll().shouldHaveSingleElement {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }
@@ -127,7 +127,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         brevsporingRepository.insert(Testdata.brevsporing)
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeFalse()
@@ -142,7 +142,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeFalse()
@@ -159,7 +159,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeFalse()
@@ -173,7 +173,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeFalse()
@@ -181,11 +181,11 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når det allerede finnes en feilede tasker`() {
-        val task = taskRepository.save(Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString()))
-        taskRepository.save(taskRepository.findById(task.id).get().copy(status = Status.FEILET))
+        val task = taskService.save(Task(type = AutomatiskSaksbehandlingTask.TYPE, payload = behandling.id.toString()))
+        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
             it.status != Status.FEILET

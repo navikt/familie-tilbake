@@ -16,7 +16,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -68,7 +68,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
@@ -236,7 +236,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagTask(): Task {
-        return taskRepository.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
+        return taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
     }
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {

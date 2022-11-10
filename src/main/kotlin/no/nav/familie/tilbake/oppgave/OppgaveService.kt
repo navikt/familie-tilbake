@@ -11,7 +11,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -36,7 +36,7 @@ class OppgaveService(
     private val fagsakRepository: FagsakRepository,
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val environment: Environment
 ) {
 
@@ -65,6 +65,7 @@ class OppgaveService(
                 )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
+
             finnOppgaveResponse.oppgaver.isEmpty() -> {
                 secureLogger.error(
                     "Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
@@ -72,6 +73,7 @@ class OppgaveService(
                 )
                 throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId}")
             }
+
             else -> {
                 return finnOppgaveResponse.oppgaver.first()
             }
@@ -174,6 +176,7 @@ class OppgaveService(
                 )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
+
             finnOppgaveResponse.oppgaver.isEmpty() -> {
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
                 secureLogger.error(
@@ -181,6 +184,7 @@ class OppgaveService(
                         "$finnOppgaveRequest, $finnOppgaveResponse"
                 )
             }
+
             else -> {
                 integrasjonerClient.ferdigstillOppgave(finnOppgaveResponse.oppgaver[0].id!!)
             }
@@ -226,16 +230,16 @@ class OppgaveService(
     }
 
     private fun finnesFerdigstillOppgaveForBehandling(behandlingId: UUID, oppgavetype: Oppgavetype): Boolean {
-        val ubehandledeTasker = taskRepository.findByStatusInAndType(
-            listOf(
+        val ubehandledeTasker = taskService.finnTasksTilFrontend(
+            status = listOf(
                 Status.UBEHANDLET,
                 Status.PLUKKET,
                 Status.FEILET,
                 Status.KLAR_TIL_PLUKK,
                 Status.BEHANDLER
             ),
-            FerdigstillOppgaveTask.TYPE,
-            Pageable.unpaged()
+            type = FerdigstillOppgaveTask.TYPE,
+            page = Pageable.unpaged()
         )
         return ubehandledeTasker.any {
             it.payload == behandlingId.toString() &&

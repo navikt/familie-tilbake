@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 
 internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
 
@@ -34,7 +35,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var avsluttBehandlingTask: AvsluttBehandlingTask
@@ -71,7 +72,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         stegstilstand[0].behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
         stegstilstand[0].behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        val tasker = taskRepository.findByStatus(Status.UBEHANDLET)
+        val tasker = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
         val historikkTask = tasker.first { it.type == LagHistorikkinnslagTask.TYPE }
         historikkTask.type shouldBe LagHistorikkinnslagTask.TYPE
         historikkTask.payload shouldBe behandlingId.toString()

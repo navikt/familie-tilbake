@@ -12,7 +12,6 @@ import io.mockk.verify
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import java.util.UUID
 
 internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
@@ -52,9 +52,6 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
-
-    @Autowired
-    private lateinit var taskRepository: TaskRepository
 
     @Autowired
     private lateinit var taskService: TaskService
@@ -156,13 +153,13 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal opprette task for å håndtere gammel kravgrunnlag`() {
         hentFagsystemsbehandlingTask.onCompletion(lagTask())
 
-        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).shouldHaveSingleElement {
             it.type == HåndterGammelKravgrunnlagTask.TYPE &&
                 it.payload == xmlMottatt.id.toString()
         }
     }
 
     private fun lagTask(): Task {
-        return taskRepository.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()))
+        return taskService.save(Task(type = HentFagsystemsbehandlingTask.TYPE, payload = mottattXmlId.toString()))
     }
 }

@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.historikkinnslag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -13,7 +13,7 @@ import java.util.UUID
 
 @Service
 class HistorikkTaskService(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val fagsakService: FagsakService
 ) {
 
@@ -42,7 +42,7 @@ class HistorikkTaskService(
             payload = behandlingId.toString(),
             properties = properties
         )
-        triggerTid?.let { taskRepository.save(task.medTriggerTid(triggerTid)) } ?: taskRepository.save(task)
+        triggerTid?.let { taskService.save(task.medTriggerTid(triggerTid)) } ?: taskService.save(task)
     }
 
     private fun fjernNewlinesFraString(tekst: String): String {

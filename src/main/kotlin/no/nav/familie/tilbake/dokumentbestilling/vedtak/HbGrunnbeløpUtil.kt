@@ -27,7 +27,6 @@ object HbGrunnbeløpUtil {
         } else {
             HbGrunnbeløp(grunnbeløpX6(grunnbeløpsperioder.single()), null)
         }
-
     }
 
     private fun formatterGrunnbeløp(grunnbeløp: Grunnbeløp, periode: Månedsperiode): String {
@@ -35,7 +34,7 @@ object HbGrunnbeløpUtil {
         val snitt = grunnbeløp.periode.snitt(periode) ?: error("Finner ikke snitt for ${grunnbeløp.periode} og $periode")
 
         return "${formatterBeløpX6(grunnbeløp)} for perioden ${format.format(snitt.fomDato)} " +
-                "til ${format.format(snitt.tomDato)}"
+            "til ${format.format(snitt.tomDato)}"
     }
 
     private fun formatterBeløpX6(grunnbeløp: Grunnbeløp): String {

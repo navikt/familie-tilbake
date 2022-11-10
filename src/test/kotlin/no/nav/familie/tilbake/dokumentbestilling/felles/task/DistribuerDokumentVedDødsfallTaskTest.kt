@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -32,7 +32,7 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var distribuerDokumentVedDødsfallTask: DistribuerDokumentVedDødsfallTask
@@ -97,7 +97,7 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype
     ) {
-        taskRepository.findAll().shouldHaveSingleElement {
+        taskService.findAll().shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 behandlingId.toString() == it.payload

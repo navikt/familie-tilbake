@@ -7,7 +7,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -26,7 +26,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var håndterGamleKravgrunnlagBatch: HåndterGamleKravgrunnlagBatch
@@ -36,17 +36,17 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
 
         håndterGamleKravgrunnlagBatch.utfør()
-        (taskRepository.findAll().filter { it.type != AvstemmingTask.TYPE }).shouldBeEmpty()
+        (taskService.findAll().filter { it.type != AvstemmingTask.TYPE }).shouldBeEmpty()
     }
 
     @Test
     fun `utfør skal ikke opprette tasker når det allerede finnes en feilet task på det samme kravgrunnlag`() {
         val mottattXml = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
-        val task = taskRepository.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
-        taskRepository.save(taskRepository.findById(task.id).get().copy(status = Status.FEILET))
+        val task = taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
+        taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
 
         håndterGamleKravgrunnlagBatch.utfør()
-        taskRepository.findAll().any { it.type == HentFagsystemsbehandlingTask.TYPE }.shouldBeFalse()
+        taskService.findAll().any { it.type == HentFagsystemsbehandlingTask.TYPE }.shouldBeFalse()
     }
 
     @Test
@@ -68,7 +68,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
         mottattXmlRepository.insert(tredjeXml)
 
         håndterGamleKravgrunnlagBatch.utfør()
-        (taskRepository.findAll() as List<*>).shouldNotBeEmpty()
-        taskRepository.findAll().count { it.type == HentFagsystemsbehandlingTask.TYPE } shouldBe 2
+        (taskService.findAll() as List<*>).shouldNotBeEmpty()
+        taskService.findAll().count { it.type == HentFagsystemsbehandlingTask.TYPE } shouldBe 2
     }
 }

@@ -13,7 +13,7 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
@@ -73,7 +73,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
@@ -238,7 +238,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
-        taskRepository.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
+        taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
     }
 
     @Test
@@ -277,7 +277,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.shouldBeFalse()
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
-        taskRepository.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
+        taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
     }
 
     @Test
@@ -715,7 +715,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTask(kravgrunnlagXml: String): Task {
-        return taskRepository.save(
+        return taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
                 payload = kravgrunnlagXml
@@ -784,7 +784,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør
     ) {
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&
@@ -793,7 +793,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertOppdaterFaktainfoTask(referanse: String) {
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             OppdaterFaktainfoTask.TYPE == it.type &&
                 fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
                 fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
@@ -805,7 +805,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         beskrivelse: String,
         fristDato: LocalDate
     ) {
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             OppdaterOppgaveTask.TYPE == it.type &&
                 behandling.id.toString() == it.payload
             beskrivelse == it.metadata["beskrivelse"] &&
