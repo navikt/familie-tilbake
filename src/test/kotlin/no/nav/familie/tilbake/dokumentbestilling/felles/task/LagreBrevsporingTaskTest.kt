@@ -20,7 +20,6 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import java.util.Properties
 import java.util.UUID
 
@@ -155,7 +154,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK
         )
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -175,7 +174,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK
         )
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -215,7 +214,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         aktør: Aktør,
         brevtype: Brevtype
     ) {
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&

@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 
 internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
 
@@ -72,7 +71,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
         stegstilstand[0].behandlingssteg shouldBe Behandlingssteg.AVSLUTTET
         stegstilstand[0].behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
 
-        val tasker = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
+        val tasker = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
         val historikkTask = tasker.first { it.type == LagHistorikkinnslagTask.TYPE }
         historikkTask.type shouldBe LagHistorikkinnslagTask.TYPE
         historikkTask.payload shouldBe behandlingId.toString()

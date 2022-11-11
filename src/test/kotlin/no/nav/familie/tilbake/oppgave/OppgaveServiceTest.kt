@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -63,7 +62,7 @@ class OppgaveServiceTest {
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
-        every { taskService.finnTasksTilFrontend(any(), any(), any()) } returns emptyList()
+        every { taskService.finnTasksMedStatus(any(), any(), any()) } returns emptyList()
     }
 
     @Nested
@@ -213,7 +212,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
             val properties = Properties().apply { setProperty("oppgavetype", Oppgavetype.GodkjenneVedtak.name) }
-            every { taskService.finnTasksTilFrontend(any(), any(), any()) } returns
+            every { taskService.finnTasksMedStatus(any(), any(), any()) } returns
                 listOf(Task(type = FerdigstillOppgaveTask.TYPE, payload = behandling.id.toString(), properties = properties))
 
             shouldNotThrow<RuntimeException> {

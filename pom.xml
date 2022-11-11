@@ -43,6 +43,7 @@
         <testcontainers.version>1.17.5</testcontainers.version>
         <tjenestespesifikasjoner.version>2606.1f6354e</tjenestespesifikasjoner.version>
         <kafka.version>3.2.3</kafka.version>
+        <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
     </properties>
 
 
@@ -208,7 +209,7 @@
         <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
-            <version>1.20221107161505_a52c041</version>
+            <version>${prosessering-core.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>

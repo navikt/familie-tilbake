@@ -230,7 +230,7 @@ class OppgaveService(
     }
 
     private fun finnesFerdigstillOppgaveForBehandling(behandlingId: UUID, oppgavetype: Oppgavetype): Boolean {
-        val ubehandledeTasker = taskService.finnTasksTilFrontend(
+        val ubehandledeTasker = taskService.finnTasksMedStatus(
             status = listOf(
                 Status.UBEHANDLET,
                 Status.PLUKKET,

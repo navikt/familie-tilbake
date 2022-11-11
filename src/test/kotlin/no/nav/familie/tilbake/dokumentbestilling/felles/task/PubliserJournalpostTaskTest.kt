@@ -11,7 +11,6 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import java.util.Properties
 import java.util.UUID
 
@@ -75,7 +74,7 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertDistribuerDokumentVedDødsfallTask() {
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             DistribuerDokumentVedDødsfallTask.TYPE == it.type
         }
     }

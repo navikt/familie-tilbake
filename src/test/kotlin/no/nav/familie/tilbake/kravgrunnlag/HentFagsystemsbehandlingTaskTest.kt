@@ -153,7 +153,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     fun `onCompletion skal opprette task for å håndtere gammel kravgrunnlag`() {
         hentFagsystemsbehandlingTask.onCompletion(lagTask())
 
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             it.type == HåndterGammelKravgrunnlagTask.TYPE &&
                 it.payload == xmlMottatt.id.toString()
         }

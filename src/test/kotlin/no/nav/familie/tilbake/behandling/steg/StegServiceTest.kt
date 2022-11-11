@@ -608,7 +608,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandlingsvedtak = behandlingsresultat.behandlingsvedtak
         behandlingsvedtak.shouldNotBeNull()
         behandlingsvedtak.iverksettingsstatus shouldBe Iverksettingsstatus.UNDER_IVERKSETTING
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged()).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }.shouldBeTrue()
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any { it.type == SendØkonomiTilbakekrevingsvedtakTask.TYPE }.shouldBeTrue()
     }
 
     @Test
