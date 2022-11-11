@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.common
 
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.YearMonth
 
 object Grunnbeløpsperioder {
 

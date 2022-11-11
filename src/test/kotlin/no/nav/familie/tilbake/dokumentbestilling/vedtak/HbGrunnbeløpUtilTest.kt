@@ -29,7 +29,7 @@ internal class HbGrunnbeløpUtilTest {
         val result = lagHbGrunnbeløp(Månedsperiode(YearMonth.of(2021, 4), YearMonth.of(2021, 5))).tekst6GangerGrunnbeløp
 
         result shouldBe "608 106 kroner for perioden 1. april 2021 til 30. april 2021 " +
-                "og 638 394 kroner for perioden 1. mai 2021 til 31. mai 2021"
+            "og 638 394 kroner for perioden 1. mai 2021 til 31. mai 2021"
     }
 
     @Test
@@ -38,7 +38,6 @@ internal class HbGrunnbeløpUtilTest {
 
         result.tekst6GangerGrunnbeløp shouldBe null
         result.grunnbeløpGanger6 shouldBe 638_394.toBigDecimal()
-
     }
 
     @Test
@@ -46,7 +45,7 @@ internal class HbGrunnbeløpUtilTest {
         val result = lagHbGrunnbeløp(Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2022, 6))).tekst6GangerGrunnbeløp
 
         result shouldBe "608 106 kroner for perioden 1. mars 2021 til 30. april 2021, " +
-                "638 394 kroner for perioden 1. mai 2021 til 30. april 2022 " +
-                "og 668 862 kroner for perioden 1. mai 2022 til 30. juni 2022"
+            "638 394 kroner for perioden 1. mai 2021 til 30. april 2022 " +
+            "og 668 862 kroner for perioden 1. mai 2022 til 30. juni 2022"
     }
 }

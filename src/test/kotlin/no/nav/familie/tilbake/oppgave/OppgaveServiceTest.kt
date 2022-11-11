@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,7 +14,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -36,7 +36,7 @@ class OppgaveServiceTest {
     private val integrasjonerClient: IntegrasjonerClient = mockk(relaxed = true)
     private val personService: PersonService = mockk(relaxed = true)
     private val environment: Environment = mockk(relaxed = true)
-    private val taskRepository: TaskRepository = mockk(relaxed = true)
+    private val taskService: TaskService = mockk(relaxed = true)
 
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
@@ -51,20 +51,18 @@ class OppgaveServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearAllMocks(answers = false)
+        clearMocks(integrasjonerClient)
         oppgaveService = OppgaveService(
             behandlingRepository,
             fagsakRepository,
             integrasjonerClient,
             personService,
-            taskRepository,
+            taskService,
             environment
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
-        every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
-        every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(0L, emptyList())
-        every { taskRepository.findByStatusInAndType(any(), any(), any()) } returns emptyList()
+        every { taskService.finnTasksMedStatus(any(), any(), any()) } returns emptyList()
     }
 
     @Nested
@@ -73,6 +71,7 @@ class OppgaveServiceTest {
         @Test
         fun `skal legge godkjenneVedtak i EF-Sak-70-mappe for enhet 4489`() {
             val slot = CapturingSlot<OpprettOppgaveRequest>()
+            every { integrasjonerClient.finnMapper(any()) } returns finnMappeResponseDto
 
             oppgaveService.opprettOppgave(
                 behandling.id,
@@ -213,7 +212,7 @@ class OppgaveServiceTest {
             every { integrasjonerClient.finnMapper("4489") } returns finnMappeResponseDto
             every { integrasjonerClient.finnOppgaver(any()) } returns FinnOppgaveResponseDto(1L, listOf(Oppgave()))
             val properties = Properties().apply { setProperty("oppgavetype", Oppgavetype.GodkjenneVedtak.name) }
-            every { taskRepository.findByStatusInAndType(any(), any(), any()) } returns
+            every { taskService.finnTasksMedStatus(any(), any(), any()) } returns
                 listOf(Task(type = FerdigstillOppgaveTask.TYPE, payload = behandling.id.toString(), properties = properties))
 
             shouldNotThrow<RuntimeException> {

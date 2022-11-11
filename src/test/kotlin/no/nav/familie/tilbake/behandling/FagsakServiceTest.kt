@@ -11,7 +11,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
@@ -48,7 +48,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var fagsakService: FagsakService
@@ -242,7 +242,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         properties["eksternFagsakId"] = mottattXml.eksternFagsakId
         properties["ytelsestype"] = Ytelsestype.BARNETRYGD.kode
         properties["eksternId"] = mottattXml.referanse
-        taskRepository.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""))
+        taskService.save(Task(type = OpprettBehandlingManueltTask.TYPE, properties = properties, payload = ""))
 
         val respons = fagsakService.kanBehandlingOpprettesManuelt(mottattXml.eksternFagsakId, Ytelsestype.BARNETRYGD)
         respons.kanBehandlingOpprettes.shouldBeFalse()

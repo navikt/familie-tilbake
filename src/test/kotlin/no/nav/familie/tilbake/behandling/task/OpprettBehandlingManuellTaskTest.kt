@@ -21,7 +21,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -58,7 +58,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -183,7 +183,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
         opprettBehandlingManueltTask.doTask(lagTask())
 
-        taskRepository.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
+        taskService.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
 
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         behandling.shouldNotBeNull()
@@ -226,7 +226,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
 
         opprettBehandlingManueltTask.doTask(lagTask())
 
-        taskRepository.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
+        taskService.findAll().any { FinnKravgrunnlagTask.TYPE == it.type }.shouldBeTrue()
 
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         behandling.shouldNotBeNull()

@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.booleans.shouldBeTrue
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -28,7 +28,7 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var automatiskGjenopptaBehandlingBatch: AutomatiskGjenopptaBehandlingBatch
@@ -47,7 +47,7 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeTrue()
@@ -68,7 +68,7 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == AutomatiskGjenopptaBehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }.shouldBeTrue()

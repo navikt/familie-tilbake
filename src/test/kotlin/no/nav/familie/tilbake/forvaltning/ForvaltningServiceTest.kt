@@ -11,7 +11,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -68,7 +68,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     private lateinit var økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -203,7 +203,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         oppdatertBehandling.avsluttetDato shouldBe LocalDate.now()
         oppdatertBehandling.sisteResultat!!.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 
-        val tasker = taskRepository.findAll()
+        val tasker = taskService.findAll()
         tasker.shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 behandling.id.toString() == it.payload &&
@@ -303,7 +303,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandling.id).shouldBeNull()
 
-        taskRepository.findAll().shouldHaveSingleElement {
+        taskService.findAll().shouldHaveSingleElement {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype

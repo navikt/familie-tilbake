@@ -31,7 +31,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETILSYN
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype.BARNETRYGD
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.BehandlingDto
@@ -109,7 +108,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var brevsporingRepository: BrevsporingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
@@ -515,7 +514,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             )
         )
 
-        val taskene = taskRepository.findByStatus(Status.UBEHANDLET)
+        val taskene = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
         taskene.size shouldBe 1
         val task = taskene[0]
         task.type shouldBe OpprettBehandlingManueltTask.TYPE
@@ -555,7 +554,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             "Venter på kravgrunnlag fra økonomi"
         )
-        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             HentKravgrunnlagTask.TYPE == it.type &&
                 revurdering.id.toString() == it.payload
         }
@@ -1156,7 +1155,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingssresultat.shouldNotBeNull()
         behandlingssresultat.type shouldBe Behandlingsresultatstype.HENLAGT_FEILOPPRETTET
 
-        taskRepository.findByStatus(Status.UBEHANDLET).any { it.type == SendHenleggelsesbrevTask.TYPE }.shouldBeTrue()
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any { it.type == SendHenleggelsesbrevTask.TYPE }.shouldBeTrue()
         assertHistorikkTask(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
@@ -1208,7 +1207,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandlingssresultat.shouldNotBeNull()
         behandlingssresultat.type shouldBe Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD
 
-        taskRepository.findByStatus(Status.UBEHANDLET).find { task -> task.type == SendHenleggelsesbrevTask.TYPE }.shouldBeNull()
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).find { task -> task.type == SendHenleggelsesbrevTask.TYPE }.shouldBeNull()
         assertHistorikkTask(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
@@ -1320,7 +1319,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling.behandlendeEnhet shouldBe "4806"
         behandling.behandlendeEnhetsNavn shouldBe "Mock NAV Drammen"
 
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
             it.type == OppdaterEnhetOppgaveTask.TYPE &&
                 "Endret tildelt enhet: 4806" == it.metadata["beskrivelse"] &&
                 "4806" == it.metadata["enhetId"]
@@ -1568,7 +1567,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         aktør: Aktør,
         tekst: String? = null
     ) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&
@@ -1578,7 +1577,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertFinnKravgrunnlagTask(behandlingId: UUID) {
-        taskRepository.findByStatus(Status.UBEHANDLET).any {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).any {
             FinnKravgrunnlagTask.TYPE == it.type && behandlingId.toString() == it.payload
         }.shouldBeTrue()
     }
@@ -1589,7 +1588,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         beskrivelse: String? = null,
         frist: LocalDate? = null
     ) {
-        taskRepository.findAll().any {
+        taskService.findAll().any {
             it.type == taskType &&
                 behandlingId.toString() == it.payload &&
                 Oppgavetype.BehandleSak.value == it.metadata["oppgavetype"]

@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -32,7 +32,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
@@ -154,7 +154,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK
         )
-        taskRepository.findByStatus(Status.UBEHANDLET)
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -174,7 +174,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             Aktør.VEDTAKSLØSNING,
             Brevtype.VEDTAK
         )
-        taskRepository.findByStatus(Status.UBEHANDLET)
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
                 it.type == LagHistorikkinnslagTask.TYPE &&
                     TilbakekrevingHistorikkinnslagstype.VEDTAKSBREV_SENDT.tekst == it.metadata["beskrivelse"]
@@ -214,7 +214,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         aktør: Aktør,
         brevtype: Brevtype
     ) {
-        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
                 aktør.name == it.metadata["aktør"] &&

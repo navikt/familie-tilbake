@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import java.util.UUID
 internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var publiserJournalpostTask: PubliserJournalpostTask
@@ -74,7 +74,7 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun assertDistribuerDokumentVedDødsfallTask() {
-        taskRepository.findByStatus(Status.UBEHANDLET).shouldHaveSingleElement {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             DistribuerDokumentVedDødsfallTask.TYPE == it.type
         }
     }
