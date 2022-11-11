@@ -376,7 +376,8 @@ class BehandlingService(
                 fagsystemsbehandling = setOf(
                     gammelFagsystemsbehandling,
                     nyFagsystemsbehandling
-                )
+                ),
+                regelverk = respons.regelverk
             )
         )
     }

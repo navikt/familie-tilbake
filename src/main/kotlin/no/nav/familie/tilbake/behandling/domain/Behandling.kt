@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
@@ -42,7 +43,8 @@ data class Behandling(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
+    val regelverk: Regelverk? = null
 ) {
 
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status

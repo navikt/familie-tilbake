@@ -63,7 +63,8 @@ object BehandlingMapper {
             manueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet,
             fagsystemsbehandling = setOf(fagsystemsbehandling),
             varsler = varsler,
-            verger = verger
+            verger = verger,
+            regelverk = opprettTilbakekrevingRequest.regelverk
         )
     }
 
@@ -232,7 +233,8 @@ object BehandlingMapper {
                 )
             ),
             fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
-            verger = verger
+            verger = verger,
+            regelverk = originalBehandling.regelverk
         )
     }
 
