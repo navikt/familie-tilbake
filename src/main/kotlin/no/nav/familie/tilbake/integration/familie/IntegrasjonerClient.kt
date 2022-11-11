@@ -76,6 +76,11 @@ class IntegrasjonerClient(
         .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
         .build()
         .toUri()
+    private fun tilordneOppgaveNyEnhetUri(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
+        .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
+        .build()
+        .toUri()
 
     private val finnoppgaverUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
         .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "/v4")
@@ -173,6 +178,11 @@ class IntegrasjonerClient(
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
         val uri = patchOppgaveUri(patchOppgave)
         return patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave).getDataOrThrow()
+    }
+
+    internal fun tilordneOppgaveNyEnhet(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean): OppgaveResponse {
+        val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave)
+        return patchForEntity<Ressurs<OppgaveResponse>>(uri, Any()).getDataOrThrow()
     }
 
     fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
