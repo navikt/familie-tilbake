@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -51,7 +52,7 @@ class OppgaveServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearAllMocks()
+        clearMocks(integrasjonerClient)
         oppgaveService = OppgaveService(
             behandlingRepository,
             fagsakRepository,
@@ -62,7 +63,7 @@ class OppgaveServiceTest {
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
-        every { taskService.finnTasksMedStatus(any(), any()) } returns emptyList()
+        every { taskService.finnTasksTilFrontend(any(), any(), any()) } returns emptyList()
     }
 
     @Nested
