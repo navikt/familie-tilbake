@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldHaveSingleElement
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -114,6 +115,18 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             it.type == AutomatiskSaksbehandlingTask.TYPE &&
                 it.payload == behandling.id.toString()
         }
+    }
+
+    @Test
+    fun `behandleAutomatisk skal ikke opprette tasker for EØS-behandlinger`() {
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id).copy(regelverk = Regelverk.EØS)
+            .also { behandlingRepository.update(it) }
+
+        automatiskSaksbehandlingBatch.behandleAutomatisk()
+        taskService.findAll().any {
+            it.type == AutomatiskSaksbehandlingTask.TYPE &&
+                it.payload == behandling.id.toString()
+        }.shouldBeFalse()
     }
 
     @Test

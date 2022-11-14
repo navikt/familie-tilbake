@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -76,6 +77,9 @@ class StegService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
+        }
+        if (behandling.regelverk == Regelverk.EØS) {
+            throw Feil("Behandling med id=$behandlingId behandles etter EØS-regelverket, og skal dermed ikke behandles automatisk.")
         }
         var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         val behandledeSteg = aktivtBehandlingssteg.name
