@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling.batch
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -40,7 +41,8 @@ class AutomatiskSaksbehandlingService(
 ) {
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
-        val behandlinger = behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling()
+        val behandlinger =
+            behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling().filter { it.regelverk != Regelverk.EØS }
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
             val bestemtDato = LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(fagsak.ytelsestype))
