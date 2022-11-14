@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.tilbake.config.IntegrasjonerConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -182,7 +183,7 @@ class IntegrasjonerClient(
 
     internal fun tilordneOppgaveNyEnhet(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean): OppgaveResponse {
         val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave)
-        return patchForEntity<Ressurs<OppgaveResponse>>(uri, Any()).getDataOrThrow()
+        return patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }
 
     fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -224,4 +225,10 @@ class IntegrasjonerClient(
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
     }
+}
+
+fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
+    this.add("Content-Type", "application/json;charset=UTF-8")
+    this.acceptCharset = listOf(Charsets.UTF_8)
+    return this
 }
