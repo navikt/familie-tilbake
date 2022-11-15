@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -31,11 +32,17 @@ class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : Asy
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy hh:mm")) + ":" +
             beskrivelse + System.lineSeparator() + oppgave.beskrivelse
-        var patchetOppgave = oppgave.copy(tildeltEnhetsnr = enhetId, beskrivelse = nyBeskrivelse)
+        var patchetOppgave = oppgave.copy(beskrivelse = nyBeskrivelse)
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
         oppgaveService.patchOppgave(patchetOppgave)
+
+        if (oppgave.tema == Tema.ENF) {
+            oppgaveService.tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, false) // ENF bruker generelle mapper
+        } else {
+            oppgaveService.tilordneOppgaveNyEnhet(oppgave.id!!, enhetId, true) // KON og BAR bruker mapper som hører til enhetene
+        }
     }
 
     companion object {

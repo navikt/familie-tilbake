@@ -406,7 +406,7 @@ class BehandlingService(
 
         oppgaveTaskService.oppdaterEnhetOppgaveTask(
             behandlingId = behandlingId,
-            beskrivelse = "Endret tildelt enhet: " + enhet.enhetId,
+            beskrivelse = "Endret tildelt enhet: " + byttEnhetDto.enhet,
             enhetId = byttEnhetDto.enhet
         )
     }

@@ -163,6 +163,10 @@ class OppgaveService(
         return integrasjonerClient.patchOppgave(patchOppgave)
     }
 
+    fun tilordneOppgaveNyEnhet(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean): OppgaveResponse {
+        return integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
+    }
+
     fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype?) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
