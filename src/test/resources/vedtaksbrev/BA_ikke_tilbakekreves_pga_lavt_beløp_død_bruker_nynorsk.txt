@@ -4,7 +4,7 @@ Vi har fått melding om at Søker Søkersen døydde. Barnetrygda skulle vore sta
 
 Fordi barnetrygda er utbetalt etter denne datoen er det utbetalt 500 kroner for mykje.
 __Korleis har vi kome fram til at barnetrygda ikkje må betalast tilbake?
-Sjølv om de burde ha forstått at barnetrygd er utbetalt ved ein feil, vert ikkje pengane krevd tilbake. Det er fordi feilutbetalt beløp er lågare enn 4 892 kroner.
+Sjølv om de burde ha forstått at barnetrygda er utbetalt ved ein feil, vert ikkje pengane krevd tilbake. Det er fordi feilutbetalt beløp er lågare enn 4 892 kroner.
 
 foo bar baz
 
