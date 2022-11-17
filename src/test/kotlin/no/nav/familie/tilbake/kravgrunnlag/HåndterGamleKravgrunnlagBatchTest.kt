@@ -59,7 +59,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
 
         val andreXml = Testdata.økonomiXmlMottatt.copy(
             id = UUID.randomUUID(),
-            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(7)),
+            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             ytelsestype = Ytelsestype.SKOLEPENGER
         )
         mottattXmlRepository.insert(andreXml)
