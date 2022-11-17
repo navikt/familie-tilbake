@@ -107,9 +107,9 @@ class HåndterGamleKravgrunnlagBatch(
 
         val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(
             BARNETRYGD to 8,
-            BARNETILSYN to 6,
-            OVERGANGSSTØNAD to 6,
-            SKOLEPENGER to 6,
+            BARNETILSYN to 8,
+            OVERGANGSSTØNAD to 8,
+            SKOLEPENGER to 8,
             KONTANTSTØTTE to 8
         )
     }
