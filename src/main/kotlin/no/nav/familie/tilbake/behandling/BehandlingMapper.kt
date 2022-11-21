@@ -168,6 +168,26 @@ object BehandlingMapper {
         )
     }
 
+    fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
+        return behandlinger
+            .filter { it.erAvsluttet }
+            .mapNotNull {
+                val avsluttetDato = it.avsluttetDato ?: error("Mangler avsluttet dato på behandling=${it.id}")
+                val sisteResultat = it.sisteResultat ?: error("Mangler resultat på behandling=${it.id}")
+                if (sisteResultat.erBehandlingHenlagt()) {
+                    return@mapNotNull null
+                }
+
+                no.nav.familie.kontrakter.felles.klage.FagsystemVedtak(
+                    eksternBehandlingId = it.eksternBrukId.toString(),
+                    behandlingstype = mapType(it).visningsnavn,
+                    resultat = sisteResultat.type.navn,
+                    vedtakstidspunkt = avsluttetDato.atStartOfDay(),
+                    //type
+                )
+            }
+    }
+
     private fun mapType(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype {
         return when (behandling.type) {
             Behandlingstype.TILBAKEKREVING -> TILBAKEKREVING
@@ -210,7 +230,8 @@ object BehandlingMapper {
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> HENLAGT
-            else -> null
+            Behandlingsresultatstype.IKKE_FASTSATT,
+            null -> null
         }
     }
 

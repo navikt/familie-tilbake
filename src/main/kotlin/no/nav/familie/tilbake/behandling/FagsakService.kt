@@ -143,6 +143,22 @@ class FagsakService(
     }
 
     @Transactional(readOnly = true)
+    fun hentVedtakForFagsak(
+        fagsystem: Fagsystem,
+        eksternFagsakId: String
+    ): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
+        val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId
+        )
+
+        return fagsak?.let {
+            val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
+            BehandlingMapper.tilVedtakForFagsystem(behandlinger)
+        } ?: emptyList()
+    }
+
+    @Transactional(readOnly = true)
     fun kanBehandlingOpprettesManuelt(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype
