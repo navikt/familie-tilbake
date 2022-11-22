@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.DELVIS_TILBAKEBETALING
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype.FULL_TILBAKEBETALING
@@ -183,7 +184,7 @@ object BehandlingMapper {
                     behandlingstype = mapType(it).visningsnavn,
                     resultat = sisteResultat.type.navn,
                     vedtakstidspunkt = avsluttetDato.atStartOfDay(),
-                    //type
+                    fagsystemType = FagsystemType.TILBAKEKREVING
                 )
             }
     }
