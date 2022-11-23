@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
@@ -102,5 +103,23 @@ class FagsakController(private val fagsakService: FagsakService) {
         @PathVariable eksternFagsakId: String
     ): Ressurs<List<Behandling>> {
         return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
+    }
+
+    @Operation(summary = "Hent behandlinger, kalles av fagsystem")
+    @GetMapping(
+        path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/vedtak/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
+        handling = "Henter behandlinger for bruk i fagsystem",
+        AuditLoggerEvent.ACCESS,
+        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+    )
+    fun hentVedtakForFagsystem(
+        @PathVariable fagsystem: Fagsystem,
+        @PathVariable eksternFagsakId: String
+    ): Ressurs<List<FagsystemVedtak>> {
+        return Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
     }
 }

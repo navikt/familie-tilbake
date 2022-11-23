@@ -25,6 +25,8 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.pdl.internal.Kjønn
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
@@ -261,6 +263,17 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         respons.kanBehandlingOpprettes.shouldBeTrue()
         respons.kravgrunnlagsreferanse shouldBe mottattXml.referanse
         respons.melding shouldBe "Det er mulig å opprette behandling manuelt."
+    }
+
+    @Nested
+    inner class hentVedtakForFagsak {
+
+        @Test
+        internal fun `skal returnere tom liste hvis det ikke finnes noen vedtak for fagsak`() {
+            assertThat(fagsakService.hentVedtakForFagsak(Fagsystem.EF, UUID.randomUUID().toString()))
+                .isEmpty()
+        }
+
     }
 
     private fun opprettBehandling(

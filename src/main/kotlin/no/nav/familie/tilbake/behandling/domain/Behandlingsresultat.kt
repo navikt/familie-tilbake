@@ -30,11 +30,19 @@ data class Behandlingsresultat(
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV
             )
+
+        val ALLE_FASTSATTKODER = setOf(
+            Behandlingsresultatstype.INGEN_TILBAKEBETALING,
+            Behandlingsresultatstype.DELVIS_TILBAKEBETALING,
+            Behandlingsresultatstype.FULL_TILBAKEBETALING,
+        )
     }
 
     fun erBehandlingHenlagt(): Boolean {
         return ALLE_HENLEGGELSESKODER.contains(type)
     }
+
+    fun erBehandlingFastsatt(): Boolean = ALLE_FASTSATTKODER.contains(type)
 
     fun resultatstypeTilFrontend(): Behandlingsresultatstype {
         if (erBehandlingHenlagt()) {
@@ -69,6 +77,7 @@ enum class Behandlingsresultatstype(val navn: String) {
     HENLAGT_KRAVGRUNNLAG_NULLSTILT("Kravgrunnlaget er nullstilt"),
     HENLAGT_TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
     HENLAGT("Henlagt"), // kun brukes i frontend
+
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
     DELVIS_TILBAKEBETALING("Delvis tilbakebetaling"),
     FULL_TILBAKEBETALING("Full tilbakebetaling");
