@@ -25,7 +25,7 @@ internal class BehandlingMapperTest {
 
         @Test
         internal fun `mapper avsluttet behandling`() {
-            val behandling = avsluttetBehandling()
+            val behandling = behandling()
             val resultat = tilVedtakForFagsystem(listOf(behandling))
             resultat.shouldHaveSize(1)
 
@@ -38,50 +38,51 @@ internal class BehandlingMapperTest {
 
         @Test
         internal fun `mapper ikke behandlinger er henlagt`() {
-            val behandling = avsluttetBehandling(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)
+            val behandling = behandling(behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)
+            tilVedtakForFagsystem(listOf(behandling)).shouldBeEmpty()
+        }
+
+        @Test
+        internal fun `mapper ikke behandlinger har behandlingsresultat ikke_fastsatt`() {
+            val behandling = behandling(behandlingsresultatstype = Behandlingsresultatstype.IKKE_FASTSATT)
+            tilVedtakForFagsystem(listOf(behandling)).shouldBeEmpty()
+        }
+
+        @Test
+        internal fun `mapper ikke behandlinger hvis behandlingsresultat mangler`() {
+            val behandling = behandling(behandlingsresultatstype = null)
             tilVedtakForFagsystem(listOf(behandling)).shouldBeEmpty()
         }
 
         @Test
         internal fun `mapper ikke behandlinger som ikke er avsluttet`() {
-            val behandling = behandling().copy(status = Behandlingsstatus.FATTER_VEDTAK)
+            val behandling = behandling(status = Behandlingsstatus.FATTER_VEDTAK)
             tilVedtakForFagsystem(listOf(behandling)).shouldBeEmpty()
         }
 
         @Test
         internal fun `forventer at behandling inneholder avsluttet dato`() {
-            val behandling = behandling().copy(status = Behandlingsstatus.AVSLUTTET, avsluttetDato = null)
+            val behandling = behandling(avsluttetDato = null)
             val exception = shouldThrow<IllegalStateException> {
                 tilVedtakForFagsystem(listOf(behandling))
             }
             exception.message shouldContain "Mangler avsluttet dato på behandling="
         }
-
-        @Test
-        internal fun `forventer at behandling inneholder sisteResultat`() {
-            val behandling = behandling().copy(status = Behandlingsstatus.AVSLUTTET, avsluttetDato = LocalDate.now())
-            val exception = shouldThrow<IllegalStateException> {
-                tilVedtakForFagsystem(listOf(behandling))
-            }
-            exception.message shouldContain "Mangler resultat på behandling="
-        }
-
     }
 
-    private fun avsluttetBehandling(
-        behandlingsresultatstype: Behandlingsresultatstype = Behandlingsresultatstype.FULL_TILBAKEBETALING
-    ) = behandling().copy(
-        status = Behandlingsstatus.AVSLUTTET,
-        avsluttetDato = LocalDate.of(2021, 7, 13),
-        resultater = setOf(Behandlingsresultat(type = behandlingsresultatstype))
-    )
-
-    private fun behandling() = Behandling(
+    private fun behandling(
+        status: Behandlingsstatus = Behandlingsstatus.AVSLUTTET,
+        avsluttetDato: LocalDate? = LocalDate.of(2021, 7, 13),
+        behandlingsresultatstype: Behandlingsresultatstype? = Behandlingsresultatstype.FULL_TILBAKEBETALING
+    ) = Behandling(
         fagsakId = UUID.randomUUID(),
         type = Behandlingstype.TILBAKEKREVING,
         ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
         behandlendeEnhet = "8020",
         behandlendeEnhetsNavn = "Oslo",
-        manueltOpprettet = false
+        manueltOpprettet = false,
+        status = status,
+        avsluttetDato = avsluttetDato,
+        resultater = behandlingsresultatstype?.let { setOf(Behandlingsresultat(type = behandlingsresultatstype)) } ?: emptySet()
     )
 }

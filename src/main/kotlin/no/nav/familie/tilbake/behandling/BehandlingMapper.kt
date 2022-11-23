@@ -172,12 +172,10 @@ object BehandlingMapper {
     fun tilVedtakForFagsystem(behandlinger: List<Behandling>): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
         return behandlinger
             .filter { it.erAvsluttet }
-            .mapNotNull {
+            .filter { it.sisteResultat?.erBehandlingFastsatt() ?: false }
+            .map {
                 val avsluttetDato = it.avsluttetDato ?: error("Mangler avsluttet dato på behandling=${it.id}")
                 val sisteResultat = it.sisteResultat ?: error("Mangler resultat på behandling=${it.id}")
-                if (sisteResultat.erBehandlingHenlagt()) {
-                    return@mapNotNull null
-                }
 
                 no.nav.familie.kontrakter.felles.klage.FagsystemVedtak(
                     eksternBehandlingId = it.eksternBrukId.toString(),
