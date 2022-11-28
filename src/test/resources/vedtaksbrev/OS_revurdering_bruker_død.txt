@@ -12,8 +12,8 @@ __Renter
 Etter vår vurdering forsto dere at det dere fikk utbetalt var feil. Derfor må dere betale et rentetillegg på 10 prosent. Det vil si 1 000 kroner før skatt. Dette er i tillegg til det feilutbetalte beløpet.
 
 Vedtaket er gjort etter Folketrygdloven § 22-15.
-_Skatt
-Beløpet som skal betales tilbake etter skatt er trukket fra, er beregnet etter gjennomsnittlig skattetrekk per måned.
+_Skatt og skatteoppgjør
+Skatten som er trukket fra beløpet som skal betales tilbake, er beregnet etter det som har blitt trukket i skatt i gjennomsnitt per måned.
 
 NAV gir opplysninger til Skatteetaten om skattebeløpet og om beløpet som skal betales tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betale tilbake
