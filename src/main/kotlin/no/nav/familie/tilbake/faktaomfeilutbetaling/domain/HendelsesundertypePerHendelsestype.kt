@@ -80,7 +80,9 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.ARBEID,
             Hendelsesundertype.REELL_ARBEIDSSØKER,
             Hendelsesundertype.UTDANNING,
-            Hendelsesundertype.ETABLERER_EGEN_VIRKSOMHET
+            Hendelsesundertype.ETABLERER_EGEN_VIRKSOMHET,
+            Hendelsesundertype.BARN_FYLT_1_ÅR
+
         ),
         Hendelsestype.STØNADSPERIODE to setOf(
             Hendelsesundertype.HOVEDPERIODE_3_ÅR,

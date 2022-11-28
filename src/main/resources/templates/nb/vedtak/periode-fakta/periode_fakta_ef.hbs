@@ -112,6 +112,10 @@ Du har fått {{{ytelsesnavnUbestemt}}} uten å ha vært i utdanning som utgjør 
 Du har fått {{{ytelsesnavnUbestemt}}} etter at du avsluttet etableringen av egen virksomhet. Derfor har du fått {{kroner
                         kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
             {{/case}}
+            {{#case "BARN_FYLT_1_ÅR" }}
+Du har fått {{{ytelsesnavnUbestemt}}} etter at barnet ditt fylte 1 år uten at du har fylt aktivitetsplikten.
+            Derfor har du fått {{kroner kravgrunnlag.feilutbetaltBeløp}} kroner for mye utbetalt i denne perioden.
+            {{/case}}
         {{/switch}}
     {{/case}}
     {{#case "STØNADSPERIODE"}}

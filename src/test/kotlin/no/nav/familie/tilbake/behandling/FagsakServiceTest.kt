@@ -273,7 +273,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             assertThat(fagsakService.hentVedtakForFagsak(Fagsystem.EF, UUID.randomUUID().toString()))
                 .isEmpty()
         }
-
     }
 
     private fun opprettBehandling(
