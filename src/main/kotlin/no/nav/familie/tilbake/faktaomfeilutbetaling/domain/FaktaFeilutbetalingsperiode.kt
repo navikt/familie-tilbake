@@ -73,6 +73,7 @@ enum class Hendelsesundertype {
     NÆRE_BOFORHOLD,
     FORELDRE_LEVER_SAMMEN,
     BARN_8_ÅR,
+    BARN_FYLT_1_ÅR,
     UTDANNING,
     ETABLERER_EGEN_VIRKSOMHET,
     HOVEDPERIODE_3_ÅR,
