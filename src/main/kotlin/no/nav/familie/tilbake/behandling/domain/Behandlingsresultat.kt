@@ -34,7 +34,7 @@ data class Behandlingsresultat(
         val ALLE_FASTSATTKODER = setOf(
             Behandlingsresultatstype.INGEN_TILBAKEBETALING,
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING,
-            Behandlingsresultatstype.FULL_TILBAKEBETALING,
+            Behandlingsresultatstype.FULL_TILBAKEBETALING
         )
     }
 
