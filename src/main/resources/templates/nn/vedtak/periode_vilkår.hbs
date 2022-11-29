@@ -40,14 +40,14 @@ De har ikkje fått den informasjonen de trong for å forstå at beløpet som ble
             {{#if vurderinger.unntasInnkrevingPgaLavtBeløp}}
             {{> ikke-krev-småbeløp}}
             {{else}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du burde forstått at beløpet var feil.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du burde forstått at beløpet var feil. At du må betale tilbake, betyr ikkje at du sjølv har skuld i feilutbetalinga.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, burde du etter vår vurdering forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
             {{/if}}
         {{/if}}
         {{#if (eq vurderinger.aktsomhetsresultat "GROV_UAKTSOMHET")}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du må ha forstått at beløpet var feil.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje, dersom du må ha forstått at beløpet var feil. At du må betale tilbake, betyr ikkje at du sjølv har skuld i feilutbetalinga.
 {{> fritekst}}
 
 Ut frå informasjonen du har fått, må du etter vår vurdering ha forstått at du fekk for mykje utbetalt. Derfor kan vi krevje pengane tilbake.
@@ -90,12 +90,12 @@ Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du f
 {{> fritekst}}
     {{/if}}
     {{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
-Du har fått informasjon om kor mykje du har rett til å få i {{{ytelsesnavnUbestemt}}}, og at du må melde frå om endringer til NAV. Informasjonen du har fått forklarer om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til å få utbetalt.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje dersom du forsto at beløpet var feil. At du må betale tilbake, betyr ikkje at du sjølv har skuld i feilutbetalinga.
 {{>fritekst}}
 
         {{#switch vurderinger.vilkårsvurderingsresultat}}
         {{#case "FORSTO_BURDE_FORSTÅTT"}}
-Vi meiner at du forstod at beløpet du fekk utbetalt var feil. Derfor må du betale tilbake det du har fått for mykje.
+Ut frå informasjonen du har fått, legg vi til grunn at du forsto at du fekk utbetalt for mykje. Derfor kan vi krevje tilbake.
         {{/case}}
         {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
 Vi vurderer det slik at du forsto at du gav oss uriktige opplysningar. Derfor må du betale tilbake det du har fått for mykje.
