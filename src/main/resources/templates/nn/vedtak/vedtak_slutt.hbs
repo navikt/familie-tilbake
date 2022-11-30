@@ -15,12 +15,16 @@ Beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} 
     {{/if}}
 NAV gjev opplysningar til Skatteetaten{{#if totalresultat.harSkattetrekk }} om skattebeløpet og om beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake før skatt er trekt frå{{/if}}. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
     {{/if}}
-_Korleis betale tilbake{{#if (not gjelderDødsfall)}} pengane du skuldar{{/if}}
+_Korleis betale tilbake
     {{#if behandling.erRevurdering}}
 NAV Innkreving vil korrigere beløpet {{> pronomen}} skal betale tilbake. {{> Pronomen}} finn meir informasjon på
 nav.no/innkreving.
     {{else}}
-{{> Pronomen}} vil få krav frå NAV Innkrevjing på det beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake. {{> Pronomen}} finn meir informasjon på nav.no/innkreving.
+{{> Pronomen}} vil få faktura frå NAV Innkrevjing på det beløpet {{#if gjelderDødsfall}}som skal betalast{{else}}du skal betale{{/if}} tilbake.
+
+På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. {{> Pronomen}} trenger ikkje å gjere noke før du får fakturaen.
+
+{{> Pronomen}} finn meir informasjon på nav.no/innkreving.
     {{/if}}
 {{/if}}
 _{{#if gjelderDødsfall}}R{{else}}Du har r{{/if}}ett til å klage
@@ -30,7 +34,7 @@ _{{#if gjelderDødsfall}}R{{else}}Du har r{{/if}}ett til å klage
     {{#if gjelderDødsfall}}
 Beløpet må betalast sjølv om det klagast dette vedtaket. Dette følgjer av forvaltningslova § 42. Om vedtaket blir gjort om slik at heile eller delar av beløpet likevel ikke skal betalast tilbake, betalar vi pengane tilbake.
     {{else}}
-Du må som hovudregel begynne å betale beløpet tilbake, sjølv om du klagar på dette vedtaket. Dette følgjer av forvaltningslova § 42. Vi vil betale tilbake pengane du har betalt inn, om du får vedtak om at du ikkje trong å betale tilbake heile eller delar av beløpet du skulda.
+Du må som hovudregel begynne å betale tilbake beløpet når du får fakturaen, sjølv om du klagar på dette vedtaket. Dette følgjer av forvaltningslova § 42. Vi vil betale tilbake pengane du har betalt inn, om du får vedtak om at du ikkje trong å betale tilbake heile eller delar av beløpet du skulda.
     {{/if}}
 {{/if}}
 _{{#if gjelderDødsfall}}R{{else}}Du har r{{/if}}ett til innsyn

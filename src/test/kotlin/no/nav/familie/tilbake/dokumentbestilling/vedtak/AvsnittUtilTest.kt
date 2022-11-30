@@ -163,7 +163,7 @@ class AvsnittUtilTest {
         resultat[2].underavsnittsliste.shouldHaveSize(7)
         resultat[2].underavsnittsliste.filter { it.fritekstTillatt }.size shouldBe 3
         resultat[3].avsnittstype shouldBe Avsnittstype.TILLEGGSINFORMASJON
-        resultat[3].underavsnittsliste.shouldHaveSize(11)
+        resultat[3].underavsnittsliste.shouldHaveSize(13)
         resultat[3].underavsnittsliste.forEach { it.fritekstTillatt shouldBe false }
     }
 

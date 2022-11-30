@@ -1,6 +1,8 @@
-Vi varslet deg 4. april 2020 om at du har fått utbetalt for mye. Beløpet du skylder før skatt er 11 000 kroner, som er hele det feilutbetalte beløpet. Dette beløpet er med renter. Beløpet du skal betale tilbake etter skatten er trukket fra er 7 011 kroner.
+Du fikk varsel fra oss 4. april 2020 om at du har fått utbetalt for mye. Beløpet du skylder før skatt er 11 000 kroner. Dette er hele det feilutbetalte beløpet. Dette beløpet er med renter.
 
-_Gjelder perioden fra og med 1. januar 2019 til og med 31. januar 2019
+Det du skal betale tilbake etter at skatten er trukket fra, er 7 011 kroner.
+
+_Perioden fra og med 1. januar 2019 til og med 31. januar 2019
 Du har fått overgangsstønad for barn som ikke bor fast hos deg. Du har derfor fått 10 000 kroner for mye utbetalt i denne perioden.
 __Hvordan har vi kommet fram til at du må betale tilbake?
 Du har fått informasjon om hvor mye du har rett til å få i overgangsstønad og at du må melde fra om endringer til NAV. Informasjonen du har fått forklarer om du har rett til overgangsstønad og hvor mye du har rett til å få utbetalt.
@@ -14,12 +16,16 @@ _Skatt
 Beløpet du skal betale tilbake etter skatt er trukket fra, er beregnet etter ditt gjennomsnittlige skattetrekk per måned. Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.
 
 NAV gir opplysninger til Skatteetaten om skattebeløpet og om beløpet du skal betale tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
-_Hvordan betale tilbake pengene du skylder
-Du vil motta krav fra NAV Innkreving på det beløpet du skal betale tilbake. Du finner mer informasjon på nav.no/innkreving.
+_Hvordan betale tilbake
+Du vil få faktura fra NAV Innkreving på det beløpet du skal betale tilbake.
+
+På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Du trenger ikke å gjøre noe før du får fakturaen.
+
+Du finner mer informasjon på nav.no/innkreving.
 _Du har rett til å klage
 Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.
 
-Du må som hovedregel begynne å betale beløpet tilbake, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.
+Du må som hovedregel begynne å betale tilbake beløpet når du får fakturaen, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.
 _Du har rett til innsyn
 På nav.no/dittnav kan du se dokumentene i saken din.
 _Har du spørsmål?
