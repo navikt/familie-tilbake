@@ -1,6 +1,7 @@
-name: Build-Deploy-Preprod
+name: Build
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
 
 env:
   IMAGE: ghcr.io/navikt/familie-tilbake:${{ github.sha }}
@@ -141,43 +142,3 @@ jobs:
           name: docker-logs-${{ github.run_number }}.tgz
           path: ./logs.tgz
           retention-days: 2
-
-  deploy-to-dev:
-    if: github.event.pull_request.draft == false && github.actor != 'dependabot[bot]'
-    name: Deploy til dev-gcp
-    runs-on: ubuntu-latest
-    needs: [ build-jar-docker, run-junit ]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Deploy til dev-gcp
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/app-dev-gcp.yaml
-      - name: Deploy dvh_sak_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/kafka/dvh_sak_topic.yaml
-      - name: Deploy dvh_vedtak_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/kafka/dvh_vedtak_topic.yaml
-      - name: Deploy hentfagsystemsbehandling_request_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/kafka/hentfagsystemsbehandling_request_topic.yaml
-      - name: Deploy hentfagsystemsbehandling_respons_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/kafka/hentfagsystemsbehandling_respons_topic.yaml
