@@ -14,7 +14,7 @@ _Skatt og skatteoppgjør
 Skatten som er trukket fra beløpet som skal betales tilbake, er beregnet etter det som har blitt trukket i skatt i gjennomsnitt per måned.
 
 NAV gir opplysninger til Skatteetaten om skattebeløpet og om beløpet som skal betales tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
-_Hvordan betale tilbake
+_Hvordan betaler du tilbake?
 Dere vil få faktura fra NAV Innkreving på det beløpet som skal betales tilbake.
 
 På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Dere trenger ikke å gjøre noe før du får fakturaen.

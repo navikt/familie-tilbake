@@ -14,10 +14,10 @@ _Skatt og skatteoppgjer
 Skatten som er trekt frå beløpet som skal betalast tilbake, er berekna etter det som har blitt trekt i skatt i gjennomsnitt per månad.
 
 NAV gjev opplysningar til Skatteetaten om skattebeløpet og om beløpet som skal betalast tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
-_Korleis betale tilbake
+_Korleis betalar du tilbake?
 De vil få faktura frå NAV Innkrevjing på det beløpet som skal betalast tilbake.
 
-På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. De trenger ikkje å gjere noke før du får fakturaen.
+På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. De treng ikkje å gjere noko før du får fakturaen.
 
 De finn meir informasjon på nav.no/innkreving.
 _Rett til å klage
