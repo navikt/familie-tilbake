@@ -8,9 +8,9 @@
 Vedtaket er gjort etter {{{hjemmel.lovhjemmelVedtak}}}.
 {{#if (neq totalresultat.hovedresultat "INGEN_TILBAKEBETALING")}}
     {{#if skattepliktig}}
-_Skatt
+_Skatt og skatteoppgjør
     {{#if totalresultat.harSkattetrekk }}
-Beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake etter skatt er trukket fra, er beregnet etter {{#if gjelderDødsfall}}gjennomsnittlig{{else}}ditt gjennomsnittlige{{/if}} skattetrekk per måned.{{#if (not gjelderDødsfall)}} Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du mottok på konto.{{/if}}
+Skatten som er trukket fra beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake, er beregnet etter det {{#if gjelderDødsfall}}som{{else}}du{{/if}} har blitt trukket i skatt i gjennomsnitt per måned.{{#if (not gjelderDødsfall)}} Det betyr at beløpet du skal betale tilbake etter skatt, ikke alltid er likt med det beløpet du fikk inn på konto.{{/if}}
 
     {{/if}}
 NAV gir opplysninger til Skatteetaten{{#if totalresultat.harSkattetrekk }} om skattebeløpet og om beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake før skatt er trukket fra{{/if}}. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
