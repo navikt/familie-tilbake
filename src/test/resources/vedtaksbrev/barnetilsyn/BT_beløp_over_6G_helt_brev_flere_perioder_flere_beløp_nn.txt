@@ -23,7 +23,7 @@ Vedtaket er gjort etter Folketrygdloven.
 _Skatt og skatteoppgjer
 NAV gjev opplysningar til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
 _Korleis betalar du tilbake?
-Du vil få faktura frå NAV Innkrevjing på det beløpet du skal betale tilbake.
+Du vil få faktura frå NAV Innkreving på det beløpet du skal betale tilbake.
 
 På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Du treng ikkje å gjere noko før du får fakturaen.
 

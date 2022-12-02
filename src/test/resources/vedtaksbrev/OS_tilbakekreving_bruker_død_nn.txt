@@ -15,7 +15,7 @@ Skatten som er trekt frå beløpet som skal betalast tilbake, er berekna etter d
 
 NAV gjev opplysningar til Skatteetaten om skattebeløpet og om beløpet som skal betalast tilbake før skatt er trekt frå. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjer.
 _Korleis betalar du tilbake?
-De vil få faktura frå NAV Innkrevjing på det beløpet som skal betalast tilbake.
+De vil få faktura frå NAV Innkreving på det beløpet som skal betalast tilbake.
 
 På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. De treng ikkje å gjere noko før du får fakturaen.
 
