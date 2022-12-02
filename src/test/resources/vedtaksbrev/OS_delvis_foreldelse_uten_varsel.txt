@@ -1,5 +1,5 @@
 I brev 12. november 2019 fikk du melding om at overgangsstønaden din er endret. Endringen førte til at du har fått utbetalt for mye. Du må betale tilbake 1 000 kroner, som er deler av det feilutbetalte beløpet.
-_Gjelder perioden fra og med 1. januar 2019 til og med 31. januar 2019
+_Perioden fra og med 1. januar 2019 til og med 31. januar 2019
 Du har fått overgangsstønad for barn som ikke bor fast hos deg. Du har derfor fått 1 000 kroner for mye utbetalt i denne perioden.
 __Hvordan har vi kommet fram til at du ikke må betale tilbake?
 Fristen for å kreve tilbake overgangsstønaden er tre år og starter fra det tidspunktet feilutbetalingen skjedde.
@@ -8,7 +8,7 @@ Foreldelsesfristen er 1. desember 2019. Vi kan ikke kreve tilbake penger som er 
 
 Du skal derfor ikke betale tilbake 1 000 kroner, som er feilutbetalt fra og med 1. januar 2019 til og med 31. januar 2019.
 
-_Gjelder perioden fra og med 1. februar 2019 til og med 28. februar 2019
+_Perioden fra og med 1. februar 2019 til og med 28. februar 2019
 Du er ikke medlem av folketrygden fordi du ikke har oppholdstillatelse i Norge. Derfor har du ikke rett til overgangsstønad.
 
 Du har fått 1 000 kroner for mye utbetalt.
@@ -22,12 +22,16 @@ _Lovhjemmelen vi har brukt
 Vedtaket er gjort etter Folketrygdloven § 22-15.
 _Skatt og skatteoppgjør
 NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
-_Hvordan betale tilbake pengene du skylder
-Du vil motta krav fra NAV Innkreving på det beløpet du skal betale tilbake. Du finner mer informasjon på nav.no/innkreving.
+_Hvordan betaler du tilbake?
+Du vil få faktura fra NAV Innkreving på det beløpet du skal betale tilbake.
+
+På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. Du trenger ikke å gjøre noe før du får fakturaen.
+
+Du finner mer informasjon på nav.no/innkreving.
 _Du har rett til å klage
 Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.
 
-Du må som hovedregel begynne å betale beløpet tilbake, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.
+Du må som hovedregel begynne å betale tilbake beløpet når du får fakturaen, selv om du klager på dette vedtaket. Dette følger av forvaltningsloven § 42. Hvis du får vedtak om at du ikke trengte å betale tilbake hele eller deler av beløpet du skyldte, betaler vi pengene tilbake til deg.
 _Du har rett til innsyn
 På nav.no/dittnav kan du se dokumentene i saken din.
 _Har du spørsmål?
