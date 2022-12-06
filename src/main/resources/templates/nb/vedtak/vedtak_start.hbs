@@ -1,7 +1,9 @@
 {{~#* inline "evt-renter-utsagn" ~}}{{#if totalresultat.totaltRentebeløp}} Dette beløpet er med renter.{{/if}}{{~/inline~}}
 {{~#* inline "tilbakebetaling" ~}}
 {{#if totalresultat.harSkattetrekk}}
-{{#if gjelderDødsfall}}Utestående beløp{{else}}Beløpet du skylder{{/if}} før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}} Beløpet {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake etter skatten er trukket fra er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
+{{#if gjelderDødsfall}}Utestående beløp{{else}}Beløpet du skylder{{/if}} før skatt er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}. Dette er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}}
+
+Det {{#if gjelderDødsfall}}som skal betales{{else}}du skal betale{{/if}} tilbake etter at skatten er trukket fra, er {{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt}}}.
     {{else}}
 {{#if (not gjelderDødsfall)}}Du må betale tilbake {{/if}}{{{kroner totalresultat.totaltTilbakekrevesBeløpMedRenter}}}{{#if gjelderDødsfall}} må betales tilbake{{/if}}, som er {{#if (eq totalresultat.hovedresultat "FULL_TILBAKEBETALING")}}hele{{else}}deler av{{/if}} det feilutbetalte beløpet.{{>evt-renter-utsagn}}
     {{/if}}
@@ -13,13 +15,13 @@ Vi har vurdert saken {{#if (not gjelderDødsfall)}}din {{/if}}om tilbakebetaling
 {{#if varsel.varsletDato}}
     {{#switch totalresultat.hovedresultat}}
     {{#case "FULL_TILBAKEBETALING"}}
-Vi varslet{{#if (not gjelderDødsfall)}} deg{{/if}} {{{dato varsel.varsletDato}}} om at {{#if gjelderDødsfall}}det er{{else}}du har fått{{/if}} utbetalt for mye. {{>korrigert-total-beløp}}{{>tilbakebetaling}}
+{{#if gjelderDødsfall}}Vi varslet {{{dato varsel.varsletDato}}} om at det er utbetalt{{else}}Du fikk varsel fra oss {{{dato varsel.varsletDato}}} om at du har fått utbetalt{{/if}} for mye. {{>korrigert-total-beløp}}{{>tilbakebetaling}}
     {{/case}}
     {{#case "DELVIS_TILBAKEBETALING"}}
-Vi varslet{{#if (not gjelderDødsfall)}} deg{{/if}} {{{dato varsel.varsletDato}}} om at {{#if gjelderDødsfall}}det er utbetalt{{else}}du har fått{{/if}} {{{kroner varsel.varsletBeløp}}} for mye. {{>korrigert-total-beløp}}{{>tilbakebetaling}}
+{{#if gjelderDødsfall}}Vi varslet {{{dato varsel.varsletDato}}} om at det er utbetalt{{else}}Du fikk varsel fra oss {{{dato varsel.varsletDato}}} om at du har fått utbetalt{{/if}} {{{kroner varsel.varsletBeløp}}} for mye. {{>korrigert-total-beløp}}{{>tilbakebetaling}}
     {{/case}}
     {{#case "INGEN_TILBAKEBETALING"}}
-Vi varslet{{#if (not gjelderDødsfall)}} deg{{/if}} {{{dato varsel.varsletDato}}} om at {{#if gjelderDødsfall}}det er utbetalt{{else}}du har fått{{/if}} {{{kroner varsel.varsletBeløp}}} for mye. {{>korrigert-total-beløp}}{{#if (not gjelderDødsfall)}}Vi har behandlet saken og du må ikke betale tilbake det feilutbetalte beløpet.{{else}}Det feilutbetalte beløpet må ikke betales tilbake.{{/if}}
+{{#if gjelderDødsfall}}Vi varslet {{{dato varsel.varsletDato}}} om at det er utbetalt{{else}}Du fikk varsel fra oss {{{dato varsel.varsletDato}}} om at du har fått utbetalt{{/if}} {{{kroner varsel.varsletBeløp}}} for mye. {{>korrigert-total-beløp}}{{#if (not gjelderDødsfall)}}Vi har behandlet saken og du må ikke betale tilbake det feilutbetalte beløpet.{{else}}Det feilutbetalte beløpet må ikke betales tilbake.{{/if}}
     {{/case}}
     {{/switch}}
 {{else}}
