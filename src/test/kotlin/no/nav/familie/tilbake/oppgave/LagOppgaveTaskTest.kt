@@ -1,8 +1,10 @@
 package no.nav.familie.tilbake.oppgave
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
+import java.util.UUID
 
 internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
@@ -115,6 +118,33 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    fun `doTask skal lage oppgave med saksbehandler som sendte til beslutter i beskrivelse`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val ident = "saksbehandlerIdent"
+        every { mockIntegrasjonerClient.hentSaksbehandler(ident) } returns
+            Saksbehandler(
+                UUID.randomUUID(),
+                ident,
+                "Saksbehandler",
+                "Saksbehandlersen"
+            )
+        lagOppgaveTask.doTask(lagTask(ident))
+
+        verify {
+            mockOppgaveService.opprettOppgave(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                enhet = "enhet",
+                beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen. ",
+                fristForFerdigstillelse = dagensDato,
+                saksbehandler = null,
+
+            )
+        }
+    }
+
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegsstatus: Behandlingsstegstatus,
@@ -133,13 +163,14 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagTask(): Task {
+    private fun lagTask(opprettetAv: String ? = null): Task {
         return Task(
             type = LagOppgaveTask.TYPE,
             payload = behandling.id.toString(),
             properties = Properties().apply {
                 setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
                 setProperty(PropertyName.ENHET, "enhet")
+                setProperty("opprettetAv", opprettetAv)
             }
         )
     }

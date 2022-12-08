@@ -41,7 +41,7 @@ class LagOppgaveTask(
             val opprettetAv: String? = task.metadata.getProperty("opprettetAv")
             val saksbehandlerNavn = opprettetAv?.let {
                 integrasjonerClient.hentSaksbehandler(it).let {
-                    "${it.etternavn} ${it.etternavn}"
+                    "${it.fornavn} ${it.etternavn}"
                 }
             }
             saksbehandlerNavn?.let { "Sendt til godkjenning av $it. " }
