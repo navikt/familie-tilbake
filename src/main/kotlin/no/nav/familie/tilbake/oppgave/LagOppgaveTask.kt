@@ -44,13 +44,18 @@ class LagOppgaveTask(
                     "${it.etternavn} ${it.etternavn}"
                 }
             }
-            saksbehandlerNavn?.let {  "Sendt til godkjenning av $it. " }
+            saksbehandlerNavn?.let { "Sendt til godkjenning av $it. " }
         } else {
             null
         }
 
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
-        val beskrivelse = (sendtTilBeslutningAv ?: "" ) + behandlingsstegstilstand?.venteårsak?.beskrivelse
+        val venteårsak = behandlingsstegstilstand?.venteårsak?.beskrivelse
+        val beskrivelse = if (sendtTilBeslutningAv != null) {
+            sendtTilBeslutningAv + (venteårsak ?: "")
+        } else {
+            venteårsak
+        }
 
         oppgaveService.opprettOppgave(
             UUID.fromString(task.payload),
