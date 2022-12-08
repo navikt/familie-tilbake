@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevService
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -128,7 +129,11 @@ class Foreslåvedtakssteg(
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.GodkjenneVedtak)
+            oppgaveTaskService.opprettOppgaveTask(
+                behandling = behandling,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                opprettetAv = ContextService.hentSaksbehandler()
+            )
         }
     }
 

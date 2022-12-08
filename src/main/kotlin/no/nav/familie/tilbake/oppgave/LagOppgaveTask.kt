@@ -5,7 +5,9 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -20,7 +22,8 @@ import java.util.UUID
 )
 class LagOppgaveTask(
     private val oppgaveService: OppgaveService,
-    private val behandlingskontrollService: BehandlingskontrollService
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val integrasjonerClient: IntegrasjonerClient
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -33,8 +36,22 @@ class LagOppgaveTask(
         val behandlingId = UUID.fromString(task.payload)
 
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+
+        val sendtTilBeslutningAv = if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.FATTE_VEDTAK) {
+            val opprettetAv: String? = task.metadata.getProperty("opprettetAv")
+            val saksbehandlerNavn = opprettetAv?.let {
+                integrasjonerClient.hentSaksbehandler(it).let {
+                    "${it.etternavn} ${it.etternavn}"
+                }
+            }
+            saksbehandlerNavn?.let {  "Sendt til godkjenning av $it. " }
+        } else {
+            null
+        }
+
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
-        val beskrivelse = behandlingsstegstilstand?.venteårsak?.beskrivelse
+        val beskrivelse = (sendtTilBeslutningAv ?: "" ) + behandlingsstegstilstand?.venteårsak?.beskrivelse
+
         oppgaveService.opprettOppgave(
             UUID.fromString(task.payload),
             oppgavetype,
