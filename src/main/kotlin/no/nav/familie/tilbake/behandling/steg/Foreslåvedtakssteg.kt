@@ -132,7 +132,7 @@ class Foreslåvedtakssteg(
             oppgaveTaskService.opprettOppgaveTask(
                 behandling = behandling,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
-                opprettetAv = ContextService.hentSaksbehandler()
+                opprettetAv = ContextService.hentSaksbehandlerNavn()
             )
         }
     }

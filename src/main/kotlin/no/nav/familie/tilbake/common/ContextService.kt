@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus
 
 object ContextService {
 
+    private const val SYSTEM_NAVN = "System"
+
     fun hentSaksbehandler(): String {
         return hentPåloggetSaksbehandler(Constants.BRUKER_ID_VEDTAKSLØSNINGEN)
     }
@@ -24,6 +26,17 @@ object ContextService {
                         ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
                 },
                 onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") }
+            )
+    }
+
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+            .fold(
+                onSuccess = {
+                    it.getClaims("azuread")?.get("name")?.toString()
+                        ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
+                },
+                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN }
             )
     }
 
