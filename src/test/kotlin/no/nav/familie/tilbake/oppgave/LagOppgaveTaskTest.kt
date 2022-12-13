@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,6 +38,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
+    private val mockIntegrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
 
     private lateinit var lagOppgaveTask: LagOppgaveTask
 
@@ -102,12 +104,33 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
         verify {
             mockOppgaveService.opprettOppgave(
-                behandling.id,
-                Oppgavetype.BehandleSak,
-                "enhet",
-                null,
-                dagensDato,
-                null
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                enhet = "enhet",
+                beskrivelse = "",
+                fristForFerdigstillelse = dagensDato,
+                saksbehandler = null,
+
+            )
+        }
+    }
+
+    @Test
+    fun `doTask skal lage oppgave med saksbehandler som sendte til beslutter i beskrivelse`() {
+        lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
+
+        val opprettetAv = "Saksbehandler Saksbehandlersen"
+        lagOppgaveTask.doTask(lagTask(opprettetAv))
+
+        verify {
+            mockOppgaveService.opprettOppgave(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                enhet = "enhet",
+                beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen ",
+                fristForFerdigstillelse = dagensDato,
+                saksbehandler = null,
+
             )
         }
     }
@@ -130,13 +153,16 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagTask(): Task {
+    private fun lagTask(opprettetAv: String ? = null): Task {
         return Task(
             type = LagOppgaveTask.TYPE,
             payload = behandling.id.toString(),
             properties = Properties().apply {
                 setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
                 setProperty(PropertyName.ENHET, "enhet")
+                if (opprettetAv != null) {
+                    setProperty("opprettetAv", opprettetAv)
+                }
             }
         )
     }

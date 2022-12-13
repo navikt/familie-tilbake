@@ -21,13 +21,14 @@ class OppgaveTaskService(
 ) {
 
     @Transactional
-    fun opprettOppgaveTask(behandling: Behandling, oppgavetype: Oppgavetype, saksbehandler: String? = null) {
+    fun opprettOppgaveTask(behandling: Behandling, oppgavetype: Oppgavetype, saksbehandler: String? = null, opprettetAv: String? = null) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandling.id)
         val properties = Properties().apply {
             setProperty("oppgavetype", oppgavetype.name)
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty(PropertyName.ENHET, behandling.behandlendeEnhet)
             saksbehandler?.let { setProperty("saksbehandler", it) }
+            opprettetAv?.let { setProperty("opprettetAv", it) }
         }
         taskService.save(
             Task(
