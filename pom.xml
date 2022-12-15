@@ -42,7 +42,7 @@
         <spring.cloud-contract>3.1.5</spring.cloud-contract>
         <testcontainers.version>1.17.5</testcontainers.version>
         <tjenestespesifikasjoner.version>2606.1f6354e</tjenestespesifikasjoner.version>
-        <kafka.version>3.2.3</kafka.version>
+        <kafka.version>3.3.1</kafka.version>
         <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
     </properties>
 
@@ -514,8 +514,7 @@
                         <phase>verify</phase>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>
@@ -529,8 +528,7 @@
                         <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                     <jvmarg value="--add-opens"/>
                                     <jvmarg value="java.base/java.lang=ALL-UNNAMED"/>
                                     <arg value="-F"/>
