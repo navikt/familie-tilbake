@@ -139,6 +139,12 @@
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
             <version>${com.openhtmltopdf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
