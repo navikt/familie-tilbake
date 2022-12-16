@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
+import no.nav.familie.kontrakter.felles.klage.VedtakType
 import no.nav.familie.tilbake.behandling.BehandlingMapper.tilVedtakForFagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -34,6 +35,7 @@ internal class BehandlingMapperTest {
             resultat[0].eksternBehandlingId shouldBe behandling.eksternBrukId.toString()
             resultat[0].vedtakstidspunkt shouldBe LocalDate.of(2021, 7, 13).atStartOfDay()
             resultat[0].fagsystemType shouldBe FagsystemType.TILBAKEKREVING
+            resultat[0].vedtakType shouldBe VedtakType.TILBAKEKREVING
         }
 
         @Test
