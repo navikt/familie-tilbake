@@ -87,8 +87,8 @@ spec:
         - application: familie-historikk
       external:
         - host: unleash.nais.io
-        - host: familie-integrasjoner-q1.dev-fss-pub.nais.io
-        - host: pdl-api-q1.dev-fss-pub.nais.io
+        - host: familie-integrasjoner.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
   replicas:
     min: 2
     max: 4
