@@ -33,6 +33,7 @@ rolle:
 
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.dev-fss-pub.nais.io
+FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
 FAMILIE_OPPDRAG_URL: https://familie-oppdrag.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
