@@ -49,6 +49,9 @@ spec:
           - id: 31778fd8-3b71-4867-8db6-a81235fbe001 # 0000-GA-Enslig-Forsorger-Veileder
           - id: 6406aba2-b930-41d3-a85b-dd13731bc974 # 0000-GA-Enslig-Forsorger-Saksbehandler
           - id: 5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54 # 0000-GA-Enslig-Forsorger-Beslutter
+          - id: 54cd86b8-2e23-48b2-8852-b05b5827bb0f # 0000-GA-Kontantstøtte-Veileder
+          - id: e40090eb-c2fb-400e-b412-e9084019a73b # 0000-GA-Kontantstøtte
+          - id: 4e7f23d9-5db1-45c0-acec-89c86a9ec678 # 0000-GA-Kontantstøtte-Beslutter
       enabled: true
       replyURLs:
         - "https://familie-tilbake.intern.nav.no/swagger-ui/oauth2-redirect.html"
@@ -69,8 +72,8 @@ spec:
           namespace: teamfamilie
           cluster: prod-gcp
         - application: familie-ks-sak
-          namespace: default
-          cluster: prod-fss
+          namespace: teamfamilie
+          cluster: prod-gcp
         - application: familie-tilbake-frontend
           namespace: teamfamilie
           cluster: prod-gcp
