@@ -24,17 +24,16 @@ spec:
       cluster: dev-gcp
       namespace: teamfamilie
     - application: familie-ba-sak
-      cluster: dev-fss
-    - application: familie-ba-sak
       cluster: dev-gcp
     - application: familie-ks-sak
       cluster: dev-gcp
     - application: familie-ba-sak-lokal
-      cluster: dev-fss
-    - application: familie-ba-sak-lokal
       cluster: dev-gcp
       namespace: teamfamilie
     - application: familie-ef-sak-lokal
+      cluster: dev-gcp
+      namespace: teamfamilie
+    - application: familie-ks-sak-lokal
       cluster: dev-gcp
       namespace: teamfamilie
     - application: familie-ef-iverksett-lokal
