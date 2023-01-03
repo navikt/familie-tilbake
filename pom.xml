@@ -22,15 +22,15 @@
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.7.21</kotlin.version>
-        <felles.version>1.20221101085322_cc4d556</felles.version>
+        <felles.version>1.20221202080911_bcf8f33</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20221122093344_b16e671</kontrakter.version>
+        <kontrakter.version>2.0_20221229093739_c660777</kontrakter.version>
         <kotest.version>5.5.4</kotest.version>
-        <token-validation-spring.version>2.1.7</token-validation-spring.version>
+        <token-validation-spring.version>2.1.8</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <jaxb-impl.version>2.3.6</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
+        <jaxb-impl.version>2.3.7</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <mockk.version>1.13.3</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -39,10 +39,10 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>3.1.5</spring.cloud-contract>
-        <testcontainers.version>1.17.5</testcontainers.version>
-        <tjenestespesifikasjoner.version>2606.1f6354e</tjenestespesifikasjoner.version>
-        <kafka.version>3.2.3</kafka.version>
+        <spring.cloud-contract>4.0.0</spring.cloud-contract>
+        <testcontainers.version>1.17.6</testcontainers.version>
+        <tjenestespesifikasjoner.version>2608.668f35c</tjenestespesifikasjoner.version>
+        <kafka.version>3.3.1</kafka.version>
         <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
     </properties>
 
@@ -139,6 +139,12 @@
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
             <version>${com.openhtmltopdf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
@@ -273,7 +279,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.13</version>
+            <version>1.6.14</version>
         </dependency>
         <dependency>
             <groupId>no.finn.unleash</groupId>
@@ -464,7 +470,7 @@
                 <!-- Plugin required to build java classes from XSD using XJC -->
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
+                <version>0.15.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.glassfish.jaxb</groupId>

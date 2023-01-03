@@ -109,8 +109,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 enhet = "enhet",
                 beskrivelse = "",
                 fristForFerdigstillelse = dagensDato,
-                saksbehandler = null,
-
+                saksbehandler = null
             )
         }
     }
@@ -129,7 +128,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 enhet = "enhet",
                 beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen ",
                 fristForFerdigstillelse = dagensDato,
-                saksbehandler = null,
+                saksbehandler = null
 
             )
         }
