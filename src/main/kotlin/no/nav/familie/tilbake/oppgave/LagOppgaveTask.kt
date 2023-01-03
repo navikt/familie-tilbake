@@ -21,7 +21,7 @@ import java.util.UUID
 )
 class LagOppgaveTask(
     private val oppgaveService: OppgaveService,
-    private val behandlingskontrollService: BehandlingskontrollService,
+    private val behandlingskontrollService: BehandlingskontrollService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
