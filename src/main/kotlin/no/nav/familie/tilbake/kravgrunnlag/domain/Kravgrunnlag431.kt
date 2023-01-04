@@ -135,6 +135,7 @@ enum class Klassekode(val aktivitet: String) {
     KL_KODE_FEIL_BA(""),
     KL_KODE_FEIL_EFOG(""),
     KL_KODE_FEIL_PEN(""),
+    KL_KODE_FEIL_KS(""), // Kontantstøtte
     KL_KODE_JUST_BA(""),
     KL_KODE_JUST_EFOG(""),
     KL_KODE_JUST_PEN(""),
@@ -143,6 +144,7 @@ enum class Klassekode(val aktivitet: String) {
     EFOG("Overgangsstønad"),
     EFBT("Barnetilsyn"),
     EFSP("Skolepenger"),
+    KS("Kontantstøtte"),
     TREK_KODER(""); // Felles klassekode for alle TREK klassetyper
 
     companion object {
