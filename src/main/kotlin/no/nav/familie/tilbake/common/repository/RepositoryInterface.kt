@@ -10,7 +10,7 @@ import org.springframework.data.repository.NoRepositoryBean
 interface RepositoryInterface<T, ID> : CrudRepository<T, ID> {
 
     @Deprecated("Støttes ikke, bruk insert/update")
-    override fun <S : T> save(entity: S): S {
+    override fun <S : T> save(entity: S & Any): S & Any {
         error("Not implemented - Use InsertUpdateRepository - insert/update")
     }
 
