@@ -32,12 +32,13 @@ rolle:
 
 
 
-FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io
+FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.dev-fss-pub.nais.io
+FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
 FAMILIE_OPPDRAG_URL: https://familie-oppdrag.dev-fss-pub.nais.io
 SECURITYTOKENSERVICE_URL: https://api-gw-q1.oera.no/security-token-service/SecurityTokenServiceProvider/
 
-PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
-PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
+PDL_URL: https://pdl-api.dev-fss-pub.nais.io
+PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 FORELDELSE_ANTALL_MÅNED: 3
 OPPRETTELSE_DAGER_BEGRENSNING: 1
 CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG: 0 10 * ? * MON-FRI
