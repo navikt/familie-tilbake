@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.domain
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar

@@ -2,7 +2,7 @@ package no.nav.familie.tilbake.behandling.batch
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldHaveSingleElement
-import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
