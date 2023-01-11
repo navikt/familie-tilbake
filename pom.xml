@@ -43,7 +43,7 @@
         <testcontainers.version>1.17.6</testcontainers.version>
         <tjenestespesifikasjoner.version>2608.668f35c</tjenestespesifikasjoner.version>
         <kafka.version>3.3.1</kafka.version>
-        <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
+        <prosessering-core.version>1.20230109093555_e5eaa65</prosessering-core.version>
     </properties>
 
 
