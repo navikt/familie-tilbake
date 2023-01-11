@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
