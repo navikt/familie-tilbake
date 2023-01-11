@@ -183,7 +183,7 @@ object BehandlingMapper {
                     resultat = sisteResultat.type.navn,
                     vedtakstidspunkt = avsluttetDato.atStartOfDay(),
                     fagsystemType = FagsystemType.TILBAKEKREVING,
-                    regelverk = it.regelverk ?: error("Mangler regelverk på behandling=${it.id}")
+                    regelverk = it.regelverk
                 )
             }
     }
