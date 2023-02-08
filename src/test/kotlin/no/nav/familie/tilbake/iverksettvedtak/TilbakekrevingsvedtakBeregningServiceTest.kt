@@ -977,7 +977,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val tilbakekrevingsperiode = tilbakekrevingsperioder[0]
         tilbakekrevingsperiode.periode shouldBe periode
         tilbakekrevingsperiode.renter shouldBe BigDecimal(1860)
-        tilbakekrevingsperiode.renter shouldNotBe BigDecimal(1861)
     }
 
     @Test
@@ -1053,7 +1052,6 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         tilbakekrevingsperioder.forEachIndexed { index, tilbakekrevingsperiode ->
             tilbakekrevingsperiode.periode shouldBe sortedPerioder[index]
             tilbakekrevingsperiode.renter shouldBe BigDecimal(1860)
-            tilbakekrevingsperiode.renter shouldNotBe BigDecimal(1861)
         }
     }
 
