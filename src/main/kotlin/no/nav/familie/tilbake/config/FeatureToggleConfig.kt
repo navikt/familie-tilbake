@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.config
 
-import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.UnleashContext
-import no.finn.unleash.UnleashContextProvider
-import no.finn.unleash.strategy.GradualRolloutRandomStrategy
-import no.finn.unleash.strategy.Strategy
-import no.finn.unleash.util.UnleashConfig
+import io.getunleash.DefaultUnleash
+import io.getunleash.UnleashContext
+import io.getunleash.UnleashContextProvider
+import io.getunleash.strategy.GradualRolloutRandomStrategy
+import io.getunleash.strategy.Strategy
+import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -82,7 +82,9 @@ class FeatureToggleConfig(
     }
 
     companion object {
-        const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK = "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
+
+        const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
+            "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
