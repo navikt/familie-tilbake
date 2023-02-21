@@ -33,8 +33,8 @@ class ManuellBrevmottakerService(
 
     @Transactional
     fun oppdaterBrevmottaker(
-        manuellBrevmottakerId: UUID,
         behandlingId: UUID,
+        manuellBrevmottakerId: UUID,
         manuellBrevmottakerDto: ManuellBrevmottakerDto
     ) {
         val manuellBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)

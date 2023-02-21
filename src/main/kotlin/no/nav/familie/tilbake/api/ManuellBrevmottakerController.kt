@@ -56,17 +56,18 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
 
     @Operation(summary = "Oppdaterer manuell brevmottaker")
     @PutMapping(
-        path = ["/{manuellBrevmottakerId}"],
+        path = ["/{behandlingId}/{manuellBrevmottakerId}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppdaterer manuell brevmottaker", AuditLoggerEvent.UPDATE)
     fun oppdaterManuellBrevmottaker(
+        @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
         @Valid @RequestBody
         manuellBrevmottakerDto: ManuellBrevmottakerDto
     ): Ressurs<String> {
-        manuellBrevmottakerService.oppdaterBrevmottaker(manuellBrevmottakerId, manuellBrevmottakerDto)
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandlingId, manuellBrevmottakerId, manuellBrevmottakerDto)
         return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
     }
 
