@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsoppsummering
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -149,7 +150,8 @@ abstract class OppslagSpringRunnerTest {
             HentFagsystemsbehandlingRequestSendt::class,
             Task::class,
             TaskLogg::class,
-            Meldingstelling::class
+            Meldingstelling::class,
+            ManuellBrevmottaker::class
         )
             .reversed()
             .forEach {
