@@ -42,7 +42,7 @@
         <spring.cloud-contract>4.0.0</spring.cloud-contract>
         <testcontainers.version>1.17.6</testcontainers.version>
         <tjenestespesifikasjoner.version>2608.668f35c</tjenestespesifikasjoner.version>
-        <kafka.version>3.3.1</kafka.version>
+        <kafka.version>3.4.0</kafka.version>
         <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
     </properties>
 
