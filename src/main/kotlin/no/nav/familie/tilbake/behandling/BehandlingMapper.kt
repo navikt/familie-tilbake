@@ -182,7 +182,8 @@ object BehandlingMapper {
                     behandlingstype = mapType(it).visningsnavn,
                     resultat = sisteResultat.type.navn,
                     vedtakstidspunkt = avsluttetDato.atStartOfDay(),
-                    fagsystemType = FagsystemType.TILBAKEKREVING
+                    fagsystemType = FagsystemType.TILBAKEKREVING,
+                    regelverk = it.regelverk
                 )
             }
     }

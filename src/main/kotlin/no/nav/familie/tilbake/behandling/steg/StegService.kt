@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -20,6 +21,7 @@ class StegService(
     val behandlingskontrollService: BehandlingskontrollService
 ) {
 
+    @Transactional
     fun håndterSteg(behandlingId: UUID) {
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
@@ -32,6 +34,7 @@ class StegService(
         }
     }
 
+    @Transactional
     fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
@@ -73,6 +76,7 @@ class StegService(
         }
     }
 
+    @Transactional
     fun håndterStegAutomatisk(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
@@ -101,6 +105,7 @@ class StegService(
         }
     }
 
+    @Transactional
     fun gjenopptaSteg(behandlingId: UUID) {
         var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
