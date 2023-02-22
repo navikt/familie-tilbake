@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
@@ -12,7 +13,9 @@ data class ManuellBrevmottaker(
     val behandlingId: UUID,
     val type: MottakerType,
     val navn: String,
+    @Column("adresselinje_1")
     val adresselinje1: String,
+    @Column("adresselinje_2")
     val adresselinje2: String? = null,
     val postnummer: String,
     val poststed: String,

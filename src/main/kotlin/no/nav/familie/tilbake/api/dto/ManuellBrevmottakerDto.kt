@@ -4,7 +4,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Mot
 import java.util.UUID
 
 data class ManuellBrevmottakerDto(
-    val id: UUID,
+    val id: UUID? = null,
     val type: MottakerType,
     val navn: String,
     val adresselinje1: String,

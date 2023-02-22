@@ -41,7 +41,7 @@ class ManuellBrevmottakerService(
         if (manuellBrevmottakere.none { it.id == manuellBrevmottakerId }) {
             throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId for behandlingId=$behandlingId")
         }
-        manuellBrevmottakerRepository.insert(
+        manuellBrevmottakerRepository.update(
             manuellBrevmottakere.single { it.id == manuellBrevmottakerId }.copy(
                 type = manuellBrevmottakerDto.type,
                 navn = manuellBrevmottakerDto.navn,
