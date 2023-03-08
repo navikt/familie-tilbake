@@ -66,7 +66,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
-import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -316,7 +315,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val fagsakService = mockk<FagsakService>()
         val taskService = mockk<TaskService>(relaxed = true)
         val brevSporingService = mockk<BrevsporingService>(relaxed = true)
-        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
         val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
         val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
         val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
@@ -331,7 +329,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock = BehandlingService(
             behandlingRepository, fagsakService,
-            taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
+            taskService, brevSporingService, kravgrunnlagRepository, økonomiXmlMottattRepository,
             behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
             historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService
         )
@@ -359,7 +357,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val fagsakService = mockk<FagsakService>()
         val taskService = mockk<TaskService>(relaxed = true)
         val brevSporingService = mockk<BrevsporingService>(relaxed = true)
-        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
         val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
         val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
         val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
@@ -374,7 +371,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock = BehandlingService(
             behandlingRepository, fagsakService,
-            taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
+            taskService, brevSporingService, kravgrunnlagRepository, økonomiXmlMottattRepository,
             behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
             historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService
         )
