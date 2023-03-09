@@ -14,7 +14,6 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Mot
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
 
 class ManuellBrevmottakerTest : OppslagSpringRunnerTest() {
 
@@ -70,5 +69,7 @@ class ManuellBrevmottakerTest : OppslagSpringRunnerTest() {
         brevMottakerInDb.postnummer shouldBe manuellBrevmottaker1.postnummer
         brevMottakerInDb.poststed shouldBe manuellBrevmottaker1.poststed
         brevMottakerInDb.landkode shouldBe manuellBrevmottaker1.landkode
+        brevMottakerInDb.vergetype shouldBe manuellBrevmottaker1.vergetype
+        brevMottakerInDb.type shouldBe manuellBrevmottaker1.type
     }
 }
