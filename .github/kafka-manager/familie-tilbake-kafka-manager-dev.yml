@@ -9,7 +9,7 @@ spec:
   image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2021.12.17_13.09-1e4eaff6c45c # See https://github.com/navikt/kafka-manager/packages
   port: 8080
   ingresses:
-    - https://familie-tilbake-kafka-manager.dev.intern.nav.no
+    - https://familie-tilbake-kafka-manager.intern.dev.nav.no
   prometheus:
     enabled: true
     path: /internal/prometheus
