@@ -229,7 +229,7 @@ class OppgaveService(
         return if (environment.activeProfiles.contains("prod")) {
             "familietilbakekreving.intern.nav.no"
         } else {
-            "familie-tilbake-frontend.dev.intern.nav.no"
+            "familie-tilbake-frontend.intern.dev.nav.no"
         }
     }
 
