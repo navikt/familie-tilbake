@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene
 
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
@@ -15,24 +16,29 @@ data class ManuellBrevmottaker(
     val type: MottakerType,
     var vergetype: Vergetype? = null,
     val navn: String,
+    val ident: String? = null,
+    @Column("org_nr")
+    val orgNr: String? = null,
     @Column("adresselinje_1")
-    val adresselinje1: String,
+    val adresselinje1: String? = null,
     @Column("adresselinje_2")
     val adresselinje2: String? = null,
-    val postnummer: String,
-    val poststed: String,
-    val landkode: String,
+    val postnummer: String? = null,
+    val poststed: String? = null,
+    val landkode: String? = null,
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {
     override fun toString(): String = "${javaClass.simpleName}(id=$id,behandlingId=$behandlingId)"
-}
 
-enum class MottakerType(val visningsnavn: String) {
-    BRUKER_MED_UTENLANDSK_ADRESSE("Bruker med utenlandsk adresse"),
-    FULLMEKTIG("Fullmektig"),
-    VERGE("Verge"),
-    DØDSBO("Dødsbo")
+    fun hasManuellAdresse(): Boolean {
+        return !(
+            adresselinje1.isNullOrBlank() ||
+                postnummer.isNullOrBlank() ||
+                poststed.isNullOrBlank() ||
+                landkode.isNullOrBlank()
+            )
+    }
 }
