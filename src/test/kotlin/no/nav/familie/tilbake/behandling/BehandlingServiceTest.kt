@@ -6,6 +6,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -19,8 +20,11 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
+import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
@@ -66,6 +70,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -106,6 +111,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
+
+    @Autowired
+    private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
 
     @Autowired
     private lateinit var taskService: TaskService
@@ -260,6 +268,25 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `opprettBehandling skal legge inn manuellBrevmottaker`() {
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                finnesVerge = false,
+                finnesVarsel = true,
+                manueltOpprettet = false,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                finnesInstitusjon = true,
+                finnesManuelleBrevmottakere = true
+            )
+
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+
+        val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandling.id)
+        manuelleBrevmottakere.shouldHaveSize(1)
+        manuelleBrevmottakere.first().navn shouldBe "Kari Nordmann"
+    }
+
+    @Test
     fun `opprettBehandling oppretter ikke behandling når det finnes åpen tilbakekreving for samme eksternFagsakId`() {
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
@@ -315,6 +342,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val fagsakService = mockk<FagsakService>()
         val taskService = mockk<TaskService>(relaxed = true)
         val brevSporingService = mockk<BrevsporingService>(relaxed = true)
+        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
         val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
         val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
         val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
@@ -329,7 +357,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock = BehandlingService(
             behandlingRepository, fagsakService,
-            taskService, brevSporingService, kravgrunnlagRepository, økonomiXmlMottattRepository,
+            taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
             behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
             historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService
         )
@@ -357,6 +385,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val fagsakService = mockk<FagsakService>()
         val taskService = mockk<TaskService>(relaxed = true)
         val brevSporingService = mockk<BrevsporingService>(relaxed = true)
+        val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>(relaxed = true)
         val kravgrunnlagRepository = mockk<KravgrunnlagRepository>(relaxed = true)
         val økonomiXmlMottattRepository = mockk<ØkonomiXmlMottattRepository>(relaxed = true)
         val behandlingskontrollService = mockk<BehandlingskontrollService>(relaxed = true)
@@ -371,7 +400,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock = BehandlingService(
             behandlingRepository, fagsakService,
-            taskService, brevSporingService, kravgrunnlagRepository, økonomiXmlMottattRepository,
+            taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
             behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
             historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService
         )
@@ -1503,7 +1532,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         finnesVarsel: Boolean,
         manueltOpprettet: Boolean,
         tilbakekrevingsvalg: Tilbakekrevingsvalg,
-        finnesInstitusjon: Boolean = false
+        finnesInstitusjon: Boolean = false,
+        finnesManuelleBrevmottakere: Boolean = false
     ): OpprettTilbakekrevingRequest {
         val varsel = if (finnesVarsel) {
             Varsel(
@@ -1532,6 +1562,23 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val institusjon =
             if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
 
+        val manuelleBrevmottakere = if (finnesManuelleBrevmottakere) {
+            setOf(
+                Brevmottaker(
+                    type = MottakerType.DØDSBO,
+                    navn = "Kari Nordmann",
+                    manuellAdresseInfo = ManuellAdresseInfo(
+                        "testadresse",
+                        postnummer = "0000",
+                        poststed = "OSLO",
+                        landkode = "NO"
+                    )
+                )
+            )
+        } else {
+            emptySet()
+        }
+
         return OpprettTilbakekrevingRequest(
             ytelsestype = BARNETRYGD,
             fagsystem = Fagsystem.BA,
@@ -1547,7 +1594,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             verge = verge,
             faktainfo = faktainfo,
             saksbehandlerIdent = "Z0000",
-            institusjon = institusjon
+            institusjon = institusjon,
+            manuelleBrevmottakere = manuelleBrevmottakere
         )
     }
 
