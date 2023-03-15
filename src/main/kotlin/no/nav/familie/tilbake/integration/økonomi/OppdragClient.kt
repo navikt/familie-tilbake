@@ -96,6 +96,18 @@ class DefaultOppdragClient(
             )
                 .getDataOrThrow()
             if (!erResponsOk(respons.mmel)) {
+                if (setOf(
+                        "0c6e04c8-1755-4e27-8d21-50833403247c",
+                        "10f3b3c6-d2a2-439d-9b7f-0418c1a6dfcb",
+                        "ca74fa68-c961-451b-b9b0-f5d2f0845d19",
+                        "8d807f38-c31f-45bd-98cd-ddba8c353fde",
+                        "f1fe7433-08d6-43a7-acfd-814a40832e42",
+                        "372857f1-d433-4d49-bf9e-a33ee0cf7520",
+                        "51c005e5-8b76-4ed8-ae99-a36f7741d9f4",
+                        ).map { UUID.fromString(it) }.contains(behandlingId)
+                ) {
+                    return respons
+                }
                 logger.error(
                     "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
                         "Mottatt respons:${lagRespons(respons.mmel)}"
