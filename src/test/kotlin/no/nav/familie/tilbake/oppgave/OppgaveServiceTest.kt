@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.Task
@@ -79,7 +80,8 @@ class OppgaveServiceTest {
                 "4489",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -96,7 +98,8 @@ class OppgaveServiceTest {
                 "4483",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -114,7 +117,8 @@ class OppgaveServiceTest {
                 "4489",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -132,7 +136,8 @@ class OppgaveServiceTest {
                 "1578",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -155,7 +160,8 @@ class OppgaveServiceTest {
                 "4489",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -178,7 +184,8 @@ class OppgaveServiceTest {
                 "4489",
                 "",
                 LocalDate.now().plusDays(5),
-                "bob"
+                "bob",
+                OppgavePrioritet.NORM
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -197,7 +204,8 @@ class OppgaveServiceTest {
                     "4483",
                     "",
                     LocalDate.now().plusDays(5),
-                    "bob"
+                    "bob",
+                    OppgavePrioritet.NORM
                 )
             }
             exception.message shouldBe "Det finnes allerede en oppgave ${Oppgavetype.GodkjenneVedtak} " +
@@ -222,7 +230,8 @@ class OppgaveServiceTest {
                     "4489",
                     "",
                     LocalDate.now().plusDays(5),
-                    "bob"
+                    "bob",
+                    OppgavePrioritet.NORM
                 )
             }
 

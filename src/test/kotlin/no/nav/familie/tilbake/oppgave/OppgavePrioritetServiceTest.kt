@@ -5,12 +5,15 @@ import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagFeilBeløp
 import no.nav.familie.tilbake.data.Testdata.lagYtelBeløp
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -19,7 +22,13 @@ import java.util.UUID
 internal class OppgavePrioritetServiceTest {
 
     val kravgrunnlagRepository = mockk<KravgrunnlagRepository>()
-    val oppgavePrioritetService = OppgavePrioritetService(kravgrunnlagRepository)
+    val featureToggleService = mockk<FeatureToggleService>()
+    val oppgavePrioritetService = OppgavePrioritetService(kravgrunnlagRepository, featureToggleService)
+
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER) } returns true
+    }
 
     @Test
     fun `skal gi prioritet LAV for feilutbetaling på 9999`() {
