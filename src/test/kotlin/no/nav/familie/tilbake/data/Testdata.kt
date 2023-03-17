@@ -360,4 +360,44 @@ object Testdata {
         ytelsestype = Ytelsestype.BARNETRYGD,
         behandlinger = setOf(vedtaksbrevbehandling)
     )
+
+    fun lagFeilBeløp(feilutbetaling: BigDecimal): Kravgrunnlagsbeløp433 {
+        return Kravgrunnlagsbeløp433(
+            klassekode = Klassekode.KL_KODE_FEIL_BA,
+            klassetype = Klassetype.FEIL,
+            nyttBeløp = feilutbetaling,
+            opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
+            tilbakekrevesBeløp = BigDecimal.ZERO,
+            uinnkrevdBeløp = BigDecimal.ZERO,
+            skatteprosent = BigDecimal.ZERO
+        )
+    }
+
+    fun lagYtelBeløp(utbetalt: BigDecimal, skatteprosent: BigDecimal): Kravgrunnlagsbeløp433 {
+        return Kravgrunnlagsbeløp433(
+            klassekode = Klassekode.BATR,
+            klassetype = Klassetype.YTEL,
+            tilbakekrevesBeløp = BigDecimal("10000"),
+            opprinneligUtbetalingsbeløp = utbetalt,
+            nyttBeløp = BigDecimal.ZERO,
+            skatteprosent = skatteprosent
+        )
+    }
+
+    fun lagYtelBeløp(
+        utbetalt: BigDecimal,
+        nyttBeløp: BigDecimal,
+        skatteprosent: BigDecimal
+    ): Kravgrunnlagsbeløp433 {
+        return Kravgrunnlagsbeløp433(
+            klassekode = Klassekode.BATR,
+            klassetype = Klassetype.YTEL,
+            tilbakekrevesBeløp = BigDecimal("10000"),
+            opprinneligUtbetalingsbeløp = utbetalt,
+            nyttBeløp = nyttBeløp,
+            skatteprosent = skatteprosent,
+            skyldkode = UUID.randomUUID()
+                .toString()
+        ) // brukte skyldkode for å få ulike Kravgrunnlagsbeløp433
+    }
 }

@@ -86,6 +86,8 @@ class FeatureToggleConfig(
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
             "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
 
+        const val SETT_PRIORITET_PÅ_OPPGAVER = "familie.tilbake.prioritet-oppgaver"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }

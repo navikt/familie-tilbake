@@ -1,12 +1,18 @@
 package no.nav.familie.tilbake.oppgave
 
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -20,7 +26,8 @@ import java.util.UUID
 )
 class OppdaterOppgaveTask(
     private val oppgaveService: OppgaveService,
-    val environment: Environment
+    val environment: Environment,
+    private val oppgavePrioritetService: OppgavePrioritetService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -38,9 +45,13 @@ class OppdaterOppgaveTask(
 
         val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
             beskrivelse + System.lineSeparator() + oppgave.beskrivelse
+
+        val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
+
         var patchetOppgave = oppgave.copy(
             fristFerdigstillelse = frist,
-            beskrivelse = nyBeskrivelse
+            beskrivelse = nyBeskrivelse,
+            prioritet = prioritet
         )
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)

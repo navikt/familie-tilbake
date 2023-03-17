@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
@@ -86,7 +87,8 @@ class OppgaveService(
         enhet: String,
         beskrivelse: String?,
         fristForFerdigstillelse: LocalDate,
-        saksbehandler: String?
+        saksbehandler: String?,
+        prioritet: OppgavePrioritet
     ): OppgaveResponse {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
@@ -122,7 +124,8 @@ class OppgaveService(
             tilordnetRessurs = saksbehandler,
             behandlingstype = Behandlingstype.Tilbakekreving.value,
             behandlingstema = null,
-            mappeId = finnAktuellMappe(enhet, oppgavetype)
+            mappeId = finnAktuellMappe(enhet, oppgavetype),
+            prioritet = prioritet
         )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
