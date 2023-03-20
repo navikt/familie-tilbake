@@ -21,17 +21,17 @@
         <java.version>17</java.version>
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.8.0</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20230111110429_b460008</kontrakter.version>
-        <kotest.version>5.5.4</kotest.version>
-        <token-validation-spring.version>2.1.8</token-validation-spring.version>
+        <kontrakter.version>2.0_20230313155154_f9438bd</kontrakter.version>
+        <kotest.version>5.5.5</kotest.version>
+        <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <jaxb-impl.version>2.3.7</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <mockk.version>1.13.3</mockk.version>
+        <mockk.version>1.13.4</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -39,11 +39,11 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.0.0</spring.cloud-contract>
+        <spring.cloud-contract>4.0.1</spring.cloud-contract>
         <testcontainers.version>1.17.6</testcontainers.version>
-        <tjenestespesifikasjoner.version>2608.668f35c</tjenestespesifikasjoner.version>
+        <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
         <kafka.version>3.3.1</kafka.version>
-        <prosessering-core.version>1.20221110194901_e9e0d90</prosessering-core.version>
+        <prosessering-core.version>1.20230207133526_5430e48</prosessering-core.version>
     </properties>
 
 
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.allclient</artifactId>
-            <version>9.3.1.0</version>
+            <version>9.3.2.0</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
@@ -189,7 +189,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.1</version>
+            <version>42.5.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

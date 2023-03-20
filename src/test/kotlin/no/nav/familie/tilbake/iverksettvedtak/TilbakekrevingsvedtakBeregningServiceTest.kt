@@ -20,6 +20,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
+import no.nav.familie.tilbake.iverksettvedtak.VilkårsvurderingsPeriodeDomainUtil.lagGrovtUaktsomVilkårsvurderingsperiode
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
@@ -527,7 +528,10 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         // en beregnet periode med 100 prosent tilbakekreving
-        lagAktsomhetVilkårsvurdering(listOf(Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))), Aktsomhet.GROV_UAKTSOMHET)
+        lagAktsomhetVilkårsvurdering(
+            listOf(Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))),
+            Aktsomhet.GROV_UAKTSOMHET
+        )
 
         val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
             .sortedBy { it.periode.fom }
@@ -926,7 +930,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         val sjuendePeriode = tilbakekrevingsperioder[6]
         sjuendePeriode.periode shouldBe sortedPerioder[6]
-        sjuendePeriode.renter shouldBe BigDecimal(1737)
+        sjuendePeriode.renter shouldBe BigDecimal(1736)
         feilPostering = sjuendePeriode.beløp.first { Klassetype.FEIL == it.klassetype }
         assertBeløp(beløp = feilPostering, nyttBeløp = BigDecimal(17364), kodeResultat = KodeResultat.FULL_TILBAKEKREVING)
         ytelsePostering = sjuendePeriode.beløp.first { Klassetype.YTEL == it.klassetype }
@@ -939,6 +943,115 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             skattBeløp = BigDecimal(8682),
             kodeResultat = KodeResultat.FULL_TILBAKEKREVING
         )
+    }
+
+    @Test
+    fun `beregnVedtaksperioder skal beregne periode med 100 prosent tilbakekreving og renter skal rundes ned`() {
+        kravgrunnlagRepository.deleteById(kravgrunnlag.id)
+        fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
+
+        val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter_avrundingsfeil_ned.xml")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id
+        )
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        val periode = kravgrunnlag.perioder.first().periode
+
+        val grovUaktsomhetPeriode = lagGrovtUaktsomVilkårsvurderingsperiode(periode.fom, periode.tom)
+
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandling.id,
+            BehandlingsstegVilkårsvurderingDto(
+                listOf(grovUaktsomhetPeriode)
+            )
+        )
+
+        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
+        tilbakekrevingsperioder.size shouldBe 1
+        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
+
+        val tilbakekrevingsperiode = tilbakekrevingsperioder[0]
+        tilbakekrevingsperiode.periode shouldBe periode
+        tilbakekrevingsperiode.renter shouldBe BigDecimal(1860)
+    }
+
+    @Test
+    fun `beregnVedtaksperioder som beregner flere perioder i samme vilkårsperiode med 100 prosent tilbakekreving og renter skal aldri overstige 10%`() {
+        kravgrunnlagRepository.deleteById(kravgrunnlag.id)
+        fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
+
+        val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id
+        )
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
+
+        val grovUaktsomhetPeriode = lagGrovtUaktsomVilkårsvurderingsperiode(sortedPerioder.first().fom, sortedPerioder.last().tom)
+
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandling.id,
+            BehandlingsstegVilkårsvurderingDto(
+                listOf(grovUaktsomhetPeriode)
+            )
+        )
+
+        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
+        tilbakekrevingsperioder.size shouldBe 3
+        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
+
+        tilbakekrevingsperioder[0].periode shouldBe sortedPerioder[0]
+        tilbakekrevingsperioder[0].renter shouldBe BigDecimal(1860)
+
+        tilbakekrevingsperioder[1].periode shouldBe sortedPerioder[1]
+        tilbakekrevingsperioder[1].renter shouldBe BigDecimal(1861)
+
+        tilbakekrevingsperioder[2].periode shouldBe sortedPerioder[2]
+        tilbakekrevingsperioder[2].renter shouldBe BigDecimal(1861)
+
+        tilbakekrevingsperioder.sumOf { it.renter } shouldBe BigDecimal(5582)
+    }
+
+    @Test
+    fun `beregnVedtaksperioder som beregner flere perioder i separate vilkårsperioder med 100 prosent tilbakekreving og renter skal skal avrunde hver renteperiode ned`() {
+        kravgrunnlagRepository.deleteById(kravgrunnlag.id)
+        fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
+
+        val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
+            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+            behandling.id
+        )
+        kravgrunnlagRepository.insert(kravgrunnlag)
+
+        val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
+
+        val grovUaktsomhetPeriode1 = lagGrovtUaktsomVilkårsvurderingsperiode(sortedPerioder[0].fom, sortedPerioder[0].tom)
+        val grovUaktsomhetPeriode2 = lagGrovtUaktsomVilkårsvurderingsperiode(sortedPerioder[1].fom, sortedPerioder[1].tom)
+        val grovUaktsomhetPeriode3 = lagGrovtUaktsomVilkårsvurderingsperiode(sortedPerioder[2].fom, sortedPerioder[2].tom)
+
+        vilkårsvurderingService.lagreVilkårsvurdering(
+            behandling.id,
+            BehandlingsstegVilkårsvurderingDto(
+                listOf(grovUaktsomhetPeriode1, grovUaktsomhetPeriode2, grovUaktsomhetPeriode3)
+            )
+        )
+
+        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+            .sortedBy { it.periode.fom }
+        tilbakekrevingsperioder.size shouldBe 3
+        shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
+
+        tilbakekrevingsperioder.forEachIndexed { index, tilbakekrevingsperiode ->
+            tilbakekrevingsperiode.periode shouldBe sortedPerioder[index]
+            tilbakekrevingsperiode.renter shouldBe BigDecimal(1860)
+        }
     }
 
     @Test

@@ -38,6 +38,8 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -66,6 +68,7 @@ class BehandlingService(
     private val fagsakService: FagsakService,
     private val taskService: TaskService,
     private val brevsporingService: BrevsporingService,
+    private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
@@ -148,7 +151,8 @@ class BehandlingService(
                 "det finnes allerede en åpen revurdering"
             throw Feil(message = feilmelding, frontendFeilmelding = feilmelding)
         }
-        val revurdering = BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype)
+        val revurdering =
+            BehandlingMapper.tilDomeneBehandlingRevurdering(originalBehandling, opprettRevurderingDto.årsakstype)
         behandlingRepository.insert(revurdering)
 
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
@@ -309,6 +313,7 @@ class BehandlingService(
         val aktør = when (behandlingsresultatstype) {
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
             Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> Aktør.VEDTAKSLØSNING
+
             else -> Aktør.SAKSBEHANDLER
         }
         historikkTaskService.lagHistorikkTask(
@@ -352,7 +357,8 @@ class BehandlingService(
                     "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype"
             )
         val faktainfo = respons.faktainfo
-        val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
+        val fagsystemskonsekvenser =
+            faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
         if (behandling.aktivFagsystemsbehandling.eksternId == eksternId) {
             logger.info(
                 "Det trenger ikke å oppdatere fakta info siden tilbakekrevingsbehandling " +
@@ -394,7 +400,12 @@ class BehandlingService(
             )
         }
         val enhet = integrasjonerClient.hentNavkontor(byttEnhetDto.enhet)
-        behandlingRepository.update(behandling.copy(behandlendeEnhet = byttEnhetDto.enhet, behandlendeEnhetsNavn = enhet.navn))
+        behandlingRepository.update(
+            behandling.copy(
+                behandlendeEnhet = byttEnhetDto.enhet,
+                behandlendeEnhetsNavn = enhet.navn
+            )
+        )
         oppdaterAnsvarligSaksbehandler(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
@@ -418,8 +429,10 @@ class BehandlingService(
         val eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId
         val eksternId = opprettTilbakekrevingRequest.eksternId
         val erManueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet
+        val brevmottakere = opprettTilbakekrevingRequest.manuelleBrevmottakere
 
-        val ansvarligsaksbehandler = integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
+        val ansvarligsaksbehandler =
+            integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
         logger.info(
             "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
@@ -437,9 +450,30 @@ class BehandlingService(
         val fagsak = eksisterendeFagsak
             ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
 
-        val behandling =
-            BehandlingMapper.tilDomeneBehandling(opprettTilbakekrevingRequest, fagsystem, fagsak, ansvarligsaksbehandler)
+        val behandling = BehandlingMapper.tilDomeneBehandling(
+            opprettTilbakekrevingRequest,
+            fagsystem,
+            fagsak,
+            ansvarligsaksbehandler
+        )
         behandlingRepository.insert(behandling)
+
+        val manuelleBrevmottakere = brevmottakere.map { brevmottaker ->
+            ManuellBrevmottaker(
+                behandlingId = behandling.id,
+                type = brevmottaker.type,
+                ident = brevmottaker.personIdent,
+                orgNr = brevmottaker.organisasjonsnummer,
+                adresselinje1 = brevmottaker.manuellAdresseInfo?.adresselinje1,
+                adresselinje2 = brevmottaker.manuellAdresseInfo?.adresselinje2,
+                postnummer = brevmottaker.manuellAdresseInfo?.postnummer,
+                poststed = brevmottaker.manuellAdresseInfo?.poststed,
+                landkode = brevmottaker.manuellAdresseInfo?.landkode,
+                navn = brevmottaker.navn,
+                vergetype = brevmottaker.vergetype
+            )
+        }
+        manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
 
         historikkTaskService.lagHistorikkTask(
             behandling.id,
@@ -481,7 +515,8 @@ class BehandlingService(
         eksternId: String,
         erManueltOpprettet: Boolean
     ) {
-        val behandling: Behandling? = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
+        val behandling: Behandling? =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null) {
             val feilMelding = "Det finnes allerede en åpen behandling for ytelsestype=$ytelsestype " +
                 "og eksternFagsakId=$eksternFagsakId, kan ikke opprette en ny."
@@ -517,8 +552,9 @@ class BehandlingService(
         if (erManueltOpprettet && !økonomiXmlMottattRepository
             .existsByEksternFagsakIdAndYtelsestypeAndReferanse(eksternFagsakId, ytelsestype, eksternId)
         ) {
-            val feilMelding = "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
-                "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
+            val feilMelding =
+                "Det finnes intet kravgrunnlag for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+                    "og eksternId=$eksternId. Tilbakekrevingsbehandling kan ikke opprettes manuelt."
             throw Feil(message = feilMelding, frontendFeilmelding = feilMelding)
         }
     }
@@ -541,7 +577,10 @@ class BehandlingService(
         return true
     }
 
-    private fun kanSendeHenleggelsesbrev(behandling: Behandling, behandlingsresultatstype: Behandlingsresultatstype): Boolean {
+    private fun kanSendeHenleggelsesbrev(
+        behandling: Behandling,
+        behandlingsresultatstype: Behandlingsresultatstype
+    ): Boolean {
         return when (behandling.type) {
             TILBAKEKREVING -> brevsporingService.erVarselSendt(behandling.id)
             REVURDERING_TILBAKEKREVING -> Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV == behandlingsresultatstype
