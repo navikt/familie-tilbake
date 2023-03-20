@@ -3,14 +3,7 @@ server:
 
 
 prosessering:
-  continuousRunning.enabled: false
-  maxantall: 1
-  fixedDelayString:
-    in:
-      milliseconds: 7000
-  delete:
-    after:
-      weeks: 4
+  enabled: false
 
 no.nav.security.jwt:
   issuer.azuread:
