@@ -42,7 +42,7 @@ class KravgrunnlagService(
     private val oppgaveTaskService: OppgaveTaskService,
     private val historikkTaskService: HistorikkTaskService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-    private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+    private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -73,13 +73,15 @@ class KravgrunnlagService(
         historikkTaskService.lagHistorikkTask(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
-            Aktør.VEDTAKSLØSNING
+            Aktør.VEDTAKSLØSNING,
         )
 
         // oppdater frist på oppgave når behandling venter på grunnlag
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
             håndterOppgave(behandling)
+        } else {
+            håndterOppgavePrioritet(behandling)
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
@@ -91,14 +93,15 @@ class KravgrunnlagService(
                 Behandlingsstegstatus.VENTER -> {
                     log.info(
                         "Behandling ${behandling.id} venter på kravgrunnlag, mottatt ENDR kravgrunnlag. " +
-                            "Flytter behandlingen til fakta steg"
+                            "Flytter behandlingen til fakta steg",
                     )
                     behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id)
                 }
+
                 else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
                     log.info(
                         "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
-                            "Flytter behandlingen til fakta steg"
+                            "Flytter behandlingen til fakta steg",
                     )
                     behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FAKTA)
                 }
@@ -110,11 +113,11 @@ class KravgrunnlagService(
 
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
-        fagsystemId: String
+        fagsystemId: String,
     ): Behandling? {
         return behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             ytelsestype = ytelsestype,
-            eksternFagsakId = fagsystemId
+            eksternFagsakId = fagsystemId,
         )
     }
 
@@ -132,13 +135,13 @@ class KravgrunnlagService(
 
     private fun hentOgOppdaterFaktaInfo(
         kravgrunnlag431: Kravgrunnlag431,
-        ytelsestype: Ytelsestype
+        ytelsestype: Ytelsestype,
     ) {
         // henter faktainfo fra fagsystem for ny referanse via kafka
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
             eksternFagsakId = kravgrunnlag431.fagsystemId,
             ytelsestype = ytelsestype,
-            eksternId = kravgrunnlag431.referanse
+            eksternId = kravgrunnlag431.referanse,
         )
         // OppdaterFaktainfoTask skal oppdatere fakta info med ny hentet faktainfo
         taskService.save(
@@ -150,8 +153,8 @@ class KravgrunnlagService(
                     setProperty("ytelsestype", ytelsestype.name)
                     setProperty("eksternId", kravgrunnlag431.referanse)
                     setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -162,7 +165,7 @@ class KravgrunnlagService(
             oppgaveTaskService.oppdaterOppgaveTask(
                 behandlingId = behandling.id,
                 beskrivelse = "Behandling er tatt av vent, pga mottatt kravgrunnlag",
-                frist = LocalDate.now().plusDays(1)
+                frist = LocalDate.now().plusDays(1),
             )
         } else {
             val beskrivelse = "Behandling er tatt av vent, " +
@@ -172,9 +175,13 @@ class KravgrunnlagService(
             oppgaveTaskService.oppdaterOppgaveTask(
                 behandlingId = behandling.id,
                 beskrivelse = beskrivelse,
-                frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE)
+                frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE),
             )
         }
+    }
+
+    private fun håndterOppgavePrioritet(behandling: Behandling) {
+        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id)
     }
 
     private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
@@ -205,7 +212,7 @@ class KravgrunnlagService(
                     "for behandlingId=${endretKravgrunnlag.behandlingId} " +
                     "er identisk med eksisterende kravgrunnlag med kravgrunnlagId ${forrigeKravgrunnlag.eksternKravgrunnlagId}," +
                     "status ${forrigeKravgrunnlag.kravstatuskode.kode} og referanse ${forrigeKravgrunnlag.referanse}." +
-                    "Undersøk om ny referanse kan gi feil i brev.."
+                    "Undersøk om ny referanse kan gi feil i brev..",
             )
         }
     }
