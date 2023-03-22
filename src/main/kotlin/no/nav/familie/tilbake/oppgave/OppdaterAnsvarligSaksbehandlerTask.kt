@@ -18,7 +18,8 @@ import java.util.UUID
 )
 class OppdaterAnsvarligSaksbehandlerTask(
     private val oppgaveService: OppgaveService,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+    private val oppgavePrioritetService: OppgavePrioritetService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -29,8 +30,9 @@ class OppdaterAnsvarligSaksbehandlerTask(
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
 
-        oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler))
+        oppgaveService.patchOppgave(oppgave.copy(tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = prioritet))
     }
 
     companion object {

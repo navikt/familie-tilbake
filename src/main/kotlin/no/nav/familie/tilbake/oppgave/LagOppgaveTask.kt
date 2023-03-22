@@ -21,7 +21,8 @@ import java.util.UUID
 )
 class LagOppgaveTask(
     private val oppgaveService: OppgaveService,
-    private val behandlingskontrollService: BehandlingskontrollService
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val oppgavePrioritetService: OppgavePrioritetService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -44,6 +45,7 @@ class LagOppgaveTask(
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
         val venteårsak = behandlingsstegstilstand?.venteårsak?.beskrivelse ?: ""
         val beskrivelse = sendtTilBeslutningAv?.let { "$sendtTilBeslutningAv $venteårsak" } ?: venteårsak
+        val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId)
 
         oppgaveService.opprettOppgave(
             UUID.fromString(task.payload),
@@ -51,7 +53,8 @@ class LagOppgaveTask(
             enhet,
             beskrivelse,
             LocalDate.now().plusWeeks(fristeUker),
-            saksbehandler
+            saksbehandler,
+            prioritet
         )
     }
 

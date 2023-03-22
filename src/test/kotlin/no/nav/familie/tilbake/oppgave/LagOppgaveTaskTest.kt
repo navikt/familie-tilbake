@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.oppgave
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -39,6 +41,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
     private val mockIntegrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
+    private val oppgavePrioritetService = mockk<OppgavePrioritetService>()
 
     private lateinit var lagOppgaveTask: LagOppgaveTask
 
@@ -51,7 +54,9 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
 
-        lagOppgaveTask = LagOppgaveTask(mockOppgaveService, behandlingskontrollService)
+        every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
+
+        lagOppgaveTask = LagOppgaveTask(mockOppgaveService, behandlingskontrollService, oppgavePrioritetService)
     }
 
     @Test
@@ -68,7 +73,8 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 "enhet",
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
                 fristForFerdigstillelse,
-                null
+                null,
+                OppgavePrioritet.NORM
             )
         }
     }
@@ -91,7 +97,8 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 "enhet",
                 Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                 fristForFerdigstillelse,
-                null
+                null,
+                OppgavePrioritet.NORM
             )
         }
     }
@@ -109,7 +116,8 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 enhet = "enhet",
                 beskrivelse = "",
                 fristForFerdigstillelse = dagensDato,
-                saksbehandler = null
+                saksbehandler = null,
+                OppgavePrioritet.NORM
             )
         }
     }
@@ -128,8 +136,8 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 enhet = "enhet",
                 beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen ",
                 fristForFerdigstillelse = dagensDato,
-                saksbehandler = null
-
+                saksbehandler = null,
+                OppgavePrioritet.NORM
             )
         }
     }
