@@ -53,6 +53,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppdaterPrioritetTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
@@ -152,6 +153,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10)
         )
+        assertIkkeOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -198,6 +200,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             "Behandling er tatt av vent, pga mottatt kravgrunnlag",
             LocalDate.now().plusDays(1)
         )
+        assertIkkeOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -239,6 +242,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
+        assertOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -278,6 +282,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         taskService.findAll().none { it.type == OppdaterOppgaveTask.TYPE }.shouldBeTrue()
+        assertOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -332,6 +337,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10)
         )
+        assertIkkeOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -431,6 +437,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
 
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
+        assertOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -553,6 +560,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, Aktør.SAKSBEHANDLER)
 
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
+        assertOpprettOppdaterPrioritetTask()
     }
 
     @Test
@@ -811,5 +819,19 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             beskrivelse == it.metadata["beskrivelse"] &&
                 fristDato.toString() == it.metadata["frist"]
         }.shouldBeTrue()
+    }
+
+    private fun assertOpprettOppdaterPrioritetTask() {
+        taskService.findAll().any {
+            OppdaterPrioritetTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload
+        }.shouldBeTrue()
+    }
+
+    private fun assertIkkeOpprettOppdaterPrioritetTask() {
+        taskService.findAll().any {
+            OppdaterPrioritetTask.TYPE == it.type &&
+                behandling.id.toString() == it.payload
+        }.shouldBeFalse()
     }
 }
