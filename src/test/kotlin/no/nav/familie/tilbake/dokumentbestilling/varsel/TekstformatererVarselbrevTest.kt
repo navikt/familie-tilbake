@@ -48,7 +48,7 @@ class TekstformatererVarselbrevTest {
             feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder()
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
-        val fasit = les("/varselbrev/OS_flere_perioder.txt")
+        val fasit = les("/varselbrev/OS_flere_perioder_nn.txt")
         generertBrev shouldBe fasit
     }
 
@@ -66,7 +66,7 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument =
             varselbrevsdokument.copy(brevmetadata = metadata, feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
-        val fasit = les("/varselbrev/OS_flere_perioder_dødsfall.txt")
+        val fasit = les("/varselbrev/OS_flere_perioder_dødsfall_nn.txt")
         generertBrev shouldBe fasit
     }
 
