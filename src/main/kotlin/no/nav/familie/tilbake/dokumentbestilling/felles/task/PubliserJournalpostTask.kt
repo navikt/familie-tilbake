@@ -4,10 +4,12 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
+import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -23,6 +25,7 @@ import java.util.UUID
 )
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
+    private val manuellBrevmottakerService: ManuellBrevmottakerService,
     private val taskService: TaskService
 ) : AsyncTaskStep {
 
@@ -33,12 +36,28 @@ class PubliserJournalpostTask(
 
         val journalpostId = task.metadata.getProperty("journalpostId")
         val behandlingId = UUID.fromString(task.payload)
+
+        prøvDistribuerJournalPost(journalpostId, task, behandlingId)
+
+        val manuelleAdresser = manuellBrevmottakerService.hentBrevmottakereAsManuellAdresse(behandlingId)
+        manuelleAdresser.forEach { manuellAdresse ->
+            prøvDistribuerJournalPost(journalpostId, task, behandlingId, manuellAdresse)
+        }
+    }
+
+    private fun prøvDistribuerJournalPost(
+        journalpostId: String,
+        task: Task,
+        behandlingId: UUID?,
+        manuellAdresse: ManuellAdresse? = null
+    ) {
         try {
             integrasjonerClient.distribuerJournalpost(
                 journalpostId,
                 Fagsystem.valueOf(task.metadata.getProperty("fagsystem")),
                 Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
-                Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt"))
+                Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
+                manuellAdresse
             )
         } catch (ressursException: RessursException) {
             when {
@@ -46,16 +65,19 @@ class PubliserJournalpostTask(
                     // ta med info om ukjent adresse
                     task.metadata["ukjentAdresse"] = "true"
                 }
+
                 DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException) -> {
                     // ta med info om ukjent adresse for dødsbo
                     task.metadata["dødsboUkjentAdresse"] = "true"
                     taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, task.payload, task.metadata))
                 }
+
                 dokumentetErAlleredeDistribuert(ressursException) -> {
                     log.warn(
                         "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId."
                     )
                 }
+
                 else -> throw ressursException
             }
         }
@@ -73,7 +95,8 @@ class PubliserJournalpostTask(
 
     // 409 Conflict betyr duplikatdistribusjon
     // https://nav-it.slack.com/archives/C6W9E5GPJ/p1657610907144549?thread_ts=1657610829.116619&cid=C6W9E5GPJ
-    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) = ressursException.httpStatus == HttpStatus.CONFLICT
+    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) =
+        ressursException.httpStatus == HttpStatus.CONFLICT
 
     companion object {
 
