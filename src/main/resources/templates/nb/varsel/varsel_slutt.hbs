@@ -1,3 +1,5 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}dere{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}Dere{{else}}Du{{/if}}{{~/inline~}}
 Før vi avgjør om {{#if gjelderDødsfall}}pengene skal betales{{else}}du skal betale{{/if}} tilbake, kan {{#if gjelderDødsfall}}dere uttale dere{{else}}du uttale deg{{/if}} innen {{{dato fristdatoForTilbakemelding}}}.
 {{#if ytelseMedSkatt}}
 
@@ -34,25 +36,19 @@ Dere kan sende uttalelsen til oss i posten. Adressen finner dere på nav.no/ette
 Dere kan også ta kontakt med oss på nav.no/kontakt.
 _Rett til innsyn
 Dere kan be om innsyn ved å ta kontakt med oss.
-_Har dere spørsmål?
-Dere finner mer informasjon på {{{ytelseUrl}}}.
-
-På nav.no/kontakt kan dere chatte eller skrive til oss.
-
-Hvis dere ikke finner svar på nav.no kan dere ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
 {{else}}
 _Slik uttaler du deg
 Du kan sende uttalelsen din ved å logge deg inn på nav.no/beskjedtilnav og velge «Send beskjed til NAV». Du kan også sende uttalelsen din til oss i posten. Adressen finner du på
 nav.no/ettersendelser.
 _Du har rett til innsyn
 På nav.no/dittnav kan du se dokumentene i saken din.
-_Har du spørsmål?
-Du finner mer informasjon på {{{ytelseUrl}}}.
-
-På nav.no/kontakt kan du chatte eller skrive til oss.
-
-Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
 {{/if}}
+_Har {{> pronomen}} spørsmål?
+{{> Pronomen}} finner mer informasjon på {{{ytelseUrl}}}.
+
+På nav.no/kontakt kan {{> pronomen}} chatte eller skrive til oss.
+
+Hvis {{> pronomen}} ikke finner svar på nav.no kan {{> pronomen}} ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
 
 
 Med vennlig hilsen

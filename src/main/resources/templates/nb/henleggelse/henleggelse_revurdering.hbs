@@ -1,20 +1,13 @@
+{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}dere{{else}}du{{/if}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}Dere{{else}}Du{{/if}}{{~/inline~}}
 {{{fritekstFraSaksbehandler}}}
 
-{{#if gjelderDødsfall}}
-_Har dere spørsmål?
-Dere finner mer informasjon på {{{ytelseUrl}}}.
+_Har {{> pronomen}} spørsmål?
+{{> Pronomen}} finner mer informasjon på {{{ytelseUrl}}}.
 
-På nav.no/kontakt kan dere chatte eller skrive til oss.
+På nav.no/kontakt kan {{> pronomen}} chatte eller skrive til oss.
 
-Hvis dere ikke finner svar på nav.no kan dere ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
-{{else}}
-_Har du spørsmål?
-Du finner mer informasjon på {{{ytelseUrl}}}.
-
-På nav.no/kontakt kan du chatte eller skrive til oss.
-
-Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
-{{/if}}
+Hvis {{> pronomen}} ikke finner svar på nav.no kan {{> pronomen}} ringe oss på telefon 55 55 33 33, hverdager 09.00-15.00.
 
 
 Med vennlig hilsen
