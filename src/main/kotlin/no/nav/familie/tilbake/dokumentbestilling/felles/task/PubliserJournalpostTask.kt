@@ -9,6 +9,8 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
@@ -26,6 +28,7 @@ import java.util.UUID
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val manuellBrevmottakerService: ManuellBrevmottakerService,
+    private val featureToggleService: FeatureToggleService,
     private val taskService: TaskService
 ) : AsyncTaskStep {
 
@@ -37,15 +40,17 @@ class PubliserJournalpostTask(
         val journalpostId = task.metadata.getProperty("journalpostId")
         val behandlingId = UUID.fromString(task.payload)
 
-        prøvDistribuerJournalPost(journalpostId, task, behandlingId)
+        prøvDistribuerJournalpost(journalpostId, task, behandlingId)
 
-        val manuelleAdresser = manuellBrevmottakerService.hentBrevmottakereAsManuellAdresse(behandlingId)
-        manuelleAdresser.forEach { manuellAdresse ->
-            prøvDistribuerJournalPost(journalpostId, task, behandlingId, manuellAdresse)
+        if (featureToggleService.isEnabled(DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+            val manuelleAdresser = manuellBrevmottakerService.hentBrevmottakereAsManuellAdresse(behandlingId)
+            manuelleAdresser.forEach { manuellAdresse ->
+                prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
+            }
         }
     }
 
-    private fun prøvDistribuerJournalPost(
+    private fun prøvDistribuerJournalpost(
         journalpostId: String,
         task: Task,
         behandlingId: UUID?,

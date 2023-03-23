@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
@@ -13,6 +14,8 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
@@ -41,6 +44,8 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
     @Autowired
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
 
+    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+
     @Autowired
     private lateinit var integrasjonerClient: IntegrasjonerClient
 
@@ -55,8 +60,12 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
         behandlingId = behandlingRepository.insert(Testdata.behandling).id
 
         publiserJournalpostTask =
+            PubliserJournalpostTask(integrasjonerClient, manuellBrevmottakerService, featureToggleService, taskService)
 
-            PubliserJournalpostTask(integrasjonerClient, manuellBrevmottakerService, taskService)
+        every {
+            featureToggleService.isEnabled(DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+        } returns true
+
         every {
             integrasjonerClient.distribuerJournalpost(
                 journalpostId = any(),
@@ -88,10 +97,10 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
 
         val actualAdresse = manuellAdresse.captured
 
-        assertEqualsManuellAddresOgBrevmottaker(actualAdresse, expectedManuellBrevmottaker)
+        assertEqualsManuellAddresseOgBrevmottaker(actualAdresse, expectedManuellBrevmottaker)
     }
 
-    private fun assertEqualsManuellAddresOgBrevmottaker(
+    private fun assertEqualsManuellAddresseOgBrevmottaker(
         actualAdresse: ManuellAdresse,
         expectedManuellBrevmottaker: ManuellBrevmottaker
     ) {

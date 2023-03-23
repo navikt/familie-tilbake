@@ -32,6 +32,7 @@ class ManuellBrevmottakerService(
     }
 
     fun hentBrevmottakere(behandlingId: UUID) = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+
     fun hentBrevmottakereAsManuellAdresse(behandlingId: UUID): List<ManuellAdresse> {
         return hentBrevmottakere(behandlingId).mapNotNull { manuellBrevmottaker ->
             if (manuellBrevmottaker.hasManuellAdresse()) {
