@@ -69,7 +69,7 @@ class OppgaveService(
 
             finnOppgaveResponse.oppgaver.isEmpty() -> {
                 secureLogger.error(
-                    "Fant ingen oppgave for behandling ${behandling.eksternBrukId}, " +
+                    "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse"
                 )
                 throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId}")
