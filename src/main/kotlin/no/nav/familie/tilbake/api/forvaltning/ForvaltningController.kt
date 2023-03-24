@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.validation.Valid
 
@@ -137,7 +138,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String
-    ): Ressurs<Forvaltningsinfo> {
+    ): Ressurs<List<Forvaltningsinfo>> {
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
 
@@ -158,4 +159,11 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     }
 }
 
-data class Forvaltningsinfo(val eksternKravgrunnlagId: BigInteger, val mottattXmlId: UUID?, val eksternId: String)
+data class Forvaltningsinfo(
+    val eksternKravgrunnlagId: BigInteger,
+    val kravgrunnlagId: UUID?,
+    val kravgrunnlagKravstatuskode: String?,
+    val mottattXmlId: UUID?,
+    val eksternId: String,
+    val opprettetTid: LocalDateTime
+)
