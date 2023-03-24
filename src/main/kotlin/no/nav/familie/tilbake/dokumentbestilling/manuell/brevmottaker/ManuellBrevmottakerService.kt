@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
+import no.nav.familie.kontrakter.felles.dokdist.AdresseType
+import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -30,6 +32,30 @@ class ManuellBrevmottakerService(
     }
 
     fun hentBrevmottakere(behandlingId: UUID) = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+
+    fun hentBrevmottakereAsManuellAdresse(behandlingId: UUID): List<ManuellAdresse> {
+        return hentBrevmottakere(behandlingId).mapNotNull { manuellBrevmottaker ->
+            if (manuellBrevmottaker.hasManuellAdresse()) {
+                ManuellAdresse(
+                    adresseType = findAdresseType(manuellBrevmottaker.landkode!!),
+                    adresselinje1 = manuellBrevmottaker.adresselinje1,
+                    adresselinje2 = manuellBrevmottaker.adresselinje2,
+                    postnummer = manuellBrevmottaker.postnummer,
+                    poststed = manuellBrevmottaker.poststed,
+                    land = manuellBrevmottaker.landkode
+                )
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun findAdresseType(landkode: String): AdresseType {
+        return when (landkode) {
+            "NO" -> AdresseType.norskPostadresse
+            else -> AdresseType.utenlandskPostadresse
+        }
+    }
 
     @Transactional
     fun oppdaterBrevmottaker(

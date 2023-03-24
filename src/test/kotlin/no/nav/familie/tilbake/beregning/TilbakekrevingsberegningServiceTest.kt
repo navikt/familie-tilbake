@@ -21,8 +21,6 @@ import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
-import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
@@ -465,7 +463,6 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val grunnlag: Kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(p))
         kravgrunnlagRepository.insert(grunnlag)
     }
-
 
     private fun lagGrunnlagPeriode(
         periode: Månedsperiode,
