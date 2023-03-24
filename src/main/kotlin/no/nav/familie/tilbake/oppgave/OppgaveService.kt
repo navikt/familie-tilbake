@@ -72,7 +72,7 @@ class OppgaveService(
                     "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse"
                 )
-                throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}")
+                throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
             }
 
             else -> {
