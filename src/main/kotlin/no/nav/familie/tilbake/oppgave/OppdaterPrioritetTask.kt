@@ -12,11 +12,11 @@ import java.util.UUID
     taskStepType = OppdaterPrioritetTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Oppdaterer prioritet på oppgave",
-    triggerTidVedFeilISekunder = 300L,
+    triggerTidVedFeilISekunder = 300L
 )
 class OppdaterPrioritetTask(
     private val oppgaveService: OppgaveService,
-    private val oppgavePrioritetService: OppgavePrioritetService,
+    private val oppgavePrioritetService: OppgavePrioritetService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
