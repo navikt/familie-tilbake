@@ -342,7 +342,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                     .first { it.ytelsestype == fagsak.ytelsestype }
             )
         )
-        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
+        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId.shouldBeNull()
         forvaltningsinfo.eksternId shouldBe kravgrunnlag.referanse
@@ -358,7 +358,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 ytelsestype = fagsak.ytelsestype
             )
         )
-        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId)
+        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
         forvaltningsinfo.eksternId shouldBe mottattXml.referanse
