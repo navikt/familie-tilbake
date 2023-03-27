@@ -52,12 +52,11 @@ class PubliserJournalpostTask(
                 prøvDistribuerJournalpost(journalpostId, task, behandlingId)
             }
 
-            val gyldigeBrevmottakere = when {
+            val manuelleAddresser = when {
                 dødsboAdresser.isNotEmpty() -> dødsboAdresser.toList()
                 utenlandskeAdresser.isNotEmpty() -> brevmottakere
                 else -> brevmottakere
-            }
-            val manuelleAddresser = gyldigeBrevmottakere.toManuelleAdresser()
+            }.toManuelleAdresser()
 
             manuelleAddresser.forEach { manuellAdresse ->
                 prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
