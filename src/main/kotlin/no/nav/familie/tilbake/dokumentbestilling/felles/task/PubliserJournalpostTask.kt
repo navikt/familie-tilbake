@@ -54,7 +54,6 @@ class PubliserJournalpostTask(
 
             val manuelleAddresser = when {
                 dødsboAdresser.isNotEmpty() -> dødsboAdresser.toList()
-                utenlandskeAdresser.isNotEmpty() -> brevmottakere
                 else -> brevmottakere
             }.toManuelleAdresser()
 
