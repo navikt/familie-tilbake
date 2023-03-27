@@ -161,11 +161,20 @@ class ForvaltningService(
         annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId)
     }
 
-    fun hentForvaltningsinfo(ytelsestype: Ytelsestype, eksternFagsakId: String): Forvaltningsinfo {
+    fun hentForvaltningsinfo(ytelsestype: Ytelsestype, eksternFagsakId: String): List<Forvaltningsinfo> {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
-            val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-            return Forvaltningsinfo(kravgrunnlag431.eksternKravgrunnlagId, null, kravgrunnlag431.referanse)
+            val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }
+            return kravgrunnlag431.map { kravgrunnlag ->
+                Forvaltningsinfo(
+                    eksternKravgrunnlagId = kravgrunnlag.eksternKravgrunnlagId,
+                    kravgrunnlagId = kravgrunnlag.id,
+                    kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
+                    mottattXmlId = null,
+                    eksternId = kravgrunnlag.referanse,
+                    opprettetTid = kravgrunnlag.sporbar.opprettetTid
+                )
+            }
         }
         val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
@@ -174,11 +183,16 @@ class ForvaltningService(
                 httpStatus = HttpStatus.BAD_REQUEST
             )
         }
-        return Forvaltningsinfo(
-            økonomiXmlMottatt[0].eksternKravgrunnlagId!!,
-            økonomiXmlMottatt[0].id,
-            økonomiXmlMottatt[0].referanse
-        )
+        return økonomiXmlMottatt.map { xml ->
+            Forvaltningsinfo(
+                eksternKravgrunnlagId = xml.eksternKravgrunnlagId!!,
+                kravgrunnlagId = null,
+                kravgrunnlagKravstatuskode = null,
+                mottattXmlId = xml.id,
+                eksternId = xml.referanse,
+                opprettetTid = xml.sporbar.opprettetTid
+            )
+        }
     }
 
     fun deaktiverKopletKravgrunnlag(behandlingId: UUID, kravgrunnlag431Id: UUID) {

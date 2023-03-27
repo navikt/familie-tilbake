@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 
-private const val EF_URL = "nav.no/familie/alene-med-barn"
+private const val EF_URL = "nav.no/alene-med-barn"
 
 open class BaseDokument(
     val ytelsestype: Ytelsestype,
