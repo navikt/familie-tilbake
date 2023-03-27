@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
+import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType.norskPostadresse
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType.utenlandskPostadresse
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
@@ -76,16 +77,19 @@ class ManuellBrevmottakerService(
     }
 }
 
+private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
+    return when {
+        brevmottaker.landkode == "NO" && brevmottaker.type != BRUKER_MED_UTENLANDSK_ADRESSE -> norskPostadresse
+        brevmottaker.landkode != "NO" && brevmottaker.type == BRUKER_MED_UTENLANDSK_ADRESSE -> utenlandskPostadresse
+        else -> throw Feil("landkode stemmer ikke overens med type for brevmottaker ${brevmottaker.id}")
+    }
+}
+
 fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
     this.mapNotNull { manuellBrevmottaker ->
         if (manuellBrevmottaker.hasManuellAdresse()) {
-            val addresseType = when {
-                manuellBrevmottaker.type == BRUKER_MED_UTENLANDSK_ADRESSE -> utenlandskPostadresse
-                else -> norskPostadresse
-            }
-
             ManuellAdresse(
-                adresseType = addresseType,
+                adresseType = findAdresseType(manuellBrevmottaker),
                 adresselinje1 = manuellBrevmottaker.adresselinje1,
                 adresselinje2 = manuellBrevmottaker.adresselinje2,
                 postnummer = manuellBrevmottaker.postnummer,
