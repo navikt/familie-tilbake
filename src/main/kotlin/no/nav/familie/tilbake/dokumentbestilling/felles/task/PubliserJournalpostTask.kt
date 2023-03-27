@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -12,6 +13,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.toManuelleAdresser
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -40,13 +42,28 @@ class PubliserJournalpostTask(
         val journalpostId = task.metadata.getProperty("journalpostId")
         val behandlingId = UUID.fromString(task.payload)
 
-        prøvDistribuerJournalpost(journalpostId, task, behandlingId)
-
         if (featureToggleService.isEnabled(DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
-            val manuelleAdresser = manuellBrevmottakerService.hentBrevmottakereAsManuellAdresse(behandlingId)
-            manuelleAdresser.forEach { manuellAdresse ->
+            val brevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandlingId)
+
+            val dødsboAdresser = brevmottakere.filter { it.type == MottakerType.DØDSBO }
+            val utenlandskeAdresser = brevmottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
+
+            if (dødsboAdresser.isEmpty() && utenlandskeAdresser.isEmpty()) {
+                prøvDistribuerJournalpost(journalpostId, task, behandlingId)
+            }
+
+            val gyldigeBrevmottakere = when {
+                dødsboAdresser.isNotEmpty() -> dødsboAdresser.toList()
+                utenlandskeAdresser.isNotEmpty() -> brevmottakere
+                else -> brevmottakere
+            }
+            val manuelleAddresser = gyldigeBrevmottakere.toManuelleAdresser()
+
+            manuelleAddresser.forEach { manuellAdresse ->
                 prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
             }
+        } else {
+            prøvDistribuerJournalpost(journalpostId, task, behandlingId)
         }
     }
 
