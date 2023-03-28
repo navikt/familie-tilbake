@@ -80,6 +80,8 @@ class KravgrunnlagService(
         val aktivBehandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
         if (aktivBehandlingsstegstilstand?.venteårsak == Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG) {
             håndterOppgave(behandling)
+        } else {
+            håndterOppgavePrioritet(behandling)
         }
 
         if (Kravstatuskode.ENDRET == kravgrunnlag431.kravstatuskode) {
@@ -95,6 +97,7 @@ class KravgrunnlagService(
                     )
                     behandlingskontrollService.tilbakeførBehandledeSteg(behandling.id)
                 }
+
                 else -> { // behandling har ikke fått SPER melding og har noen steg som blir behandlet
                     log.info(
                         "Behandling ${behandling.id} blir behandlet, mottatt ENDR kravgrunnlag. " +
@@ -175,6 +178,10 @@ class KravgrunnlagService(
                 frist = revurderingsvedtaksdato.plusDays(FRIST_DATO_GRENSE)
             )
         }
+    }
+
+    private fun håndterOppgavePrioritet(behandling: Behandling) {
+        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id)
     }
 
     private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {

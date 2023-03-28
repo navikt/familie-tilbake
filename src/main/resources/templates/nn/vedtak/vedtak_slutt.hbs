@@ -1,6 +1,5 @@
 {{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
 {{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}De{{else}}Du{{/if}}{{~/inline~}}
-{{~#* inline "eiepronomen"~}}{{#if gjelderDødsfall}}dykkar{{else}}ditt{{/if}}{{~/inline~}}
 {{#if (neq 1 antallPerioder)}}_{{#if hjemmel.lovhjemmelFlertall}}Lovheimlene{{else}}Lovheimelen{{/if}} vi har brukt
 {{else}}
 
@@ -43,9 +42,8 @@ _{{#if gjelderDødsfall}}R{{else}}Du har r{{/if}}ett til innsyn
 {{else}}
 På nav.no/dittnav kan du sjå dokumenta i saka di.
 {{/if}}
-_Har {{> pronomen}} spørsmål?
-{{> Pronomen}} finn nyttig informasjon på {{{ytelseUrl}}}
-Om {{> pronomen}} ikkje finn svar på spørsmålet {{> eiepronomen}}, kontakt oss på nav.no/kontakt.
+{{> nn/felles/spørsmål_kontaktinformasjon}}
+
 
 Med venleg helsing
 {{{avsenderenhet}}}

@@ -21,7 +21,12 @@ class OppgaveTaskService(
 ) {
 
     @Transactional
-    fun opprettOppgaveTask(behandling: Behandling, oppgavetype: Oppgavetype, saksbehandler: String? = null, opprettetAv: String? = null) {
+    fun opprettOppgaveTask(
+        behandling: Behandling,
+        oppgavetype: Oppgavetype,
+        saksbehandler: String? = null,
+        opprettetAv: String? = null
+    ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandling.id)
         val properties = Properties().apply {
             setProperty("oppgavetype", oppgavetype.name)
@@ -68,7 +73,13 @@ class OppgaveTaskService(
     }
 
     @Transactional
-    fun oppdaterOppgaveTaskMedTriggertid(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long, saksbehandler: String? = null) {
+    fun oppdaterOppgaveTaskMedTriggertid(
+        behandlingId: UUID,
+        beskrivelse: String,
+        frist: LocalDate,
+        triggerTid: Long,
+        saksbehandler: String? = null
+    ) {
         opprettOppdaterOppgaveTask(
             behandlingId = behandlingId,
             beskrivelse = beskrivelse,
@@ -78,7 +89,13 @@ class OppgaveTaskService(
         )
     }
 
-    private fun opprettOppdaterOppgaveTask(behandlingId: UUID, beskrivelse: String, frist: LocalDate, triggerTid: Long? = null, saksbehandler: String? = null) {
+    private fun opprettOppdaterOppgaveTask(
+        behandlingId: UUID,
+        beskrivelse: String,
+        frist: LocalDate,
+        triggerTid: Long? = null,
+        saksbehandler: String? = null
+    ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
@@ -122,6 +139,20 @@ class OppgaveTaskService(
         taskService.save(
             Task(
                 type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties
+            )
+        )
+    }
+
+    fun oppdaterOppgavePrioritetTask(behandlingId: UUID) {
+        val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
+        val properties = Properties().apply {
+            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+        }
+        taskService.save(
+            Task(
+                type = OppdaterPrioritetTask.TYPE,
                 payload = behandlingId.toString(),
                 properties = properties
             )
