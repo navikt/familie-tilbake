@@ -1,10 +1,14 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType
+import no.nav.familie.kontrakter.felles.dokdist.AdresseType.norskPostadresse
+import no.nav.familie.kontrakter.felles.dokdist.AdresseType.utenlandskPostadresse
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import org.springframework.stereotype.Service
@@ -32,30 +36,6 @@ class ManuellBrevmottakerService(
     }
 
     fun hentBrevmottakere(behandlingId: UUID) = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
-
-    fun hentBrevmottakereAsManuellAdresse(behandlingId: UUID): List<ManuellAdresse> {
-        return hentBrevmottakere(behandlingId).mapNotNull { manuellBrevmottaker ->
-            if (manuellBrevmottaker.hasManuellAdresse()) {
-                ManuellAdresse(
-                    adresseType = findAdresseType(manuellBrevmottaker.landkode!!),
-                    adresselinje1 = manuellBrevmottaker.adresselinje1,
-                    adresselinje2 = manuellBrevmottaker.adresselinje2,
-                    postnummer = manuellBrevmottaker.postnummer,
-                    poststed = manuellBrevmottaker.poststed,
-                    land = manuellBrevmottaker.landkode
-                )
-            } else {
-                null
-            }
-        }
-    }
-
-    private fun findAdresseType(landkode: String): AdresseType {
-        return when (landkode) {
-            "NO" -> AdresseType.norskPostadresse
-            else -> AdresseType.utenlandskPostadresse
-        }
-    }
 
     @Transactional
     fun oppdaterBrevmottaker(
@@ -96,3 +76,27 @@ class ManuellBrevmottakerService(
         )
     }
 }
+
+private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
+    return when {
+        brevmottaker.landkode == "NO" && brevmottaker.type != BRUKER_MED_UTENLANDSK_ADRESSE -> norskPostadresse
+        brevmottaker.landkode != "NO" && brevmottaker.type == BRUKER_MED_UTENLANDSK_ADRESSE -> utenlandskPostadresse
+        else -> throw Feil("landkode stemmer ikke overens med type for brevmottaker ${brevmottaker.id}")
+    }
+}
+
+fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
+    this.mapNotNull { manuellBrevmottaker ->
+        if (manuellBrevmottaker.hasManuellAdresse()) {
+            ManuellAdresse(
+                adresseType = findAdresseType(manuellBrevmottaker),
+                adresselinje1 = manuellBrevmottaker.adresselinje1,
+                adresselinje2 = manuellBrevmottaker.adresselinje2,
+                postnummer = manuellBrevmottaker.postnummer,
+                poststed = manuellBrevmottaker.poststed,
+                land = manuellBrevmottaker.landkode!!
+            )
+        } else {
+            null
+        }
+    }

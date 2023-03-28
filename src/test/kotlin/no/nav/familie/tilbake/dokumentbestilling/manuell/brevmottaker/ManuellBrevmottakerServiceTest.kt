@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -70,6 +71,11 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 opprettetTidspunkt = capture(opprettetTidspunktSlot)
             )
         } just runs
+    }
+
+    @AfterEach
+    fun clearSlot() {
+        opprettetTidspunktSlot.clear()
     }
 
     @Test
@@ -130,7 +136,10 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto)
         }
         shouldNotThrow<RuntimeException> {
-            manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann"))
+            manuellBrevmottakerService.leggTilBrevmottaker(
+                behandling.id,
+                manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann")
+            )
         }
 
         val manuellBrevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandling.id)
@@ -152,7 +161,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             manuellBrevmottakerService.fjernBrevmottaker(behandling.id, dbManuellBrevmottaker.id)
         }
 
-        manuellBrevmottakerService.hentBrevmottakere(behandling.id).filter { it.navn.equals("John Doe") }.shouldBeEmpty()
+        manuellBrevmottakerService.hentBrevmottakere(behandling.id).filter { it.navn.equals("John Doe") }
+            .shouldBeEmpty()
 
         verify(exactly = 1) {
             mockHistorikkService.lagHistorikkinnslag(
