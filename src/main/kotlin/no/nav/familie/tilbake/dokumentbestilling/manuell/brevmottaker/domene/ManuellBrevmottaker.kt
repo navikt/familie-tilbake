@@ -14,7 +14,7 @@ data class ManuellBrevmottaker(
     val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     val type: MottakerType,
-    var vergetype: Vergetype? = null,
+    val vergetype: Vergetype? = null,
     val navn: String,
     val ident: String? = null,
     @Column("org_nr")
@@ -31,6 +31,15 @@ data class ManuellBrevmottaker(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {
+
+    init {
+        if (type == MottakerType.VERGE) {
+            requireNotNull(vergetype)
+        }
+
+        require(!ident.isNullOrBlank() || !orgNr.isNullOrBlank() || hasManuellAdresse())
+    }
+
     override fun toString(): String = "${javaClass.simpleName}(id=$id,behandlingId=$behandlingId)"
 
     fun hasManuellAdresse(): Boolean {

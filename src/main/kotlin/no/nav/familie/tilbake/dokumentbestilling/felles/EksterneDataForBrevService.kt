@@ -42,7 +42,17 @@ class EksterneDataForBrevService(
         verge: Verge?,
         fagsystem: Fagsystem
     ): Adresseinfo {
-        return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
+        return verge?.let {
+            hentAdresse(
+                vergeType = it.type,
+                organisasjonsnummer = it.orgNr,
+                navn = it.navn,
+                personinfo = personinfo,
+                brevmottager = brevmottager,
+                personIdent = it.ident,
+                fagsystem = fagsystem
+            )
+        }
             ?: hentAdresse(personinfo)
     }
 

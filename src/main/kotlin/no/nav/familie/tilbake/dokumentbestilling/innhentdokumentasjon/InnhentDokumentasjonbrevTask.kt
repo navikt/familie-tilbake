@@ -40,11 +40,13 @@ class InnhentDokumentasjonbrevTask(
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         val fritekst: String = taskdata.fritekst
-        if (behandling.harVerge) {
-            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
+
+        val brevmottager = when {
+            behandling.harVerge -> Brevmottager.VERGE
+            fagsakRepository.findByIdOrThrow(behandling.fagsakId).institusjon != null -> Brevmottager.INSTITUSJON
+            else -> Brevmottager.BRUKER
         }
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
 
         val fristTid = Constants.saksbehandlersTidsfrist()

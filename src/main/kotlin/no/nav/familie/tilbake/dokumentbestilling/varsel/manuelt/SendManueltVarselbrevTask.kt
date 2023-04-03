@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
@@ -42,28 +43,28 @@ class SendManueltVarselbrevTask(
         val maltype = taskdata.maltype
         val fritekst = taskdata.fritekst
 
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        val brevmottager = when {
+            behandling.harVerge -> Brevmottager.VERGE
+            fagsakRepository.findByIdOrThrow(behandling.fagsakId).institusjon != null -> Brevmottager.INSTITUSJON
+            else -> Brevmottager.BRUKER
+        }
 
-        // sjekk om behandlingen har verge
-        if (Dokumentmalstype.VARSEL == maltype) {
-            if (behandling.harVerge) {
-                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
-            }
-            manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
-        } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            if (behandling.harVerge) {
-                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
-            }
-            manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
+        when (maltype) {
+            Dokumentmalstype.VARSEL ->
+                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
+
+            Dokumentmalstype.KORRIGERT_VARSEL ->
+                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
+
+            else -> throw Feil("SendmanueltVarselbrevtask ${task.id} opprettet med Dokumentmalstype $maltype")
         }
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandling.id,
             beskrivelse = "Frist er oppdatert. Saksbehandler ${
-            behandling
-                .ansvarligSaksbehandler
+                behandling
+                    .ansvarligSaksbehandler
             } har sendt varselbrev til bruker",
             frist = fristTid,
             saksbehandler = behandling.ansvarligSaksbehandler
