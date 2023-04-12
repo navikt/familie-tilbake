@@ -302,7 +302,8 @@ class VedtaksbrevgeneratorService(
             personinfo,
             brevmottager,
             vedtaksbrevgrunnlag.aktivVerge,
-            vedtaksbrevgrunnlag.fagsystem
+            vedtaksbrevgrunnlag.fagsystem,
+            vedtaksbrevgrunnlag.behandling.id
         )
         val ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(vedtaksbrevgrunnlag.aktivVerge, adresseinfo)

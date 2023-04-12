@@ -59,7 +59,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
-        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
+        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any()) }
             .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
         every {

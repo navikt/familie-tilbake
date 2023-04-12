@@ -62,10 +62,8 @@ class SendManueltVarselbrevTask(
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandling.id,
-            beskrivelse = "Frist er oppdatert. Saksbehandler ${
-                behandling
-                    .ansvarligSaksbehandler
-            } har sendt varselbrev til bruker",
+            beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling.ansvarligSaksbehandler}" +
+                " har sendt varselbrev til bruker",
             frist = fristTid,
             saksbehandler = behandling.ansvarligSaksbehandler
         )

@@ -13,11 +13,12 @@ object BrevmottagerUtil {
         val brukernavn = brevmetadata.sakspartsnavn
         val vergenavn = brevmetadata.vergenavn
 
-        return if (mottagernavn.equals(brukernavn, ignoreCase = true)) {
-            if (brevmetadata.finnesVerge) vergenavn else ""
-        } else {
-            brukernavn
-        }
+        return brevmetadata.mottageradresse.annenMottagersNavn
+            ?: if (mottagernavn.equals(brukernavn, ignoreCase = true)) {
+                if (brevmetadata.finnesVerge) vergenavn else ""
+            } else {
+                brukernavn
+            }
     }
 
     fun getVergenavn(verge: DomainVerge?, adresseinfo: Adresseinfo): String {

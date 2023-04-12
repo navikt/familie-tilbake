@@ -13,7 +13,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
-import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.toManuelleAdresser
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.toManuellAdresse
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -55,7 +55,7 @@ class PubliserJournalpostTask(
             val manuelleAddresser = when {
                 dødsboAdresser.isNotEmpty() -> dødsboAdresser.toList()
                 else -> brevmottakere
-            }.toManuelleAdresser()
+            }.map { it.toManuellAdresse() }
 
             manuelleAddresser.forEach { manuellAdresse ->
                 prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)

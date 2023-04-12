@@ -6,7 +6,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -47,7 +46,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
-        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
+        every { mockEksterneDataForBrevService.hentAdresse(any(), any(), any(), any(), any()) }
             .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
     }
 

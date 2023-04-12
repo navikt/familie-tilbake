@@ -102,7 +102,7 @@ class ManueltVarselbrevService(
         // Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
-            eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+            eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem, behandling.id)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
 
         // Henter feilutbetaling fakta

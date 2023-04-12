@@ -74,7 +74,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         val ident: String = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, any()) }.returns(personinfo)
         every {
-            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
 
         fagsak = fagsakRepository.insert(fagsak)

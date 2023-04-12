@@ -53,7 +53,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
         every {
-            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 

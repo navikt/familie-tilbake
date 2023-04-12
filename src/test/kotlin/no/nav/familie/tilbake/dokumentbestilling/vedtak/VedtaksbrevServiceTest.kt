@@ -136,7 +136,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligBeslutter!!) }
             .returns("Ansvarlig O'Beslutter")
         every {
-            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
+            eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
     }
 

@@ -85,18 +85,16 @@ private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
     }
 }
 
-fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
-    this.mapNotNull { manuellBrevmottaker ->
-        if (manuellBrevmottaker.hasManuellAdresse()) {
-            ManuellAdresse(
-                adresseType = findAdresseType(manuellBrevmottaker),
-                adresselinje1 = manuellBrevmottaker.adresselinje1,
-                adresselinje2 = manuellBrevmottaker.adresselinje2,
-                postnummer = manuellBrevmottaker.postnummer,
-                poststed = manuellBrevmottaker.poststed,
-                land = manuellBrevmottaker.landkode!!
-            )
-        } else {
-            null
-        }
+fun ManuellBrevmottaker.toManuellAdresse(): ManuellAdresse? =
+    if (this.hasManuellAdresse()) {
+        ManuellAdresse(
+            adresseType = findAdresseType(this),
+            adresselinje1 = this.adresselinje1,
+            adresselinje2 = this.adresselinje2,
+            postnummer = this.postnummer,
+            poststed = this.poststed,
+            land = this.landkode!!
+        )
+    } else {
+        null
     }

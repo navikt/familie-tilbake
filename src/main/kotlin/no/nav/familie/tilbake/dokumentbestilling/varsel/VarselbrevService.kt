@@ -66,7 +66,7 @@ class VarselbrevService(
 
         // Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
+        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem, behandling.id)
         val vergenavn: String = BrevmottagerUtil.getVergenavn(verge, adresseinfo)
         val faktaFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandling.id)
 

@@ -49,6 +49,11 @@ class InnhentDokumentasjonbrevTask(
 
         innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
 
+        // Sender brev til bruker i tillegg til verge
+        if (brevmottager == Brevmottager.VERGE) {
+            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.BRUKER)
+        }
+
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandling.id,

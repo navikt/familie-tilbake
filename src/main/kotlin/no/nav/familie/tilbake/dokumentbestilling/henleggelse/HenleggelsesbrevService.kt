@@ -101,7 +101,8 @@ class HenleggelsesbrevService(
             personinfo,
             brevmottager,
             behandling.aktivVerge,
-            fagsak.fagsystem
+            fagsak.fagsystem,
+            behandling.id
         )
         val ansvarligSaksbehandler = if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             SIGNATUR_AUTOMATISK_HENLEGGELSESBREV

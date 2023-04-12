@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
@@ -88,9 +87,16 @@ class InnhentDokumentasjonbrevService(
         brevmottager: Brevmottager
     ): InnhentDokumentasjonsbrevsdokument {
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-        val adresseinfo: Adresseinfo =
-            eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+
+        val adresseinfo = eksterneDataForBrevService.hentAdresse(
+            personinfo,
+            brevmottager,
+            behandling.aktivVerge,
+            fagsak.fagsystem,
+            behandling.id
+        )
         val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         val gjelderDødsfall = personinfo.dødsdato != null
