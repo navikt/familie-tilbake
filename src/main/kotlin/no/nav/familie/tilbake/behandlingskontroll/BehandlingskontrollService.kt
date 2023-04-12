@@ -6,11 +6,11 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.TILBAKEFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.UTFØRT
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.VENTER
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
@@ -110,7 +110,7 @@ class BehandlingskontrollService(
             oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
         }
     }
-    @Deprecated(message = "Verge-steget vil erstattes av det nye Brevmottaker-steget")
+
     @Transactional
     fun behandleVergeSteg(behandlingId: UUID) {
         tilbakeførBehandledeSteg(behandlingId)
@@ -131,7 +131,6 @@ class BehandlingskontrollService(
 
     @Transactional
     fun behandleBrevmottakerSteg(behandlingId: UUID) {
-        //tilbakeførBehandledeSteg(behandlingId)
         behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
             behandlingId,
             Behandlingssteg.BREVMOTTAKER

@@ -122,7 +122,7 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID
     )
-    fun fjernManuelleBrevmottakere(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun fjernBrevmottakerSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         manuellBrevmottakerService.fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId)
         return Ressurs.success("OK")
     }

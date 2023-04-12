@@ -111,7 +111,7 @@ object BehandlingMapper {
             eksternFagsakId = eksternFagsakId,
             behandlingsårsakstype = behandling.sisteÅrsak?.type,
             harManuelleBrevmottakere = harManuelleBrevmottakere,
-            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
+            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere
         )
     }
 

@@ -37,7 +37,7 @@ data class BehandlingDto(
     val eksternFagsakId: String,
     val behandlingsårsakstype: Behandlingsårsakstype? = null,
     val støtterManuelleBrevmottakere: Boolean,
-    val harManuelleBrevmottakere: Boolean,
+    val harManuelleBrevmottakere: Boolean
 )
 
 data class BehandlingsstegsinfoDto(

@@ -30,7 +30,7 @@ class ManuellBrevmottakerService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val behandlingskontrollService: BehandlingskontrollService,
+    private val behandlingskontrollService: BehandlingskontrollService
 ) {
 
     @Transactional
@@ -93,9 +93,10 @@ class ManuellBrevmottakerService(
         validerStegopprettelse(behandling)
         behandlingskontrollService.behandleBrevmottakerSteg(behandlingId)
     }
+
     @Transactional
     fun fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId: UUID) {
-        hentBrevmottakere(behandlingId).forEach{manuellBrevmottaker ->
+        hentBrevmottakere(behandlingId).forEach { manuellBrevmottaker ->
             manuellBrevmottakerRepository.deleteById(manuellBrevmottaker.id)
             historikkService.lagHistorikkinnslag(
                 behandlingId = behandlingId,
@@ -131,7 +132,6 @@ class ManuellBrevmottakerService(
             )
         }
     }
-
 }
 
 private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
