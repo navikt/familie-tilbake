@@ -34,6 +34,7 @@ enum class Behandlingssteg(
 
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
+    BREVMOTTAKER(3, true, false, Behandlingsstatus.UTREDES, "Registrere brevmottakere manuelt. Erstatter Verge-steget"),
     VERGE(3, true, false, Behandlingsstatus.UTREDES, "Fakta om verge"),
     FAKTA(4, true, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
     FORELDELSE(5, true, true, Behandlingsstatus.UTREDES, "Vurder om feilutbetalte perioder er foreldet"),

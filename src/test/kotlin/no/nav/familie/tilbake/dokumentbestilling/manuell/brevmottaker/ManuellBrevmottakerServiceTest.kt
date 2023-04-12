@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
@@ -33,6 +34,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
     private val mockHistorikkService: HistorikkService = mockk(relaxed = true)
+    private val mockBehandlingRepository: BehandlingRepository = mockk(relaxed = true)
+    private val mockBehandlingskontrollService: BehandlingskontrollService = mockk(relaxed = true)
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
@@ -61,7 +64,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
 
-        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService)
+        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService, mockBehandlingRepository, mockBehandlingskontrollService)
 
         every {
             mockHistorikkService.lagHistorikkinnslag(
