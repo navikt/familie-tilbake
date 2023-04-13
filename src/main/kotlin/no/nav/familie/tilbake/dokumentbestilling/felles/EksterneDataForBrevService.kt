@@ -70,34 +70,21 @@ class EksterneDataForBrevService(
                 } else {
                     return hentAdresseForBruker(manuellBruker, brukerNavn, vergeNavn, personinfo)
                 }
-            } else {
-                return verge?.let {
-                    hentAdresse(
-                        vergeType = it.type,
-                        organisasjonsnummer = it.orgNr,
-                        vergeNavn = it.navn,
-                        personinfo = personinfo,
-                        brevmottager = brevmottager,
-                        vergeIdent = it.ident,
-                        fagsystem = fagsystem
-                    )
-                }
-                    ?: hentAdresse(personinfo)
             }
-        } else {
-            return verge?.let {
-                hentAdresse(
-                    vergeType = it.type,
-                    organisasjonsnummer = it.orgNr,
-                    vergeNavn = it.navn,
-                    personinfo = personinfo,
-                    brevmottager = brevmottager,
-                    vergeIdent = it.ident,
-                    fagsystem = fagsystem
-                )
-            }
-                ?: hentAdresse(personinfo)
         }
+
+        return verge?.let {
+            hentAdresse(
+                vergeType = it.type,
+                organisasjonsnummer = it.orgNr,
+                vergeNavn = it.navn,
+                personinfo = personinfo,
+                brevmottager = brevmottager,
+                vergeIdent = it.ident,
+                fagsystem = fagsystem
+            )
+        }
+            ?: hentAdresse(personinfo)
     }
 
     private fun hentAdresseForBruker(
