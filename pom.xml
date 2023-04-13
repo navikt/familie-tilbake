@@ -43,6 +43,7 @@
         <testcontainers.version>1.17.6</testcontainers.version>
         <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
         <kafka.version>3.4.0</kafka.version>
+        <spring-kafka-test.version>3.0.5</spring-kafka-test.version>
         <prosessering-core.version>1.20230207133526_5430e48</prosessering-core.version>
     </properties>
 
@@ -358,6 +359,7 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
+            <version>${spring-kafka-test.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
