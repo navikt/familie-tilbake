@@ -38,12 +38,16 @@ data class Varselbrevsdokument(
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
-    val isYtelseMedSkatt
-        get() = ytelsestype == Ytelsestype.OVERGANGSSTØNAD
+    val isYtelseMedSkatt = ytelsestype == Ytelsestype.OVERGANGSSTØNAD
 
     @Suppress("unused") // Handlebars
-    val isRentepliktig
-        get() = ytelsestype != Ytelsestype.BARNETRYGD
+    val isRentepliktig = ytelsestype != Ytelsestype.BARNETRYGD && ytelsestype != Ytelsestype.KONTANTSTØTTE
+
+    @Suppress("unused") // Handlebars
+    val isBarnetrygd = ytelsestype == Ytelsestype.BARNETRYGD
+
+    @Suppress("unused") // Handlebars
+    val isKontantstøtte = ytelsestype == Ytelsestype.KONTANTSTØTTE
 
     @Suppress("unused") // Handlebars
     val isFinnesVerge
