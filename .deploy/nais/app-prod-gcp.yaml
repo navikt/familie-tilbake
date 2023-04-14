@@ -87,6 +87,11 @@ spec:
         - host: unleash.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
+        - host: mpls02.adeo.no
+          ports:
+            - name: mq
+              port: 1414
+              protocol: TCP
   replicas:
     min: 2
     max: 4
