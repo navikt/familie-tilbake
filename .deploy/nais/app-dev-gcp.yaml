@@ -89,6 +89,11 @@ spec:
         - host: unleash.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
+        - host: b27apvl220.preprod.local
+          ports:
+            - name: mq
+              port: 1413
+              protocol: TCP
   replicas:
     min: 2
     max: 4
