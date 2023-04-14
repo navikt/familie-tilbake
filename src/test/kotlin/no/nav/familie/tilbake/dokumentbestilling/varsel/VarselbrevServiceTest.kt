@@ -62,7 +62,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         val forhåndsvisVarselbrevRequest =
             ForhåndsvisVarselbrevRequest(
                 "Dette er et varsel!",
-                Ytelsestype.KONTANTSTØTTE,
+                Ytelsestype.BARNETRYGD,
                 "1570",
                 "Bodø",
                 "321321",
