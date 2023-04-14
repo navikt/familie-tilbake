@@ -27,7 +27,7 @@ Selv om det er NAV som er skyld i feilutbetalingen, kan vi likevel kreve at {{#i
 Hvis {{#if gjelderDødsfall}}dere{{else}}du{{/if}} må betale tilbake, og {{#if gjelderDødsfall}}dere{{else}}du{{/if}} har gitt oss feil eller mangelfull informasjon, kan vi kreve at {{#if gjelderDødsfall}}dere{{else}}du{{/if}} betaler et rentetillegg på ti prosent av beløpet.
 
 {{/if}}
-Dette går fram av {{#if rentepliktig}}folketrygdloven §§ 22-15 og 22-17a{{else}}barnetrygdloven §13{{/if}}.
+Dette går fram av {{#if isBarnetrygd}}barnetrygdloven § 13{{else if isKontantstøtte}}kontantstøtteloven § 11{{else}}folketrygdloven §§ 22-15 og 22-17a{{/if}}.
 {{#if gjelderDødsfall}}
 _Rett til uttalelse
 Dere kan sende uttalelsen til oss i posten. Adressen finner dere på nav.no/ettersendelser.

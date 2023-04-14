@@ -4,7 +4,7 @@ _{{#if gjelderDødsfall}}De{{else}}Du{{/if}} må sende oss
 _Saka blir behandlet etter frist har gått ut
 Dersom vi ikkje får opplysningane innan {{{dato fristdato}}}, behandlar vi saka med dei opplysningane vi har.
 
-Dette går fram av {{#if rentepliktig}}folketrygdlova § 21-3{{else}}barnetrygdlova §§ 17 og 18{{/if}}.
+Dette går fram av {{#if isBarnetrygd}}barnetrygdlova §§ 17 og 18{{else if isKontantstøtte}}kontantstøttelova §§ 12 og 13{{else}}folketrygdlova § 21-3{{/if}}.
 {{#if gjelderDødsfall}}
 _Rett til uttale
 De kan sende uttalen til oss i posten. Adressa finn de på nav.no/ettersendelser.

@@ -24,8 +24,13 @@ data class InnhentDokumentasjonsbrevsdokument(
     val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
-    val isRentepliktig
-        get() = ytelsestype != Ytelsestype.BARNETRYGD
+    val isRentepliktig = ytelsestype != Ytelsestype.BARNETRYGD && ytelsestype != Ytelsestype.KONTANTSTØTTE
+
+    @Suppress("unused") // Handlebars
+    val isBarnetrygd = ytelsestype == Ytelsestype.BARNETRYGD
+
+    @Suppress("unused") // Handlebars
+    val isKontantstøtte = ytelsestype == Ytelsestype.KONTANTSTØTTE
 
     init {
         if (finnesVerge) {

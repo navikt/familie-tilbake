@@ -80,7 +80,8 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                 Fagsystem.EF,
                 "321654",
                 Testdata.fagsak.bruker.ident,
-                null
+                null,
+                fagsystemsbehandlingId = "123"
             )
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)

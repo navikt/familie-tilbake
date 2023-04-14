@@ -93,6 +93,18 @@ class TekstformatererVarselbrevTest {
     }
 
     @Test
+    fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode kontantstøtte`() {
+        val metadata = metadata.copy(ytelsestype = Ytelsestype.KONTANTSTØTTE)
+        val varselbrevsdokument = varselbrevsdokument.copy(
+            brevmetadata = metadata,
+            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode()
+        )
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/KS_en_periode.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift`() {
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(metadata, false)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
