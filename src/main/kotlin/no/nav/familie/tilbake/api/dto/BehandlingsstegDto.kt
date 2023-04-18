@@ -22,6 +22,7 @@ import javax.validation.constraints.Size
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
     JsonSubTypes.Type(value = BehandlingsstegVergeDto::class),
+    JsonSubTypes.Type(value = BehandlingsstegBrevmottakerDto::class),
     JsonSubTypes.Type(value = BehandlingsstegFaktaDto::class),
     JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
     JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
@@ -46,11 +47,28 @@ data class BehandlingsstegVergeDto(val verge: VergeDto) : BehandlingsstegDto() {
     }
 }
 
+@JsonTypeName(BehandlingsstegBrevmottakerDto.STEGNAVN)
+data class BehandlingsstegBrevmottakerDto(val brevmottakerstegDto: BrevmottakerstegDto) : BehandlingsstegDto() {
+
+    override fun getSteg(): String {
+        return STEGNAVN
+    }
+
+    companion object {
+        const val STEGNAVN = "BREVMOTTAKER"
+    }
+}
+
 data class VergeDto(
     val ident: String? = null,
     val orgNr: String? = null,
     val type: Vergetype,
     val navn: String,
+    @Size(max = 4000, message = "Begrunnelse er for lang")
+    val begrunnelse: String?
+)
+
+data class BrevmottakerstegDto(
     @Size(max = 4000, message = "Begrunnelse er for lang")
     val begrunnelse: String?
 )

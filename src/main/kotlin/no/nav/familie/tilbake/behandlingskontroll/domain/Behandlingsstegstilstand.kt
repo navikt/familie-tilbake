@@ -52,8 +52,10 @@ enum class Behandlingssteg(
 
     companion object {
 
-        fun finnNesteBehandlingssteg(behandlingssteg: Behandlingssteg, harVerge: Boolean): Behandlingssteg {
-            val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1)
+        fun finnNesteBehandlingssteg(
+            behandlingssteg: Behandlingssteg, harVerge: Boolean, harManuelleBrevmottakere: Boolean
+        ): Behandlingssteg {
+            val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1, harManuelleBrevmottakere)
             if (nesteBehandlingssteg == VERGE && !harVerge) {
                 // Hvis behandling opprettes ikke med verge, kan behandlingen flyttes til neste steg
                 return fraSekvens(nesteBehandlingssteg.sekvens + 1)
@@ -61,10 +63,13 @@ enum class Behandlingssteg(
             return nesteBehandlingssteg
         }
 
-        fun fraSekvens(sekvens: Int): Behandlingssteg {
+        fun fraSekvens(sekvens: Int, brevmottakerErstatterVerge: Boolean = false): Behandlingssteg {
             for (behandlingssteg in values()) {
                 if (sekvens == behandlingssteg.sekvens) {
-                    return behandlingssteg
+                    return when (behandlingssteg) {
+                        BREVMOTTAKER, VERGE -> if (brevmottakerErstatterVerge) BREVMOTTAKER else VERGE
+                        else -> behandlingssteg
+                    }
                 }
             }
             throw IllegalArgumentException("Behandlingssteg finnes ikke med sekvens=$sekvens")

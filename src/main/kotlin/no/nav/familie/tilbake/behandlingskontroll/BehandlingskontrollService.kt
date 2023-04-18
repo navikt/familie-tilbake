@@ -16,7 +16,10 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -32,7 +35,9 @@ class BehandlingskontrollService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingTilstandService: BehandlingTilstandService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
+    private val featureToggleService: FeatureToggleService,
+    private val brevmottakerRepository: ManuellBrevmottakerRepository
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -104,7 +109,7 @@ class BehandlingskontrollService(
 
         if (behandledeSteg.sekvens < aktivtBehandlingssteg.sekvens) {
             for (i in aktivtBehandlingssteg.sekvens downTo behandledeSteg.sekvens + 1 step 1) {
-                val behandlingssteg = Behandlingssteg.fraSekvens(i)
+                val behandlingssteg = Behandlingssteg.fraSekvens(i, sjekkOmBrevmottakerErstatterVergeForSekvens(i, behandlingId))
                 oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
             }
             oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
@@ -329,8 +334,11 @@ class BehandlingskontrollService(
         }
         return lagBehandlingsstegsinfo(
             behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(
-                sisteUtførteSteg,
-                behandling.harVerge
+                behandlingssteg = sisteUtførteSteg,
+                harVerge = behandling.harVerge,
+                harManuelleBrevmottakere =
+                featureToggleService.isEnabled(FeatureToggleConfig.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE) &&
+                    brevmottakerRepository.findByBehandlingId(behandling.id).isNotEmpty()
             ),
             KLAR
         )
@@ -402,4 +410,8 @@ class BehandlingskontrollService(
             behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
         }
     }
+
+    private fun sjekkOmBrevmottakerErstatterVergeForSekvens(sekvens: Int, behandlingId: UUID) =
+        sekvens == Behandlingssteg.BREVMOTTAKER.sekvens && behandlingsstegstilstandRepository
+            .findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.BREVMOTTAKER) != null
 }

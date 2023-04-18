@@ -111,10 +111,11 @@ class StegService(
 
         hentStegInstans(aktivtBehandlingssteg).gjenopptaSteg(behandlingId)
 
-        // Autoutfør verge steg om verge informasjon er kopiert fra fagsystem
+        // Autoutfør brevmottaker steg og verge steg om verge informasjon er kopiert fra fagsystem
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg == Behandlingssteg.VERGE) {
-            hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        when (aktivtBehandlingssteg) {
+            Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+            else -> return
         }
     }
 
@@ -138,6 +139,7 @@ class StegService(
         if (aktivtBehandlingssteg !in setOf(
                 Behandlingssteg.VARSEL,
                 Behandlingssteg.GRUNNLAG,
+                Behandlingssteg.BREVMOTTAKER,
                 Behandlingssteg.VERGE,
                 Behandlingssteg.FAKTA,
                 Behandlingssteg.FORELDELSE,
