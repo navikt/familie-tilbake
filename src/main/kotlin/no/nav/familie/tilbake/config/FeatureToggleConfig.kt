@@ -88,7 +88,7 @@ class FeatureToggleConfig(
 
         const val SETT_PRIORITET_PÅ_OPPGAVER = "familie.tilbake.prioritet-oppgaver"
 
-        const val DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
+        const val DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

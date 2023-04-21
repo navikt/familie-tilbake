@@ -10,7 +10,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.toManuelleAdresser
@@ -42,7 +42,7 @@ class PubliserJournalpostTask(
         val journalpostId = task.metadata.getProperty("journalpostId")
         val behandlingId = UUID.fromString(task.payload)
 
-        if (featureToggleService.isEnabled(DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+        if (featureToggleService.isEnabled(DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
             val brevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandlingId)
 
             val dødsboAdresser = brevmottakere.filter { it.type == MottakerType.DØDSBO }

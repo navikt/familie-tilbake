@@ -136,15 +136,13 @@ class BehandlingskontrollService(
 
     @Transactional
     fun behandleBrevmottakerSteg(behandlingId: UUID) {
+        log.info("Aktiverer brevmottaker steg for behandling med id=$behandlingId")
         behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
             behandlingId,
             Behandlingssteg.BREVMOTTAKER
         ) ?.apply {
             oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
-            log.info("Oppdaterte brevmottaker steg for behandling med id=$behandlingId")
-        } ?: opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT)).also {
-            log.info("Opprettet brevmottaker steg for behandling med id=$behandlingId")
-        }
+        } ?: opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
     }
 
     @Transactional
@@ -337,7 +335,7 @@ class BehandlingskontrollService(
                 behandlingssteg = sisteUtførteSteg,
                 harVerge = behandling.harVerge,
                 harManuelleBrevmottakere =
-                featureToggleService.isEnabled(FeatureToggleConfig.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE) &&
+                featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) &&
                     brevmottakerRepository.findByBehandlingId(behandling.id).isNotEmpty()
             ),
             KLAR

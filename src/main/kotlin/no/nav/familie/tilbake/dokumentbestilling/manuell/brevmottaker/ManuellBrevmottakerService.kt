@@ -78,13 +78,7 @@ class ManuellBrevmottakerService(
         if (manuellBrevmottakere.none { it.id == manuellBrevmottakerId }) {
             throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId for behandlingId=$behandlingId")
         }
-        manuellBrevmottakerRepository.deleteById(manuellBrevmottakerId)
-        historikkService.lagHistorikkinnslag(
-            behandlingId = behandlingId,
-            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-            aktør = Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt = LocalDateTime.now()
-        )
+        fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottakerId, behandlingId)
     }
 
     @Transactional
@@ -97,13 +91,7 @@ class ManuellBrevmottakerService(
     @Transactional
     fun fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId: UUID) {
         hentBrevmottakere(behandlingId).forEach { manuellBrevmottaker ->
-            manuellBrevmottakerRepository.deleteById(manuellBrevmottaker.id)
-            historikkService.lagHistorikkinnslag(
-                behandlingId = behandlingId,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-                aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = LocalDateTime.now()
-            )
+            fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottaker.id, behandlingId)
         }
 
         behandlingskontrollService.oppdaterBehandlingsstegsstaus(
@@ -114,6 +102,16 @@ class ManuellBrevmottakerService(
             )
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
+    }
+
+    private fun fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottakerId: UUID, behandlingId: UUID) {
+        manuellBrevmottakerRepository.deleteById(manuellBrevmottakerId)
+        historikkService.lagHistorikkinnslag(
+            behandlingId = behandlingId,
+            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
+            aktør = Aktør.SAKSBEHANDLER,
+            opprettetTidspunkt = LocalDateTime.now()
+        )
     }
 
     private fun validerStegopprettelse(behandling: Behandling) {

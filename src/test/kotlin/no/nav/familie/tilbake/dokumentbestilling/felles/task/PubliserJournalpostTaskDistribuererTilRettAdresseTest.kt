@@ -17,7 +17,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
@@ -73,7 +73,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
             PubliserJournalpostTask(integrasjonerClient, manuellBrevmottakerService, featureToggleService, taskService)
 
         every {
-            featureToggleService.isEnabled(DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            featureToggleService.isEnabled(DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
         } returns true
 
         every {

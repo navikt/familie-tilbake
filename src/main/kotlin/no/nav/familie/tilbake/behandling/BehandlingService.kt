@@ -194,7 +194,7 @@ class BehandlingService(
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val harManuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId).isNotEmpty()
         val støtterManuelleBrevmottakere =
-            featureToggleService.isEnabled(FeatureToggleConfig.DSITRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
 
         return BehandlingMapper.tilRespons(
             behandling,
