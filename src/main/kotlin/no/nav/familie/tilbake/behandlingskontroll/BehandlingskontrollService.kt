@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AUTOUTFØRT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.AVBRUTT
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.KLAR
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus.TILBAKEFØRT
@@ -15,7 +16,10 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -31,7 +35,9 @@ class BehandlingskontrollService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingTilstandService: BehandlingTilstandService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
+    private val featureToggleService: FeatureToggleService,
+    private val brevmottakerRepository: ManuellBrevmottakerRepository
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -92,7 +98,7 @@ class BehandlingskontrollService(
             .filter { it.behandlingssteg !in listOf(Behandlingssteg.VARSEL, Behandlingssteg.GRUNNLAG) }
         alleIkkeVentendeSteg.forEach {
             log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
-            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
         }
     }
 
@@ -103,10 +109,10 @@ class BehandlingskontrollService(
 
         if (behandledeSteg.sekvens < aktivtBehandlingssteg.sekvens) {
             for (i in aktivtBehandlingssteg.sekvens downTo behandledeSteg.sekvens + 1 step 1) {
-                val behandlingssteg = Behandlingssteg.fraSekvens(i)
-                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
+                val behandlingssteg = Behandlingssteg.fraSekvens(i, sjekkOmBrevmottakerErstatterVergeForSekvens(i, behandlingId))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
             }
-            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
         }
     }
 
@@ -120,12 +126,23 @@ class BehandlingskontrollService(
         )
         when {
             eksisterendeVergeSteg != null -> {
-                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
             }
             else -> {
                 opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
             }
         }
+    }
+
+    @Transactional
+    fun behandleBrevmottakerSteg(behandlingId: UUID) {
+        log.info("Aktiverer brevmottaker steg for behandling med id=$behandlingId")
+        behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
+            behandlingId,
+            Behandlingssteg.BREVMOTTAKER
+        ) ?.apply {
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
+        } ?: opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
     }
 
     @Transactional
@@ -204,7 +221,7 @@ class BehandlingskontrollService(
     }
 
     @Transactional
-    fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
+    fun oppdaterBehandlingsstegStatus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet && (
             behandlingsstegsinfo.behandlingssteg != Behandlingssteg.AVSLUTTET &&
@@ -272,7 +289,7 @@ class BehandlingskontrollService(
                 opprettBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
             }
             else -> {
-                oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+                oppdaterBehandlingsstegStatus(behandlingId, behandlingsstegsinfo)
             }
         }
     }
@@ -315,8 +332,11 @@ class BehandlingskontrollService(
         }
         return lagBehandlingsstegsinfo(
             behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(
-                sisteUtførteSteg,
-                behandling.harVerge
+                behandlingssteg = sisteUtførteSteg,
+                harVerge = behandling.harVerge,
+                harManuelleBrevmottakere =
+                featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) &&
+                    brevmottakerRepository.findByBehandlingId(behandling.id).isNotEmpty()
             ),
             KLAR
         )
@@ -388,4 +408,8 @@ class BehandlingskontrollService(
             behandlingRepository.update(behandling.copy(status = behandlingssteg.behandlingsstatus))
         }
     }
+
+    private fun sjekkOmBrevmottakerErstatterVergeForSekvens(sekvens: Int, behandlingId: UUID) =
+        sekvens == Behandlingssteg.VERGE.sekvens && behandlingsstegstilstandRepository
+            .findByBehandlingIdAndBehandlingssteg(behandlingId, Behandlingssteg.BREVMOTTAKER) != null
 }

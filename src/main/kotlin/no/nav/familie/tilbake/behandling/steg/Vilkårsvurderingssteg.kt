@@ -44,7 +44,7 @@ class Vilkårsvurderingssteg(
 
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT)
             )
@@ -68,7 +68,7 @@ class Vilkårsvurderingssteg(
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT))
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
@@ -83,7 +83,7 @@ class Vilkårsvurderingssteg(
         vilkårsvurderingService.lagreFastVilkårForAutomatiskSaksbehandling(behandlingId)
         lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT)
         )
@@ -93,7 +93,7 @@ class Vilkårsvurderingssteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på $VILKÅRSVURDERING steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 VILKÅRSVURDERING,

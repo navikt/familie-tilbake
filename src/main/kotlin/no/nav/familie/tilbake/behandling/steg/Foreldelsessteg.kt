@@ -40,7 +40,7 @@ class Foreldelsessteg(
         if (!harGrunnlagForeldetPeriode(behandlingId)) {
             lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.FORELDELSE,
@@ -60,7 +60,7 @@ class Foreldelsessteg(
 
         lagHistorikkinnslag(behandlingId, Aktør.SAKSBEHANDLER)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,
@@ -80,7 +80,7 @@ class Foreldelsessteg(
         foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
         lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,
@@ -93,7 +93,7 @@ class Foreldelsessteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FORELDELSE} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,

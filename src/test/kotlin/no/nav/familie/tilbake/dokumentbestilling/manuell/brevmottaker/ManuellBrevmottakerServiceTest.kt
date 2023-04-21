@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
 import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -18,15 +20,26 @@ import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
@@ -39,6 +52,15 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
+    private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
@@ -61,7 +83,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
 
-        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService)
+        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService, behandlingRepository, behandlingskontrollService)
 
         every {
             mockHistorikkService.lagHistorikkinnslag(
@@ -174,6 +196,57 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    fun `opprettBrevmottakerSteg skal opprette og autoutføre behandlingssteg BREVMOTTAKER`() {
+        manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id)
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        behandlingsstegstilstand.shouldHaveSingleElement {
+            it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
+        }
+    }
+
+    @Test
+    fun `opprettBrevmottakerSteg skal ikke opprette steg når behandling er avsluttet`() {
+        behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
+
+        val exception = shouldThrow<RuntimeException> { manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
+    }
+
+    @Test
+    fun `opprettBrevmottakerSteg skal ikke opprette steg når behandling er på vent`() {
+        val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
+        lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        behandlingskontrollService.settBehandlingPåVent(
+            behandling.id,
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+            LocalDate.now().plusWeeks(4)
+        )
+
+        val exception = shouldThrow<RuntimeException> { manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id) }
+        exception.message shouldBe "Behandling med id=${behandling.id} er på vent."
+    }
+
+    @Test
+    fun `fjernManuelleBrevmottakereOgTilbakeførSteg skal fjerne brevmottakere og tilbakeføre steget`() {
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id)
+        manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto)
+        manuellBrevmottakerService.hentBrevmottakere(behandling.id).shouldHaveSize(1)
+
+        manuellBrevmottakerService.fjernManuelleBrevmottakereOgTilbakeførSteg(behandling.id)
+        manuellBrevmottakerService.hentBrevmottakere(behandling.id).shouldHaveSize(0)
+
+        behandlingsstegstilstandRepository.findByBehandlingId(behandling.id).shouldHaveSingleElement {
+            it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
+                    it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
+        }
+    }
+
     private fun assertEqualsManuellBrevmottaker(a: ManuellBrevmottaker, b: ManuellBrevmottakerRequestDto) {
         a.id.shouldNotBeNull()
         a.orgNr shouldBe b.organisasjonsnummer
@@ -185,5 +258,19 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         a.postnummer shouldBe b.manuellAdresseInfo?.postnummer
         a.poststed shouldBe b.manuellAdresseInfo?.poststed
         a.landkode shouldBe b.manuellAdresseInfo?.landkode
+    }
+
+    private fun lagBehandlingsstegstilstand(
+        behandlingId: UUID,
+        behandlingssteg: Behandlingssteg,
+        behandlingsstegstatus: Behandlingsstegstatus
+    ) {
+        behandlingsstegstilstandRepository.insert(
+            Behandlingsstegstilstand(
+                behandlingId = behandlingId,
+                behandlingssteg = behandlingssteg,
+                behandlingsstegsstatus = behandlingsstegstatus
+            )
+        )
     }
 }

@@ -34,6 +34,8 @@ enum class Behandlingssteg(
 
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
+    BREVMOTTAKER(3, true, false, Behandlingsstatus.UTREDES, "Registrere brevmottakere manuelt. Erstatter Verge-steget"),
+    @Deprecated("Erstattes av BREVMOTTAKER")
     VERGE(3, true, false, Behandlingsstatus.UTREDES, "Fakta om verge"),
     FAKTA(4, true, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
     FORELDELSE(5, true, true, Behandlingsstatus.UTREDES, "Vurder om feilutbetalte perioder er foreldet"),
@@ -51,8 +53,10 @@ enum class Behandlingssteg(
 
     companion object {
 
-        fun finnNesteBehandlingssteg(behandlingssteg: Behandlingssteg, harVerge: Boolean): Behandlingssteg {
-            val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1)
+        fun finnNesteBehandlingssteg(
+            behandlingssteg: Behandlingssteg, harVerge: Boolean, harManuelleBrevmottakere: Boolean
+        ): Behandlingssteg {
+            val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1, harManuelleBrevmottakere)
             if (nesteBehandlingssteg == VERGE && !harVerge) {
                 // Hvis behandling opprettes ikke med verge, kan behandlingen flyttes til neste steg
                 return fraSekvens(nesteBehandlingssteg.sekvens + 1)
@@ -60,10 +64,13 @@ enum class Behandlingssteg(
             return nesteBehandlingssteg
         }
 
-        fun fraSekvens(sekvens: Int): Behandlingssteg {
+        fun fraSekvens(sekvens: Int, brevmottakerErstatterVerge: Boolean = false): Behandlingssteg {
             for (behandlingssteg in values()) {
                 if (sekvens == behandlingssteg.sekvens) {
-                    return behandlingssteg
+                    return when (behandlingssteg) {
+                        BREVMOTTAKER, VERGE -> if (brevmottakerErstatterVerge) BREVMOTTAKER else VERGE
+                        else -> behandlingssteg
+                    }
                 }
             }
             throw IllegalArgumentException("Behandlingssteg finnes ikke med sekvens=$sekvens")

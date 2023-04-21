@@ -77,7 +77,9 @@ object BehandlingMapper {
         kanRevurderingOpprettes: Boolean,
         behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
         varselSendt: Boolean,
-        eksternFagsakId: String
+        eksternFagsakId: String,
+        harManuelleBrevmottakere: Boolean,
+        støtterManuelleBrevmottakere: Boolean
     ): BehandlingDto {
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
@@ -107,7 +109,9 @@ object BehandlingMapper {
             behandlingsstegsinfo = tilBehandlingstegsinfoDto(behandlingsstegsinfoer),
             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
             eksternFagsakId = eksternFagsakId,
-            behandlingsårsakstype = behandling.sisteÅrsak?.type
+            behandlingsårsakstype = behandling.sisteÅrsak?.type,
+            harManuelleBrevmottakere = harManuelleBrevmottakere,
+            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere
         )
     }
 

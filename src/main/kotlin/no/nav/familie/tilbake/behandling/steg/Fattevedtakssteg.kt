@@ -69,7 +69,7 @@ class Fattevedtakssteg(
                 behandling.ansvarligSaksbehandler
             )
         } else {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.FATTE_VEDTAK,
@@ -93,7 +93,7 @@ class Fattevedtakssteg(
         totrinnService.oppdaterAnsvarligBeslutter(behandlingId)
         totrinnService.lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FATTE_VEDTAK,
@@ -112,7 +112,7 @@ class Fattevedtakssteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FATTE_VEDTAK} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FATTE_VEDTAK,

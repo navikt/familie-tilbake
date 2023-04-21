@@ -27,7 +27,7 @@ class Grunnlagssteg(
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.GRUNNLAG} steg")
         if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandlingId)) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.GRUNNLAG,
