@@ -69,7 +69,7 @@ class FaktaFeilutbetalingssteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.FAKTA} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FAKTA,
@@ -88,7 +88,7 @@ class FaktaFeilutbetalingssteg(
     }
 
     private fun flyttBehandlingVidere(behandlingId: UUID) {
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FAKTA,

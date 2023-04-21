@@ -32,7 +32,7 @@ class Vergessteg(
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.harVerge) {
-            behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.VERGE,
@@ -50,7 +50,7 @@ class Vergessteg(
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT)
         )
@@ -60,7 +60,7 @@ class Vergessteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.VERGE} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.VERGE,

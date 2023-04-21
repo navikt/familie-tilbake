@@ -98,7 +98,7 @@ class BehandlingskontrollService(
             .filter { it.behandlingssteg !in listOf(Behandlingssteg.VARSEL, Behandlingssteg.GRUNNLAG) }
         alleIkkeVentendeSteg.forEach {
             log.info("Tilbakefører ${it.behandlingssteg} for behandling $behandlingId")
-            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(it.behandlingssteg, TILBAKEFØRT))
         }
     }
 
@@ -110,9 +110,9 @@ class BehandlingskontrollService(
         if (behandledeSteg.sekvens < aktivtBehandlingssteg.sekvens) {
             for (i in aktivtBehandlingssteg.sekvens downTo behandledeSteg.sekvens + 1 step 1) {
                 val behandlingssteg = Behandlingssteg.fraSekvens(i, sjekkOmBrevmottakerErstatterVergeForSekvens(i, behandlingId))
-                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandlingssteg, TILBAKEFØRT))
             }
-            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(behandledeSteg, KLAR))
         }
     }
 
@@ -126,7 +126,7 @@ class BehandlingskontrollService(
         )
         when {
             eksisterendeVergeSteg != null -> {
-                oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
+                oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
             }
             else -> {
                 opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.VERGE, KLAR))
@@ -141,7 +141,7 @@ class BehandlingskontrollService(
             behandlingId,
             Behandlingssteg.BREVMOTTAKER
         ) ?.apply {
-            oppdaterBehandlingsstegsstaus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
+            oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
         } ?: opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
     }
 
@@ -221,7 +221,7 @@ class BehandlingskontrollService(
     }
 
     @Transactional
-    fun oppdaterBehandlingsstegsstaus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
+    fun oppdaterBehandlingsstegStatus(behandlingId: UUID, behandlingsstegsinfo: Behandlingsstegsinfo) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erAvsluttet && (
             behandlingsstegsinfo.behandlingssteg != Behandlingssteg.AVSLUTTET &&
@@ -289,7 +289,7 @@ class BehandlingskontrollService(
                 opprettBehandlingsstegOgStatus(behandlingId, behandlingsstegsinfo)
             }
             else -> {
-                oppdaterBehandlingsstegsstaus(behandlingId, behandlingsstegsinfo)
+                oppdaterBehandlingsstegStatus(behandlingId, behandlingsstegsinfo)
             }
         }
     }

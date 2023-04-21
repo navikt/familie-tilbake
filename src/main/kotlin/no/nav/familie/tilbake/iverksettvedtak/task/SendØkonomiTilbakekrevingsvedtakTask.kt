@@ -36,7 +36,7 @@ class SendØkonomiTilbakekrevingsvedtakTask(
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
         behandlingskontrollService
-            .oppdaterBehandlingsstegsstaus(
+            .oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,

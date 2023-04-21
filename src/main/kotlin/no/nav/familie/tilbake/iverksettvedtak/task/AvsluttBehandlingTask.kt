@@ -53,7 +53,7 @@ class AvsluttBehandlingTask(
         )
 
         behandlingskontrollService
-            .oppdaterBehandlingsstegsstaus(
+            .oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     behandlingssteg = Behandlingssteg.AVSLUTTET,

@@ -70,7 +70,7 @@ class VergeService(
                 Aktør.SAKSBEHANDLER
             )
         }
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.VERGE,

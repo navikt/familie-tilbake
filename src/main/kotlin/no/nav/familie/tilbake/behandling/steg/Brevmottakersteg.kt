@@ -24,7 +24,7 @@ class Brevmottakersteg(
     @Transactional
     override fun utførSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
@@ -38,7 +38,7 @@ class Brevmottakersteg(
     override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, UTFØRT)
         )
@@ -48,7 +48,7 @@ class Brevmottakersteg(
     @Transactional
     override fun gjenopptaSteg(behandlingId: UUID) {
         logger.info("Behandling $behandlingId gjenopptar på ${Behandlingssteg.BREVMOTTAKER} steg")
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,

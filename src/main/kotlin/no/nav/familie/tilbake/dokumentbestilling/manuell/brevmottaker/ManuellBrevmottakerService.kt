@@ -94,7 +94,7 @@ class ManuellBrevmottakerService(
             fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottaker.id, behandlingId)
         }
 
-        behandlingskontrollService.oppdaterBehandlingsstegsstaus(
+        behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
