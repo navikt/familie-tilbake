@@ -21,16 +21,16 @@
         <java.version>17</java.version>
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.8.10</kotlin.version>
+        <kotlin.version>1.8.21</kotlin.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>2.0_20230313155154_f9438bd</kontrakter.version>
-        <kotest.version>5.5.5</kotest.version>
+        <kotest.version>5.6.1</kotest.version>
         <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <jaxb-impl.version>2.3.7</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
+        <jaxb-impl.version>2.3.8</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <mockk.version>1.13.5</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -39,8 +39,8 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.0.1</spring.cloud-contract>
-        <testcontainers.version>1.17.6</testcontainers.version>
+        <spring.cloud-contract>4.0.2</spring.cloud-contract>
+        <testcontainers.version>1.18.0</testcontainers.version>
         <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
         <prosessering-core.version>1.20230207133526_5430e48</prosessering-core.version>
     </properties>
@@ -153,7 +153,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.27</version>
+            <version>2.0.28</version>
         </dependency>
         <dependency>
             <groupId>org.verapdf</groupId>
@@ -188,7 +188,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.4</version>
+            <version>42.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -277,12 +277,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.14</version>
+            <version>1.7.0</version>
         </dependency>
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>7.1.0</version>
+            <version>8.0.0</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -447,6 +447,7 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
                 <configuration>
                     <args>
                         <arg>-Xjsr305=strict</arg>
