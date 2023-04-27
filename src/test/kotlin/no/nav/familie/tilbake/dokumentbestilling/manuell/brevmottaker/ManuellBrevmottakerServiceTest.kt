@@ -83,7 +83,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
 
-        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService, behandlingRepository, behandlingskontrollService)
+        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService, behandlingRepository, behandlingskontrollService, mockk(), mockk(), mockk())
 
         every {
             mockHistorikkService.lagHistorikkinnslag(
@@ -141,6 +141,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
+                behandling.id,
                 dbManuellBrevmottaker.id,
                 oppdatertManuellBrevmottaker
             )
@@ -202,7 +203,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
         }
     }
 
@@ -243,7 +244,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
         behandlingsstegstilstandRepository.findByBehandlingId(behandling.id).shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
         }
     }
 

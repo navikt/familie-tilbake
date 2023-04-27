@@ -76,13 +76,19 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppdaterer manuell brevmottaker", AuditLoggerEvent.UPDATE)
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Oppdaterer manuell brevmottaker",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID
+    )
     fun oppdaterManuellBrevmottaker(
+        @PathVariable behandlingId: UUID,
         @PathVariable manuellBrevmottakerId: UUID,
         @Valid @RequestBody
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
     ): Ressurs<String> {
-        manuellBrevmottakerService.oppdaterBrevmottaker(manuellBrevmottakerId, manuellBrevmottakerRequestDto)
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandlingId, manuellBrevmottakerId, manuellBrevmottakerRequestDto)
         return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
     }
 
