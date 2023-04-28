@@ -32,6 +32,8 @@ import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerMapper
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 
 object BehandlingMapper {
 
@@ -78,7 +80,7 @@ object BehandlingMapper {
         behandlingsstegsinfoer: List<Behandlingsstegsinfo>,
         varselSendt: Boolean,
         eksternFagsakId: String,
-        harManuelleBrevmottakere: Boolean,
+        manuelleBrevmottakere: List<ManuellBrevmottaker>,
         støtterManuelleBrevmottakere: Boolean
     ): BehandlingDto {
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
@@ -110,8 +112,9 @@ object BehandlingMapper {
             fagsystemsbehandlingId = behandling.aktivFagsystemsbehandling.eksternId,
             eksternFagsakId = eksternFagsakId,
             behandlingsårsakstype = behandling.sisteÅrsak?.type,
-            harManuelleBrevmottakere = harManuelleBrevmottakere,
-            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere
+            harManuelleBrevmottakere = manuelleBrevmottakere.isNotEmpty(),
+            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
+            manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
         )
     }
 
