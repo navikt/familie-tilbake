@@ -274,7 +274,36 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
+        val requestMedPersonIdent = manuellBrevmottakerRequestDto.copy(
+            personIdent = "12345678910",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
+        var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA).navn
+
+        val requestMedOrgnrUtenKontaktperson = manuellBrevmottakerRequestDto.copy(
+            navn = " ",
+            organisasjonsnummer = "123456789",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrUtenKontaktperson)
+
+        lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe "Organisasjon AS"
+
+        val requestMedOrgnrMedKontaktperson = manuellBrevmottakerRequestDto.copy(
+            organisasjonsnummer = "123456789",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrMedKontaktperson)
+
+        lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe "Organisasjon AS v/ ${manuellBrevmottakerRequestDto.navn}"
+    }
 
     private fun assertEqualsManuellBrevmottaker(a: ManuellBrevmottaker, b: ManuellBrevmottakerRequestDto) {
         a.id.shouldNotBeNull()
@@ -287,45 +316,6 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         a.postnummer shouldBe b.manuellAdresseInfo?.postnummer
         a.poststed shouldBe b.manuellAdresseInfo?.poststed
         a.landkode shouldBe b.manuellAdresseInfo?.landkode
-    }
-
-    @Test
-    fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
-        val requestMedPersonIdent = manuellBrevmottakerRequestDto.copy(
-            personIdent = "12345678910",
-            manuellAdresseInfo = null
-        )
-        manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
-
-        var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA).navn
-
-        val kontaktperson = lagretMottaker.navn
-        val requestMedOrgnr = requestMedPersonIdent.copy(
-            navn = kontaktperson,
-            organisasjonsnummer = "123456789",
-            personIdent = null
-        )
-        manuellBrevmottakerService.oppdaterBrevmottaker(
-            behandling.id,
-            lagretMottaker.id,
-            requestMedOrgnr
-        )
-        lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe "Organisasjon AS v/ $kontaktperson"
-    }
-
-    @Test
-    fun `skal bytte ut placeholder for navn i request med navn hentet fra organisasjonsregister`() {
-        val requestMedOrgnr = manuellBrevmottakerRequestDto.copy(
-            navn = "Placeholder",
-            organisasjonsnummer = "123456789",
-            manuellAdresseInfo = null
-        )
-        manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedOrgnr)
-
-        val lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe "Organisasjon AS"
     }
 
     private fun lagBehandlingsstegstilstand(

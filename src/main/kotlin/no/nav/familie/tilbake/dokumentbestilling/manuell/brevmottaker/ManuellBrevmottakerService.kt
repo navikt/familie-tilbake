@@ -28,8 +28,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-private const val PLACEHOLDER = "Placeholder"
-
 @Service
 class ManuellBrevmottakerService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
@@ -151,7 +149,7 @@ class ManuellBrevmottakerService(
                     frontendFeilmelding = "Organisasjon $it er ikke gyldig"
                 )
             }
-            integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn != PLACEHOLDER) " v/ ${dto.navn}" else ""
+            integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
         }
     }
 }
