@@ -22,7 +22,7 @@ object HbGrunnbeløpUtil {
             val kommaSeparertePerioder = formattertPerioder.dropLast(1).joinToString(", ")
             HbGrunnbeløp(
                 null,
-                "$kommaSeparertePerioder og ${formattertPerioder.last()}"
+                "$kommaSeparertePerioder og ${formattertPerioder.last()}",
             )
         } else {
             HbGrunnbeløp(grunnbeløpX6(grunnbeløpsperioder.single()), null)

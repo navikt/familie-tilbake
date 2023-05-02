@@ -16,13 +16,13 @@ data class Varselbrevsdokument(
     val fristdatoForTilbakemelding: LocalDate,
     val varsletDato: LocalDate? = null,
     val varsletBeløp: Long? = null,
-    val erKorrigert: Boolean = false
+    val erKorrigert: Boolean = false,
 ) : BaseDokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall
+    brevmetadata.gjelderDødsfall,
 ) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge

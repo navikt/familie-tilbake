@@ -49,19 +49,19 @@ import java.math.BigDecimal
 class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
 ) {
 
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Brevdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
             TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
             TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
-            vedtaksbrevsdata.metadata
+            vedtaksbrevsdata.metadata,
         )
         val vedleggHtml = if (vedtaksbrevsdata.vedtaksbrevsdata.felles.harVedlegg) {
             TekstformatererVedtaksbrev.lagVedtaksbrevsvedleggHtml(vedtaksbrevsdata.vedtaksbrevsdata)
@@ -73,19 +73,19 @@ class VedtaksbrevgeneratorService(
             metadata = data.brevmetadata,
             overskrift = data.overskrift,
             brevtekst = data.brevtekst,
-            vedleggHtml = vedleggHtml
+            vedleggHtml = vedleggHtml,
         )
     }
 
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        dto: HentForhåndvisningVedtaksbrevPdfDto
+        dto: HentForhåndvisningVedtaksbrevPdfDto,
     ): Brevdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
             dto.perioderMedTekst,
-            vedtaksbrevgrunnlag.brevmottager
+            vedtaksbrevgrunnlag.brevmottager,
         )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
@@ -100,7 +100,7 @@ class VedtaksbrevgeneratorService(
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
             brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
-            vedleggHtml = vedleggHtml
+            vedleggHtml = vedleggHtml,
         )
     }
 
@@ -111,7 +111,7 @@ class VedtaksbrevgeneratorService(
 
     private fun hentDataForVedtaksbrev(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Vedtaksbrevsdata {
         val fritekstoppsummering = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.oppsummeringFritekst
         val fritekstPerioder: List<PeriodeMedTekstDto> =
@@ -123,18 +123,18 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         oppsummeringFritekst: String?,
         perioderFritekst: List<PeriodeMedTekstDto>,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Vedtaksbrevsdata {
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(
             vedtaksbrevgrunnlag.bruker.ident,
-            vedtaksbrevgrunnlag.fagsystem
+            vedtaksbrevgrunnlag.fagsystem,
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
         val brevMetadata: Brevmetadata = lagMetadataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             personinfo,
             beregnetResultat.vedtaksresultat,
-            brevmottager
+            brevmottager,
         )
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(
             vedtaksbrevgrunnlag,
@@ -142,7 +142,7 @@ class VedtaksbrevgeneratorService(
             beregnetResultat,
             oppsummeringFritekst,
             perioderFritekst,
-            brevMetadata
+            brevMetadata,
         )
         return Vedtaksbrevsdata(data, brevMetadata)
     }
@@ -153,7 +153,7 @@ class VedtaksbrevgeneratorService(
         beregningsresultat: Beregningsresultat,
         oppsummeringFritekst: String?,
         perioderFritekst: List<PeriodeMedTekstDto>,
-        brevmetadata: Brevmetadata
+        brevmetadata: Brevmetadata,
     ): HbVedtaksbrevsdata {
         val vedtaksbrevtype = vedtaksbrevgrunnlag.utledVedtaksbrevstype()
         val effektForBruker: VedtakHjemmel.EffektForBruker =
@@ -165,12 +165,12 @@ class VedtaksbrevgeneratorService(
             effektForBruker,
             brevmetadata.språkkode,
             visHjemmelForRenter = true,
-            klagebehandling
+            klagebehandling,
         ) // sannsynligvis hjemmel
         val perioder: List<HbVedtaksbrevsperiode> = lagHbVedtaksbrevPerioder(
             vedtaksbrevgrunnlag,
             beregningsresultat,
-            perioderFritekst
+            perioderFritekst,
         )
         val hbTotalresultat: HbTotalresultat =
             lagHbTotalresultat(beregningsresultat.vedtaksresultat, beregningsresultat)
@@ -180,7 +180,7 @@ class VedtaksbrevgeneratorService(
         val ansvarligBeslutter = if (vedtaksbrevgrunnlag.aktivtSteg in setOf(
                 Behandlingssteg.FATTE_VEDTAK,
                 Behandlingssteg.IVERKSETT_VEDTAK,
-                Behandlingssteg.AVSLUTTET
+                Behandlingssteg.AVSLUTTET,
             )
         ) {
             eksterneDataForBrevService
@@ -205,14 +205,14 @@ class VedtaksbrevgeneratorService(
                 totalresultat = hbTotalresultat,
                 konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
                 datoer = HbVedtaksbrevDatoer(perioder),
-                søker = utledSøker(personinfo)
+                søker = utledSøker(personinfo),
             )
         return HbVedtaksbrevsdata(vedtaksbrevFelles, perioder)
     }
 
     private fun utledEffektForBruker(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        beregningsresultat: Beregningsresultat
+        beregningsresultat: Beregningsresultat,
     ): VedtakHjemmel.EffektForBruker {
         return if (vedtaksbrevgrunnlag.erRevurdering) {
             hentEffektForBruker(vedtaksbrevgrunnlag, beregningsresultat.totaltTilbakekrevesMedRenter)
@@ -223,14 +223,14 @@ class VedtaksbrevgeneratorService(
 
     private fun lagHbTotalresultat(
         vedtakResultatType: Vedtaksresultat,
-        beregningsresultat: Beregningsresultat
+        beregningsresultat: Beregningsresultat,
     ): HbTotalresultat {
         return HbTotalresultat(
             vedtakResultatType,
             beregningsresultat.totaltTilbakekrevesUtenRenter,
             beregningsresultat.totaltTilbakekrevesMedRenter,
             beregningsresultat.totaltTilbakekrevesBeløpMedRenterUtenSkatt,
-            beregningsresultat.totaltRentebeløp
+            beregningsresultat.totaltRentebeløp,
         )
     }
 
@@ -239,14 +239,14 @@ class VedtaksbrevgeneratorService(
             erRevurdering = vedtaksbrevgrunnlag.erRevurdering,
             erRevurderingEtterKlage = vedtaksbrevgrunnlag.erRevurderingEtterKlage,
             erRevurderingEtterKlageNfp = vedtaksbrevgrunnlag.erRevurderingEtterKlageNfp,
-            originalBehandlingsdatoFagsakvedtak = vedtaksbrevgrunnlag.finnOriginalBehandlingVedtaksdato()
+            originalBehandlingsdatoFagsakvedtak = vedtaksbrevgrunnlag.finnOriginalBehandlingVedtaksdato(),
         )
     }
 
     private fun lagHbVedtaksbrevPerioder(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         beregningsresultat: Beregningsresultat,
-        perioderFritekst: List<PeriodeMedTekstDto>
+        perioderFritekst: List<PeriodeMedTekstDto>,
     ): List<HbVedtaksbrevsperiode> {
         val fakta = vedtaksbrevgrunnlag.faktaFeilutbetaling
             ?: error("Vedtaksbrev mangler fakta for behandling: ${vedtaksbrevgrunnlag.behandling.id}")
@@ -260,7 +260,7 @@ class VedtaksbrevgeneratorService(
                     vilkårPerioder = vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
                     foreldelse = vedtaksbrevgrunnlag.vurdertForeldelse,
                     perioderFritekst = perioderFritekst,
-                    førstePeriode = index == 0
+                    førstePeriode = index == 0,
                 )
             }
         }
@@ -268,7 +268,7 @@ class VedtaksbrevgeneratorService(
 
     private fun hentEffektForBruker(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        totaltTilbakekrevesMedRenter: BigDecimal
+        totaltTilbakekrevesMedRenter: BigDecimal,
     ): VedtakHjemmel.EffektForBruker {
         val behandlingÅrsak: Behandlingsårsak = vedtaksbrevgrunnlag.behandling.årsaker.first()
         val originaltBeregnetResultat = tilbakekrevingBeregningService.beregn(behandlingÅrsak.originalBehandlingId!!)
@@ -287,7 +287,7 @@ class VedtaksbrevgeneratorService(
     private fun utledSøker(personinfo: Personinfo): HbPerson {
         return HbPerson(
             navn = WordUtils.capitalizeFully(personinfo.navn, ' ', '-'),
-            dødsdato = null
+            dødsdato = null,
         )
     }
 
@@ -295,14 +295,14 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         personinfo: Personinfo,
         vedtakResultatType: Vedtaksresultat?,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Brevmetadata {
         val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
             personinfo,
             brevmottager,
             vedtaksbrevgrunnlag.aktivVerge,
-            vedtaksbrevgrunnlag.fagsystem
+            vedtaksbrevgrunnlag.fagsystem,
         )
         val ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(vedtaksbrevgrunnlag.aktivVerge, adresseinfo)
@@ -328,7 +328,7 @@ class VedtaksbrevgeneratorService(
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
             gjelderDødsfall = personinfo.dødsdato != null,
-            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) }
+            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) },
         )
     }
 
@@ -338,7 +338,7 @@ class VedtaksbrevgeneratorService(
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
         perioderFritekst: List<PeriodeMedTekstDto>,
-        førstePeriode: Boolean
+        førstePeriode: Boolean,
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
         val fritekster: PeriodeMedTekstDto? =
@@ -350,7 +350,7 @@ class VedtaksbrevgeneratorService(
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
             resultat = utledResultat(resultatPeriode, foreldelse),
             førstePeriode = førstePeriode,
-            grunnbeløp = lagHbGrunnbeløp(periode)
+            grunnbeløp = lagHbGrunnbeløp(periode),
         )
     }
 
@@ -358,7 +358,7 @@ class VedtaksbrevgeneratorService(
         return HbKravgrunnlag(
             resultatPeriode.riktigYtelsesbeløp,
             resultatPeriode.utbetaltYtelsesbeløp,
-            resultatPeriode.feilutbetaltBeløp
+            resultatPeriode.feilutbetaltBeløp,
         )
     }
 
@@ -373,7 +373,7 @@ class VedtaksbrevgeneratorService(
         periode: Månedsperiode,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
-        fritekst: PeriodeMedTekstDto?
+        fritekst: PeriodeMedTekstDto?,
     ): HbVurderinger {
         val foreldelsePeriode = finnForeldelsePeriode(foreldelse, periode)
         val vilkårsvurdering = vilkårPerioder.firstOrNull { it.periode.inneholder(periode) }
@@ -393,7 +393,7 @@ class VedtaksbrevgeneratorService(
                 HbSærligeGrunner(
                     vilkårsvurderingAktsomhet.særligeGrunner,
                     fritekstSærligeGrunner,
-                    fritekstSærligGrunnAnnet
+                    fritekstSærligGrunnAnnet,
                 )
             } else {
                 null
@@ -410,7 +410,7 @@ class VedtaksbrevgeneratorService(
                 ?: Foreldelsesvurderingstype.IKKE_VURDERT,
             foreldelsesfrist = foreldelsePeriode?.foreldelsesfrist,
             oppdagelsesdato = foreldelsePeriode?.oppdagelsesdato,
-            fritekstForeldelse = fritekst?.foreldelseAvsnitt
+            fritekstForeldelse = fritekst?.foreldelseAvsnitt,
         )
     }
 
@@ -427,7 +427,7 @@ class VedtaksbrevgeneratorService(
                 resultatPeriode.feilutbetaltBeløp.subtract(resultatPeriode.tilbakekrevingsbeløp)
             } else {
                 null
-            }
+            },
         )
     }
 

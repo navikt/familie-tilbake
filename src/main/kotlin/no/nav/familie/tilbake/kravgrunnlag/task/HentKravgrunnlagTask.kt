@@ -19,12 +19,12 @@ import java.util.UUID
 @TaskStepBeskrivelse(
     taskStepType = HentKravgrunnlagTask.TYPE,
     beskrivelse = "Henter kravgrunnlag fra økonomi",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class HentKravgrunnlagTask(
     private val behandlingRepository: BehandlingRepository,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
-    private val stegService: StegService
+    private val stegService: StegService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -42,7 +42,7 @@ class HentKravgrunnlagTask(
         val tilbakekrevingsgrunnlag = hentKravgrunnlagService.hentTilbakekrevingskravgrunnlag(originalBehandlingId)
         val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
             tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
-            KodeAksjon.HENT_GRUNNLAG_OMGJØRING
+            KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
         )
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 

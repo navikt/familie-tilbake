@@ -39,7 +39,7 @@ object BehandlingMapper {
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         fagsystem: Fagsystem,
         fagsak: Fagsak,
-        ansvarligSaksbehandler: Saksbehandler
+        ansvarligSaksbehandler: Saksbehandler,
     ): Behandling {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
@@ -50,7 +50,7 @@ object BehandlingMapper {
                 revurderingsvedtaksdato = opprettTilbakekrevingRequest.revurderingsvedtaksdato,
                 resultat = faktainfo.revurderingsresultat,
                 årsak = faktainfo.revurderingsårsak,
-                konsekvenser = fagsystemskonsekvenser
+                konsekvenser = fagsystemskonsekvenser,
             )
         val varsler = tilDomeneVarsel(opprettTilbakekrevingRequest)
         val verger = tilDomeneVerge(fagsystem, opprettTilbakekrevingRequest)
@@ -65,7 +65,7 @@ object BehandlingMapper {
             fagsystemsbehandling = setOf(fagsystemsbehandling),
             varsler = varsler,
             verger = verger,
-            regelverk = opprettTilbakekrevingRequest.regelverk
+            regelverk = opprettTilbakekrevingRequest.regelverk,
         )
     }
 
@@ -79,7 +79,7 @@ object BehandlingMapper {
         varselSendt: Boolean,
         eksternFagsakId: String,
         harManuelleBrevmottakere: Boolean,
-        støtterManuelleBrevmottakere: Boolean
+        støtterManuelleBrevmottakere: Boolean,
     ): BehandlingDto {
         val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
             it.sporbar.endret.endretTid
@@ -111,7 +111,7 @@ object BehandlingMapper {
             eksternFagsakId = eksternFagsakId,
             behandlingsårsakstype = behandling.sisteÅrsak?.type,
             harManuelleBrevmottakere = harManuelleBrevmottakere,
-            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere
+            støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
         )
     }
 
@@ -121,7 +121,7 @@ object BehandlingMapper {
                 behandlingssteg = it.behandlingssteg,
                 behandlingsstegstatus = it.behandlingsstegstatus,
                 venteårsak = it.venteårsak,
-                tidsfrist = it.tidsfrist
+                tidsfrist = it.tidsfrist,
             )
         }
     }
@@ -136,8 +136,8 @@ object BehandlingMapper {
                 Varsel(
                     varseltekst = it.varseltekst,
                     varselbeløp = it.sumFeilutbetaling.longValueExact(),
-                    perioder = varselsperioder
-                )
+                    perioder = varselsperioder,
+                ),
             )
         } ?: emptySet()
     }
@@ -150,8 +150,8 @@ object BehandlingMapper {
                     kilde = fagsystem.name,
                     navn = it.navn,
                     orgNr = it.organisasjonsnummer,
-                    ident = it.personIdent
-                )
+                    ident = it.personIdent,
+                ),
             )
         }
         return emptySet()
@@ -169,7 +169,7 @@ object BehandlingMapper {
             status = mapStatus(behandling),
             årsak = mapÅrsak(behandling),
             vedtaksdato = behandling.avsluttetDato?.atStartOfDay(),
-            resultat = mapResultat(resultat)
+            resultat = mapResultat(resultat),
         )
     }
 
@@ -187,7 +187,7 @@ object BehandlingMapper {
                     resultat = sisteResultat.type.navn,
                     vedtakstidspunkt = avsluttetDato.atStartOfDay(),
                     fagsystemType = FagsystemType.TILBAKEKREVING,
-                    regelverk = it.regelverk
+                    regelverk = it.regelverk,
                 )
             }
     }
@@ -233,15 +233,17 @@ object BehandlingMapper {
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
             Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
             Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-            Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> HENLAGT
+            Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            -> HENLAGT
             Behandlingsresultatstype.IKKE_FASTSATT,
-            null -> null
+            null,
+            -> null
         }
     }
 
     fun tilDomeneBehandlingRevurdering(
         originalBehandling: Behandling,
-        behandlingsårsakstype: Behandlingsårsakstype
+        behandlingsårsakstype: Behandlingsårsakstype,
     ): Behandling {
         val verger: Set<Verge> = kopiVerge(originalBehandling)?.let { setOf(it) } ?: emptySet()
         return Behandling(
@@ -254,12 +256,12 @@ object BehandlingMapper {
             årsaker = setOf(
                 Behandlingsårsak(
                     type = behandlingsårsakstype,
-                    originalBehandlingId = originalBehandling.id
-                )
+                    originalBehandlingId = originalBehandling.id,
+                ),
             ),
             fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
             verger = verger,
-            regelverk = originalBehandling.regelverk
+            regelverk = originalBehandling.regelverk,
         )
     }
 
@@ -271,7 +273,7 @@ object BehandlingMapper {
             resultat = fagsystemsbehandling.resultat,
             tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
             revurderingsvedtaksdato = fagsystemsbehandling.revurderingsvedtaksdato,
-            konsekvenser = kopiFagsystemskonsekvenser(fagsystemsbehandling.konsekvenser)
+            konsekvenser = kopiFagsystemskonsekvenser(fagsystemsbehandling.konsekvenser),
         )
     }
 
@@ -288,7 +290,7 @@ object BehandlingMapper {
                 orgNr = it.orgNr,
                 navn = it.navn,
                 begrunnelse = it.begrunnelse,
-                kilde = it.kilde
+                kilde = it.kilde,
             )
         }
     }

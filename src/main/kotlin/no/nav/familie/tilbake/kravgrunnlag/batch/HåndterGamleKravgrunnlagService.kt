@@ -46,7 +46,7 @@ class HåndterGamleKravgrunnlagService(
     private val økonomiXmlMottattService: ØkonomiXmlMottattService,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
     private val stegService: StegService,
-    private val historikkService: HistorikkService
+    private val historikkService: HistorikkService,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -67,7 +67,7 @@ class HåndterGamleKravgrunnlagService(
                     "Det finnes allerede en åpen behandling for " +
                     "fagsak=$eksternFagsakId og ytelsestype=$ytelsestype. " +
                     "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                    "ved å bruke forvaltningsrutine etter feilundersøkelse."
+                    "ved å bruke forvaltningsrutine etter feilundersøkelse.",
             )
         }
     }
@@ -90,7 +90,7 @@ class HåndterGamleKravgrunnlagService(
         }
         logger.info(
             "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                "til behandling=$behandlingId"
+                "til behandling=$behandlingId",
         )
         val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
         kravgrunnlagRepository.insert(kravgrunnlag)
@@ -99,14 +99,14 @@ class HåndterGamleKravgrunnlagService(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
             aktør = Aktør.VEDTAKSLØSNING,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         stegService.håndterSteg(behandlingId)
         if (erSperret) {
             logger.info(
                 "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
-                    "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi"
+                    "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",
             )
             sperKravgrunnlag(behandlingId)
         }
@@ -123,7 +123,7 @@ class HåndterGamleKravgrunnlagService(
         return try {
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 mottattXml.eksternKravgrunnlagId!!,
-                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
+                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
             ) to false
         } catch (e: SperretKravgrunnlagFeil) {
             logger.warn(e.melding)
@@ -133,7 +133,7 @@ class HåndterGamleKravgrunnlagService(
 
     fun opprettBehandling(
         hentetKravgrunnlag: DetaljertKravgrunnlagDto,
-        fagsystemsbehandlingData: HentFagsystemsbehandling
+        fagsystemsbehandlingData: HentFagsystemsbehandling,
     ): Behandling {
         val opprettTilbakekrevingRequest =
             lagOpprettBehandlingsrequest(
@@ -141,7 +141,7 @@ class HåndterGamleKravgrunnlagService(
                 ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
                     .ytelsestype,
                 eksternId = hentetKravgrunnlag.referanse,
-                fagsystemsbehandlingData = fagsystemsbehandlingData
+                fagsystemsbehandlingData = fagsystemsbehandlingData,
             )
         return behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
     }
@@ -150,7 +150,7 @@ class HåndterGamleKravgrunnlagService(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
         eksternId: String,
-        fagsystemsbehandlingData: HentFagsystemsbehandling
+        fagsystemsbehandlingData: HentFagsystemsbehandling,
     ): OpprettTilbakekrevingRequest {
         return OpprettTilbakekrevingRequest(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
@@ -167,7 +167,7 @@ class HåndterGamleKravgrunnlagService(
             revurderingsvedtaksdato = fagsystemsbehandlingData.revurderingsvedtaksdato,
             faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
             verge = fagsystemsbehandlingData.verge,
-            varsel = null
+            varsel = null,
         )
     }
 
@@ -183,15 +183,15 @@ class HåndterGamleKravgrunnlagService(
                     behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                     venteårsak = venteårsak,
                     tidsfrist = LocalDate.now()
-                        .plusWeeks(venteårsak.defaultVenteTidIUker)
-                )
+                        .plusWeeks(venteårsak.defaultVenteTidIUker),
+                ),
             )
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
             aktør = Aktør.VEDTAKSLØSNING,
             beskrivelse = venteårsak.beskrivelse,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
@@ -200,7 +200,7 @@ class HåndterGamleKravgrunnlagService(
             revurderingsresultat = faktainfo.revurderingsresultat,
             revurderingsårsak = faktainfo.revurderingsårsak,
             tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-            konsekvensForYtelser = faktainfo.konsekvensForYtelser
+            konsekvensForYtelser = faktainfo.konsekvensForYtelser,
         )
     }
 }

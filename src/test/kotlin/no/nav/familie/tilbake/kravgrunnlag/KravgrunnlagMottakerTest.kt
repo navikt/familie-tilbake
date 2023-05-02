@@ -17,8 +17,8 @@ internal class KravgrunnlagMottakerTest : OppslagSpringRunnerTest() {
         taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
-                payload = "kravgrunnlagFraOppdrag"
-            )
+                payload = "kravgrunnlagFraOppdrag",
+            ),
         )
         taskService.findAll().filter { it.type == BehandleKravgrunnlagTask.TYPE }.isNotEmpty()
     }

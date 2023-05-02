@@ -30,7 +30,7 @@ class ManuellBrevmottakerService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val behandlingskontrollService: BehandlingskontrollService
+    private val behandlingskontrollService: BehandlingskontrollService,
 ) {
 
     @Transactional
@@ -41,7 +41,7 @@ class ManuellBrevmottakerService(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
             aktør = Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
         return id
     }
@@ -51,7 +51,7 @@ class ManuellBrevmottakerService(
     @Transactional
     fun oppdaterBrevmottaker(
         manuellBrevmottakerId: UUID,
-        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
+        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ) {
         val manuellBrevmottaker = manuellBrevmottakerRepository.findById(manuellBrevmottakerId).getOrNull()
             ?: throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId")
@@ -67,8 +67,8 @@ class ManuellBrevmottakerService(
                 postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer,
                 poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed,
                 landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
-                vergetype = manuellBrevmottakerRequestDto.vergetype
-            )
+                vergetype = manuellBrevmottakerRequestDto.vergetype,
+            ),
         )
     }
 
@@ -98,8 +98,8 @@ class ManuellBrevmottakerService(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
-                Behandlingsstegstatus.TILBAKEFØRT
-            )
+                Behandlingsstegstatus.TILBAKEFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -110,7 +110,7 @@ class ManuellBrevmottakerService(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
             aktør = Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
@@ -119,14 +119,14 @@ class ManuellBrevmottakerService(
             throw Feil(
                 "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         if (behandlingskontrollService.erBehandlingPåVent(behandling.id)) {
             throw Feil(
                 "Behandling med id=${behandling.id} er på vent.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -149,7 +149,7 @@ fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
                 adresselinje2 = manuellBrevmottaker.adresselinje2,
                 postnummer = manuellBrevmottaker.postnummer,
                 poststed = manuellBrevmottaker.poststed,
-                land = manuellBrevmottaker.landkode!!
+                land = manuellBrevmottaker.landkode!!,
             )
         } else {
             null

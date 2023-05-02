@@ -15,12 +15,12 @@ import java.util.UUID
     taskStepType = SendVarselbrevTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Sender varselbrev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class SendVarselbrevTask(
     private val varselbrevService: VarselbrevService,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

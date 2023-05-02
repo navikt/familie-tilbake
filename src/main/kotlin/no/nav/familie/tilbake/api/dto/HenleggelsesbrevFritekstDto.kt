@@ -7,5 +7,5 @@ data class HenleggelsesbrevFritekstDto(
     val behandlingsresultatstype: Behandlingsresultatstype,
     val begrunnelse: String,
     @Size(max = 1500, message = "Fritekst er for lang")
-    val fritekst: String? = null
+    val fritekst: String? = null,
 )

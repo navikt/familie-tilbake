@@ -35,7 +35,7 @@ class IverksettelseService(
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
     private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
-    private val oppdragClient: OppdragClient
+    private val oppdragClient: OppdragClient,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -72,7 +72,7 @@ class IverksettelseService(
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,
         kravgrunnlag: Kravgrunnlag431,
-        beregnetPerioder: List<Tilbakekrevingsperiode>
+        beregnetPerioder: List<Tilbakekrevingsperiode>,
     ): TilbakekrevingsvedtakRequest {
         val request = TilbakekrevingsvedtakRequest()
         val vedtak = TilbakekrevingsvedtakDto()
@@ -147,7 +147,7 @@ class IverksettelseService(
                     "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
                     "Beregnet beløp i iverksettelse er " +
                     "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
-                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp"
+                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp",
             )
         }
     }

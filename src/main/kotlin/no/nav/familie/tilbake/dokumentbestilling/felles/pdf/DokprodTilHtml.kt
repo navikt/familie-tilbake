@@ -43,7 +43,7 @@ object DokprodTilHtml {
                     <td class="saksbehandler">$saksbehandler</td>
                     <td class="beslutter">$beslutter</td>
                     </tr>
-                    </table>"""
+                    </table>""",
                     )
 
                     continue

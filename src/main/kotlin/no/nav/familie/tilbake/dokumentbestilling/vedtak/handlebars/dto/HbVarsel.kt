@@ -6,5 +6,5 @@ import java.time.LocalDate
 @Suppress("unused") // Handlebars
 class HbVarsel(
     private val varsletDato: LocalDate?,
-    private val varsletBeløp: BigDecimal?
+    private val varsletBeløp: BigDecimal?,
 )

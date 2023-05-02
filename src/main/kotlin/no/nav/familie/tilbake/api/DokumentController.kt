@@ -37,7 +37,7 @@ class DokumentController(
     private val dokumentbehandlingService: DokumentbehandlingService,
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService
+    private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
 ) {
 
     @Operation(summary = "Bestill brevsending")
@@ -45,7 +45,7 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Sender brev", AuditLoggerEvent.CREATE)
     fun bestillBrev(
         @RequestBody @Valid
-        bestillBrevDto: BestillBrevDto
+        bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
         val maltype: Dokumentmalstype = bestillBrevDto.brevmalkode
         dokumentbehandlingService.bestillBrev(bestillBrevDto.behandlingId, maltype, bestillBrevDto.fritekst)
@@ -57,12 +57,12 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun forhåndsvisBrev(
         @RequestBody @Valid
-        bestillBrevDto: BestillBrevDto
+        bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
         val dokument: ByteArray = dokumentbehandlingService.forhåndsvisBrev(
             bestillBrevDto.behandlingId,
             bestillBrevDto.brevmalkode,
-            bestillBrevDto.fritekst
+            bestillBrevDto.fritekst,
         )
         return Ressurs.success(dokument)
     }
@@ -70,12 +70,12 @@ class DokumentController(
     @Operation(summary = "Forhåndsvis varselbrev")
     @PostMapping(
         "/forhandsvis-varselbrev",
-        produces = [MediaType.APPLICATION_PDF_VALUE]
+        produces = [MediaType.APPLICATION_PDF_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVarselbrev(
         @Valid @RequestBody
-        forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest
+        forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest,
     ): ByteArray {
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }
@@ -83,12 +83,12 @@ class DokumentController(
     @Operation(summary = "Forhåndsvis henleggelsesbrev")
     @PostMapping(
         "/forhandsvis-henleggelsesbrev",
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser henleggelsesbrev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningHenleggelsesbrev(
         @Valid @RequestBody
-        dto: ForhåndsvisningHenleggelsesbrevDto
+        dto: ForhåndsvisningHenleggelsesbrevDto,
     ): Ressurs<ByteArray> {
         return Ressurs.success(henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(dto.behandlingId, dto.fritekst))
     }
@@ -96,12 +96,12 @@ class DokumentController(
     @Operation(summary = "Forhåndsvis vedtaksbrev")
     @PostMapping(
         "/forhandsvis-vedtaksbrev",
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVedtaksbrev(
         @Valid @RequestBody
-        dto: HentForhåndvisningVedtaksbrevPdfDto
+        dto: HentForhåndvisningVedtaksbrevPdfDto,
     ): Ressurs<ByteArray> {
         return Ressurs.success(vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto))
     }
@@ -109,7 +109,7 @@ class DokumentController(
     @Operation(summary = "Hent vedtaksbrevtekst")
     @GetMapping(
         "/vedtaksbrevtekst/{behandlingId}",
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
     fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
@@ -119,17 +119,17 @@ class DokumentController(
     @Operation(summary = "Lagre utkast av vedtaksbrev")
     @PostMapping(
         "/vedtaksbrevtekst/{behandlingId}/utkast",
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.SAKSBEHANDLER,
         "Lagrer utkast av vedtaksbrev",
         AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun lagreUtkastVedtaksbrev(
         @PathVariable behandlingId: UUID,
-        @RequestBody fritekstavsnitt: FritekstavsnittDto
+        @RequestBody fritekstavsnitt: FritekstavsnittDto,
     ): Ressurs<String> {
         lagreUtkastVedtaksbrevService.lagreUtkast(behandlingId, fritekstavsnitt)
         return Ressurs.success("OK")

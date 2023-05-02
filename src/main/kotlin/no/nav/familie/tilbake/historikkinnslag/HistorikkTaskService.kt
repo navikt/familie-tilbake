@@ -14,7 +14,7 @@ import java.util.UUID
 @Service
 class HistorikkTaskService(
     private val taskService: TaskService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     fun lagHistorikkTask(
@@ -24,7 +24,7 @@ class HistorikkTaskService(
         triggerTid: LocalDateTime? = null,
         beskrivelse: String? = null,
         brevtype: Brevtype? = null,
-        beslutter: String? = null
+        beslutter: String? = null,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
@@ -40,7 +40,7 @@ class HistorikkTaskService(
         val task = Task(
             type = LagHistorikkinnslagTask.TYPE,
             payload = behandlingId.toString(),
-            properties = properties
+            properties = properties,
         )
         triggerTid?.let { taskService.save(task.medTriggerTid(triggerTid)) } ?: taskService.save(task)
     }

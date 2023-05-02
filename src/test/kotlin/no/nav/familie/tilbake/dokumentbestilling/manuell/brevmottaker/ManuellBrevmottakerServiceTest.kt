@@ -74,8 +74,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             adresselinje2 = "test adresse2",
             postnummer = "0000",
             poststed = "Oslo",
-            landkode = "NO"
-        )
+            landkode = "NO",
+        ),
     )
 
     @BeforeEach
@@ -90,7 +90,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = any(),
                 historikkinnslagstype = any(),
                 aktør = any(),
-                opprettetTidspunkt = capture(opprettetTidspunktSlot)
+                opprettetTidspunkt = capture(opprettetTidspunktSlot),
             )
         } just runs
     }
@@ -111,8 +111,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 manuellBrevmottakerRequestDto.copy(
                     navn = "Kari Nordmann",
                     manuellAdresseInfo = null,
-                    personIdent = "12345678910"
-                )
+                    personIdent = "12345678910",
+                ),
             )
         }
 
@@ -127,7 +127,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
             )
         }
 
@@ -136,13 +136,13 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 adresselinje1 = "ny",
                 postnummer = "1111",
                 poststed = "stavanger",
-                landkode = "NO"
-            )
+                landkode = "NO",
+            ),
         )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
                 dbManuellBrevmottaker.id,
-                oppdatertManuellBrevmottaker
+                oppdatertManuellBrevmottaker,
             )
         }
 
@@ -160,7 +160,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.leggTilBrevmottaker(
                 behandling.id,
-                manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann")
+                manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann"),
             )
         }
 
@@ -175,7 +175,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
             )
         }
 
@@ -191,7 +191,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[2]
+                opprettetTidspunkt = opprettetTidspunktSlot[2],
             )
         }
     }
@@ -202,7 +202,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
         }
     }
 
@@ -222,7 +222,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-            LocalDate.now().plusWeeks(4)
+            LocalDate.now().plusWeeks(4),
         )
 
         val exception = shouldThrow<RuntimeException> { manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id) }
@@ -243,7 +243,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
         behandlingsstegstilstandRepository.findByBehandlingId(behandling.id).shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
         }
     }
 
@@ -263,14 +263,14 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegstilstand(
         behandlingId: UUID,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
                 behandlingssteg = behandlingssteg,
-                behandlingsstegsstatus = behandlingsstegstatus
-            )
+                behandlingsstegsstatus = behandlingsstegstatus,
+            ),
         )
     }
 }

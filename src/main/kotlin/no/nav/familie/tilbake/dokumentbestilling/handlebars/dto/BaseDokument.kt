@@ -12,7 +12,7 @@ open class BaseDokument(
     override val språkkode: Språkkode,
     val behandlendeEnhetsNavn: String,
     val ansvarligSaksbehandler: String,
-    val gjelderDødsfall: Boolean
+    val gjelderDødsfall: Boolean,
 ) : Språkstøtte {
 
     val avsenderenhet =
@@ -30,14 +30,14 @@ open class BaseDokument(
                     Språkkode.NB to Ytelsesnavn(
                         "barnetrygd",
                         "barnetrygden",
-                        "barnetrygden din"
+                        "barnetrygden din",
                     ),
                     Språkkode.NN to Ytelsesnavn(
                         "barnetrygd",
                         "barnetrygda",
-                        "barnetrygda di"
-                    )
-                )
+                        "barnetrygda di",
+                    ),
+                ),
             ),
             Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo(
                 EF_URL,
@@ -45,14 +45,14 @@ open class BaseDokument(
                     Språkkode.NB to Ytelsesnavn(
                         "overgangsstønad",
                         "overgangsstønaden",
-                        "overgangsstønaden din"
+                        "overgangsstønaden din",
                     ),
                     Språkkode.NN to Ytelsesnavn(
                         "overgangsstønad",
                         "overgangsstønaden",
-                        "overgangsstønaden din"
-                    )
-                )
+                        "overgangsstønaden din",
+                    ),
+                ),
             ),
             Ytelsestype.BARNETILSYN to Ytelsesinfo(
                 EF_URL,
@@ -60,14 +60,14 @@ open class BaseDokument(
                     Språkkode.NB to Ytelsesnavn(
                         "stønad til barnetilsyn",
                         "stønaden til barnetilsyn",
-                        "stønaden din til barnetilsyn"
+                        "stønaden din til barnetilsyn",
                     ),
                     Språkkode.NN to Ytelsesnavn(
                         "stønad til barnetilsyn",
                         "stønaden til barnetilsyn",
-                        "stønaden din til barnetilsyn"
-                    )
-                )
+                        "stønaden din til barnetilsyn",
+                    ),
+                ),
             ),
             Ytelsestype.SKOLEPENGER to Ytelsesinfo(
                 EF_URL,
@@ -75,14 +75,14 @@ open class BaseDokument(
                     Språkkode.NB to Ytelsesnavn(
                         "stønad til skolepenger",
                         "stønaden til skolepenger",
-                        "stønaden din til skolepenger"
+                        "stønaden din til skolepenger",
                     ),
                     Språkkode.NN to Ytelsesnavn(
                         "stønad til skulepengar",
                         "stønaden til skulepengar",
-                        "stønaden din til skulepengar"
-                    )
-                )
+                        "stønaden din til skulepengar",
+                    ),
+                ),
             ),
             Ytelsestype.KONTANTSTØTTE to Ytelsesinfo(
                 "nav.no/kontantstotte",
@@ -90,15 +90,15 @@ open class BaseDokument(
                     Språkkode.NB to Ytelsesnavn(
                         "kontantstøtte",
                         "kontantstøtten",
-                        "kontantstøtten din"
+                        "kontantstøtten din",
                     ),
                     Språkkode.NN to Ytelsesnavn(
                         "kontantstøtte",
                         "kontantstøtta",
-                        "kontantstøtta di"
-                    )
-                )
-            )
+                        "kontantstøtta di",
+                    ),
+                ),
+            ),
         )
 
     private val ytelsesinfo

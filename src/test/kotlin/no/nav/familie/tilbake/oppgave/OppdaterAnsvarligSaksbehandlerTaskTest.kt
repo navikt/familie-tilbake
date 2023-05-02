@@ -49,8 +49,9 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         verify {
             mockOppgaveService.patchOppgave(
                 oppgave.copy(
-                    tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.HOY
-                )
+                    tilordnetRessurs = behandling.ansvarligSaksbehandler,
+                    prioritet = OppgavePrioritet.HOY,
+                ),
             )
         }
     }
@@ -66,8 +67,9 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         verify(atLeast = 1) {
             mockOppgaveService.patchOppgave(
                 oppgave.copy(
-                    tilordnetRessurs = behandling.ansvarligSaksbehandler, prioritet = OppgavePrioritet.NORM
-                )
+                    tilordnetRessurs = behandling.ansvarligSaksbehandler,
+                    prioritet = OppgavePrioritet.NORM,
+                ),
             )
         }
     }
@@ -85,7 +87,8 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
     }
 
     private fun lagTask(opprettetAv: String? = null): Task {
-        return Task(type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
+        return Task(
+            type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
             payload = behandling.id.toString(),
             properties = Properties().apply {
                 setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
@@ -93,6 +96,7 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
                 if (opprettetAv != null) {
                     setProperty("opprettetAv", opprettetAv)
                 }
-            })
+            },
+        )
     }
 }

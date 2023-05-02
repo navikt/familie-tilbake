@@ -9,7 +9,7 @@ import java.math.BigDecimal
 
 data class VurdertVilkårsvurderingDto(
     val perioder: List<VurdertVilkårsvurderingsperiodeDto>,
-    val rettsgebyr: Long
+    val rettsgebyr: Long,
 )
 
 data class VurdertVilkårsvurderingsperiodeDto(
@@ -20,19 +20,19 @@ data class VurdertVilkårsvurderingsperiodeDto(
     val aktiviteter: List<AktivitetDto> = listOf(),
     val vilkårsvurderingsresultatInfo: VurdertVilkårsvurderingsresultatDto? = null,
     val begrunnelse: String? = null,
-    val foreldet: Boolean
+    val foreldet: Boolean,
 )
 
 data class VurdertVilkårsvurderingsresultatDto(
     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat? = null,
     val godTro: VurdertGodTroDto? = null,
-    val aktsomhet: VurdertAktsomhetDto? = null
+    val aktsomhet: VurdertAktsomhetDto? = null,
 )
 
 data class VurdertGodTroDto(
     val beløpErIBehold: Boolean,
     val beløpTilbakekreves: BigDecimal? = null,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 data class VurdertAktsomhetDto(
@@ -44,12 +44,12 @@ data class VurdertAktsomhetDto(
     val særligeGrunner: List<VurdertSærligGrunnDto>? = null,
     val særligeGrunnerTilReduksjon: Boolean = false,
     val tilbakekrevSmåbeløp: Boolean = true,
-    val særligeGrunnerBegrunnelse: String? = null
+    val særligeGrunnerBegrunnelse: String? = null,
 )
 
 data class VurdertSærligGrunnDto(
     val særligGrunn: SærligGrunn,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )
 
 data class RedusertBeløpDto(val trekk: Boolean, val beløp: BigDecimal)

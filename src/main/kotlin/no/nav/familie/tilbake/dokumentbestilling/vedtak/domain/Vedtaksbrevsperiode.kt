@@ -18,7 +18,7 @@ data class Vedtaksbrevsperiode(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Friteksttype {
@@ -26,5 +26,5 @@ enum class Friteksttype {
     FORELDELSE,
     VILKÅR,
     SÆRLIGE_GRUNNER,
-    SÆRLIGE_GRUNNER_ANNET
+    SÆRLIGE_GRUNNER_ANNET,
 }

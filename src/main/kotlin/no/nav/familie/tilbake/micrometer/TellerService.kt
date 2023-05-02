@@ -22,7 +22,7 @@ import java.time.LocalDate
 @Transactional
 class TellerService(
     private val fagsakRepository: FagsakRepository,
-    private val meldingstellingRepository: MeldingstellingRepository
+    private val meldingstellingRepository: MeldingstellingRepository,
 ) {
 
     fun tellKobletKravgrunnlag(fagsystem: Fagsystem) =
@@ -42,15 +42,15 @@ class TellerService(
             fagsystem,
             type,
             status,
-            LocalDate.now()
+            LocalDate.now(),
         )
         if (meldingstelling == null) {
             meldingstellingRepository.insert(
                 Meldingstelling(
                     fagsystem = fagsystem,
                     type = type,
-                    status = status
-                )
+                    status = status,
+                ),
             )
         } else {
             meldingstellingRepository.oppdaterTeller(fagsystem, type, status)
@@ -64,8 +64,8 @@ class TellerService(
                 "fagsystem",
                 fagsak.fagsystem.name,
                 "brevtype",
-                brevtype.name
-            )
+                brevtype.name,
+            ),
         ).increment()
     }
 
@@ -83,8 +83,8 @@ class TellerService(
                 "fagsystem",
                 fagsak.fagsystem.name,
                 "vedtakstype",
-                vedtakstype
-            )
+                vedtakstype,
+            ),
         ).increment()
     }
 }

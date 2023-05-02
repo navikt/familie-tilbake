@@ -82,7 +82,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
                 fagsystem = any(),
                 distribusjonstype = any(),
                 distribusjonstidspunkt = any(),
-                manuellAdresse = capture(sendteManuelleAdresser)
+                manuellAdresse = capture(sendteManuelleAdresser),
             )
         } returns "hei"
 
@@ -93,7 +93,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
             adresselinje1 = "Gate gatesen 2",
             postnummer = "0000",
             poststed = "OSLO",
-            landkode = "NO"
+            landkode = "NO",
         )
     }
 
@@ -120,7 +120,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
     @Test
     fun `skal kun sende til dødsbo`() {
         val expectedManuellBrevmottaker = manuellBrevmottakerRepository.insert(
-            mockBrevmottaker.copy(id = UUID.randomUUID(), type = MottakerType.DØDSBO)
+            mockBrevmottaker.copy(id = UUID.randomUUID(), type = MottakerType.DØDSBO),
         )
         manuellBrevmottakerRepository.insert(mockBrevmottaker)
 
@@ -135,7 +135,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
     @Test
     fun `skal ikke sende til folkeregistrert når man har utenlandsk adresse`() {
         val expectedManuellBrevmottaker = manuellBrevmottakerRepository.insert(
-            mockBrevmottaker.copy(id = UUID.randomUUID(), type = BRUKER_MED_UTENLANDSK_ADRESSE, landkode = "DE")
+            mockBrevmottaker.copy(id = UUID.randomUUID(), type = BRUKER_MED_UTENLANDSK_ADRESSE, landkode = "DE"),
         )
         manuellBrevmottakerRepository.insert(mockBrevmottaker)
 
@@ -151,7 +151,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
 
     private fun assertEqualsManuellAddresseOgBrevmottaker(
         actualAdresse: ManuellAdresse,
-        expectedManuellBrevmottaker: ManuellBrevmottaker
+        expectedManuellBrevmottaker: ManuellBrevmottaker,
     ) {
         actualAdresse.adresselinje1 shouldBe expectedManuellBrevmottaker.adresselinje1
         actualAdresse.adresselinje2 shouldBe expectedManuellBrevmottaker.adresselinje2
@@ -169,7 +169,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
                 this["fagsystem"] = Fagsystem.BA.name
                 this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
                 this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
-            }
+            },
         )
     }
 }

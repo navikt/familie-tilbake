@@ -16,7 +16,7 @@ data class Brevsporing(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Brevtype {
@@ -24,7 +24,8 @@ enum class Brevtype {
     KORRIGERT_VARSEL,
     VEDTAK,
     HENLEGGELSE,
-    INNHENT_DOKUMENTASJON;
+    INNHENT_DOKUMENTASJON,
+    ;
 
     fun gjelderVarsel(): Boolean {
         return this in setOf(VARSEL, KORRIGERT_VARSEL)

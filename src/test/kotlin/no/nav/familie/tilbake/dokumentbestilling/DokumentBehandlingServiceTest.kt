@@ -78,7 +78,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             kravgrunnlagRepository,
             taskService,
             mockManueltVarselBrevService,
-            mockInnhentDokumentasjonbrevService
+            mockInnhentDokumentasjonbrevService,
         )
     }
 
@@ -106,7 +106,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
         dokumentBehandlingService.bestillBrev(
             behandlingId,
             Dokumentmalstype.INNHENT_DOKUMENTASJON,
-            "Bestilt innhent dokumentasjon"
+            "Bestilt innhent dokumentasjon",
         )
 
         val tasks = taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
@@ -119,7 +119,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             dokumentBehandlingService.bestillBrev(
                 behandling.id,
                 Dokumentmalstype.INNHENT_DOKUMENTASJON,
-                "Bestilt innhent dokumentasjon"
+                "Bestilt innhent dokumentasjon",
             )
         }.message shouldBe "Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = " +
             "${behandling.id}"
@@ -132,7 +132,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             nyttBeløp = BigDecimal.ZERO,
             tilbakekrevesBeløp = BigDecimal.valueOf(1000),
             opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
-            skatteprosent = BigDecimal.ZERO
+            skatteprosent = BigDecimal.ZERO,
         )
         val feilBeløp = Kravgrunnlagsbeløp433(
             klassetype = Klassetype.FEIL,
@@ -140,12 +140,12 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             nyttBeløp = BigDecimal.valueOf(1000),
             tilbakekrevesBeløp = BigDecimal.ZERO,
             opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
-            skatteprosent = BigDecimal.ZERO
+            skatteprosent = BigDecimal.ZERO,
         )
         val periode = Kravgrunnlagsperiode432(
             periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
             månedligSkattebeløp = BigDecimal.ZERO,
-            beløp = setOf(ytelBeløp, feilBeløp)
+            beløp = setOf(ytelBeløp, feilBeløp),
         )
         val kravgrunnlag431 = Kravgrunnlag431(
             behandlingId = behandling.id,
@@ -164,7 +164,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             kontrollfelt = "132323",
             saksbehandlerId = "23454334",
             referanse = "testverdi",
-            perioder = setOf(periode)
+            perioder = setOf(periode),
         )
         kravgrunnlagRepository.insert(kravgrunnlag431)
         return kravgrunnlag431.behandlingId

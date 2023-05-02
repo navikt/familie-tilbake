@@ -76,7 +76,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         tilbakekrevingsvedtakRequest = TilbakekrevingsvedtakMarshaller.unmarshall(
             tilbakekrevingsvedtakRequestXml,
             behandling.id,
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
         hentKravgrunnlagRequest = KravgrunnlagHentDetaljRequest().apply {
             hentkravgrunnlag = HentKravgrunnlagDetaljDto().apply {
@@ -98,7 +98,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
         wireMockServer.stubFor(
             post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson()))
+                .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson())),
         )
         val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
 
@@ -109,13 +109,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun `iverksettVedtak skal ikke sende iverksettelse request til oppdrag når oppdrag har nedetid`() {
         wireMockServer.stubFor(
             post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408))
+                .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408)),
         )
 
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.iverksettVedtak(
                 behandling.id,
-                tilbakekrevingsvedtakRequest
+                tilbakekrevingsvedtakRequest,
             )
         }
         exception.shouldNotBeNull()
@@ -127,13 +127,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun `iverksettVedtak skal ikke iverksette behandling til oppdrag når økonomi ikke svarer`() {
         wireMockServer.stubFor(
             post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
-                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
 
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.iverksettVedtak(
                 behandling.id,
-                tilbakekrevingsvedtakRequest
+                tilbakekrevingsvedtakRequest,
             )
         }
         exception.shouldNotBeNull()
@@ -148,20 +148,20 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             post(
                 urlEqualTo(
                     DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
-                )
+                        kravgrunnlagId,
+                ),
             )
                 .willReturn(
                     okJson(
                         Ressurs.success(
                             lagHentKravgrunnlagRespons(
                                 "00",
-                                "OK"
-                            )
+                                "OK",
+                            ),
                         )
-                            .toJson()
-                    )
-                )
+                            .toJson(),
+                    ),
+                ),
         )
         val hentKravgrunnlag = oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
 
@@ -174,20 +174,20 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             post(
                 urlEqualTo(
                     DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
-                )
+                        kravgrunnlagId,
+                ),
             )
                 .willReturn(
                     okJson(
                         Ressurs.success(
                             lagHentKravgrunnlagRespons(
                                 "00",
-                                "B420010I"
-                            )
+                                "B420010I",
+                            ),
                         )
-                            .toJson()
-                    )
-                )
+                            .toJson(),
+                    ),
+                ),
         )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
@@ -207,20 +207,20 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             post(
                 urlEqualTo(
                     DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
-                )
+                        kravgrunnlagId,
+                ),
             )
                 .willReturn(
                     okJson(
                         Ressurs.success(
                             lagHentKravgrunnlagRespons(
                                 "00",
-                                "B420012I"
-                            )
+                                "B420012I",
+                            ),
                         )
-                            .toJson()
-                    )
-                )
+                            .toJson(),
+                    ),
+                ),
         )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
@@ -236,10 +236,10 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             post(
                 urlEqualTo(
                     DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
-                )
+                        kravgrunnlagId,
+                ),
             )
-                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
         val exception = shouldThrow<RuntimeException> {
             oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
@@ -257,12 +257,12 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             tom = YearMonth.now().minusMonths(1).atDay(1),
             feilutbetaltBeløp = BigDecimal("20000"),
             tidligereUtbetaltBeløp = BigDecimal("30000"),
-            nyttBeløp = BigDecimal("10000")
+            nyttBeløp = BigDecimal("10000"),
         )
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
         wireMockServer.stubFor(
             post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
-                .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson()))
+                .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())),
         )
 
         val respons = oppdragClient
@@ -270,8 +270,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 HentFeilutbetalingerFraSimuleringRequest(
                     Ytelsestype.OVERGANGSSTØNAD,
                     "123",
-                    "1"
-                )
+                    "1",
+                ),
             )
         respons shouldNotBe null
     }
@@ -280,7 +280,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
         wireMockServer.stubFor(
             post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
-                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
+                .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
 
         val exception = shouldThrow<RuntimeException> {
@@ -288,8 +288,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 HentFeilutbetalingerFraSimuleringRequest(
                     Ytelsestype.OVERGANGSSTØNAD,
                     "123",
-                    "1"
-                )
+                    "1",
+                ),
             )
         }
         exception.shouldNotBeNull()
@@ -310,7 +310,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     private fun lagHentKravgrunnlagRespons(
         alvorlighetsgrad: String,
-        kodeMelding: String
+        kodeMelding: String,
     ): KravgrunnlagHentDetaljResponse {
         val mmelDto = lagMmmelDto(alvorlighetsgrad, kodeMelding)
 

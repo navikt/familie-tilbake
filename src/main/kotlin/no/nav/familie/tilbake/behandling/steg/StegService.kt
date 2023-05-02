@@ -18,7 +18,7 @@ import java.util.UUID
 class StegService(
     val steg: List<IBehandlingssteg>,
     val behandlingRepository: BehandlingRepository,
-    val behandlingskontrollService: BehandlingskontrollService
+    val behandlingskontrollService: BehandlingskontrollService,
 ) {
 
     @Transactional
@@ -46,7 +46,7 @@ class StegService(
             throw Feil(
                 message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
                 frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
 
@@ -70,7 +70,7 @@ class StegService(
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         if (aktivtBehandlingssteg in listOf(
                 Behandlingssteg.FORELDELSE,
-                Behandlingssteg.VILKÅRSVURDERING
+                Behandlingssteg.VILKÅRSVURDERING,
             )
         ) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
@@ -94,7 +94,7 @@ class StegService(
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
             throw Feil(
                 message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
-                    "Kan ikke saksbehandle den automatisk"
+                    "Kan ikke saksbehandle den automatisk",
             )
         }
         while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
@@ -122,7 +122,7 @@ class StegService(
 
     fun kanAnsvarligSaksbehandlerOppdateres(
         behandlingId: UUID,
-        behandlingsstegDto: BehandlingsstegDto
+        behandlingsstegDto: BehandlingsstegDto,
     ): Boolean {
         val behandlingssteg = Behandlingssteg.fraNavn(behandlingsstegDto.getSteg())
         return when (behandlingssteg) {
@@ -135,7 +135,7 @@ class StegService(
         val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
             ?: throw Feil(
                 message = "Behandling $behandlingId har ikke noe aktiv steg",
-                frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg"
+                frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg",
             )
         if (aktivtBehandlingssteg !in setOf(
                 Behandlingssteg.VARSEL,
@@ -147,7 +147,7 @@ class StegService(
                 Behandlingssteg.VILKÅRSVURDERING,
                 Behandlingssteg.FORESLÅ_VEDTAK,
                 Behandlingssteg.FATTE_VEDTAK,
-                Behandlingssteg.IVERKSETT_VEDTAK
+                Behandlingssteg.IVERKSETT_VEDTAK,
             )
         ) {
             throw Feil(message = "Steg $aktivtBehandlingssteg er ikke implementer ennå")

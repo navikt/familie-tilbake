@@ -21,12 +21,12 @@ import java.util.UUID
     taskStepType = SendHenleggelsesbrevTask.TYPE,
     maxAntallFeil = 50,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Send henleggelsesbrev."
+    beskrivelse = "Send henleggelsesbrev.",
 )
 class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -46,12 +46,12 @@ class SendHenleggelsesbrevTask(
         fun opprettTask(
             behandlingId: UUID,
             fagsystem: Fagsystem,
-            fritekst: String?
+            fritekst: String?,
         ): Task =
             Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(SendBrevTaskdata(behandlingId, fritekst)),
-                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             )
                 .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
@@ -61,5 +61,5 @@ class SendHenleggelsesbrevTask(
 
 data class SendBrevTaskdata(
     val behandlingId: UUID,
-    val fritekst: String?
+    val fritekst: String?,
 )

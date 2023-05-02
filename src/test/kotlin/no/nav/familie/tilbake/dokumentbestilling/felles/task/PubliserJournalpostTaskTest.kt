@@ -69,7 +69,7 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
                 this["fagsystem"] = Fagsystem.BA.name
                 this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
                 this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
-            }
+            },
         )
     }
 

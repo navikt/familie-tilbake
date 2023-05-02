@@ -87,8 +87,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
-                )
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                ),
             )
         val andrePeriode = Testdata.kravgrunnlagsperiode432
             .copy(
@@ -96,8 +96,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID())
-                )
+                    Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
+                ),
             )
 
         val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
@@ -106,14 +106,14 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val periode = FaktaFeilutbetalingsperiode(
             periode = Månedsperiode(førstePeriode.periode.fom, andrePeriode.periode.tom),
             hendelsestype = Hendelsestype.ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
                 behandlingId = behandling.id,
                 begrunnelse = "fakta begrunnelse",
-                perioder = setOf(periode)
-            )
+                perioder = setOf(periode),
+            ),
         )
 
         lagBehandlingsstegstilstand(Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
@@ -221,17 +221,17 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val justBeløp = lagKravgrunnlagsbeløp(
             klassetype = Klassetype.JUST,
             nyttBeløp = BigDecimal(5000),
-            opprinneligUtbetalingsbeløp = BigDecimal.ZERO
+            opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
         )
         val trekBeløp = lagKravgrunnlagsbeløp(
             klassetype = Klassetype.TREK,
             nyttBeløp = BigDecimal.ZERO,
-            opprinneligUtbetalingsbeløp = BigDecimal(-2000)
+            opprinneligUtbetalingsbeløp = BigDecimal(-2000),
         )
         val skatBeløp = lagKravgrunnlagsbeløp(
             klassetype = Klassetype.SKAT,
             nyttBeløp = BigDecimal.ZERO,
-            opprinneligUtbetalingsbeløp = BigDecimal(-2000)
+            opprinneligUtbetalingsbeløp = BigDecimal(-2000),
         )
         val førstePeriode = kravgrunnlag431.perioder
             .toList()[0]
@@ -239,8 +239,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
-                    justBeløp
-                )
+                    justBeløp,
+                ),
             )
         val andrePeriode = kravgrunnlag431.perioder
             .toList()[1]
@@ -249,8 +249,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                     Testdata.ytelKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
                     trekBeløp,
-                    skatBeløp
-                )
+                    skatBeløp,
+                ),
             )
         kravgrunnlagRepository.update(kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode)))
 
@@ -288,7 +288,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET))
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
-            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto
+            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
         )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
@@ -330,7 +330,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             lagVilkårsvurderingMedGodTro(perioder = listOf(Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))))
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandlingId = behandling.id,
-            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto
+            behandlingsstegVilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
         )
 
         val vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
@@ -378,10 +378,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     perioder = listOf(
                         Datoperiode(
                             YearMonth.of(2020, 2),
-                            YearMonth.of(2020, 2)
-                        )
-                    )
-                )
+                            YearMonth.of(2020, 2),
+                        ),
+                    ),
+                ),
             )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -391,7 +391,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         oppdaterForeldelsesvurdering(
             vurdertForeldelse,
             Foreldelsesvurderingstype.IKKE_FORELDET,
-            Foreldelsesvurderingstype.IKKE_FORELDET
+            Foreldelsesvurderingstype.IKKE_FORELDET,
         )
 
         vurdertVilkårsvurderingDto = vilkårsvurderingService.hentVilkårsvurdering(behandling.id)
@@ -449,10 +449,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     perioder = listOf(
                         Datoperiode(
                             YearMonth.of(2020, 2),
-                            YearMonth.of(2020, 2)
-                        )
-                    )
-                )
+                            YearMonth.of(2020, 2),
+                        ),
+                    ),
+                ),
             )
         lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
@@ -496,8 +496,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     lagVilkårsvurderingMedSimpelAktsomhet(
                         andelTilbakekreves = BigDecimal(120),
                         særligGrunn =
-                        SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
-                    )
+                        SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET),
+                    ),
                 )
         }
         exception.message shouldBe "Andel som skal tilbakekreves kan ikke være mer enn 100 prosent"
@@ -509,7 +509,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             vilkårsvurderingService
                 .lagreVilkårsvurdering(
                     behandling.id,
-                    lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.ANNET))
+                    lagVilkårsvurderingMedSimpelAktsomhet(særligGrunn = SærligGrunnDto(SærligGrunn.ANNET)),
                 )
         }
         exception.message shouldBe "ANNET særlig grunner må ha ANNET begrunnelse"
@@ -521,7 +521,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegVilkårsvurderingDto =
             lagVilkårsvurderingMedSimpelAktsomhet(
                 manueltSattBeløp = BigDecimal(30000),
-                særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
+                særligGrunn = SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET),
             )
         val exception = shouldThrow<RuntimeException> {
             vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, behandlingsstegVilkårsvurderingDto)
@@ -539,11 +539,11 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     listOf(
                         Datoperiode(
                             YearMonth.of(2020, 1),
-                            YearMonth.of(2020, 2)
-                        )
+                            YearMonth.of(2020, 2),
+                        ),
                     ),
-                    BigDecimal(30000)
-                )
+                    BigDecimal(30000),
+                ),
             )
         }
         exception.message shouldBe "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
@@ -558,8 +558,8 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 lagVilkårsvurderingMedSimpelAktsomhet(
                     ileggRenter = true,
                     særligGrunn =
-                    SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET)
-                )
+                    SærligGrunnDto(SærligGrunn.GRAD_AV_UAKTSOMHET),
+                ),
             )
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
@@ -598,15 +598,15 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             Behandlingsstegstilstand(
                 behandlingssteg = behandlingssteg,
                 behandlingsstegsstatus = behandlingsstegstatus,
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
     }
 
     private fun lagKravgrunnlagsbeløp(
         klassetype: Klassetype,
         nyttBeløp: BigDecimal,
-        opprinneligUtbetalingsbeløp: BigDecimal
+        opprinneligUtbetalingsbeløp: BigDecimal,
     ): Kravgrunnlagsbeløp433 {
         return Kravgrunnlagsbeløp433(
             id = UUID.randomUUID(),
@@ -619,7 +619,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             uinnkrevdBeløp = BigDecimal.ZERO,
             resultatkode = "testverdi",
             årsakskode = "testverdi",
-            skyldkode = "testverdi"
+            skyldkode = "testverdi",
         )
     }
 
@@ -633,7 +633,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         andelTilbakekreves: BigDecimal? = null,
         manueltSattBeløp: BigDecimal? = null,
         ileggRenter: Boolean? = null,
-        særligGrunn: SærligGrunnDto
+        særligGrunn: SærligGrunnDto,
     ): BehandlingsstegVilkårsvurderingDto {
         val periode = VilkårsvurderingsperiodeDto(
             periode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2)),
@@ -648,15 +648,15 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 særligeGrunner = listOf(særligGrunn),
                 tilbakekrevSmåbeløp = false,
                 særligeGrunnerBegrunnelse =
-                "Særlig grunner begrunnelse"
-            )
+                "Særlig grunner begrunnelse",
+            ),
         )
         return BehandlingsstegVilkårsvurderingDto(listOf(periode))
     }
 
     private fun lagVilkårsvurderingMedGodTro(
         perioder: List<Datoperiode>,
-        beløpTilbakekreves: BigDecimal? = null
+        beløpTilbakekreves: BigDecimal? = null,
     ): BehandlingsstegVilkårsvurderingDto {
         return BehandlingsstegVilkårsvurderingDto(
             vilkårsvurderingsperioder = perioder.map {
@@ -667,10 +667,10 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                     godTroDto = GodTroDto(
                         begrunnelse = "God tro begrunnelse",
                         beløpErIBehold = true,
-                        beløpTilbakekreves = beløpTilbakekreves
-                    )
+                        beløpTilbakekreves = beløpTilbakekreves,
+                    ),
                 )
-            }
+            },
         )
     }
 
@@ -680,32 +680,32 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                 Foreldelsesperiode(
                     periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
-                    begrunnelse = "foreldelse begrunnelse 1"
+                    begrunnelse = "foreldelse begrunnelse 1",
                 ),
                 Foreldelsesperiode(
                     periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
-                    begrunnelse = "foreldelse begrunnelse 2"
-                )
+                    begrunnelse = "foreldelse begrunnelse 2",
+                ),
             )
         foreldelseRepository.insert(VurdertForeldelse(behandlingId = behandling.id, foreldelsesperioder = foreldelsesperioder))
     }
 
     private fun oppdaterForeldelsesvurdering(
         vurdertForeldelse: VurdertForeldelse,
-        vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype
+        vararg foreldelsesvurderingstyper: Foreldelsesvurderingstype,
     ) {
         val foreldelsesperioder = setOf(
             Foreldelsesperiode(
                 periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                 foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
-                begrunnelse = "foreldelse begrunnelse 1"
+                begrunnelse = "foreldelse begrunnelse 1",
             ),
             Foreldelsesperiode(
                 periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                 foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
-                begrunnelse = "foreldelse begrunnelse 2"
-            )
+                begrunnelse = "foreldelse begrunnelse 2",
+            ),
         )
         foreldelseRepository.update(vurdertForeldelse.copy(foreldelsesperioder = foreldelsesperioder))
     }

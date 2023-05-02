@@ -46,7 +46,7 @@ data class Kravgrunnlag431(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 data class Kravgrunnlagsperiode432(
@@ -61,7 +61,7 @@ data class Kravgrunnlagsperiode432(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     fun harIdentiskKravgrunnlagsperiode(other: Any?): Boolean {
@@ -96,7 +96,7 @@ data class Kravgrunnlagsbeløp433(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -126,7 +126,7 @@ data class Kravgrunnlagsbeløp433(
             resultatkode,
             skatteprosent,
             skyldkode,
-            årsakskode
+            årsakskode,
         )
     }
 }
@@ -145,7 +145,8 @@ enum class Klassekode(val aktivitet: String) {
     EFBT("Barnetilsyn"),
     EFSP("Skolepenger"),
     KS("Kontantstøtte"),
-    TREK_KODER(""); // Felles klassekode for alle TREK klassetyper
+    TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
+    ;
 
     companion object {
 
@@ -162,7 +163,8 @@ enum class Klassetype(val navn: String) {
     JUST("Justeringskonto"),
     SKAT("Skatt"),
     TREK("Trekk"),
-    YTEL("Ytelseskonto");
+    YTEL("Ytelseskonto"),
+    ;
 
     companion object {
 

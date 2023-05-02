@@ -38,13 +38,13 @@ class PdlClientConfig {
                 fødselsdato = LocalDate.now().minusYears(20),
                 navn = "testverdi",
                 kjønn = Kjønn.MANN,
-                dødsdato = dødsdato
+                dødsdato = dødsdato,
             )
         }
         every { pdlClient.hentIdenter(any(), any()) } answers {
             PdlHentIdenterResponse(
                 data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
-                errors = listOf()
+                errors = listOf(),
             )
         }
         return pdlClient

@@ -42,7 +42,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
             faktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
-            FaktaFeilutbetaling::versjon
+            FaktaFeilutbetaling::versjon,
         )
         lagretFaktaFeilutbetaling.versjon shouldBe 1
     }
@@ -59,7 +59,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         lagretFaktaFeilutbetaling.shouldBeEqualToComparingFieldsExcept(
             oppdatertFaktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
-            FaktaFeilutbetaling::versjon
+            FaktaFeilutbetaling::versjon,
         )
         lagretFaktaFeilutbetaling.versjon shouldBe 2
     }
@@ -73,7 +73,7 @@ internal class FaktaFeilutbetalingRepositoryTest : OppslagSpringRunnerTest() {
         findByBehandlingId?.shouldBeEqualToComparingFieldsExcept(
             faktaFeilutbetaling,
             FaktaFeilutbetaling::sporbar,
-            FaktaFeilutbetaling::versjon
+            FaktaFeilutbetaling::versjon,
         )
     }
 }

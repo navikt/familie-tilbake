@@ -58,8 +58,8 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
-                )
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
             )
         val andreKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
             .copy(
@@ -67,16 +67,16 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
-                )
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
             )
         kravgrunnlagRepository.insert(
             kravgrunnlag431.copy(
                 perioder = setOf(
                     førsteKravgrunnlagsperiode,
-                    andreKravgrunnlagsperiode
-                )
-            )
+                    andreKravgrunnlagsperiode,
+                ),
+            ),
         )
     }
 
@@ -107,16 +107,16 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                             LocalDate.of(2017, 1, 1),
                             LocalDate.of(2017, 1, 31),
                             Foreldelsesvurderingstype
-                                .FORELDET
+                                .FORELDET,
                         ),
                         lagForeldelsesperiode(
                             LocalDate.of(2017, 2, 1),
                             LocalDate.of(2017, 2, 28),
                             Foreldelsesvurderingstype
-                                .IKKE_FORELDET
-                        )
-                    )
-                )
+                                .IKKE_FORELDET,
+                        ),
+                    ),
+                ),
             )
 
         val vurdertForeldelseDto = foreldelseService.hentVurdertForeldelse(behandling.id)
@@ -154,10 +154,10 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                             LocalDate.of(2017, 1, 1),
                             LocalDate.of(2017, 1, 31),
                             Foreldelsesvurderingstype
-                                .FORELDET
-                        )
-                    )
-                )
+                                .FORELDET,
+                        ),
+                    ),
+                ),
             )
 
         val vurdertForeldelse = foreldelsesRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
@@ -176,13 +176,13 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperiode = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 10),
             LocalDate.of(2017, 1, 31),
-            Foreldelsesvurderingstype.FORELDET
+            Foreldelsesvurderingstype.FORELDET,
         )
         val exception = shouldThrow<RuntimeException> {
             foreldelseService
                 .lagreVurdertForeldelse(
                     behandling.id,
-                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode))
+                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
                 )
         }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
@@ -193,13 +193,13 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperiode = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 1),
             LocalDate.of(2017, 1, 27),
-            Foreldelsesvurderingstype.FORELDET
+            Foreldelsesvurderingstype.FORELDET,
         )
         val exception = shouldThrow<RuntimeException> {
             foreldelseService
                 .lagreVurdertForeldelse(
                     behandling.id,
-                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode))
+                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
                 )
         }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
@@ -210,7 +210,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val forrigeForeldelsesperiode = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 1),
             LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET
+            Foreldelsesvurderingstype.IKKE_FORELDET,
         )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
         vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
@@ -220,21 +220,21 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val nyForeldelsesperiode1 = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 1),
             LocalDate.of(2017, 2, 28),
-            Foreldelsesvurderingstype.IKKE_FORELDET
+            Foreldelsesvurderingstype.IKKE_FORELDET,
         )
         val nyForeldelsesperiode2 = lagForeldelsesperiode(
             LocalDate.of(2017, 3, 1),
             LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET
+            Foreldelsesvurderingstype.IKKE_FORELDET,
         )
         foreldelseService.lagreVurdertForeldelse(
             behandling.id,
             BehandlingsstegForeldelseDto(
                 listOf(
                     nyForeldelsesperiode1,
-                    nyForeldelsesperiode2
-                )
-            )
+                    nyForeldelsesperiode2,
+                ),
+            ),
         )
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
     }
@@ -244,7 +244,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val forrigeForeldelsesperiode = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 1),
             LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET
+            Foreldelsesvurderingstype.IKKE_FORELDET,
         )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
         vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
@@ -254,7 +254,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val nyForeldelsesperiode = lagForeldelsesperiode(
             LocalDate.of(2017, 1, 1),
             LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.FORELDET
+            Foreldelsesvurderingstype.FORELDET,
         )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
@@ -263,13 +263,13 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     private fun lagForeldelsesperiode(
         fom: LocalDate,
         tom: LocalDate,
-        foreldelsesvurderingstype: Foreldelsesvurderingstype
+        foreldelsesvurderingstype: Foreldelsesvurderingstype,
     ): ForeldelsesperiodeDto {
         return ForeldelsesperiodeDto(
             periode = Datoperiode(fom, tom),
             begrunnelse = "foreldelses begrunnelse",
             foreldelsesvurderingstype = foreldelsesvurderingstype,
-            foreldelsesfrist = LocalDate.of(2017, 2, 28)
+            foreldelsesfrist = LocalDate.of(2017, 2, 28),
         )
     }
 }

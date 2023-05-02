@@ -42,8 +42,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                tidsfrist = LocalDate.now().minusWeeks(4)
-            )
+                tidsfrist = LocalDate.now().minusWeeks(4),
+            ),
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 
@@ -63,8 +63,8 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
                 behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
-                tidsfrist = tidsfrist
-            )
+                tidsfrist = tidsfrist,
+            ),
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingBatch.automatiskGjenopptaBehandling() }
 

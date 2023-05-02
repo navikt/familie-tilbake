@@ -25,7 +25,7 @@ class VarselbrevService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val pdfBrevService: PdfBrevService,
-    private val varselbrevUtil: VarselbrevUtil
+    private val varselbrevUtil: VarselbrevUtil,
 ) {
 
     fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager) {
@@ -38,7 +38,7 @@ class VarselbrevService(
         val vedlegg = varselbrevUtil.lagVedlegg(
             varselbrevsdokument,
             behandling.aktivFagsystemsbehandling.eksternId,
-            varselbrevsdokument.beløp
+            varselbrevsdokument.beløp,
         )
 
         pdfBrevService.sendBrev(
@@ -50,17 +50,17 @@ class VarselbrevService(
                 metadata = varselbrevsdokument.brevmetadata,
                 overskrift = overskrift,
                 brevtekst = brevtekst,
-                vedleggHtml = vedlegg
+                vedleggHtml = vedlegg,
             ),
             varsletFeilutbetaling,
-            fritekst
+            fritekst,
         )
     }
 
     private fun lagVarselbrevForSending(
         behandling: Behandling,
         fagsak: Fagsak,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Varselbrevsdokument {
         val verge = behandling.aktivVerge
 
@@ -77,7 +77,7 @@ class VarselbrevService(
             adresseinfo,
             personinfo,
             behandling.aktivtVarsel,
-            vergenavn
+            vergenavn,
         )
     }
 
@@ -88,13 +88,13 @@ class VarselbrevService(
         val data = Fritekstbrevsdata(
             overskrift = overskrift,
             brevtekst = brevtekst,
-            brevmetadata = varselbrevsdokument.brevmetadata
+            brevmetadata = varselbrevsdokument.brevmetadata,
         )
         val brevmottager = utledBrevmottager(forhåndsvisVarselbrevRequest)
         val vedlegg = varselbrevUtil.lagVedlegg(
             varselbrevsdokument,
             forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
-            varselbrevsdokument.beløp
+            varselbrevsdokument.beløp,
         )
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
@@ -102,8 +102,8 @@ class VarselbrevService(
                 metadata = data.brevmetadata,
                 overskrift = data.overskrift,
                 brevtekst = data.brevtekst,
-                vedleggHtml = vedlegg
-            )
+                vedleggHtml = vedlegg,
+            ),
         )
     }
 
@@ -114,13 +114,13 @@ class VarselbrevService(
             personinfo,
             brevmottager,
             request.verge,
-            request.fagsystem
+            request.fagsystem,
         )
 
         return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(
             adresseinfo,
             request,
-            personinfo
+            personinfo,
         )
     }
 

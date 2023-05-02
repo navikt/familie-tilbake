@@ -26,7 +26,7 @@ import java.util.Properties
 class HåndterGamleKravgrunnlagBatch(
     private val mottattXmlService: ØkonomiXmlMottattService,
     private val taskService: TaskService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -35,9 +35,9 @@ class HåndterGamleKravgrunnlagBatch(
     @Transactional
     fun utfør() {
         if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
-            it.contains("local") ||
-                it.contains("integrasjonstest")
-        }
+                it.contains("local") ||
+                    it.contains("integrasjonstest")
+            }
         ) {
             return
         }
@@ -49,22 +49,22 @@ class HåndterGamleKravgrunnlagBatch(
             beregnBestemtDato(BARNETILSYN),
             beregnBestemtDato(OVERGANGSSTØNAD),
             beregnBestemtDato(SKOLEPENGER),
-            beregnBestemtDato(KONTANTSTØTTE)
+            beregnBestemtDato(KONTANTSTØTTE),
         )
 
         if (mottattXmlIdsMedYtelse.isNotEmpty()) {
             logger.info(
                 "Det finnes ${mottattXmlIdsMedYtelse.size} kravgrunnlag som er eldre enn " +
-                    "$ALDERSGRENSE_I_UKER uker fra dagens dato"
+                    "$ALDERSGRENSE_I_UKER uker fra dagens dato",
             )
 
             val alleFeiledeTasker = taskService.finnTasksMedStatus(
                 listOf(
                     Status.FEILET,
                     Status.KLAR_TIL_PLUKK,
-                    Status.MANUELL_OPPFØLGING
+                    Status.MANUELL_OPPFØLGING,
                 ),
-                Pageable.unpaged()
+                Pageable.unpaged(),
             )
             mottattXmlIdsMedYtelse.forEach { mottattXmlIdOgYtelse ->
                 val finnesTask = alleFeiledeTasker.any {
@@ -80,16 +80,16 @@ class HåndterGamleKravgrunnlagBatch(
                             properties = Properties().apply {
                                 setProperty(
                                     PropertyName.FAGSYSTEM,
-                                    fagsystem.name
+                                    fagsystem.name,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
                 } else {
                     logger.info(
                         "Det finnes allerede en feilet HåndterGammelKravgrunnlagTask " +
                             "eller HentFagsystemsbehandlingTask " +
-                            "på det samme kravgrunnlaget med id ${mottattXmlIdOgYtelse.id}"
+                            "på det samme kravgrunnlaget med id ${mottattXmlIdOgYtelse.id}",
                     )
                 }
             }
@@ -110,7 +110,7 @@ class HåndterGamleKravgrunnlagBatch(
             BARNETILSYN to 8,
             OVERGANGSSTØNAD to 8,
             SKOLEPENGER to 8,
-            KONTANTSTØTTE to 8
+            KONTANTSTØTTE to 8,
         )
     }
 }

@@ -7,7 +7,7 @@ object HendelsesundertypePerHendelsestype {
         Hendelsestype.SATSER to setOf(Hendelsesundertype.SATSENDRING),
         Hendelsestype.SMÅBARNSTILLEGG to setOf(
             Hendelsesundertype.SMÅBARNSTILLEGG_3_ÅR,
-            Hendelsesundertype.SMÅBARNSTILLEGG_OVERGANGSSTØNAD
+            Hendelsesundertype.SMÅBARNSTILLEGG_OVERGANGSSTØNAD,
         ),
         Hendelsestype.BOR_MED_SØKER to setOf(Hendelsesundertype.BOR_IKKE_MED_BARN),
         Hendelsestype.BOSATT_I_RIKET to setOf(
@@ -16,25 +16,25 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.BARN_BOR_IKKE_I_NORGE,
             Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE,
             Hendelsesundertype.BRUKER_OG_BARN_FLYTTET_FRA_NORGE,
-            Hendelsesundertype.BRUKER_OG_BARN_BOR_IKKE_I_NORGE
+            Hendelsesundertype.BRUKER_OG_BARN_BOR_IKKE_I_NORGE,
         ),
         Hendelsestype.LOVLIG_OPPHOLD to setOf(Hendelsesundertype.UTEN_OPPHOLDSTILLATELSE),
         Hendelsestype.DØDSFALL to setOf(
             Hendelsesundertype.BARN_DØD,
-            Hendelsesundertype.BRUKER_DØD
+            Hendelsesundertype.BRUKER_DØD,
         ),
         Hendelsestype.DELT_BOSTED to setOf(
             Hendelsesundertype.ENIGHET_OM_OPPHØR_DELT_BOSTED,
             Hendelsesundertype.UENIGHET_OM_OPPHØR_DELT_BOSTED,
-            Hendelsesundertype.FLYTTET_SAMMEN
+            Hendelsesundertype.FLYTTET_SAMMEN,
         ),
         Hendelsestype.BARNS_ALDER to setOf(
             Hendelsesundertype.BARN_OVER_6_ÅR,
-            Hendelsesundertype.BARN_OVER_18_ÅR
+            Hendelsesundertype.BARN_OVER_18_ÅR,
         ),
         Hendelsestype.MEDLEMSKAP to setOf(
             Hendelsesundertype.MEDLEM_SISTE_5_ÅR,
-            Hendelsesundertype.LOVLIG_OPPHOLD
+            Hendelsesundertype.LOVLIG_OPPHOLD,
         ),
         Hendelsestype.MEDLEMSKAP_BA to setOf(
             Hendelsesundertype.UTENLANDS_IKKE_MEDLEM,
@@ -42,7 +42,7 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.ANNEN_FORELDER_IKKE_MEDLEM,
             Hendelsesundertype.ANNEN_FORELDER_OPPHØRT_MEDLEMSKAP,
             Hendelsesundertype.FLERE_UTENLANDSOPPHOLD,
-            Hendelsesundertype.BOSATT_IKKE_MEDLEM
+            Hendelsesundertype.BOSATT_IKKE_MEDLEM,
         ),
         Hendelsestype.UTVIDET to setOf(
             Hendelsesundertype.GIFT,
@@ -56,14 +56,14 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.EKTEFELLE_AVSLUTTET_SONING,
             Hendelsesundertype.SAMBOER_AVSLUTTET_SONING,
             Hendelsesundertype.EKTEFELLE_INSTITUSJON,
-            Hendelsesundertype.SAMBOER_INSTITUSJON
+            Hendelsesundertype.SAMBOER_INSTITUSJON,
         ),
         Hendelsestype.OPPHOLD_I_NORGE to setOf(
             Hendelsesundertype.BRUKER_IKKE_OPPHOLD_I_NORGE,
             Hendelsesundertype.BARN_IKKE_OPPHOLD_I_NORGE,
             Hendelsesundertype.BRUKER_FLYTTET_FRA_NORGE,
             Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
-            Hendelsesundertype.OPPHOLD_UTLAND_6_UKER_ELLER_MER
+            Hendelsesundertype.OPPHOLD_UTLAND_6_UKER_ELLER_MER,
         ),
         Hendelsestype.ENSLIG_FORSØRGER to setOf(
             Hendelsesundertype.UGIFT,
@@ -73,7 +73,7 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.ENDRET_SAMVÆRSORDNING,
             Hendelsesundertype.BARN_FLYTTET,
             Hendelsesundertype.NÆRE_BOFORHOLD,
-            Hendelsesundertype.FORELDRE_LEVER_SAMMEN
+            Hendelsesundertype.FORELDRE_LEVER_SAMMEN,
         ),
         Hendelsestype.OVERGANGSSTØNAD to setOf(Hendelsesundertype.BARN_8_ÅR),
         Hendelsestype.YRKESRETTET_AKTIVITET to setOf(
@@ -81,7 +81,7 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.REELL_ARBEIDSSØKER,
             Hendelsesundertype.UTDANNING,
             Hendelsesundertype.ETABLERER_EGEN_VIRKSOMHET,
-            Hendelsesundertype.BARN_FYLT_1_ÅR
+            Hendelsesundertype.BARN_FYLT_1_ÅR,
 
         ),
         Hendelsestype.STØNADSPERIODE to setOf(
@@ -95,18 +95,18 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.PÅVENTE_ARBEIDSTILBUD_STARTET_TIDLIGERE,
             Hendelsesundertype.PÅVENTE_BARNETILSYN_IKKE_HA_TILSYN,
             Hendelsesundertype.PÅVENTE_BARNETILSYN_STARTET_TIDLIGERE,
-            Hendelsesundertype.ARBEIDSSØKER
+            Hendelsesundertype.ARBEIDSSØKER,
         ),
         Hendelsestype.INNTEKT to setOf(
             Hendelsesundertype.ARBEIDSINNTEKT_FÅTT_INNTEKT,
             Hendelsesundertype.ARBEIDSINNTEKT_ENDRET_INNTEKT,
             Hendelsesundertype.ANDRE_FOLKETRYGDYTELSER,
             Hendelsesundertype.SELVSTENDIG_NÆRINGSDRIVENDE_FÅTT_INNTEKT,
-            Hendelsesundertype.SELVSTENDIG_NÆRINGSDRIVENDE_ENDRET_INNTEKT
+            Hendelsesundertype.SELVSTENDIG_NÆRINGSDRIVENDE_ENDRET_INNTEKT,
         ),
         Hendelsestype.PENSJONSYTELSER to setOf(
             Hendelsesundertype.UFØRETRYGD,
-            Hendelsesundertype.GJENLEVENDE_EKTEFELLE
+            Hendelsesundertype.GJENLEVENDE_EKTEFELLE,
         ),
         Hendelsestype.STØNAD_TIL_BARNETILSYN to setOf(
             Hendelsesundertype.IKKE_ARBEID,
@@ -118,12 +118,12 @@ object HendelsesundertypePerHendelsestype {
             Hendelsesundertype.ETTER_4_SKOLEÅR_ENDRET_ARBEIDSTID,
             Hendelsesundertype.INNTEKT_OVER_6G,
             Hendelsesundertype.KONTANTSTØTTE,
-            Hendelsesundertype.ØKT_KONTANTSTØTTE
+            Hendelsesundertype.ØKT_KONTANTSTØTTE,
         ),
         Hendelsestype.SKOLEPENGER to setOf(
             Hendelsesundertype.IKKE_RETT_TIL_OVERGANGSSTØNAD,
-            Hendelsesundertype.SLUTTET_I_UTDANNING
-        )
+            Hendelsesundertype.SLUTTET_I_UTDANNING,
+        ),
     )
 
     fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> {

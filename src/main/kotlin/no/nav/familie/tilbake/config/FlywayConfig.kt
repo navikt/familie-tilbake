@@ -15,7 +15,7 @@ data class FlywayConfig(private val role: String) {
     @Bean
     fun flywayConfig(
         @Value("\${spring.flyway.placeholders.ignoreIfProd}") ignoreIfProd: String,
-        environment: Environment
+        environment: Environment,
     ): FlywayConfigurationCustomizer {
         logger.info("DB-oppdateringer kjøres med rolle $role")
         val isProd = environment.activeProfiles.contains("prod")

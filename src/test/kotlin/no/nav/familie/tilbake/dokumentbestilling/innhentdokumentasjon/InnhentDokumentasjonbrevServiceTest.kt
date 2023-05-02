@@ -39,7 +39,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             behandlingRepository,
             mockEksterneDataForBrevService,
             pdfBrevService,
-            organisasjonService
+            organisasjonService,
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
@@ -55,7 +55,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
         val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
             Testdata.behandling.id,
-            flereOpplysninger
+            flereOpplysninger,
         )
 
         PdfaValidator.validatePdf(data)

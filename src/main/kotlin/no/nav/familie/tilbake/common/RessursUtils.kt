@@ -33,7 +33,7 @@ object RessursUtils {
     private fun <T> errorResponse(
         httpStatus: HttpStatus,
         errorMessage: String,
-        throwable: Throwable?
+        throwable: Throwable?,
     ): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 

@@ -22,7 +22,7 @@ class Vergessteg(
     private val behandlingRepository: BehandlingRepository,
     private val vergeService: VergeService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -36,8 +36,8 @@ class Vergessteg(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.VERGE,
-                    AUTOUTFØRT
-                )
+                    AUTOUTFØRT,
+                ),
             )
         }
         behandlingskontrollService.fortsettBehandling(behandlingId)
@@ -52,7 +52,7 @@ class Vergessteg(
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
-            Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT)
+            Behandlingsstegsinfo(Behandlingssteg.VERGE, UTFØRT),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -64,8 +64,8 @@ class Vergessteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.VERGE,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 

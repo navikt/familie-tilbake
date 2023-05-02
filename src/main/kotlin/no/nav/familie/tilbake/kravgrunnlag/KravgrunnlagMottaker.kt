@@ -35,8 +35,8 @@ class KravgrunnlagMottaker(private val taskService: TaskService) {
                     payload = meldingFraOppdrag,
                     properties = Properties().apply {
                         this["callId"] = UUID.randomUUID()
-                    }
-                )
+                    },
+                ),
             )
         } else {
             taskService.save(
@@ -45,8 +45,8 @@ class KravgrunnlagMottaker(private val taskService: TaskService) {
                     payload = meldingFraOppdrag,
                     properties = Properties().apply {
                         this["callId"] = UUID.randomUUID()
-                    }
-                )
+                    },
+                ),
             )
         }
     }

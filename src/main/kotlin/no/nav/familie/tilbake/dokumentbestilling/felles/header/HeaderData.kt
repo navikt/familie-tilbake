@@ -7,5 +7,5 @@ class HeaderData(
     override val språkkode: Språkkode,
     val person: Person,
     val brev: Brev,
-    val institusjon: Institusjon? = null
+    val institusjon: Institusjon? = null,
 ) : Språkstøtte

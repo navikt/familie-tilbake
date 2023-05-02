@@ -7,5 +7,5 @@ data class Personinfo(
     val fødselsdato: LocalDate,
     val navn: String,
     val kjønn: Kjønn = Kjønn.UKJENT,
-    val dødsdato: LocalDate? = null
+    val dødsdato: LocalDate? = null,
 )

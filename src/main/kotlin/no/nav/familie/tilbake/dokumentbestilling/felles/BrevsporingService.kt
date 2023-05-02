@@ -12,13 +12,13 @@ class BrevsporingService(private val brevsporingRepository: BrevsporingRepositor
         behandlingId: UUID,
         dokumentId: String,
         journalpostId: String,
-        brevtype: Brevtype
+        brevtype: Brevtype,
     ) {
         val brevSporing = Brevsporing(
             behandlingId = behandlingId,
             dokumentId = dokumentId,
             journalpostId = journalpostId,
-            brevtype = brevtype
+            brevtype = brevtype,
         )
         brevsporingRepository.insert(brevSporing)
     }
@@ -35,7 +35,7 @@ class BrevsporingService(private val brevsporingRepository: BrevsporingRepositor
     fun erVarselSendt(behandlingId: UUID): Boolean {
         return brevsporingRepository.existsByBehandlingIdAndBrevtypeIn(
             behandlingId,
-            setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL)
+            setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL),
         )
     }
 }

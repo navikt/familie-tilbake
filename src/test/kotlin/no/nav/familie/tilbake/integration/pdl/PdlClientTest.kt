@@ -53,7 +53,7 @@ class PdlClientTest {
     fun `hentPersoninfo skal hente person info for barnetrygd med ok respons fra PDL`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlOkResponseEnkel.json")))
+                .willReturn(okJson(readFile("pdlOkResponseEnkel.json"))),
         )
 
         val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
@@ -69,7 +69,7 @@ class PdlClientTest {
     fun `hentPersoninfo skal hente info for en død person`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlOkResponseDødPerson.json")))
+                .willReturn(okJson(readFile("pdlOkResponseDødPerson.json"))),
         )
 
         val respons = pdlClient.hentPersoninfo("11111122222", Fagsystem.BA)
@@ -85,12 +85,12 @@ class PdlClientTest {
     fun `hentPersoninfo skal ikke hente person info når person ikke finnes`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json")))
+                .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))),
         )
 
         val exception = shouldThrow<RuntimeException>(
             block =
-            { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) }
+            { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) },
         )
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }

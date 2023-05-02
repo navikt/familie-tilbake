@@ -31,7 +31,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
@@ -40,12 +40,12 @@ class VedtakHjemmelTest {
 
     private fun lagVedtaksbrevgrunnlag(
         vurdertForeldelse: VurdertForeldelse?,
-        vurderingPerioder: Set<Vilkårsvurderingsperiode>
+        vurderingPerioder: Set<Vilkårsvurderingsperiode>,
     ): Vedtaksbrevgrunnlag {
         val behandling = Testdata.vedtaksbrevbehandling
             .copy(
                 vurderteForeldelser = vurdertForeldelse?.let { setOf(it) } ?: setOf(),
-                vilkårsvurdering = setOf(Testdata.vilkårsvurdering.copy(perioder = vurderingPerioder))
+                vilkårsvurdering = setOf(Testdata.vilkårsvurdering.copy(perioder = vurderingPerioder)),
             )
         return Testdata.vedtaksbrevgrunnlag.copy(behandlinger = setOf(behandling), ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
     }
@@ -60,7 +60,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NN,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15"
@@ -79,7 +79,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
@@ -99,7 +99,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
@@ -119,7 +119,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = false,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
@@ -138,7 +138,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 sjette ledd"
@@ -157,7 +157,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NN,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdlova § 22-15 sjette ledd"
@@ -169,7 +169,7 @@ class VedtakHjemmelTest {
         val vurdertForeldelse = lagForeldelseperiode(periode) {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
-                foreldelsesfrist = periode.fom.plusMonths(11).atDay(1)
+                foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
             )
         }
 
@@ -179,7 +179,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "foreldelsesloven §§ 2 og 3"
@@ -191,7 +191,7 @@ class VedtakHjemmelTest {
         val vurdertForeldelse: VurdertForeldelse = lagForeldelseperiode(periode) {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
-                foreldelsesfrist = periode.fom.plusMonths(11).atDay(1)
+                foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
             )
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
@@ -204,7 +204,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2 og 3"
@@ -226,7 +226,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a"
@@ -239,7 +239,7 @@ class VedtakHjemmelTest {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                 foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
-                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1)
+                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1),
             )
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
@@ -252,7 +252,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og foreldelsesloven §§ 2, 3 og 10"
@@ -265,7 +265,7 @@ class VedtakHjemmelTest {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                 foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
-                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1)
+                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1),
             )
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
@@ -276,12 +276,12 @@ class VedtakHjemmelTest {
             Vedtaksresultat.INGEN_TILBAKEBETALING,
             lagVedtaksbrevgrunnlag(
                 vurdertForeldelse,
-                vurderingPerioder
+                vurderingPerioder,
             ),
             VedtakHjemmel.EffektForBruker.FØRSTEGANGSVEDTAK,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10"
@@ -298,7 +298,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15 og forvaltningsloven § 35 c)"
@@ -311,7 +311,7 @@ class VedtakHjemmelTest {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                 foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
-                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1)
+                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1),
             )
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
@@ -324,7 +324,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = false
+            klagebehandling = false,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a, " +
@@ -342,7 +342,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.ENDRET_TIL_UGUNST_FOR_BRUKER,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = true
+            klagebehandling = true,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven § 22-15"
@@ -355,7 +355,7 @@ class VedtakHjemmelTest {
             it.copy(
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
                 foreldelsesfrist = periode.fom.plusMonths(11).atDay(1),
-                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1)
+                oppdagelsesdato = periode.fom.plusMonths(5).atDay(1),
             )
         }
         val vurderingPerioder: Set<Vilkårsvurderingsperiode> = aktsomhet(periode) {
@@ -368,7 +368,7 @@ class VedtakHjemmelTest {
             VedtakHjemmel.EffektForBruker.ENDRET_TIL_GUNST_FOR_BRUKER,
             Språkkode.NB,
             visHjemmelForRenter = true,
-            klagebehandling = true
+            klagebehandling = true,
         )
 
         hbHjemmel.lovhjemmelVedtak shouldBe "folketrygdloven §§ 22-15 og 22-17 a og foreldelsesloven §§ 2, 3 og 10"
@@ -377,22 +377,22 @@ class VedtakHjemmelTest {
 
     private fun lagForeldelseperiode(
         periode: Månedsperiode,
-        oppsett: (Foreldelsesperiode) -> Foreldelsesperiode
+        oppsett: (Foreldelsesperiode) -> Foreldelsesperiode,
     ): VurdertForeldelse {
         val periodeBuilder = Foreldelsesperiode(
             periode = periode,
             foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
-            begrunnelse = "bob"
+            begrunnelse = "bob",
         )
         return VurdertForeldelse(
             behandlingId = UUID.randomUUID(),
-            foreldelsesperioder = setOf(oppsett(periodeBuilder))
+            foreldelsesperioder = setOf(oppsett(periodeBuilder)),
         )
     }
 
     private fun aktsomhet(
         periode: Månedsperiode,
-        oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet
+        oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet,
     ): Set<Vilkårsvurderingsperiode> {
         return aktsomhet(Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT, periode, oppsett)
     }
@@ -400,7 +400,7 @@ class VedtakHjemmelTest {
     private fun aktsomhet(
         resultat: Vilkårsvurderingsresultat,
         periode: Månedsperiode,
-        oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet
+        oppsett: (VilkårsvurderingAktsomhet) -> VilkårsvurderingAktsomhet,
     ): Set<Vilkårsvurderingsperiode> {
         val aktsomhet: VilkårsvurderingAktsomhet =
             oppsett(VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET, begrunnelse = "foo"))
@@ -408,7 +408,7 @@ class VedtakHjemmelTest {
             periode = periode,
             vilkårsvurderingsresultat = resultat,
             begrunnelse = "foo",
-            aktsomhet = aktsomhet
+            aktsomhet = aktsomhet,
         )
 
         return setOf(vurderingPeriode.copy(aktsomhet = aktsomhet))

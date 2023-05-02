@@ -76,7 +76,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             behandlingsstegstilstandRepository,
             fagsakRepository,
             taskService,
-            faktaFeilutbetalingService
+            faktaFeilutbetalingService,
         )
 
         fagsakRepository.insert(Testdata.fagsak)
@@ -88,8 +88,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(
             lagOpprettTilbakekrevingRequest(
                 true,
-                OPPRETT_TILBAKEKREVING_MED_VARSEL
-            )
+                OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            ),
         )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
@@ -122,8 +122,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(
             lagOpprettTilbakekrevingRequest(
                 false,
-                OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-            )
+                OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            ),
         )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
@@ -155,7 +155,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             behandlendeEnhetsNavn = "foo bar",
             ansvarligSaksbehandler = "Z111111",
             ansvarligBeslutter = "Z111112",
-            resultater = setOf(behandlingsresultat)
+            resultater = setOf(behandlingsresultat),
         )
         behandlingRepository.update(fattetBehandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand.copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
@@ -194,8 +194,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             behandling.id,
             BehandlingPåVentDto(
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusDays(1)
-            )
+                LocalDate.now().plusDays(1),
+            ),
         )
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
@@ -212,7 +212,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.venterPåØkonomi shouldBe false
         tilstand.funksjoneltTidspunkt.shouldBeBetween(
             OffsetDateTime.now().minusMinutes(1),
-            OffsetDateTime.now().plusSeconds(1)
+            OffsetDateTime.now().plusSeconds(1),
         )
 
         tilstand.totalFeilutbetaltBeløp shouldBe BigDecimal("10000.00")
@@ -225,7 +225,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagOpprettTilbakekrevingRequest(
         finnesVarsel: Boolean,
-        tilbakekrevingsvalg: Tilbakekrevingsvalg
+        tilbakekrevingsvalg: Tilbakekrevingsvalg,
     ): OpprettTilbakekrevingRequest {
         val fom = YearMonth.now().minusMonths(1).atDay(1)
         val tom = YearMonth.now().atEndOfMonth()
@@ -234,7 +234,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             Varsel(
                 varseltekst = "testverdi",
                 sumFeilutbetaling = BigDecimal.valueOf(1500L),
-                perioder = listOf(Periode(fom, tom))
+                perioder = listOf(Periode(fom, tom)),
             )
         } else {
             null
@@ -243,7 +243,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val faktainfo = Faktainfo(
             revurderingsårsak = "testverdi",
             revurderingsresultat = "testresultat",
-            tilbakekrevingsvalg = tilbakekrevingsvalg
+            tilbakekrevingsvalg = tilbakekrevingsvalg,
         )
 
         return OpprettTilbakekrevingRequest(
@@ -259,7 +259,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             varsel = varsel,
             revurderingsvedtaksdato = fom,
             faktainfo = faktainfo,
-            saksbehandlerIdent = "Z0000"
+            saksbehandlerIdent = "Z0000",
         )
     }
 }

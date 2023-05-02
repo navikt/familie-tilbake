@@ -25,7 +25,7 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
         lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
             økonomiXmlMottattArkiv,
             ØkonomiXmlMottattArkiv::sporbar,
-            ØkonomiXmlMottattArkiv::versjon
+            ØkonomiXmlMottattArkiv::versjon,
         )
         lagretØkonomiXmlMottattArkiv.versjon shouldBe 1
     }
@@ -42,7 +42,7 @@ internal class ØkonomiXmlMottattArkivRepositoryTest : OppslagSpringRunnerTest()
         lagretØkonomiXmlMottattArkiv.shouldBeEqualToComparingFieldsExcept(
             oppdatertØkonomiXmlMottattArkiv,
             ØkonomiXmlMottattArkiv::sporbar,
-            ØkonomiXmlMottattArkiv::versjon
+            ØkonomiXmlMottattArkiv::versjon,
         )
         lagretØkonomiXmlMottattArkiv.versjon shouldBe 2
     }

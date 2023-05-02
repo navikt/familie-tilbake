@@ -16,12 +16,12 @@ import java.util.UUID
     taskStepType = OppdaterOppgaveTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Oppdaterer oppgave",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class OppdaterOppgaveTask(
     private val oppgaveService: OppgaveService,
     val environment: Environment,
-    private val oppgavePrioritetService: OppgavePrioritetService
+    private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -45,7 +45,7 @@ class OppdaterOppgaveTask(
         var patchetOppgave = oppgave.copy(
             fristFerdigstillelse = frist,
             beskrivelse = nyBeskrivelse,
-            prioritet = prioritet
+            prioritet = prioritet,
         )
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)

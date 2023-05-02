@@ -25,7 +25,7 @@ import java.time.LocalDate
 @Service
 class PdlClient(
     private val pdlConfig: PdlConfig,
-    @Qualifier("azureClientCredential") restTemplate: RestOperations
+    @Qualifier("azureClientCredential") restTemplate: RestOperations,
 ) :
     AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
@@ -34,12 +34,12 @@ class PdlClient(
     fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(ident),
-            query = PdlConfig.hentEnkelPersonQuery
+            query = PdlConfig.hentEnkelPersonQuery,
         )
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(fagsystem),
         )
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
@@ -49,7 +49,7 @@ class PdlClient(
                     fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                     navn = it.navn.first().fulltNavn(),
                     kjønn = it.kjønn.first().kjønn,
-                    dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) }
+                    dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) },
                 )
             }
         } else {
@@ -57,7 +57,7 @@ class PdlClient(
             throw Feil(
                 message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                 frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             )
         }
     }
@@ -65,19 +65,19 @@ class PdlClient(
     fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(personIdent),
-            query = PdlConfig.hentIdenterQuery
+            query = PdlConfig.hentIdenterQuery,
         )
         val response = postForEntity<PdlHentIdenterResponse>(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(fagsystem),
         )
 
         if (!response.harFeil()) return response
         throw Feil(
             message = "Feil mot pdl: ${response.errorMessages()}",
             frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-            httpStatus = HttpStatus.NOT_FOUND
+            httpStatus = HttpStatus.NOT_FOUND,
         )
     }
 

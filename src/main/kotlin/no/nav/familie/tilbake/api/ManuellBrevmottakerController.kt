@@ -34,18 +34,18 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
     @PostMapping(
         path = ["/{behandlingId}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.SAKSBEHANDLER,
         "Legger til brevmottaker manuelt",
         AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun leggTilBrevmottaker(
         @PathVariable behandlingId: UUID,
         @Valid @RequestBody
-        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
+        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<UUID> {
         val id = manuellBrevmottakerService.leggTilBrevmottaker(behandlingId, manuellBrevmottakerRequestDto)
         return Ressurs.success(id, melding = "Manuell brevmottaker er lagt til.")
@@ -54,19 +54,19 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
     @Operation(summary = "Henter manuell brevmottakere")
     @GetMapping(
         path = ["/{behandlingId}"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         handling = "Henter manuelle brevmottakere",
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.BEHANDLING_ID
+        henteParam = HenteParam.BEHANDLING_ID,
     )
     fun hentManuellBrevmottakere(@PathVariable behandlingId: UUID): Ressurs<List<ManuellBrevmottakerResponsDto>> {
         return Ressurs
             .success(
                 manuellBrevmottakerService.hentBrevmottakere(behandlingId)
-                    .map { ManuellBrevmottakerMapper.tilRespons(it) }
+                    .map { ManuellBrevmottakerMapper.tilRespons(it) },
             )
     }
 
@@ -74,13 +74,13 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
     @PutMapping(
         path = ["/{behandlingId}/{manuellBrevmottakerId}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppdaterer manuell brevmottaker", AuditLoggerEvent.UPDATE)
     fun oppdaterManuellBrevmottaker(
         @PathVariable manuellBrevmottakerId: UUID,
         @Valid @RequestBody
-        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
+        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ): Ressurs<String> {
         manuellBrevmottakerService.oppdaterBrevmottaker(manuellBrevmottakerId, manuellBrevmottakerRequestDto)
         return Ressurs.success("", melding = "Manuell brevmottaker er oppdatert")
@@ -91,11 +91,11 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
     @Rolletilgangssjekk(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         handling = "Fjerner manuell brevmottaker",
-        auditLoggerEvent = AuditLoggerEvent.UPDATE
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
     )
     fun fjernManuellBrevmottaker(
         @PathVariable behandlingId: UUID,
-        @PathVariable manuellBrevmottakerId: UUID
+        @PathVariable manuellBrevmottakerId: UUID,
     ): Ressurs<String> {
         manuellBrevmottakerService.fjernBrevmottaker(behandlingId, manuellBrevmottakerId)
         return Ressurs.success("", melding = "Manuell brevmottaker er fjernet")
@@ -107,7 +107,7 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         Behandlerrolle.SAKSBEHANDLER,
         "Oppretter brevmottaker-steg på behandling",
         AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun opprettBrevmottakerSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         manuellBrevmottakerService.opprettBrevmottakerSteg(behandlingId)
@@ -120,7 +120,7 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         Behandlerrolle.SAKSBEHANDLER,
         "Fjern ev. manuelt registrerte brevmottakere og deaktiver steg.",
         AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun fjernBrevmottakerSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         manuellBrevmottakerService.fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId)

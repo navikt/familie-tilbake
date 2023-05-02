@@ -28,7 +28,7 @@ class InnhentDokumentasjonbrevService(
     private val behandlingRepository: BehandlingRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -39,20 +39,20 @@ class InnhentDokumentasjonbrevService(
             mottager = brevmottager,
             metadata = fritekstbrevsdata.brevmetadata,
             overskrift = fritekstbrevsdata.overskrift,
-            brevtekst = fritekstbrevsdata.brevtekst
+            brevtekst = fritekstbrevsdata.brevtekst,
         )
         pdfBrevService.sendBrev(
             behandling = behandling,
             fagsak = fagsak,
             brevtype = Brevtype.INNHENT_DOKUMENTASJON,
             data = brevdata,
-            fritekst = fritekst
+            fritekst = fritekst,
         )
     }
 
     fun hentForhåndsvisningInnhentDokumentasjonBrev(
         behandlingId: UUID,
-        fritekst: String
+        fritekst: String,
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -65,8 +65,8 @@ class InnhentDokumentasjonbrevService(
                 mottager = brevmottager,
                 metadata = fritekstbrevsdata.brevmetadata,
                 overskrift = fritekstbrevsdata.overskrift,
-                brevtekst = fritekstbrevsdata.brevtekst
-            )
+                brevtekst = fritekstbrevsdata.brevtekst,
+            ),
         )
     }
 
@@ -77,7 +77,7 @@ class InnhentDokumentasjonbrevService(
         return Fritekstbrevsdata(
             overskrift = overskrift,
             brevtekst = brevtekst,
-            brevmetadata = dokument.brevmetadata
+            brevmetadata = dokument.brevmetadata,
         )
     }
 
@@ -85,7 +85,7 @@ class InnhentDokumentasjonbrevService(
         behandling: Behandling,
         fagsak: Fagsak,
         fritekst: String,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): InnhentDokumentasjonsbrevsdokument {
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
         val adresseinfo: Adresseinfo =
@@ -111,12 +111,12 @@ class InnhentDokumentasjonbrevService(
             gjelderDødsfall = gjelderDødsfall,
             institusjon = fagsak.institusjon?.let {
                 organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            }
+            },
         )
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata,
             fristdato = Constants.brukersSvarfrist(),
-            fritekstFraSaksbehandler = fritekst
+            fritekstFraSaksbehandler = fritekst,
         )
     }
 

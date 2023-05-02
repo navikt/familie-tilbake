@@ -20,7 +20,7 @@ import java.util.UUID
 class ForeldelseService(
     private val foreldelseRepository: VurdertForeldelseRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
 
     fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelseDto {
@@ -60,7 +60,7 @@ class ForeldelseService(
             ForeldelsesperiodeDto(
                 periode = it.periode,
                 begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET
+                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
             )
         }
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId, foreldetPerioder))

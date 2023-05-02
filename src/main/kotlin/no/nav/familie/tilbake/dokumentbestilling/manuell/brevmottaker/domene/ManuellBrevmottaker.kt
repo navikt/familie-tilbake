@@ -29,7 +29,7 @@ data class ManuellBrevmottaker(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
     override fun toString(): String = "${javaClass.simpleName}(id=$id,behandlingId=$behandlingId)"
 

@@ -40,7 +40,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
             vurdertForeldelse,
             VurdertForeldelse::sporbar,
-            VurdertForeldelse::versjon
+            VurdertForeldelse::versjon,
         )
         lagretVurdertForeldelse.versjon shouldBe 1
     }
@@ -57,7 +57,7 @@ internal class VurdertForeldelseRepositoryTest : OppslagSpringRunnerTest() {
         lagretVurdertForeldelse.shouldBeEqualToComparingFieldsExcept(
             oppdatertVurdertForeldelse,
             VurdertForeldelse::sporbar,
-            VurdertForeldelse::versjon
+            VurdertForeldelse::versjon,
         )
         lagretVurdertForeldelse.versjon shouldBe 2
     }

@@ -24,5 +24,5 @@ class RolleConfig(
     @Value("\${rolle.kontantstøtte.veileder}")
     val veilederRolleKontantStøtte: String,
     @Value("\${rolle.teamfamilie.forvalter}")
-    val forvalterRolleTeamfamilie: String
+    val forvalterRolleTeamfamilie: String,
 )

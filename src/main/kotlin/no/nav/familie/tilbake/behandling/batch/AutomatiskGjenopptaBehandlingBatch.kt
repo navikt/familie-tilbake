@@ -20,7 +20,7 @@ class AutomatiskGjenopptaBehandlingBatch(
     private val fagsakRepository: FagsakRepository,
     private val automatiskGjenopptaBehandlingService: AutomatiskGjenopptaBehandlingService,
     private val taskService: TaskService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -29,8 +29,8 @@ class AutomatiskGjenopptaBehandlingBatch(
     @Transactional
     fun automatiskGjenopptaBehandling() {
         if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
-            it.contains("local") || it.contains("integrasjonstest")
-        }
+                it.contains("local") || it.contains("integrasjonstest")
+            }
         ) {
             return
         }
@@ -43,7 +43,7 @@ class AutomatiskGjenopptaBehandlingBatch(
         if (behandlinger.isNotEmpty()) {
             val alleFeiledeTasker = taskService.finnTasksMedStatus(
                 listOf(Status.FEILET, Status.PLUKKET, Status.KLAR_TIL_PLUKK),
-                Pageable.unpaged()
+                Pageable.unpaged(),
             )
             behandlinger.forEach {
                 val finnesTask = alleFeiledeTasker.any { task ->
@@ -58,10 +58,10 @@ class AutomatiskGjenopptaBehandlingBatch(
                             properties = Properties().apply {
                                 setProperty(
                                     PropertyName.FAGSYSTEM,
-                                    fagsystem.name
+                                    fagsystem.name,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
                 } else {
                     logger.info("Det finnes allerede en feilet AutomatiskGjenopptaBehandlingTask for behandlingId=${it.id}")

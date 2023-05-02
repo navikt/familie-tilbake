@@ -68,7 +68,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         orgNr = "987654321",
         type = Vergetype.ADVOKAT,
         navn = "Stor Herlig Straff",
-        begrunnelse = "Det var nødvendig"
+        begrunnelse = "Det var nødvendig",
     )
 
     @BeforeEach
@@ -81,7 +81,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             historikkTaskService,
             behandlingskontrollService,
             integrasjonerClient,
-            personService
+            personService,
         )
         clearAllMocks(answers = false)
     }
@@ -122,7 +122,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             historikkTaskService.lagHistorikkTask(
                 behandling.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                Aktør.SAKSBEHANDLER
+                Aktør.SAKSBEHANDLER,
             )
         }
     }
@@ -143,7 +143,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             historikkTaskService,
             behandlingskontrollService,
             mockIntegrasjonerClient,
-            personService
+            personService,
         )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
@@ -170,7 +170,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             historikkTaskService,
             behandlingskontrollService,
             integrasjonerClient,
-            personService
+            personService,
         )
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
@@ -226,7 +226,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             historikkTaskService.lagHistorikkTask(
                 behandlingFørOppdatering.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                Aktør.SAKSBEHANDLER
+                Aktør.SAKSBEHANDLER,
             )
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
@@ -292,7 +292,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-            LocalDate.now().plusWeeks(4)
+            LocalDate.now().plusWeeks(4),
         )
 
         val exception = shouldThrow<RuntimeException> { vergeService.opprettVergeSteg(behandling.id) }
@@ -317,21 +317,21 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegstilstand(
         behandlingId: UUID,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
                 behandlingssteg = behandlingssteg,
-                behandlingsstegsstatus = behandlingsstegstatus
-            )
+                behandlingsstegsstatus = behandlingsstegstatus,
+            ),
         )
     }
 
     private fun assertBehandlingssteg(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&

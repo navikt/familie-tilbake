@@ -17,12 +17,12 @@ import java.util.UUID
     taskStepType = LagOppgaveTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Lager oppgave for nye behandlinger",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class LagOppgaveTask(
     private val oppgaveService: OppgaveService,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val oppgavePrioritetService: OppgavePrioritetService
+    private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -54,7 +54,7 @@ class LagOppgaveTask(
             beskrivelse,
             LocalDate.now().plusWeeks(fristeUker),
             saksbehandler,
-            prioritet
+            prioritet,
         )
     }
 

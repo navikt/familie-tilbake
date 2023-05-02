@@ -31,7 +31,7 @@ class OppdragMQConfig(
     @Value("\${oppdrag.mq.port}") val port: Int,
     @Value("\${CREDENTIAL_USERNAME}") val user: String,
     @Value("\${CREDENTIAL_PASSWORD}") val password: String,
-    val environment: Environment
+    val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(OppdragMQConfig::class.java)
@@ -68,7 +68,7 @@ class OppdragMQConfig(
     @Bean
     fun jmsListenerContainerFactory(
         @Qualifier("mqQueueConnectionFactory") connectionFactory: ConnectionFactory,
-        configurer: DefaultJmsListenerContainerFactoryConfigurer
+        configurer: DefaultJmsListenerContainerFactoryConfigurer,
     ): JmsListenerContainerFactory<*> {
         val factory = DefaultJmsListenerContainerFactory()
         configurer.configure(factory, connectionFactory)

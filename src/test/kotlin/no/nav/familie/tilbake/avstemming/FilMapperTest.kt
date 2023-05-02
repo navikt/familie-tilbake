@@ -37,9 +37,9 @@ class FilMapperTest {
                     tilbakekrevesNettoUtenRenter = BigDecimal.ZERO,
                     renter = BigDecimal.ZERO,
                     skatt = BigDecimal.ZERO,
-                    erOmgjøringTilIngenTilbakekreving = true
-                )
-            )
+                    erOmgjøringTilIngenTilbakekreving = true,
+                ),
+            ),
         )
         avstemmingsfil.tilFlatfil()
             .decodeToString() shouldBe FORVENTET_HEADER + "familie-tilbake;1234;12345678901;20191231;BA;0;0;0;0;Omgjoring0"
@@ -56,7 +56,7 @@ class FilMapperTest {
             tilbakekrevesNettoUtenRenter = BigDecimal.valueOf(800),
             skatt = BigDecimal.valueOf(200),
             renter = BigDecimal.valueOf(100),
-            erOmgjøringTilIngenTilbakekreving = false
+            erOmgjøringTilIngenTilbakekreving = false,
         )
     }
 

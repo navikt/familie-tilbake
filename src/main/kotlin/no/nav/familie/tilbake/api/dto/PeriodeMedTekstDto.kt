@@ -14,5 +14,5 @@ class PeriodeMedTekstDto(
     @Size(max = 4000, message = "Fritekst for særlige grunner er for lang")
     val særligeGrunnerAvsnitt: String? = null,
     @Size(max = 4000, message = "Fritekst for særlige grunner annet er for lang")
-    val særligeGrunnerAnnetAvsnitt: String? = null
+    val særligeGrunnerAnnetAvsnitt: String? = null,
 )

@@ -19,7 +19,7 @@ import java.util.UUID
 class FaktaFeilutbetalingService(
     private val behandlingRepository: BehandlingRepository,
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
-    private val kravgrunnlagRepository: KravgrunnlagRepository
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
 ) {
 
     @Transactional(readOnly = true)
@@ -33,7 +33,7 @@ class FaktaFeilutbetalingService(
                 kravgrunnlag = kravgrunnlag,
                 revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
                 varsletData = behandling.aktivtVarsel,
-                fagsystemsbehandling = behandling.aktivFagsystemsbehandling
+                fagsystemsbehandling = behandling.aktivFagsystemsbehandling,
             )
     }
 
@@ -45,7 +45,7 @@ class FaktaFeilutbetalingService(
             FaktaFeilutbetalingsperiode(
                 periode = Månedsperiode(it.periode.fom, it.periode.tom),
                 hendelsestype = it.hendelsestype,
-                hendelsesundertype = it.hendelsesundertype
+                hendelsesundertype = it.hendelsesundertype,
             )
         }.toSet()
 
@@ -53,8 +53,8 @@ class FaktaFeilutbetalingService(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = behandlingsstegFaktaDto.begrunnelse
-            )
+                begrunnelse = behandlingsstegFaktaDto.begrunnelse,
+            ),
         )
     }
 
@@ -64,15 +64,15 @@ class FaktaFeilutbetalingService(
             FaktaFeilutbetalingsperiode(
                 periode = it.periode.toMånedsperiode(),
                 hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             )
         }.toSet()
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
-            )
+                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+            ),
         )
     }
 

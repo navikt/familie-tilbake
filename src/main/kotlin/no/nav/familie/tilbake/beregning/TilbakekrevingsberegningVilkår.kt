@@ -24,7 +24,7 @@ internal object TilbakekrevingsberegningVilkår {
         vilkårVurdering: Vilkårsvurderingsperiode,
         delresultat: FordeltKravgrunnlagsbeløp,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
     ): Beregningsresultatsperiode {
         val periode: Månedsperiode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
@@ -39,7 +39,7 @@ internal object TilbakekrevingsberegningVilkår {
                 finnBeløpUtenRenter(
                     delresultat.feilutbetaltBeløp,
                     andel,
-                    manueltBeløp
+                    manueltBeløp,
                 )
             }
         val rentebeløp: BigDecimal = beregnRentebeløp(beløpUtenRenter, renter)
@@ -48,7 +48,7 @@ internal object TilbakekrevingsberegningVilkår {
             beregnSkattBeløp(
                 periode,
                 beløpUtenRenter,
-                perioderMedSkatteprosent
+                perioderMedSkatteprosent,
             )
         val nettoBeløp: BigDecimal = tilbakekrevingBeløp.subtract(skattBeløp)
         return Beregningsresultatsperiode(
@@ -64,7 +64,7 @@ internal object TilbakekrevingsberegningVilkår {
             rentebeløp = rentebeløp,
             tilbakekrevingsbeløpEtterSkatt = nettoBeløp,
             skattebeløp = skattBeløp,
-            tilbakekrevingsbeløp = tilbakekrevingBeløp
+            tilbakekrevingsbeløp = tilbakekrevingBeløp,
         )
     }
 
@@ -75,7 +75,7 @@ internal object TilbakekrevingsberegningVilkår {
     private fun beregnSkattBeløp(
         periode: Månedsperiode,
         bruttoTilbakekrevesBeløp: BigDecimal,
-        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>
+        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
     ): BigDecimal {
         val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
         val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {

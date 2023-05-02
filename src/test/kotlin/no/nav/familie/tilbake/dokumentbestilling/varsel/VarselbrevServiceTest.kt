@@ -46,7 +46,7 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
             eksterneDataForBrevService,
             faktaFeilutbetalingService,
             pdfBrevService,
-            varselbrevUtil
+            varselbrevUtil,
         )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
@@ -73,15 +73,15 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
                     listOf(
                         Periode(
                             LocalDate.of(2020, 5, 4),
-                            LocalDate.now()
-                        )
-                    )
+                            LocalDate.now(),
+                        ),
+                    ),
                 ),
                 Fagsystem.EF,
                 "321654",
                 Testdata.fagsak.bruker.ident,
                 null,
-                fagsystemsbehandlingId = "123"
+                fagsystemsbehandlingId = "123",
             )
 
         val bytes = varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)

@@ -137,32 +137,32 @@ class DokumentasjonsgeneratorPeriodeFakta {
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                beløpIBehold = BigDecimal.valueOf(5000)
+                beløpIBehold = BigDecimal.valueOf(5000),
             ),
             kravgrunnlag = HbKravgrunnlag(
                 feilutbetaltBeløp = BigDecimal.valueOf(10000),
                 riktigBeløp = BigDecimal.valueOf(23333),
-                utbetaltBeløp = BigDecimal.valueOf(33333)
+                utbetaltBeløp = BigDecimal.valueOf(33333),
             ),
             resultat = HbResultat(
                 tilbakekrevesBeløp = BigDecimal.valueOf(5000),
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(4002),
-                rentebeløp = BigDecimal.ZERO
+                rentebeløp = BigDecimal.ZERO,
             ),
             fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype),
             grunnbeløp = HbGrunnbeløp(BigDecimal.TEN, "120"),
-            førstePeriode = true
+            førstePeriode = true,
         )
     }
 
     private fun lagFelles(
         ytelsestype: Ytelsestype,
-        språkkode: Språkkode
+        språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
         val datoer = HbVedtaksbrevDatoer(
             LocalDate.of(2018, 3, 2),
             LocalDate.of(2018, 3, 3),
-            LocalDate.of(2018, 3, 4)
+            LocalDate.of(2018, 3, 4),
         )
 
         return HbVedtaksbrevFelles(
@@ -176,23 +176,23 @@ class DokumentasjonsgeneratorPeriodeFakta {
                 totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                BigDecimal.valueOf(6855)
+                BigDecimal.valueOf(6855),
             ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.now().minusDays(100),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
         )
     }
 
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
-        språkkode: Språkkode
+        språkkode: Språkkode,
     ): Brevmetadata {
         return Brevmetadata(
             sakspartId = "",
@@ -203,7 +203,7 @@ class DokumentasjonsgeneratorPeriodeFakta {
             saksnummer = "1232456",
             språkkode = språkkode,
             ytelsestype = ytelsestype,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         )
     }
 

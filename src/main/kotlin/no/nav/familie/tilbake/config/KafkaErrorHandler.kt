@@ -26,7 +26,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
         e: Exception,
         records: List<ConsumerRecord<*, *>>?,
         consumer: Consumer<*, *>,
-        container: MessageListenerContainer
+        container: MessageListenerContainer,
     ) {
         Thread.sleep(1000)
 
@@ -37,13 +37,13 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
                 records,
                 consumer,
                 container,
-                "Ukjent topic"
+                "Ukjent topic",
             )
         } else {
             records.first().run {
                 logger.error(
                     "Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
-                        "offset: ${this.offset()}, partition: ${this.partition()}"
+                        "offset: ${this.offset()}, partition: ${this.partition()}",
                 )
                 secureLogger.error("${this.topic()} - Problemer med prosessering av $records", e)
                 scheduleRestart(
@@ -51,7 +51,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
                     records,
                     consumer,
                     container,
-                    this.topic()
+                    this.topic(),
                 )
             }
         }
@@ -62,7 +62,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
         records: List<ConsumerRecord<*, *>>? = null,
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
-        topic: String
+        topic: String,
     ) {
         val now = System.currentTimeMillis()
         if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TID) {
@@ -85,7 +85,7 @@ class KafkaErrorHandler : ContainerStoppingErrorHandler() {
             Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"),
             records,
             consumer,
-            container
+            container,
         )
     }
 

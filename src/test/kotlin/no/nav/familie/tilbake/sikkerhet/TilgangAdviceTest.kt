@@ -65,8 +65,8 @@ import java.util.Calendar
         "rolle.kontantstøtte.beslutter = kb123",
         "rolle.kontantstøtte.saksbehandler = ks123",
         "rolle.kontantstøtte.veileder = kv123",
-        "rolle.teamfamilie.forvalter = familie123"
-    ]
+        "rolle.teamfamilie.forvalter = familie123",
+    ],
 )
 internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
 
@@ -127,9 +127,9 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             faktainfo = Faktainfo(
                 "testårsak",
                 "testresultat",
-                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             ),
-            saksbehandlerIdent = "bob"
+            saksbehandlerIdent = "bob",
         )
 
     @BeforeEach
@@ -141,7 +141,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             kravgrunnlagRepository,
             auditLogger,
             mottattXmlRepository,
-            mockIntegrasjonerClient
+            mockIntegrasjonerClient,
         )
 
         fagsak = fagsakRepository.insert(
@@ -149,8 +149,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                 bruker = Bruker("1232"),
                 eksternFagsakId = "123",
                 fagsystem = Fagsystem.BA,
-                ytelsestype = Ytelsestype.BARNETRYGD
-            )
+                ytelsestype = Ytelsestype.BARNETRYGD,
+            ),
         )
         behandling = behandlingRepository.insert(
             Behandling(
@@ -159,8 +159,8 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                 ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
                 behandlendeEnhet = "8020",
                 behandlendeEnhetsNavn = "Oslo",
-                manueltOpprettet = false
-            )
+                manueltOpprettet = false,
+            ),
         )
     }
 
@@ -211,7 +211,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.VEILEDER,
             "barnetrygd hent behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         val exception = shouldThrow<RuntimeException>(block = {
@@ -231,7 +231,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "barnetrygd opprett behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN
+            HenteParam.INGEN,
         )
 
         val exception = shouldThrow<RuntimeException>(block = {
@@ -252,7 +252,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "barnetrygd opprett behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN
+            HenteParam.INGEN,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -294,7 +294,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val exception = shouldThrow<RuntimeException>(block = {
             tilgangAdvice.sjekkTilgang(
                 mockJoinpoint,
-                rolletilgangssjekk
+                rolletilgangssjekk,
             )
         })
 
@@ -312,7 +312,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -329,7 +329,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -349,7 +349,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -364,14 +364,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             behandling.id,
             BehandlingPåVentDto(
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2)
-            )
+                LocalDate.now().plusWeeks(2),
+            ),
         )
         val rolletilgangssjekk = Rolletilgangssjekk(
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -386,14 +386,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             behandling.id,
             BehandlingPåVentDto(
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2)
-            )
+                LocalDate.now().plusWeeks(2),
+            ),
         )
         val rolletilgangssjekk = Rolletilgangssjekk(
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -412,7 +412,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.FORVALTER,
             "Tving henlegger behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -431,7 +431,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.FORVALTER,
             "Tving henlegger behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -446,14 +446,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             behandling.id,
             BehandlingPåVentDto(
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2)
-            )
+                LocalDate.now().plusWeeks(2),
+            ),
         )
         val rolletilgangssjekk = Rolletilgangssjekk(
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -470,7 +470,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.FORVALTER,
             "Tving henlegger behandling",
             AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID
+            HenteParam.BEHANDLING_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -487,7 +487,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.FORVALTER,
             "Arkiverer mottatt kravgrunnlag",
             AuditLoggerEvent.ACCESS,
-            HenteParam.MOTTATT_XML_ID
+            HenteParam.MOTTATT_XML_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -504,7 +504,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.FORVALTER,
             "Annulerer mottatt kravgrunnlag",
             AuditLoggerEvent.ACCESS,
-            HenteParam.EKSTERN_KRAVGRUNNLAG_ID
+            HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
         )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
@@ -520,7 +520,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID
+            HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
         )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
@@ -539,7 +539,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN
+            HenteParam.INGEN,
         )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
@@ -557,7 +557,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+            HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
         )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
@@ -578,14 +578,14 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                     Fagsystem.BA,
                     Språkkode.NB,
                     BrukerDto("", "", LocalDate.now(), Kjønn.KVINNE),
-                    listOf()
-                )
+                    listOf(),
+                ),
             )
         val rolletilgangssjekk = Rolletilgangssjekk(
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN
+            HenteParam.INGEN,
         )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
@@ -604,7 +604,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             Behandlerrolle.SAKSBEHANDLER,
             "Setter behandling på vent",
             AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN
+            HenteParam.INGEN,
         )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
@@ -627,7 +627,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                 Behandlerrolle.SAKSBEHANDLER,
                 "Setter behandling på vent",
                 AuditLoggerEvent.ACCESS,
-                HenteParam.INGEN
+                HenteParam.INGEN,
             )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)

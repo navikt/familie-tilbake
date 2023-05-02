@@ -44,7 +44,7 @@ class KafkaErrorHandlerTest {
                 RuntimeException("Feil i test"),
                 listOf(consumerRecord),
                 consumer,
-                container
+                container,
             )
         }.message shouldNotContain "Feil i test" shouldContain "Sjekk securelogs for mer info"
     }

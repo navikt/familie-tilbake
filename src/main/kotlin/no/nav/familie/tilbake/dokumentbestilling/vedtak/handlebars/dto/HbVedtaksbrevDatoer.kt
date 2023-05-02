@@ -7,25 +7,25 @@ import java.time.LocalDate
 class HbVedtaksbrevDatoer(
     val opphørsdatoDødSøker: LocalDate? = null,
     val opphørsdatoDødtBarn: LocalDate? = null,
-    val opphørsdatoIkkeOmsorg: LocalDate? = null
+    val opphørsdatoIkkeOmsorg: LocalDate? = null,
 ) {
 
     constructor(perioder: List<HbVedtaksbrevsperiode>) : this(
         getFørsteDagForHendelsesundertype(
             perioder,
-            Hendelsesundertype.BRUKER_DØD
+            Hendelsesundertype.BRUKER_DØD,
         ),
         getFørsteDagForHendelsesundertype(
             perioder,
-            Hendelsesundertype.BARN_DØD
-        )
+            Hendelsesundertype.BARN_DØD,
+        ),
     )
 
     companion object {
 
         private fun getFørsteDagForHendelsesundertype(
             perioder: List<HbVedtaksbrevsperiode>,
-            vararg hendelsesundertyper: Hendelsesundertype
+            vararg hendelsesundertyper: Hendelsesundertype,
         ): LocalDate? {
             return perioder.firstOrNull {
                 hendelsesundertyper.contains(it.fakta.hendelsesundertype)

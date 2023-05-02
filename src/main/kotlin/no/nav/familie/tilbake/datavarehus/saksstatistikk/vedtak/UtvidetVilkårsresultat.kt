@@ -5,5 +5,5 @@ enum class UtvidetVilkårsresultat {
     FORSTO_BURDE_FORSTÅTT,
     MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
     FEIL_OPPLYSNINGER_FRA_BRUKER,
-    GOD_TRO
+    GOD_TRO,
 }

@@ -75,7 +75,7 @@ internal class BehandlingMapperTest {
     private fun behandling(
         status: Behandlingsstatus = Behandlingsstatus.AVSLUTTET,
         avsluttetDato: LocalDate? = LocalDate.of(2021, 7, 13),
-        behandlingsresultatstype: Behandlingsresultatstype? = Behandlingsresultatstype.FULL_TILBAKEBETALING
+        behandlingsresultatstype: Behandlingsresultatstype? = Behandlingsresultatstype.FULL_TILBAKEBETALING,
     ) = Behandling(
         fagsakId = UUID.randomUUID(),
         type = Behandlingstype.TILBAKEKREVING,
@@ -86,6 +86,6 @@ internal class BehandlingMapperTest {
         status = status,
         avsluttetDato = avsluttetDato,
         resultater = behandlingsresultatstype?.let { setOf(Behandlingsresultat(type = behandlingsresultatstype)) } ?: emptySet(),
-        regelverk = Regelverk.NASJONAL
+        regelverk = Regelverk.NASJONAL,
     )
 }

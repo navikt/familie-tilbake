@@ -17,7 +17,7 @@ object ForeldelseMapper {
     fun tilRespons(
         logiskePerioder: List<LogiskPeriode>,
         kravgrunnlag431: Kravgrunnlag431,
-        vurdertForeldelse: VurdertForeldelse?
+        vurdertForeldelse: VurdertForeldelse?,
     ): VurdertForeldelseDto {
         val vurdertForeldelsesperioder: List<VurdertForeldelsesperiodeDto> = vurdertForeldelse?.foreldelsesperioder?.map {
             VurdertForeldelsesperiodeDto(
@@ -25,17 +25,17 @@ object ForeldelseMapper {
                 feilutbetaltBeløp = KravgrunnlagsberegningService
                     .beregnFeilutbetaltBeløp(
                         kravgrunnlag431,
-                        it.periode
+                        it.periode,
                     ).setScale(0, RoundingMode.HALF_UP),
                 begrunnelse = it.begrunnelse,
                 foreldelsesvurderingstype = it.foreldelsesvurderingstype,
                 foreldelsesfrist = it.foreldelsesfrist,
-                oppdagelsesdato = it.oppdagelsesdato
+                oppdagelsesdato = it.oppdagelsesdato,
             )
         } ?: logiskePerioder.map {
             VurdertForeldelsesperiodeDto(
                 periode = it.periode.toDatoperiode(),
-                feilutbetaltBeløp = it.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_UP)
+                feilutbetaltBeløp = it.feilutbetaltBeløp.setScale(0, RoundingMode.HALF_UP),
             )
         }
 
@@ -49,7 +49,7 @@ object ForeldelseMapper {
                 foreldelsesvurderingstype = it.foreldelsesvurderingstype,
                 begrunnelse = it.begrunnelse,
                 foreldelsesfrist = it.foreldelsesfrist,
-                oppdagelsesdato = it.oppdagelsesdato
+                oppdagelsesdato = it.oppdagelsesdato,
             )
         }.toSet()
         return VurdertForeldelse(behandlingId = behandlingId, foreldelsesperioder = foreldelsesperioder)

@@ -14,14 +14,14 @@ object FagsakMapper {
         fagsak: Fagsak,
         personinfo: Personinfo,
         behandlinger: List<Behandling>,
-        organisasjonService: OrganisasjonService
+        organisasjonService: OrganisasjonService,
     ): FagsakDto {
         val bruker = BrukerDto(
             personIdent = fagsak.bruker.ident,
             navn = personinfo.navn,
             fødselsdato = personinfo.fødselsdato,
             kjønn = personinfo.kjønn,
-            dødsdato = personinfo.dødsdato
+            dødsdato = personinfo.dødsdato,
         )
 
         val behandlingListe = behandlinger.map {
@@ -29,7 +29,7 @@ object FagsakMapper {
                 behandlingId = it.id,
                 eksternBrukId = it.eksternBrukId,
                 type = it.type,
-                status = it.status
+                status = it.status,
             )
         }
 
@@ -44,7 +44,7 @@ object FagsakMapper {
             språkkode = fagsak.bruker.språkkode,
             bruker = bruker,
             behandlinger = behandlingListe,
-            institusjon = institusjon
+            institusjon = institusjon,
         )
     }
 }

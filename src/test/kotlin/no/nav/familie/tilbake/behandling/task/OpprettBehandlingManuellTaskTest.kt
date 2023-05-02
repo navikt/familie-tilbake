@@ -91,7 +91,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
         opprettBehandlingManueltTask = OpprettBehandlingManueltTask(
             hentFagsystemsbehandlingService,
-            behandlingManuellOpprettelseService
+            behandlingManuellOpprettelseService,
         )
 
         val future = SettableListenableFuture<SendResult<String, String>>()
@@ -110,7 +110,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         verify {
             spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
                 capture(requestIdSlot),
-                capture(hentFagsystemsbehandlingRequestSlot)
+                capture(hentFagsystemsbehandlingRequestSlot),
             )
         }
         val requestId = requestIdSlot.captured
@@ -118,7 +118,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         requestSendt.shouldNotBeNull()
         requestSendt.id shouldBe requestId
@@ -142,7 +142,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         requestSendt.shouldNotBeNull()
     }
@@ -155,7 +155,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -173,7 +173,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -216,7 +216,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -261,7 +261,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 setProperty("ytelsestype", ytelsestype.name)
                 setProperty("eksternId", eksternId)
                 setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
-            }
+            },
         )
     }
 
@@ -280,9 +280,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 revurderingsårsak = "testverdi",
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING
+                    .IGNORER_TILBAKEKREVING,
             ),
-            institusjon = institusjon
+            institusjon = institusjon,
         )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling)
     }

@@ -6,7 +6,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 
 class Vedtaksbrevsdata(
     val vedtaksbrevsdata: HbVedtaksbrevsdata,
-    val metadata: Brevmetadata
+    val metadata: Brevmetadata,
 ) {
 
     val hovedresultat: Vedtaksresultat get() = vedtaksbrevsdata.felles.hovedresultat

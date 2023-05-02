@@ -119,7 +119,7 @@ object KravgrunnlagUtil {
                     .append(
                         "$periode->belopTilbakekreves",
                         beløp.first.belopTilbakekreves,
-                        beløp.second.belopTilbakekreves
+                        beløp.second.belopTilbakekreves,
                     )
                     .append("$periode->skattProsent", beløp.first.skattProsent, beløp.second.skattProsent)
             }
@@ -134,7 +134,7 @@ object KravgrunnlagUtil {
 
     private fun sammenlignPerioder(
         mottattPerioder: List<DetaljertKravgrunnlagPeriodeDto>,
-        hentetPerioder: List<DetaljertKravgrunnlagPeriodeDto>
+        hentetPerioder: List<DetaljertKravgrunnlagPeriodeDto>,
     ): List<DetaljertKravgrunnlagPeriodeDto> {
         if (mottattPerioder.size == hentetPerioder.size) {
             return mottattPerioder.filter { hentetPerioder.none { mindre -> mindre.periode.fom == it.periode.fom } }

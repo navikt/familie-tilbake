@@ -28,7 +28,7 @@ class ManueltVarselbrevService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
-    private val varselbrevUtil: VarselbrevUtil
+    private val varselbrevUtil: VarselbrevUtil,
 ) {
 
     fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -57,17 +57,17 @@ class ManueltVarselbrevService(
                 overskrift = overskrift,
                 brevtekst = brevtekst,
                 metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = vedlegg
+                vedleggHtml = vedlegg,
             ),
             varsletFeilutbetaling,
-            fritekst
+            fritekst,
         )
     }
 
     fun hentForhåndsvisningManueltVarselbrev(
         behandlingId: UUID,
         maltype: Dokumentmalstype,
-        fritekst: String
+        fritekst: String,
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -86,8 +86,8 @@ class ManueltVarselbrevService(
                 overskrift = overskrift,
                 brevtekst = brevtekst,
                 metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = vedlegg
-            )
+                vedleggHtml = vedlegg,
+            ),
         )
     }
 
@@ -97,7 +97,7 @@ class ManueltVarselbrevService(
         fagsak: Fagsak,
         brevmottager: Brevmottager,
         erKorrigert: Boolean,
-        aktivtVarsel: Varsel? = null
+        aktivtVarsel: Varsel? = null,
     ): Varselbrevsdokument {
         // Henter data fra pdl
         val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
@@ -115,14 +115,14 @@ class ManueltVarselbrevService(
             fagsak,
             vergenavn,
             erKorrigert,
-            personinfo.dødsdato != null
+            personinfo.dødsdato != null,
         )
 
         return varselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(
             metadata,
             fritekst,
             feilutbetalingsfakta,
-            aktivtVarsel
+            aktivtVarsel,
         )
     }
 }

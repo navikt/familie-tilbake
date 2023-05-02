@@ -58,7 +58,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             Totrinnsstegsinfo(Behandlingssteg.FAKTA, null, null),
             Totrinnsstegsinfo(Behandlingssteg.FORELDELSE, null, null),
             Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, null, null),
-            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, null, null)
+            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, null, null),
         )
     }
 
@@ -78,24 +78,24 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FAKTA,
                     godkjent = true,
-                    begrunnelse = "testverdi"
+                    begrunnelse = "testverdi",
                 ),
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FORELDELSE,
                     godkjent = true,
-                    begrunnelse = "testverdi"
+                    begrunnelse = "testverdi",
                 ),
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                     godkjent = false,
-                    begrunnelse = "testverdi"
+                    begrunnelse = "testverdi",
                 ),
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
                     godkjent = false,
-                    begrunnelse = "testverdi"
-                )
-            )
+                    begrunnelse = "testverdi",
+                ),
+            ),
         )
 
         val totrinnsvurderingDto = totrinnService.hentTotrinnsvurderinger(behandlingId)
@@ -104,7 +104,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         totrinnsstegsinfo.shouldContainExactly(
             Totrinnsstegsinfo(Behandlingssteg.FAKTA, true, "testverdi"),
             Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
-            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi")
+            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi"),
         )
     }
 
@@ -124,19 +124,19 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FAKTA,
                     godkjent = true,
-                    begrunnelse = "testverdi"
+                    begrunnelse = "testverdi",
                 ),
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                     godkjent = false,
-                    begrunnelse = "testverdi"
+                    begrunnelse = "testverdi",
                 ),
                 VurdertTotrinnDto(
                     behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
                     godkjent = false,
-                    begrunnelse = "testverdi"
-                )
-            )
+                    begrunnelse = "testverdi",
+                ),
+            ),
         )
 
         // Dette steget var ikke behandlet med første omgang
@@ -149,7 +149,7 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
             Totrinnsstegsinfo(Behandlingssteg.FAKTA, true, "testverdi"),
             Totrinnsstegsinfo(Behandlingssteg.FORELDELSE, null, null),
             Totrinnsstegsinfo(Behandlingssteg.VILKÅRSVURDERING, false, "testverdi"),
-            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi")
+            Totrinnsstegsinfo(Behandlingssteg.FORESLÅ_VEDTAK, false, "testverdi"),
         )
     }
 
@@ -170,14 +170,14 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
                     VurdertTotrinnDto(
                         behandlingssteg = Behandlingssteg.FAKTA,
                         godkjent = true,
-                        begrunnelse = "testverdi"
+                        begrunnelse = "testverdi",
                     ),
                     VurdertTotrinnDto(
                         behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
                         godkjent = false,
-                        begrunnelse = "testverdi"
-                    )
-                )
+                        begrunnelse = "testverdi",
+                    ),
+                ),
             )
         }
 
@@ -186,14 +186,14 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
                 behandlingssteg = behandlingssteg,
-                behandlingsstegsstatus = behandlingsstegstatus
-            )
+                behandlingsstegsstatus = behandlingsstegstatus,
+            ),
         )
     }
 }

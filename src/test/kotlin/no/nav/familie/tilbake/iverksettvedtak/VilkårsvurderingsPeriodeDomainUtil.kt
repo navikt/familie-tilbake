@@ -23,9 +23,9 @@ object VilkårsvurderingsPeriodeDomainUtil {
             særligeGrunnerTilReduksjon = false,
             tilbakekrevSmåbeløp = true,
             særligeGrunnerBegrunnelse = "testverdi",
-            særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi"))
+            særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi")),
         ),
         vilkårsvurderingsresultat =
-        Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
     )
 }

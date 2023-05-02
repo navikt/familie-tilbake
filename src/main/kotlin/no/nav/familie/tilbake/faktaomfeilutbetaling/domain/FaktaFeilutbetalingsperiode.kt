@@ -17,7 +17,7 @@ data class FaktaFeilutbetalingsperiode(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Hendelsestype {
@@ -41,7 +41,7 @@ enum class Hendelsestype {
     SATSER,
     SMÅBARNSTILLEGG,
     MEDLEMSKAP_BA,
-    UTVIDET
+    UTVIDET,
 }
 
 enum class Hendelsesundertype {
@@ -131,5 +131,5 @@ enum class Hendelsesundertype {
     EKTEFELLE_AVSLUTTET_SONING,
     SAMBOER_AVSLUTTET_SONING,
     EKTEFELLE_INSTITUSJON,
-    SAMBOER_INSTITUSJON
+    SAMBOER_INSTITUSJON,
 }

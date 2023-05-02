@@ -27,7 +27,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker
 @Profile("local")
 class KafkaLokalConfig(
     @Value("\${LOKAL_BROKER_KAFKA_PORT:8093}") private val brokerKafkaPort: Int,
-    @Value("\${LOKAL_BROKER_REMOTE_PORT:8094}") private val brokerRemotePort: Int
+    @Value("\${LOKAL_BROKER_REMOTE_PORT:8094}") private val brokerRemotePort: Int,
 ) {
 
     @Bean
@@ -38,11 +38,11 @@ class KafkaLokalConfig(
             .kafkaPorts(brokerKafkaPort)
             .brokerProperty(
                 "listeners",
-                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort"
+                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort",
             )
             .brokerProperty(
                 "advertised.listeners",
-                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort"
+                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort",
             )
             .brokerProperty("listener.security.protocol.map", "PLAINTEXT:PLAINTEXT,REMOTE:PLAINTEXT")
             .brokerListProperty("spring.kafka.bootstrap-servers")
@@ -92,7 +92,7 @@ class KafkaLokalConfig(
         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
         ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
         ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
-        ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name
+        ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name,
     )
 
     private fun consumerConfigs() = mapOf(
@@ -103,6 +103,6 @@ class KafkaLokalConfig(
         ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-tilbake-1",
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
         CommonClientConfigs.RETRIES_CONFIG to 10,
-        CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100
+        CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100,
     )
 }

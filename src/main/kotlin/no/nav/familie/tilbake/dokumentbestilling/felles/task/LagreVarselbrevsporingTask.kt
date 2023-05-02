@@ -14,7 +14,7 @@ import java.util.UUID
     taskStepType = LagreVarselbrevsporingTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Lagrer varselbrev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class LagreVarselbrevsporingTask(private val varselService: VarselService) : AsyncTaskStep {
 

@@ -8,19 +8,19 @@ data class HbSærligeGrunner(
     val navfeil: Boolean = false,
     val tid: Boolean = false,
     val fritekst: String? = null,
-    val fritekstAnnet: String? = null
+    val fritekstAnnet: String? = null,
 ) {
 
     constructor(
         grunner: Collection<SærligGrunn>,
         fritekst: String? = null,
-        fritekstAnnet: String? = null
+        fritekstAnnet: String? = null,
     ) : this(
         grunner.contains(SærligGrunn.STØRRELSE_BELØP),
         grunner.contains(SærligGrunn.ANNET),
         grunner.contains(SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL),
         grunner.contains(SærligGrunn.TID_FRA_UTBETALING),
         fritekst,
-        fritekstAnnet
+        fritekstAnnet,
     )
 }

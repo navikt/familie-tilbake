@@ -65,7 +65,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             mockEksterneDataForBrevService,
             spyPdfBrevService,
             mockFeilutbetalingService,
-            varselbrevUtil
+            varselbrevUtil,
         )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
@@ -91,7 +91,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 eq(Brevtype.VARSEL),
                 any(),
                 eq(9000L),
-                any()
+                any(),
             )
         }
     }
@@ -104,9 +104,9 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             varsler = setOf(
                 Varsel(
                     varseltekst = varseltekst,
-                    varselbeløp = 100L
-                )
-            )
+                    varselbeløp = 100L,
+                ),
+            ),
         )
         val behandling = behandlingRepository.update(behandlingCopy)
 
@@ -119,7 +119,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 eq(Brevtype.KORRIGERT_VARSEL),
                 any(),
                 eq(9000L),
-                any()
+                any(),
             )
         }
     }
@@ -132,10 +132,10 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             varsler = setOf(
                 Varsel(
                     varseltekst = varseltekst,
-                    varselbeløp = 100L
-                )
+                    varselbeløp = 100L,
+                ),
             ),
-            verger = setOf(Testdata.verge)
+            verger = setOf(Testdata.verge),
         )
         val behandling = behandlingRepository.update(behandlingCopy)
 
@@ -148,7 +148,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 eq(Brevtype.KORRIGERT_VARSEL),
                 any(),
                 eq(9000L),
-                any()
+                any(),
             )
         }
     }
@@ -158,7 +158,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
             behandling.id,
             Dokumentmalstype.VARSEL,
-            varseltekst
+            varseltekst,
         )
 
         PdfaValidator.validatePdf(data)
@@ -170,16 +170,16 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             varsler = setOf(
                 Varsel(
                     varseltekst = varseltekst,
-                    varselbeløp = 100L
-                )
-            )
+                    varselbeløp = 100L,
+                ),
+            ),
         )
         behandlingRepository.update(behandlingCopy)
 
         val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
             behandling.id,
             Dokumentmalstype.KORRIGERT_VARSEL,
-            varseltekst
+            varseltekst,
         )
 
         PdfaValidator.validatePdf(data)
@@ -188,7 +188,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
         val periode = Månedsperiode(
             LocalDate.of(2019, 10, 1),
-            LocalDate.of(2019, 10, 30)
+            LocalDate.of(2019, 10, 30),
         )
 
         return FaktaFeilutbetalingDto(
@@ -197,8 +197,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             feilutbetaltePerioder = listOf(
                 FeilutbetalingsperiodeDto(
                     periode.toDatoperiode(),
-                    BigDecimal(9000)
-                )
+                    BigDecimal(9000),
+                ),
             ),
             revurderingsvedtaksdato = LocalDate.now().minusDays(1),
             begrunnelse = "",
@@ -206,8 +206,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 revurderingsårsak = "testverdi",
                 revurderingsresultat = "testverdi",
                 tilbakekrevingsvalg =
-                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
-            )
+                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            ),
         )
     }
 }

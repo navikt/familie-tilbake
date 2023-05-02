@@ -42,8 +42,8 @@ class ApiExceptionHandler {
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
                 errorMessage = feil.message,
-                frontendFeilmelding = feil.frontendFeilmelding
-            )
+                frontendFeilmelding = feil.frontendFeilmelding,
+            ),
         )
     }
 
@@ -70,7 +70,7 @@ class ApiExceptionHandler {
                 "Validering feil har oppstått: field={} message={} verdi={}",
                 fieldError.field,
                 fieldError.defaultMessage,
-                fieldError.rejectedValue
+                fieldError.rejectedValue,
             )
             logger.error("Validering feil har oppstått: field={} message={}", fieldError.field, fieldError.defaultMessage)
             feilMelding.append(fieldError.defaultMessage)

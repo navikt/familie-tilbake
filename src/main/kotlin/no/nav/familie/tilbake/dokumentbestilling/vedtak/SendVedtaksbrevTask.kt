@@ -24,13 +24,13 @@ import java.util.UUID
     taskStepType = SendVedtaksbrevTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Sender vedtaksbrev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class SendVedtaksbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -45,8 +45,8 @@ class SendVedtaksbrevTask(
                 Task(
                     type = AvsluttBehandlingTask.TYPE,
                     payload = task.payload,
-                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
-                )
+                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
+                ),
             )
             return
         }
@@ -59,8 +59,8 @@ class SendVedtaksbrevTask(
                 Task(
                     type = AvsluttBehandlingTask.TYPE,
                     payload = task.payload,
-                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
-                )
+                    properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
+                ),
             )
             return
         }
@@ -79,8 +79,8 @@ class SendVedtaksbrevTask(
             Task(
                 type = SendVedtaksoppsummeringTilDvhTask.TYPE,
                 payload = task.payload,
-                properties = task.metadata
-            )
+                properties = task.metadata,
+            ),
         )
     }
 

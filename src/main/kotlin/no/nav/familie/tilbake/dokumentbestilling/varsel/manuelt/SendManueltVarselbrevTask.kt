@@ -26,14 +26,14 @@ import java.util.UUID
     taskStepType = SendManueltVarselbrevTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Sender manuelt varselbrev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class SendManueltVarselbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -62,18 +62,18 @@ class SendManueltVarselbrevTask(
         oppgaveTaskService.oppdaterOppgaveTask(
             behandlingId = behandling.id,
             beskrivelse = "Frist er oppdatert. Saksbehandler ${
-            behandling
-                .ansvarligSaksbehandler
+                behandling
+                    .ansvarligSaksbehandler
             } har sendt varselbrev til bruker",
             frist = fristTid,
-            saksbehandler = behandling.ansvarligSaksbehandler
+            saksbehandler = behandling.ansvarligSaksbehandler,
         )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
             behandlingskontrollService.settBehandlingPåVent(
                 behandling.id,
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                fristTid
+                fristTid,
             )
         }
     }
@@ -87,10 +87,10 @@ class SendManueltVarselbrevTask(
                     SendManueltVarselbrevTaskdata(
                         behandlingId = behandlingId,
                         maltype = maltype,
-                        fritekst = fritekst
-                    )
+                        fritekst = fritekst,
+                    ),
                 ),
-                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             )
 
         const val TYPE = "brev.sendManueltVarsel"
@@ -100,5 +100,5 @@ class SendManueltVarselbrevTask(
 data class SendManueltVarselbrevTaskdata(
     val behandlingId: UUID,
     val maltype: Dokumentmalstype,
-    val fritekst: String
+    val fritekst: String,
 )

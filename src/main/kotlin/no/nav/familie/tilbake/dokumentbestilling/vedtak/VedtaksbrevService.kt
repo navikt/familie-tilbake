@@ -25,7 +25,7 @@ class VedtaksbrevService(
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
-    private val pdfBrevService: PdfBrevService
+    private val pdfBrevService: PdfBrevService,
 ) {
 
     fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
@@ -36,7 +36,7 @@ class VedtaksbrevService(
             behandling,
             fagsak,
             Brevtype.VEDTAK,
-            brevdata
+            brevdata,
         )
     }
 
@@ -68,7 +68,7 @@ class VedtaksbrevService(
     private fun lagreFriteksterFraSaksbehandler(
         behandlingId: UUID,
         fritekstavsnittDto: FritekstavsnittDto,
-        validerPåkrevetFritekster: Boolean = false
+        validerPåkrevetFritekster: Boolean = false,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
@@ -87,7 +87,7 @@ class VedtaksbrevService(
             avsnittMedPerioder = fritekstavsnittDto.perioderMedTekst,
             vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
             vedtaksbrevstype = vedtaksbrevstype,
-            validerPåkrevetFritekster = validerPåkrevetFritekster
+            validerPåkrevetFritekster = validerPåkrevetFritekster,
         )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)

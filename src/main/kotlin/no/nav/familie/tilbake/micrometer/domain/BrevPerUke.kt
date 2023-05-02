@@ -8,5 +8,5 @@ class BrevPerUke(
     val uke: Int,
     val fagsystem: Fagsystem,
     val brevtype: Brevtype,
-    val antall: Int
+    val antall: Int,
 )

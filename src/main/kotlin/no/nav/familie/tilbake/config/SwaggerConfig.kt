@@ -19,7 +19,7 @@ class SwaggerConfig(
     @Value("\${TOKEN_URL}")
     val tokenUrl: String,
     @Value("\${API_SCOPE}")
-    val apiScope: String
+    val apiScope: String,
 ) {
 
     @Bean
@@ -40,8 +40,8 @@ class SwaggerConfig(
                     .authorizationCode(
                         OAuthFlow().authorizationUrl(authorizationUrl)
                             .tokenUrl(tokenUrl)
-                            .scopes(Scopes().addString(apiScope, "read,write"))
-                    )
+                            .scopes(Scopes().addString(apiScope, "read,write")),
+                    ),
             )
     }
 }

@@ -22,13 +22,13 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
     private val innhentDokumentasjonsbrevsdokument =
         InnhentDokumentasjonsbrevsdokument(
             brevmetadata = metadata,
             fritekstFraSaksbehandler = "Dette er ein fritekst.",
-            fristdato = LocalDate.of(2020, 3, 2)
+            fristdato = LocalDate.of(2020, 3, 2),
         )
 
     @Test
@@ -66,11 +66,11 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val brevMetadata = metadata.copy(
             mottageradresse = Adresseinfo(
                 ident = "12345678901",
-                mottagernavn = "Semba AS c/o John Doe"
+                mottagernavn = "Semba AS c/o John Doe",
             ),
             sakspartsnavn = "Test",
             vergenavn = "John Doe",
-            finnesVerge = true
+            finnesVerge = true,
         )
         val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 

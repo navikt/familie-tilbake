@@ -25,7 +25,7 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
         lagretØkonomiXmlMottatt.shouldBeEqualToComparingFieldsExcept(
             økonomiXmlMottatt,
             ØkonomiXmlMottatt::sporbar,
-            ØkonomiXmlMottatt::versjon
+            ØkonomiXmlMottatt::versjon,
         )
         lagretØkonomiXmlMottatt.versjon shouldBe 1
     }
@@ -42,7 +42,7 @@ internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
         lagretØkonomiXmlMottatt.shouldBeEqualToComparingFieldsExcept(
             oppdatertØkonomiXmlMottatt,
             ØkonomiXmlMottatt::sporbar,
-            ØkonomiXmlMottatt::versjon
+            ØkonomiXmlMottatt::versjon,
         )
         lagretØkonomiXmlMottatt.versjon shouldBe 2
     }

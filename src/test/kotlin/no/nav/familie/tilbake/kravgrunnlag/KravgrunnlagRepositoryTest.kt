@@ -43,7 +43,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
             kravgrunnlag431,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,
-            Kravgrunnlag431::versjon
+            Kravgrunnlag431::versjon,
         )
         lagretKravgrunnlag431.versjon shouldBe 1
     }
@@ -61,7 +61,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
             oppdatertKravgrunnlag431,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,
-            Kravgrunnlag431::versjon
+            Kravgrunnlag431::versjon,
         )
         lagretKravgrunnlag431.versjon shouldBe 2
     }
@@ -76,7 +76,7 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
             findByBehandlingId,
             Kravgrunnlag431::sporbar,
             Kravgrunnlag431::perioder,
-            Kravgrunnlag431::versjon
+            Kravgrunnlag431::versjon,
         )
     }
 }

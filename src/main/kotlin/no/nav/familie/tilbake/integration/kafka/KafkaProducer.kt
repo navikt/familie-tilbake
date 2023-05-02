@@ -52,7 +52,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
                 {
                     log.info(
                         "Melding på topic $topic for $behandlingId med $key er sendt. " +
-                            "Fikk offset ${it?.recordMetadata?.offset()}"
+                            "Fikk offset ${it?.recordMetadata?.offset()}",
                     )
                 },
                 {
@@ -60,7 +60,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
                         "Feiler med ${it.message}"
                     log.warn(feilmelding)
                     throw Feil(message = feilmelding)
-                }
+                },
             )
     }
 }

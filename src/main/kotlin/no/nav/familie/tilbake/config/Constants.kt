@@ -11,7 +11,7 @@ object Constants {
     private val rettsgebyrForDato = listOf(
         Datobeløp(LocalDate.of(2021, 1, 1), 1199),
         Datobeløp(LocalDate.of(2022, 1, 1), 1223),
-        Datobeløp(LocalDate.of(2023, 1, 1), 1243)
+        Datobeløp(LocalDate.of(2023, 1, 1), 1243),
     )
 
     private val brukersSvarfrist: Period = Period.ofWeeks(2)
@@ -40,7 +40,7 @@ object Constants {
             Ytelsestype.SKOLEPENGER to BigDecimal.valueOf(rettsgebyr)
                 .multiply(BigDecimal(0.5)),
             Ytelsestype.KONTANTSTØTTE to BigDecimal.valueOf(rettsgebyr)
-                .multiply(BigDecimal(0.5))
+                .multiply(BigDecimal(0.5)),
         )
 
     const val AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE = "Automatisk satt verdi"

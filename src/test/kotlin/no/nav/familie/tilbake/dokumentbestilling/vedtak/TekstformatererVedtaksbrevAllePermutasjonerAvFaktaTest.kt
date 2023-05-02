@@ -39,7 +39,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
 
     private val januar = Datoperiode(
         LocalDate.of(2019, 1, 1),
-        LocalDate.of(2019, 1, 31)
+        LocalDate.of(2019, 1, 31),
     )
 
     private val brevmetadata = Brevmetadata(
@@ -51,7 +51,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETRYGD,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     @Test
@@ -59,7 +59,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.OVERGANGSSTØNAD,
             Språkkode.NB,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -68,7 +68,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.OVERGANGSSTØNAD,
             Språkkode.NN,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -77,7 +77,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.BARNETILSYN,
             Språkkode.NB,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -86,7 +86,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.BARNETILSYN,
             Språkkode.NN,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -95,7 +95,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.SKOLEPENGER,
             Språkkode.NB,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -104,7 +104,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
         lagTeksterOgValider(
             Ytelsestype.SKOLEPENGER,
             Språkkode.NN,
-            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING)
+            HendelseMedUndertype(Hendelsestype.STØNADSPERIODE, Hendelsesundertype.UTVIDELSE_UTDANNING),
         )
     }
 
@@ -122,7 +122,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
     private fun lagTeksterOgValider(
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
-        vararg unntak: HendelseMedUndertype
+        vararg unntak: HendelseMedUndertype,
     ) {
         val felles: HbVedtaksbrevFelles = lagFellesBuilder(språkkode, ytelsestype)
 
@@ -168,7 +168,7 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
             kravgrunnlag = HbKravgrunnlag(
                 feilutbetaltBeløp = BigDecimal.valueOf(10000),
                 utbetaltBeløp = BigDecimal.valueOf(33333),
-                riktigBeløp = BigDecimal.valueOf(23333)
+                riktigBeløp = BigDecimal.valueOf(23333),
             ),
             fakta = fakta,
             grunnbeløp = HbGrunnbeløp(null, "Seks ganger grunnbeløpet er 741 000 for perioden fra 01.05.2022"),
@@ -176,14 +176,14 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 aktsomhetsresultat = AnnenVurdering.GOD_TRO,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                beløpIBehold = BigDecimal.valueOf(10000)
+                beløpIBehold = BigDecimal.valueOf(10000),
             ),
             resultat = HbResultat(
                 tilbakekrevesBeløp = BigDecimal(10000),
                 rentebeløp = BigDecimal(1000),
-                tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000)
+                tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(9000),
             ),
-            førstePeriode = true
+            førstePeriode = true,
         )
     }
 
@@ -197,16 +197,16 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
                 totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                BigDecimal.valueOf(11000)
+                BigDecimal.valueOf(11000),
             ),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.now().minusDays(100),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(
                 navn = "Søker Søkersen",
-                dødsdato = LocalDate.of(2018, 3, 1)
+                dødsdato = LocalDate.of(2018, 3, 1),
             ),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
@@ -215,8 +215,8 @@ class TekstformatererVedtaksbrevAllePermutasjonerAvFaktaTest {
             ansvarligBeslutter = "ansvarlig person sin signatur",
             datoer = HbVedtaksbrevDatoer(
                 opphørsdatoDødSøker = LocalDate.of(2021, 5, 4),
-                opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4)
-            )
+                opphørsdatoDødtBarn = LocalDate.of(2021, 5, 4),
+            ),
         )
 
     private fun getFeilutbetalingsårsaker(ytelsestype: Ytelsestype): List<HendelseMedUndertype> {

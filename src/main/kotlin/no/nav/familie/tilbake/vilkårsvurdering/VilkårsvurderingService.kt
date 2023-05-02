@@ -27,14 +27,14 @@ class VilkårsvurderingService(
     val fagsakRepository: FagsakRepository,
     val behandlingRepository: BehandlingRepository,
     val foreldelseService: ForeldelseService,
-    val faktaFeilutbetalingService: FaktaFeilutbetalingService
+    val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
         val faktaOmFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
             ?: throw Feil(
                 message = "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
-                    "kan ikke hente vilkårsvurdering"
+                    "kan ikke hente vilkårsvurdering",
             )
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -60,7 +60,7 @@ class VilkårsvurderingService(
             perioder = perioder.toList(),
             foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
             faktaFeilutbetaling = faktaOmFeilutbetaling,
-            kravgrunnlag431 = kravgrunnlag431
+            kravgrunnlag431 = kravgrunnlag431,
         )
     }
 
@@ -72,7 +72,7 @@ class VilkårsvurderingService(
         // Valider request
         VilkårsvurderingValidator.validerVilkårsvurdering(
             vilkårsvurderingDto = behandlingsstegVilkårsvurderingDto,
-            kravgrunnlag431 = kravgrunnlag
+            kravgrunnlag431 = kravgrunnlag,
         )
         // filter bort perioder som er foreldet
         val ikkeForeldetPerioder = behandlingsstegVilkårsvurderingDto.vilkårsvurderingsperioder
@@ -82,8 +82,8 @@ class VilkårsvurderingService(
             VilkårsvurderingMapper.tilDomene(
                 behandlingId = behandlingId,
                 vilkårsvurderingsperioder = ikkeForeldetPerioder,
-                fagsystem = fagsystem
-            )
+                fagsystem = fagsystem,
+            ),
         )
     }
 
@@ -101,16 +101,16 @@ class VilkårsvurderingService(
                 aktsomhetDto = AktsomhetDto(
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     tilbakekrevSmåbeløp = false,
-                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
-                )
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                ),
             )
         }
         vilkårsvurderingRepository.insert(
             VilkårsvurderingMapper.tilDomene(
                 behandlingId = behandlingId,
                 vilkårsvurderingsperioder = vurdertePerioder,
-                fagsystem = fagsystem
-            )
+                fagsystem = fagsystem,
+            ),
         )
     }
 

@@ -7,7 +7,7 @@ import java.util.SortedMap
 
 data class LogiskPeriode(
     val periode: Månedsperiode,
-    val feilutbetaltBeløp: BigDecimal
+    val feilutbetaltBeløp: BigDecimal,
 ) {
 
     val fom get() = periode.fom
@@ -30,8 +30,8 @@ object LogiskPeriodeUtil {
                     resultat.add(
                         LogiskPeriode(
                             periode = Månedsperiode(førsteMåned!!, sisteMåned),
-                            feilutbetaltBeløp = logiskPeriodeBeløp
-                        )
+                            feilutbetaltBeløp = logiskPeriodeBeløp,
+                        ),
                     )
                     førsteMåned = periode.fom
                     logiskPeriodeBeløp = BigDecimal.ZERO
@@ -44,8 +44,8 @@ object LogiskPeriodeUtil {
             resultat.add(
                 LogiskPeriode(
                     periode = Månedsperiode(førsteMåned!!, sisteMåned!!),
-                    feilutbetaltBeløp = logiskPeriodeBeløp
-                )
+                    feilutbetaltBeløp = logiskPeriodeBeløp,
+                ),
             )
         }
         return resultat.toList()

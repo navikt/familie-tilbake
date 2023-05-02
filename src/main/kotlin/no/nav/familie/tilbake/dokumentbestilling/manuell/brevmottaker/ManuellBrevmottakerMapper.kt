@@ -21,7 +21,7 @@ object ManuellBrevmottakerMapper {
             postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer?.trim(),
             poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed?.trim(),
             landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
-            vergetype = manuellBrevmottakerRequestDto.vergetype
+            vergetype = manuellBrevmottakerRequestDto.vergetype,
         )
 
     fun tilRespons(manuellBrevmottaker: ManuellBrevmottaker) = ManuellBrevmottakerResponsDto(
@@ -37,12 +37,12 @@ object ManuellBrevmottakerMapper {
                     adresselinje2 = manuellBrevmottaker.adresselinje2,
                     postnummer = manuellBrevmottaker.postnummer!!,
                     poststed = manuellBrevmottaker.poststed!!,
-                    landkode = manuellBrevmottaker.landkode!!
+                    landkode = manuellBrevmottaker.landkode!!,
                 )
             } else {
                 null
             },
-            vergetype = manuellBrevmottaker.vergetype
-        )
+            vergetype = manuellBrevmottaker.vergetype,
+        ),
     )
 }

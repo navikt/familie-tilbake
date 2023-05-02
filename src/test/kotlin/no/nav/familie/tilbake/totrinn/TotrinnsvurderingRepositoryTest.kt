@@ -40,7 +40,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
             totrinnsvurdering,
             Totrinnsvurdering::sporbar,
-            Totrinnsvurdering::versjon
+            Totrinnsvurdering::versjon,
         )
         lagretTotrinnsvurdering.versjon shouldBe 1
     }
@@ -57,7 +57,7 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         lagretTotrinnsvurdering.shouldBeEqualToComparingFieldsExcept(
             oppdatertTotrinnsvurdering,
             Totrinnsvurdering::sporbar,
-            Totrinnsvurdering::versjon
+            Totrinnsvurdering::versjon,
         )
         lagretTotrinnsvurdering.versjon shouldBe 2
     }

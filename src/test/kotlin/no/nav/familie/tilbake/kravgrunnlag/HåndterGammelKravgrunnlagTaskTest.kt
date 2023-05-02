@@ -115,7 +115,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             økonomiXmlMottattService,
             mockHentKravgrunnlagService,
             stegService,
-            historikkService
+            historikkService,
         )
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
@@ -136,8 +136,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             HentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId = xmlMottatt.eksternFagsakId,
                 ytelsestype = xmlMottatt.ytelsestype,
-                eksternId = xmlMottatt.referanse
-            )
+                eksternId = xmlMottatt.referanse,
+            ),
         )
         val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
@@ -153,8 +153,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     eksternFagsakId = xmlMottatt.eksternFagsakId,
                     ytelsestype = xmlMottatt.ytelsestype,
                     eksternId = xmlMottatt.referanse,
-                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)
-                )
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt),
+                ),
             )
 
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
@@ -165,7 +165,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             xmlMottatt.ytelsestype,
-            hentetKravgrunnlag.fagsystemId
+            hentetKravgrunnlag.fagsystemId,
         )
         behandling.shouldNotBeNull()
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
@@ -177,7 +177,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
         xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype
+            xmlMottatt.ytelsestype,
         ).shouldNotBeNull()
     }
 
@@ -189,8 +189,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     eksternFagsakId = xmlMottatt.eksternFagsakId,
                     ytelsestype = xmlMottatt.ytelsestype,
                     eksternId = xmlMottatt.referanse,
-                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)
-                )
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt),
+                ),
             )
 
         val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
@@ -201,7 +201,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         håndterGammelKravgrunnlagTask.doTask(lagTask())
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             xmlMottatt.ytelsestype,
-            hentetKravgrunnlag.fagsystemId
+            hentetKravgrunnlag.fagsystemId,
         )
         behandling.shouldNotBeNull()
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id).shouldBeTrue()
@@ -212,7 +212,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
         xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             xmlMottatt.eksternFagsakId,
-            xmlMottatt.ytelsestype
+            xmlMottatt.ytelsestype,
         ).shouldNotBeNull()
     }
 
@@ -224,8 +224,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     eksternFagsakId = xmlMottatt.eksternFagsakId,
                     ytelsestype = xmlMottatt.ytelsestype,
                     eksternId = xmlMottatt.referanse,
-                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)
-                )
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt),
+                ),
             )
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
@@ -253,8 +253,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 revurderingsårsak = "testverdi",
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING
-            )
+                    .IGNORER_TILBAKEKREVING,
+            ),
         )
 
         return objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
@@ -263,7 +263,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private fun assertSteg(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstand.shouldHaveSingleElement {
             it.behandlingssteg == behandlingssteg &&

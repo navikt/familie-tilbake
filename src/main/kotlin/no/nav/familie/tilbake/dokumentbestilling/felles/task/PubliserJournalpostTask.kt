@@ -25,13 +25,13 @@ import java.util.UUID
     taskStepType = PubliserJournalpostTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Publiserer journalpost",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val manuellBrevmottakerService: ManuellBrevmottakerService,
     private val featureToggleService: FeatureToggleService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -69,7 +69,7 @@ class PubliserJournalpostTask(
         journalpostId: String,
         task: Task,
         behandlingId: UUID?,
-        manuellAdresse: ManuellAdresse? = null
+        manuellAdresse: ManuellAdresse? = null,
     ) {
         try {
             integrasjonerClient.distribuerJournalpost(
@@ -77,7 +77,7 @@ class PubliserJournalpostTask(
                 Fagsystem.valueOf(task.metadata.getProperty("fagsystem")),
                 Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
                 Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
-                manuellAdresse
+                manuellAdresse,
             )
         } catch (ressursException: RessursException) {
             when {
@@ -94,7 +94,7 @@ class PubliserJournalpostTask(
 
                 dokumentetErAlleredeDistribuert(ressursException) -> {
                     log.warn(
-                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId."
+                        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering. BehandlingId=$behandlingId.",
                     )
                 }
 

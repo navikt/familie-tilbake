@@ -13,5 +13,5 @@ data class VurdertForeldelsesperiodeDto(
     val begrunnelse: String? = null,
     val foreldelsesvurderingstype: Foreldelsesvurderingstype? = null,
     val foreldelsesfrist: LocalDate? = null,
-    val oppdagelsesdato: LocalDate? = null
+    val oppdagelsesdato: LocalDate? = null,
 )

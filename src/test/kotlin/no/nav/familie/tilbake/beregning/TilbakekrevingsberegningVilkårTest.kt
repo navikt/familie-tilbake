@@ -31,18 +31,18 @@ class TilbakekrevingsberegningVilkårTest {
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 periode = Månedsperiode(
                     LocalDate.of(2019, 5, 1),
-                    LocalDate.of(2019, 5, 3)
+                    LocalDate.of(2019, 5, 3),
                 ),
-                begrunnelse = "foo"
+                begrunnelse = "foo",
             )
         forstoBurdeForstattVurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 periode = Månedsperiode(
                     LocalDate.of(2019, 5, 1),
-                    LocalDate.of(2019, 5, 3)
+                    LocalDate.of(2019, 5, 3),
                 ),
-                begrunnelse = "foo"
+                begrunnelse = "foo",
             )
 
         grunnlagsperiodeMedSkatteprosent =
@@ -54,8 +54,8 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(
             aktsomhet = VilkårsvurderingAktsomhet(
                 aktsomhet = Aktsomhet.FORSETT,
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
 
         // act
@@ -81,8 +81,8 @@ class TilbakekrevingsberegningVilkårTest {
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo",
-                    ileggRenter = true
-                )
+                    ileggRenter = true,
+                ),
             )
 
         // act
@@ -90,7 +90,7 @@ class TilbakekrevingsberegningVilkårTest {
             forstoBurdeForstattVurdering,
             BigDecimal.valueOf(10000),
             Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-            true
+            true,
         )
 
         // assert
@@ -112,8 +112,8 @@ class TilbakekrevingsberegningVilkårTest {
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo",
-                    ileggRenter = false
-                )
+                    ileggRenter = false,
+                ),
             )
 
         // act
@@ -121,7 +121,7 @@ class TilbakekrevingsberegningVilkårTest {
             forstoBurdeForstattVurdering,
             BigDecimal.valueOf(10000),
             Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-            true
+            true,
         )
 
         // assert
@@ -143,8 +143,8 @@ class TilbakekrevingsberegningVilkårTest {
                 aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = false,
-                ileggRenter = true
-            )
+                ileggRenter = true,
+            ),
         )
 
         // assert
@@ -162,8 +162,8 @@ class TilbakekrevingsberegningVilkårTest {
                 aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = false,
-                tilbakekrevSmåbeløp = false
-            )
+                tilbakekrevSmåbeløp = false,
+            ),
         )
 
         // assert
@@ -181,8 +181,8 @@ class TilbakekrevingsberegningVilkårTest {
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = true,
                 ileggRenter = true,
-                andelTilbakekreves = BigDecimal.valueOf(70)
-            )
+                andelTilbakekreves = BigDecimal.valueOf(70),
+            ),
         )
 
         // assert
@@ -200,8 +200,8 @@ class TilbakekrevingsberegningVilkårTest {
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = true,
                 ileggRenter = false,
-                andelTilbakekreves = BigDecimal.valueOf(70)
-            )
+                andelTilbakekreves = BigDecimal.valueOf(70),
+            ),
         )
 
         // assert
@@ -220,8 +220,8 @@ class TilbakekrevingsberegningVilkårTest {
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = true,
                 ileggRenter = false,
-                andelTilbakekreves = BigDecimal("0.01")
-            )
+                andelTilbakekreves = BigDecimal("0.01"),
+            ),
         )
 
         // assert
@@ -240,8 +240,8 @@ class TilbakekrevingsberegningVilkårTest {
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = true,
                 ileggRenter = false,
-                manueltSattBeløp = BigDecimal.valueOf(6556)
-            )
+                manueltSattBeløp = BigDecimal.valueOf(6556),
+            ),
         )
 
         // assert
@@ -259,8 +259,8 @@ class TilbakekrevingsberegningVilkårTest {
                 begrunnelse = "foo",
                 særligeGrunnerTilReduksjon = true,
                 ileggRenter = true,
-                manueltSattBeløp = BigDecimal.valueOf(6000)
-            )
+                manueltSattBeløp = BigDecimal.valueOf(6000),
+            ),
         )
 
         // assert
@@ -276,8 +276,8 @@ class TilbakekrevingsberegningVilkårTest {
             godTro = VilkårsvurderingGodTro(
                 beløpErIBehold = true,
                 beløpTilbakekreves = BigDecimal.valueOf(8991),
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
 
         // assert
@@ -295,8 +295,8 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(
             godTro = VilkårsvurderingGodTro(
                 beløpErIBehold = false,
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
 
         // assert
@@ -315,8 +315,8 @@ class TilbakekrevingsberegningVilkårTest {
             godTro = VilkårsvurderingGodTro(
                 beløpErIBehold = true,
                 beløpTilbakekreves = BigDecimal.valueOf(8991),
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
         val grunnlagPeriodeMedSkattProsent =
             GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
@@ -338,8 +338,8 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(
             aktsomhet = VilkårsvurderingAktsomhet(
                 aktsomhet = Aktsomhet.FORSETT,
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
         val grunnlagPeriodeMedSkattProsent =
             GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
@@ -367,8 +367,8 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = vurdering.copy(
             aktsomhet = VilkårsvurderingAktsomhet(
                 aktsomhet = Aktsomhet.FORSETT,
-                begrunnelse = "foo"
-            )
+                begrunnelse = "foo",
+            ),
         )
         val grunnlagPeriodeMedSkattProsent =
             GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
@@ -395,7 +395,7 @@ class TilbakekrevingsberegningVilkårTest {
         vilkårVurdering: Vilkårsvurderingsperiode,
         feilutbetalt: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter)

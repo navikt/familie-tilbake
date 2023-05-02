@@ -13,7 +13,8 @@ enum class Kravstatuskode(@JsonValue val kode: String, val navn: String) {
     FEIL("FEIL", "Feil på kravgrunnlag"),
     MANUELL("MANU", "Manuell behandling"),
     NYTT("NY", "Nytt kravgrunnlag"),
-    SPERRET("SPER", "Kravgrunnlag sperret");
+    SPERRET("SPER", "Kravgrunnlag sperret"),
+    ;
 
     companion object {
 

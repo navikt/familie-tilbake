@@ -27,7 +27,7 @@ class TekstformatererVarselbrevTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     private val varselbrevsdokument =
@@ -37,7 +37,7 @@ class TekstformatererVarselbrevTest {
             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
             fristdatoForTilbakemelding = LocalDate.of(2020, 4, 4),
             revurderingsvedtaksdato = LocalDate.of(2019, 12, 18),
-            brevmetadata = metadata
+            brevmetadata = metadata,
         )
 
     @Test
@@ -45,7 +45,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(språkkode = Språkkode.NN)
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
-            feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder()
+            feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder(),
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_flere_perioder_nn.txt")
@@ -85,7 +85,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(ytelsestype = Ytelsestype.BARNETRYGD)
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
-            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode()
+            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/BA_en_periode.txt")
@@ -97,7 +97,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(ytelsestype = Ytelsestype.KONTANTSTØTTE)
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
-            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode()
+            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/KS_en_periode.txt")
@@ -140,11 +140,11 @@ class TekstformatererVarselbrevTest {
             ytelsestype = Ytelsestype.BARNETRYGD,
             vergenavn = "John Doe",
             finnesVerge = true,
-            språkkode = Språkkode.NB
+            språkkode = Språkkode.NB,
         )
         val varselbrevsdokument = varselbrevsdokument.copy(
             brevmetadata = metadata,
-            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode()
+            feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/BA_en_periode.txt")
@@ -162,9 +162,9 @@ class TekstformatererVarselbrevTest {
                     YearMonth.of(2022, 1),
                     BigDecimal(1572),
                     BigDecimal(1573),
-                    BigDecimal(1574)
-                )
-            )
+                    BigDecimal(1574),
+                ),
+            ),
         )
 
         val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
@@ -183,9 +183,9 @@ class TekstformatererVarselbrevTest {
                     YearMonth.of(2022, 1),
                     BigDecimal(1572),
                     BigDecimal(1573),
-                    BigDecimal(1574)
-                )
-            )
+                    BigDecimal(1574),
+                ),
+            ),
         )
 
         val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
@@ -204,9 +204,9 @@ class TekstformatererVarselbrevTest {
                     YearMonth.of(2022, 1),
                     BigDecimal(1572),
                     BigDecimal(1573),
-                    BigDecimal(1574)
-                )
-            )
+                    BigDecimal(1574),
+                ),
+            ),
         )
 
         val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
@@ -225,9 +225,9 @@ class TekstformatererVarselbrevTest {
                     YearMonth.of(2022, 1),
                     BigDecimal(1572),
                     BigDecimal(1573),
-                    BigDecimal(1574)
-                )
-            )
+                    BigDecimal(1574),
+                ),
+            ),
         )
 
         val html = TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
@@ -239,11 +239,11 @@ class TekstformatererVarselbrevTest {
     private fun lagFeilutbetalingerMedFlerePerioder(): List<Datoperiode> {
         val periode1 = Datoperiode(
             LocalDate.of(2019, 3, 3),
-            LocalDate.of(2020, 3, 3)
+            LocalDate.of(2020, 3, 3),
         )
         val periode2 = Datoperiode(
             LocalDate.of(2022, 3, 3),
-            LocalDate.of(2024, 3, 3)
+            LocalDate.of(2024, 3, 3),
         )
         return listOf(periode1, periode2)
     }
@@ -252,8 +252,8 @@ class TekstformatererVarselbrevTest {
         return listOf(
             Datoperiode(
                 LocalDate.of(2019, 3, 3),
-                LocalDate.of(2020, 3, 3)
-            )
+                LocalDate.of(2020, 3, 3),
+            ),
         )
     }
 

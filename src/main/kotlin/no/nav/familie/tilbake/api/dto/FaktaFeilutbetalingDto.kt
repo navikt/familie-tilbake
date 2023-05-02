@@ -14,7 +14,7 @@ data class FaktaFeilutbetalingDto(
     val totaltFeilutbetaltBeløp: BigDecimal,
     val revurderingsvedtaksdato: LocalDate,
     val begrunnelse: String,
-    val faktainfo: Faktainfo
+    val faktainfo: Faktainfo,
 ) {
     val gjelderDødsfall get() = feilutbetaltePerioder.any { it.hendelsestype == Hendelsestype.DØDSFALL }
 }
@@ -23,5 +23,5 @@ data class FeilutbetalingsperiodeDto(
     val periode: Datoperiode,
     val feilutbetaltBeløp: BigDecimal,
     val hendelsestype: Hendelsestype? = null,
-    val hendelsesundertype: Hendelsesundertype? = null
+    val hendelsesundertype: Hendelsesundertype? = null,
 )

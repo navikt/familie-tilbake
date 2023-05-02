@@ -16,7 +16,7 @@ class Rad(
     val skatt: BigDecimal,
     val tilbakekrevesNettoUtenRenter: BigDecimal,
     val renter: BigDecimal,
-    val erOmgjøringTilIngenTilbakekreving: Boolean = false
+    val erOmgjøringTilIngenTilbakekreving: Boolean = false,
 ) {
 
     fun toCsvString(): String {

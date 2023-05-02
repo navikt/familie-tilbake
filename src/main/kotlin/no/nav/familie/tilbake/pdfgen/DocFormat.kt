@@ -5,7 +5,8 @@ import java.util.Locale
 enum class DocFormat {
     PDF,
     HTML,
-    EMAIL;
+    EMAIL,
+    ;
 
     override fun toString(): String {
         return name.lowercase(Locale.getDefault())
