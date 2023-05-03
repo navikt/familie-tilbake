@@ -2,8 +2,6 @@ package no.nav.familie.tilbake.common
 
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.YearMonth
 
 object Grunnbeløpsperioder {
 
@@ -32,7 +30,7 @@ data class Grunnbeløp(
 private val grunnbeløpsperioder: List<Grunnbeløp> =
     listOf(
         Grunnbeløp(
-            periode = Månedsperiode("2022-05" to "2023-05"), // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
+            periode = Månedsperiode("2022-05" to "2023-04"), // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
             grunnbeløp = 111_477.toBigDecimal(),
             perMnd = 9_290.toBigDecimal(),
             gjennomsnittPerÅr = 109_784.toBigDecimal()
