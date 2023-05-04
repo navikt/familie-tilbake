@@ -121,12 +121,28 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        val kravgrunnlagsperiode432 = Testdata.kravgrunnlag431.perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
             Testdata.vilkårsvurdering
-                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(godTro = null)))
+                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null)))
         )
-        faktaRepository.insert(Testdata.faktaFeilutbetaling)
+        faktaRepository.insert(
+            Testdata.faktaFeilutbetaling.copy(
+                perioder = setOf(
+                    FaktaFeilutbetalingsperiode(
+                        periode = Månedsperiode("2020-04" to "2022-08"),
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+                    ),
+                    FaktaFeilutbetalingsperiode(
+                        periode = Månedsperiode("2023-03" to "2023-04"),
+                        hendelsestype = Hendelsestype.ANNET,
+                        hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+                    )
+                )
+            )
+        )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
