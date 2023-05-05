@@ -528,7 +528,6 @@
                     </execution>
                     <execution>
                         <id>ktlint-format</id>
-                        <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
                                 <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">

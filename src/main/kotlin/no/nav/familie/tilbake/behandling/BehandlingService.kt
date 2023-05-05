@@ -188,8 +188,7 @@ class BehandlingService(
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
-        val støtterManuelleBrevmottakere =
-            getStøtterManuelleBrevmottakere(fagsak)
+        val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(fagsak)
 
         return BehandlingMapper.tilRespons(
             behandling,
@@ -203,12 +202,6 @@ class BehandlingService(
             manuelleBrevmottakere,
             støtterManuelleBrevmottakere
         )
-    }
-
-    private fun getStøtterManuelleBrevmottakere(fagsak: Fagsak): Boolean {
-        val featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE, true) // @TODO remove param true
-        val erInstitusjon = fagsak.institusjon != null
-        return (featureToggleEnabled && !erInstitusjon)
     }
 
     @Transactional
@@ -625,5 +618,11 @@ class BehandlingService(
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
+    }
+
+    private fun sjekkOmManuelleBrevmottakereErStøttet(fagsak: Fagsak): Boolean {
+        val featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+        val erIkkeInstitusjonssak = fagsak.institusjon == null
+        return featureToggleEnabled && erIkkeInstitusjonssak
     }
 }
