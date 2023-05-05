@@ -15,14 +15,9 @@ import no.nav.familie.tilbake.api.dto.BehandlingPåVentDto
 import no.nav.familie.tilbake.api.dto.ByttEnhetDto
 import no.nav.familie.tilbake.api.dto.HenleggelsesbrevFritekstDto
 import no.nav.familie.tilbake.api.dto.OpprettRevurderingDto
-import no.nav.familie.tilbake.behandling.domain.Behandling
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
-import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.*
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
-import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
-import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -194,7 +189,7 @@ class BehandlingService(
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         val støtterManuelleBrevmottakere =
-            featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            getStøtterManuelleBrevmottakere(fagsak)
 
         return BehandlingMapper.tilRespons(
             behandling,
@@ -208,6 +203,12 @@ class BehandlingService(
             manuelleBrevmottakere,
             støtterManuelleBrevmottakere
         )
+    }
+
+    private fun getStøtterManuelleBrevmottakere(fagsak: Fagsak): Boolean {
+        val featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE, true) // @TODO remove param true
+        val erInstitusjon = fagsak.institusjon != null
+        return (featureToggleEnabled && !erInstitusjon)
     }
 
     @Transactional

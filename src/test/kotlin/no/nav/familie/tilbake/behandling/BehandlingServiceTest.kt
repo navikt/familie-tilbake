@@ -1402,6 +1402,24 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
+    /* Ny test */
+    @Test
+    fun `Behandling på fagsak av type institusjon skal ikke støtte manuelle brevmottakere`() {
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                finnesVerge = false,
+                finnesVarsel = false,
+                manueltOpprettet = false,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                finnesInstitusjon = true
+            )
+
+        var behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        var behandlingDto = behandlingService.hentBehandling(behandling.id);
+
+        behandlingDto.støtterManuelleBrevmottakere shouldBe false
+    }
+
     private fun assertFellesBehandlingRespons(
         behandlingDto: BehandlingDto,
         behandling: Behandling
