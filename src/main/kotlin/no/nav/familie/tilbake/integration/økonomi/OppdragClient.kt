@@ -192,7 +192,7 @@ class DefaultOppdragClient(
         } catch (exception: Exception) {
             logger.error(
                 "Feilutbetalinger kan ikke hentes fra simulering for for ytelsestype=${request.ytelsestype}, " +
-                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId}" +
+                    "eksternFagsakId=${request.eksternFagsakId} og eksternId=${request.fagsystemsbehandlingId} " +
                     "Feiler med ${exception.message}"
             )
             throw IntegrasjonException(
