@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -18,6 +19,8 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.integration.pdl.PdlClient
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,12 +33,16 @@ class ManuellBrevmottakerService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val behandlingskontrollService: BehandlingskontrollService
+    private val behandlingskontrollService: BehandlingskontrollService,
+    private val fagsakService: FagsakService,
+    private val pdlClient: PdlClient,
+    private val integrasjonerClient: IntegrasjonerClient
 ) {
 
     @Transactional
-    fun leggTilBrevmottaker(behandlingId: UUID, manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto): UUID {
-        val manuellBrevmottaker = ManuellBrevmottakerMapper.tilDomene(behandlingId, manuellBrevmottakerRequestDto)
+    fun leggTilBrevmottaker(behandlingId: UUID, requestDto: ManuellBrevmottakerRequestDto): UUID {
+        val navnFraRegister: String? = hentPersonEllerOrganisasjonNavnFraRegister(requestDto, behandlingId)
+        val manuellBrevmottaker = ManuellBrevmottakerMapper.tilDomene(behandlingId, requestDto, navnFraRegister)
         val id = manuellBrevmottakerRepository.insert(manuellBrevmottaker).id
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
@@ -50,6 +57,7 @@ class ManuellBrevmottakerService(
 
     @Transactional
     fun oppdaterBrevmottaker(
+        behandlingId: UUID,
         manuellBrevmottakerId: UUID,
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
     ) {
@@ -59,7 +67,8 @@ class ManuellBrevmottakerService(
         manuellBrevmottakerRepository.update(
             manuellBrevmottaker.copy(
                 type = manuellBrevmottakerRequestDto.type,
-                navn = manuellBrevmottakerRequestDto.navn,
+                navn = hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId)
+                    ?: manuellBrevmottakerRequestDto.navn,
                 ident = manuellBrevmottakerRequestDto.personIdent,
                 orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
                 adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
@@ -128,6 +137,20 @@ class ManuellBrevmottakerService(
                 frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
                 httpStatus = HttpStatus.BAD_REQUEST
             )
+        }
+    }
+
+    private fun hentPersonEllerOrganisasjonNavnFraRegister(dto: ManuellBrevmottakerRequestDto, behandlingId: UUID): String? {
+        return dto.personIdent?.let {
+            pdlClient.hentPersoninfo(ident = it, fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)).navn
+        } ?: dto.organisasjonsnummer?.let {
+            if (!integrasjonerClient.validerOrganisasjon(it)) {
+                throw Feil(
+                    message = "Organisasjon $it er ikke gyldig",
+                    frontendFeilmelding = "Organisasjon $it er ikke gyldig"
+                )
+            }
+            integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
         }
     }
 }
