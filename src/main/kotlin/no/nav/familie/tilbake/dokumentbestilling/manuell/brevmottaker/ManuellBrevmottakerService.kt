@@ -41,7 +41,7 @@ class ManuellBrevmottakerService(
 
     @Transactional
     fun leggTilBrevmottaker(behandlingId: UUID, requestDto: ManuellBrevmottakerRequestDto): UUID {
-        val navnFraRegister: String? = hentNavn(requestDto, behandlingId)
+        val navnFraRegister: String? = hentPersonEllerOrganisasjonNavnFraRegister(requestDto, behandlingId)
         val manuellBrevmottaker = ManuellBrevmottakerMapper.tilDomene(behandlingId, requestDto, navnFraRegister)
         val id = manuellBrevmottakerRepository.insert(manuellBrevmottaker).id
         historikkService.lagHistorikkinnslag(
@@ -67,7 +67,8 @@ class ManuellBrevmottakerService(
         manuellBrevmottakerRepository.update(
             manuellBrevmottaker.copy(
                 type = manuellBrevmottakerRequestDto.type,
-                navn = hentNavn(manuellBrevmottakerRequestDto, behandlingId) ?: manuellBrevmottakerRequestDto.navn,
+                navn = hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId)
+                    ?: manuellBrevmottakerRequestDto.navn,
                 ident = manuellBrevmottakerRequestDto.personIdent,
                 orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
                 adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
@@ -139,7 +140,7 @@ class ManuellBrevmottakerService(
         }
     }
 
-    private fun hentNavn(dto: ManuellBrevmottakerRequestDto, behandlingId: UUID): String? {
+    private fun hentPersonEllerOrganisasjonNavnFraRegister(dto: ManuellBrevmottakerRequestDto, behandlingId: UUID): String? {
         return dto.personIdent?.let {
             pdlClient.hentPersoninfo(ident = it, fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)).navn
         } ?: dto.organisasjonsnummer?.let {
