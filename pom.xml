@@ -24,7 +24,7 @@
         <kotlin.version>1.8.21</kotlin.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20230313155154_f9438bd</kontrakter.version>
+        <kontrakter.version>3.0_20230505152139_b374866-JAKARTA</kontrakter.version>
         <kotest.version>5.6.1</kotest.version>
         <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
