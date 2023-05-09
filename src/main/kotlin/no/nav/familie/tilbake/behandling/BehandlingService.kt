@@ -187,8 +187,9 @@ class BehandlingService(
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
-        val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(fagsak)
+        val manuelleBrevmottakere = if (støtterManuelleBrevmottakere)
+            manuellBrevmottakerRepository.findByBehandlingId(behandlingId) else emptyList()
 
         return BehandlingMapper.tilRespons(
             behandling,
