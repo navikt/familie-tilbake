@@ -90,7 +90,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = any(),
                 historikkinnslagstype = any(),
                 aktør = any(),
-                opprettetTidspunkt = capture(opprettetTidspunktSlot)
+                opprettetTidspunkt = capture(opprettetTidspunktSlot),
+                tittel = any(),
+                beskrivelse = any()
             )
         } just runs
     }
@@ -127,7 +129,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                beskrivelse = any(),
+                tittel = any()
             )
         }
 
@@ -175,7 +179,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                beskrivelse = any(),
+                tittel = any()
             )
         }
 
@@ -191,7 +197,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[2]
+                opprettetTidspunkt = opprettetTidspunktSlot[2],
+                beskrivelse = any(),
+                tittel = any()
             )
         }
     }
@@ -202,7 +210,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.AUTOUTFØRT
         }
     }
 
@@ -243,7 +251,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
         behandlingsstegstilstandRepository.findByBehandlingId(behandling.id).shouldHaveSingleElement {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
-                    it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
+                it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
         }
     }
 

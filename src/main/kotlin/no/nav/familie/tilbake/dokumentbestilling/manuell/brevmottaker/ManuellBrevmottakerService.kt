@@ -177,5 +177,5 @@ fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
             )
         } else {
             null
-        } 
+        }
     }
