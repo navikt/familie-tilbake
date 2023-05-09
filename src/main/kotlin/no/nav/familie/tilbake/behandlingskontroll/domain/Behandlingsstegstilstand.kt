@@ -35,6 +35,7 @@ enum class Behandlingssteg(
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
     BREVMOTTAKER(3, true, false, Behandlingsstatus.UTREDES, "Registrere brevmottakere manuelt. Erstatter Verge-steget"),
+
     @Deprecated("Erstattes av BREVMOTTAKER")
     VERGE(3, true, false, Behandlingsstatus.UTREDES, "Fakta om verge"),
     FAKTA(4, true, true, Behandlingsstatus.UTREDES, "Fakta om Feilutbetaling"),
@@ -54,7 +55,9 @@ enum class Behandlingssteg(
     companion object {
 
         fun finnNesteBehandlingssteg(
-            behandlingssteg: Behandlingssteg, harVerge: Boolean, harManuelleBrevmottakere: Boolean
+            behandlingssteg: Behandlingssteg,
+            harVerge: Boolean,
+            harManuelleBrevmottakere: Boolean
         ): Behandlingssteg {
             val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1, harManuelleBrevmottakere)
             if (nesteBehandlingssteg == VERGE && !harVerge) {

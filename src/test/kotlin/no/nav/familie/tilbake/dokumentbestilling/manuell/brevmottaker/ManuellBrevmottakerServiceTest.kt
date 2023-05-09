@@ -111,14 +111,16 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = any(),
                 historikkinnslagstype = any(),
                 aktør = any(),
-                opprettetTidspunkt = capture(opprettetTidspunktSlot)
+                opprettetTidspunkt = capture(opprettetTidspunktSlot),
+                tittel = any(),
+                beskrivelse = any()
             )
         } just runs
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
         every { mockIntegrasjonerClient.hentOrganisasjon("123456789") } returns
-                Organisasjon("123456789", navn = "Organisasjon AS")
+            Organisasjon("123456789", navn = "Organisasjon AS")
     }
 
     @AfterEach
@@ -153,7 +155,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                beskrivelse = any(),
+                tittel = any()
             )
         }
 
@@ -202,7 +206,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1])
+                opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
+                beskrivelse = any(),
+                tittel = any()
             )
         }
 
@@ -218,7 +224,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandling.id,
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
                 aktør = Aktør.SAKSBEHANDLER,
-                opprettetTidspunkt = opprettetTidspunktSlot[2]
+                opprettetTidspunkt = opprettetTidspunktSlot[2],
+                beskrivelse = any(),
+                tittel = any()
             )
         }
     }

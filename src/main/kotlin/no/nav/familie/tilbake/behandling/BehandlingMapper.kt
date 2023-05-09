@@ -114,7 +114,7 @@ object BehandlingMapper {
             behandlingsårsakstype = behandling.sisteÅrsak?.type,
             harManuelleBrevmottakere = manuelleBrevmottakere.isNotEmpty(),
             støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
-            manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
+            manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) }
         )
     }
 

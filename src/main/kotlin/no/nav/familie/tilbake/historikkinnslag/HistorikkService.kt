@@ -14,6 +14,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_ENDRET
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND
@@ -42,7 +45,8 @@ class HistorikkService(
         opprettetTidspunkt: LocalDateTime,
         beskrivelse: String? = null,
         brevtype: String? = null,
-        beslutter: String? = null
+        beslutter: String? = null,
+        tittel: String? = null
     ) {
         val request = lagHistorikkinnslagRequest(
             behandlingId,
@@ -51,7 +55,8 @@ class HistorikkService(
             opprettetTidspunkt,
             beskrivelse,
             brevtype,
-            beslutter
+            beslutter,
+            tittel
         )
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
@@ -63,7 +68,8 @@ class HistorikkService(
         opprettetTidspunkt: LocalDateTime,
         beskrivelse: String?,
         brevtype: String?,
-        beslutter: String?
+        beslutter: String?,
+        tittel: String?
     ): OpprettHistorikkinnslagRequest {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -79,7 +85,7 @@ class HistorikkService(
             aktørIdent = hentAktørIdent(behandling, aktør, beslutter),
             opprettetTidspunkt = opprettetTidspunkt,
             steg = historikkinnslagstype.steg?.name,
-            tittel = historikkinnslagstype.tittel,
+            tittel = tittel ?: historikkinnslagstype.tittel,
             tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
             journalpostId = brevdata?.journalpostId,
             dokumentId = brevdata?.dokumentId
@@ -106,6 +112,7 @@ class HistorikkService(
             BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE -> "$beskrivelse er ikke sendt"
             DISTRIBUSJON_BREV_DØDSBO_SUKSESS -> "$beskrivelse er sendt"
             DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND -> "${historikkinnslagstype.tekst}. $beskrivelse er ikke sendt"
+            BREVMOTTAKER_ENDRET, BREVMOTTAKER_LAGT_TIL, BREVMOTTAKER_FJERNET -> beskrivelse
             else -> historikkinnslagstype.tekst
         }
     }
