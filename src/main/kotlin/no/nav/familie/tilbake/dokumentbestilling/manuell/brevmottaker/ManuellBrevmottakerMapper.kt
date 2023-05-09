@@ -9,11 +9,11 @@ import java.util.UUID
 
 object ManuellBrevmottakerMapper {
 
-    fun tilDomene(behandlingId: UUID, manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto) =
+    fun tilDomene(behandlingId: UUID, manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto, navnFraRegister: String?) =
         ManuellBrevmottaker(
             behandlingId = behandlingId,
             type = manuellBrevmottakerRequestDto.type,
-            navn = manuellBrevmottakerRequestDto.navn,
+            navn = navnFraRegister ?: manuellBrevmottakerRequestDto.navn,
             ident = manuellBrevmottakerRequestDto.personIdent,
             orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
             adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
