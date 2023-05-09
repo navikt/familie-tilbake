@@ -12,13 +12,16 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.DØDSBO
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -32,6 +35,9 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
+import no.nav.familie.tilbake.integration.pdl.PdlClient
+import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -62,6 +68,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
     private val opprettetTidspunktSlot = mutableListOf<LocalDateTime>()
@@ -78,12 +87,24 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         )
     )
 
+    private val mockPdlClient: PdlClient = mockk()
+
+    private val mockIntegrasjonerClient: IntegrasjonerClient = mockk()
+
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
 
-        manuellBrevmottakerService = ManuellBrevmottakerService(manuellBrevmottakerRepository, mockHistorikkService, behandlingRepository, behandlingskontrollService)
+        manuellBrevmottakerService = ManuellBrevmottakerService(
+            manuellBrevmottakerRepository = manuellBrevmottakerRepository,
+            historikkService = mockHistorikkService,
+            behandlingRepository = behandlingRepository,
+            behandlingskontrollService = behandlingskontrollService,
+            fagsakService = fagsakService,
+            pdlClient = mockPdlClient,
+            integrasjonerClient = mockIntegrasjonerClient
+        )
 
         every {
             mockHistorikkService.lagHistorikkinnslag(
@@ -95,6 +116,11 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 beskrivelse = any()
             )
         } just runs
+
+        every { mockPdlClient.hentPersoninfo(any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
+        every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
+        every { mockIntegrasjonerClient.hentOrganisasjon("123456789") } returns
+            Organisasjon("123456789", navn = "Organisasjon AS")
     }
 
     @AfterEach
@@ -145,6 +171,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
+                behandling.id,
                 dbManuellBrevmottaker.id,
                 oppdatertManuellBrevmottaker
             )
@@ -253,6 +280,37 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             it.behandlingssteg == Behandlingssteg.BREVMOTTAKER &&
                 it.behandlingsstegsstatus == Behandlingsstegstatus.TILBAKEFØRT
         }
+    }
+
+    @Test
+    fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
+        val requestMedPersonIdent = manuellBrevmottakerRequestDto.copy(
+            personIdent = "12345678910",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
+
+        var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA).navn
+
+        val requestMedOrgnrUtenKontaktperson = manuellBrevmottakerRequestDto.copy(
+            navn = " ",
+            organisasjonsnummer = "123456789",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrUtenKontaktperson)
+
+        lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe "Organisasjon AS"
+
+        val requestMedOrgnrMedKontaktperson = manuellBrevmottakerRequestDto.copy(
+            organisasjonsnummer = "123456789",
+            manuellAdresseInfo = null
+        )
+        manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrMedKontaktperson)
+
+        lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
+        lagretMottaker.navn shouldBe "Organisasjon AS v/ ${manuellBrevmottakerRequestDto.navn}"
     }
 
     private fun assertEqualsManuellBrevmottaker(a: ManuellBrevmottaker, b: ManuellBrevmottakerRequestDto) {
