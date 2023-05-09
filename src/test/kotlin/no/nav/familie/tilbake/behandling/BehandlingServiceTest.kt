@@ -1414,7 +1414,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
                 finnesInstitusjon = true,
-                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
             )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
