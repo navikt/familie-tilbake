@@ -21,6 +21,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.REVURDERING_TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -192,9 +193,12 @@ class BehandlingService(
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
-        val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
-        val støtterManuelleBrevmottakere =
-            featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+        val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(fagsak)
+        val manuelleBrevmottakere = if (støtterManuelleBrevmottakere) {
+            manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
+        } else {
+            emptyList()
+        }
 
         return BehandlingMapper.tilRespons(
             behandling,
@@ -624,5 +628,11 @@ class BehandlingService(
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
+    }
+
+    private fun sjekkOmManuelleBrevmottakereErStøttet(fagsak: Fagsak): Boolean {
+        val featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+        val erIkkeInstitusjonssak = fagsak.institusjon == null
+        return featureToggleEnabled && erIkkeInstitusjonssak
     }
 }

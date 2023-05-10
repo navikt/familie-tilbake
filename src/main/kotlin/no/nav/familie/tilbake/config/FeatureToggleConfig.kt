@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
@@ -27,6 +28,7 @@ class FeatureToggleConfig(
     )
 
     @Bean
+    @Profile("!integrasjonstest")
     fun featureToggle(): FeatureToggleService =
         if (enabled) {
             lagUnleashFeatureToggleService()

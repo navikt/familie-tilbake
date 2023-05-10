@@ -62,6 +62,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
@@ -129,6 +130,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingskontrollService: BehandlingskontrollService
+
+    @Autowired
+    private lateinit var featureToggleService: FeatureToggleService
 
     private val fom: LocalDate = LocalDate.now().minusMonths(1)
     private val tom: LocalDate = LocalDate.now()
@@ -1402,6 +1406,22 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
+    @Test
+    fun `Behandling på fagsak av type institusjon skal ikke støtte manuelle brevmottakere`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
+
+        val opprettTilbakekrevingRequest =
+            lagOpprettTilbakekrevingRequest(
+                finnesInstitusjon = true,
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            )
+
+        val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
+        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+
+        behandlingDto.støtterManuelleBrevmottakere shouldBe false
+    }
+
     private fun assertFellesBehandlingRespons(
         behandlingDto: BehandlingDto,
         behandling: Behandling
@@ -1528,10 +1548,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagOpprettTilbakekrevingRequest(
-        finnesVerge: Boolean,
-        finnesVarsel: Boolean,
-        manueltOpprettet: Boolean,
         tilbakekrevingsvalg: Tilbakekrevingsvalg,
+        finnesVerge: Boolean = false,
+        finnesVarsel: Boolean = false,
+        manueltOpprettet: Boolean = false,
         finnesInstitusjon: Boolean = false,
         finnesManuelleBrevmottakere: Boolean = false
     ): OpprettTilbakekrevingRequest {
