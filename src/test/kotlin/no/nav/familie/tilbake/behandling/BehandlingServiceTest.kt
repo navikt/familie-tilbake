@@ -1406,7 +1406,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
-    /* Ny test */
     @Test
     fun `Behandling på fagsak av type institusjon skal ikke støtte manuelle brevmottakere`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
