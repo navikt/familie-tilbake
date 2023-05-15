@@ -467,7 +467,7 @@
                 <!-- Plugin required to build java classes from XSD using XJC -->
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.15.2</version>
+                <version>0.15.3</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.glassfish.jaxb</groupId>
