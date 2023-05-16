@@ -47,7 +47,9 @@ class PdfBrevService(
     ) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
-        if (data.mottager != Brevmottager.VERGE) { // Ikke tell kopier sendt til verge
+        if (data.mottager != Brevmottager.VERGE &&
+            !data.metadata.annenMottakersNavn.equals(data.metadata.sakspartsnavn, ignoreCase = true)) { // TODO: bruke contains istedenfor equals pga. potensiel suffix ved dødsbo?
+            // Ikke tell kopier sendt til verge eller fullmektig
             tellerService.tellBrevSendt(fagsak, brevtype)
         }
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)

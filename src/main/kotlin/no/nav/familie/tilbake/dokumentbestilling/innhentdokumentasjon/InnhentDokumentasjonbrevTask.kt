@@ -12,6 +12,8 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -33,19 +35,24 @@ class InnhentDokumentasjonbrevTask(
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val fagsakRepository: FagsakRepository
-) : AsyncTaskStep {
+    private val fagsakRepository: FagsakRepository,
+    private val featureToggleService: FeatureToggleService,
+    ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         val fritekst: String = taskdata.fritekst
-        if (behandling.harVerge) {
-            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+            if (behandling.harVerge) {
+                innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
+            }
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
+        } else {
+            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst)
         }
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-        innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(

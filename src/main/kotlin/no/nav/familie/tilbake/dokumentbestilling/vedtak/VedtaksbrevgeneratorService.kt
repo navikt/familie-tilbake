@@ -54,9 +54,10 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
+        brevmetadata: Brevmetadata? = null
     ): Brevdata {
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager)
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
             TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
@@ -79,13 +80,15 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        dto: HentForhåndvisningVedtaksbrevPdfDto
+        dto: HentForhåndvisningVedtaksbrevPdfDto,
+        brevmetadata: Brevmetadata? = null
     ): Brevdata {
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
             dto.perioderMedTekst,
-            vedtaksbrevgrunnlag.brevmottager
+            vedtaksbrevgrunnlag.brevmottager,
+            brevmetadata
         )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
 
@@ -104,33 +107,38 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    fun genererVedtaksbrevsdata(vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag): HbVedtaksbrevsdata {
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, vedtaksbrevgrunnlag.brevmottager)
+    fun genererVedtaksbrevsdata(
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
+        brevmetadata: Brevmetadata? = null
+    ): HbVedtaksbrevsdata {
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, vedtaksbrevgrunnlag.brevmottager, brevmetadata)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
 
     private fun hentDataForVedtaksbrev(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
+        brevmetadata: Brevmetadata? = null
     ): Vedtaksbrevsdata {
         val fritekstoppsummering = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.oppsummeringFritekst
         val fritekstPerioder: List<PeriodeMedTekstDto> =
             VedtaksbrevFritekstMapper.mapFritekstFraDb(vedtaksbrevgrunnlag.behandling.eksisterendePerioderForBrev)
-        return hentDataForVedtaksbrev(vedtaksbrevgrunnlag, fritekstoppsummering, fritekstPerioder, brevmottager)
+        return hentDataForVedtaksbrev(vedtaksbrevgrunnlag, fritekstoppsummering, fritekstPerioder, brevmottager, brevmetadata)
     }
 
     private fun hentDataForVedtaksbrev(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         oppsummeringFritekst: String?,
         perioderFritekst: List<PeriodeMedTekstDto>,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
+        brevmetadata: Brevmetadata? = null
     ): Vedtaksbrevsdata {
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(
             vedtaksbrevgrunnlag.bruker.ident,
             vedtaksbrevgrunnlag.fagsystem
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
-        val brevMetadata: Brevmetadata = lagMetadataForVedtaksbrev(
+        val brevMetadata: Brevmetadata = brevmetadata ?: lagMetadataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             personinfo,
             beregnetResultat.vedtaksresultat,

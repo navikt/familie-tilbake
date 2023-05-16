@@ -10,6 +10,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -30,7 +32,8 @@ class SendVedtaksbrevTask(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -65,12 +68,16 @@ class SendVedtaksbrevTask(
             return
         }
 
-        if (behandling.harVerge) {
-            vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+            if (behandling.harVerge) {
+                vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
+            }
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+            vedtaksbrevService.sendVedtaksbrev(behandling, brevmottager)
+        } else {
+            vedtaksbrevService.sendVedtaksbrev(behandling)
         }
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-        vedtaksbrevService.sendVedtaksbrev(behandling, brevmottager)
         log.info("Utført for behandling: {}", behandlingId)
     }
 

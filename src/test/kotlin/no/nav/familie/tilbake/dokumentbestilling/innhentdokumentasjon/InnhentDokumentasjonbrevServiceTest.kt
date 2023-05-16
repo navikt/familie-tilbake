@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.SendBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -27,6 +28,8 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var pdfBrevService: PdfBrevService
+    @Autowired
+    lateinit var sendBrevService: SendBrevService
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
@@ -39,7 +42,8 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             behandlingRepository,
             mockEksterneDataForBrevService,
             pdfBrevService,
-            organisasjonService
+            organisasjonService,
+            sendBrevService
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling

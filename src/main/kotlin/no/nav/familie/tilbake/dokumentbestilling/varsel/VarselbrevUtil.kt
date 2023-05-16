@@ -83,7 +83,7 @@ class VarselbrevUtil(
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(ContextService.hentSaksbehandler())
 
-        val metadata = Brevmetadata(
+        val metadata = Brevmetadata( // TODO Sette finnesAnnenMottaker og annenMottakersNavn etter request-utvidelse med tilrettelagt støtte for det
             sakspartId = personinfo.ident,
             sakspartsnavn = personinfo.navn,
             finnesVerge = request.verge != null,

@@ -9,6 +9,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Component
@@ -26,19 +28,24 @@ import java.util.UUID
 class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
 
-        if (behandling.harVerge) {
-            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.VERGE)
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+            if (behandling.harVerge) {
+                henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.VERGE)
+            }
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, brevmottager)
+        } else {
+            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst)
         }
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, brevmottager)
     }
 
     companion object {

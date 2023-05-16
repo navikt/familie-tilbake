@@ -111,6 +111,7 @@ class JournalføringService(
             )
             Brevmottager.VERGE -> lagVergemottager(behandling)
             Brevmottager.INSTITUSJON -> lagInstitusjonmottager(behandling, brevmetadata)
+            Brevmottager.MANUELL -> TODO()
         }
     }
 

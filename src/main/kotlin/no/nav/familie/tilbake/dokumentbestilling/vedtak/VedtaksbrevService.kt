@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.dokumentbestilling.SendBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -25,24 +26,33 @@ class VedtaksbrevService(
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
-    private val pdfBrevService: PdfBrevService
+    private val pdfBrevService: PdfBrevService,
+    private val sendBrevService: SendBrevService,
 ) {
 
-    fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager) {
+    fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager? = null) {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottager)
-        pdfBrevService.sendBrev(
-            behandling,
-            fagsak,
-            Brevtype.VEDTAK,
-            brevdata
-        )
+        if (brevmottager != null) {
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottager)
+            pdfBrevService.sendBrev(
+                behandling,
+                fagsak,
+                Brevtype.VEDTAK,
+                brevdata
+            )
+        } else {
+            sendBrevService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
+                vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata)
+            }
+        }
     }
 
     fun hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto: HentForhåndvisningVedtaksbrevPdfDto): ByteArray {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(dto.behandlingId)
-        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(vedtaksbrevgrunnlag, dto)
+        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForForhåndsvisning(
+            vedtaksbrevgrunnlag, dto, sendBrevService.genererMetadataForBrev(Brevtype.VEDTAK, dto.behandlingId)
+        )
 
         return pdfBrevService.genererForhåndsvisning(brevdata)
     }
@@ -50,7 +60,10 @@ class VedtaksbrevService(
     fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
 
-        val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdata(vedtaksbrevgrunnlag)
+        val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdata(
+            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
+            brevmetadata = sendBrevService.genererMetadataForBrev(Brevtype.VEDTAK, behandlingId)
+        )
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
     }
