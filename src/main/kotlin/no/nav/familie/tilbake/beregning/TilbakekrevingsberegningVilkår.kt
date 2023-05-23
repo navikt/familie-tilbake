@@ -144,7 +144,7 @@ internal object TilbakekrevingsberegningVilkår {
         } else if (godTro != null) {
             return godTro.beløpTilbakekreves
         }
-        throw IllegalArgumentException("VVurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
+        throw IllegalArgumentException("Vurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
     }
 
     private fun finnVurdering(vurdering: Vilkårsvurderingsperiode): Vurdering {
@@ -154,6 +154,6 @@ internal object TilbakekrevingsberegningVilkår {
         if (vurdering.godTro != null) {
             return AnnenVurdering.GOD_TRO
         }
-        throw IllegalArgumentException("VVurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
+        throw IllegalArgumentException("Vurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
     }
 }
