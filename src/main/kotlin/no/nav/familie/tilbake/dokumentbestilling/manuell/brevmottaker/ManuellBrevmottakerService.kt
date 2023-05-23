@@ -68,7 +68,8 @@ class ManuellBrevmottakerService(
 
         val oppdatertBrevmottaker = manuellBrevmottaker.copy(
             type = manuellBrevmottakerRequestDto.type,
-            navn = hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId) ?: manuellBrevmottakerRequestDto.navn,
+            navn = hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId)
+                ?: manuellBrevmottakerRequestDto.navn,
             ident = manuellBrevmottakerRequestDto.personIdent,
             orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
             adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
@@ -79,13 +80,20 @@ class ManuellBrevmottakerService(
             vergetype = manuellBrevmottakerRequestDto.vergetype
         )
 
+        val historikkinnslagtittel =
+            if (manuellBrevmottaker.type == oppdatertBrevmottaker.type) {
+                "${manuellBrevmottaker.type.visningsnavn} er endret"
+            } else {
+                "${manuellBrevmottaker.type.visningsnavn} er endret til ${oppdatertBrevmottaker.type.visningsnavn}"
+            }
+
         historikkService.lagHistorikkinnslag(
             behandlingId = manuellBrevmottaker.behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_ENDRET,
             aktør = Aktør.SAKSBEHANDLER,
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(oppdatertBrevmottaker),
-            tittel = "${manuellBrevmottaker.type.visningsnavn} er endret til"
+            tittel = historikkinnslagtittel
         )
 
         manuellBrevmottakerRepository.update(oppdatertBrevmottaker)
@@ -97,7 +105,10 @@ class ManuellBrevmottakerService(
         if (manuellBrevmottakere.none { it.id == manuellBrevmottakerId }) {
             throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId for behandlingId=$behandlingId")
         }
-        fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottakere.single { it.id == manuellBrevmottakerId }, behandlingId)
+        fjernBrevmottakerOgLagHistorikkinnslag(
+            manuellBrevmottakere.single { it.id == manuellBrevmottakerId },
+            behandlingId
+        )
     }
 
     @Transactional
@@ -163,9 +174,15 @@ class ManuellBrevmottakerService(
             brevmottaker.landkode
         ).joinToString(separator = System.lineSeparator())
 
-    private fun hentPersonEllerOrganisasjonNavnFraRegister(dto: ManuellBrevmottakerRequestDto, behandlingId: UUID): String? {
+    private fun hentPersonEllerOrganisasjonNavnFraRegister(
+        dto: ManuellBrevmottakerRequestDto,
+        behandlingId: UUID
+    ): String? {
         return dto.personIdent?.let {
-            pdlClient.hentPersoninfo(ident = it, fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)).navn
+            pdlClient.hentPersoninfo(
+                ident = it,
+                fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
+            ).navn
         } ?: dto.organisasjonsnummer?.let {
             if (!integrasjonerClient.validerOrganisasjon(it)) {
                 throw Feil(
