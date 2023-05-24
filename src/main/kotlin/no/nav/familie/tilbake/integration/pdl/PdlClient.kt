@@ -39,8 +39,12 @@ class PdlClient(
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(mapTilTema(fagsystem))
         )
+        if (respons.harAdvarsel()) {
+            logger.warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
+            secureLogger.warn("Advarsel ved henting av personinfo fra PDL: ${respons.extensions?.warnings}")
+        }
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
                 val aktivtIdent = it.identer.first().identifikasjonsnummer ?: error("Kan ikke hente aktivt ident fra PDL")
@@ -70,9 +74,12 @@ class PdlClient(
         val response = postForEntity<PdlHentIdenterResponse>(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(mapTilTema(fagsystem))
         )
-
+        if (response.harAdvarsel()) {
+            logger.warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
+            secureLogger.warn("Advarsel ved henting av personidenter fra PDL: ${response.extensions?.warnings}")
+        }
         if (!response.harFeil()) return response
         throw Feil(
             message = "Feil mot pdl: ${response.errorMessages()}",
@@ -81,14 +88,11 @@ class PdlClient(
         )
     }
 
-    private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
+    private fun httpHeaders(tema: Tema): HttpHeaders {
         return HttpHeaders().apply {
-            add("Tema", hentTema(fagsystem).name)
+            add("Tema", tema.name)
+            add("behandlingsnummer", tema.behandlingsnummer)
         }
-    }
-
-    private fun hentTema(fagsystem: Fagsystem): Tema {
-        return Tema.valueOf(fagsystem.tema)
     }
 
     override val pingUri: URI
@@ -96,5 +100,13 @@ class PdlClient(
 
     override fun ping() {
         operations.optionsForAllow(pingUri)
+    }
+    private fun mapTilTema(fagsystem: Fagsystem): Tema {
+        return when (fagsystem) {
+            Fagsystem.EF -> Tema.ENF
+            Fagsystem.KONT -> Tema.KON
+            Fagsystem.BA -> Tema.BAR
+            else -> error("Ugyldig fagsystem=${fagsystem.navn}")
+        }
     }
 }
