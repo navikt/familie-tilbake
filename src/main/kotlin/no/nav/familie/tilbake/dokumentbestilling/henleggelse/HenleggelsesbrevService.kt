@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.dokumentbestilling.SendBrevService
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -32,13 +32,29 @@ class HenleggelsesbrevService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
-    private val sendBrevService: SendBrevService,
+    private val distribusjonshåndteringService: DistribusjonshåndteringService,
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager? = null) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        if (brevmottager != null) {
+        if (brevmottager == null) {
+            distribusjonshåndteringService.sendBrev(behandling, Brevtype.HENLEGGELSE) { brevmottaker, brevmetadata ->
+                val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottaker, brevmetadata)
+                val fritekstbrevData: Fritekstbrevsdata =
+                    if (Behandlingstype.TILBAKEKREVING == behandling.type) {
+                        lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
+                    } else {
+                        lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
+                    }
+                Brevdata(
+                    mottager = brevmottaker,
+                    metadata = fritekstbrevData.brevmetadata,
+                    overskrift = fritekstbrevData.overskrift,
+                    brevtekst = fritekstbrevData.brevtekst
+                )
+            }
+        } else {
             val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager)
             val fritekstbrevData: Fritekstbrevsdata =
                 if (Behandlingstype.TILBAKEKREVING == behandling.type) {
@@ -57,36 +73,15 @@ class HenleggelsesbrevService(
                     brevtekst = fritekstbrevData.brevtekst
                 )
             )
-        } else {
-            sendBrevService.sendBrev(behandling, Brevtype.HENLEGGELSE) { brevmottaker, brevmetadata ->
-                val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottaker, brevmetadata)
-                val fritekstbrevData: Fritekstbrevsdata =
-                    if (Behandlingstype.TILBAKEKREVING == behandling.type) {
-                        lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
-                    } else {
-                        lagRevurderingHenleggelsebrev(henleggelsesbrevSamletInfo)
-                    }
-                Brevdata(
-                    mottager = brevmottaker,
-                    metadata = fritekstbrevData.brevmetadata,
-                    overskrift = fritekstbrevData.overskrift,
-                    brevtekst = fritekstbrevData.brevtekst
-                )
-            }
         }
     }
 
     fun hentForhåndsvisningHenleggelsesbrev(behandlingUuid: UUID, fritekst: String?): ByteArray {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingUuid)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevMottaker: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
-        val henleggelsesbrevSamletInfo = lagHenleggelsebrev(
-            behandling,
-            fagsak,
-            fritekst,
-            brevMottaker,
-            forhåndsgenerertMetadata = sendBrevService.genererMetadataForBrev(Brevtype.HENLEGGELSE, behandlingUuid)
-        )
+        val (metadata, brevmottager) =
+            distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(behandling.id)
+        val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager, metadata)
         val fritekstbrevData: Fritekstbrevsdata =
             if (Behandlingstype.TILBAKEKREVING == behandling.type) {
                 lagHenleggelsesbrev(henleggelsesbrevSamletInfo)
@@ -95,7 +90,7 @@ class HenleggelsesbrevService(
             }
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
-                mottager = brevMottaker,
+                mottager = brevmottager,
                 metadata = fritekstbrevData.brevmetadata,
                 overskrift = fritekstbrevData.overskrift,
                 brevtekst = fritekstbrevData.brevtekst
@@ -151,7 +146,6 @@ class HenleggelsesbrevService(
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
             behandlingstype = behandling.type,
-            tittel = TITTEL_HENLEGGELSESBREV,
             gjelderDødsfall = gjelderDødsfall,
             institusjon = fagsak.institusjon?.let {
                 organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
@@ -159,7 +153,7 @@ class HenleggelsesbrevService(
         )
 
         return Henleggelsesbrevsdokument(
-            metadata,
+            metadata.copy(tittel = TITTEL_HENLEGGELSESBREV),
             brevSporing?.sporbar?.opprettetTid?.toLocalDate(),
             fritekst
         )

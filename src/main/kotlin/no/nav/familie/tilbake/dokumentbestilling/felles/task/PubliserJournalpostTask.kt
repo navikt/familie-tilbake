@@ -5,15 +5,11 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
-import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE
-import no.nav.familie.tilbake.config.FeatureToggleService
-import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerService
-import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.toManuelleAdresser
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -29,8 +25,6 @@ import java.util.UUID
 )
 class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
-    private val manuellBrevmottakerService: ManuellBrevmottakerService,
-    private val featureToggleService: FeatureToggleService,
     private val taskService: TaskService
 ) : AsyncTaskStep {
 
@@ -40,29 +34,10 @@ class PubliserJournalpostTask(
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
         val journalpostId = task.metadata.getProperty("journalpostId")
-        val behandlingId = UUID.fromString(task.payload)
+        val (behandlingId, manuellAdresse) = objectMapper.readValue(task.payload, PubliserJournalpostTaskDTO::class.java)
+            .let { it.behandlingId to it.manuellAdresse }
 
-        if (featureToggleService.isEnabled(DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
-            val brevmottakere = manuellBrevmottakerService.hentBrevmottakere(behandlingId)
-
-            val dødsboAdresser = brevmottakere.filter { it.type == MottakerType.DØDSBO }
-            val utenlandskeAdresser = brevmottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-
-            if (dødsboAdresser.isEmpty() && utenlandskeAdresser.isEmpty()) {
-                prøvDistribuerJournalpost(journalpostId, task, behandlingId)
-            }
-
-            val manuelleAddresser = when {
-                dødsboAdresser.isNotEmpty() -> dødsboAdresser.toList()
-                else -> brevmottakere
-            }.toManuelleAdresser()
-
-            manuelleAddresser.forEach { manuellAdresse ->
-                prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
-            }
-        } else {
-            prøvDistribuerJournalpost(journalpostId, task, behandlingId)
-        }
+        prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
     }
 
     private fun prøvDistribuerJournalpost(
@@ -123,3 +98,8 @@ class PubliserJournalpostTask(
         const val TYPE = "publiserJournalpost"
     }
 }
+
+class PubliserJournalpostTaskDTO(
+    val behandlingId: UUID,
+    val manuellAdresse: ManuellAdresse?
+)

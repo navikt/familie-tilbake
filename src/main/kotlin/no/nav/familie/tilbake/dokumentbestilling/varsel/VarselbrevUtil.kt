@@ -20,7 +20,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevServi
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
-import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -40,37 +39,8 @@ class VarselbrevUtil(
 
     companion object {
 
-        private const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
-        private const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
-    }
-
-    fun sammenstillInfoFraFagsystemerForSending(
-        fagsak: Fagsak,
-        behandling: Behandling,
-        faktaFeilutbetaling: FaktaFeilutbetaling?,
-        adresseinfo: Adresseinfo,
-        personinfo: Personinfo,
-        varsel: Varsel?,
-        vergenavn: String?
-    ): Varselbrevsdokument {
-        val metadata = sammenstillInfoForBrevmetadata(
-            behandling,
-            personinfo,
-            adresseinfo,
-            fagsak,
-            vergenavn,
-            false,
-            personinfo.dødsdato != null
-        )
-
-        return Varselbrevsdokument(
-            brevmetadata = metadata,
-            beløp = varsel?.varselbeløp ?: 0L,
-            revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
-            fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
-            varseltekstFraSaksbehandler = varsel?.varseltekst,
-            feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel)
-        )
+        const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
+        const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
     }
 
     fun sammenstillInfoForForhåndvisningVarselbrev(
@@ -270,10 +240,6 @@ class VarselbrevUtil(
 
     private fun mapFeilutbetaltePerioder(feilutbetaltePerioderDto: FeilutbetaltePerioderDto): List<Datoperiode> {
         return feilutbetaltePerioderDto.perioder.map { Datoperiode(it.fom, it.tom) }
-    }
-
-    private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> {
-        return varsel?.perioder?.map { Datoperiode(it.fom, it.tom) } ?: emptyList()
     }
 
     private fun mapFeilutbetaltePerioder(feilutbetalingsfakta: FaktaFeilutbetalingDto): List<Datoperiode> {

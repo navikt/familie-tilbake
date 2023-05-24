@@ -25,7 +25,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.SendBrevService
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
@@ -103,7 +103,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var vedtaksbrevService: VedtaksbrevService
 
     @Autowired
-    private lateinit var sendBrevService: SendBrevService
+    private lateinit var sendBrevService: DistribusjonshåndteringService
 
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak

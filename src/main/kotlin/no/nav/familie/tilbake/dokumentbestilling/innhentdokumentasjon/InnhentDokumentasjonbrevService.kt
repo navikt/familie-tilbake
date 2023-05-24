@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.dokumentbestilling.SendBrevService
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -30,7 +30,7 @@ class InnhentDokumentasjonbrevService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
-    private val sendBrevService: SendBrevService,
+    private val distribusjonshåndteringService: DistribusjonshåndteringService,
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager? = null) {
@@ -52,7 +52,7 @@ class InnhentDokumentasjonbrevService(
                 fritekst = fritekst
             )
         } else {
-            sendBrevService.sendBrev(behandling, Brevtype.INNHENT_DOKUMENTASJON) { mottaker, brevmetadata ->
+            distribusjonshåndteringService.sendBrev(behandling, Brevtype.INNHENT_DOKUMENTASJON) { mottaker, brevmetadata ->
                 val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, mottaker, brevmetadata)
                 val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
                 Brevdata(
@@ -71,14 +71,9 @@ class InnhentDokumentasjonbrevService(
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager: Brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
-        val dokument = settOppInnhentDokumentasjonsbrevsdokument(
-            behandling,
-            fagsak,
-            fritekst,
-            brevmottager,
-            forhåndsgenerertMetadata = sendBrevService.genererMetadataForBrev(Brevtype.INNHENT_DOKUMENTASJON, behandlingId)
-        )
+        val (metadata, brevmottager) =
+            distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(behandlingId)
+        val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager, metadata)
         val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
 
         return pdfBrevService.genererForhåndsvisning(

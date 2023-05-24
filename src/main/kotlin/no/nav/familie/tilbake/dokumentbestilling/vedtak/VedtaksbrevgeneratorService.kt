@@ -11,6 +11,9 @@ import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
+import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat.DELVIS_TILBAKEBETALING
+import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat.FULL_TILBAKEBETALING
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -49,15 +52,16 @@ import java.math.BigDecimal
 class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
+    private val distribusjonshåndteringService: DistribusjonshåndteringService,
 ) {
 
     fun genererVedtaksbrevForSending(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         brevmottager: Brevmottager,
-        brevmetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null
     ): Brevdata {
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, forhåndsgenerertMetadata)
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
         val data = Fritekstbrevsdata(
             TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
@@ -80,14 +84,16 @@ class VedtaksbrevgeneratorService(
 
     fun genererVedtaksbrevForForhåndsvisning(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        dto: HentForhåndvisningVedtaksbrevPdfDto,
-        brevmetadata: Brevmetadata? = null
+        dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
+        val (brevmetadata, brevmottager) = distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(
+            vedtaksbrevgrunnlag.behandling.id
+        )
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
             dto.perioderMedTekst,
-            vedtaksbrevgrunnlag.brevmottager,
+            brevmottager,
             brevmetadata
         )
         val hbVedtaksbrevsdata: HbVedtaksbrevsdata = vedtaksbrevsdata.vedtaksbrevsdata
@@ -99,7 +105,7 @@ class VedtaksbrevgeneratorService(
         }
 
         return Brevdata(
-            mottager = vedtaksbrevgrunnlag.brevmottager,
+            mottager = brevmottager,
             metadata = vedtaksbrevsdata.metadata,
             overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata),
             brevtekst = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(hbVedtaksbrevsdata),
@@ -108,10 +114,11 @@ class VedtaksbrevgeneratorService(
     }
 
     fun genererVedtaksbrevsdata(
-        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
-        brevmetadata: Brevmetadata? = null
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
     ): HbVedtaksbrevsdata {
-        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, vedtaksbrevgrunnlag.brevmottager, brevmetadata)
+        val (brevmetadata, brevmottager) =
+            distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+        val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
 
@@ -131,18 +138,20 @@ class VedtaksbrevgeneratorService(
         oppsummeringFritekst: String?,
         perioderFritekst: List<PeriodeMedTekstDto>,
         brevmottager: Brevmottager,
-        brevmetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null
     ): Vedtaksbrevsdata {
+        val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(
             vedtaksbrevgrunnlag.bruker.ident,
             vedtaksbrevgrunnlag.fagsystem
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
-        val brevMetadata: Brevmetadata = brevmetadata ?: lagMetadataForVedtaksbrev(
+        val brevMetadata: Brevmetadata = forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             personinfo,
             beregnetResultat.vedtaksresultat,
-            brevmottager
+            brevmottager,
+            språkkode
         )
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(
             vedtaksbrevgrunnlag,
@@ -150,7 +159,13 @@ class VedtaksbrevgeneratorService(
             beregnetResultat,
             oppsummeringFritekst,
             perioderFritekst,
-            brevMetadata
+            brevMetadata.copy(
+                tittel = finnTittelVedtaksbrev(
+                    ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!,
+                    tilbakekreves = beregnetResultat.vedtaksresultat == FULL_TILBAKEBETALING ||
+                            beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
+                )
+            )
         )
         return Vedtaksbrevsdata(data, brevMetadata)
     }
@@ -303,9 +318,9 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         personinfo: Personinfo,
         vedtakResultatType: Vedtaksresultat?,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
+        språkkode: Språkkode
     ): Brevmetadata {
-        val språkkode: Språkkode = vedtaksbrevgrunnlag.bruker.språkkode
         val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
             personinfo,
             brevmottager,

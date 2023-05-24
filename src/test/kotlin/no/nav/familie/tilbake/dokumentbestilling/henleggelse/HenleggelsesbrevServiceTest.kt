@@ -14,6 +14,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -42,6 +43,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val brevsporingService: BrevsporingService = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
     private val organisasjonService: OrganisasjonService = mockk()
+    private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
 
     @BeforeEach
     fun setup() {
@@ -52,7 +54,8 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository,
             eksterneDataForBrevService,
             spyPdfBrevService,
-            organisasjonService
+            organisasjonService,
+            distribusjonshåndteringService
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling

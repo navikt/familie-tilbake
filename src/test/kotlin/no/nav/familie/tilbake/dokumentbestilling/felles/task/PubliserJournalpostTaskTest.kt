@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -63,7 +64,7 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
     private fun opprettTask(journalpostId: String): Task {
         return Task(
             type = PubliserJournalpostTask.TYPE,
-            payload = UUID.randomUUID().toString(),
+            payload = objectMapper.writeValueAsString(PubliserJournalpostTaskDTO(UUID.randomUUID(), null)),
             properties = Properties().apply {
                 this["journalpostId"] = journalpostId
                 this["fagsystem"] = Fagsystem.BA.name

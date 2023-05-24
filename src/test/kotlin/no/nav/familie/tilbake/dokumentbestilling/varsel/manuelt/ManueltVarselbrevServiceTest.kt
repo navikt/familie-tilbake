@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -51,6 +52,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
+    private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
@@ -65,7 +67,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             mockEksterneDataForBrevService,
             spyPdfBrevService,
             mockFeilutbetalingService,
-            varselbrevUtil
+            varselbrevUtil,
+            mockDistribusjonshåndteringService
         )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }

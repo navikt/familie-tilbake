@@ -68,15 +68,15 @@ class SendVedtaksbrevTask(
             return
         }
 
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
+            vedtaksbrevService.sendVedtaksbrev(behandling)
+        } else {
             if (behandling.harVerge) {
                 vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
             }
             val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
             val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
             vedtaksbrevService.sendVedtaksbrev(behandling, brevmottager)
-        } else {
-            vedtaksbrevService.sendVedtaksbrev(behandling)
         }
         log.info("Utført for behandling: {}", behandlingId)
     }

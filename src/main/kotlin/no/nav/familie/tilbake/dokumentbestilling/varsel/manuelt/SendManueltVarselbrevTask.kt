@@ -12,6 +12,8 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -33,7 +35,8 @@ class SendManueltVarselbrevTask(
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -45,17 +48,25 @@ class SendManueltVarselbrevTask(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
 
-        // sjekk om behandlingen har verge
-        if (Dokumentmalstype.VARSEL == maltype) {
-            if (behandling.harVerge) {
-                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
+        if (featureToggleService.isEnabled(KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
+            manueltVarselBrevService.sendVarselbrev(
+                behandling = behandling,
+                fritekst = fritekst,
+                erKorrigert = maltype.erKorrigert
+            )
+        } else {
+            // sjekk om behandlingen har verge
+            if (Dokumentmalstype.VARSEL == maltype) {
+                if (behandling.harVerge) {
+                    manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
+                }
+                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
+            } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
+                if (behandling.harVerge) {
+                    manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
+                }
+                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
             }
-            manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
-        } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-            if (behandling.harVerge) {
-                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
-            }
-            manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
         }
 
         val fristTid = Constants.saksbehandlersTidsfrist()
@@ -102,3 +113,10 @@ data class SendManueltVarselbrevTaskdata(
     val maltype: Dokumentmalstype,
     val fritekst: String
 )
+
+private val Dokumentmalstype.erKorrigert: Boolean
+    get() = when (this) {
+        Dokumentmalstype.KORRIGERT_VARSEL -> true
+        Dokumentmalstype.VARSEL -> false
+        else -> throw IllegalArgumentException("Dokumentmalstype.$this")
+    }

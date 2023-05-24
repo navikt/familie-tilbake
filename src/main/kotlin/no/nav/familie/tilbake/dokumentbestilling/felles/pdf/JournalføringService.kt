@@ -103,15 +103,20 @@ class JournalføringService(
 
     private fun lagMottager(behandling: Behandling, mottager: Brevmottager, brevmetadata: Brevmetadata): AvsenderMottaker {
         val adresseinfo: Adresseinfo = brevmetadata.mottageradresse
+        val mottagerIdent = adresseinfo.ident.takeIf { it.isNotEmpty() }
         return when (mottager) {
-            Brevmottager.BRUKER -> AvsenderMottaker(
-                id = adresseinfo.ident,
-                idType = BrukerIdType.FNR,
+            Brevmottager.BRUKER, Brevmottager.MANUELL -> AvsenderMottaker(
+                id = mottagerIdent,
+                idType = when (mottagerIdent?.length) {
+                    0, null -> null
+                    9 -> BrukerIdType.ORGNR
+                    11 -> BrukerIdType.FNR
+                    else -> throw IllegalArgumentException("Ugyldig idType")
+                },
                 navn = adresseinfo.mottagernavn
             )
             Brevmottager.VERGE -> lagVergemottager(behandling)
             Brevmottager.INSTITUSJON -> lagInstitusjonmottager(behandling, brevmetadata)
-            Brevmottager.MANUELL -> TODO()
         }
     }
 
