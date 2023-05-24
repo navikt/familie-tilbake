@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
@@ -53,6 +54,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
     private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
+    private val mockBrevmetadataUtil: BrevmetadataUtil = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
@@ -68,7 +70,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService,
             mockFeilutbetalingService,
             varselbrevUtil,
-            mockDistribusjonshåndteringService
+            mockDistribusjonshåndteringService,
+            mockBrevmetadataUtil
         )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }

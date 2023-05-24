@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -29,11 +30,12 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var pdfBrevService: PdfBrevService
     @Autowired
-    lateinit var sendBrevService: DistribusjonshåndteringService
+    lateinit var distribusjonshåndteringService: DistribusjonshåndteringService
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
     private val organisasjonService: OrganisasjonService = mockk()
+    private val brevmetadataUtil: BrevmetadataUtil = mockk()
 
     @BeforeEach
     fun setup() {
@@ -43,7 +45,8 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             mockEksterneDataForBrevService,
             pdfBrevService,
             organisasjonService,
-            sendBrevService
+            distribusjonshåndteringService,
+            brevmetadataUtil
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling

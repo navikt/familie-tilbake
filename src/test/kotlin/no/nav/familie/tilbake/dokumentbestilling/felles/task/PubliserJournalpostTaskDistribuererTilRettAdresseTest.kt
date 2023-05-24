@@ -70,7 +70,7 @@ class PubliserJournalpostTaskDistribuererTilRettAdresseTest : OppslagSpringRunne
         behandlingId = behandlingRepository.insert(Testdata.behandling).id
 
         publiserJournalpostTask =
-            PubliserJournalpostTask(integrasjonerClient, manuellBrevmottakerService, featureToggleService, taskService)
+            PubliserJournalpostTask(integrasjonerClient, taskService)
 
         every {
             featureToggleService.isEnabled(DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)

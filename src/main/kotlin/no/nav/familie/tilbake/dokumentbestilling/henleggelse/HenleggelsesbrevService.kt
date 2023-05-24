@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -33,6 +34,7 @@ class HenleggelsesbrevService(
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
+    private val brevmetadataUtil: BrevmetadataUtil,
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager? = null) {
@@ -80,7 +82,7 @@ class HenleggelsesbrevService(
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingUuid)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (metadata, brevmottager) =
-            distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(behandling.id)
         val henleggelsesbrevSamletInfo = lagHenleggelsebrev(behandling, fagsak, fritekst, brevmottager, metadata)
         val fritekstbrevData: Fritekstbrevsdata =
             if (Behandlingstype.TILBAKEKREVING == behandling.type) {

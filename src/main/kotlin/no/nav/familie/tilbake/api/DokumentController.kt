@@ -75,7 +75,7 @@ class DokumentController(
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Forhåndsviser brev", AuditLoggerEvent.ACCESS)
     fun hentForhåndsvisningVarselbrev(
         @Valid @RequestBody
-        forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest //TODO: request må oppdateres for å støtte manuell brevmottaker
+        forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest
     ): ByteArray {
         return varselbrevService.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest)
     }

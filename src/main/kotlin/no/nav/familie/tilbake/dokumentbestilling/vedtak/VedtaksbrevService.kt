@@ -58,7 +58,7 @@ class VedtaksbrevService(
     fun hentVedtaksbrevSomTekst(behandlingId: UUID): List<Avsnitt> {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandlingId)
 
-        val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdata(vedtaksbrevgrunnlag)
+        val hbVedtaksbrevsdata = vedtaksbrevgeneratorService.genererVedtaksbrevsdataTilVisningIFrontendSkjema(vedtaksbrevgrunnlag)
         val hovedoverskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(hbVedtaksbrevsdata)
         return AvsnittUtil.lagVedtaksbrevDeltIAvsnitt(hbVedtaksbrevsdata, hovedoverskrift)
     }

@@ -64,7 +64,7 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
     private fun opprettTask(journalpostId: String): Task {
         return Task(
             type = PubliserJournalpostTask.TYPE,
-            payload = objectMapper.writeValueAsString(PubliserJournalpostTaskDTO(UUID.randomUUID(), null)),
+            payload = objectMapper.writeValueAsString(PubliserJournalpostTaskData(UUID.randomUUID(), null)),
             properties = Properties().apply {
                 this["journalpostId"] = journalpostId
                 this["fagsystem"] = Fagsystem.BA.name

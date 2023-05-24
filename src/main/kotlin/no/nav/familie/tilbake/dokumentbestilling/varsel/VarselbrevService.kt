@@ -92,22 +92,24 @@ class VarselbrevService(
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null
     ): Varselbrevsdokument {
+        val metadata = forhåndsgenerertMetadata ?: run {
+            // Henter data fra pdl
+            val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+            val verge = behandling.aktivVerge
+            val adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
+
+            varselbrevUtil.sammenstillInfoForBrevmetadata(
+                behandling = behandling,
+                personinfo = personinfo,
+                adresseinfo = adresseinfo,
+                fagsak = fagsak,
+                vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
+                erKorrigert = false,
+                gjelderDødsfall = personinfo.dødsdato != null
+            )
+        }
+
         val varsel = behandling.aktivtVarsel
-        val verge = behandling.aktivVerge
-
-        // Henter data fra pdl
-        val personinfo by lazy { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem) }
-        val adresseinfo by lazy { eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem) }
-
-        val metadata = forhåndsgenerertMetadata ?: varselbrevUtil.sammenstillInfoForBrevmetadata(
-            behandling = behandling,
-            personinfo = personinfo,
-            adresseinfo = adresseinfo,
-            fagsak = fagsak,
-            vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
-            erKorrigert = false,
-            gjelderDødsfall = personinfo.dødsdato != null
-        )
 
         return Varselbrevsdokument(
             brevmetadata = metadata.copy(tittel = TITTEL_VARSEL_TILBAKEBETALING + fagsak.ytelsesnavn),

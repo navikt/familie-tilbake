@@ -13,7 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
-import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskDTO
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
@@ -67,7 +67,7 @@ class PdfBrevService(
         dokumentreferanse: JournalpostIdOgDokumentId
     ) {
         val payload = objectMapper.writeValueAsString(
-            PubliserJournalpostTaskDTO(
+            PubliserJournalpostTaskData(
                 behandlingId = behandling.id,
                 manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse
             )

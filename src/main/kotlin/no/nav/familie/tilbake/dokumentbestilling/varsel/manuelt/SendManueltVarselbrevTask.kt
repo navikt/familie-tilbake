@@ -46,7 +46,6 @@ class SendManueltVarselbrevTask(
         val fritekst = taskdata.fritekst
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
 
         if (featureToggleService.isEnabled(KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
             manueltVarselBrevService.sendVarselbrev(
@@ -55,6 +54,8 @@ class SendManueltVarselbrevTask(
                 erKorrigert = maltype.erKorrigert
             )
         } else {
+            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+
             // sjekk om behandlingen har verge
             if (Dokumentmalstype.VARSEL == maltype) {
                 if (behandling.harVerge) {

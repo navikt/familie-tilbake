@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
@@ -34,6 +35,7 @@ class ManueltVarselbrevService(
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val varselbrevUtil: VarselbrevUtil,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
+    private val brevmetadataUtil: BrevmetadataUtil
 ) {
 
     fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -109,12 +111,14 @@ class ManueltVarselbrevService(
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val brevmottager = BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
+        val (metadata, brevmottager) =
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(behandlingId)
         val erKorrigert = maltype == Dokumentmalstype.KORRIGERT_VARSEL
-
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
+        val aktivtVarsel = behandling.aktivtVarsel
+
         val varselbrevsdokument =
-            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, behandling.aktivtVarsel)
+            lagVarselbrev(fritekst, behandling, fagsak, brevmottager, erKorrigert, feilutbetalingsfakta, aktivtVarsel, metadata)
         val overskrift =
             lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert)
         val brevtekst = lagFritekst(varselbrevsdokument, erKorrigert)

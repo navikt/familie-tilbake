@@ -13,9 +13,9 @@ import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat.DELVIS_TILBAKEBETALING
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat.FULL_TILBAKEBETALING
-import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmottagerUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
@@ -53,7 +53,7 @@ class VedtaksbrevgeneratorService(
     private val tilbakekrevingBeregningService: TilbakekrevingsberegningService,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val organisasjonService: OrganisasjonService,
-    private val distribusjonshåndteringService: DistribusjonshåndteringService,
+    private val brevmetadataUtil: BrevmetadataUtil
 ) {
 
     fun genererVedtaksbrevForSending(
@@ -86,9 +86,8 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
-        val (brevmetadata, brevmottager) = distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(
-            vedtaksbrevgrunnlag.behandling.id
-        )
+        val (brevmetadata, brevmottager) =
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -113,11 +112,11 @@ class VedtaksbrevgeneratorService(
         )
     }
 
-    fun genererVedtaksbrevsdata(
+    fun genererVedtaksbrevsdataTilVisningIFrontendSkjema(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
     ): HbVedtaksbrevsdata {
         val (brevmetadata, brevmottager) =
-            distribusjonshåndteringService.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }

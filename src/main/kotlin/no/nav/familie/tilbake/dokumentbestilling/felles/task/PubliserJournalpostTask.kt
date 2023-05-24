@@ -34,7 +34,7 @@ class PubliserJournalpostTask(
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
         val journalpostId = task.metadata.getProperty("journalpostId")
-        val (behandlingId, manuellAdresse) = objectMapper.readValue(task.payload, PubliserJournalpostTaskDTO::class.java)
+        val (behandlingId, manuellAdresse) = objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java)
             .let { it.behandlingId to it.manuellAdresse }
 
         prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
@@ -99,7 +99,7 @@ class PubliserJournalpostTask(
     }
 }
 
-class PubliserJournalpostTaskDTO(
+class PubliserJournalpostTaskData(
     val behandlingId: UUID,
     val manuellAdresse: ManuellAdresse?
 )
