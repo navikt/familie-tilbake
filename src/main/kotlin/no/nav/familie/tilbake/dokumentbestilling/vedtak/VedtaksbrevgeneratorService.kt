@@ -145,12 +145,17 @@ class VedtaksbrevgeneratorService(
             vedtaksbrevgrunnlag.fagsystem
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
-        val brevMetadata: Brevmetadata = forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
+        val brevMetadata: Brevmetadata = (forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             personinfo,
-            beregnetResultat.vedtaksresultat,
             brevmottager,
             språkkode
+        )).copy(
+            tittel = finnTittelVedtaksbrev(
+                ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!,
+                tilbakekreves = beregnetResultat.vedtaksresultat == FULL_TILBAKEBETALING ||
+                        beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
+            )
         )
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(
             vedtaksbrevgrunnlag,
@@ -158,13 +163,7 @@ class VedtaksbrevgeneratorService(
             beregnetResultat,
             oppsummeringFritekst,
             perioderFritekst,
-            brevMetadata.copy(
-                tittel = finnTittelVedtaksbrev(
-                    ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!,
-                    tilbakekreves = beregnetResultat.vedtaksresultat == FULL_TILBAKEBETALING ||
-                            beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
-                )
-            )
+            brevMetadata
         )
         return Vedtaksbrevsdata(data, brevMetadata)
     }
@@ -316,7 +315,6 @@ class VedtaksbrevgeneratorService(
     private fun lagMetadataForVedtaksbrev(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag,
         personinfo: Personinfo,
-        vedtakResultatType: Vedtaksresultat?,
         brevmottager: Brevmottager,
         språkkode: Språkkode
     ): Brevmetadata {
@@ -326,10 +324,7 @@ class VedtaksbrevgeneratorService(
             vedtaksbrevgrunnlag.aktivVerge,
             vedtaksbrevgrunnlag.fagsystem
         )
-        val ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!
         val vergeNavn: String = BrevmottagerUtil.getVergenavn(vedtaksbrevgrunnlag.aktivVerge, adresseinfo)
-        val tilbakekreves = Vedtaksresultat.FULL_TILBAKEBETALING == vedtakResultatType ||
-            Vedtaksresultat.DELVIS_TILBAKEBETALING == vedtakResultatType
         val ansvarligSaksbehandler = if (vedtaksbrevgrunnlag.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK) {
             eksterneDataForBrevService
                 .hentPåloggetSaksbehandlernavnMedDefault(vedtaksbrevgrunnlag.behandling.ansvarligSaksbehandler)
@@ -348,7 +343,6 @@ class VedtaksbrevgeneratorService(
             saksnummer = vedtaksbrevgrunnlag.eksternFagsakId,
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
-            tittel = finnTittelVedtaksbrev(ytelsesnavn, tilbakekreves),
             gjelderDødsfall = personinfo.dødsdato != null,
             institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) }
         )
