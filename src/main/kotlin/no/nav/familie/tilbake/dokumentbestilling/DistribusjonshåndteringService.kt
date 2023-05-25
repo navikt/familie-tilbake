@@ -15,6 +15,9 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.INSTITUSJON
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
@@ -85,42 +88,53 @@ class DistribusjonshåndteringService(
             fagsak: Fagsak,
             erManuelleMottakereStøttet: Boolean,
             manueltRegistrerteMottakere: Set<ManuellBrevmottaker>
-        ): Pair<Any, Any?> {
+        ): Pair<Brevmottaker, Brevmottaker?> {
             return if (erManuelleMottakereStøttet) {
                 require(manueltRegistrerteMottakere.all { it.behandlingId == behandling.id })
 
                 val (manuellBrukeradresse, manuellTilleggsmottaker) = manueltRegistrerteMottakere
                     .partition { it.type == BRUKER_MED_UTENLANDSK_ADRESSE || it.type == DØDSBO }
-                Pair(manuellBrukeradresse.singleOrNull() ?: Brevmottager.BRUKER, manuellTilleggsmottaker.singleOrNull())
+                Pair(
+                    first = manuellBrukeradresse.singleOrNull()?.let { ManuellBrevmottakerType(it) } ?: BrevmottagerType(BRUKER),
+                    second = manuellTilleggsmottaker.singleOrNull()?.let { ManuellBrevmottakerType(it) }
+                )
             } else {
-                val defaultMottaker = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-                val tilleggsmottaker = if (behandling.harVerge) Brevmottager.VERGE else null
-                Pair(defaultMottaker, tilleggsmottaker)
+                val defaultMottaker = if (fagsak.institusjon != null) INSTITUSJON else BRUKER
+                val tilleggsmottaker = if (behandling.harVerge) VERGE else null
+                Pair(
+                    first = BrevmottagerType(defaultMottaker),
+                    second = tilleggsmottaker?.let { BrevmottagerType(it) }
+                )
             }
         }
     }
 }
 
-val Any?.navn: String?
-    get() = if (this is ManuellBrevmottaker) navn else null
-val Any?.somBrevmottager: Brevmottager
-    get() = this as? Brevmottager ?: Brevmottager.MANUELL
-val Any?.manuellAdresse: Adresseinfo?
-    get() = if (this is ManuellBrevmottaker)
+sealed interface Brevmottaker
+
+class BrevmottagerType(val mottaker: Brevmottager) : Brevmottaker
+class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker): Brevmottaker
+
+val Brevmottaker?.navn: String?
+    get() = if (this is ManuellBrevmottakerType) mottaker.navn else null
+val Brevmottaker?.somBrevmottager: Brevmottager
+    get() = (this as? BrevmottagerType)?.mottaker ?: Brevmottager.MANUELL
+val Brevmottaker?.manuellAdresse: Adresseinfo?
+    get() = if (this is ManuellBrevmottakerType)
         Adresseinfo(
-            ident = ident.orEmpty(),
-            mottagernavn = navn,
-            manuellAdresse = if (hasManuellAdresse())
+            ident = mottaker.ident.orEmpty(),
+            mottagernavn = mottaker.navn,
+            manuellAdresse = if (mottaker.hasManuellAdresse())
                 ManuellAdresse(
-                    adresseType = when (landkode) {
+                    adresseType = when (mottaker.landkode) {
                         "NO" -> AdresseType.norskPostadresse
                         else -> AdresseType.utenlandskPostadresse
                     },
-                    adresselinje1 = adresselinje1,
-                    adresselinje2 = adresselinje2,
-                    postnummer = postnummer,
-                    poststed = poststed,
-                    land = landkode!!,
+                    adresselinje1 = mottaker.adresselinje1,
+                    adresselinje2 = mottaker.adresselinje2,
+                    postnummer = mottaker.postnummer,
+                    poststed = mottaker.poststed,
+                    land = mottaker.landkode!!,
                 ) else null,
         ) else null
 

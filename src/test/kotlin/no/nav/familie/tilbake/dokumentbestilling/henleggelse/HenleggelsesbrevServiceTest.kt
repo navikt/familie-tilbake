@@ -45,7 +45,15 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val organisasjonService: OrganisasjonService = mockk()
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
-    private val brevmetadataUtil: BrevmetadataUtil = mockk()
+
+    private val brevmetadataUtil = BrevmetadataUtil(
+        behandlingRepository = behandlingRepository,
+        fagsakRepository = fagsakRepository,
+        manuelleBrevmottakerRepository = mockk(),
+        eksterneDataForBrevService = eksterneDataForBrevService,
+        organisasjonService = organisasjonService,
+        featureToggleService = mockk(relaxed = true)
+    )
 
     @BeforeEach
     fun setup() {
@@ -62,11 +70,11 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
-        val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
+        val personinfo = Personinfo("DUMMY_FNR_1", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
         every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any()) }
-            .returns(Adresseinfo("DUMMY_FØDSELSNUMMER", "Bob"))
+            .returns(Adresseinfo("DUMMY_FNR_2", "Bob"))
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns "Siri Saksbehandler"
         every {
             brevsporingService.finnSisteVarsel(behandlingId)

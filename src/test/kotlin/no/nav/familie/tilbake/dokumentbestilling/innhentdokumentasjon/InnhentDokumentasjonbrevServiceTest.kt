@@ -35,7 +35,16 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
     private val organisasjonService: OrganisasjonService = mockk()
-    private val brevmetadataUtil: BrevmetadataUtil = mockk()
+
+    private val brevmetadataUtil = BrevmetadataUtil(
+        behandlingRepository = behandlingRepository,
+        fagsakRepository = fagsakRepository,
+        manuelleBrevmottakerRepository = mockk(),
+        eksterneDataForBrevService = mockEksterneDataForBrevService,
+        organisasjonService = organisasjonService,
+        featureToggleService = mockk(relaxed = true)
+    )
+
 
     @BeforeEach
     fun setup() {

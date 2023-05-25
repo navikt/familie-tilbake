@@ -140,6 +140,7 @@ class TekstformatererVarselbrevTest {
             ytelsestype = Ytelsestype.BARNETRYGD,
             vergenavn = "John Doe",
             finnesVerge = true,
+            finnesAnnenMottaker = true,
             språkkode = Språkkode.NB
         )
         val varselbrevsdokument = varselbrevsdokument.copy(

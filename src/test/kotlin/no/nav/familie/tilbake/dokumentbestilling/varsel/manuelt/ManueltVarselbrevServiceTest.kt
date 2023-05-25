@@ -54,15 +54,23 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
     private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
-    private val mockBrevmetadataUtil: BrevmetadataUtil = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
     private var fagsak = Testdata.fagsak
+    private lateinit var brevmetadataUtil: BrevmetadataUtil
 
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
+        brevmetadataUtil = BrevmetadataUtil(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = mockk(),
+            eksterneDataForBrevService = mockEksterneDataForBrevService,
+            organisasjonService = mockk(),
+            featureToggleService = mockk(relaxed = true)
+        )
         manueltVarselbrevService = ManueltVarselbrevService(
             behandlingRepository,
             fagsakRepository,
@@ -71,7 +79,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             mockFeilutbetalingService,
             varselbrevUtil,
             mockDistribusjonshåndteringService,
-            mockBrevmetadataUtil
+            brevmetadataUtil
         )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
