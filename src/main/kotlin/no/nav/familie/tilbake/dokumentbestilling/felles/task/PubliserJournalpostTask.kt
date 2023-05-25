@@ -43,7 +43,7 @@ class PubliserJournalpostTask(
     private fun prøvDistribuerJournalpost(
         journalpostId: String,
         task: Task,
-        behandlingId: UUID?,
+        behandlingId: UUID,
         manuellAdresse: ManuellAdresse? = null
     ) {
         try {
@@ -64,7 +64,7 @@ class PubliserJournalpostTask(
                 DistribuerDokumentVedDødsfallTask.mottakerErDødUtenDødsboadresse(ressursException) -> {
                     // ta med info om ukjent adresse for dødsbo
                     task.metadata["dødsboUkjentAdresse"] = "true"
-                    taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, task.payload, task.metadata))
+                    taskService.save(Task(DistribuerDokumentVedDødsfallTask.TYPE, behandlingId.toString(), task.metadata))
                 }
 
                 dokumentetErAlleredeDistribuert(ressursException) -> {
@@ -79,7 +79,8 @@ class PubliserJournalpostTask(
     }
 
     override fun onCompletion(task: Task) {
-        taskService.save(Task(LagreBrevsporingTask.TYPE, task.payload, task.metadata))
+        val behandlingId = objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java).behandlingId
+        taskService.save(Task(LagreBrevsporingTask.TYPE, behandlingId.toString(), task.metadata))
     }
 
     // 400 BAD_REQUEST + kanal print er eneste måten å vite at bruker ikke er digital og har ukjent adresse fra Dokdist
