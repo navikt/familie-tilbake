@@ -1,6 +1,9 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
@@ -13,6 +16,8 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -21,6 +26,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
@@ -45,14 +51,15 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val organisasjonService: OrganisasjonService = mockk()
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
 
     private val brevmetadataUtil = BrevmetadataUtil(
         behandlingRepository = behandlingRepository,
         fagsakRepository = fagsakRepository,
-        manuelleBrevmottakerRepository = mockk(),
+        manuelleBrevmottakerRepository = mockk(relaxed = true),
         eksterneDataForBrevService = eksterneDataForBrevService,
         organisasjonService = organisasjonService,
-        featureToggleService = mockk(relaxed = true)
+        featureToggleService = featureToggleService
     )
 
     @BeforeEach
@@ -148,6 +155,28 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         }
 
         e.message shouldContain "henleggelsesbrev uten fritekst"
+    }
+
+    @Test
+    fun `brevmetadataUtil skal lage lik metadata som HeleggelsesbrevService selv`(){
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
+                true andThen false
+
+        val brevdata = mutableListOf<Brevdata>()
+
+        henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, null)
+        henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandlingId, null)
+
+        verify(exactly = 2) {
+            spyPdfBrevService.genererForhåndsvisning(
+                capture(brevdata),
+            )
+        }
+
+        brevdata shouldHaveSize 2
+        brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
+                brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
     companion object {

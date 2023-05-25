@@ -147,7 +147,6 @@ class HenleggelsesbrevService(
             saksnummer = fagsak.eksternFagsakId,
             språkkode = fagsak.bruker.språkkode,
             ytelsestype = fagsak.ytelsestype,
-            behandlingstype = behandling.type,
             gjelderDødsfall = gjelderDødsfall,
             institusjon = fagsak.institusjon?.let {
                 organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
@@ -155,7 +154,11 @@ class HenleggelsesbrevService(
         )
 
         return Henleggelsesbrevsdokument(
-            metadata.copy(tittel = TITTEL_HENLEGGELSESBREV),
+            metadata.copy(
+                tittel = TITTEL_HENLEGGELSESBREV,
+                behandlingstype = behandling.type,
+                ansvarligSaksbehandler = ansvarligSaksbehandler
+            ),
             brevSporing?.sporbar?.opprettetTid?.toLocalDate(),
             fritekst
         )
