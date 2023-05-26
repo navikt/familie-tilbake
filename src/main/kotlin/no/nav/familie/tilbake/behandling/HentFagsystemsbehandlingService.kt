@@ -27,27 +27,18 @@ class HentFagsystemsbehandlingService(
     ) {
         val eksisterendeRequestSendt =
             requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId, ytelsestype, eksternId)
-
         if (eksisterendeRequestSendt == null) {
-            opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
+            val requestSendt =
+                requestSendtRepository.insert(
+                    HentFagsystemsbehandlingRequestSendt(
+                        eksternFagsakId = eksternFagsakId,
+                        ytelsestype = ytelsestype,
+                        eksternId = eksternId
+                    )
+                )
+            val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
+            kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request)
         }
-    }
-
-    fun opprettOgSendHentFagsystembehandlingRequest(
-        eksternFagsakId: String,
-        ytelsestype: Ytelsestype,
-        eksternId: String
-    ) {
-        val requestSendt = requestSendtRepository.insert(
-            HentFagsystemsbehandlingRequestSendt(
-                eksternFagsakId = eksternFagsakId,
-                ytelsestype = ytelsestype,
-                eksternId = eksternId
-            )
-        )
-
-        val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
-        kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request)
     }
 
     @Transactional
