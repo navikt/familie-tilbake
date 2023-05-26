@@ -354,7 +354,8 @@ class TekstformatererVedtaksbrevTest {
                     ),
                     sakspartsnavn = "Test",
                     vergenavn = "John Doe",
-                    finnesVerge = true
+                    finnesVerge = true,
+                    finnesAnnenMottaker = true
                 ),
                 varsel = null,
                 totalresultat = HbTotalresultat(

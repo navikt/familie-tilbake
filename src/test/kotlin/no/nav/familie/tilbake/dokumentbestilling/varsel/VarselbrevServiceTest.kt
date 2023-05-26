@@ -12,10 +12,10 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.pdfgen.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
@@ -27,15 +27,13 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     private val fagsakRepository: FagsakRepository = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
+    private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
 
     @Autowired
     private lateinit var pdfBrevService: PdfBrevService
 
     @Autowired
     private lateinit var varselbrevUtil: VarselbrevUtil
-
-    @Autowired
-    private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private lateinit var varselbrevService: VarselbrevService
 
@@ -44,9 +42,9 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
         varselbrevService = VarselbrevService(
             fagsakRepository,
             eksterneDataForBrevService,
-            faktaFeilutbetalingService,
             pdfBrevService,
-            varselbrevUtil
+            varselbrevUtil,
+            distribusjonshåndteringService
         )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")

@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -12,6 +13,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHeader
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
@@ -47,7 +49,9 @@ class PdfBrevService(
     ) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
-        if (data.mottager != Brevmottager.VERGE) { // Ikke tell kopier sendt til verge
+        if (data.mottager != Brevmottager.VERGE &&
+            !data.metadata.annenMottakersNavn.equals(data.metadata.sakspartsnavn, ignoreCase = true)) {
+            // Ikke tell kopier sendt til verge eller fullmektig
             tellerService.tellBrevSendt(fagsak, brevtype)
         }
         lagTaskerForUtsendingOgSporing(behandling, fagsak, brevtype, varsletBeløp, fritekst, data, dokumentreferanse)
@@ -62,7 +66,12 @@ class PdfBrevService(
         brevdata: Brevdata,
         dokumentreferanse: JournalpostIdOgDokumentId
     ) {
-        val idString = behandling.id.toString()
+        val payload = objectMapper.writeValueAsString(
+            PubliserJournalpostTaskData(
+                behandlingId = behandling.id,
+                manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse
+            )
+        )
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
             setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
@@ -76,8 +85,10 @@ class PdfBrevService(
             fritekst?.also { setProperty("fritekst", Base64.getEncoder().encodeToString(fritekst.toByteArray())) }
             brevdata.tittel?.also { setProperty("tittel", it) }
         }
-        logger.info("Oppretter task for publisering av brev for behandlingId=${behandling.id}]")
-        taskService.save(Task(PubliserJournalpostTask.TYPE, idString, properties))
+        logger.info(
+            "Oppretter task for publisering av brev for behandlingId=${behandling.id}, eksternFagsakId=${fagsak.eksternFagsakId}"
+        )
+        taskService.save(Task(PubliserJournalpostTask.TYPE, payload, properties))
     }
 
     private fun lagOgJournalførBrev(

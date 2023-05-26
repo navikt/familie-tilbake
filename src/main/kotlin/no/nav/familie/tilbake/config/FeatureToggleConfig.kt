@@ -92,6 +92,8 @@ class FeatureToggleConfig(
 
         const val DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
 
+        const val KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE = "familie-tilbake.konsolidert-brevdistribusjon"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
