@@ -119,5 +119,5 @@ private val Dokumentmalstype.erKorrigert: Boolean
     get() = when (this) {
         Dokumentmalstype.KORRIGERT_VARSEL -> true
         Dokumentmalstype.VARSEL -> false
-        else -> throw IllegalArgumentException("Dokumentmalstype.$this")
+        else -> throw IllegalArgumentException("SendManueltVarselbrevTask kan ikke sende Dokumentmalstype.$this")
     }

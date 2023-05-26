@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuellAdresse
 import no.nav.familie.tilbake.dokumentbestilling.somBrevmottager
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -39,7 +38,9 @@ class BrevmetadataUtil(
         manuellAdresseinfo: Adresseinfo? = null,
         annenMottakersNavn: String? = null,
     ): Brevmetadata? {
-        require(brevmottager != Brevmottager.MANUELL || manuellAdresseinfo != null)
+        require(brevmottager != Brevmottager.MANUELL || manuellAdresseinfo != null) {
+            "For en manuelt registrert brevmottaker (Brevmottager.MANUELL) kan ikke manuellAdresseinfo være null"
+        }
 
         val behandling: Behandling by lazy { behandlingRepository.findByIdOrThrow(behandlingId) }
         val fagsak: Fagsak by lazy { fagsakRepository.findByIdOrThrow(behandling.fagsakId) }
@@ -47,11 +48,11 @@ class BrevmetadataUtil(
 
         val aktivVerge = vedtaksbrevgrunnlag?.aktivVerge ?: behandling.aktivVerge
 
-        val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(
+        val personinfo = eksterneDataForBrevService.hentPerson(
             ident = vedtaksbrevgrunnlag?.bruker?.ident ?: fagsak.bruker.ident,
             fagsystem = fagsystem
         )
-        val adresseinfo: Adresseinfo = manuellAdresseinfo ?: eksterneDataForBrevService.hentAdresse(
+        val adresseinfo = manuellAdresseinfo ?: eksterneDataForBrevService.hentAdresse(
             personinfo = personinfo,
             brevmottager = brevmottager,
             verge = aktivVerge,
@@ -96,7 +97,7 @@ class BrevmetadataUtil(
             logger.info("Dropper forhåndsutfylling av metadata som er felles da toggle er avskrudd")
             return null to BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
         }
-        val støtterManuelleBrevmottakere: Boolean = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
+        val støtterManuelleBrevmottakere = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
             behandling = behandling,
             fagsak = fagsak,
             featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
@@ -126,17 +127,17 @@ class BrevmetadataUtil(
         persistertSaksbehandlerId: String,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag?
     ): String {
-        return if (vedtaksbrevgrunnlag != null) {
-            when (vedtaksbrevgrunnlag.aktivtSteg) {
-                Behandlingssteg.FORESLÅ_VEDTAK ->
-                    eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
-                else ->
-                    eksterneDataForBrevService.hentSaksbehandlernavn(persistertSaksbehandlerId)
-            }
-        } else if (persistertSaksbehandlerId != Constants.BRUKER_ID_VEDTAKSLØSNINGEN){
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
-        } else {
-            ""
+        return when {
+            vedtaksbrevgrunnlag?.aktivtSteg == Behandlingssteg.FORESLÅ_VEDTAK ->
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
+
+            vedtaksbrevgrunnlag != null ->
+                eksterneDataForBrevService.hentSaksbehandlernavn(persistertSaksbehandlerId)
+
+            persistertSaksbehandlerId != Constants.BRUKER_ID_VEDTAKSLØSNINGEN ->
+                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(persistertSaksbehandlerId)
+
+            else -> ""
         }
     }
 }

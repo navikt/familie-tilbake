@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -102,7 +101,7 @@ class DistribusjonshåndteringServiceTest  {
     }
 
     @Test
-    fun `skal distribuere brev med likt innhold og til samme mottakere når toggle er på som sendbrev-tasken når toggle er av`() {
+    fun `skal sende brev med likt innhold og til samme mottakere når toggle er på, som sendbrev-tasken når toggle er av`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
                 true andThen false
 
@@ -132,5 +131,38 @@ class DistribusjonshåndteringServiceTest  {
                 brevdata.last { it.mottager == VERGE }.metadata
         brevdata.first { it.mottager == BRUKER }.metadata shouldBeEqual
                 brevdata.last { it.mottager == BRUKER }.metadata
+    }
+
+    @Test
+    fun `skal kun sende til bruker`() {
+        val behandlingUtenVerge = behandling.copy(verger = emptySet())
+
+        every { behandlingRepository.findById(any()) } returns Optional.of(behandlingUtenVerge)
+        every {
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any())
+        } returns brukerAdresse
+
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
+                true andThen false
+
+        val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
+        val brevdata = mutableListOf<Brevdata>()
+
+        sendHenleggelsesbrevTask.doTask(task)
+        sendHenleggelsesbrevTask.doTask(task)
+
+        verify {
+            pdfBrevService.sendBrev(
+                behandlingUtenVerge,
+                fagsak,
+                Brevtype.HENLEGGELSE,
+                capture(brevdata),
+            )
+        }
+
+        brevdata shouldHaveSize 2
+
+        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
+        brevdata.first().metadata shouldBeEqual brevdata.last().metadata
     }
 }

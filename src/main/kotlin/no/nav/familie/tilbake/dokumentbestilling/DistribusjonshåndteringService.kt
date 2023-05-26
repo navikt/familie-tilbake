@@ -62,7 +62,7 @@ class DistribusjonshåndteringService(
             manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet()
         ).toList()
 
-        brevmottakere.forEachIndexed { index, brevmottaker ->
+        brevmottakere.filterNotNull().forEachIndexed { index, brevmottaker ->
             pdfBrevService.sendBrev(
                 behandling = behandling,
                 fagsak = fagsak,
