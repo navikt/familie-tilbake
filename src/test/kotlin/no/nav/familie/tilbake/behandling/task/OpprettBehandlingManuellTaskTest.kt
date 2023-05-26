@@ -38,6 +38,7 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -166,6 +167,43 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask hente fagsystembehandling på nytt dersom det ga feilmelding forrige kjøring`() {
+        val task = lagTask()
+        opprettBehandlingManueltTask.preCondition(task)
+
+        val nySlotId = mutableListOf<UUID>()
+
+        val feiletRequestSendt = requestSendtRepository
+            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                eksternFagsakId,
+                ytelsestype,
+                eksternId
+            )
+        val respons = lagHentFagsystemsbehandlingRespons(feilmelding = "Feilmelding")
+        feiletRequestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
+
+        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(task) }
+        exception.message shouldBe "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres.Feiler med Feilmelding"
+
+        val nyRequestSendt = requestSendtRepository
+            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                eksternFagsakId,
+                ytelsestype,
+                eksternId
+            )
+
+        verify(exactly = 2) {
+            spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
+                capture(nySlotId),
+                any()
+            )
+        }
+
+        assertThat(nySlotId[0]).isEqualTo(feiletRequestSendt?.id)
+        assertThat(nySlotId[1]).isEqualTo(nyRequestSendt?.id)
+    }
+
+    @Test
     fun `doTask skal opprette behandling når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
         opprettBehandlingManueltTask.preCondition(lagTask())
 
@@ -265,7 +303,10 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun lagHentFagsystemsbehandlingRespons(erInstitusjon: Boolean = false): HentFagsystemsbehandlingRespons {
+    private fun lagHentFagsystemsbehandlingRespons(
+        erInstitusjon: Boolean = false,
+        feilmelding: String? = null
+    ): HentFagsystemsbehandlingRespons {
         var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
             eksternFagsakId = eksternFagsakId,
@@ -284,6 +325,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             ),
             institusjon = institusjon
         )
-        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling)
+        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling, feilMelding = feilmelding)
     }
 }
