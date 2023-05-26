@@ -59,11 +59,8 @@ class OpprettBehandlingManueltTask(
         val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
         val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
         if (feilMelding != null) {
-            hentFagsystemsbehandlingService.fjernHentFagsystemsbehandlingRequest(requestSendt.id)
-            hentFagsystemsbehandlingService.opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
-
             throw Feil(
-                "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres." +
+                "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
                     "Feiler med $feilMelding"
             )
         }
