@@ -51,7 +51,7 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev for verge`() {
-        val brevMetadata = metadata.copy(vergenavn = "John Doe", finnesVerge = true)
+        val brevMetadata = metadata.copy(vergenavn = "John Doe", finnesVerge = true, finnesAnnenMottaker = true)
         val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
@@ -70,7 +70,8 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
             ),
             sakspartsnavn = "Test",
             vergenavn = "John Doe",
-            finnesVerge = true
+            finnesVerge = true,
+            finnesAnnenMottaker = true
         )
         val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 

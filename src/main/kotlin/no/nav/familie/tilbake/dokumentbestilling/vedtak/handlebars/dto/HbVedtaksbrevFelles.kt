@@ -39,7 +39,7 @@ data class HbVedtaksbrevFelles(
     @Suppress("unused") // Handlebars
     val opphørsdatoIkkeOmsorg = datoer?.opphørsdatoIkkeOmsorg
 
-    val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
+    val annenMottagersNavn: String? = BrevmottagerUtil.getAnnenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
     val skattepliktig = Ytelsestype.OVERGANGSSTØNAD == brevmetadata.ytelsestype
