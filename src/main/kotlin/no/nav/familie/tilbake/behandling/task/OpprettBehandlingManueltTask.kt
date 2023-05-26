@@ -63,7 +63,7 @@ class OpprettBehandlingManueltTask(
             hentFagsystemsbehandlingService.opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
 
             throw Feil(
-                "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres." +
+                "Noe gikk galt mens henter fagsystemsbehandling fra fagsystem ble hentet. Legger ny melding på topic. Task må rekjøres." +
                     "Feiler med $feilMelding"
             )
         }
