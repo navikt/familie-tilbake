@@ -17,6 +17,7 @@ class HentFagsystemsbehandlingService(
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaProducer: KafkaProducer
 ) {
+
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -47,7 +48,11 @@ class HentFagsystemsbehandlingService(
         respons: String
     ) {
         // TODO: Slett etter at det er kjørt i prod
-        if (requestId == UUID.fromString("7308c41f-cff3-4032-8414-959d603b00a2")) {
+        if (listOf(
+                UUID.fromString("64225f43-7c18-4b4f-818d-150c642b2b00"),
+                UUID.fromString("e008dbe1-71c6-4a77-ae3e-b85622ccc23f"),
+                UUID.fromString("7308c41f-cff3-4032-8414-959d603b00a2")).contains(requestId)
+        ) {
             logger.info("Skal ikke lagre respons med id = $requestId.")
             return
         }
