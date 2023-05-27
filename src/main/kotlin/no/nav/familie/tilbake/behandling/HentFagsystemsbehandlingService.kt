@@ -17,6 +17,7 @@ class HentFagsystemsbehandlingService(
     private val kafkaProducer: KafkaProducer
 ) {
 
+
     @Transactional
     fun sendHentFagsystemsbehandlingRequest(
         eksternFagsakId: String,
