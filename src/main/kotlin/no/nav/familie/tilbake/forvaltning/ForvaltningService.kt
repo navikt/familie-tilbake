@@ -121,21 +121,6 @@ class ForvaltningService(
     }
 
     @Transactional
-    fun hentFagsystemsbehandling(hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto) {
-        val ytelsestype = hentFagsystemsbehandlingRequest.ytelsestype
-        val eksternFagsakId = hentFagsystemsbehandlingRequest.eksternFagsakId
-        val eksternId = hentFagsystemsbehandlingRequest.eksternId
-
-        val sendtRequest =
-            hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId, ytelsestype, eksternId)
-        // fjern eksisterende sendte request slik at ny request kan sendes
-        if (sendtRequest != null) {
-            hentFagsystemsbehandlingService.fjernHentFagsystemsbehandlingRequest(sendtRequest.id)
-        }
-        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
-    }
-
-    @Transactional
     fun flyttBehandlingsstegTilbakeTilFakta(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
