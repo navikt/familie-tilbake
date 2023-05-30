@@ -4,5 +4,6 @@ enum class Brevmottager {
     BRUKER,
     VERGE,
     INSTITUSJON,
-    MANUELL,
+    MANUELL_BRUKER,
+    MANUELL_TILLEGGSMOTTAKER
 }

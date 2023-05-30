@@ -34,12 +34,12 @@ class BrevmetadataUtil(
     fun genererMetadataForBrev(
         behandlingId: UUID,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null,
-        brevmottager: Brevmottager = Brevmottager.MANUELL,
+        brevmottager: Brevmottager = Brevmottager.BRUKER,
         manuellAdresseinfo: Adresseinfo? = null,
         annenMottakersNavn: String? = null,
     ): Brevmetadata? {
-        require(brevmottager != Brevmottager.MANUELL || manuellAdresseinfo != null) {
-            "For en manuelt registrert brevmottaker (Brevmottager.MANUELL) kan ikke manuellAdresseinfo være null"
+        require(brevmottager != brevmottager.MANUELL || manuellAdresseinfo != null) {
+            "For en manuelt registrert brevmottaker kan ikke manuellAdresseinfo være null"
         }
 
         val behandling: Behandling by lazy { behandlingRepository.findByIdOrThrow(behandlingId) }
@@ -141,3 +141,10 @@ class BrevmetadataUtil(
         }
     }
 }
+
+private val Brevmottager.MANUELL
+    get() = when (this) {
+        Brevmottager.MANUELL_BRUKER,
+        Brevmottager.MANUELL_TILLEGGSMOTTAKER -> this
+        else -> null
+    }

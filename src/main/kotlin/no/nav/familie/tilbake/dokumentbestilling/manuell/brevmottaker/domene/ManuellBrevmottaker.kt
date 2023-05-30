@@ -41,4 +41,6 @@ data class ManuellBrevmottaker(
                 landkode.isNullOrBlank()
             )
     }
+
+    val erTilleggsmottaker get() = type == MottakerType.VERGE || type == MottakerType.FULLMEKTIG
 }

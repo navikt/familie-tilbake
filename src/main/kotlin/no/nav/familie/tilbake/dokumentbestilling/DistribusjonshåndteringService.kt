@@ -17,6 +17,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.INSTITUSJON
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
@@ -117,8 +119,10 @@ class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker): Brevmottaker
 
 val Brevmottaker?.navn: String?
     get() = if (this is ManuellBrevmottakerType) mottaker.navn else null
-val Brevmottaker?.somBrevmottager: Brevmottager
-    get() = (this as? BrevmottagerType)?.mottaker ?: Brevmottager.MANUELL
+val Brevmottaker.somBrevmottager: Brevmottager
+    get() = (this as? BrevmottagerType)?.mottaker ?: (this as ManuellBrevmottakerType).run {
+        if (mottaker.erTilleggsmottaker) MANUELL_TILLEGGSMOTTAKER else MANUELL_BRUKER
+    }
 val Brevmottaker?.manuellAdresse: Adresseinfo?
     get() = if (this is ManuellBrevmottakerType)
         Adresseinfo(
