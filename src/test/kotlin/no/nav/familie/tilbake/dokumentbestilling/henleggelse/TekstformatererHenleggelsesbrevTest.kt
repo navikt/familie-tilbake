@@ -70,7 +70,7 @@ class TekstformatererHenleggelsesbrevTest {
 
     @Test
     fun `lagFritekst skal generere henleggelsesbrev med verge`() {
-        val brevmetadata = brevmetadata.copy(finnesVerge = true)
+        val brevmetadata = brevmetadata.copy(finnesVerge = true, finnesAnnenMottaker = true)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev.txt")
@@ -80,7 +80,7 @@ class TekstformatererHenleggelsesbrevTest {
 
     @Test
     fun `lagRevurderingsfritekst skal generere henleggelsesbrev for tilbakekreving revurdering med verge`() {
-        val brevmetadata = brevmetadata.copy(finnesVerge = true)
+        val brevmetadata = brevmetadata.copy(finnesVerge = true, finnesAnnenMottaker = true)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String =
             TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(henleggelsesbrevsdokument)
