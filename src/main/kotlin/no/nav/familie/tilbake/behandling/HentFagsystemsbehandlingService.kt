@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -18,7 +17,6 @@ class HentFagsystemsbehandlingService(
     private val kafkaProducer: KafkaProducer
 ) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun sendHentFagsystemsbehandlingRequest(
@@ -47,15 +45,6 @@ class HentFagsystemsbehandlingService(
         requestId: UUID,
         respons: String
     ) {
-        // TODO: Slett etter at det er kjørt i prod
-        if (listOf(
-                UUID.fromString("64225f43-7c18-4b4f-818d-150c642b2b00"),
-                UUID.fromString("e008dbe1-71c6-4a77-ae3e-b85622ccc23f"),
-                UUID.fromString("7308c41f-cff3-4032-8414-959d603b00a2")).contains(requestId)
-        ) {
-            logger.info("Skal ikke lagre respons med id = $requestId.")
-            return
-        }
         val fagsystemsbehandlingRequestSendt = requestSendtRepository.findByIdOrThrow(requestId)
         requestSendtRepository.update(fagsystemsbehandlingRequestSendt.copy(respons = respons))
     }
