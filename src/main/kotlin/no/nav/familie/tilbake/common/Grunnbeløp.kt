@@ -30,7 +30,13 @@ data class Grunnbeløp(
 private val grunnbeløpsperioder: List<Grunnbeløp> =
     listOf(
         Grunnbeløp(
-            periode = Månedsperiode("2022-05" to "2023-04"), // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
+            periode = Månedsperiode("2023-05" to "2024-04"), // Setter ikke MAX for å unngå at grunnbeløpet ikke er oppdatert for neste periode
+            grunnbeløp = 118_620.toBigDecimal(),
+            perMnd = 9_885.toBigDecimal(),
+            gjennomsnittPerÅr = 116239.toBigDecimal()
+        ),
+        Grunnbeløp(
+            periode = Månedsperiode("2022-05" to "2023-04"),
             grunnbeløp = 111_477.toBigDecimal(),
             perMnd = 9_290.toBigDecimal(),
             gjennomsnittPerÅr = 109_784.toBigDecimal()
