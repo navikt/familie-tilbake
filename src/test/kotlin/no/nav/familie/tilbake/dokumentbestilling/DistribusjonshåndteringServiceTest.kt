@@ -180,13 +180,14 @@ class DistribusjonshåndteringServiceTest {
 
     @Test
     fun `skal journalføre og sende brev med samme brødtekst til både manuell bruker og manuell tilleggsmottaker`() {
-        val behandlingMedManuelleBrevmottakere = behandling.copy(id = UUID.randomUUID(), verger = emptySet())
+        val behandlingId = UUID.randomUUID()
+        val behandlingMedManuelleBrevmottakere = behandling.copy(id = behandlingId, verger = emptySet())
 
-        every { behandlingRepository.findById(any()) } returns Optional.of(behandlingMedManuelleBrevmottakere)
-        every { manuelleBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
+        every { behandlingRepository.findById(behandlingId) } returns Optional.of(behandlingMedManuelleBrevmottakere)
+        every { manuelleBrevmottakerRepository.findByBehandlingId(behandlingId) } returns listOf(
             ManuellBrevmottaker(
                 type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
-                behandlingId = behandlingMedManuelleBrevmottakere.id,
+                behandlingId = behandlingId,
                 navn = personinfoBruker.navn,
                 adresselinje1 = "adresselinje1",
                 postnummer = "postnummer",
@@ -195,7 +196,7 @@ class DistribusjonshåndteringServiceTest {
             ),
             ManuellBrevmottaker(
                 type = MottakerType.VERGE,
-                behandlingId = behandlingMedManuelleBrevmottakere.id,
+                behandlingId = behandlingId,
                 navn = verge.navn,
                 ident = verge.ident
             )
@@ -203,7 +204,7 @@ class DistribusjonshåndteringServiceTest {
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns true
 
-        val task = SendHenleggelsesbrevTask.opprettTask(this.behandling.id, fagsak.fagsystem, "fritekst")
+        val task = SendHenleggelsesbrevTask.opprettTask(behandlingId, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
         val eksternReferanseIdVedJournalføring = mutableListOf<String>()
 
