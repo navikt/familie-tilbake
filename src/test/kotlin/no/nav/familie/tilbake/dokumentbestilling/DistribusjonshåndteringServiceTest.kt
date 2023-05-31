@@ -43,7 +43,7 @@ class DistribusjonshåndteringServiceTest {
     private val fagsakRepository: FagsakRepository = mockk()
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository = mockk(relaxed = true)
     private val journalføringService: JournalføringService = mockk(relaxed = true)
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+    private val featureToggleService: FeatureToggleService = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService = mockk()
 
@@ -110,6 +110,7 @@ class DistribusjonshåndteringServiceTest {
         every { eksterneDataForBrevService.hentSaksbehandlernavn(any()) } returns behandling.ansvarligSaksbehandler
         every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns behandling.ansvarligSaksbehandler
         every { brevsporingService.finnSisteVarsel(any()) } returns Testdata.brevsporing
+        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @Test
@@ -202,6 +203,7 @@ class DistribusjonshåndteringServiceTest {
             )
         )
 
+        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns true
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandlingId, fagsak.fagsystem, "fritekst")
