@@ -2,9 +2,12 @@ package no.nav.familie.tilbake.dokumentbestilling
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.equals.shouldNotBeEqual
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -14,16 +17,20 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
@@ -31,17 +38,23 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.Optional
+import java.util.UUID
 
 class DistribusjonshåndteringServiceTest  {
 
     private val behandlingRepository: BehandlingRepository = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository = mockk(relaxed = true)
-    private val pdfBrevService: PdfBrevService = mockk(relaxed = true)
+    private val journalføringService: JournalføringService = mockk(relaxed = true)
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService = mockk()
 
+    private val pdfBrevService = spyk(PdfBrevService(
+        journalføringService = journalføringService,
+        tellerService = mockk(relaxed = true),
+        taskService = mockk(relaxed = true),
+    ))
     private val brevmetadataUtil = BrevmetadataUtil(
         behandlingRepository = behandlingRepository,
         fagsakRepository = fagsakRepository,
@@ -164,5 +177,76 @@ class DistribusjonshåndteringServiceTest  {
 
         brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
         brevdata.first().metadata shouldBeEqual brevdata.last().metadata
+    }
+
+    @Test
+    fun `skal journalføre og sende brev med samme brødtekst til både manuell bruker og manuell tilleggsmottaker`() {
+        val behandling = behandling.copy(id = UUID.randomUUID(), verger = emptySet())
+
+        every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+        every { manuelleBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
+            ManuellBrevmottaker(
+                type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
+                behandlingId = behandling.id,
+                navn = personinfoBruker.navn,
+                adresselinje1 = "adresselinje1",
+                postnummer = "postnummer",
+                poststed = "poststed",
+                landkode = "NO"
+            ),
+            ManuellBrevmottaker(
+                type = MottakerType.VERGE,
+                behandlingId = behandling.id,
+                navn = verge.navn,
+                ident = verge.ident
+            )
+        )
+        every {
+            eksterneDataForBrevService.hentAdresse(personinfoBruker, MANUELL_TILLEGGSMOTTAKER, behandling.aktivVerge, any())
+        } returns vergeAdresse
+
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns true
+
+        val task = SendHenleggelsesbrevTask.opprettTask(this.behandling.id, fagsak.fagsystem, "fritekst")
+        val brevdata = mutableListOf<Brevdata>()
+        val eksternReferanseIdVedJournalføring = mutableListOf<String>()
+
+        sendHenleggelsesbrevTask.doTask(task)
+
+        verify(exactly = 2) {
+            pdfBrevService.sendBrev(
+                behandling = behandling,
+                fagsak = fagsak,
+                brevtype = Brevtype.HENLEGGELSE,
+                data = capture(brevdata),
+            )
+            journalføringService.journalførUtgåendeBrev(
+                behandling = behandling,
+                fagsak = fagsak,
+                dokumentkategori = any(),
+                brevmetadata = any(),
+                brevmottager = any(),
+                vedleggPdf = any(),
+                eksternReferanseId = capture(eksternReferanseIdVedJournalføring)
+            )
+        }
+
+        eksternReferanseIdVedJournalføring.first() shouldNotBeEqual eksternReferanseIdVedJournalføring.last()
+        eksternReferanseIdVedJournalføring.all {
+            it.contains("manuell_bruker") || it.contains("manuell_tilleggsmottaker")
+        }
+
+        val brevdataTilBruker = brevdata.first { it.mottager == MANUELL_BRUKER }
+        val brevdataTilManuellVerge = brevdata.first { it.mottager == MANUELL_TILLEGGSMOTTAKER }
+
+        val (brødtekstTilManuellVerge, annenMottakerOppgittTilVerge) = brevdataTilManuellVerge.brevtekst
+            .split("Brev med likt innhold er sendt til ")
+        val (brødtekstTilBruker, annenMottakerOppgittTilBruker) = brevdataTilBruker.brevtekst
+            .split("Brev med likt innhold er sendt til ")
+
+        brødtekstTilManuellVerge shouldBeEqual brødtekstTilBruker
+
+        annenMottakerOppgittTilBruker shouldBeEqual verge.navn
+        annenMottakerOppgittTilVerge shouldBeEqual personinfoBruker.navn
     }
 }
