@@ -115,7 +115,7 @@ class DistribusjonshåndteringService(
 sealed interface Brevmottaker
 
 class BrevmottagerType(val mottaker: Brevmottager) : Brevmottaker
-class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker): Brevmottaker
+class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker) : Brevmottaker
 
 val Brevmottaker?.navn: String?
     get() = if (this is ManuellBrevmottakerType) mottaker.navn else null
@@ -124,11 +124,11 @@ val Brevmottaker.somBrevmottager: Brevmottager
         if (mottaker.erTilleggsmottaker) MANUELL_TILLEGGSMOTTAKER else MANUELL_BRUKER
     }
 val Brevmottaker?.manuellAdresse: Adresseinfo?
-    get() = if (this is ManuellBrevmottakerType)
+    get() = if (this is ManuellBrevmottakerType) {
         Adresseinfo(
             ident = mottaker.ident.orEmpty(),
             mottagernavn = mottaker.navn,
-            manuellAdresse = if (mottaker.hasManuellAdresse())
+            manuellAdresse = if (mottaker.hasManuellAdresse()) {
                 ManuellAdresse(
                     adresseType = when (mottaker.landkode) {
                         "NO" -> AdresseType.norskPostadresse
@@ -138,7 +138,12 @@ val Brevmottaker?.manuellAdresse: Adresseinfo?
                     adresselinje2 = mottaker.adresselinje2,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,
-                    land = mottaker.landkode!!,
-                ) else null,
-        ) else null
-
+                    land = mottaker.landkode!!
+                )
+            } else {
+                null
+            }
+        )
+    } else {
+        null
+    }

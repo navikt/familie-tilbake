@@ -34,7 +34,7 @@ class HenleggelsesbrevService(
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
-    private val brevmetadataUtil: BrevmetadataUtil,
+    private val brevmetadataUtil: BrevmetadataUtil
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager? = null) {

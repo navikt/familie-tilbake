@@ -36,7 +36,7 @@ class BrevmetadataUtil(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null,
         brevmottager: Brevmottager = Brevmottager.BRUKER,
         manuellAdresseinfo: Adresseinfo? = null,
-        annenMottakersNavn: String? = null,
+        annenMottakersNavn: String? = null
     ): Brevmetadata? {
         require(brevmottager != brevmottager.MANUELL || manuellAdresseinfo != null) {
             "For en manuelt registrert brevmottaker kan ikke manuellAdresseinfo være null"
@@ -88,7 +88,7 @@ class BrevmetadataUtil(
     }
 
     fun lagBrevmetadataForMottakerTilForhåndsvisning(
-        behandlingId: UUID,
+        behandlingId: UUID
     ): Pair<Brevmetadata?, Brevmottager> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -118,7 +118,9 @@ class BrevmetadataUtil(
             manuellAdresseinfo = manuellAdresseinfo,
             annenMottakersNavn = if (tilleggsmottaker != null) {
                 eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
-            } else null
+            } else {
+                null
+            }
         )
         return metadata to brevmottager
     }

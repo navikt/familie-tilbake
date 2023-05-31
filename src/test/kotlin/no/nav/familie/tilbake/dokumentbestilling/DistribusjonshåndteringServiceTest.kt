@@ -8,7 +8,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
-
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.config.FeatureToggleConfig
@@ -28,10 +27,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.JournalføringServic
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.HenleggelsesbrevService
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
-
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
-
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevgunnlagService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +37,7 @@ import java.time.LocalDate
 import java.util.Optional
 import java.util.UUID
 
-class DistribusjonshåndteringServiceTest  {
+class DistribusjonshåndteringServiceTest {
 
     private val behandlingRepository: BehandlingRepository = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
@@ -50,18 +47,20 @@ class DistribusjonshåndteringServiceTest  {
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService = mockk()
 
-    private val pdfBrevService = spyk(PdfBrevService(
-        journalføringService = journalføringService,
-        tellerService = mockk(relaxed = true),
-        taskService = mockk(relaxed = true),
-    ))
+    private val pdfBrevService = spyk(
+        PdfBrevService(
+            journalføringService = journalføringService,
+            tellerService = mockk(relaxed = true),
+            taskService = mockk(relaxed = true)
+        )
+    )
     private val brevmetadataUtil = BrevmetadataUtil(
         behandlingRepository = behandlingRepository,
         fagsakRepository = fagsakRepository,
         manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
         eksterneDataForBrevService = eksterneDataForBrevService,
         organisasjonService = mockk(),
-        featureToggleService = featureToggleService,
+        featureToggleService = featureToggleService
     )
     private val distribusjonshåndteringService = DistribusjonshåndteringService(
         brevmetadataUtil = brevmetadataUtil,
@@ -101,7 +100,7 @@ class DistribusjonshåndteringServiceTest  {
         every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
         every { fagsakRepository.findById(any()) } returns Optional.of(fagsak)
         every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem) } returns
-                personinfoBruker
+            personinfoBruker
         every {
             eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandling.aktivVerge, any())
         } returns brukerAdresse
@@ -116,7 +115,7 @@ class DistribusjonshåndteringServiceTest  {
     @Test
     fun `skal sende brev med likt innhold og til samme mottakere når toggle er på, som sendbrev-tasken når toggle er av`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-                true andThen false
+            true andThen false
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
@@ -129,21 +128,21 @@ class DistribusjonshåndteringServiceTest  {
                 behandling,
                 fagsak,
                 Brevtype.HENLEGGELSE,
-                capture(brevdata),
+                capture(brevdata)
             )
         }
 
         brevdata shouldHaveSize 4
 
         brevdata.first { it.mottager == VERGE }.brevtekst shouldBeEqual
-                brevdata.last { it.mottager == VERGE }.brevtekst
+            brevdata.last { it.mottager == VERGE }.brevtekst
         brevdata.first { it.mottager == BRUKER }.brevtekst shouldBeEqual
-                brevdata.last { it.mottager == BRUKER }.brevtekst
+            brevdata.last { it.mottager == BRUKER }.brevtekst
 
         brevdata.first { it.mottager == VERGE }.metadata shouldBeEqual
-                brevdata.last { it.mottager == VERGE }.metadata
+            brevdata.last { it.mottager == VERGE }.metadata
         brevdata.first { it.mottager == BRUKER }.metadata shouldBeEqual
-                brevdata.last { it.mottager == BRUKER }.metadata
+            brevdata.last { it.mottager == BRUKER }.metadata
     }
 
     @Test
@@ -156,7 +155,7 @@ class DistribusjonshåndteringServiceTest  {
         } returns brukerAdresse
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-                true andThen false
+            true andThen false
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
@@ -169,7 +168,7 @@ class DistribusjonshåndteringServiceTest  {
                 behandlingUtenVerge,
                 fagsak,
                 Brevtype.HENLEGGELSE,
-                capture(brevdata),
+                capture(brevdata)
             )
         }
 
@@ -181,13 +180,13 @@ class DistribusjonshåndteringServiceTest  {
 
     @Test
     fun `skal journalføre og sende brev med samme brødtekst til både manuell bruker og manuell tilleggsmottaker`() {
-        val behandling = behandling.copy(id = UUID.randomUUID(), verger = emptySet())
+        val behandlingMedManuelleBrevmottakere = behandling.copy(id = UUID.randomUUID(), verger = emptySet())
 
-        every { behandlingRepository.findById(any()) } returns Optional.of(behandling)
+        every { behandlingRepository.findById(any()) } returns Optional.of(behandlingMedManuelleBrevmottakere)
         every { manuelleBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
             ManuellBrevmottaker(
                 type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
-                behandlingId = behandling.id,
+                behandlingId = behandlingMedManuelleBrevmottakere.id,
                 navn = personinfoBruker.navn,
                 adresselinje1 = "adresselinje1",
                 postnummer = "postnummer",
@@ -196,14 +195,11 @@ class DistribusjonshåndteringServiceTest  {
             ),
             ManuellBrevmottaker(
                 type = MottakerType.VERGE,
-                behandlingId = behandling.id,
+                behandlingId = behandlingMedManuelleBrevmottakere.id,
                 navn = verge.navn,
                 ident = verge.ident
             )
         )
-        every {
-            eksterneDataForBrevService.hentAdresse(personinfoBruker, MANUELL_TILLEGGSMOTTAKER, behandling.aktivVerge, any())
-        } returns vergeAdresse
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns true
 
@@ -215,13 +211,13 @@ class DistribusjonshåndteringServiceTest  {
 
         verify(exactly = 2) {
             pdfBrevService.sendBrev(
-                behandling = behandling,
+                behandling = behandlingMedManuelleBrevmottakere,
                 fagsak = fagsak,
                 brevtype = Brevtype.HENLEGGELSE,
-                data = capture(brevdata),
+                data = capture(brevdata)
             )
             journalføringService.journalførUtgåendeBrev(
-                behandling = behandling,
+                behandling = behandlingMedManuelleBrevmottakere,
                 fagsak = fagsak,
                 dokumentkategori = any(),
                 brevmetadata = any(),
