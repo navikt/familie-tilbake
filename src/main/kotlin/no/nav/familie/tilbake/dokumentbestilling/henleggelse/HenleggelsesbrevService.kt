@@ -34,7 +34,7 @@ class HenleggelsesbrevService(
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
-    private val brevmetadataUtil: BrevmetadataUtil,
+    private val brevmetadataUtil: BrevmetadataUtil
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager? = null) {
@@ -120,38 +120,42 @@ class HenleggelsesbrevService(
             )
         }
 
-        val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
-            personinfo,
-            brevmottager,
-            behandling.aktivVerge,
-            fagsak.fagsystem
-        )
         val ansvarligSaksbehandler = if (behandling.ansvarligSaksbehandler == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             SIGNATUR_AUTOMATISK_HENLEGGELSESBREV
         } else {
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
         }
-        val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-        val gjelderDødsfall = personinfo.dødsdato != null
 
-        val metadata = forhåndsgenerertMetadata ?: Brevmetadata(
-            sakspartId = personinfo.ident,
-            sakspartsnavn = personinfo.navn,
-            finnesVerge = behandling.harVerge,
-            vergenavn = vergenavn,
-            mottageradresse = adresseinfo,
-            behandlendeEnhetId = behandling.behandlendeEnhet,
-            behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            saksnummer = fagsak.eksternFagsakId,
-            språkkode = fagsak.bruker.språkkode,
-            ytelsestype = fagsak.ytelsestype,
-            gjelderDødsfall = gjelderDødsfall,
-            institusjon = fagsak.institusjon?.let {
-                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            }
-        )
+        val metadata = forhåndsgenerertMetadata ?: run {
+            val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+            val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
+                personinfo,
+                brevmottager,
+                behandling.aktivVerge,
+                fagsak.fagsystem
+            )
+
+            val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+            val gjelderDødsfall = personinfo.dødsdato != null
+
+            Brevmetadata(
+                sakspartId = personinfo.ident,
+                sakspartsnavn = personinfo.navn,
+                finnesVerge = behandling.harVerge,
+                vergenavn = vergenavn,
+                mottageradresse = adresseinfo,
+                behandlendeEnhetId = behandling.behandlendeEnhet,
+                behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                saksnummer = fagsak.eksternFagsakId,
+                språkkode = fagsak.bruker.språkkode,
+                ytelsestype = fagsak.ytelsestype,
+                gjelderDødsfall = gjelderDødsfall,
+                institusjon = fagsak.institusjon?.let {
+                    organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+                }
+            )
+        }
 
         return Henleggelsesbrevsdokument(
             metadata.copy(

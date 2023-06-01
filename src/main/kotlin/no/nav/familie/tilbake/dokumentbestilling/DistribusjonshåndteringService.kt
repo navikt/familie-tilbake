@@ -17,6 +17,8 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.BRUKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.INSTITUSJON
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_BRUKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
@@ -113,18 +115,20 @@ class DistribusjonshåndteringService(
 sealed interface Brevmottaker
 
 class BrevmottagerType(val mottaker: Brevmottager) : Brevmottaker
-class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker): Brevmottaker
+class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker) : Brevmottaker
 
 val Brevmottaker?.navn: String?
     get() = if (this is ManuellBrevmottakerType) mottaker.navn else null
-val Brevmottaker?.somBrevmottager: Brevmottager
-    get() = (this as? BrevmottagerType)?.mottaker ?: Brevmottager.MANUELL
+val Brevmottaker.somBrevmottager: Brevmottager
+    get() = (this as? BrevmottagerType)?.mottaker ?: (this as ManuellBrevmottakerType).run {
+        if (mottaker.erTilleggsmottaker) MANUELL_TILLEGGSMOTTAKER else MANUELL_BRUKER
+    }
 val Brevmottaker?.manuellAdresse: Adresseinfo?
-    get() = if (this is ManuellBrevmottakerType)
+    get() = if (this is ManuellBrevmottakerType) {
         Adresseinfo(
             ident = mottaker.ident.orEmpty(),
             mottagernavn = mottaker.navn,
-            manuellAdresse = if (mottaker.hasManuellAdresse())
+            manuellAdresse = if (mottaker.hasManuellAdresse()) {
                 ManuellAdresse(
                     adresseType = when (mottaker.landkode) {
                         "NO" -> AdresseType.norskPostadresse
@@ -134,7 +138,12 @@ val Brevmottaker?.manuellAdresse: Adresseinfo?
                     adresselinje2 = mottaker.adresselinje2,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,
-                    land = mottaker.landkode!!,
-                ) else null,
-        ) else null
-
+                    land = mottaker.landkode!!
+                )
+            } else {
+                null
+            }
+        )
+    } else {
+        null
+    }

@@ -158,9 +158,9 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `brevmetadataUtil skal lage lik metadata som HeleggelsesbrevService selv`(){
+    fun `brevmetadataUtil skal lage lik metadata som HeleggelsesbrevService selv`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-                true andThen false
+            true andThen false
 
         val brevdata = mutableListOf<Brevdata>()
 
@@ -169,13 +169,13 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
         verify(exactly = 2) {
             spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
+                capture(brevdata)
             )
         }
 
         brevdata shouldHaveSize 2
         brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
-                brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
         brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
