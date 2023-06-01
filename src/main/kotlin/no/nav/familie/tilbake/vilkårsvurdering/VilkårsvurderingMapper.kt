@@ -266,7 +266,7 @@ object VilkårsvurderingMapper {
 
     private fun utledIleggRenter(ileggRenter: Boolean?, fagsystem: Fagsystem): Boolean? {
         return when {
-            ileggRenter != null && Fagsystem.BA == fagsystem -> false
+            ileggRenter != null && listOf(Fagsystem.BA, Fagsystem.KONT).contains(fagsystem) -> false
             else -> ileggRenter
         }
     }
