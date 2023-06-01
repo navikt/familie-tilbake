@@ -471,6 +471,15 @@ class BehandlingService(
         )
         behandlingRepository.insert(behandling)
 
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+            Aktør.VEDTAKSLØSNING
+        )
+
+        behandlingskontrollService.fortsettBehandling(behandling.id)
+        stegService.håndterSteg(behandling.id)
+
         val manuelleBrevmottakere = brevmottakere.map { brevmottaker ->
             ManuellBrevmottaker(
                 behandlingId = behandling.id,
@@ -486,16 +495,12 @@ class BehandlingService(
                 vergetype = brevmottaker.vergetype
             )
         }
-        manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
 
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-            Aktør.VEDTAKSLØSNING
-        )
-
-        behandlingskontrollService.fortsettBehandling(behandling.id)
-        stegService.håndterSteg(behandling.id)
+        if (manuelleBrevmottakere.isNotEmpty()) {
+            logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
+            manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
+            aktiverBrevmottakersteget(behandling, fagsak)
+        }
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
         taskService.save(
@@ -632,6 +637,20 @@ class BehandlingService(
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
+    }
+
+    private fun aktiverBrevmottakersteget(
+        behandling: Behandling,
+        fagsak: Fagsak
+    ) {
+        if (sjekkOmManuelleBrevmottakereErStøttet(
+                behandling = behandling,
+                fagsak = fagsak,
+                featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            )
+        ) {
+            behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
+        }
     }
 
     companion object {

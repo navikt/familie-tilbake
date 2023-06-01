@@ -142,7 +142,11 @@ class BehandlingskontrollService(
             Behandlingssteg.BREVMOTTAKER
         ) ?.apply {
             oppdaterBehandlingsstegStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
-        } ?: opprettBehandlingsstegOgStatus(behandlingId, Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT))
+        } ?: opprettBehandlingsstegOgStatus(
+            behandlingId = behandlingId,
+            nesteStegMedStatus = Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, AUTOUTFØRT),
+            opprettSendingAvBehandlingensTilstand = false // da det settes AUTOUTFØRT, forblir aktivt steg / tilstanden den samme
+        )
     }
 
     @Transactional
@@ -257,7 +261,8 @@ class BehandlingskontrollService(
 
     private fun opprettBehandlingsstegOgStatus(
         behandlingId: UUID,
-        nesteStegMedStatus: Behandlingsstegsinfo
+        nesteStegMedStatus: Behandlingsstegsinfo,
+        opprettSendingAvBehandlingensTilstand: Boolean = true
     ) {
         // startet nytt behandlingssteg
         behandlingsstegstilstandRepository
@@ -272,7 +277,9 @@ class BehandlingskontrollService(
             )
         // oppdater tilsvarende behandlingsstatus
         oppdaterBehandlingsstatus(behandlingId, nesteStegMedStatus.behandlingssteg)
-        behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus)
+        if (opprettSendingAvBehandlingensTilstand) {
+            behandlingTilstandService.opprettSendingAvBehandlingensTilstand(behandlingId, nesteStegMedStatus)
+        }
     }
 
     private fun persisterBehandlingsstegOgStatus(
