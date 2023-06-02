@@ -78,20 +78,6 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
-    @Operation(summary = "Hent fagsysytemsbehandlingsinformasjon fra fagsystem via Kafka")
-    @PostMapping(
-        path = ["/fagsystemsbehandling/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
-    )
-    @Rolletilgangssjekk(Behandlerrolle.FORVALTER, "Henter fagsystemsbehandling fra fagsystem via kafka", AuditLoggerEvent.UPDATE)
-    fun hentFagsystemsbehandling(
-        @Valid @RequestBody
-        hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto
-    ): Ressurs<String> {
-        forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequest)
-        return Ressurs.success("OK")
-    }
-
     @Operation(summary = "Flytt behandling tilbake til fakta")
     @PutMapping(
         path = ["/behandling/{behandlingId}/flytt-behandling/v1"],

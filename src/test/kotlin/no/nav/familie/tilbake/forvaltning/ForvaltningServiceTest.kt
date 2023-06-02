@@ -221,29 +221,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentFagsystemsbehandling skal sende request til fagsystem for å hente fagsystemsbehandling`() {
-        val eksternFagsakId = Testdata.fagsak.eksternFagsakId
-        val ytelsestype = Testdata.fagsak.ytelsestype
-        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
-        // finnes en eksisterende request
-        val requestSendt = requestSendtRepository.insert(
-            HentFagsystemsbehandlingRequestSendt(
-                eksternFagsakId = eksternFagsakId,
-                ytelsestype = ytelsestype,
-                eksternId = eksternId
-            )
-        )
-        val hentFagsystemsbehandlingRequestDto = HentFagsystemsbehandlingRequestDto(ytelsestype, eksternFagsakId, eksternId)
-        forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequestDto)
-        requestSendtRepository.findByIdOrNull(requestSendt.id).shouldBeNull()
-        requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
-            eksternFagsakId,
-            ytelsestype,
-            eksternId
-        ).shouldNotBeNull()
-    }
-
-    @Test
     fun `flyttBehandlingsstegTilbakeTilFakta skal ikke flytte behandlingssteg når behandling er avsluttet`() {
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
