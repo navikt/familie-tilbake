@@ -6,7 +6,20 @@
             {{/case}}
         {{/switch}}
     {{/case}}
-    {{#case "DØDSFALL"}}
-            {{> fakta-død}}
+    {{#case "BARNEHAGEPLASS"}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "FULLTID_BARNEHAGEPLASS"}}
+Barnet ditt har hatt fulltids barnehageplass. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
+    {{/case}}
+    {{#case "BARNS_ALDER_KS"}}
+        {{#switch fakta.hendelsesundertype}}
+            {{#case "OVER_2_ÅR"}}
+Du har fått {{{ytelsesnavnUbestemt}}} etter at barn fylte 2 år. Du har derfor fått {{kroner
+                        kravgrunnlag.feilutbetaltBeløp}} for mye utbetalt i denne perioden.
+            {{/case}}
+        {{/switch}}
     {{/case}}
 {{/switch}}

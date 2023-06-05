@@ -123,6 +123,12 @@ object HendelsesundertypePerHendelsestype {
         Hendelsestype.SKOLEPENGER to setOf(
             Hendelsesundertype.IKKE_RETT_TIL_OVERGANGSSTØNAD,
             Hendelsesundertype.SLUTTET_I_UTDANNING
+        ),
+        Hendelsestype.BARNEHAGEPLASS to setOf(
+            Hendelsesundertype.FULLTID_BARNEHAGEPLASS,
+        ),
+        Hendelsestype.BARNS_ALDER_KS to setOf(
+            Hendelsesundertype.OVER_2_ÅR,
         )
     )
 

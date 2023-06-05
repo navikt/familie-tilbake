@@ -181,7 +181,7 @@ class KravgrunnlagService(
     }
 
     private fun håndterOppgavePrioritet(behandling: Behandling) {
-        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id)
+        oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId)
     }
 
     private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {

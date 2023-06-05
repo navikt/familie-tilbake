@@ -49,7 +49,11 @@ object HendelsestypePerYtelsestype {
         Ytelsestype.KONTANTSTØTTE to setOf(
             Hendelsestype.ANNET,
             Hendelsestype.BOR_MED_SØKER,
-            Hendelsestype.DØDSFALL
+            Hendelsestype.BARNS_ALDER_KS,
+            Hendelsestype.BARNEHAGEPLASS,
+            Hendelsestype.MEDLEMSKAP_ANNEN_FORELDER,
+            Hendelsestype.BOSATT_I_RIKET,
+            Hendelsestype.MEDLEMSKAP_KS
         )
     )
 
