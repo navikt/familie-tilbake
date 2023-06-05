@@ -38,6 +38,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var pdfBrevService: PdfBrevService
     lateinit var spyPdfBrevService: PdfBrevService
+
     @Autowired
     lateinit var distribusjonshåndteringService: DistribusjonshåndteringService
     private val fagsakRepository: FagsakRepository = mockk()
@@ -53,7 +54,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         organisasjonService = organisasjonService,
         featureToggleService = featureToggleService
     )
-
 
     @BeforeEach
     fun setup() {
@@ -88,9 +88,9 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `brevmetadataUtil skal lage lik metadata som InnhentDokumentasjonbrevService selv`(){
+    fun `brevmetadataUtil skal lage lik metadata som InnhentDokumentasjonbrevService selv`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-                true andThen false
+            true andThen false
 
         val brevdata = mutableListOf<Brevdata>()
 
@@ -105,13 +105,13 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
         verify(exactly = 2) {
             spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
+                capture(brevdata)
             )
         }
 
         brevdata shouldHaveSize 2
         brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
-                brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
         brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 }
