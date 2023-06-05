@@ -149,6 +149,7 @@ class OppgaveTaskService(
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+            setProperty("behandlingId", behandlingId.toString())
         }
         taskService.save(
             Task(
