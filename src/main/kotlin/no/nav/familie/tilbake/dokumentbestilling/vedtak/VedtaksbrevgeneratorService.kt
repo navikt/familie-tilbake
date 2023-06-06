@@ -87,7 +87,7 @@ class VedtaksbrevgeneratorService(
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
         val (brevmetadata, brevmottager) =
-            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -116,7 +116,7 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
     ): HbVedtaksbrevsdata {
         val (brevmetadata, brevmottager) =
-            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
