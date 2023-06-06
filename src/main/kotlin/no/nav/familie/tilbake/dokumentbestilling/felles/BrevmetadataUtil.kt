@@ -88,7 +88,17 @@ class BrevmetadataUtil(
     }
 
     fun lagBrevmetadataForMottakerTilForhåndsvisning(
-        behandlingId: UUID
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
+    ): Pair<Brevmetadata?, Brevmottager> {
+        return lagBrevmetadataForMottakerTilForhåndsvisning(
+            behandlingId = vedtaksbrevgrunnlag.behandling.id,
+            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag
+        )
+    }
+
+    fun lagBrevmetadataForMottakerTilForhåndsvisning(
+        behandlingId: UUID,
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null
     ): Pair<Brevmetadata?, Brevmottager> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -114,12 +124,11 @@ class BrevmetadataUtil(
         }
         val metadata = genererMetadataForBrev(
             behandlingId = behandling.id,
+            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
             brevmottager = brevmottager,
             manuellAdresseinfo = manuellAdresseinfo,
-            annenMottakersNavn = if (tilleggsmottaker != null) {
+            annenMottakersNavn = tilleggsmottaker?.let {
                 eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
-            } else {
-                null
             }
         )
         return metadata to brevmottager
