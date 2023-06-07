@@ -44,6 +44,7 @@ class PdlClientConfig {
         every { pdlClient.hentIdenter(any(), any()) } answers {
             PdlHentIdenterResponse(
                 data = Data(PdlIdenter(identer = listOf(IdentInformasjon("123", "AKTORID")))),
+                extensions = null,
                 errors = listOf()
             )
         }
