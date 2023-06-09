@@ -499,7 +499,7 @@ class BehandlingService(
         if (manuelleBrevmottakere.isNotEmpty()) {
             logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
             manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
-            aktiverBrevmottakersteget(behandling, fagsak)
+            håndterBrevmottakerSteg(behandling, fagsak)
         }
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
@@ -639,7 +639,7 @@ class BehandlingService(
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
-    private fun aktiverBrevmottakersteget(
+    private fun håndterBrevmottakerSteg(
         behandling: Behandling,
         fagsak: Fagsak
     ) {
