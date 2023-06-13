@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsbelo
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -38,7 +39,7 @@ class IverksettelseService(
     private val oppdragClient: OppdragClient
 ) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
@@ -52,6 +53,7 @@ class IverksettelseService(
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
         // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
         val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
+        secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
