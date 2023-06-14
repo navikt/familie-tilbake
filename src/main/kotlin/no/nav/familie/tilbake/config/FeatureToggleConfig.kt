@@ -94,7 +94,7 @@ class FeatureToggleConfig(
 
         const val KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE = "familie-tilbake.konsolidert-brevdistribusjon"
 
-        const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake-overstyr-delvis-hvis-full"
+        const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
