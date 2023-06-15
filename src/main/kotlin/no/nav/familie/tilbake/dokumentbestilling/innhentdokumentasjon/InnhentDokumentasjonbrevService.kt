@@ -107,7 +107,6 @@ class InnhentDokumentasjonbrevService(
         forhåndsgenerertMetadata: Brevmetadata? = null
     ): InnhentDokumentasjonsbrevsdokument {
         val brevmetadata = forhåndsgenerertMetadata ?: run {
-
             val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
             val adresseinfo: Adresseinfo =
                 eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)

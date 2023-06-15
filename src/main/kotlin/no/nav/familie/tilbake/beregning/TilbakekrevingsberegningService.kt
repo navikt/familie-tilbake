@@ -215,7 +215,7 @@ class TilbakekrevingsberegningService(
     }
 
     private fun skalBeregneRenter(fagområdekode: Fagområdekode): Boolean =
-        when(fagområdekode) {
+        when (fagområdekode) {
             Fagområdekode.BA, Fagområdekode.KS -> false
             else -> true
         }
