@@ -88,7 +88,7 @@ internal object TilbakekrevingsberegningVilkår {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)
                 skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.DOWN)
             }
         }
