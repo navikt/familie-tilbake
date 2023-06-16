@@ -24,7 +24,8 @@ internal object TilbakekrevingsberegningVilkår {
         vilkårVurdering: Vilkårsvurderingsperiode,
         delresultat: FordeltKravgrunnlagsbeløp,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
+        bruk6desimalerISkatteberegning: Boolean = false
     ): Beregningsresultatsperiode {
         val periode: Månedsperiode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
@@ -48,7 +49,8 @@ internal object TilbakekrevingsberegningVilkår {
             beregnSkattBeløp(
                 periode,
                 beløpUtenRenter,
-                perioderMedSkatteprosent
+                perioderMedSkatteprosent,
+                bruk6desimalerISkatteberegning
             )
         val nettoBeløp: BigDecimal = tilbakekrevingBeløp.subtract(skattBeløp)
         return Beregningsresultatsperiode(
@@ -75,7 +77,8 @@ internal object TilbakekrevingsberegningVilkår {
     private fun beregnSkattBeløp(
         periode: Månedsperiode,
         bruttoTilbakekrevesBeløp: BigDecimal,
-        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>
+        perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
+        bruk6desimalerISkatteberegning: Boolean
     ): BigDecimal {
         val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
         val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {
@@ -86,9 +89,10 @@ internal object TilbakekrevingsberegningVilkår {
         var skattBeløp: BigDecimal = BigDecimal.ZERO
         for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
+                val scale = if(bruk6desimalerISkatteberegning) 6 else 4
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                    .divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(100), scale, RoundingMode.HALF_UP)
                 skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.DOWN)
             }
         }
