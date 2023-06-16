@@ -195,8 +195,6 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             .also { it.metadata["mottager"] shouldBe Brevmottager.BRUKER.name }
     }
 
-
-
     private fun opprettTask(
         behandlingId: UUID,
         brevtype: Brevtype,
