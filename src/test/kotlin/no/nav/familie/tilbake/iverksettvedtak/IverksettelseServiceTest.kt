@@ -10,6 +10,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,6 +26,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.integration.økonomi.DefaultOppdragClient
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
@@ -91,6 +93,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
+    private val mockFeatureToggleService: FeatureToggleService = mockk()
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
@@ -120,7 +123,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             tilbakekrevingsvedtakBeregningService,
             beregningService,
             behandlingVedtakService,
-            oppdragClient
+            oppdragClient,
+            mockFeatureToggleService
         )
     }
 
