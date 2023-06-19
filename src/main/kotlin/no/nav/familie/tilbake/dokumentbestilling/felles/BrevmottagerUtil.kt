@@ -9,8 +9,9 @@ import no.nav.familie.tilbake.behandling.domain.Verge as DomainVerge
 object BrevmottagerUtil {
 
     fun getAnnenMottagersNavn(brevmetadata: Brevmetadata): String? {
-        if (brevmetadata.annenMottakersNavn != null)
+        if (brevmetadata.annenMottakersNavn != null) {
             return brevmetadata.annenMottakersNavn
+        }
 
         val mottagernavn: String = brevmetadata.mottageradresse.mottagernavn
         val brukernavn = brevmetadata.sakspartsnavn

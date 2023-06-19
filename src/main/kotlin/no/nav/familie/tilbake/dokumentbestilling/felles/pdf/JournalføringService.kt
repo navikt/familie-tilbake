@@ -105,7 +105,9 @@ class JournalføringService(
         val adresseinfo: Adresseinfo = brevmetadata.mottageradresse
         val mottagerIdent = adresseinfo.ident.takeIf { it.isNotBlank() }
         return when (mottager) {
-            Brevmottager.BRUKER, Brevmottager.MANUELL -> AvsenderMottaker(
+            Brevmottager.BRUKER,
+            Brevmottager.MANUELL_BRUKER,
+            Brevmottager.MANUELL_TILLEGGSMOTTAKER -> AvsenderMottaker(
                 id = mottagerIdent,
                 idType = utledIdType(mottagerIdent),
                 navn = adresseinfo.mottagernavn

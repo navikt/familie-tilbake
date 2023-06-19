@@ -214,9 +214,11 @@ class TilbakekrevingsberegningService(
             }.flatten()
     }
 
-    private fun skalBeregneRenter(fagområdekode: Fagområdekode): Boolean {
-        return Fagområdekode.BA != fagområdekode
-    }
+    private fun skalBeregneRenter(fagområdekode: Fagområdekode): Boolean =
+        when (fagområdekode) {
+            Fagområdekode.BA, Fagområdekode.KS -> false
+            else -> true
+        }
 
     private fun bestemVedtakResultat(
         behandlingId: UUID,

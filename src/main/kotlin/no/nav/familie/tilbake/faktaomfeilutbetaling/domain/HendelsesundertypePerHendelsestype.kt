@@ -123,8 +123,60 @@ object HendelsesundertypePerHendelsestype {
         Hendelsestype.SKOLEPENGER to setOf(
             Hendelsesundertype.IKKE_RETT_TIL_OVERGANGSSTØNAD,
             Hendelsesundertype.SLUTTET_I_UTDANNING
+        ),
+
+        Hendelsestype.VILKÅR_BARN to setOf(
+            Hendelsesundertype.FULLTIDSPLASS_BARNEHAGE,
+            Hendelsesundertype.DELTIDSPLASS_BARNEHAGEPLASS,
+            Hendelsesundertype.BARN_IKKE_BOSATT,
+            Hendelsesundertype.BARN_IKKE_OPPHOLDSTILLATELSE,
+            Hendelsesundertype.BARN_FLYTTET_FRA_NORGE,
+            Hendelsesundertype.BARN_OVER_2_ÅR
+        ),
+        Hendelsestype.VILKÅR_SØKER to setOf(
+            Hendelsesundertype.DEN_ANDRE_FORELDEREN_IKKE_MEDLEM_FOLKETRYGDEN,
+            Hendelsesundertype.DEN_ANDRE_FORELDEREN_IKKE_MEDLEM_FOLKETRYGDEN_ELLER_EØS,
+            Hendelsesundertype.SØKER_IKKE_MEDLEM_FOLKETRYGDEN,
+            Hendelsesundertype.SØKER_IKKE_MEDLEM_FOLKETRYGDEN_ELLER_EØS,
+            Hendelsesundertype.BEGGE_FORELDRENE_IKKE_MEDLEM_FOLKETRYGDEN,
+            Hendelsesundertype.BEGGE_FORELDRENE_IKKE_MEDLEM_FOLKETRYGDEN_ELLER_EØS,
+            Hendelsesundertype.BARN_BOR_IKKE_HOS_SØKER,
+            Hendelsesundertype.UTENLANDSOPPHOLD_OVER_3_MÅNEDER,
+            Hendelsesundertype.SØKER_FLYTTET_FRA_NORGE,
+            Hendelsesundertype.SØKER_IKKE_BOSATT,
+            Hendelsesundertype.SØKER_IKKE_OPPHOLDSTILLATELSE,
+            Hendelsesundertype.SØKER_IKKE_OPPHOLDSTILLATELSE_I_MER_ENN_12_MÅNEDER
+        ),
+        Hendelsestype.BARN_I_FOSTERHJEM_ELLER_INSTITUSJON to setOf(
+            Hendelsesundertype.BARN_I_FOSTERHJEM,
+            Hendelsesundertype.BARN_I_INSTITUSJON
+
+        ),
+        Hendelsestype.KONTANTSTØTTENS_STØRRELSE to setOf(
+            Hendelsesundertype.FULLTIDSPLASS_BARNEHAGE,
+            Hendelsesundertype.DELTIDSPLASS_BARNEHAGEPLASS,
+            Hendelsesundertype.ØKT_TIMEANTALL_I_BARNEHAGE,
+            Hendelsesundertype.SATSENDRING
+        ),
+        Hendelsestype.STØTTEPERIODE to setOf(
+            Hendelsesundertype.BARN_2_ÅR
+        ),
+        Hendelsestype.UTBETALING to setOf(
+            Hendelsesundertype.DELT_BOSTED_AVTALE_OPPHØRT,
+            Hendelsesundertype.DOBBELUTBETALING
+        ),
+        Hendelsestype.KONTANTSTØTTE_FOR_ADOPTERTE_BARN to setOf(
+            Hendelsesundertype.MER_ENN_11_MÅNEDER,
+            Hendelsesundertype.BARN_STARTET_PÅ_SKOLEN
+        ),
+        Hendelsestype.ANNET_KS to setOf(
+            Hendelsesundertype.ANNET_FRITEKST,
+            Hendelsesundertype.BARN_DØD,
+            Hendelsesundertype.BRUKER_DØD,
+        ),
+
+
         )
-    )
 
     fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> {
         return HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")

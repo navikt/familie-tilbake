@@ -34,12 +34,12 @@ class BrevmetadataUtil(
     fun genererMetadataForBrev(
         behandlingId: UUID,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null,
-        brevmottager: Brevmottager = Brevmottager.MANUELL,
+        brevmottager: Brevmottager = Brevmottager.BRUKER,
         manuellAdresseinfo: Adresseinfo? = null,
-        annenMottakersNavn: String? = null,
+        annenMottakersNavn: String? = null
     ): Brevmetadata? {
-        require(brevmottager != Brevmottager.MANUELL || manuellAdresseinfo != null) {
-            "For en manuelt registrert brevmottaker (Brevmottager.MANUELL) kan ikke manuellAdresseinfo være null"
+        require(brevmottager != brevmottager.MANUELL || manuellAdresseinfo != null) {
+            "For en manuelt registrert brevmottaker kan ikke manuellAdresseinfo være null"
         }
 
         val behandling: Behandling by lazy { behandlingRepository.findByIdOrThrow(behandlingId) }
@@ -88,7 +88,17 @@ class BrevmetadataUtil(
     }
 
     fun lagBrevmetadataForMottakerTilForhåndsvisning(
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
+    ): Pair<Brevmetadata?, Brevmottager> {
+        return lagBrevmetadataForMottakerTilForhåndsvisning(
+            behandlingId = vedtaksbrevgrunnlag.behandling.id,
+            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag
+        )
+    }
+
+    fun lagBrevmetadataForMottakerTilForhåndsvisning(
         behandlingId: UUID,
+        vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null
     ): Pair<Brevmetadata?, Brevmottager> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -114,11 +124,12 @@ class BrevmetadataUtil(
         }
         val metadata = genererMetadataForBrev(
             behandlingId = behandling.id,
+            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
             brevmottager = brevmottager,
             manuellAdresseinfo = manuellAdresseinfo,
-            annenMottakersNavn = if (tilleggsmottaker != null) {
+            annenMottakersNavn = tilleggsmottaker?.let {
                 eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
-            } else null
+            }
         )
         return metadata to brevmottager
     }
@@ -141,3 +152,10 @@ class BrevmetadataUtil(
         }
     }
 }
+
+private val Brevmottager.MANUELL
+    get() = when (this) {
+        Brevmottager.MANUELL_BRUKER,
+        Brevmottager.MANUELL_TILLEGGSMOTTAKER -> this
+        else -> null
+    }
