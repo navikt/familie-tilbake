@@ -69,6 +69,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private var fagsak = Testdata.fagsak
     private lateinit var brevmetadataUtil: BrevmetadataUtil
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -101,7 +102,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
             mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
         every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
 
         fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)
@@ -212,9 +213,9 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `brevmetadataUtil skal lage lik metadata som ManueltVarselbrevService selv`(){
+    fun `brevmetadataUtil skal lage lik metadata som ManueltVarselbrevService selv`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-                true andThen false
+            true andThen false
 
         val brevdata = mutableListOf<Brevdata>()
 
@@ -230,13 +231,13 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         )
         verify(exactly = 2) {
             spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
+                capture(brevdata)
             )
         }
 
         brevdata shouldHaveSize 2
         brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
-                brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
         brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 

@@ -36,8 +36,8 @@ class InnhentDokumentasjonbrevTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val fagsakRepository: FagsakRepository,
-    private val featureToggleService: FeatureToggleService,
-    ) : AsyncTaskStep {
+    private val featureToggleService: FeatureToggleService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)

@@ -27,7 +27,7 @@ class VedtaksbrevService(
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
     private val pdfBrevService: PdfBrevService,
-    private val distribusjonshåndteringService: DistribusjonshåndteringService,
+    private val distribusjonshåndteringService: DistribusjonshåndteringService
 ) {
 
     fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager? = null) {
