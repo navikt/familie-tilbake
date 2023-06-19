@@ -3,5 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.felles
 enum class Brevmottager {
     BRUKER,
     VERGE,
-    INSTITUSJON
+    INSTITUSJON,
+    MANUELL_BRUKER,
+    MANUELL_TILLEGGSMOTTAKER
 }

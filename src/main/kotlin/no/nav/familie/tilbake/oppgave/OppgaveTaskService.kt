@@ -145,10 +145,12 @@ class OppgaveTaskService(
         )
     }
 
-    fun oppdaterOppgavePrioritetTask(behandlingId: UUID) {
+    fun oppdaterOppgavePrioritetTask(behandlingId: UUID, fagsakId: String) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+            setProperty("behandlingId", behandlingId.toString())
+            setProperty("ekstertFagsakId", fagsakId)
         }
         taskService.save(
             Task(

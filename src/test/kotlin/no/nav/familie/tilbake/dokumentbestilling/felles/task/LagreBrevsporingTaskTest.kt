@@ -13,10 +13,13 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.MANUELL_TILLEGGSMOTTAKER
+import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager.VERGE
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -181,10 +184,22 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
             }
     }
 
+    @Test
+    fun `onCompletion skal lage AvsluttBehandlingTask ved brevtype VEDTAK, men kun når mottakeren ikke er en tilleggsmottaker`() {
+        lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK))
+        lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK, brevmottager = MANUELL_TILLEGGSMOTTAKER))
+        lagreBrevsporingTask.onCompletion(opprettTask(behandlingId, Brevtype.VEDTAK, brevmottager = VERGE))
+
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+            .single { it.type == AvsluttBehandlingTask.TYPE }
+            .also { it.metadata["mottager"] shouldBe Brevmottager.BRUKER.name }
+    }
+
     private fun opprettTask(
         behandlingId: UUID,
         brevtype: Brevtype,
-        ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+        ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+        brevmottager: Brevmottager = Brevmottager.BRUKER
     ): Task {
         return Task(
             type = LagreBrevsporingTask.TYPE,
@@ -193,7 +208,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
                 this["dokumentId"] = dokumentId
                 this["journalpostId"] = journalpostId
                 this["brevtype"] = brevtype.name
-                this["mottager"] = Brevmottager.BRUKER.name
+                this["mottager"] = brevmottager.name
                 this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
             }
         )

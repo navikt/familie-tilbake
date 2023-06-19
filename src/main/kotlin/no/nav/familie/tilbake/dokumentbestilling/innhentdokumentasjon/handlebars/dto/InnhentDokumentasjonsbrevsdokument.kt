@@ -21,7 +21,7 @@ data class InnhentDokumentasjonsbrevsdokument(
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
-    val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
+    val annenMottagersNavn: String? = BrevmottagerUtil.getAnnenMottagersNavn(brevmetadata)
 
     @Suppress("unused") // Handlebars
     val isRentepliktig = ytelsestype != Ytelsestype.BARNETRYGD && ytelsestype != Ytelsestype.KONTANTSTØTTE

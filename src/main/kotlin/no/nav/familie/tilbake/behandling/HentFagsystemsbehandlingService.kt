@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestS
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
@@ -26,17 +27,36 @@ class HentFagsystemsbehandlingService(
         val eksisterendeRequestSendt =
             requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId, ytelsestype, eksternId)
         if (eksisterendeRequestSendt == null) {
-            val requestSendt =
-                requestSendtRepository.insert(
-                    HentFagsystemsbehandlingRequestSendt(
-                        eksternFagsakId = eksternFagsakId,
-                        ytelsestype = ytelsestype,
-                        eksternId = eksternId
-                    )
-                )
-            val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
-            kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request)
+            opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
         }
+    }
+
+    private fun opprettOgSendHentFagsystembehandlingRequest(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String
+    ) {
+        val requestSendt = requestSendtRepository.insert(
+            HentFagsystemsbehandlingRequestSendt(
+                eksternFagsakId = eksternFagsakId,
+                ytelsestype = ytelsestype,
+                eksternId = eksternId
+            )
+        )
+
+        val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
+        kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request)
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun slettOgSendNyHentFagsystembehandlingRequest(
+        requestSendtId: UUID,
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String
+    ) {
+        fjernHentFagsystemsbehandlingRequest(requestSendtId)
+        opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
     }
 
     @Transactional

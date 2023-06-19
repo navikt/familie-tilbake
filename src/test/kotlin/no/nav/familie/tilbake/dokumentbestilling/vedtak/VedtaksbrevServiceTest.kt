@@ -3,6 +3,8 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -24,7 +26,10 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
@@ -101,6 +106,12 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var vedtaksbrevService: VedtaksbrevService
 
+    @Autowired
+    private lateinit var sendBrevService: DistribusjonshåndteringService
+
+    @Autowired
+    private lateinit var featureToggleService: FeatureToggleService
+
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
 
@@ -116,7 +127,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository,
             vedtaksbrevsoppsummeringRepository,
             vedtaksbrevsperiodeRepository,
-            spyPdfBrevService
+            spyPdfBrevService,
+            sendBrevService
         )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
@@ -207,23 +219,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf med xml-spesialtegn`() {
-        val dto = HentForhåndvisningVedtaksbrevPdfDto(
-            Testdata.behandling.id,
-            "Dette er en stor og gild oppsummeringstekst",
-            listOf(
-                PeriodeMedTekstDto(
-                    Datoperiode(
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now()
-                    ),
-                    faktaAvsnitt = "&bob",
-                    vilkårAvsnitt = "<bob>",
-                    særligeGrunnerAnnetAvsnitt = "'bob' \"bob\""
-                )
-            )
-        )
-
-        val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(dto)
+        val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
 
 //        File("test.pdf").writeBytes(bytes)
         PdfaValidator.validatePdf(bytes)
@@ -235,6 +231,26 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         avsnitt.shouldHaveSize(3)
         avsnitt.first().overskrift shouldBe "Du må betale tilbake barnetrygden"
+    }
+
+    @Test
+    fun `metadata generert for vedtaksbrev skal bli den samme uansett toggle-verdi for forhåndsgenerering eller ikke`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
+            true andThen false
+        val brevdata = mutableListOf<Brevdata>()
+
+        vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
+        vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
+
+        verify(exactly = 2) {
+            spyPdfBrevService.genererForhåndsvisning(
+                capture(brevdata)
+            )
+        }
+        brevdata shouldHaveSize 2
+        brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
+            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
     @Test
@@ -619,5 +635,24 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         underavsnitt.fritekst shouldBe fritekst
         underavsnitt.fritekstTillatt shouldBe fritekstTillatt
         underavsnitt.fritekstPåkrevet shouldBe fritekstPåkrevet
+    }
+
+    companion object {
+
+        private val forhåndvisningDto = HentForhåndvisningVedtaksbrevPdfDto(
+            Testdata.behandling.id,
+            "Dette er en stor og gild oppsummeringstekst",
+            listOf(
+                PeriodeMedTekstDto(
+                    Datoperiode(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now()
+                    ),
+                    faktaAvsnitt = "&bob",
+                    vilkårAvsnitt = "<bob>",
+                    særligeGrunnerAnnetAvsnitt = "'bob' \"bob\""
+                )
+            )
+        )
     }
 }

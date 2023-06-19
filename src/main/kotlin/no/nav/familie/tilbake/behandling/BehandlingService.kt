@@ -193,7 +193,11 @@ class BehandlingService(
         val kanEndres: Boolean = kanBehandlingEndres(behandling, fagsak.fagsystem)
         val kanRevurderingOpprettes: Boolean =
             tilgangService.tilgangTilÅOppretteRevurdering(fagsak.fagsystem) && kanRevurderingOpprettes(behandling)
-        val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(fagsak)
+        val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(
+            behandling = behandling,
+            fagsak = fagsak,
+            featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+        )
         val manuelleBrevmottakere = if (støtterManuelleBrevmottakere) {
             manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         } else {
@@ -467,6 +471,15 @@ class BehandlingService(
         )
         behandlingRepository.insert(behandling)
 
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+            Aktør.VEDTAKSLØSNING
+        )
+
+        behandlingskontrollService.fortsettBehandling(behandling.id)
+        stegService.håndterSteg(behandling.id)
+
         val manuelleBrevmottakere = brevmottakere.map { brevmottaker ->
             ManuellBrevmottaker(
                 behandlingId = behandling.id,
@@ -482,16 +495,12 @@ class BehandlingService(
                 vergetype = brevmottaker.vergetype
             )
         }
-        manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
 
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-            Aktør.VEDTAKSLØSNING
-        )
-
-        behandlingskontrollService.fortsettBehandling(behandling.id)
-        stegService.håndterSteg(behandling.id)
+        if (manuelleBrevmottakere.isNotEmpty()) {
+            logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
+            manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
+            håndterBrevmottakerSteg(behandling, fagsak)
+        }
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
         taskService.save(
@@ -630,9 +639,25 @@ class BehandlingService(
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
     }
 
-    private fun sjekkOmManuelleBrevmottakereErStøttet(fagsak: Fagsak): Boolean {
-        val featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
-        val erIkkeInstitusjonssak = fagsak.institusjon == null
-        return featureToggleEnabled && erIkkeInstitusjonssak
+    private fun håndterBrevmottakerSteg(
+        behandling: Behandling,
+        fagsak: Fagsak
+    ) {
+        if (sjekkOmManuelleBrevmottakereErStøttet(
+                behandling = behandling,
+                fagsak = fagsak,
+                featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            )
+        ) {
+            behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
+        }
+    }
+
+    companion object {
+        fun sjekkOmManuelleBrevmottakereErStøttet(
+            behandling: Behandling,
+            fagsak: Fagsak,
+            featureToggleEnabled: Boolean
+        ): Boolean = featureToggleEnabled && fagsak.institusjon == null && !behandling.harVerge
     }
 }

@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
@@ -118,21 +117,6 @@ class ForvaltningService(
         )
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
-    }
-
-    @Transactional
-    fun hentFagsystemsbehandling(hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto) {
-        val ytelsestype = hentFagsystemsbehandlingRequest.ytelsestype
-        val eksternFagsakId = hentFagsystemsbehandlingRequest.eksternFagsakId
-        val eksternId = hentFagsystemsbehandlingRequest.eksternId
-
-        val sendtRequest =
-            hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(eksternFagsakId, ytelsestype, eksternId)
-        // fjern eksisterende sendte request slik at ny request kan sendes
-        if (sendtRequest != null) {
-            hentFagsystemsbehandlingService.fjernHentFagsystemsbehandlingRequest(sendtRequest.id)
-        }
-        hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
     }
 
     @Transactional
