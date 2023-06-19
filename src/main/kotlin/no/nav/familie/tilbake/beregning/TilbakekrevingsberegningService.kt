@@ -15,6 +15,8 @@ import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
 import no.nav.familie.tilbake.beregning.modell.GrunnlagsperiodeMedSkatteprosent
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.BRUK_6_DESIMALER_I_SKATTEBEREGNING
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.foreldelse.VurdertForeldelseRepository
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
@@ -36,7 +38,8 @@ class TilbakekrevingsberegningService(
     private val vurdertForeldelseRepository: VurdertForeldelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
-    private val kravgrunnlagsberegningService: KravgrunnlagsberegningService
+    private val kravgrunnlagsberegningService: KravgrunnlagsberegningService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
@@ -92,7 +95,8 @@ class TilbakekrevingsberegningService(
 
         return BeregnetPerioderDto(
             beregnetPerioder = perioder.map {
-                val feilutbetaltBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
+                val feilutbetaltBeløp =
+                    KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
                 BeregnetPeriodeDto(
                     periode = it,
                     feilutbetaltBeløp = feilutbetaltBeløp
@@ -109,7 +113,10 @@ class TilbakekrevingsberegningService(
         return vurdertForeldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
-    private fun finnPerioder(vurdertForeldelse: VurdertForeldelse?, vilkårsvurdering: Vilkårsvurdering?): List<Månedsperiode> {
+    private fun finnPerioder(
+        vurdertForeldelse: VurdertForeldelse?,
+        vilkårsvurdering: Vilkårsvurdering?
+    ): List<Månedsperiode> {
         return finnForeldedePerioder(vurdertForeldelse) + finnIkkeForeldedePerioder(vilkårsvurdering)
     }
 
@@ -192,7 +199,15 @@ class TilbakekrevingsberegningService(
         val delresultat = kravbeløpPerPeriode[vurdering.periode]
             ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
         val perioderMedSkattProsent = lagGrunnlagPeriodeMedSkattProsent(vurdering.periode, kravgrunnlag)
-        return TilbakekrevingsberegningVilkår.beregn(vurdering, delresultat, perioderMedSkattProsent, beregnRenter)
+
+        val bruk6desimalerISkatteberegning = featureToggleService.isEnabled(BRUK_6_DESIMALER_I_SKATTEBEREGNING)
+        return TilbakekrevingsberegningVilkår.beregn(
+            vurdering,
+            delresultat,
+            perioderMedSkattProsent,
+            beregnRenter,
+            bruk6desimalerISkatteberegning
+        )
     }
 
     private fun lagGrunnlagPeriodeMedSkattProsent(
