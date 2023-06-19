@@ -354,7 +354,8 @@ class TekstformatererVedtaksbrevTest {
                     ),
                     sakspartsnavn = "Test",
                     vergenavn = "John Doe",
-                    finnesVerge = true
+                    finnesVerge = true,
+                    finnesAnnenMottaker = true
                 ),
                 varsel = null,
                 totalresultat = HbTotalresultat(
@@ -836,7 +837,7 @@ class TekstformatererVedtaksbrevTest {
                         periode = januar,
                         kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
                         fakta = HbFakta(
-                            hendelsestype = Hendelsestype.ANNET,
+                            hendelsestype = Hendelsestype.ANNET_KS,
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                             fritekstFakta = "Dette er svindel!"
                         ),

@@ -23,7 +23,7 @@ data class Henleggelsesbrevsdokument(
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
-    val annenMottagersNavn: String? = BrevmottagerUtil.getannenMottagersNavn(brevmetadata)
+    val annenMottagersNavn: String? = BrevmottagerUtil.getAnnenMottagersNavn(brevmetadata)
 
     init {
         if (finnesVerge) {
