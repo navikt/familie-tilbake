@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -14,15 +13,12 @@ import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.validation.Valid
 
 // Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
 
@@ -75,20 +71,6 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Rolletilgangssjekk(Behandlerrolle.FORVALTER, "Tving henlegger behandling", AuditLoggerEvent.NONE, HenteParam.BEHANDLING_ID)
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.tvingHenleggBehandling(behandlingId)
-        return Ressurs.success("OK")
-    }
-
-    @Operation(summary = "Hent fagsysytemsbehandlingsinformasjon fra fagsystem via Kafka")
-    @PostMapping(
-        path = ["/fagsystemsbehandling/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
-    )
-    @Rolletilgangssjekk(Behandlerrolle.FORVALTER, "Henter fagsystemsbehandling fra fagsystem via kafka", AuditLoggerEvent.UPDATE)
-    fun hentFagsystemsbehandling(
-        @Valid @RequestBody
-        hentFagsystemsbehandlingRequest: HentFagsystemsbehandlingRequestDto
-    ): Ressurs<String> {
-        forvaltningService.hentFagsystemsbehandling(hentFagsystemsbehandlingRequest)
         return Ressurs.success("OK")
     }
 

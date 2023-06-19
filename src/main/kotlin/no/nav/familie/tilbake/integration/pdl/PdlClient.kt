@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.integration.pdl
 
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
@@ -39,8 +38,12 @@ class PdlClient(
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(mapTilTema(fagsystem))
         )
+        if (respons.harAdvarsel()) {
+            logger.warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
+            secureLogger.warn("Advarsel ved henting av personinfo fra PDL: ${respons.extensions?.warnings}")
+        }
         if (!respons.harFeil()) {
             return respons.data.person!!.let {
                 val aktivtIdent = it.identer.first().identifikasjonsnummer ?: error("Kan ikke hente aktivt ident fra PDL")
@@ -70,9 +73,12 @@ class PdlClient(
         val response = postForEntity<PdlHentIdenterResponse>(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(fagsystem)
+            httpHeaders(mapTilTema(fagsystem))
         )
-
+        if (response.harAdvarsel()) {
+            logger.warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
+            secureLogger.warn("Advarsel ved henting av personidenter fra PDL: ${response.extensions?.warnings}")
+        }
         if (!response.harFeil()) return response
         throw Feil(
             message = "Feil mot pdl: ${response.errorMessages()}",
@@ -81,14 +87,11 @@ class PdlClient(
         )
     }
 
-    private fun httpHeaders(fagsystem: Fagsystem): HttpHeaders {
+    private fun httpHeaders(tema: Tema): HttpHeaders {
         return HttpHeaders().apply {
-            add("Tema", hentTema(fagsystem).name)
+            add("Tema", tema.name)
+            add("behandlingsnummer", tema.behandlingsnummer)
         }
-    }
-
-    private fun hentTema(fagsystem: Fagsystem): Tema {
-        return Tema.valueOf(fagsystem.tema)
     }
 
     override val pingUri: URI
@@ -97,4 +100,21 @@ class PdlClient(
     override fun ping() {
         operations.optionsForAllow(pingUri)
     }
+    private fun mapTilTema(fagsystem: Fagsystem): Tema {
+        return when (fagsystem) {
+            Fagsystem.EF -> Tema.ENF
+            Fagsystem.KONT -> Tema.KON
+            Fagsystem.BA -> Tema.BAR
+            else -> error("Ugyldig fagsystem=${fagsystem.navn}")
+        }
+    }
+}
+
+/**
+ * TODO : Fjern når versjon 3 av kontrakter blir tatt i bruk.
+ */
+private enum class Tema(val fagsaksystem: String, val behandlingsnummer: String) {
+    BAR("BA", "B284"),
+    ENF("EF", "B288"),
+    KON("KONT", "B278")
 }

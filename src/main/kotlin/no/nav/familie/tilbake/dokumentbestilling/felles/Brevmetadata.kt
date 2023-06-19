@@ -10,7 +10,9 @@ data class Brevmetadata(
     val sakspartId: String,
     val sakspartsnavn: String,
     val finnesVerge: Boolean = false,
+    val finnesAnnenMottaker: Boolean = finnesVerge,
     val vergenavn: String? = null,
+    val annenMottakersNavn: String? = null,
     val mottageradresse: Adresseinfo,
     val behandlendeEnhetId: String? = null,
     val behandlendeEnhetsNavn: String,
@@ -22,4 +24,10 @@ data class Brevmetadata(
     val tittel: String? = null,
     val gjelderDødsfall: Boolean,
     val institusjon: Institusjon? = null
-) : Språkstøtte
+) : Språkstøtte {
+    init {
+        if (finnesAnnenMottaker && !finnesVerge) {
+            requireNotNull(annenMottakersNavn) { "annenMottakersNavn kan ikke være null" }
+        }
+    }
+}

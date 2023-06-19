@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.equals.shouldBeEqual
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
@@ -15,12 +18,17 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -49,23 +57,40 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var varselbrevUtil: VarselbrevUtil
 
+    @Autowired
+    private lateinit var eksterneDataForBrevService: EksterneDataForBrevService
+
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
+    private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
     private var behandling = Testdata.behandling
     private var fagsak = Testdata.fagsak
+    private lateinit var brevmetadataUtil: BrevmetadataUtil
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
+
+        brevmetadataUtil = BrevmetadataUtil(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = mockk(relaxed = true),
+            eksterneDataForBrevService = mockEksterneDataForBrevService,
+            organisasjonService = mockk(),
+            featureToggleService = featureToggleService
+        )
         manueltVarselbrevService = ManueltVarselbrevService(
             behandlingRepository,
             fagsakRepository,
             mockEksterneDataForBrevService,
             spyPdfBrevService,
             mockFeilutbetalingService,
-            varselbrevUtil
+            varselbrevUtil,
+            mockDistribusjonshåndteringService,
+            brevmetadataUtil
         )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
@@ -76,6 +101,8 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         every {
             mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
+        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any()) } returns
+            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
 
         fagsak = fagsakRepository.insert(fagsak)
         behandling = behandlingRepository.insert(behandling)
@@ -183,6 +210,35 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         )
 
         PdfaValidator.validatePdf(data)
+    }
+
+    @Test
+    fun `brevmetadataUtil skal lage lik metadata som ManueltVarselbrevService selv`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
+            true andThen false
+
+        val brevdata = mutableListOf<Brevdata>()
+
+        manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+            behandling.id,
+            Dokumentmalstype.VARSEL,
+            varseltekst
+        )
+        manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+            behandling.id,
+            Dokumentmalstype.VARSEL,
+            varseltekst
+        )
+        verify(exactly = 2) {
+            spyPdfBrevService.genererForhåndsvisning(
+                capture(brevdata)
+            )
+        }
+
+        brevdata shouldHaveSize 2
+        brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
+            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
+        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {

@@ -272,14 +272,16 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `opprettBehandling skal legge inn manuellBrevmottaker`() {
+    fun `opprettBehandling skal legge inn manuellBrevmottaker fra request og autoutføre behandlingssteg BREVMOTTAKER`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
+
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
                 finnesVerge = false,
                 finnesVarsel = true,
                 manueltOpprettet = false,
                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                finnesInstitusjon = true,
+                finnesInstitusjon = false,
                 finnesManuelleBrevmottakere = true
             )
 
@@ -288,6 +290,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandling.id)
         manuelleBrevmottakere.shouldHaveSize(1)
         manuelleBrevmottakere.first().navn shouldBe "Kari Nordmann"
+
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        assertBehandlingsstegstilstand(
+            behandlingsstegstilstand,
+            Behandlingssteg.BREVMOTTAKER,
+            Behandlingsstegstatus.AUTOUTFØRT
+        )
     }
 
     @Test

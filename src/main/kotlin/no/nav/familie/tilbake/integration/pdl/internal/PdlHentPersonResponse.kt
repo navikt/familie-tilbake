@@ -5,17 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class PdlHentPersonResponse<T>(
     val data: T,
-    val errors: List<PdlError>?
-) {
-
-    fun harFeil(): Boolean {
-        return errors != null && errors.isNotEmpty()
-    }
-
-    fun errorMessages(): String {
-        return errors?.joinToString { it -> it.message } ?: ""
-    }
-}
+    override val errors: List<PdlError>?,
+    override val extensions: PdlExtensions?
+) : PdlBaseResponse(errors, extensions)
 
 data class PdlPerson(val person: PdlPersonData?)
 
@@ -31,10 +23,10 @@ data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: Strin
 
 data class PdlError(
     val message: String,
-    val extensions: PdlExtensions?
+    val extensions: PdlErrorExtensions?
 )
 
-data class PdlExtensions(val code: String?)
+data class PdlErrorExtensions(val code: String?)
 
 data class PdlNavn(
     val fornavn: String,
