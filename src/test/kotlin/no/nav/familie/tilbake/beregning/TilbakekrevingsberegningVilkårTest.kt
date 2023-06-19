@@ -26,15 +26,14 @@ class TilbakekrevingsberegningVilkårTest {
 
     @BeforeEach
     fun setup() {
-        vurdering =
-            Vilkårsvurderingsperiode(
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                periode = Månedsperiode(
-                    LocalDate.of(2019, 5, 1),
-                    LocalDate.of(2019, 5, 3)
-                ),
-                begrunnelse = "foo"
-            )
+        vurdering = Vilkårsvurderingsperiode(
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            periode = Månedsperiode(
+                LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3)
+            ),
+            begrunnelse = "foo",
+            aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "foo")
+        )
         forstoBurdeForstattVurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
@@ -44,7 +43,6 @@ class TilbakekrevingsberegningVilkårTest {
                 ),
                 begrunnelse = "foo"
             )
-
         grunnlagsperiodeMedSkatteprosent =
             GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
     }
@@ -277,7 +275,8 @@ class TilbakekrevingsberegningVilkårTest {
                 beløpErIBehold = true,
                 beløpTilbakekreves = BigDecimal.valueOf(8991),
                 begrunnelse = "foo"
-            )
+            ),
+            aktsomhet = null,
         )
 
         // assert
@@ -296,7 +295,8 @@ class TilbakekrevingsberegningVilkårTest {
             godTro = VilkårsvurderingGodTro(
                 beløpErIBehold = false,
                 begrunnelse = "foo"
-            )
+            ),
+            aktsomhet = null
         )
 
         // assert
@@ -316,7 +316,8 @@ class TilbakekrevingsberegningVilkårTest {
                 beløpErIBehold = true,
                 beløpTilbakekreves = BigDecimal.valueOf(8991),
                 begrunnelse = "foo"
-            )
+            ),
+            aktsomhet = null
         )
         val grunnlagPeriodeMedSkattProsent =
             GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
@@ -331,6 +332,38 @@ class TilbakekrevingsberegningVilkårTest {
         resultat.manueltSattTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
         resultat.skattebeløp shouldBe BigDecimal.valueOf(899)
         resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(8092)
+    }
+
+    @Test
+    fun `beregn skatt med 4 og 6 desimaler`() {
+        val tilbakekrevingsbeløp = BigDecimal.valueOf(4212)
+        val skatteprosent = BigDecimal.valueOf(33.9981)
+        val grunnlagPeriodeMedSkattProsent =
+            listOf(
+                GrunnlagsperiodeMedSkatteprosent(
+                    periode = vurdering.periode,
+                    tilbakekrevingsbeløp = tilbakekrevingsbeløp,
+                    skatteprosent = skatteprosent
+                )
+            )
+
+        val resultat = beregn(
+            vilkårVurdering = vurdering,
+            feilutbetalt = tilbakekrevingsbeløp,
+            perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
+            beregnRenter = true,
+            bruk6desimalerISkatteberegning = false
+        )
+        val resultatMed6Desimaler = beregn(
+            vilkårVurdering = vurdering,
+            feilutbetalt = tilbakekrevingsbeløp,
+            perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
+            beregnRenter = true,
+            bruk6desimalerISkatteberegning = true
+        )
+
+        resultat.skattebeløp shouldBe BigDecimal.valueOf(1432)
+        resultatMed6Desimaler.skattebeløp shouldBe BigDecimal.valueOf(1431)
     }
 
     @Test
@@ -395,9 +428,12 @@ class TilbakekrevingsberegningVilkårTest {
         vilkårVurdering: Vilkårsvurderingsperiode,
         feilutbetalt: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
+        bruk6desimalerISkatteberegning: Boolean = false
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
-        return TilbakekrevingsberegningVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter)
+        return TilbakekrevingsberegningVilkår.beregn(
+            vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter, bruk6desimalerISkatteberegning
+        )
     }
 }
