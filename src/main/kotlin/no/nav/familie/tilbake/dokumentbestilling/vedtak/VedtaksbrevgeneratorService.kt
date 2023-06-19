@@ -145,16 +145,18 @@ class VedtaksbrevgeneratorService(
             vedtaksbrevgrunnlag.fagsystem
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
-        val brevMetadata: Brevmetadata = (forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
-            vedtaksbrevgrunnlag,
-            personinfo,
-            brevmottager,
-            språkkode
-        )).copy(
+        val brevMetadata: Brevmetadata = (
+            forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
+                vedtaksbrevgrunnlag,
+                personinfo,
+                brevmottager,
+                språkkode
+            )
+            ).copy(
             tittel = finnTittelVedtaksbrev(
                 ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!,
                 tilbakekreves = beregnetResultat.vedtaksresultat == FULL_TILBAKEBETALING ||
-                        beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
+                    beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
             )
         )
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(

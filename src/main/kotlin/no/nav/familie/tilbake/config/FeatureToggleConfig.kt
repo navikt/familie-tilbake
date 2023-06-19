@@ -78,7 +78,7 @@ class FeatureToggleConfig(
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return defaultValue
+                return System.getenv(toggleId).run { toBoolean() } || defaultValue
             }
         }
     }
@@ -93,6 +93,8 @@ class FeatureToggleConfig(
         const val DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
 
         const val KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE = "familie-tilbake.konsolidert-brevdistribusjon"
+
+        const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

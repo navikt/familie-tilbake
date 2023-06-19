@@ -33,7 +33,7 @@ class SendVedtaksbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
     private val taskService: TaskService,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
