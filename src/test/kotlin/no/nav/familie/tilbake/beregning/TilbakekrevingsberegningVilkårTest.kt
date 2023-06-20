@@ -1,8 +1,6 @@
 package no.nav.familie.tilbake.beregning
 
 import com.google.common.collect.Lists
-import io.kotest.matchers.bigdecimal.shouldBeZero
-import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
@@ -13,6 +11,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhe
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingGodTro
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,13 +21,24 @@ import java.time.LocalDate
 
 class TilbakekrevingsberegningVilkårTest {
 
-    private lateinit var vurdering: Vilkårsvurderingsperiode
+    private var vilkårsvurderingsperiode = Vilkårsvurderingsperiode(
+        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+        periode = Månedsperiode(
+            LocalDate.of(2019, 5, 1),
+            LocalDate.of(2019, 5, 3)
+        ),
+        begrunnelse = "foo"
+    )
+
     private lateinit var grunnlagsperiodeMedSkatteprosent: GrunnlagsperiodeMedSkatteprosent
     private lateinit var forstoBurdeForstattVurdering: Vilkårsvurderingsperiode
 
+    private val FEILUTBETALT_BELØP = BigDecimal.valueOf(10_000)
+    private val RENTEPROSENT = BigDecimal.valueOf(10)
+
     @BeforeEach
     fun setup() {
-        vurdering =
+        vilkårsvurderingsperiode =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 periode = Månedsperiode(
@@ -47,34 +58,45 @@ class TilbakekrevingsberegningVilkårTest {
             )
 
         grunnlagsperiodeMedSkatteprosent =
-            GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
+            GrunnlagsperiodeMedSkatteprosent(vilkårsvurderingsperiode.periode, BigDecimal.valueOf(10000), BigDecimal.ZERO)
     }
 
     @Nested
     inner class VilkårsvurderingGodTro {
         @Test
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro`() {
-            vurdering = vurdering.copy(
+            val manueltBeløp = BigDecimal.valueOf(8991)
+
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 godTro = VilkårsvurderingGodTro(
                     beløpErIBehold = true,
-                    beløpTilbakekreves = BigDecimal.valueOf(8991),
+                    beløpTilbakekreves = manueltBeløp,
                     begrunnelse = "foo"
                 )
             )
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
-            resultat.renteprosent shouldBe null
-            resultat.andelAvBeløp shouldBe null
-            resultat.vurdering shouldBe AnnenVurdering.GOD_TRO
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = AnnenVurdering.GOD_TRO,
+                manueltSattTilbakekrevingsbeløp = manueltBeløp,
+                tilbakekrevingsbeløpUtenRenter = manueltBeløp,
+                tilbakekrevingsbeløp = manueltBeløp,
+                andelAvBeløp = null
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake ingenting når det er god tro og beløp ikke er i_behold`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 godTro = VilkårsvurderingGodTro(
                     beløpErIBehold = false,
                     begrunnelse = "foo"
@@ -83,36 +105,58 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.ZERO
-            resultat.renteprosent shouldBe null
-            resultat.andelAvBeløp!!.shouldBeZero()
-            resultat.vurdering shouldBe AnnenVurdering.GOD_TRO
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = AnnenVurdering.GOD_TRO,
+                tilbakekrevingsbeløpUtenRenter = BigDecimal.ZERO,
+                tilbakekrevingsbeløp = BigDecimal.ZERO,
+                andelAvBeløp = BigDecimal.ZERO
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro med skatt prosent`() {
-            vurdering = vurdering.copy(
+            val beløpTilbakekreves = BigDecimal.valueOf(8991)
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 godTro = VilkårsvurderingGodTro(
                     beløpErIBehold = true,
-                    beløpTilbakekreves = BigDecimal.valueOf(8991),
+                    beløpTilbakekreves = beløpTilbakekreves,
                     begrunnelse = "foo"
                 )
             )
             val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(
+                    periode = vilkårsvurderingsperiode.periode,
+                    tilbakekrevingsbeløp = FEILUTBETALT_BELØP,
+                    skatteprosent = BigDecimal.valueOf(10)
+                )
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
-            resultat.renteprosent shouldBe null
-            resultat.andelAvBeløp shouldBe null
-            resultat.vurdering shouldBe AnnenVurdering.GOD_TRO
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe BigDecimal.valueOf(8991)
-            resultat.skattebeløp shouldBe BigDecimal.valueOf(899)
-            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(8092)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = AnnenVurdering.GOD_TRO,
+                tilbakekrevingsbeløpUtenRenter = beløpTilbakekreves,
+                tilbakekrevingsbeløp = beløpTilbakekreves,
+                manueltSattTilbakekrevingsbeløp = beløpTilbakekreves,
+                skattebeløp = BigDecimal.valueOf(899),
+                tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(8092),
+                andelAvBeløp = null
+            )
         }
     }
 
@@ -120,7 +164,7 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetForsett {
         @Test
         fun `beregn skal kreve tilbake alt med renter ved forsett og illeggRenter ikke satt`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
@@ -129,18 +173,17 @@ class TilbakekrevingsberegningVilkårTest {
 
             // act
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
+                beregn(vilkårVurdering = vilkårsvurderingsperiode, feilutbetalt = FEILUTBETALT_BELØP, perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), beregnRenter = true)
 
-            // assert
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
-            resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.FORSETT,
+                tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
+                tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
+                rentebeløp = BigDecimal.valueOf(1000),
+                renteprosent = RENTEPROSENT,
+                andelAvBeløp = BigDecimal.valueOf(100)
+            )
         }
 
         @Test
@@ -156,22 +199,22 @@ class TilbakekrevingsberegningVilkårTest {
 
             // act
             val resultat: Beregningsresultatsperiode = beregn(
-                forstoBurdeForstattVurdering,
-                BigDecimal.valueOf(10000),
-                Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-                true
+                vilkårVurdering = forstoBurdeForstattVurdering,
+                feilutbetalt = FEILUTBETALT_BELØP,
+                perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                beregnRenter = true
             )
 
-            // assert
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
-            resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.FORSETT,
+                vurderingsperiode = forstoBurdeForstattVurdering.periode,
+                tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
+                tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
+                rentebeløp = BigDecimal.valueOf(1000),
+                renteprosent = RENTEPROSENT,
+                andelAvBeløp = BigDecimal.valueOf(100)
+            )
         }
 
         @Test
@@ -187,80 +230,88 @@ class TilbakekrevingsberegningVilkårTest {
 
             // act
             val resultat: Beregningsresultatsperiode = beregn(
-                forstoBurdeForstattVurdering,
-                BigDecimal.valueOf(10000),
-                Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-                true
+                vilkårVurdering = forstoBurdeForstattVurdering,
+                feilutbetalt = FEILUTBETALT_BELØP,
+                perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                beregnRenter = true
             )
 
-            // assert
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
-            resultat.rentebeløp shouldBe BigDecimal.valueOf(0)
-            resultat.renteprosent shouldBe null
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.FORSETT,
+                vurderingsperiode = forstoBurdeForstattVurdering.periode,
+                tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
+                tilbakekrevingsbeløp = FEILUTBETALT_BELØP
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake alt med renter ved forsett med skatt prosent`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
                 )
             )
             val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(
+                    periode = vilkårsvurderingsperiode.periode,
+                    tilbakekrevingsbeløp = FEILUTBETALT_BELØP,
+                    skatteprosent = BigDecimal.valueOf(10)
+                )
 
             // act
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), true)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    beregnRenter = true
+                )
 
             // assert
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
-            resultat.rentebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
-            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(10000)
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.FORSETT,
+                tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
+                renteprosent = RENTEPROSENT,
+                rentebeløp = BigDecimal.valueOf(1000),
+                skattebeløp = BigDecimal.valueOf(1000),
+                tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(10000)
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake alt uten renter ved forsett men frisinn med skatt prosent`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
                 )
             )
             val grunnlagPeriodeMedSkattProsent =
-                GrunnlagsperiodeMedSkatteprosent(vurdering.periode, BigDecimal.valueOf(10000), BigDecimal.valueOf(10))
+                GrunnlagsperiodeMedSkatteprosent(
+                    periode = vilkårsvurderingsperiode.periode,
+                    tilbakekrevingsbeløp = FEILUTBETALT_BELØP,
+                    skatteprosent = BigDecimal.valueOf(10)
+                )
 
             // act
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagPeriodeMedSkattProsent), false)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagPeriodeMedSkattProsent),
+                    beregnRenter = false
+                )
 
             // assert
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.tilbakekrevingsbeløpUtenRenter shouldBe BigDecimal.valueOf(10000)
-            resultat.rentebeløp shouldBe BigDecimal.valueOf(0)
-            resultat.renteprosent shouldBe null
-            resultat.andelAvBeløp shouldBe BigDecimal.valueOf(100)
-            resultat.feilutbetaltBeløp shouldBe BigDecimal.valueOf(10000)
-            resultat.vurdering shouldBe Aktsomhet.FORSETT
-            resultat.periode shouldBe Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
-            resultat.manueltSattTilbakekrevingsbeløp shouldBe null
-            resultat.skattebeløp shouldBe BigDecimal.valueOf(1000)
-            resultat.tilbakekrevingsbeløpEtterSkatt shouldBe BigDecimal.valueOf(9000)
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.FORSETT,
+                skattebeløp = BigDecimal.valueOf(1000),
+                tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(9000)
+            )
         }
     }
 
@@ -268,7 +319,7 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetGrovUaktsomhet {
         @Test
         fun `beregn skalkreve tilbake alt ved grov uaktsomhet når ikke annet er valgt`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -279,15 +330,25 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(11000)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
-            resultat.vurdering shouldBe Aktsomhet.GROV_UAKTSOMHET
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
+                renteprosent = RENTEPROSENT,
+                rentebeløp = BigDecimal.valueOf(1000)
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake deler ved grov uaktsomhet når særlige grunner er valgt og ilegge renter når det er valgt`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -299,14 +360,27 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7700)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                andelAvBeløp = BigDecimal.valueOf(70),
+                tilbakekrevingsbeløpUtenRenter = BigDecimal.valueOf(7000),
+                tilbakekrevingsbeløp = BigDecimal.valueOf(7700),
+                renteprosent = RENTEPROSENT,
+                rentebeløp = BigDecimal.valueOf(700)
+            )
         }
 
         @Test
         fun `beregn skal kreve tilbake deler ved grov uaktsomhet ved når særlige grunner og ikke ilegge renter når det er false`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -318,15 +392,25 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7000)
-            resultat.renteprosent shouldBe null
-            resultat.rentebeløp.shouldBeZero()
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                andelAvBeløp = BigDecimal.valueOf(70),
+                tilbakekrevingsbeløpUtenRenter = BigDecimal.valueOf(7000),
+                tilbakekrevingsbeløp = BigDecimal.valueOf(7000)
+            )
         }
 
         @Test
         fun `beregn skaltakle desimaler på prosenter som tilbakekreves`() {
-            vurdering = vurdering.copy(
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -338,48 +422,89 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(70000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(7)
-            resultat.renteprosent shouldBe null
-            resultat.rentebeløp.shouldBeZero()
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                andelAvBeløp = BigDecimal("0.01"),
+                tilbakekrevingsbeløpUtenRenter = BigDecimal.valueOf(1),
+                tilbakekrevingsbeløp = BigDecimal.valueOf(1)
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake manuelt beløp når det er satt`() {
-            vurdering = vurdering.copy(
+            val manueltSattBeløp = BigDecimal.valueOf(6556)
+
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
                     særligeGrunnerTilReduksjon = true,
                     ileggRenter = false,
-                    manueltSattBeløp = BigDecimal.valueOf(6556)
-                )
+                    manueltSattBeløp = manueltSattBeløp
+                ),
+                godTro = null
             )
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(6556)
-            resultat.renteprosent shouldBe null
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
+                tilbakekrevingsbeløp = manueltSattBeløp,
+                manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
+                andelAvBeløp = null
+            )
         }
 
         @Test
         fun `beregn skalkreve tilbake manuelt beløp med renter når det er satt`() {
-            vurdering = vurdering.copy(
+            val manueltSattBeløp = BigDecimal.valueOf(6000)
+
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
                     særligeGrunnerTilReduksjon = true,
                     ileggRenter = true,
-                    manueltSattBeløp = BigDecimal.valueOf(6000)
+                    manueltSattBeløp = manueltSattBeløp
                 )
             )
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(10000), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.valueOf(6600)
-            resultat.renteprosent shouldBe BigDecimal.valueOf(10)
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.GROV_UAKTSOMHET,
+                tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
+                tilbakekrevingsbeløp = BigDecimal.valueOf(6600),
+                manueltSattTilbakekrevingsbeløp = manueltSattBeløp,
+                andelAvBeløp = null,
+                renteprosent = BigDecimal.valueOf(10),
+                rentebeløp = BigDecimal.valueOf(600)
+            )
         }
     }
 
@@ -387,7 +512,9 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetSimpelUaktsomhet {
         @Test
         fun `beregn skalikke kreve noe når sjette ledd benyttes for å ikke gjøre innkreving av småbeløp`() {
-            vurdering = vurdering.copy(
+            val feilutbetaltBeløp = BigDecimal.valueOf(522)
+
+            vilkårsvurderingsperiode = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -398,9 +525,21 @@ class TilbakekrevingsberegningVilkårTest {
 
             // assert
             val resultat: Beregningsresultatsperiode =
-                beregn(vurdering, BigDecimal.valueOf(522), Lists.newArrayList(grunnlagsperiodeMedSkatteprosent), true)
-            resultat.tilbakekrevingsbeløp shouldBe BigDecimal.ZERO
-            resultat.vurdering shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+                beregn(
+                    vilkårVurdering = vilkårsvurderingsperiode,
+                    feilutbetalt = feilutbetaltBeløp,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true
+                )
+
+            validerResultat(
+                resultat = resultat,
+                vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
+                feilutbetalt = feilutbetaltBeløp,
+                andelAvBeløp = BigDecimal.ZERO,
+                tilbakekrevingsbeløpUtenRenter = BigDecimal.ZERO,
+                tilbakekrevingsbeløp = BigDecimal.ZERO
+            )
         }
     }
 
@@ -412,5 +551,40 @@ class TilbakekrevingsberegningVilkårTest {
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter)
+    }
+
+    /**
+     * Metode brukt for å sørge for at alle verdiene i resultatet sjekkes i alle tester.
+     * Default verdiene tilsvarer full tilbakekreving (andel = 100%) av hele ytelsesbeløpet uten renter og skatt.
+     */
+    private fun validerResultat(
+        resultat: Beregningsresultatsperiode,
+        vurderingsperiode: Månedsperiode = vilkårsvurderingsperiode.periode,
+        vurdering: Vurdering,
+        feilutbetalt: BigDecimal = FEILUTBETALT_BELØP,
+        andelAvBeløp: BigDecimal? = BigDecimal.valueOf(100),
+        renteprosent: BigDecimal? = null,
+        manueltSattTilbakekrevingsbeløp: BigDecimal? = null,
+        tilbakekrevingsbeløpUtenRenter: BigDecimal = feilutbetalt, // feilutbetalt?
+        rentebeløp: BigDecimal = BigDecimal.ZERO, // Sjekk denne
+        tilbakekrevingsbeløp: BigDecimal = tilbakekrevingsbeløpUtenRenter, // Med mindre annet er fyllt inn vil det ikke legges på renter
+        skattebeløp: BigDecimal = BigDecimal.ZERO,
+        tilbakekrevingsbeløpEtterSkatt: BigDecimal = tilbakekrevingsbeløp, // Med mindre annet er fyllt inn vil det ikke tas hensyn til skatt
+        utbetaltYtelsesbeløp: BigDecimal = FEILUTBETALT_BELØP,
+        riktigYtelsesbeløp: BigDecimal = BigDecimal.ZERO
+    ) {
+        assertThat(resultat.periode).isEqualTo(vurderingsperiode)
+        assertThat(resultat.vurdering).isEqualTo(vurdering)
+        assertThat(resultat.feilutbetaltBeløp).isEqualTo(feilutbetalt)
+        assertThat(resultat.andelAvBeløp).isEqualTo(andelAvBeløp)
+        assertThat(resultat.renteprosent).isEqualTo(renteprosent)
+        assertThat(resultat.manueltSattTilbakekrevingsbeløp).isEqualTo(manueltSattTilbakekrevingsbeløp)
+        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualTo(tilbakekrevingsbeløpUtenRenter)
+        assertThat(resultat.rentebeløp).isEqualTo(rentebeløp)
+        assertThat(resultat.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
+        assertThat(resultat.skattebeløp).isEqualTo(skattebeløp)
+        assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
+        assertThat(resultat.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp) // Rått beløp, ikke justert for ev. trekk
+        assertThat(resultat.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
     }
 }
