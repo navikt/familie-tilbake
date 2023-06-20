@@ -75,7 +75,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -103,7 +102,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -138,7 +136,6 @@ class TilbakekrevingsberegningVilkårTest {
                     skatteprosent = BigDecimal.valueOf(10)
                 )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -274,7 +271,6 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            // assert
             validerResultat(
                 resultat = resultat,
                 vurdering = Aktsomhet.FORSETT,
@@ -310,7 +306,6 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = false
                 )
 
-            // assert
             validerResultat(
                 resultat = resultat,
                 vurdering = Aktsomhet.FORSETT,
@@ -362,7 +357,7 @@ class TilbakekrevingsberegningVilkårTest {
                 tilbakekrevingsbeløpUtenRenter = tilbakekrevingsbeløp,
                 tilbakekrevingsbeløp = BigDecimal.valueOf(4633),
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(3201),
-                skattebeløp = BigDecimal.valueOf(1432),
+                skattebeløp = BigDecimal.valueOf(1432)
             )
 
             validerResultat(
@@ -374,7 +369,7 @@ class TilbakekrevingsberegningVilkårTest {
                 tilbakekrevingsbeløpUtenRenter = tilbakekrevingsbeløp,
                 tilbakekrevingsbeløp = BigDecimal.valueOf(4633),
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal.valueOf(3202),
-                skattebeløp = BigDecimal.valueOf(1431),
+                skattebeløp = BigDecimal.valueOf(1431)
             )
         }
     }
@@ -392,7 +387,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -422,7 +416,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -454,7 +447,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -484,7 +476,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -517,7 +508,6 @@ class TilbakekrevingsberegningVilkårTest {
                 godTro = null
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -550,7 +540,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -587,7 +576,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // assert
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurderingsperiode,
@@ -636,11 +624,11 @@ class TilbakekrevingsberegningVilkårTest {
         andelAvBeløp: BigDecimal? = BigDecimal.valueOf(100),
         renteprosent: BigDecimal? = null,
         manueltSattTilbakekrevingsbeløp: BigDecimal? = null,
-        tilbakekrevingsbeløpUtenRenter: BigDecimal = feilutbetalt, // feilutbetalt?
-        rentebeløp: BigDecimal = BigDecimal.ZERO, // Sjekk denne
-        tilbakekrevingsbeløp: BigDecimal = tilbakekrevingsbeløpUtenRenter, // Med mindre annet er fyllt inn vil det ikke legges på renter
+        tilbakekrevingsbeløpUtenRenter: BigDecimal = feilutbetalt,
+        rentebeløp: BigDecimal = BigDecimal.ZERO,
+        tilbakekrevingsbeløp: BigDecimal = tilbakekrevingsbeløpUtenRenter, // Med mindre annet er fylt inn vil det ikke legges på renter
         skattebeløp: BigDecimal = BigDecimal.ZERO,
-        tilbakekrevingsbeløpEtterSkatt: BigDecimal = tilbakekrevingsbeløp, // Med mindre annet er fyllt inn vil det ikke tas hensyn til skatt
+        tilbakekrevingsbeløpEtterSkatt: BigDecimal = tilbakekrevingsbeløp, // Med mindre annet er fylt inn vil det ikke tas hensyn til skatt
         utbetaltYtelsesbeløp: BigDecimal = feilutbetalt,
         riktigYtelsesbeløp: BigDecimal = BigDecimal.ZERO
     ) {
@@ -655,7 +643,7 @@ class TilbakekrevingsberegningVilkårTest {
         assertThat(resultat.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
         assertThat(resultat.skattebeløp).isEqualTo(skattebeløp)
         assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
-        assertThat(resultat.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp) // Rått beløp, ikke justert for ev. trekk
+        assertThat(resultat.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp)
         assertThat(resultat.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
     }
 }
