@@ -31,7 +31,7 @@ class TilbakekrevingsberegningVilkårTest {
     )
 
     private lateinit var grunnlagsperiodeMedSkatteprosent: GrunnlagsperiodeMedSkatteprosent
-    private lateinit var forstoBurdeForstattVurdering: Vilkårsvurderingsperiode
+    private lateinit var forstodBurdeForståttVurdering: Vilkårsvurderingsperiode
 
     private val FEILUTBETALT_BELØP = BigDecimal.valueOf(10_000)
     private val RENTEPROSENT = BigDecimal.valueOf(10)
@@ -47,7 +47,7 @@ class TilbakekrevingsberegningVilkårTest {
                 ),
                 begrunnelse = "foo"
             )
-        forstoBurdeForstattVurdering =
+        forstodBurdeForståttVurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 periode = Månedsperiode(
@@ -190,8 +190,8 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skal kreve tilbake alt med renter ved forsett og illeggRenter satt true`() {
-            forstoBurdeForstattVurdering =
-                forstoBurdeForstattVurdering.copy(
+            forstodBurdeForståttVurdering =
+                forstodBurdeForståttVurdering.copy(
                     aktsomhet = VilkårsvurderingAktsomhet(
                         aktsomhet = Aktsomhet.FORSETT,
                         begrunnelse = "foo",
@@ -201,7 +201,7 @@ class TilbakekrevingsberegningVilkårTest {
 
             // act
             val resultat: Beregningsresultatsperiode = beregn(
-                vilkårVurdering = forstoBurdeForstattVurdering,
+                vilkårVurdering = forstodBurdeForståttVurdering,
                 feilutbetalt = FEILUTBETALT_BELØP,
                 perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
                 beregnRenter = true
@@ -210,7 +210,7 @@ class TilbakekrevingsberegningVilkårTest {
             validerResultat(
                 resultat = resultat,
                 vurdering = Aktsomhet.FORSETT,
-                vurderingsperiode = forstoBurdeForstattVurdering.periode,
+                vurderingsperiode = forstodBurdeForståttVurdering.periode,
                 tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
                 tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
                 rentebeløp = BigDecimal.valueOf(1000),
@@ -221,8 +221,8 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake alt uten renter ved forsett og illeggRenter satt false`() {
-            forstoBurdeForstattVurdering =
-                forstoBurdeForstattVurdering.copy(
+            forstodBurdeForståttVurdering =
+                forstodBurdeForståttVurdering.copy(
                     aktsomhet = VilkårsvurderingAktsomhet(
                         aktsomhet = Aktsomhet.FORSETT,
                         begrunnelse = "foo",
@@ -232,7 +232,7 @@ class TilbakekrevingsberegningVilkårTest {
 
             // act
             val resultat: Beregningsresultatsperiode = beregn(
-                vilkårVurdering = forstoBurdeForstattVurdering,
+                vilkårVurdering = forstodBurdeForståttVurdering,
                 feilutbetalt = FEILUTBETALT_BELØP,
                 perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
                 beregnRenter = true
@@ -241,7 +241,7 @@ class TilbakekrevingsberegningVilkårTest {
             validerResultat(
                 resultat = resultat,
                 vurdering = Aktsomhet.FORSETT,
-                vurderingsperiode = forstoBurdeForstattVurdering.periode,
+                vurderingsperiode = forstodBurdeForståttVurdering.periode,
                 tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
                 tilbakekrevingsbeløp = FEILUTBETALT_BELØP
             )
