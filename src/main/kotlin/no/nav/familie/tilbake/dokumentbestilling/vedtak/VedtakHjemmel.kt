@@ -41,7 +41,7 @@ object VedtakHjemmel {
                 barnetrygd && ignorerteSmåbeløp -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15_SJETTE))
                 ignorerteSmåbeløp -> hjemler.add(Hjemler.FOLKETRYGD_22_15_SJETTE)
                 barnetrygd -> hjemler.addAll(setOf(Hjemler.BARNETRYGD_13, Hjemler.FOLKETRYGD_22_15))
-                kontantstøtte -> hjemler.add(Hjemler.KONTANTSTØTTE_11)
+                kontantstøtte -> hjemler.addAll(setOf(Hjemler.KONTANTSTØTTE_11, Hjemler.FOLKETRYGD_22_15))
                 renter -> hjemler.add(Hjemler.FOLKETRYGD_22_15_OG_22_17_A)
                 else -> hjemler.add(Hjemler.FOLKETRYGD_22_15)
             }
