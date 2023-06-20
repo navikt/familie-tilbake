@@ -50,7 +50,8 @@ class PdfBrevService(
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
         if (data.mottager != Brevmottager.VERGE &&
-            !data.metadata.annenMottakersNavn.equals(data.metadata.sakspartsnavn, ignoreCase = true)) {
+            !data.metadata.annenMottakersNavn.equals(data.metadata.sakspartsnavn, ignoreCase = true)
+        ) {
             // Ikke tell kopier sendt til verge eller fullmektig
             tellerService.tellBrevSendt(fagsak, brevtype)
         }

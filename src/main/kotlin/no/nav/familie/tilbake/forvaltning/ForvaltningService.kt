@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService

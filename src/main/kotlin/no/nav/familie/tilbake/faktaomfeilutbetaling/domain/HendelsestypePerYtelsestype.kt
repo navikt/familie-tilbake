@@ -47,13 +47,14 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.SKOLEPENGER
         ),
         Ytelsestype.KONTANTSTØTTE to setOf(
-            Hendelsestype.ANNET,
-            Hendelsestype.BOR_MED_SØKER,
-            Hendelsestype.BARNS_ALDER_KS,
-            Hendelsestype.BARNEHAGEPLASS,
-            Hendelsestype.MEDLEMSKAP_ANNEN_FORELDER,
-            Hendelsestype.BOSATT_I_RIKET,
-            Hendelsestype.MEDLEMSKAP_KS
+            Hendelsestype.VILKÅR_BARN,
+            Hendelsestype.VILKÅR_SØKER,
+            Hendelsestype.BARN_I_FOSTERHJEM_ELLER_INSTITUSJON,
+            Hendelsestype.KONTANTSTØTTENS_STØRRELSE,
+            Hendelsestype.STØTTEPERIODE,
+            Hendelsestype.UTBETALING,
+            Hendelsestype.KONTANTSTØTTE_FOR_ADOPTERTE_BARN,
+            Hendelsestype.ANNET_KS
         )
     )
 

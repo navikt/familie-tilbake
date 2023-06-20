@@ -29,7 +29,7 @@ class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
