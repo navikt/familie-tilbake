@@ -163,7 +163,6 @@ class TilbakekrevingsberegningVilkårTest {
                 )
             )
 
-            // act
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
@@ -195,7 +194,6 @@ class TilbakekrevingsberegningVilkårTest {
                     )
                 )
 
-            // act
             val resultat: Beregningsresultatsperiode = beregn(
                 vilkårVurdering = vilkårsvurdering,
                 feilutbetalt = FEILUTBETALT_BELØP,
@@ -226,7 +224,6 @@ class TilbakekrevingsberegningVilkårTest {
                     )
                 )
 
-            // act
             val resultat: Beregningsresultatsperiode = beregn(
                 vilkårVurdering = vilkårsvurdering,
                 feilutbetalt = FEILUTBETALT_BELØP,
@@ -258,7 +255,6 @@ class TilbakekrevingsberegningVilkårTest {
                     skatteprosent = BigDecimal.valueOf(10)
                 )
 
-            // act
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
@@ -294,7 +290,6 @@ class TilbakekrevingsberegningVilkårTest {
                     skatteprosent = BigDecimal.valueOf(10)
                 )
 
-            // act
             val resultat: Beregningsresultatsperiode =
                 beregn(
                     vilkårVurdering = vilkårsvurdering,
