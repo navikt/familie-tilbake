@@ -59,7 +59,7 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro`() {
             val manueltBeløp = BigDecimal.valueOf(8991)
 
-            val vilkårsvurdering =  vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 godTro = VilkårsvurderingGodTro(
                     beløpErIBehold = true,
                     beløpTilbakekreves = manueltBeløp,
@@ -116,7 +116,7 @@ class TilbakekrevingsberegningVilkårTest {
         @Test
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro med skatt prosent`() {
             val beløpTilbakekreves = BigDecimal.valueOf(8991)
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 godTro = VilkårsvurderingGodTro(
                     beløpErIBehold = true,
                     beløpTilbakekreves = beløpTilbakekreves,
@@ -156,7 +156,7 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetForsett {
         @Test
         fun `beregn skal kreve tilbake alt med renter ved forsett og illeggRenter ikke satt`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
@@ -245,7 +245,7 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake alt med renter ved forsett med skatt prosent`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
@@ -281,7 +281,7 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake alt uten renter ved forsett men frisinn med skatt prosent`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
@@ -316,8 +316,8 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skatt med 4 og 6 desimaler`() {
             val tilbakekrevingsbeløp = BigDecimal.valueOf(4212)
             val skatteprosent = BigDecimal.valueOf(33.9981)
-            
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
                     begrunnelse = "foo"
@@ -380,7 +380,7 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetGrovUaktsomhet {
         @Test
         fun `beregn skalkreve tilbake alt ved grov uaktsomhet når ikke annet er valgt`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -409,7 +409,7 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake deler ved grov uaktsomhet når særlige grunner er valgt og ilegge renter når det er valgt`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -441,7 +441,7 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skal kreve tilbake deler ved grov uaktsomhet ved når særlige grunner og ikke ilegge renter når det er false`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -471,7 +471,7 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skaltakle desimaler på prosenter som tilbakekreves`() {
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -503,7 +503,7 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake manuelt beløp når det er satt`() {
             val manueltSattBeløp = BigDecimal.valueOf(6556)
 
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -537,7 +537,7 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake manuelt beløp med renter når det er satt`() {
             val manueltSattBeløp = BigDecimal.valueOf(6000)
 
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     begrunnelse = "foo",
@@ -575,7 +575,7 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalikke kreve noe når sjette ledd benyttes for å ikke gjøre innkreving av småbeløp`() {
             val feilutbetaltBeløp = BigDecimal.valueOf(522)
 
-            val vilkårsvurdering =vilkårsvurderingsperiode.copy(
+            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     begrunnelse = "foo",
