@@ -145,6 +145,7 @@ enum class Klassekode(val aktivitet: String) {
     EFBT("Barnetilsyn"),
     EFSP("Skolepenger"),
     KS("Kontantstøtte"),
+    KONT("Kontantstøtte"),
     TREK_KODER(""); // Felles klassekode for alle TREK klassetyper
 
     companion object {
