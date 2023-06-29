@@ -137,6 +137,7 @@ enum class Klassekode(val aktivitet: String) {
     KL_KODE_FEIL_PEN(""),
     KL_KODE_FEIL_KS(""), // Kontantstøtte
     KL_KODE_JUST_BA(""),
+    KL_KODE_JUST_KS(""),
     KL_KODE_JUST_EFOG(""),
     KL_KODE_JUST_PEN(""),
     BATR("Barnetrygd"),

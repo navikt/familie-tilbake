@@ -7,7 +7,10 @@ import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
@@ -20,10 +23,12 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsbelo
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsperiodeDto
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -35,10 +40,11 @@ class IverksettelseService(
     private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
     private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
-    private val oppdragClient: OppdragClient
+    private val oppdragClient: OppdragClient,
+    private val featureToggleService: FeatureToggleService
 ) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
@@ -52,6 +58,7 @@ class IverksettelseService(
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
         // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
         val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
+        secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
@@ -114,13 +121,35 @@ class IverksettelseService(
                 belopUinnkrevd = it.uinnkrevdBeløp
                 belopSkatt = it.skattBeløp
                 if (Klassetype.YTEL == it.klassetype) {
-                    kodeResultat = it.kodeResultat.kode
+                    kodeResultat = utledKodeResultat(it)
                     kodeAarsak = "ANNET" // fast verdi
                     kodeSkyld = "IKKE_FORDELT" // fast verdi
                 }
             }
         }
     }
+
+    private fun utledKodeResultat(tilbakekrevingsbeløp: Tilbakekrevingsbeløp): String {
+        return if (harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp)) {
+            secureLogger.warn(
+                """Fant tilbakekrevingsperiode med delvis tilbakekreving hvor vi krever tilbake hele beløpet.
+                | Økonomi krever trolig at vi setter full tilbakekreving. 
+                | Dersom kjøringen feiler mot økonomi med feilmelding: Innkrevd beløp = feilutbetalt ved delvis tilbakekreving.
+                | Vurder å skru på featuretoggle familie-tilbake-overstyr-delvis-tilbakekreving og rekjør.
+                | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin()
+            )
+            if (featureToggleService.isEnabled(FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING)) {
+                KodeResultat.FULL_TILBAKEKREVING.kode
+            } else {
+                KodeResultat.DELVIS_TILBAKEKREVING.kode
+            }
+        } else {
+            tilbakekrevingsbeløp.kodeResultat.kode
+        }
+    }
+
+    private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) =
+        tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
 
     fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
         val beregnetResultat = beregningService.beregn(behandlingId)

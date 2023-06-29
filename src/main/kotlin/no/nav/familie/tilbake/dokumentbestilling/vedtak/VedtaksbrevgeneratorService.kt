@@ -87,7 +87,7 @@ class VedtaksbrevgeneratorService(
         dto: HentForhåndvisningVedtaksbrevPdfDto
     ): Brevdata {
         val (brevmetadata, brevmottager) =
-            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(
             vedtaksbrevgrunnlag,
             dto.oppsummeringstekst,
@@ -116,7 +116,7 @@ class VedtaksbrevgeneratorService(
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag
     ): HbVedtaksbrevsdata {
         val (brevmetadata, brevmottager) =
-            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag.behandling.id)
+            brevmetadataUtil.lagBrevmetadataForMottakerTilForhåndsvisning(vedtaksbrevgrunnlag)
         val vedtaksbrevsdata = hentDataForVedtaksbrev(vedtaksbrevgrunnlag, brevmottager, brevmetadata)
         return vedtaksbrevsdata.vedtaksbrevsdata
     }
@@ -145,16 +145,18 @@ class VedtaksbrevgeneratorService(
             vedtaksbrevgrunnlag.fagsystem
         )
         val beregnetResultat = tilbakekrevingBeregningService.beregn(vedtaksbrevgrunnlag.behandling.id)
-        val brevMetadata: Brevmetadata = (forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
-            vedtaksbrevgrunnlag,
-            personinfo,
-            brevmottager,
-            språkkode
-        )).copy(
+        val brevMetadata: Brevmetadata = (
+            forhåndsgenerertMetadata ?: lagMetadataForVedtaksbrev(
+                vedtaksbrevgrunnlag,
+                personinfo,
+                brevmottager,
+                språkkode
+            )
+            ).copy(
             tittel = finnTittelVedtaksbrev(
                 ytelsesnavn = vedtaksbrevgrunnlag.ytelsestype.navn[språkkode]!!,
                 tilbakekreves = beregnetResultat.vedtaksresultat == FULL_TILBAKEBETALING ||
-                        beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
+                    beregnetResultat.vedtaksresultat == DELVIS_TILBAKEBETALING
             )
         )
         val data: HbVedtaksbrevsdata = lagHbVedtaksbrevsdata(
