@@ -86,7 +86,7 @@ class HåndterGamleKravgrunnlagService(
         val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
         val diffs = KravgrunnlagUtil.sammenlignKravgrunnlag(mottattKravgrunnlag, hentetKravgrunnlag)
         if (diffs.isNotEmpty()) {
-            logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag. Avvikene er $diffs")
+            logger.warn("Det finnes avvik mellom hentet kravgrunnlag og mottatt kravgrunnlag for ${hentetKravgrunnlag.kodeFagomraade}. Avvikene er $diffs")
         }
         logger.info(
             "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
