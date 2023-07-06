@@ -30,7 +30,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
-        path = ["/behandling/{behandlingId}/kravgrunnlag/{kravgrunnlagId}/v1"],
+        path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
