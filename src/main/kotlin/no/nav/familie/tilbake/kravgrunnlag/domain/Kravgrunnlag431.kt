@@ -143,8 +143,10 @@ enum class Klassekode(val aktivitet: String) {
     BATR("Barnetrygd"),
     BATRSMA("Småbarnstillegg"),
     BAOROSMS("Barnetrygd-Infotrygd"),
+    BAUTEFMS("BarnetrygdUtvidet-Infotrygd"),
     EFOG("Overgangsstønad"),
     EFBT("Barnetilsyn"),
+    EFBTOR("Barnetilsyn-Infotrygd"),
     EFSP("Skolepenger"),
     KS("Kontantstøtte"),
     TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
