@@ -51,7 +51,7 @@ class ForvaltningService(
     private val oppgaveTaskService: OppgaveTaskService,
     private val tellerService: TellerService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-    private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher
+    private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -59,13 +59,13 @@ class ForvaltningService(
     @Transactional
     fun korrigerKravgrunnlag(
         behandlingId: UUID,
-        kravgrunnlagId: BigInteger
+        kravgrunnlagId: BigInteger,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
         val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
             kravgrunnlagId,
-            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
+            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
         )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
@@ -84,7 +84,7 @@ class ForvaltningService(
         økonomiXmlMottattService.arkiverMottattXml(
             mottattKravgrunnlag.melding,
             mottattKravgrunnlag.eksternFagsakId,
-            mottattKravgrunnlag.ytelsestype
+            mottattKravgrunnlag.ytelsestype,
         )
         økonomiXmlMottattService.slettMottattXml(mottattXmlId)
     }
@@ -104,8 +104,8 @@ class ForvaltningService(
                 resultater = setOf(behandlingsresultat),
                 status = Behandlingsstatus.AVSLUTTET,
                 ansvarligSaksbehandler = ContextService.hentSaksbehandler(),
-                avsluttetDato = LocalDate.now()
-            )
+                avsluttetDato = LocalDate.now(),
+            ),
         )
         behandlingTilstandService.opprettSendingAvBehandlingenHenlagt(behandlingId)
 
@@ -113,7 +113,7 @@ class ForvaltningService(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
             aktør = Aktør.SAKSBEHANDLER,
-            beskrivelse = ""
+            beskrivelse = "",
         )
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId)
         tellerService.tellVedtak(Behandlingsresultatstype.HENLAGT, behandling)
@@ -131,7 +131,7 @@ class ForvaltningService(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_FLYTTET_MED_FORVALTNING,
-            Aktør.VEDTAKSLØSNING
+            Aktør.VEDTAKSLØSNING,
         )
     }
 
@@ -156,7 +156,8 @@ class ForvaltningService(
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
                     mottattXmlId = null,
                     eksternId = kravgrunnlag.referanse,
-                    opprettetTid = kravgrunnlag.sporbar.opprettetTid
+                    opprettetTid = kravgrunnlag.sporbar.opprettetTid,
+                    behandlingId = behandling.id,
                 )
             }
         }
@@ -164,7 +165,7 @@ class ForvaltningService(
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil(
                 "Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         return økonomiXmlMottatt.map { xml ->
@@ -174,7 +175,8 @@ class ForvaltningService(
                 kravgrunnlagKravstatuskode = null,
                 mottattXmlId = xml.id,
                 eksternId = xml.referanse,
-                opprettetTid = xml.sporbar.opprettetTid
+                opprettetTid = xml.sporbar.opprettetTid,
+                behandlingId = null,
             )
         }
     }
@@ -185,13 +187,13 @@ class ForvaltningService(
         if (!kravgrunnlagPåBehandling.contains(kravgrunnlag431)) {
             throw Feil(
                 "Fant ikke kravgrunnlag med id $kravgrunnlag431Id på behandling med id $behandlingId",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         if (kravgrunnlagPåBehandling.size < 2) {
             throw Feil(
                 "Kan ikke deaktivere kravgrunnlag med id $kravgrunnlag431Id på behandling med id $behandlingId. Behandling vil ikke lengre ha aktive kravgrunnlag",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
 
@@ -204,7 +206,7 @@ class ForvaltningService(
             throw Feil(
                 "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
