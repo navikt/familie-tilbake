@@ -17,6 +17,7 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         val hentEnkelPersonQuery = graphqlQuery("hentperson-enkel")
         val hentIdenterQuery = graphqlQuery("hentIdenter")
+        val hentAdressebeskyttelseBolkQuery = graphqlQuery("hent-adressebeskyttelse-bolk")
 
         private fun graphqlQuery(pdlResource: String) = PdlConfig::class.java.getResource("/pdl/$pdlResource.graphql")
             .readText()

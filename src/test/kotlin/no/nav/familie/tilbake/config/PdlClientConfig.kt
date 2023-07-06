@@ -48,6 +48,9 @@ class PdlClientConfig {
                 errors = listOf()
             )
         }
+        every { pdlClient.hentAdressebeskyttelseBolk(any(), any()) } answers {
+            emptyMap()
+        }
         return pdlClient
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.person
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -24,6 +25,16 @@ class PersonService(
             endretPersonIdentEventPublisher.fireEvent(personInfo.ident, fagsak.id)
         }
         return personInfo
+    }
+
+    fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>, fagsystem: Fagsystem): List<String> {
+        val adresseBeskyttelseBolk = pdlClient.hentAdressebeskyttelseBolk(personIdenter, fagsystem)
+        return adresseBeskyttelseBolk.filter { (_, person) ->
+            person.adressebeskyttelse.any { adressebeskyttelse ->
+                adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+            }
+        }.map { it.key }
     }
 
     fun hentAktørId(personIdent: String, fagsystem: Fagsystem): List<String> {
