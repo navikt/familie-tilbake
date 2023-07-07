@@ -7,8 +7,6 @@ import no.nav.familie.tilbake.behandling.event.EndretPersonIdentEventPublisher
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.integration.pdl.PdlClient
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,7 +15,6 @@ class PersonService(
     private val fagsakRepository: FagsakRepository,
     private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): Personinfo {
         val personInfo = pdlClient.hentPersoninfo(personIdent, fagsystem)
@@ -32,7 +29,6 @@ class PersonService(
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>, fagsystem: Fagsystem): List<String> {
         val adresseBeskyttelseBolk = pdlClient.hentAdressebeskyttelseBolk(personIdenter, fagsystem)
-        logger.info("personIdenter fra pdl ${personIdenter.size}")
         return adresseBeskyttelseBolk.filter { (_, person) ->
             person.adressebeskyttelse.any { adressebeskyttelse ->
                 adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
