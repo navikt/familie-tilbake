@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -18,7 +19,8 @@ import java.util.UUID
 class StegService(
     val steg: List<IBehandlingssteg>,
     val behandlingRepository: BehandlingRepository,
-    val behandlingskontrollService: BehandlingskontrollService
+    val behandlingskontrollService: BehandlingskontrollService,
+    val validerBrevmottakerService: ValiderBrevmottakerService
 ) {
 
     @Transactional
@@ -51,6 +53,9 @@ class StegService(
         }
 
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        if (Behandlingssteg.FORESLÅ_VEDTAK == aktivtBehandlingssteg) {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
+        }
         // Behandling kan ikke tilbakeføres når er på FatteVedtak/IverksetteVedtak steg
         if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg || Behandlingssteg.IVERKSETT_VEDTAK == aktivtBehandlingssteg) {
             if (behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto) {
