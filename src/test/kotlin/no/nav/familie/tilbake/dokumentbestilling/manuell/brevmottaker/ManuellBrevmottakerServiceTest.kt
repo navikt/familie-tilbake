@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.FagsakService
+import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -71,6 +72,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
+    @Autowired
+    private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
+
     private lateinit var behandling: Behandling
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
     private val opprettetTidspunktSlot = mutableListOf<LocalDateTime>()
@@ -103,7 +107,9 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             behandlingskontrollService = behandlingskontrollService,
             fagsakService = fagsakService,
             pdlClient = mockPdlClient,
-            integrasjonerClient = mockIntegrasjonerClient
+            integrasjonerClient = mockIntegrasjonerClient,
+            validerBrevmottakerService = validerBrevmottakerService
+
         )
 
         every {
