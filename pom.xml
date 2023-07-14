@@ -42,7 +42,7 @@
         <spring.cloud-contract>4.0.3</spring.cloud-contract>
         <testcontainers.version>1.18.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
-        <prosessering-core.version>1.20230207133526_5430e48</prosessering-core.version>
+        <prosessering-core.version>2.20230713120621_747ed8f</prosessering-core.version>
     </properties>
 
 
