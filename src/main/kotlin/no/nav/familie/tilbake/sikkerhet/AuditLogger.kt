@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.LoggerFactory
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import javax.servlet.http.HttpServletRequest
 
 /**
  * [custom1], [custom2], [custom3] brukes for å logge ekstra felter, eks fagsak, behandling,

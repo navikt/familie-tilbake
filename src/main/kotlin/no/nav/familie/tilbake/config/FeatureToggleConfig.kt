@@ -8,19 +8,16 @@ import io.getunleash.strategy.Strategy
 import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
-@ConstructorBinding
 class FeatureToggleConfig(
     private val enabled: Boolean,
     val unleash: Unleash
 ) {
 
-    @ConstructorBinding
     data class Unleash(
         val uri: URI,
         val cluster: String,

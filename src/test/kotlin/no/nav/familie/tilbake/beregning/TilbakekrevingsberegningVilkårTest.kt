@@ -29,7 +29,8 @@ class TilbakekrevingsberegningVilkårTest {
         vurdering = Vilkårsvurderingsperiode(
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
             periode = Månedsperiode(
-                LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3)
+                LocalDate.of(2019, 5, 1),
+                LocalDate.of(2019, 5, 3)
             ),
             begrunnelse = "foo",
             aktsomhet = VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "foo")
@@ -276,7 +277,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beløpTilbakekreves = BigDecimal.valueOf(8991),
                 begrunnelse = "foo"
             ),
-            aktsomhet = null,
+            aktsomhet = null
         )
 
         // assert
@@ -433,7 +434,11 @@ class TilbakekrevingsberegningVilkårTest {
     ): Beregningsresultatsperiode {
         val delresultat = FordeltKravgrunnlagsbeløp(feilutbetalt, feilutbetalt, BigDecimal.ZERO)
         return TilbakekrevingsberegningVilkår.beregn(
-            vilkårVurdering, delresultat, perioderMedSkatteprosent, beregnRenter, bruk6desimalerISkatteberegning
+            vilkårVurdering,
+            delresultat,
+            perioderMedSkatteprosent,
+            beregnRenter,
+            bruk6desimalerISkatteberegning
         )
     }
 }

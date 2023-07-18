@@ -31,17 +31,17 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
         AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
+        HenteParam.BEHANDLING_ID
     )
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
-        @PathVariable eksternKravgrunnlagId: BigInteger,
+        @PathVariable eksternKravgrunnlagId: BigInteger
     ): Ressurs<String> {
         forvaltningService.korrigerKravgrunnlag(behandlingId, eksternKravgrunnlagId)
         return Ressurs.success("OK")
@@ -50,13 +50,13 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Arkiver mottatt kravgrunnlag")
     @PutMapping(
         path = ["/arkiver/kravgrunnlag/{mottattXmlId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Arkiverer mottatt kravgrunnlag",
         AuditLoggerEvent.NONE,
-        HenteParam.MOTTATT_XML_ID,
+        HenteParam.MOTTATT_XML_ID
     )
     fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
@@ -66,7 +66,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Tvinghenlegg behandling")
     @PutMapping(
         path = ["/behandling/{behandlingId}/tving-henleggelse/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(Behandlerrolle.FORVALTER, "Tving henlegger behandling", AuditLoggerEvent.NONE, HenteParam.BEHANDLING_ID)
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
@@ -77,13 +77,13 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Flytt behandling tilbake til fakta")
     @PutMapping(
         path = ["/behandling/{behandlingId}/flytt-behandling/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Flytter behandling tilbake til Fakta",
         AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID,
+        HenteParam.BEHANDLING_ID
     )
     fun flyttBehandlingTilFakta(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
@@ -93,13 +93,13 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Annuler kravgrunnlag")
     @PutMapping(
         path = ["/annuler/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Annulerer kravgrunnlag",
         AuditLoggerEvent.NONE,
-        HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
+        HenteParam.EKSTERN_KRAVGRUNNLAG_ID
     )
     fun annulerKravgrunnlag(@PathVariable eksternKravgrunnlagId: BigInteger): Ressurs<String> {
         forvaltningService.annulerKravgrunnlag(eksternKravgrunnlagId)
@@ -109,17 +109,17 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Hent informasjon som kreves for forvaltning")
     @GetMapping(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Henter forvaltningsinformasjon",
         AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
+        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID
     )
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
-        @PathVariable eksternFagsakId: String,
+        @PathVariable eksternFagsakId: String
     ): Ressurs<List<Forvaltningsinfo>> {
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
@@ -127,13 +127,13 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Deaktiver koplet kravgrunnlag (ved feilsituasjonen når 2 aktive kravgrunnlag er koplet mot behandling)")
     @PutMapping(
         path = ["/deaktiver/kravgrunnlag/{behandlingId}/{kravgrunnlag431Id}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Deaktiver koplet kravgrunnlag",
         AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
+        HenteParam.BEHANDLING_ID
     )
     fun deaktiverKopletKravgrunnlag(@PathVariable behandlingId: UUID, @PathVariable kravgrunnlag431Id: UUID): Ressurs<String> {
         forvaltningService.deaktiverKopletKravgrunnlag(behandlingId, kravgrunnlag431Id)

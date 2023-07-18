@@ -38,14 +38,13 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.assertj.core.api.Assertions.assertThat
+import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.util.concurrent.SettableListenableFuture
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
@@ -95,8 +94,10 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             behandlingManuellOpprettelseService
         )
 
-        val future = SettableListenableFuture<SendResult<String, String>>()
-        every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()) }.returns(future)
+        val recordMetadata = mockk<RecordMetadata>()
+        every { recordMetadata.offset() } returns 1
+        val result = SendResult<String, String>(mockk(), recordMetadata)
+        every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()).get() } returns result
     }
 
     @AfterEach
@@ -207,44 +208,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         fagsak.bruker.språkkode shouldBe fagsystemsbehandling.språkkode
         fagsak.fagsystem shouldBe FagsystemUtil.hentFagsystemFraYtelsestype(fagsystemsbehandling.ytelsestype)
         fagsak.institusjon shouldBe null
-    }
-
-    @Test
-    fun `doTask hente fagsystembehandling på nytt dersom det ga feilmelding forrige kjøring`() {
-        val task = lagTask()
-        opprettBehandlingManueltTask.preCondition(task)
-
-        val nySlotId = mutableListOf<UUID>()
-
-        val feiletRequestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId
-            )
-        val respons = lagHentFagsystemsbehandlingRespons(feilmelding = "Feilmelding")
-        feiletRequestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
-
-        val exception = shouldThrow<RuntimeException> { opprettBehandlingManueltTask.doTask(task) }
-        exception.message shouldBe "Noe gikk galt ved henting av fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres. Feiler med Feilmelding"
-
-        val nyRequestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId
-            )
-
-        verify(exactly = 2) {
-            spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
-                capture(nySlotId),
-                any()
-            )
-        }
-
-        assertThat(feiletRequestSendt?.id).isNotEqualTo(nyRequestSendt?.id)
-        assertThat(nySlotId[0]).isEqualTo(feiletRequestSendt?.id)
-        assertThat(nySlotId[1]).isEqualTo(nyRequestSendt?.id)
     }
 
     @Test

@@ -1,5 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBException
+import jakarta.xml.bind.Unmarshaller
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
@@ -17,9 +20,6 @@ import java.io.StringReader
 import java.math.BigDecimal
 import java.util.SortedMap
 import javax.xml.XMLConstants
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
-import javax.xml.bind.Unmarshaller
 import javax.xml.validation.SchemaFactory
 
 object KravgrunnlagUtil {

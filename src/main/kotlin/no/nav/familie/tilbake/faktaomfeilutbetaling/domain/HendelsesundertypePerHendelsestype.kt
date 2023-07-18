@@ -172,11 +172,10 @@ object HendelsesundertypePerHendelsestype {
         Hendelsestype.ANNET_KS to setOf(
             Hendelsesundertype.ANNET_FRITEKST,
             Hendelsesundertype.BARN_DØD,
-            Hendelsesundertype.BRUKER_DØD,
-        ),
-
-
+            Hendelsesundertype.BRUKER_DØD
         )
+
+    )
 
     fun getHendelsesundertyper(hendelsestype: Hendelsestype): Set<Hendelsesundertype> {
         return HIERARKI[hendelsestype] ?: error("Ikke-støttet hendelseType: $hendelsestype")

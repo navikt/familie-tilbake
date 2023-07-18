@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.1</version>
     </parent>
 
     <properties>
@@ -21,16 +21,17 @@
         <java.version>17</java.version>
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.8.21</kotlin.version>
-        <felles.version>1.20221202080911_bcf8f33</felles.version>
+        <kotlin.version>1.9.0</kotlin.version>
+        <felles.version>2.20230508082643_6b28bd8</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>2.0_20230313155154_f9438bd</kontrakter.version>
+        <kontrakter.version>3.0_20230705132547_9303863</kontrakter.version>
+        <felles.version>2.20230508082643_6b28bd8</felles.version>
         <kotest.version>5.6.1</kotest.version>
-        <token-validation-spring.version>2.1.9</token-validation-spring.version>
+        <token-validation-spring.version>3.1.0</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
-        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
-        <jaxb-impl.version>2.3.8</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
+        <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
+        <jaxb-impl.version>4.0.3</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <mockk.version>1.13.5</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -42,7 +43,8 @@
         <spring.cloud-contract>4.0.3</spring.cloud-contract>
         <testcontainers.version>1.18.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
-        <prosessering-core.version>1.20230207133526_5430e48</prosessering-core.version>
+        <familie-tjenestespesifikasjoner.version>1.0-SNAPSHOT</familie-tjenestespesifikasjoner.version>
+        <prosessering-core.version>2.20230713120621_747ed8f</prosessering-core.version>
     </properties>
 
 
@@ -97,6 +99,11 @@
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>${jakarta.xml.bind-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb-impl.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -168,12 +175,12 @@
         </dependency>
         <dependency>
             <groupId>com.ibm.mq</groupId>
-            <artifactId>com.ibm.mq.allclient</artifactId>
+            <artifactId>com.ibm.mq.jakarta.client</artifactId>
             <version>9.3.2.0</version>
         </dependency>
         <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>javax.jms-api</artifactId>
+            <groupId>jakarta.jms</groupId>
+            <artifactId>jakarta.jms-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -221,6 +228,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
             <artifactId>log</artifactId>
             <version>${felles.version}</version>
         </dependency>
@@ -259,9 +271,9 @@
             <version>${tjenestespesifikasjoner.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <groupId>no.nav.familie.tjenestespesifikasjoner</groupId>
             <artifactId>tilbakekreving-v1-tjenestespesifikasjon</artifactId>
-            <version>${tjenestespesifikasjoner.version}</version>
+            <version>${familie-tjenestespesifikasjoner.version}</version>
         </dependency>
 
         <!-- Diverse -->
@@ -281,7 +293,12 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>8.0.0</version>
+            <version>8.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.messaginghub</groupId>
+            <artifactId>pooled-jms</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -462,50 +479,6 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <!-- Plugin required to build java classes from XSD using XJC -->
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.15.2</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                        <version>2.3.6</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <markGenerated>true</markGenerated>
-                    <enableIntrospection>true</enableIntrospection>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-annotate</artifactId>
-                            <version>1.1.0</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>kravgrunnlag</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaDirectory>${basedir}/src/main/resources/xsd/</schemaDirectory>
-                            <schemaIncludes>
-                                <include>**/*.xsd</include>
-                            </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/kravgrunnlag</generateDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
