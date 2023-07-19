@@ -32,6 +32,7 @@
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
         <jaxb-impl.version>4.0.3</jaxb-impl.version><!-- Kan ikke oppgradere til 3.* p.g.a. av plugin maven-jaxb2-plugin -->
+        <verapdf.version>1.24.1</verapdf.version>
         <mockk.version>1.13.5</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -162,11 +163,18 @@
             <artifactId>pdfbox</artifactId>
             <version>2.0.28</version>
         </dependency>
+        <!-- PDF/A-2U-validering -->
+        <dependency>
+            <groupId>org.verapdf</groupId>
+            <artifactId>core-jakarta</artifactId>
+            <version>${verapdf.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>1.22.2</version>
+            <version>${verapdf.version}</version>
         </dependency>
+        <!-- PDF/A-2U-validering -->
 
         <!-- MQ -->
         <dependency>

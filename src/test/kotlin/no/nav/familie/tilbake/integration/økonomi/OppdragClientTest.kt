@@ -97,7 +97,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `iverksettVedtak skal sende iverksettelse request til oppdrag`() {
         wireMockServer.stubFor(
-            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+            post(urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/${behandling.id}"))
                 .willReturn(okJson(Ressurs.success(lagIverksettelseRespons()).toJson()))
         )
         val iverksettVedtak = oppdragClient.iverksettVedtak(behandling.id, tilbakekrevingsvedtakRequest)
@@ -108,7 +108,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `iverksettVedtak skal ikke sende iverksettelse request til oppdrag når oppdrag har nedetid`() {
         wireMockServer.stubFor(
-            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+            post(urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/${behandling.id}"))
                 .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408))
         )
 
@@ -126,7 +126,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `iverksettVedtak skal ikke iverksette behandling til oppdrag når økonomi ikke svarer`() {
         wireMockServer.stubFor(
-            post(urlEqualTo(DefaultOppdragClient.IVERKSETTELSE_PATH + behandling.id))
+            post(urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/${behandling.id}"))
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
         )
 
@@ -147,8 +147,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
-                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
+                    "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId"
                 )
             )
                 .willReturn(
@@ -173,8 +172,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
-                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
+                    "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId"
                 )
             )
                 .willReturn(
@@ -206,8 +204,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
-                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
+                    "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId"
                 )
             )
                 .willReturn(
@@ -235,8 +232,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         wireMockServer.stubFor(
             post(
                 urlEqualTo(
-                    DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH +
-                        kravgrunnlagId
+                    "/${DefaultOppdragClient.HENT_KRAVGRUNNLAG_PATH}/$kravgrunnlagId"
                 )
             )
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
@@ -261,7 +257,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         )
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
         wireMockServer.stubFor(
-            post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
+            post(urlEqualTo("/${DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH}"))
                 .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson()))
         )
 
@@ -279,7 +275,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentFeilutbetalingerFraSimulering skal ikke hente feilutbetalinger fra simulering`() {
         wireMockServer.stubFor(
-            post(urlEqualTo(DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH))
+            post(urlEqualTo("/${DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH}"))
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message"))
         )
 
