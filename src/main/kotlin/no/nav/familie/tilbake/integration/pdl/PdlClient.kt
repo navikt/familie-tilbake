@@ -5,12 +5,17 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.PdlConfig
+import no.nav.familie.tilbake.integration.pdl.internal.PdlAdressebeskyttelsePerson
+import no.nav.familie.tilbake.integration.pdl.internal.PdlBolkResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPerson
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonBolkRequest
+import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonBolkRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequest
 import no.nav.familie.tilbake.integration.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
+import no.nav.familie.tilbake.integration.pdl.internal.feilsjekkOgReturnerData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -84,6 +89,21 @@ class PdlClient(
             message = "Feil mot pdl: ${response.errorMessages()}",
             frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
+        )
+    }
+
+    fun hentAdressebeskyttelseBolk(personIdentList: List<String>, fagsystem: Fagsystem): Map<String, PdlAdressebeskyttelsePerson> {
+        val pdlRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdentList),
+            query = PdlConfig.hentAdressebeskyttelseBolkQuery
+        )
+        val pdlResponse = postForEntity<PdlBolkResponse<PdlAdressebeskyttelsePerson>>(
+            pdlConfig.pdlUri,
+            pdlRequest,
+            httpHeaders(mapTilTema(fagsystem))
+        )
+        return feilsjekkOgReturnerData(
+            pdlResponse = pdlResponse
         )
     }
 
