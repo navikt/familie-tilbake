@@ -75,8 +75,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = AnnenVurdering.GOD_TRO,
                 manueltSattTilbakekrevingsbeløp = manueltBeløp,
@@ -103,8 +102,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = AnnenVurdering.GOD_TRO,
                 tilbakekrevingsbeløpUtenRenter = BigDecimal.ZERO,
@@ -138,8 +136,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = AnnenVurdering.GOD_TRO,
                 tilbakekrevingsbeløpUtenRenter = beløpTilbakekreves,
@@ -171,8 +168,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
@@ -201,8 +197,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregnRenter = true
             )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
@@ -231,8 +226,7 @@ class TilbakekrevingsberegningVilkårTest {
                 beregnRenter = true
             )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 tilbakekrevingsbeløpUtenRenter = FEILUTBETALT_BELØP,
@@ -263,8 +257,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
@@ -298,8 +291,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = false
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 skattebeløp = BigDecimal.valueOf(1000),
@@ -343,8 +335,7 @@ class TilbakekrevingsberegningVilkårTest {
                 bruk6desimalerISkatteberegning = true
             )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 feilutbetalt = tilbakekrevingsbeløp,
@@ -356,8 +347,7 @@ class TilbakekrevingsberegningVilkårTest {
                 skattebeløp = BigDecimal.valueOf(1432)
             )
 
-            validerResultat(
-                resultat = resultatMed6Desimaler,
+            resultatMed6Desimaler.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.FORSETT,
                 feilutbetalt = tilbakekrevingsbeløp,
@@ -392,8 +382,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 tilbakekrevingsbeløp = BigDecimal.valueOf(11000),
@@ -422,8 +411,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 andelAvBeløp = BigDecimal.valueOf(70),
@@ -454,8 +442,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 andelAvBeløp = BigDecimal.valueOf(70),
@@ -484,8 +471,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 andelAvBeløp = BigDecimal("0.01"),
@@ -517,8 +503,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
@@ -550,8 +535,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.GROV_UAKTSOMHET,
                 tilbakekrevingsbeløpUtenRenter = manueltSattBeløp,
@@ -587,8 +571,7 @@ class TilbakekrevingsberegningVilkårTest {
                     beregnRenter = true
                 )
 
-            validerResultat(
-                resultat = resultat,
+            resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
                 vurdering = Aktsomhet.SIMPEL_UAKTSOMHET,
                 feilutbetalt = feilutbetaltBeløp,
@@ -620,8 +603,7 @@ class TilbakekrevingsberegningVilkårTest {
      * Metode brukt for å sørge for at alle verdiene i resultatet sjekkes i alle tester.
      * Default verdiene tilsvarer full tilbakekreving (andel = 100%) av hele ytelsesbeløpet uten renter og skatt.
      */
-    private fun validerResultat(
-        resultat: Beregningsresultatsperiode,
+    private fun Beregningsresultatsperiode.skalHaVerdier(
         vilkårsvurdering: Vilkårsvurderingsperiode,
         vurdering: Vurdering,
         feilutbetalt: BigDecimal = FEILUTBETALT_BELØP,
@@ -636,18 +618,18 @@ class TilbakekrevingsberegningVilkårTest {
         utbetaltYtelsesbeløp: BigDecimal = feilutbetalt,
         riktigYtelsesbeløp: BigDecimal = BigDecimal.ZERO
     ) {
-        assertThat(resultat.periode).isEqualTo(vilkårsvurdering.periode)
-        assertThat(resultat.vurdering).isEqualTo(vurdering)
-        assertThat(resultat.feilutbetaltBeløp).isEqualTo(feilutbetalt)
-        assertThat(resultat.andelAvBeløp).isEqualTo(andelAvBeløp)
-        assertThat(resultat.renteprosent).isEqualTo(renteprosent)
-        assertThat(resultat.manueltSattTilbakekrevingsbeløp).isEqualTo(manueltSattTilbakekrevingsbeløp)
-        assertThat(resultat.tilbakekrevingsbeløpUtenRenter).isEqualTo(tilbakekrevingsbeløpUtenRenter)
-        assertThat(resultat.rentebeløp).isEqualTo(rentebeløp)
-        assertThat(resultat.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
-        assertThat(resultat.skattebeløp).isEqualTo(skattebeløp)
-        assertThat(resultat.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
-        assertThat(resultat.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp)
-        assertThat(resultat.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
+        assertThat(this.periode).isEqualTo(vilkårsvurdering.periode)
+        assertThat(this.vurdering).isEqualTo(vurdering)
+        assertThat(this.feilutbetaltBeløp).isEqualTo(feilutbetalt)
+        assertThat(this.andelAvBeløp).isEqualTo(andelAvBeløp)
+        assertThat(this.renteprosent).isEqualTo(renteprosent)
+        assertThat(this.manueltSattTilbakekrevingsbeløp).isEqualTo(manueltSattTilbakekrevingsbeløp)
+        assertThat(this.tilbakekrevingsbeløpUtenRenter).isEqualTo(tilbakekrevingsbeløpUtenRenter)
+        assertThat(this.rentebeløp).isEqualTo(rentebeløp)
+        assertThat(this.tilbakekrevingsbeløp).isEqualTo(tilbakekrevingsbeløp)
+        assertThat(this.skattebeløp).isEqualTo(skattebeløp)
+        assertThat(this.tilbakekrevingsbeløpEtterSkatt).isEqualTo(tilbakekrevingsbeløpEtterSkatt)
+        assertThat(this.utbetaltYtelsesbeløp).isEqualTo(utbetaltYtelsesbeløp)
+        assertThat(this.riktigYtelsesbeløp).isEqualTo(riktigYtelsesbeløp)
     }
 }
