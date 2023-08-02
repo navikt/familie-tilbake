@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teamfamilie
 spec:
-  image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2021.12.17_13.09-1e4eaff6c45c # See https://github.com/navikt/kafka-manager/packages
+  image: europe-north1-docker.pkg.dev/nais-management-233d/poao/kafka-manager:2023.08.02-07.02-45dfb71 # See https://github.com/navikt/kafka-manager/packages
   port: 8080
   ingresses:
     - https://familie-tilbake-kafka-manager.intern.dev.nav.no
