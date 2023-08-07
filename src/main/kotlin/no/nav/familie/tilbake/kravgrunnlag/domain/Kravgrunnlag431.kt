@@ -142,6 +142,7 @@ enum class Klassekode(val aktivitet: String) {
     KL_KODE_JUST_PEN(""),
     BATR("Barnetrygd"),
     BATRSMA("Småbarnstillegg"),
+    BAOREUMS("Barnetrygd-EU-Norge-Infotrygd"),
     BAOROSMS("Barnetrygd-Infotrygd"),
     BAUTEFMS("BarnetrygdUtvidet-Infotrygd"),
     BAUTEFSM("Småbarnstillegg-Infotrygd"),
