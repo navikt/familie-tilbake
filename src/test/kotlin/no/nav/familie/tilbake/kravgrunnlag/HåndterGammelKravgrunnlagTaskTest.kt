@@ -229,10 +229,42 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
+            IntegrasjonException("Kravgrunnlag ikke funnet")
 
         val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
+    }
+    @Test
+    fun `doTask skal arkivere kravgrunnlag som ikke finnes hos økonomi dersom det er en duplikat av en annen mottattXml`() {
+        requestSendtRepository
+            .insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = xmlMottatt.eksternFagsakId,
+                    ytelsestype = xmlMottatt.ytelsestype,
+                    eksternId = xmlMottatt.referanse,
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)
+                )
+            )
+
+        økonomiXmlMottattService.arkiverMottattXml(
+            mottattXml = mottattXMl
+                .replace("referanse>", "referanse>2")
+                .replace("kravgrunnlagId>", "kravgrunnlagId>2")
+                .replace("kontrollfelt>", "kontrollfelt>2"),
+            fagsystemId = xmlMottatt.eksternFagsakId,
+            ytelsestype = xmlMottatt.ytelsestype
+        )
+
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
+                IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
+
+        håndterGammelKravgrunnlagTask.doTask(lagTask())
+
+        val arkiverteKravgrunnlag =
+            økonomiXmlMottattService.hentArkiverteKravgrunnlag(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
+
+        arkiverteKravgrunnlag.size shouldBe 2
+        arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }
     }
 
     private fun lagTask(): Task {

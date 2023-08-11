@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -56,7 +57,17 @@ class HåndterGammelKravgrunnlagTask(
                     "Feiler med $feilMelding"
             )
         }
-        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
+        try {
+            håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
+        } catch (e: IntegrasjonException) {
+            if (e.cause?.message?.contains("Kravgrunnlag ikke funnet") == true &&
+                håndterGamleKravgrunnlagService.sjekkArkivForDuplikatMottatXml(mottattXml)
+            ) {
+                håndterGamleKravgrunnlagService.arkiverKravgrunnlag(mottattXmlId)
+            } else {
+                throw e
+            }
+        }
     }
 
     companion object {

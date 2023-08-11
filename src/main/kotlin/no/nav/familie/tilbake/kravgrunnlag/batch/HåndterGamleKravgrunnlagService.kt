@@ -28,6 +28,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
@@ -71,6 +72,26 @@ class HåndterGamleKravgrunnlagService(
             )
         }
     }
+
+    fun sjekkArkivForDuplikatMottatXml(mottattXml: ØkonomiXmlMottatt): Boolean {
+        return økonomiXmlMottattService.hentArkiverteKravgrunnlag(mottattXml.eksternFagsakId, mottattXml.ytelsestype)
+            .any { arkivertXml ->
+                arkivertXml.sporbar.opprettetTid.isAfter(mottattXml.sporbar.opprettetTid) &&
+                sjekkDiff(
+                    arkivertXml,
+                    mottattXml,
+                    felterHvorAvvikErForventet = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
+                )
+            }
+    }
+
+    private fun sjekkDiff(
+        arkivertXml: ØkonomiXmlMottattArkiv,
+        mottattXml: ØkonomiXmlMottatt,
+        felterHvorAvvikErForventet: List<String>
+    ) = arkivertXml.melding.linjeformatert.lines().minus(mottattXml.melding.linjeformatert.lines()).none { avvik ->
+            felterHvorAvvikErForventet.none { avvik.contains(it) }
+        }
 
     @Transactional(rollbackFor = [Exception::class])
     fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt) {
@@ -204,3 +225,7 @@ class HåndterGamleKravgrunnlagService(
         )
     }
 }
+
+
+private val String.linjeformatert: String
+    get() = replace("<urn", "\n<urn")
