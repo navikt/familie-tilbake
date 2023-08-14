@@ -78,6 +78,28 @@ class ForvaltningService(
     }
 
     @Transactional
+    fun korrigerKravgrunnlag(
+        behandlingId: UUID,
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling)
+
+        val kravgrunnlagId = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
+        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+            kravgrunnlagId,
+            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+        )
+
+        val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
+        if (kravgrunnlag != null) {
+            kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
+        }
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+
+        stegService.håndterSteg(behandlingId)
+    }
+
+    @Transactional
     fun arkiverMottattKravgrunnlag(mottattXmlId: UUID) {
         logger.info("Arkiverer mottattXml for Id=$mottattXmlId")
         val mottattKravgrunnlag = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)

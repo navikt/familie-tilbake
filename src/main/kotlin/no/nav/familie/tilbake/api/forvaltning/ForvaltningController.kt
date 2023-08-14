@@ -47,6 +47,24 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
         return Ressurs.success("OK")
     }
 
+    @Operation(summary = "Hent korrigert kravgrunnlag")
+    @PutMapping(
+        path = ["/behandling/{behandlingId}/kravgrunnlag/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.FORVALTER,
+        "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
+        AuditLoggerEvent.NONE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun korrigerKravgrunnlag(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String> {
+        forvaltningService.korrigerKravgrunnlag(behandlingId)
+        return Ressurs.success("OK")
+    }
+
     @Operation(summary = "Arkiver mottatt kravgrunnlag")
     @PutMapping(
         path = ["/arkiver/kravgrunnlag/{mottattXmlId}/v1"],
