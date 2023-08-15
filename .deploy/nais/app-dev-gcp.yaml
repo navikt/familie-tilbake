@@ -97,11 +97,9 @@ spec:
   replicas:
     min: 2
     max: 4
-    cpuThresholdPercentage: 50
   resources:
     limits:
       memory: 1024Mi
-      cpu: "1"
     requests:
       memory: 512Mi
       cpu: 500m
