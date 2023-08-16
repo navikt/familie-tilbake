@@ -236,7 +236,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `doTask skal arkivere kravgrunnlag som ikke finnes hos økonomi dersom det er en duplikat av en annen mottattXml`() {
+    fun `doTask skal arkivere kravgrunnlag som ikke finnes hos økonomi dersom det finnes nyere duplikat med kravstatus AVSL`() {
         requestSendtRepository
             .insert(
                 HentFagsystemsbehandlingRequestSendt(
@@ -249,9 +249,16 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         økonomiXmlMottattService.arkiverMottattXml(
             mottattXml = mottattXMl
-                .replace("vedtakId>", "vedtakId>2")
-                .replace("kravgrunnlagId>", "kravgrunnlagId>2")
-                .replace("kontrollfelt>", "kontrollfelt>2"),
+                .replace("<urn:vedtakId>", "<urn:vedtakId>2")
+                .replace("<urn:kravgrunnlagId>", "<urn:kravgrunnlagId>2")
+                .replace("<urn:kontrollfelt>", "<urn:kontrollfelt>2"),
+            fagsystemId = xmlMottatt.eksternFagsakId,
+            ytelsestype = xmlMottatt.ytelsestype
+        )
+
+        økonomiXmlMottattService.arkiverMottattXml(
+            mottattXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
+                .replace("<urn:vedtakId>", "<urn:vedtakId>2"),
             fagsystemId = xmlMottatt.eksternFagsakId,
             ytelsestype = xmlMottatt.ytelsestype
         )
@@ -264,7 +271,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val arkiverteKravgrunnlag =
             økonomiXmlMottattService.hentArkiverteKravgrunnlag(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
 
-        arkiverteKravgrunnlag.size shouldBe 2
+        arkiverteKravgrunnlag.size shouldBe 3
         arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }
     }
 

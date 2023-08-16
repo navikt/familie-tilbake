@@ -61,7 +61,9 @@ class HåndterGammelKravgrunnlagTask(
             håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
         } catch (e: IntegrasjonException) {
             if (e.cause?.message?.contains("Kravgrunnlag ikke funnet") == true &&
-                håndterGamleKravgrunnlagService.sjekkArkivForDuplikatMottatXml(mottattXml)
+                håndterGamleKravgrunnlagService.sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(
+                    kravgrunnlagIkkeFunnet = mottattXml
+                )
             ) {
                 håndterGamleKravgrunnlagService.arkiverKravgrunnlag(mottattXmlId)
             } else {
