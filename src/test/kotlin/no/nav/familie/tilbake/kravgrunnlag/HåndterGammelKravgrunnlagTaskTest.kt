@@ -229,11 +229,12 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            IntegrasjonException("Kravgrunnlag ikke funnet")
+            IntegrasjonException("Kravgrunnlag finnes ikke i økonomi")
 
         val exception = shouldThrow<RuntimeException> { håndterGammelKravgrunnlagTask.doTask(lagTask()) }
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
     }
+
     @Test
     fun `doTask skal arkivere kravgrunnlag som ikke finnes hos økonomi dersom det er en duplikat av en annen mottattXml`() {
         requestSendtRepository
@@ -248,7 +249,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         økonomiXmlMottattService.arkiverMottattXml(
             mottattXml = mottattXMl
-                .replace("referanse>", "referanse>2")
+                .replace("vedtakId>", "vedtakId>2")
                 .replace("kravgrunnlagId>", "kravgrunnlagId>2")
                 .replace("kontrollfelt>", "kontrollfelt>2"),
             fagsystemId = xmlMottatt.eksternFagsakId,
@@ -256,7 +257,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-                IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
+            IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
 
         håndterGammelKravgrunnlagTask.doTask(lagTask())
 

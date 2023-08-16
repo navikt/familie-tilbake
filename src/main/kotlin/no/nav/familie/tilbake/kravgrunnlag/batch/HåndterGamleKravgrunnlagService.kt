@@ -80,7 +80,7 @@ class HåndterGamleKravgrunnlagService(
                 sjekkDiff(
                     arkivertXml,
                     mottattXml,
-                    felterHvorAvvikErForventet = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
+                    forventedeAvvik = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
                 )
             }
     }
@@ -88,10 +88,10 @@ class HåndterGamleKravgrunnlagService(
     private fun sjekkDiff(
         arkivertXml: ØkonomiXmlMottattArkiv,
         mottattXml: ØkonomiXmlMottatt,
-        felterHvorAvvikErForventet: List<String>
+        forventedeAvvik: List<String>
     ) = arkivertXml.melding.linjeformatert.lines().minus(mottattXml.melding.linjeformatert.lines()).none { avvik ->
-            felterHvorAvvikErForventet.none { avvik.contains(it) }
-        }
+            forventedeAvvik.none { it in avvik }
+    }
 
     @Transactional(rollbackFor = [Exception::class])
     fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt) {
@@ -225,7 +225,6 @@ class HåndterGamleKravgrunnlagService(
         )
     }
 }
-
 
 private val String.linjeformatert: String
     get() = replace("<urn", "\n<urn")
