@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api.dto
 
+import jakarta.validation.constraints.Size
 import java.util.UUID
-import javax.validation.constraints.Size
 
 data class ForhåndsvisningHenleggelsesbrevDto(
     val behandlingId: UUID,

@@ -49,7 +49,7 @@ enum class Hendelsestype {
     STØTTEPERIODE,
     UTBETALING,
     KONTANTSTØTTE_FOR_ADOPTERTE_BARN,
-    ANNET_KS,
+    ANNET_KS
 }
 
 enum class Hendelsesundertype {
@@ -164,5 +164,5 @@ enum class Hendelsesundertype {
     DELT_BOSTED_AVTALE_OPPHØRT,
     DOBBELUTBETALING,
     MER_ENN_11_MÅNEDER,
-    BARN_STARTET_PÅ_SKOLEN,
+    BARN_STARTET_PÅ_SKOLEN
 }

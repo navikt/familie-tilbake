@@ -47,21 +47,18 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
     private fun sendKafkamelding(behandlingId: UUID, topic: String, key: String, request: Any) {
         val melding = objectMapper.writeValueAsString(request)
         val producerRecord = ProducerRecord(topic, key, melding)
-        kafkaTemplate.send(producerRecord)
-            .addCallback(
-                {
-                    log.info(
-                        "Melding på topic $topic for $behandlingId med $key er sendt. " +
-                            "Fikk offset ${it?.recordMetadata?.offset()}"
-                    )
-                },
-                {
-                    val feilmelding = "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
-                        "Feiler med ${it.message}"
-                    log.warn(feilmelding)
-                    throw Feil(message = feilmelding)
-                }
+        kotlin.runCatching {
+            val callback = kafkaTemplate.send(producerRecord).get()
+            log.info(
+                "Melding på topic $topic for $behandlingId med $key er sendt. " +
+                    "Fikk offset ${callback?.recordMetadata?.offset()}"
             )
+        }.onFailure {
+            val feilmelding = "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
+                "Feiler med ${it.message}"
+            log.warn(feilmelding)
+            throw Feil(message = feilmelding)
+        }
     }
 }
 
