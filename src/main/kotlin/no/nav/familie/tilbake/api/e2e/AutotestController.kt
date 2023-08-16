@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.api.e2e
 
+import jakarta.validation.Valid
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/autotest")

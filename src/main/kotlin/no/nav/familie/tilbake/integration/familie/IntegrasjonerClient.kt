@@ -85,7 +85,7 @@ class IntegrasjonerClient(
         .toUri()
 
     private val finnoppgaverUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "/v4")
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "v4")
         .build()
         .toUri()
 

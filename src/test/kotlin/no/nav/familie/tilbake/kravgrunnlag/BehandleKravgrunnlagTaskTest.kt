@@ -568,7 +568,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_ugyldig_struktur.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
-        exception.message shouldBe "Mottatt kravgrunnlagXML er ugyldig! Den feiler med javax.xml.bind.UnmarshalException\n" +
+        exception.message shouldBe "Mottatt kravgrunnlagXML er ugyldig! Den feiler med jakarta.xml.bind.UnmarshalException\n" +
             " - with linked exception:\n" +
             "[org.xml.sax.SAXParseException; lineNumber: 21; columnNumber: 33; " +
             "cvc-complex-type.2.4.b: The content of element 'urn:detaljertKravgrunnlag' " +

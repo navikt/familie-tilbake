@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
+import jakarta.validation.Validation
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -9,7 +10,6 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
-import javax.validation.Validation
 
 @Service
 @TaskStepBeskrivelse(
