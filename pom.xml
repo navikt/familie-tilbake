@@ -45,7 +45,7 @@
         <testcontainers.version>1.18.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2612.db4dc68</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230718100517_1e1beb0</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20230713120621_747ed8f</prosessering-core.version>
+        <prosessering-core.version>2.20230807154047_d770f01</prosessering-core.version>
     </properties>
 
 
