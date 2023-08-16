@@ -239,11 +239,11 @@ class DefaultOppdragClient(
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
 
-        const val IVERKSETTELSE_PATH = "/api/tilbakekreving/iverksett/"
-        const val HENT_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/kravgrunnlag/"
-        const val ANNULER_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/annuler/kravgrunnlag/"
-        const val HENT_FEILUTBETALINGER_PATH = "/api/simulering/feilutbetalinger"
-        const val PING_PATH = "/internal/status/alive"
+        const val IVERKSETTELSE_PATH = "api/tilbakekreving/iverksett"
+        const val HENT_KRAVGRUNNLAG_PATH = "api/tilbakekreving/kravgrunnlag"
+        const val ANNULER_KRAVGRUNNLAG_PATH = "api/tilbakekreving/annuler/kravgrunnlag"
+        const val HENT_FEILUTBETALINGER_PATH = "api/simulering/feilutbetalinger"
+        const val PING_PATH = "internal/status/alive"
     }
 }
 

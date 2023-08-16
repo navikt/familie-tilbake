@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.api.dto
 
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import java.util.UUID
-import javax.validation.Valid
-import javax.validation.constraints.Size
 
 class HentForhåndvisningVedtaksbrevPdfDto(
     var behandlingId: UUID,

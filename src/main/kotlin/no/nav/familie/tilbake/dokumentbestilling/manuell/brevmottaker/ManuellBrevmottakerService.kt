@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.BRUKER_MED_U
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakService
+import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
@@ -36,13 +37,16 @@ class ManuellBrevmottakerService(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val fagsakService: FagsakService,
     private val pdlClient: PdlClient,
-    private val integrasjonerClient: IntegrasjonerClient
+    private val integrasjonerClient: IntegrasjonerClient,
+    private val validerBrevmottakerService: ValiderBrevmottakerService
 ) {
 
     @Transactional
     fun leggTilBrevmottaker(behandlingId: UUID, requestDto: ManuellBrevmottakerRequestDto): UUID {
         val navnFraRegister: String? = hentPersonEllerOrganisasjonNavnFraRegister(requestDto, behandlingId)
         val manuellBrevmottaker = ManuellBrevmottakerMapper.tilDomene(behandlingId, requestDto, navnFraRegister)
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
         val id = manuellBrevmottakerRepository.insert(manuellBrevmottaker).id
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
@@ -114,7 +118,7 @@ class ManuellBrevmottakerService(
     @Transactional
     fun opprettBrevmottakerSteg(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        validerStegopprettelse(behandling)
+        validerBrevmottakerStegopprettelse(behandling)
         behandlingskontrollService.behandleBrevmottakerSteg(behandlingId)
     }
 
@@ -147,7 +151,7 @@ class ManuellBrevmottakerService(
         manuellBrevmottakerRepository.deleteById(manuellBrevmottaker.id)
     }
 
-    private fun validerStegopprettelse(behandling: Behandling) {
+    private fun validerBrevmottakerStegopprettelse(behandling: Behandling) {
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil(
                 "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
@@ -162,6 +166,7 @@ class ManuellBrevmottakerService(
                 httpStatus = HttpStatus.BAD_REQUEST
             )
         }
+        validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
     }
 
     private fun lagHistorikkBeskrivelseForBrevmottaker(brevmottaker: ManuellBrevmottaker) =

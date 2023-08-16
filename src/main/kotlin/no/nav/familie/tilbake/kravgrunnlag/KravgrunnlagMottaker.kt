@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import jakarta.jms.TextMessage
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.config.Constants
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Properties
 import java.util.UUID
-import javax.jms.TextMessage
 
 @Service
 @Profile("!e2e & !integrasjonstest")

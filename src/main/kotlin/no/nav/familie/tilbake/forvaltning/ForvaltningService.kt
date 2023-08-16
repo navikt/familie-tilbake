@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.forvaltning
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.api.dto.HentFagsystemsbehandlingRequestDto
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
@@ -67,6 +66,28 @@ class ForvaltningService(
         val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
             kravgrunnlagId,
             KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
+        )
+
+        val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
+        if (kravgrunnlag != null) {
+            kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
+        }
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+
+        stegService.håndterSteg(behandlingId)
+    }
+
+    @Transactional
+    fun korrigerKravgrunnlag(
+        behandlingId: UUID,
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling)
+
+        val kravgrunnlagId = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
+        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+            kravgrunnlagId,
+            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
         )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
@@ -157,7 +178,8 @@ class ForvaltningService(
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
                     mottattXmlId = null,
                     eksternId = kravgrunnlag.referanse,
-                    opprettetTid = kravgrunnlag.sporbar.opprettetTid
+                    opprettetTid = kravgrunnlag.sporbar.opprettetTid,
+                    behandlingId = behandling.id
                 )
             }
         }
@@ -175,7 +197,8 @@ class ForvaltningService(
                 kravgrunnlagKravstatuskode = null,
                 mottattXmlId = xml.id,
                 eksternId = xml.referanse,
-                opprettetTid = xml.sporbar.opprettetTid
+                opprettetTid = xml.sporbar.opprettetTid,
+                behandlingId = null
             )
         }
     }

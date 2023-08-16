@@ -8,19 +8,16 @@ import io.getunleash.strategy.Strategy
 import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
-@ConstructorBinding
 class FeatureToggleConfig(
     private val enabled: Boolean,
     val unleash: Unleash
 ) {
 
-    @ConstructorBinding
     data class Unleash(
         val uri: URI,
         val cluster: String,
@@ -78,7 +75,7 @@ class FeatureToggleConfig(
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return defaultValue
+                return System.getenv(toggleId).run { toBoolean() } || defaultValue
             }
         }
     }
@@ -93,6 +90,10 @@ class FeatureToggleConfig(
         const val DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
 
         const val KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE = "familie-tilbake.konsolidert-brevdistribusjon"
+
+        const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
+
+        const val BRUK_6_DESIMALER_I_SKATTEBEREGNING = "familie-tilbake.bruk-seks-desimaler-skatt"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
