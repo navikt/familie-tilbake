@@ -158,7 +158,11 @@
             <artifactId>openhtmltopdf-slf4j</artifactId>
             <version>${com.openhtmltopdf.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.29</version>
+        </dependency>
         <!-- PDF/A-2U-validering -->
         <dependency>
             <groupId>org.verapdf</groupId>
@@ -297,7 +301,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>8.2.1</version>
+            <version>8.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.messaginghub</groupId>
