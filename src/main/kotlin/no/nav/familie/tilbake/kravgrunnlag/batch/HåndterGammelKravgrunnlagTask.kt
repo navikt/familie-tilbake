@@ -66,7 +66,7 @@ class HåndterGammelKravgrunnlagTask(
                     )
             ) {
                 task.metadata["merknad"] =
-                    "Kravgrunnlag ikke funnet, men identisk kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
+                    "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
                 logger.warn(
                     "Arkiverer kravgrunnlag(id=$mottattXml) som ikke ble funnet hos økonomi, " +
                         "da identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet"
