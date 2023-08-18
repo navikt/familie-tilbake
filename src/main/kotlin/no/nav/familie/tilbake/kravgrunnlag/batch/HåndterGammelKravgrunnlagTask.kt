@@ -62,9 +62,15 @@ class HåndterGammelKravgrunnlagTask(
         } catch (e: IntegrasjonException) {
             if (e.cause?.message?.contains("Kravgrunnlag ikke funnet") == true &&
                 håndterGamleKravgrunnlagService.sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(
-                    kravgrunnlagIkkeFunnet = mottattXml
-                )
+                        kravgrunnlagIkkeFunnet = mottattXml
+                    )
             ) {
+                task.metadata["merknad"] =
+                    "Kravgrunnlag ikke funnet, men identisk kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
+                logger.warn(
+                    "Arkiverer kravgrunnlag(id=$mottattXml) som ikke ble funnet hos økonomi, " +
+                        "da identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet"
+                )
                 håndterGamleKravgrunnlagService.arkiverKravgrunnlag(mottattXmlId)
             } else {
                 throw e

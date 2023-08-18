@@ -266,10 +266,11 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
             IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
 
-        håndterGammelKravgrunnlagTask.doTask(lagTask())
+        val task = lagTask()
+        håndterGammelKravgrunnlagTask.doTask(task)
 
         val arkiverteKravgrunnlag =
-            økonomiXmlMottattService.hentArkiverteKravgrunnlag(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
+            økonomiXmlMottattService.hentArkiverteMottattXml(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
 
         arkiverteKravgrunnlag.size shouldBe 3
         arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }

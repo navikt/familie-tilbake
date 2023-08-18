@@ -118,7 +118,7 @@ class ØkonomiXmlMottattService(
         )
     }
 
-    fun hentArkiverteKravgrunnlag(
+    fun hentArkiverteMottattXml(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype
     ): List<ØkonomiXmlMottattArkiv> {

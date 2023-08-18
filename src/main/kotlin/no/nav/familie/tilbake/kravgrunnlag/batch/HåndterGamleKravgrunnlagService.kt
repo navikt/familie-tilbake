@@ -76,7 +76,7 @@ class HåndterGamleKravgrunnlagService(
     }
 
     fun sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet: ØkonomiXmlMottatt): Boolean {
-        val arkiverteXmlMottattPåSammeFagsak = økonomiXmlMottattService.hentArkiverteKravgrunnlag(
+        val arkiverteXmlMottattPåSammeFagsak = økonomiXmlMottattService.hentArkiverteMottattXml(
             eksternFagsakId = kravgrunnlagIkkeFunnet.eksternFagsakId,
             ytelsestype = kravgrunnlagIkkeFunnet.ytelsestype
         )
@@ -88,12 +88,12 @@ class HåndterGamleKravgrunnlagService(
         return arkiverteKravgrunnlag
             .any { arkivertKravgrunnlag ->
                 arkivertKravgrunnlag.sporbar.opprettetTid.isAfter(kravgrunnlagIkkeFunnet.sporbar.opprettetTid) &&
-                        sjekkDiff(
-                            arkivertXml = arkivertKravgrunnlag,
-                            mottattXml = kravgrunnlagIkkeFunnet,
-                            forventedeAvvik = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
-                        ) &&
-                        arkivertKravgrunnlag.harKravstatusAvsluttet(arkiverteStatusmeldinger)
+                    sjekkDiff(
+                        arkivertXml = arkivertKravgrunnlag,
+                        mottattXml = kravgrunnlagIkkeFunnet,
+                        forventedeAvvik = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
+                    ) &&
+                    arkivertKravgrunnlag.harKravstatusAvsluttet(arkiverteStatusmeldinger)
             }
     }
 
@@ -247,8 +247,8 @@ private fun ØkonomiXmlMottattArkiv.harKravstatusAvsluttet(statusmeldingerMottat
     return statusmeldingerMottatt.any {
         KravgrunnlagUtil.unmarshalStatusmelding(it.melding).let { statusmelding ->
             statusmelding.vedtakId == kravgrunnlagDto.vedtakId &&
-                    statusmelding.referanse == kravgrunnlagDto.referanse &&
-                    statusmelding.kodeStatusKrav == Kravstatuskode.AVSLUTTET.kode
+                statusmelding.referanse == kravgrunnlagDto.referanse &&
+                statusmelding.kodeStatusKrav == Kravstatuskode.AVSLUTTET.kode
         }
     }
 }
