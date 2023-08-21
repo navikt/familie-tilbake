@@ -50,16 +50,16 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
         "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
         AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID,
+        HenteParam.BEHANDLING_ID
     )
     fun korrigerKravgrunnlag(
-        @PathVariable behandlingId: UUID,
+        @PathVariable behandlingId: UUID
     ): Ressurs<String> {
         forvaltningService.korrigerKravgrunnlag(behandlingId)
         return Ressurs.success("OK")
