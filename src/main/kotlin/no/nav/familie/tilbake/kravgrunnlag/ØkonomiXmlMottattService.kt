@@ -117,4 +117,11 @@ class ØkonomiXmlMottattService(
             )
         )
     }
+
+    fun hentArkiverteMottattXml(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype
+    ): List<ØkonomiXmlMottattArkiv> {
+        return mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
+    }
 }
