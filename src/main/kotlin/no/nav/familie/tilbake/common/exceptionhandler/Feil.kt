@@ -24,3 +24,5 @@ class UkjentravgrunnlagFeil(val melding: String) : RuntimeException(melding)
 class UgyldigStatusmeldingFeil(val melding: String) : RuntimeException(melding)
 
 class SperretKravgrunnlagFeil(val melding: String) : IntegrasjonException(melding)
+
+class KravgrunnlagIkkeFunnetFeil(val melding: String) : IntegrasjonException(melding)

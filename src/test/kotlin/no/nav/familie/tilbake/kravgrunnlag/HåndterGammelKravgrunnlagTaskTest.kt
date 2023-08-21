@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
+import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -264,7 +265,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
-            IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
+            KravgrunnlagIkkeFunnetFeil(melding = "Noe gikk galt")
 
         val task = lagTask()
         håndterGammelKravgrunnlagTask.doTask(task)

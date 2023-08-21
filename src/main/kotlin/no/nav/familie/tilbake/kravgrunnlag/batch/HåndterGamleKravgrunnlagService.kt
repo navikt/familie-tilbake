@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
@@ -17,6 +18,7 @@ import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
 import no.nav.familie.tilbake.config.Constants
@@ -98,9 +100,24 @@ class HåndterGamleKravgrunnlagService(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt) {
+    fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt, task: Task) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> = hentKravgrunnlagFraØkonomi(mottattXml)
+        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> = try {
+            hentKravgrunnlagFraØkonomi(mottattXml)
+        } catch (e: KravgrunnlagIkkeFunnetFeil) {
+            if (sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet = mottattXml)) {
+                logger.warn(
+                    "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
+                            " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet."
+                )
+                arkiverKravgrunnlag(mottattXml.id)
+                task.metadata["merknad"] =
+                    "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
+                return
+            } else {
+                throw e
+            }
+        }
         val hentetKravgrunnlag = hentetData.first
         val erSperret = hentetData.second
 
