@@ -235,6 +235,47 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Kravgrunnlag finnes ikke i økonomi"
     }
 
+    @Test
+    fun `doTask skal arkivere kravgrunnlag som ikke finnes hos økonomi dersom det finnes nyere duplikat med kravstatus AVSL`() {
+        requestSendtRepository
+            .insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = xmlMottatt.eksternFagsakId,
+                    ytelsestype = xmlMottatt.ytelsestype,
+                    eksternId = xmlMottatt.referanse,
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt)
+                )
+            )
+
+        økonomiXmlMottattService.arkiverMottattXml(
+            mottattXml = mottattXMl
+                .replace("<urn:vedtakId>", "<urn:vedtakId>2")
+                .replace("<urn:kravgrunnlagId>", "<urn:kravgrunnlagId>2")
+                .replace("<urn:kontrollfelt>", "<urn:kontrollfelt>2"),
+            fagsystemId = xmlMottatt.eksternFagsakId,
+            ytelsestype = xmlMottatt.ytelsestype
+        )
+
+        økonomiXmlMottattService.arkiverMottattXml(
+            mottattXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
+                .replace("<urn:vedtakId>", "<urn:vedtakId>2"),
+            fagsystemId = xmlMottatt.eksternFagsakId,
+            ytelsestype = xmlMottatt.ytelsestype
+        )
+
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } throws
+            IntegrasjonException(msg = "Noe gikk galt", throwable = IntegrasjonException("Kravgrunnlag ikke funnet"))
+
+        val task = lagTask()
+        håndterGammelKravgrunnlagTask.doTask(task)
+
+        val arkiverteKravgrunnlag =
+            økonomiXmlMottattService.hentArkiverteMottattXml(xmlMottatt.eksternFagsakId, xmlMottatt.ytelsestype)
+
+        arkiverteKravgrunnlag.size shouldBe 3
+        arkiverteKravgrunnlag.shouldHaveSingleElement { it.melding == mottattXMl }
+    }
+
     private fun lagTask(): Task {
         return taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXmlId.toString()))
     }

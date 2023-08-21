@@ -4,6 +4,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -56,7 +57,26 @@ class HåndterGammelKravgrunnlagTask(
                     "Feiler med $feilMelding"
             )
         }
-        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
+        try {
+            håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
+        } catch (e: IntegrasjonException) {
+            if (e.cause?.message?.contains("Kravgrunnlag ikke funnet") == true &&
+                håndterGamleKravgrunnlagService.sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(
+                        kravgrunnlagIkkeFunnet = mottattXml
+                    )
+            ) {
+                task.metadata["merknad"] =
+                    "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, " +
+                            "og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
+                logger.warn(
+                    "Arkiverer kravgrunnlag(id=$mottattXmlId, eksternFagsakId=$eksternFagsakId) som ikke ble funnet hos økonomi, " +
+                        "da identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet"
+                )
+                håndterGamleKravgrunnlagService.arkiverKravgrunnlag(mottattXmlId)
+            } else {
+                throw e
+            }
+        }
     }
 
     companion object {

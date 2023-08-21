@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -27,7 +28,9 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
+import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.LoggerFactory
@@ -70,6 +73,28 @@ class HåndterGamleKravgrunnlagService(
                     "ved å bruke forvaltningsrutine etter feilundersøkelse."
             )
         }
+    }
+
+    fun sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet: ØkonomiXmlMottatt): Boolean {
+        val arkiverteXmlMottattPåSammeFagsak = økonomiXmlMottattService.hentArkiverteMottattXml(
+            eksternFagsakId = kravgrunnlagIkkeFunnet.eksternFagsakId,
+            ytelsestype = kravgrunnlagIkkeFunnet.ytelsestype
+        )
+        val arkiverteKravgrunnlag = arkiverteXmlMottattPåSammeFagsak
+            .filter { it.melding.contains(Constants.kravgrunnlagXmlRootElement) }
+        val arkiverteStatusmeldinger = arkiverteXmlMottattPåSammeFagsak
+            .filter { it.melding.contains(Constants.statusmeldingXmlRootElement) }
+
+        return arkiverteKravgrunnlag
+            .any { arkivertKravgrunnlag ->
+                arkivertKravgrunnlag.sporbar.opprettetTid.isAfter(kravgrunnlagIkkeFunnet.sporbar.opprettetTid) &&
+                    sjekkDiff(
+                        arkivertXml = arkivertKravgrunnlag,
+                        mottattXml = kravgrunnlagIkkeFunnet,
+                        forventedeAvvik = listOf("kravgrunnlagId", "vedtakId", "kontrollfelt")
+                    ) &&
+                    arkivertKravgrunnlag.harKravstatusAvsluttet(arkiverteStatusmeldinger)
+            }
     }
 
     @Transactional(rollbackFor = [Exception::class])
@@ -202,5 +227,28 @@ class HåndterGamleKravgrunnlagService(
             tilbakekrevingsvalg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             konsekvensForYtelser = faktainfo.konsekvensForYtelser
         )
+    }
+
+    private fun sjekkDiff(
+        arkivertXml: ØkonomiXmlMottattArkiv,
+        mottattXml: ØkonomiXmlMottatt,
+        forventedeAvvik: List<String>
+    ) = arkivertXml.melding.linjeformatert.lines().minus(mottattXml.melding.linjeformatert.lines()).none { avvik ->
+        forventedeAvvik.none { it in avvik }
+    }
+}
+
+private val String.linjeformatert: String
+    get() = replace("<urn", "\n<urn")
+
+private fun ØkonomiXmlMottattArkiv.harKravstatusAvsluttet(statusmeldingerMottatt: List<ØkonomiXmlMottattArkiv>): Boolean {
+    val kravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(melding)
+
+    return statusmeldingerMottatt.any {
+        KravgrunnlagUtil.unmarshalStatusmelding(it.melding).let { statusmelding ->
+            statusmelding.vedtakId == kravgrunnlagDto.vedtakId &&
+                statusmelding.referanse == kravgrunnlagDto.referanse &&
+                statusmelding.kodeStatusKrav == Kravstatuskode.AVSLUTTET.kode
+        }
     }
 }
