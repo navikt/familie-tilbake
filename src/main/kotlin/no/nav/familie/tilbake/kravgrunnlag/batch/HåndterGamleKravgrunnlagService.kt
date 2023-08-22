@@ -264,7 +264,6 @@ private fun ØkonomiXmlMottattArkiv.harKravstatusAvsluttet(statusmeldingerMottat
     return statusmeldingerMottatt.any {
         KravgrunnlagUtil.unmarshalStatusmelding(it.melding).let { statusmelding ->
             statusmelding.vedtakId == kravgrunnlagDto.vedtakId &&
-                statusmelding.referanse == kravgrunnlagDto.referanse &&
                 statusmelding.kodeStatusKrav == Kravstatuskode.AVSLUTTET.kode
         }
     }
