@@ -128,7 +128,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             vedtaksbrevsoppsummeringRepository,
             vedtaksbrevsperiodeRepository,
             spyPdfBrevService,
-            sendBrevService
+            sendBrevService,
+            featureToggleService
         )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
