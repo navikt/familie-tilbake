@@ -247,7 +247,8 @@ class IntegrasjonerClientConfig {
             UUID.randomUUID(),
             "bb1234",
             "Bob",
-            "Burger"
+            "Burger",
+            "enhet"
         )
 
         every { integrasjonerClient.finnOppgaver(any()) } answers

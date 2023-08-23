@@ -79,7 +79,7 @@ class ForvaltningService(
 
     @Transactional
     fun korrigerKravgrunnlag(
-        behandlingId: UUID,
+        behandlingId: UUID
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
@@ -87,7 +87,7 @@ class ForvaltningService(
         val kravgrunnlagId = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
         val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
             kravgrunnlagId,
-            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
         )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)

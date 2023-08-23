@@ -145,7 +145,7 @@ class KravgrunnlagService(
                     "eksisterendeKravgrunnlagId=${eksisterendeKravgrunnlag.id}, " +
                     "eksisterendeEksternKravgrunnlagId=${eksisterendeKravgrunnlag.eksternKravgrunnlagId}, " +
                     "nyKravgrunnlagId=${kravgrunnlag431.id}, " +
-                    "nyEksternKravgrunnlagId=${kravgrunnlag431.eksternKravgrunnlagId}",
+                    "nyEksternKravgrunnlagId=${kravgrunnlag431.eksternKravgrunnlagId}"
             )
         }
     }
