@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.config
 
+import no.nav.familie.kafka.KafkaErrorHandler
 import no.nav.familie.kontrakter.felles.Applikasjon
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -51,7 +52,7 @@ class KafkaConfig(
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.consumerFactory = consumerFactory()
-        factory.setErrorHandler(kafkaErrorHandler)
+        factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
 

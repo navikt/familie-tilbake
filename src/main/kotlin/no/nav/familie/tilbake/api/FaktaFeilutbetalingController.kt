@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.validation.constraints.NotNull
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
-import javax.validation.constraints.NotNull
 
 @RestController
 @RequestMapping("/api")

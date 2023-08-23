@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.api.dto
 
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Size
 
 data class ByttEnhetDto(
     val enhet: String,

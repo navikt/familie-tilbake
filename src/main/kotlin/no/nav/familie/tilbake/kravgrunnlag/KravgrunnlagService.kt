@@ -125,12 +125,29 @@ class KravgrunnlagService(
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
             val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(kravgrunnlag431.behandlingId)
+            loggFeilHvisGammeltKravgrunnlag(kravgrunnlag431, eksisterendeKravgrunnlag)
             kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = false))
             if (eksisterendeKravgrunnlag.referanse != kravgrunnlag431.referanse) {
                 hentOgOppdaterFaktaInfo(kravgrunnlag431, ytelsestype)
             }
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
+    }
+
+    private fun loggFeilHvisGammeltKravgrunnlag(
+        kravgrunnlag431: Kravgrunnlag431,
+        eksisterendeKravgrunnlag: Kravgrunnlag431
+    ) {
+        if (kravgrunnlag431.kontrollfelt < eksisterendeKravgrunnlag.kontrollfelt) {
+            log.error(
+                "Skitpomfrit! Det hentes inn et eldre kravgrunnlag enn det som allerede finnes på behandlingen. Dette må sjekkes nærmere! " +
+                    "Gjelder behandling=${kravgrunnlag431.behandlingId}, " +
+                    "eksisterendeKravgrunnlagId=${eksisterendeKravgrunnlag.id}, " +
+                    "eksisterendeEksternKravgrunnlagId=${eksisterendeKravgrunnlag.eksternKravgrunnlagId}, " +
+                    "nyKravgrunnlagId=${kravgrunnlag431.id}, " +
+                    "nyEksternKravgrunnlagId=${kravgrunnlag431.eksternKravgrunnlagId}"
+            )
+        }
     }
 
     private fun hentOgOppdaterFaktaInfo(

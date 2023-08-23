@@ -1,14 +1,14 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBException
+import jakarta.xml.bind.Marshaller
+import jakarta.xml.bind.Unmarshaller
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import java.io.StringReader
 import java.io.StringWriter
 import java.util.UUID
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
-import javax.xml.bind.Marshaller
-import javax.xml.bind.Unmarshaller
 
 object TilbakekrevingsvedtakMarshaller {
 
