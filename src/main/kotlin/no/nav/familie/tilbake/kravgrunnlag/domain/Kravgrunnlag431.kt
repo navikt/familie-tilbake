@@ -142,13 +142,17 @@ enum class Klassekode(val aktivitet: String) {
     KL_KODE_JUST_PEN(""),
     BATR("Barnetrygd"),
     BATRSMA("Småbarnstillegg"),
+    BAOREUMS("Barnetrygd-EU-Norge-Infotrygd"),
+    BAOROSMS("Barnetrygd-Infotrygd"),
+    BAUTEFMS("BarnetrygdUtvidet-Infotrygd"),
+    BAUTEFSM("Småbarnstillegg-Infotrygd"),
     EFOG("Overgangsstønad"),
     EFBT("Barnetilsyn"),
+    EFBTOR("Barnetilsyn-Infotrygd"),
     EFSP("Skolepenger"),
     KS("Kontantstøtte"),
-    KONT("Kontantstøtte"),
-    TREK_KODER(""); // Felles klassekode for alle TREK klassetyper
-
+    TREK_KODER("") // Felles klassekode for alle TREK klassetyper
+    ;
     companion object {
 
         fun fraKode(kode: String, klassetype: Klassetype): Klassekode {
@@ -164,7 +168,8 @@ enum class Klassetype(val navn: String) {
     JUST("Justeringskonto"),
     SKAT("Skatt"),
     TREK("Trekk"),
-    YTEL("Ytelseskonto");
+    YTEL("Ytelseskonto")
+    ;
 
     companion object {
 

@@ -89,7 +89,7 @@ internal object TilbakekrevingsberegningVilkår {
         var skattBeløp: BigDecimal = BigDecimal.ZERO
         for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
-                val scale = if(bruk6desimalerISkatteberegning) 6 else 4
+                val scale = if (bruk6desimalerISkatteberegning) 6 else 4
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
                 val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
                     .divide(BigDecimal.valueOf(100), scale, RoundingMode.HALF_UP)

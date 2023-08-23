@@ -1,10 +1,12 @@
 package no.nav.familie.tilbake.config
 
 import com.ibm.mq.constants.CMQC
-import com.ibm.mq.jms.MQQueueConnectionFactory
-import com.ibm.msg.client.jms.JmsConstants
-import com.ibm.msg.client.wmq.common.CommonConstants
-import org.apache.activemq.jms.pool.PooledConnectionFactory
+import com.ibm.mq.jakarta.jms.MQQueueConnectionFactory
+import com.ibm.msg.client.jakarta.jms.JmsConstants
+import com.ibm.msg.client.jakarta.wmq.common.CommonConstants
+import jakarta.jms.ConnectionFactory
+import jakarta.jms.JMSException
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -17,8 +19,6 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory
 import org.springframework.jms.config.JmsListenerContainerFactory
 import org.springframework.jms.connection.JmsTransactionManager
 import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter
-import javax.jms.ConnectionFactory
-import javax.jms.JMSException
 
 private const val UTF_8_WITH_PUA = 1208
 
@@ -38,7 +38,7 @@ class OppdragMQConfig(
 
     @Bean
     @Throws(JMSException::class)
-    fun mqQueueConnectionFactory(): PooledConnectionFactory {
+    fun mqQueueConnectionFactory(): JmsPoolConnectionFactory {
         val targetFactory = MQQueueConnectionFactory()
         targetFactory.hostName = hostname
         targetFactory.queueManager = queuemanager
@@ -55,10 +55,10 @@ class OppdragMQConfig(
         cf.setPassword(password)
         cf.setTargetConnectionFactory(targetFactory)
 
-        val pooledFactory = PooledConnectionFactory()
+        val pooledFactory = JmsPoolConnectionFactory()
         pooledFactory.connectionFactory = cf
         pooledFactory.maxConnections = 10
-        pooledFactory.maximumActiveSessionPerConnection = 10
+        pooledFactory.maxSessionsPerConnection = 10
 
         logger.info("MQ bruker $user")
 

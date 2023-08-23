@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.sikkerhet
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.tilbake.common.ContextService
 import org.slf4j.LoggerFactory
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import javax.servlet.http.HttpServletRequest
 
 /**
  * [custom1], [custom2], [custom3] brukes for å logge ekstra felter, eks fagsak, behandling,
@@ -58,7 +58,7 @@ class AuditLogger(@Value("\${NAIS_APP_NAME:appName}") private val applicationNam
     private fun createAuditLogString(data: Sporingsdata, request: HttpServletRequest): String {
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
-        return "CEF:0|$applicationName|auditLog|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
+        return "CEF:0|Familie|$applicationName|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
             "suid=${ContextService.hentSaksbehandler()} " +
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +

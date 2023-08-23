@@ -78,6 +78,28 @@ class ForvaltningService(
     }
 
     @Transactional
+    fun korrigerKravgrunnlag(
+        behandlingId: UUID
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        sjekkOmBehandlingErAvsluttet(behandling)
+
+        val kravgrunnlagId = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
+        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+            kravgrunnlagId,
+            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG
+        )
+
+        val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
+        if (kravgrunnlag != null) {
+            kravgrunnlagRepository.update(kravgrunnlag.copy(aktiv = false))
+        }
+        hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
+
+        stegService.håndterSteg(behandlingId)
+    }
+
+    @Transactional
     fun arkiverMottattKravgrunnlag(mottattXmlId: UUID) {
         logger.info("Arkiverer mottattXml for Id=$mottattXmlId")
         val mottattKravgrunnlag = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
@@ -156,7 +178,8 @@ class ForvaltningService(
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
                     mottattXmlId = null,
                     eksternId = kravgrunnlag.referanse,
-                    opprettetTid = kravgrunnlag.sporbar.opprettetTid
+                    opprettetTid = kravgrunnlag.sporbar.opprettetTid,
+                    behandlingId = behandling.id
                 )
             }
         }
@@ -174,7 +197,8 @@ class ForvaltningService(
                 kravgrunnlagKravstatuskode = null,
                 mottattXmlId = xml.id,
                 eksternId = xml.referanse,
-                opprettetTid = xml.sporbar.opprettetTid
+                opprettetTid = xml.sporbar.opprettetTid,
+                behandlingId = null
             )
         }
     }

@@ -30,7 +30,7 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
-        path = ["/behandling/{behandlingId}/kravgrunnlag/{kravgrunnlagId}/v1"],
+        path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     @Rolletilgangssjekk(
@@ -41,9 +41,27 @@ class ForvaltningController(private val forvaltningService: ForvaltningService) 
     )
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
-        @PathVariable kravgrunnlagId: BigInteger
+        @PathVariable eksternKravgrunnlagId: BigInteger
     ): Ressurs<String> {
-        forvaltningService.korrigerKravgrunnlag(behandlingId, kravgrunnlagId)
+        forvaltningService.korrigerKravgrunnlag(behandlingId, eksternKravgrunnlagId)
+        return Ressurs.success("OK")
+    }
+
+    @Operation(summary = "Hent korrigert kravgrunnlag")
+    @PutMapping(
+        path = ["/behandling/{behandlingId}/kravgrunnlag/v1"],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.FORVALTER,
+        "Henter korrigert kravgrunnlag fra økonomi og oppdaterer kravgrunnlag431",
+        AuditLoggerEvent.NONE,
+        HenteParam.BEHANDLING_ID
+    )
+    fun korrigerKravgrunnlag(
+        @PathVariable behandlingId: UUID
+    ): Ressurs<String> {
+        forvaltningService.korrigerKravgrunnlag(behandlingId)
         return Ressurs.success("OK")
     }
 
@@ -147,5 +165,6 @@ data class Forvaltningsinfo(
     val kravgrunnlagKravstatuskode: String?,
     val mottattXmlId: UUID?,
     val eksternId: String,
-    val opprettetTid: LocalDateTime
+    val opprettetTid: LocalDateTime,
+    val behandlingId: UUID?
 )

@@ -30,12 +30,12 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.util.concurrent.SettableListenableFuture
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -79,8 +79,10 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             brevsporingRepository,
             spyKafkaProducer
         )
-        val future = SettableListenableFuture<SendResult<String, String>>()
-        every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()) }.returns(future)
+        val recordMetadata = mockk<RecordMetadata>()
+        every { recordMetadata.offset() } returns 1
+        val result = SendResult<String, String>(mockk(), recordMetadata)
+        every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()).get() }.returns(result)
     }
 
     @Test

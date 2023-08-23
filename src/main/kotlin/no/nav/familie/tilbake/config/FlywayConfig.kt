@@ -3,11 +3,9 @@ package no.nav.familie.tilbake.config
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 
-@ConstructorBinding
 data class FlywayConfig(private val role: String) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

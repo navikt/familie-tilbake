@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
 import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
+import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
 import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -135,6 +136,9 @@ class DefaultOppdragClient(
                 "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$kravgrunnlagId. " +
                     "Feiler med ${exception.message}"
             )
+            if (exception.message?.contains("Kravgrunnlag ikke funnet") == true) {
+                throw KravgrunnlagIkkeFunnetFeil(exception.message!!)
+            }
             throw IntegrasjonException(
                 msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId",
                 throwable = exception
@@ -239,11 +243,11 @@ class DefaultOppdragClient(
         const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
         const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
 
-        const val IVERKSETTELSE_PATH = "/api/tilbakekreving/iverksett/"
-        const val HENT_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/kravgrunnlag/"
-        const val ANNULER_KRAVGRUNNLAG_PATH = "/api/tilbakekreving/annuler/kravgrunnlag/"
-        const val HENT_FEILUTBETALINGER_PATH = "/api/simulering/feilutbetalinger"
-        const val PING_PATH = "/internal/status/alive"
+        const val IVERKSETTELSE_PATH = "api/tilbakekreving/iverksett"
+        const val HENT_KRAVGRUNNLAG_PATH = "api/tilbakekreving/kravgrunnlag"
+        const val ANNULER_KRAVGRUNNLAG_PATH = "api/tilbakekreving/annuler/kravgrunnlag"
+        const val HENT_FEILUTBETALINGER_PATH = "api/simulering/feilutbetalinger"
+        const val PING_PATH = "internal/status/alive"
     }
 }
 
