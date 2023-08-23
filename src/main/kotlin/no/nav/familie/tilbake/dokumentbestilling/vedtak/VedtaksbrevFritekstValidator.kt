@@ -167,13 +167,13 @@ object VedtaksbrevFritekstValidator {
                 Friteksttype.SÆRLIGE_GRUNNER_ANNET
             )
 
-            if (perioder.isEmpty() && validerPåkrevetFritekster) {
-                throw Feil(
-                    message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
-                    frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
-                    httpStatus = HttpStatus.BAD_REQUEST
-                )
-            }
+            // if (perioder.isEmpty() && validerPåkrevetFritekster) {
+            //    throw Feil(
+            //        message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
+            //        frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
+            //        httpStatus = HttpStatus.BAD_REQUEST
+            //    )
+            // }
         }
     }
 
