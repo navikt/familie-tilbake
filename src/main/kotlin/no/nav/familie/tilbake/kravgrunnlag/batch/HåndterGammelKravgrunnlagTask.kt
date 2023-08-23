@@ -56,7 +56,7 @@ class HåndterGammelKravgrunnlagTask(
                     "Feiler med $feilMelding"
             )
         }
-        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml)
+        håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml, task)
     }
 
     companion object {

@@ -30,6 +30,7 @@ class HentFagsystemsbehandlingTask(
         logger.info("HentFagsystemsbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
+        task.metadata["eksternFagsakId"] = mottattXml.eksternFagsakId
 
         håndterGamleKravgrunnlagService.sjekkOmDetFinnesEnAktivBehandling(mottattXml)
         hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
