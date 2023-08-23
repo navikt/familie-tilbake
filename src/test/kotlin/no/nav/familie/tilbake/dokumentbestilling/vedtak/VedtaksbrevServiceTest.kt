@@ -128,7 +128,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             vedtaksbrevsoppsummeringRepository,
             vedtaksbrevsperiodeRepository,
             spyPdfBrevService,
-            sendBrevService
+            sendBrevService,
+            featureToggleService
         )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
@@ -166,6 +167,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
+
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test

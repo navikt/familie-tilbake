@@ -108,7 +108,7 @@ class HåndterGamleKravgrunnlagService(
             if (sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet = mottattXml)) {
                 logger.warn(
                     "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
-                            " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet."
+                        " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet."
                 )
                 arkiverKravgrunnlag(mottattXml.id)
                 task.metadata["merknad"] =

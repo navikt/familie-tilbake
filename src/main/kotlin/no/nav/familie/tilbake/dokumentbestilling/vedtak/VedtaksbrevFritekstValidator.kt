@@ -28,15 +28,19 @@ object VedtaksbrevFritekstValidator {
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
-        validerPåkrevetFritekster: Boolean
+        validerPåkrevetFritekster: Boolean,
+        skalValidereAnnetFritekst: Boolean
     ) {
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
-        vilkårsvurdering?.let {
-            validerFritekstISærligGrunnerAnnetAvsnitt(
-                it,
-                vedtaksbrevFritekstPerioder,
-                validerPåkrevetFritekster
-            )
+
+        if (skalValidereAnnetFritekst) {
+            vilkårsvurdering?.let {
+                validerFritekstISærligGrunnerAnnetAvsnitt(
+                    it,
+                    vedtaksbrevFritekstPerioder,
+                    validerPåkrevetFritekster
+                )
+            }
         }
 
         if (ORDINÆR == vedtaksbrevstype) {
