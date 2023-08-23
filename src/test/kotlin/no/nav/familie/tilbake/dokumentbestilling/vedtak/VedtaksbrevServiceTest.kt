@@ -297,19 +297,19 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Oppsummeringstekst er for lang for behandling ${behandling.id}"
     }
 
-    // @Test
-    // fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
-    //    lagFakta()
-    //    lagVilkårsvurdering()
-    //    val exception = shouldThrow<RuntimeException> {
-    //        vedtaksbrevService.lagreFriteksterFraSaksbehandler(
-    //            behandlingId = behandling.id,
-    //            lagFritekstAvsnittDto("fakta", "fakta data")
-    //        )
-    //    }
-    //    exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
-    //        "${Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
-    // }
+    @Test
+    fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for ANNET særliggrunner begrunnelse`() {
+        lagFakta()
+        lagVilkårsvurdering()
+        val exception = shouldThrow<RuntimeException> {
+            vedtaksbrevService.lagreFriteksterFraSaksbehandler(
+                behandlingId = behandling.id,
+                lagFritekstAvsnittDto("fakta", "fakta data")
+            )
+        }
+        exception.message shouldBe "Mangler ANNET Særliggrunner fritekst for " +
+            "${Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))}"
+    }
 
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre når fritekst mangler for alle fakta perioder`() {
