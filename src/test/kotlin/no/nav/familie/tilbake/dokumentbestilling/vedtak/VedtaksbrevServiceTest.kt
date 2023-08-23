@@ -129,7 +129,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             vedtaksbrevsperiodeRepository,
             spyPdfBrevService,
             sendBrevService,
-            featureToggleService
+            spyk(featureToggleService)
         )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
@@ -168,7 +168,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
         }.returns(Adresseinfo("12345678901", "Test"))
 
-        every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST) } returns true
     }
 
     @Test
