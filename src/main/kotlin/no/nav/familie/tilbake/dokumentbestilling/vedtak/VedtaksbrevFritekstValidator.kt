@@ -29,11 +29,11 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
         validerPåkrevetFritekster: Boolean,
-        skalValidereAnnetFritekst: Boolean
+        skalIkkeValidereAnnetFritekst: Boolean
     ) {
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
 
-        if (skalValidereAnnetFritekst) {
+        if (!skalIkkeValidereAnnetFritekst) {
             vilkårsvurdering?.let {
                 validerFritekstISærligGrunnerAnnetAvsnitt(
                     it,

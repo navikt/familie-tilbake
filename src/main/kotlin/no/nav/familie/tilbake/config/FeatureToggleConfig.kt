@@ -95,7 +95,7 @@ class FeatureToggleConfig(
 
         const val BRUK_6_DESIMALER_I_SKATTEBEREGNING = "familie-tilbake.bruk-seks-desimaler-skatt"
 
-        const val VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST = "familie-tilbake.valider-saerlig-grunnet-annet-fritekst"
+        const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST = "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

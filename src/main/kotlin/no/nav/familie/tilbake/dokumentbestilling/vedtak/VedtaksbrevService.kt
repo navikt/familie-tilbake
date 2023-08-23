@@ -90,7 +90,7 @@ class VedtaksbrevService(
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val skalValidereAnnetFritekst = featureToggleService.isEnabled(FeatureToggleConfig.VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST)
+        val skalIkkeValidereAnnetFritekst = featureToggleService.isEnabled(FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST)
 
         VedtaksbrevFritekstValidator.validerObligatoriskeFritekster(
             behandling = behandling,
@@ -101,7 +101,7 @@ class VedtaksbrevService(
             vedtaksbrevsoppsummering = vedtaksbrevsoppsummering,
             vedtaksbrevstype = vedtaksbrevstype,
             validerPåkrevetFritekster = validerPåkrevetFritekster,
-            skalValidereAnnetFritekst = skalValidereAnnetFritekst
+            skalIkkeValidereAnnetFritekst = skalIkkeValidereAnnetFritekst
         )
         // slett og legge til Vedtaksbrevsoppsummering
         val eksisterendeVedtaksbrevsoppsummering = vedtaksbrevsoppsummeringRepository.findByBehandlingId(behandlingId)
