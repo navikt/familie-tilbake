@@ -9,7 +9,7 @@ class HbVedtaksbrevPeriodeOgFelles(
     @get:JsonUnwrapped
     val felles: HbVedtaksbrevFelles,
     @get:JsonUnwrapped
-    val periode: HbVedtaksbrevsperiode
+    val periode: HbVedtaksbrevsperiode,
 ) : Språkstøtte {
 
     override val språkkode: Språkkode = felles.språkkode

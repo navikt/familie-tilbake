@@ -50,8 +50,8 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
             mockOppgaveService.patchOppgave(
                 oppgave.copy(
                     tilordnetRessurs = behandling.ansvarligSaksbehandler,
-                    prioritet = OppgavePrioritet.HOY
-                )
+                    prioritet = OppgavePrioritet.HOY,
+                ),
             )
         }
     }
@@ -68,8 +68,8 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
             mockOppgaveService.patchOppgave(
                 oppgave.copy(
                     tilordnetRessurs = behandling.ansvarligSaksbehandler,
-                    prioritet = OppgavePrioritet.NORM
-                )
+                    prioritet = OppgavePrioritet.NORM,
+                ),
             )
         }
     }
@@ -96,7 +96,7 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
                 if (opprettetAv != null) {
                     setProperty("opprettetAv", opprettetAv)
                 }
-            }
+            },
         )
     }
 }

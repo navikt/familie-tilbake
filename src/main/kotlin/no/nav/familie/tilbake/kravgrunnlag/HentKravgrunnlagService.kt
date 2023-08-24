@@ -21,7 +21,7 @@ import java.util.UUID
 class HentKravgrunnlagService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val oppdragClient: OppdragClient,
-    private val historikkService: HistorikkService
+    private val historikkService: HistorikkService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -46,19 +46,19 @@ class HentKravgrunnlagService(
     fun opprettHistorikkinnslag(behandlingId: UUID) {
         logger.info(
             "Oppretter historikkinnslag ${TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT} " +
-                "for behandling $behandlingId"
+                "for behandling $behandlingId",
         )
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_HENT,
             aktør = Aktør.VEDTAKSLØSNING,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
     private fun lagRequest(
         kravgrunnlagId: BigInteger,
-        kodeAksjon: KodeAksjon
+        kodeAksjon: KodeAksjon,
     ): KravgrunnlagHentDetaljRequest {
         val hentkravgrunnlag = HentKravgrunnlagDetaljDto()
         hentkravgrunnlag.kravgrunnlagId = kravgrunnlagId

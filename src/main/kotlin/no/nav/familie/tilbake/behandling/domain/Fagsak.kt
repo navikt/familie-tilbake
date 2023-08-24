@@ -21,7 +21,7 @@ data class Fagsak(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL)
-    val institusjon: Institusjon? = null
+    val institusjon: Institusjon? = null,
 ) {
 
     val ytelsesnavn

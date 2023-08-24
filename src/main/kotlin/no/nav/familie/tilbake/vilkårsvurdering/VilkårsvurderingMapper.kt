@@ -38,7 +38,7 @@ object VilkårsvurderingMapper {
         perioder: List<Månedsperiode>,
         foreldetPerioderMedBegrunnelse: Map<Månedsperiode, String>,
         faktaFeilutbetaling: FaktaFeilutbetaling,
-        kravgrunnlag431: Kravgrunnlag431
+        kravgrunnlag431: Kravgrunnlag431,
     ): VurdertVilkårsvurderingDto {
         // allerede behandlet perioder uten perioder som er foreldet
         val vilkårsvurdertePerioder = vilkårsvurdering?.perioder
@@ -49,13 +49,13 @@ object VilkårsvurderingMapper {
                     feilutbetaltBeløp = beregnFeilutbetaltBeløp(kravgrunnlag431, it.periode),
                     hendelsestype = hentHendelsestype(
                         faktaFeilutbetaling.perioder,
-                        it.periode
+                        it.periode,
                     ),
                     reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it.periode),
                     aktiviteter = hentAktiviteter(kravgrunnlag431, it.periode),
                     begrunnelse = it.begrunnelse,
                     foreldet = false,
-                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it)
+                    vilkårsvurderingsresultatInfo = tilVilkårsvurderingsresultatDto(it),
                 )
             }
 
@@ -66,7 +66,7 @@ object VilkårsvurderingMapper {
                 hendelsestype = hentHendelsestype(faktaFeilutbetaling.perioder, it),
                 reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, it),
                 aktiviteter = hentAktiviteter(kravgrunnlag431, it),
-                foreldet = false
+                foreldet = false,
             )
         }
 
@@ -78,7 +78,7 @@ object VilkårsvurderingMapper {
                 reduserteBeløper = utledReduserteBeløp(kravgrunnlag431, periode),
                 aktiviteter = hentAktiviteter(kravgrunnlag431, periode),
                 foreldet = true,
-                begrunnelse = begrunnelse
+                begrunnelse = begrunnelse,
             )
         }
 
@@ -88,14 +88,14 @@ object VilkårsvurderingMapper {
 
         return VurdertVilkårsvurderingDto(
             perioder = samletPerioder.sortedBy { it.periode.fom },
-            rettsgebyr = Constants.rettsgebyr
+            rettsgebyr = Constants.rettsgebyr,
         )
     }
 
     fun tilDomene(
         behandlingId: UUID,
         vilkårsvurderingsperioder: List<VilkårsvurderingsperiodeDto>,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
     ): Vilkårsvurdering {
         val vilkårsvurderingsperiode = vilkårsvurderingsperioder.map {
             Vilkårsvurderingsperiode(
@@ -103,12 +103,12 @@ object VilkårsvurderingMapper {
                 begrunnelse = it.begrunnelse,
                 vilkårsvurderingsresultat = it.vilkårsvurderingsresultat,
                 godTro = tilDomeneGodTro(it.godTroDto),
-                aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem)
+                aktsomhet = tilDomeneAktsomhet(it.aktsomhetDto, fagsystem),
             )
         }.toSet()
         return Vilkårsvurdering(
             behandlingId = behandlingId,
-            perioder = vilkårsvurderingsperiode
+            perioder = vilkårsvurderingsperiode,
         )
     }
 
@@ -116,7 +116,7 @@ object VilkårsvurderingMapper {
         return VurdertVilkårsvurderingsresultatDto(
             vilkårsvurderingsresultat = vilkårsvurderingsperiode.vilkårsvurderingsresultat,
             godTro = tilGodTroDto(vilkårsvurderingsperiode.godTro),
-            aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhet)
+            aktsomhet = tilAktsomhetDto(vilkårsvurderingsperiode.aktsomhet),
         )
     }
 
@@ -125,7 +125,7 @@ object VilkårsvurderingMapper {
             return VurdertGodTroDto(
                 begrunnelse = vilkårsvurderingGodTro.begrunnelse,
                 beløpErIBehold = vilkårsvurderingGodTro.beløpErIBehold,
-                beløpTilbakekreves = vilkårsvurderingGodTro.beløpTilbakekreves
+                beløpTilbakekreves = vilkårsvurderingGodTro.beløpTilbakekreves,
             )
         }
         return null
@@ -136,7 +136,7 @@ object VilkårsvurderingMapper {
             return VilkårsvurderingGodTro(
                 begrunnelse = godTroDto.begrunnelse,
                 beløpErIBehold = godTroDto.beløpErIBehold,
-                beløpTilbakekreves = godTroDto.beløpTilbakekreves
+                beløpTilbakekreves = godTroDto.beløpTilbakekreves,
             )
         }
         return null
@@ -154,9 +154,9 @@ object VilkårsvurderingMapper {
                 særligeGrunnerBegrunnelse = vilkårsvurderingAktsomhet.særligeGrunnerBegrunnelse,
                 særligeGrunner = tilSærligGrunnerDto(
                     vilkårsvurderingAktsomhet
-                        .vilkårsvurderingSærligeGrunner
+                        .vilkårsvurderingSærligeGrunner,
                 ),
-                tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp
+                tilbakekrevSmåbeløp = vilkårsvurderingAktsomhet.tilbakekrevSmåbeløp,
             )
         }
         return null
@@ -173,7 +173,7 @@ object VilkårsvurderingMapper {
                 særligeGrunnerTilReduksjon = aktsomhetDto.særligeGrunnerTilReduksjon,
                 særligeGrunnerBegrunnelse = aktsomhetDto.særligeGrunnerBegrunnelse,
                 vilkårsvurderingSærligeGrunner = tilSærligGrunnerDomene(aktsomhetDto.særligeGrunner),
-                tilbakekrevSmåbeløp = aktsomhetDto.tilbakekrevSmåbeløp
+                tilbakekrevSmåbeløp = aktsomhetDto.tilbakekrevSmåbeløp,
             )
         }
         return null
@@ -183,7 +183,7 @@ object VilkårsvurderingMapper {
         særligGrunner.map {
             VurdertSærligGrunnDto(
                 særligGrunn = it.særligGrunn,
-                begrunnelse = it.begrunnelse
+                begrunnelse = it.begrunnelse,
             )
         }
 
@@ -191,7 +191,7 @@ object VilkårsvurderingMapper {
         særligGrunner?.map {
             VilkårsvurderingSærligGrunn(
                 særligGrunn = it.særligGrunn,
-                begrunnelse = it.begrunnelse
+                begrunnelse = it.begrunnelse,
             )
         }?.toSet() ?: emptySet()
 
@@ -201,13 +201,13 @@ object VilkårsvurderingMapper {
 
     private fun hentHendelsestype(
         faktaPerioder: Set<FaktaFeilutbetalingsperiode>,
-        vurdertVilkårsperiode: Månedsperiode
+        vurdertVilkårsperiode: Månedsperiode,
     ): Hendelsestype =
         faktaPerioder.first { it.periode.overlapper(vurdertVilkårsperiode) }.hendelsestype
 
     private fun utledReduserteBeløp(
         kravgrunnlag431: Kravgrunnlag431,
-        vurdertVilkårsperiode: Månedsperiode
+        vurdertVilkårsperiode: Månedsperiode,
     ): List<RedusertBeløpDto> {
         val perioder = kravgrunnlag431.perioder.filter { vurdertVilkårsperiode.overlapper(it.periode) }
         val redusertBeløper = mutableListOf<RedusertBeløpDto>()
@@ -230,7 +230,7 @@ object VilkårsvurderingMapper {
 
     private fun hentAktiviteter(
         kravgrunnlag431: Kravgrunnlag431,
-        vurdertVilkårsperiode: Månedsperiode
+        vurdertVilkårsperiode: Månedsperiode,
     ): List<AktivitetDto> {
         val perioder = kravgrunnlag431.perioder.filter { vurdertVilkårsperiode.overlapper(it.periode) }
         val aktiviteter = mutableListOf<AktivitetDto>()
@@ -245,9 +245,9 @@ object VilkårsvurderingMapper {
                                 .beregnBeløpForPeriode(
                                     tilbakekrevesBeløp = it.tilbakekrevesBeløp,
                                     vurderingsperiode = vurdertVilkårsperiode,
-                                    kravgrunnlagsperiode = periode.periode
-                                )
-                        )
+                                    kravgrunnlagsperiode = periode.periode,
+                                ),
+                        ),
                     )
                 }
         }

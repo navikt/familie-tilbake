@@ -72,7 +72,7 @@ object Testdata {
         ytelsestype = Ytelsestype.BARNETRYGD,
         fagsystem = Fagsystem.BA,
         eksternFagsakId = "testverdi",
-        bruker = bruker
+        bruker = bruker,
     )
 
     private val date = LocalDate.now()
@@ -83,13 +83,13 @@ object Testdata {
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             revurderingsvedtaksdato = date.minusDays(1),
             resultat = "OPPHØR",
-            årsak = "testverdi"
+            årsak = "testverdi",
         )
 
     val varsel = Varsel(
         varseltekst = "testverdi",
         varselbeløp = 123,
-        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date))
+        perioder = setOf(Varselsperiode(fom = date.minusMonths(2), tom = date)),
     )
 
     val verge = Verge(
@@ -98,7 +98,7 @@ object Testdata {
         orgNr = "testverdi",
         navn = "testverdi",
         kilde = "testverdi",
-        begrunnelse = "testverdi"
+        begrunnelse = "testverdi",
     )
 
     private val behandlingsvedtak = Behandlingsvedtak(vedtaksdato = LocalDate.now())
@@ -119,7 +119,7 @@ object Testdata {
         resultater = setOf(behandlingsresultat),
         varsler = setOf(varsel),
         verger = setOf(verge),
-        eksternBrukId = UUID.randomUUID()
+        eksternBrukId = UUID.randomUUID(),
     )
 
     val revurdering = Behandling(
@@ -127,8 +127,8 @@ object Testdata {
         årsaker = setOf(
             Behandlingsårsak(
                 originalBehandlingId = behandling.id,
-                type = Behandlingsårsakstype.REVURDERING_KLAGE_KA
-            )
+                type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+            ),
         ),
         type = Behandlingstype.REVURDERING_TILBAKEKREVING,
         opprettetDato = LocalDate.now(),
@@ -140,25 +140,25 @@ object Testdata {
         resultater = emptySet(),
         varsler = emptySet(),
         verger = setOf(verge.copy(id = UUID.randomUUID())),
-        eksternBrukId = UUID.randomUUID()
+        eksternBrukId = UUID.randomUUID(),
     )
 
     val behandlingsårsak = Behandlingsårsak(
         type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-        originalBehandlingId = behandling.id
+        originalBehandlingId = behandling.id,
     )
 
     val behandlingsstegstilstand = Behandlingsstegstilstand(
         behandlingId = behandling.id,
         behandlingssteg = Behandlingssteg.FAKTA,
-        behandlingsstegsstatus = Behandlingsstegstatus.KLAR
+        behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
     )
 
     val totrinnsvurdering = Totrinnsvurdering(
         behandlingId = behandling.id,
         behandlingssteg = Behandlingssteg.FAKTA,
         godkjent = true,
-        begrunnelse = "testverdi"
+        begrunnelse = "testverdi",
     )
 
     private val foreldelsesperiode = Foreldelsesperiode(
@@ -166,12 +166,12 @@ object Testdata {
         foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
         begrunnelse = "testverdi",
         foreldelsesfrist = LocalDate.now(),
-        oppdagelsesdato = LocalDate.now()
+        oppdagelsesdato = LocalDate.now(),
     )
 
     val vurdertForeldelse = VurdertForeldelse(
         behandlingId = behandling.id,
-        foreldelsesperioder = setOf(foreldelsesperiode)
+        foreldelsesperioder = setOf(foreldelsesperiode),
     )
 
     val feilKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(
@@ -184,7 +184,7 @@ object Testdata {
         resultatkode = "testverdi",
         årsakskode = "testverdi",
         skyldkode = "testverdi",
-        skatteprosent = BigDecimal("35.1100")
+        skatteprosent = BigDecimal("35.1100"),
     )
 
     val ytelKravgrunnlagsbeløp433 = Kravgrunnlagsbeløp433(
@@ -197,19 +197,19 @@ object Testdata {
         resultatkode = "testverdi",
         årsakskode = "testverdi",
         skyldkode = "testverdi",
-        skatteprosent = BigDecimal("35.1100")
+        skatteprosent = BigDecimal("35.1100"),
     )
 
     val kravgrunnlagsperiode432 = Kravgrunnlagsperiode432(
         periode = Månedsperiode(
             YearMonth.now().minusMonths(1),
-            YearMonth.now()
+            YearMonth.now(),
         ),
         beløp = setOf(
             feilKravgrunnlagsbeløp433,
-            ytelKravgrunnlagsbeløp433
+            ytelKravgrunnlagsbeløp433,
         ),
-        månedligSkattebeløp = BigDecimal("123.11")
+        månedligSkattebeløp = BigDecimal("123.11"),
     )
 
     val kravgrunnlag431 = Kravgrunnlag431(
@@ -235,18 +235,18 @@ object Testdata {
         eksternKravgrunnlagId = BigInteger.ZERO,
         perioder = setOf(kravgrunnlagsperiode432),
         aktiv = true,
-        sperret = false
+        sperret = false,
     )
 
     private val vilkårsvurderingSærligGrunn = VilkårsvurderingSærligGrunn(
         særligGrunn = SærligGrunn.GRAD_AV_UAKTSOMHET,
-        begrunnelse = "testverdi"
+        begrunnelse = "testverdi",
     )
 
     private val vilkårsvurderingGodTro = VilkårsvurderingGodTro(
         beløpErIBehold = true,
         beløpTilbakekreves = BigDecimal("32165"),
-        begrunnelse = "testverdi"
+        begrunnelse = "testverdi",
     )
 
     private val vilkårsvurderingAktsomhet =
@@ -258,7 +258,7 @@ object Testdata {
             begrunnelse = "testverdi",
             særligeGrunnerTilReduksjon = true,
             særligeGrunnerBegrunnelse = "testverdi",
-            vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn)
+            vilkårsvurderingSærligeGrunner = setOf(vilkårsvurderingSærligGrunn),
         )
 
     val vilkårsperiode =
@@ -267,19 +267,19 @@ object Testdata {
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             begrunnelse = "testverdi",
             aktsomhet = vilkårsvurderingAktsomhet,
-            godTro = vilkårsvurderingGodTro
+            godTro = vilkårsvurderingGodTro,
         )
 
     val vilkårsvurdering = Vilkårsvurdering(
         behandlingId = behandling.id,
-        perioder = setOf(vilkårsperiode)
+        perioder = setOf(vilkårsperiode),
     )
 
     private val faktaFeilutbetalingsperiode =
         FaktaFeilutbetalingsperiode(
             periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
             hendelsestype = Hendelsestype.ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
 
     val faktaFeilutbetaling = FaktaFeilutbetaling(
@@ -290,10 +290,10 @@ object Testdata {
             FaktaFeilutbetalingsperiode(
                 periode = Månedsperiode("2020-04" to "2022-08"),
                 hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             ),
-            faktaFeilutbetalingsperiode
-        )
+            faktaFeilutbetalingsperiode,
+        ),
     )
 
     val økonomiXmlMottatt = ØkonomiXmlMottatt(
@@ -304,38 +304,38 @@ object Testdata {
         referanse = "testverdi",
         eksternKravgrunnlagId = BigInteger.ZERO,
         vedtakId = BigInteger.ZERO,
-        kontrollfelt = "testverdi"
+        kontrollfelt = "testverdi",
     )
 
     val økonomiXmlMottattArkiv = ØkonomiXmlMottattArkiv(
         melding = "testverdi",
         eksternFagsakId = "testverdi",
-        ytelsestype = Ytelsestype.BARNETRYGD
+        ytelsestype = Ytelsestype.BARNETRYGD,
     )
 
     val vedtaksbrevsoppsummering = Vedtaksbrevsoppsummering(
         behandlingId = behandling.id,
-        oppsummeringFritekst = "testverdi"
+        oppsummeringFritekst = "testverdi",
     )
 
     val vedtaksbrevsperiode = Vedtaksbrevsperiode(
         behandlingId = behandling.id,
         periode = Månedsperiode(LocalDate.now(), LocalDate.now()),
         fritekst = "testverdi",
-        fritekststype = Friteksttype.FAKTA
+        fritekststype = Friteksttype.FAKTA,
     )
 
     val økonomiXmlSendt = ØkonomiXmlSendt(
         behandlingId = behandling.id,
         melding = "testverdi",
-        kvittering = "testverdi"
+        kvittering = "testverdi",
     )
 
     val brevsporing = Brevsporing(
         behandlingId = behandling.id,
         journalpostId = "testverdi",
         dokumentId = "testverdi",
-        brevtype = Brevtype.VARSEL
+        brevtype = Brevtype.VARSEL,
     )
 
     val vedtaksbrevbehandling = Vedtaksbrevbehandling(
@@ -349,7 +349,7 @@ object Testdata {
         resultater = setOf(behandlingsresultat),
         varsler = setOf(varsel),
         verger = setOf(verge),
-        vedtaksbrevOppsummering = vedtaksbrevsoppsummering
+        vedtaksbrevOppsummering = vedtaksbrevsoppsummering,
     )
 
     val vedtaksbrevgrunnlag = Vedtaksbrevgrunnlag(
@@ -358,7 +358,7 @@ object Testdata {
         eksternFagsakId = "testverdi",
         fagsystem = Fagsystem.BA,
         ytelsestype = Ytelsestype.BARNETRYGD,
-        behandlinger = setOf(vedtaksbrevbehandling)
+        behandlinger = setOf(vedtaksbrevbehandling),
     )
 
     fun lagFeilBeløp(feilutbetaling: BigDecimal): Kravgrunnlagsbeløp433 {
@@ -369,7 +369,7 @@ object Testdata {
             opprinneligUtbetalingsbeløp = BigDecimal.ZERO,
             tilbakekrevesBeløp = BigDecimal.ZERO,
             uinnkrevdBeløp = BigDecimal.ZERO,
-            skatteprosent = BigDecimal.ZERO
+            skatteprosent = BigDecimal.ZERO,
         )
     }
 
@@ -380,14 +380,14 @@ object Testdata {
             tilbakekrevesBeløp = BigDecimal("10000"),
             opprinneligUtbetalingsbeløp = utbetalt,
             nyttBeløp = BigDecimal.ZERO,
-            skatteprosent = skatteprosent
+            skatteprosent = skatteprosent,
         )
     }
 
     fun lagYtelBeløp(
         utbetalt: BigDecimal,
         nyttBeløp: BigDecimal,
-        skatteprosent: BigDecimal
+        skatteprosent: BigDecimal,
     ): Kravgrunnlagsbeløp433 {
         return Kravgrunnlagsbeløp433(
             klassekode = Klassekode.BATR,
@@ -397,7 +397,7 @@ object Testdata {
             nyttBeløp = nyttBeløp,
             skatteprosent = skatteprosent,
             skyldkode = UUID.randomUUID()
-                .toString()
+                .toString(),
         ) // brukte skyldkode for å få ulike Kravgrunnlagsbeløp433
     }
 }

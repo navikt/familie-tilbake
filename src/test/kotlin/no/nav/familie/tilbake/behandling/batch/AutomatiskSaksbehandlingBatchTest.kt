@@ -65,19 +65,19 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(fagsak)
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
             tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
         )
         behandlingRepository.insert(
             behandling.copy(
                 fagsystemsbehandling = setOf(fagsystemsbehandling),
-                status = Behandlingsstatus.UTREDES
-            )
+                status = Behandlingsstatus.UTREDES,
+            ),
         )
         val feilKravgrunnlagBeløp = Testdata.feilKravgrunnlagsbeløp433.copy(nyttBeløp = BigDecimal("100"))
         val ytelKravgrunnlagsbeløp433 =
             Testdata.ytelKravgrunnlagsbeløp433.copy(
                 opprinneligUtbetalingsbeløp = BigDecimal("100"),
-                tilbakekrevesBeløp = BigDecimal("100")
+                tilbakekrevesBeløp = BigDecimal("100"),
             )
 
         val kravgrunnlag = Testdata.kravgrunnlag431
@@ -87,24 +87,24 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                     Testdata.kravgrunnlagsperiode432.copy(
                         beløp = setOf(
                             feilKravgrunnlagBeløp,
-                            ytelKravgrunnlagsbeløp433
-                        )
-                    )
-                )
+                            ytelKravgrunnlagsbeløp433,
+                        ),
+                    ),
+                ),
             )
 
         kravgrunnlagRepository.insert(kravgrunnlag)
         behandlingsstegstilstandRepository.insert(
             lagBehandlingsstegstilstand(
                 Behandlingssteg.GRUNNLAG,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingsstegstilstandRepository.insert(
             lagBehandlingsstegstilstand(
                 Behandlingssteg.FAKTA,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 
@@ -134,7 +134,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
             tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_MED_VARSEL
+                .OPPRETT_TILBAKEKREVING_MED_VARSEL,
         )
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
         brevsporingRepository.insert(Testdata.brevsporing)
@@ -151,7 +151,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.AVVENTER_DOKUMENTASJON,
-            LocalDate.now().plusWeeks(2)
+            LocalDate.now().plusWeeks(2),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
@@ -167,8 +167,8 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
             kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
                 .copy(
                     kontrollfelt = LocalDateTime.now()
-                        .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS"))
-                )
+                        .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
+                ),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
@@ -182,7 +182,7 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     fun `behandleAutomatisk skal ikke opprette tasker når behandlingens kravgrunnlag har feilbeløp mer enn begrensning`() {
         kravgrunnlagRepository.update(
             kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-                .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432))
+                .copy(perioder = setOf(Testdata.kravgrunnlagsperiode432)),
         )
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
@@ -207,12 +207,12 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ): Behandlingsstegstilstand {
         return Behandlingsstegstilstand(
             behandlingId = behandling.id,
             behandlingssteg = behandlingssteg,
-            behandlingsstegsstatus = behandlingsstegstatus
+            behandlingsstegsstatus = behandlingsstegstatus,
         )
     }
 }

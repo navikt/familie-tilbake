@@ -58,21 +58,21 @@ class PdfGenerator {
                 "Source Sans Pro",
                 400,
                 BaseRendererBuilder.FontStyle.NORMAL,
-                true
+                true,
             )
                 .useFont(
                     fontSupplier("SourceSansPro-Bold.ttf"),
                     "Source Sans Pro",
                     700,
                     BaseRendererBuilder.FontStyle.OBLIQUE,
-                    true
+                    true,
                 )
                 .useFont(
                     fontSupplier("SourceSansPro-It.ttf"),
                     "Source Sans Pro",
                     400,
                     BaseRendererBuilder.FontStyle.ITALIC,
-                    true
+                    true,
                 )
                 .useColorProfile(FileStructureUtil.colorProfile)
                 .useSVGDrawer(BatikSVGDrawer())

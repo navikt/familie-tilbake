@@ -100,8 +100,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                     behandlingssteg = Behandlingssteg.GRUNNLAG,
                     behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                     tidsfrist = LocalDate.now().plusWeeks(3),
-                    venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
-                )
+                    venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                ),
             )
     }
 
@@ -109,13 +109,13 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `korrigerKravgrunnlag skal ikke hente korrigert kravgrunnlag når behandling er avsluttet`() {
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
-                .copy(status = Behandlingsstatus.AVSLUTTET)
+                .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
         val exception = shouldThrow<RuntimeException> {
             forvaltningService.korrigerKravgrunnlag(
                 behandling.id,
-                BigInteger.ZERO
+                BigInteger.ZERO,
             )
         }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
@@ -127,7 +127,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
         forvaltningService.korrigerKravgrunnlag(
             behandling.id,
-            Testdata.kravgrunnlag431.eksternKravgrunnlagId
+            Testdata.kravgrunnlag431.eksternKravgrunnlagId,
         )
 
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandling.id)
@@ -161,7 +161,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.existsById(økonomiXmlMottatt.id).shouldBeFalse()
         økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             økonomiXmlMottatt.eksternFagsakId,
-            økonomiXmlMottatt.ytelsestype
+            økonomiXmlMottatt.ytelsestype,
         ).shouldNotBeEmpty()
     }
 
@@ -169,7 +169,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `tvingHenleggBehandling skal ikke henlegge behandling når behandling er avsluttet`() {
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
-                .copy(status = Behandlingsstatus.AVSLUTTET)
+                .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
         val exception = shouldThrow<RuntimeException> {
@@ -220,7 +220,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `flyttBehandlingsstegTilbakeTilFakta skal ikke flytte behandlingssteg når behandling er avsluttet`() {
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
-                .copy(status = Behandlingsstatus.AVSLUTTET)
+                .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
         val exception = shouldThrow<RuntimeException> {
@@ -233,16 +233,16 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     fun `flyttBehandlingsstegTilbakeTilFakta skal flytte behandlingssteg til FAKTA når behandling er i IVERKSETT_VEDTAK steg`() {
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
-                .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK)
+                .copy(status = Behandlingsstatus.IVERKSETTER_VEDTAK),
         )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         behandlingsstegstilstandRepository
             .update(
                 behandlingsstegstilstandRepository.findByBehandlingIdAndBehandlingssteg(
                     behandling.id,
-                    Behandlingssteg.GRUNNLAG
+                    Behandlingssteg.GRUNNLAG,
                 )!!
-                    .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT)
+                    .copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT),
             )
 
         faktaFeilutbetalingRepository.insert(Testdata.faktaFeilutbetaling)
@@ -280,7 +280,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
                 it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
-                .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
+                    .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }
     }
@@ -312,8 +312,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             kravgrunnlag.copy(
                 fagsystemId = fagsak.eksternFagsakId,
                 fagområdekode = Fagområdekode.values()
-                    .first { it.ytelsestype == fagsak.ytelsestype }
-            )
+                    .first { it.ytelsestype == fagsak.ytelsestype },
+            ),
         )
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
@@ -328,8 +328,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         økonomiXmlMottattRepository.insert(
             mottattXml.copy(
                 eksternFagsakId = fagsak.eksternFagsakId,
-                ytelsestype = fagsak.ytelsestype
-            )
+                ytelsestype = fagsak.ytelsestype,
+            ),
         )
         val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
@@ -343,7 +343,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val exception = shouldThrow<RuntimeException> {
             forvaltningService.hentForvaltningsinfo(
                 fagsak.ytelsestype,
-                fagsak.eksternFagsakId
+                fagsak.eksternFagsakId,
             )
         }
         exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
@@ -392,15 +392,15 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 eksternKravgrunnlagId = BigInteger.ZERO,
                 vedtakId = BigInteger.ZERO,
                 kontrollfelt = "2021-03-02-18.50.15.236315",
-                sperret = false
-            )
+                sperret = false,
+            ),
         )
     }
 
     private fun assertBehandlingssteg(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
@@ -410,14 +410,14 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagBehandlingssteg(
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandling.id,
                 behandlingssteg = behandlingssteg,
-                behandlingsstegsstatus = behandlingsstegstatus
-            )
+                behandlingsstegsstatus = behandlingsstegstatus,
+            ),
         )
     }
 }

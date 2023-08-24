@@ -20,7 +20,7 @@ class AutomatiskSaksbehandlingBatch(
     private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService,
     private val fagsakRepository: FagsakRepository,
     private val taskService: TaskService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -29,9 +29,9 @@ class AutomatiskSaksbehandlingBatch(
     @Transactional
     fun behandleAutomatisk() {
         if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
-            it.contains("local") ||
-                it.contains("integrasjonstest")
-        }
+                it.contains("local") ||
+                    it.contains("integrasjonstest")
+            }
         ) {
             return
         }
@@ -46,9 +46,9 @@ class AutomatiskSaksbehandlingBatch(
                 listOf(
                     Status.FEILET,
                     Status.PLUKKET,
-                    Status.KLAR_TIL_PLUKK
+                    Status.KLAR_TIL_PLUKK,
                 ),
-                Pageable.unpaged()
+                Pageable.unpaged(),
             )
             behandlinger.forEach {
                 val finnesTask = alleFeiledeTasker.any { task ->
@@ -63,10 +63,10 @@ class AutomatiskSaksbehandlingBatch(
                             properties = Properties().apply {
                                 setProperty(
                                     PropertyName.FAGSYSTEM,
-                                    fagsystem.name
+                                    fagsystem.name,
                                 )
-                            }
-                        )
+                            },
+                        ),
                     )
                 } else {
                     logger.info("Det finnes allerede en feilet AutomatiskSaksbehandlingTask for samme behandlingId=${it.id}")

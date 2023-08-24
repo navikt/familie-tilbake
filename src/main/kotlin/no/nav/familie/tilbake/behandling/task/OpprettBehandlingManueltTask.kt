@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional
     taskStepType = OpprettBehandlingManueltTask.TYPE,
     beskrivelse = "oppretter behandling manuelt",
     maxAntallFeil = 10,
-    triggerTidVedFeilISekunder = 5L
+    triggerTidVedFeilISekunder = 5L,
 )
 class OpprettBehandlingManueltTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-    private val behManuellOpprService: BehandlingManuellOpprettelseService
+    private val behManuellOpprService: BehandlingManuellOpprettelseService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -46,8 +46,8 @@ class OpprettBehandlingManueltTask(
             hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
-            )
+                eksternId,
+            ),
         )
         // kaster exception inntil respons-en har mottatt
         val respons = requireNotNull(requestSendt.respons) {
@@ -63,11 +63,11 @@ class OpprettBehandlingManueltTask(
                 requestSendtId = requestSendt.id,
                 eksternFagsakId = eksternFagsakId,
                 ytelsestype = ytelsestype,
-                eksternId = eksternId
+                eksternId = eksternId,
             )
             throw Feil(
                 "Noe gikk galt ved henting av fagsystemsbehandling fra fagsystem. Legger ny melding på topic. Task må rekjøres. " +
-                    "Feiler med $feilMelding"
+                    "Feiler med $feilMelding",
             )
         }
 
@@ -75,7 +75,7 @@ class OpprettBehandlingManueltTask(
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
         log.info(
             "Oppretter manuell tilbakekrevingsbehandling request for " +
-                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId."
+                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId.",
         )
         behManuellOpprService.opprettBehandlingManuell(
             eksternFagsakId = eksternFagsakId,
@@ -83,7 +83,7 @@ class OpprettBehandlingManueltTask(
             eksternId = eksternId,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             fagsystemsbehandlingData = hentFagsystemsbehandlingRespons
-                .hentFagsystemsbehandling!!
+                .hentFagsystemsbehandling!!,
         )
     }
 

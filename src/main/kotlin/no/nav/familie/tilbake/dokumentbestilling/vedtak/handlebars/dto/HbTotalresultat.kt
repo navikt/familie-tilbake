@@ -8,7 +8,7 @@ data class HbTotalresultat(
     val totaltTilbakekrevesBeløp: BigDecimal,
     val totaltTilbakekrevesBeløpMedRenter: BigDecimal,
     val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal,
-    val totaltRentebeløp: BigDecimal
+    val totaltRentebeløp: BigDecimal,
 ) {
 
     val harSkattetrekk = totaltTilbakekrevesBeløpMedRenterUtenSkatt < totaltTilbakekrevesBeløpMedRenter

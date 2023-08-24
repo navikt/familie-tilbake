@@ -87,8 +87,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             adresselinje2 = "test adresse2",
             postnummer = "0000",
             poststed = "Oslo",
-            landkode = "NO"
-        )
+            landkode = "NO",
+        ),
     )
 
     private val mockPdlClient: PdlClient = mockk()
@@ -108,7 +108,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             fagsakService = fagsakService,
             pdlClient = mockPdlClient,
             integrasjonerClient = mockIntegrasjonerClient,
-            validerBrevmottakerService = validerBrevmottakerService
+            validerBrevmottakerService = validerBrevmottakerService,
 
         )
 
@@ -119,7 +119,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 aktør = any(),
                 opprettetTidspunkt = capture(opprettetTidspunktSlot),
                 tittel = any(),
-                beskrivelse = any()
+                beskrivelse = any(),
             )
         } just runs
 
@@ -145,8 +145,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 manuellBrevmottakerRequestDto.copy(
                     navn = "Kari Nordmann",
                     manuellAdresseInfo = null,
-                    personIdent = "12345678910"
-                )
+                    personIdent = "12345678910",
+                ),
             )
         }
 
@@ -163,7 +163,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 aktør = Aktør.SAKSBEHANDLER,
                 opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
                 beskrivelse = any(),
-                tittel = any()
+                tittel = any(),
             )
         }
 
@@ -172,14 +172,14 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 adresselinje1 = "ny",
                 postnummer = "1111",
                 poststed = "stavanger",
-                landkode = "NO"
-            )
+                landkode = "NO",
+            ),
         )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
                 behandling.id,
                 dbManuellBrevmottaker.id,
-                oppdatertManuellBrevmottaker
+                oppdatertManuellBrevmottaker,
             )
         }
 
@@ -197,7 +197,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.leggTilBrevmottaker(
                 behandling.id,
-                manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann")
+                manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann"),
             )
         }
 
@@ -214,7 +214,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 aktør = Aktør.SAKSBEHANDLER,
                 opprettetTidspunkt = or(opprettetTidspunktSlot[0], opprettetTidspunktSlot[1]),
                 beskrivelse = any(),
-                tittel = any()
+                tittel = any(),
             )
         }
 
@@ -232,7 +232,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                 aktør = Aktør.SAKSBEHANDLER,
                 opprettetTidspunkt = opprettetTidspunktSlot[2],
                 beskrivelse = any(),
-                tittel = any()
+                tittel = any(),
             )
         }
     }
@@ -263,7 +263,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-            LocalDate.now().plusWeeks(4)
+            LocalDate.now().plusWeeks(4),
         )
 
         val exception = shouldThrow<RuntimeException> { manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id) }
@@ -292,7 +292,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
         val requestMedPersonIdent = manuellBrevmottakerRequestDto.copy(
             personIdent = "12345678910",
-            manuellAdresseInfo = null
+            manuellAdresseInfo = null,
         )
         manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
@@ -302,7 +302,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val requestMedOrgnrUtenKontaktperson = manuellBrevmottakerRequestDto.copy(
             navn = " ",
             organisasjonsnummer = "123456789",
-            manuellAdresseInfo = null
+            manuellAdresseInfo = null,
         )
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrUtenKontaktperson)
 
@@ -311,7 +311,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
         val requestMedOrgnrMedKontaktperson = manuellBrevmottakerRequestDto.copy(
             organisasjonsnummer = "123456789",
-            manuellAdresseInfo = null
+            manuellAdresseInfo = null,
         )
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrMedKontaktperson)
 
@@ -335,14 +335,14 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegstilstand(
         behandlingId: UUID,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
                 behandlingssteg = behandlingssteg,
-                behandlingsstegsstatus = behandlingsstegstatus
-            )
+                behandlingsstegsstatus = behandlingsstegstatus,
+            ),
         )
     }
 }

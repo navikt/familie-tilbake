@@ -8,5 +8,5 @@ class VedtakPerUke(
     val uke: Int,
     val fagsystem: Fagsystem,
     val vedtakstype: Behandlingsresultatstype,
-    val antall: Int
+    val antall: Int,
 )

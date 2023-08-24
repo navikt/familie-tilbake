@@ -10,13 +10,13 @@ import java.util.Objects
 data class Henleggelsesbrevsdokument(
     val brevmetadata: Brevmetadata,
     val varsletDato: LocalDate?,
-    val fritekstFraSaksbehandler: String?
+    val fritekstFraSaksbehandler: String?,
 ) : BaseDokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall
+    brevmetadata.gjelderDødsfall,
 ) {
 
     private val tilbakekrevingsrevurdering = Behandlingstype.REVURDERING_TILBAKEKREVING == brevmetadata.behandlingstype

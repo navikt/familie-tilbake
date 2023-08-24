@@ -70,8 +70,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                     eksternFagsakId = fagsak.eksternFagsakId,
                     eksternId = "1",
                     ytelsestype = fagsak.ytelsestype,
-                    respons = objectMapper.writeValueAsString(lagRespons(eksternId = "1"))
-                )
+                    respons = objectMapper.writeValueAsString(lagRespons(eksternId = "1")),
+                ),
             )
 
         oppdaterFaktainfoTask.doTask(lagTask())
@@ -89,8 +89,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
             HentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId = fagsak.eksternFagsakId,
                 eksternId = "1",
-                ytelsestype = fagsak.ytelsestype
-            )
+                ytelsestype = fagsak.ytelsestype,
+            ),
         )
         val exception = shouldThrow<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
         exception.message shouldBe "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
@@ -105,8 +105,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                 eksternFagsakId = fagsak.eksternFagsakId,
                 eksternId = behandling.aktivFagsystemsbehandling.eksternId,
                 ytelsestype = fagsak.ytelsestype,
-                respons = objectMapper.writeValueAsString(lagRespons(eksternId = behandling.aktivFagsystemsbehandling.eksternId))
-            )
+                respons = objectMapper.writeValueAsString(lagRespons(eksternId = behandling.aktivFagsystemsbehandling.eksternId)),
+            ),
         )
         shouldNotThrowAny { oppdaterFaktainfoTask.doTask(lagTask(eksternId = behandling.aktivFagsystemsbehandling.eksternId)) }
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -128,8 +128,8 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                 revurderingsårsak = "testårsak",
                 revurderingsresultat = "testresultat",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING
-            )
+                    .IGNORER_TILBAKEKREVING,
+            ),
         )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
@@ -142,7 +142,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                 setProperty("eksternFagsakId", fagsak.eksternFagsakId)
                 setProperty("ytelsestype", fagsak.ytelsestype.name)
                 setProperty("eksternId", eksternId)
-            }
+            },
         )
     }
 }

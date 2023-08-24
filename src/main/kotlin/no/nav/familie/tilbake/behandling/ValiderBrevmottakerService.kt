@@ -10,7 +10,7 @@ import java.util.UUID
 class ValiderBrevmottakerService(
     private val manuellBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val fagsakService: FagsakService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
     fun validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId: UUID, fagsakId: UUID) {
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId).takeIf { it.isNotEmpty() } ?: return

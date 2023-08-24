@@ -15,7 +15,7 @@ import java.util.UUID
     taskStepType = LagHistorikkinnslagTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Lag historikkinnslag og sender det til kafka",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : AsyncTaskStep {
 
@@ -40,7 +40,7 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
             opprettetTidspunkt,
             beskrivelse,
             brevtype,
-            beslutter
+            beslutter,
         )
     }
 

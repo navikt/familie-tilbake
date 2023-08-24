@@ -51,7 +51,7 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
             val callback = kafkaTemplate.send(producerRecord).get()
             log.info(
                 "Melding på topic $topic for $behandlingId med $key er sendt. " +
-                    "Fikk offset ${callback?.recordMetadata?.offset()}"
+                    "Fikk offset ${callback?.recordMetadata?.offset()}",
             )
         }.onFailure {
             val feilmelding = "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +

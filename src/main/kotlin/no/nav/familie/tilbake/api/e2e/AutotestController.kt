@@ -48,7 +48,7 @@ class AutotestController(
     private val behandlingRepository: BehandlingRepository,
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
@@ -59,8 +59,8 @@ class AutotestController(
                 payload = kravgrunnlag,
                 properties = Properties().apply {
                     this["callId"] = UUID.randomUUID()
-                }
-            )
+                },
+            ),
         )
         return Ressurs.success("OK")
     }
@@ -73,25 +73,25 @@ class AutotestController(
                 payload = statusmelding,
                 properties = Properties().apply {
                     this["callId"] = UUID.randomUUID()
-                }
-            )
+                },
+            ),
         )
         return Ressurs.success("OK")
     }
 
     @PutMapping(
         path = ["/behandling/{behandlingId}/endre/saksbehandler/{nyAnsvarligSaksbehandler}"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         handling = "endre ansvarlig saksbehandler",
         AuditLoggerEvent.UPDATE,
-        henteParam = HenteParam.BEHANDLING_ID
+        henteParam = HenteParam.BEHANDLING_ID,
     )
     fun endreAnsvarligSaksbehandler(
         @PathVariable behandlingId: UUID,
-        @PathVariable nyAnsvarligSaksbehandler: String
+        @PathVariable nyAnsvarligSaksbehandler: String,
     ): Ressurs<String> {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(behandling.copy(ansvarligSaksbehandler = nyAnsvarligSaksbehandler))
@@ -102,7 +102,7 @@ class AutotestController(
     fun publishFagsystemsbehandlingsdata(
         @Valid @RequestBody
         opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest,
-        @RequestParam(required = false, name = "erInstitusjon") erInstitusjon: Boolean = false
+        @RequestParam(required = false, name = "erInstitusjon") erInstitusjon: Boolean = false,
     ): Ressurs<String> {
         val eksternFagsakId = opprettManueltTilbakekrevingRequest.eksternFagsakId
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
@@ -121,14 +121,14 @@ class AutotestController(
                 revurderingsårsak = "testverdi",
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING
+                    .IGNORER_TILBAKEKREVING,
             ),
-            institusjon = institusjon
+            institusjon = institusjon,
         )
         val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
             eksternFagsakId,
             ytelsestype,
-            eksternId
+            eksternId,
         )
         val melding =
             objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
@@ -138,7 +138,7 @@ class AutotestController(
             val producerRecord = ProducerRecord(
                 KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
                 requestSendt?.id.toString(),
-                melding
+                melding,
             )
             kafkaTemplate.send(producerRecord)
         }

@@ -17,12 +17,12 @@ data class HbVurderinger(
     val foreldelsesfrist: LocalDate? = null,
     val oppdagelsesdato: LocalDate? = null,
     val fritekstForeldelse: String? = null,
-    val beløpIBehold: BigDecimal? = null
+    val beløpIBehold: BigDecimal? = null,
 ) {
 
     val harForeldelsesavsnitt = foreldelsevurdering in setOf(
         Foreldelsesvurderingstype.FORELDET,
-        Foreldelsesvurderingstype.TILLEGGSFRIST
+        Foreldelsesvurderingstype.TILLEGGSFRIST,
     )
 
     init {

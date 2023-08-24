@@ -52,7 +52,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         manuelleBrevmottakerRepository = mockk(relaxed = true),
         eksterneDataForBrevService = mockEksterneDataForBrevService,
         organisasjonService = organisasjonService,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
 
     @BeforeEach
@@ -65,7 +65,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService,
             organisasjonService,
             distribusjonshåndteringService,
-            brevmetadataUtil
+            brevmetadataUtil,
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
@@ -81,7 +81,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
         val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
             Testdata.behandling.id,
-            flereOpplysninger
+            flereOpplysninger,
         )
 
         PdfaValidator.validatePdf(data)
@@ -96,16 +96,16 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
         innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
             Testdata.behandling.id,
-            flereOpplysninger
+            flereOpplysninger,
         )
         innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
             Testdata.behandling.id,
-            flereOpplysninger
+            flereOpplysninger,
         )
 
         verify(exactly = 2) {
             spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata)
+                capture(brevdata),
             )
         }
 

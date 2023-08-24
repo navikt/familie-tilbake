@@ -7,7 +7,7 @@ import java.math.BigDecimal
 
 data class BeregningsresultatDto(
     val beregningsresultatsperioder: List<BeregningsresultatsperiodeDto>,
-    val vedtaksresultat: Vedtaksresultat
+    val vedtaksresultat: Vedtaksresultat,
 )
 
 data class BeregningsresultatsperiodeDto(
@@ -17,5 +17,5 @@ data class BeregningsresultatsperiodeDto(
     val andelAvBeløp: BigDecimal? = null,
     val renteprosent: BigDecimal? = null,
     val tilbakekrevingsbeløp: BigDecimal? = null,
-    val tilbakekrevesBeløpEtterSkatt: BigDecimal? = null
+    val tilbakekrevesBeløpEtterSkatt: BigDecimal? = null,
 )

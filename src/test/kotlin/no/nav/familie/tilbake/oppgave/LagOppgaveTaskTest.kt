@@ -74,7 +74,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
                 fristForFerdigstillelse,
                 null,
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -84,7 +84,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(
             Behandlingssteg.GRUNNLAG,
             Behandlingsstegstatus.VENTER,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
         )
         val fristForFerdigstillelse = dagensDato.plusWeeks(Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.defaultVenteTidIUker)
 
@@ -98,7 +98,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
                 fristForFerdigstillelse,
                 null,
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -117,7 +117,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 beskrivelse = "",
                 fristForFerdigstillelse = dagensDato,
                 saksbehandler = null,
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -137,7 +137,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 beskrivelse = "Sendt til godkjenning av Saksbehandler Saksbehandlersen ",
                 fristForFerdigstillelse = dagensDato,
                 saksbehandler = null,
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -145,7 +145,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegsstatus: Behandlingsstegstatus,
-        venteårsak: Venteårsak? = null
+        venteårsak: Venteårsak? = null,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
@@ -155,12 +155,12 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 venteårsak = venteårsak,
                 tidsfrist = venteårsak?.let {
                     dagensDato.plusWeeks(it.defaultVenteTidIUker)
-                }
-            )
+                },
+            ),
         )
     }
 
-    private fun lagTask(opprettetAv: String ? = null): Task {
+    private fun lagTask(opprettetAv: String? = null): Task {
         return Task(
             type = LagOppgaveTask.TYPE,
             payload = behandling.id.toString(),
@@ -170,7 +170,7 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 if (opprettetAv != null) {
                     setProperty("opprettetAv", opprettetAv)
                 }
-            }
+            },
         )
     }
 }

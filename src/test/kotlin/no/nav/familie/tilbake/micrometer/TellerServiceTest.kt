@@ -24,7 +24,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.KOBLET
+            Mottaksstatus.KOBLET,
         )
 
         meldingstelling!!.antall shouldBe 1
@@ -37,7 +37,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.UKOBLET
+            Mottaksstatus.UKOBLET,
         )
 
         meldingstelling!!.antall shouldBe 1
@@ -50,7 +50,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.STATUSMELDING,
-            Mottaksstatus.KOBLET
+            Mottaksstatus.KOBLET,
         )
 
         meldingstelling!!.antall shouldBe 1
@@ -63,7 +63,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.STATUSMELDING,
-            Mottaksstatus.UKOBLET
+            Mottaksstatus.UKOBLET,
         )
 
         meldingstelling!!.antall shouldBe 1
@@ -77,7 +77,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.KOBLET
+            Mottaksstatus.KOBLET,
         )
 
         meldingstelling!!.antall shouldBe 2
@@ -91,7 +91,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.UKOBLET
+            Mottaksstatus.UKOBLET,
         )
 
         meldingstelling!!.antall shouldBe 2
@@ -105,7 +105,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.STATUSMELDING,
-            Mottaksstatus.KOBLET
+            Mottaksstatus.KOBLET,
         )
 
         meldingstelling!!.antall shouldBe 2
@@ -119,7 +119,7 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
             Fagsystem.EF,
             Meldingstype.STATUSMELDING,
-            Mottaksstatus.UKOBLET
+            Mottaksstatus.UKOBLET,
         )
 
         meldingstelling!!.antall shouldBe 2

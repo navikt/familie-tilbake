@@ -4,5 +4,5 @@ enum class Dokumentmalstype {
     INNHENT_DOKUMENTASJON,
     FRITEKSTBREV,
     VARSEL,
-    KORRIGERT_VARSEL;
+    KORRIGERT_VARSEL,
 }

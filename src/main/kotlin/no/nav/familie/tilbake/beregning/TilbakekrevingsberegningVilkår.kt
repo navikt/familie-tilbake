@@ -25,7 +25,7 @@ internal object TilbakekrevingsberegningVilkår {
         delresultat: FordeltKravgrunnlagsbeløp,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
         beregnRenter: Boolean,
-        bruk6desimalerISkatteberegning: Boolean = false
+        bruk6desimalerISkatteberegning: Boolean = false,
     ): Beregningsresultatsperiode {
         val periode: Månedsperiode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
@@ -40,7 +40,7 @@ internal object TilbakekrevingsberegningVilkår {
                 finnBeløpUtenRenter(
                     delresultat.feilutbetaltBeløp,
                     andel,
-                    manueltBeløp
+                    manueltBeløp,
                 )
             }
         val rentebeløp: BigDecimal = beregnRentebeløp(beløpUtenRenter, renter)
@@ -50,7 +50,7 @@ internal object TilbakekrevingsberegningVilkår {
                 periode,
                 beløpUtenRenter,
                 perioderMedSkatteprosent,
-                bruk6desimalerISkatteberegning
+                bruk6desimalerISkatteberegning,
             )
         val nettoBeløp: BigDecimal = tilbakekrevingBeløp.subtract(skattBeløp)
         return Beregningsresultatsperiode(
@@ -66,7 +66,7 @@ internal object TilbakekrevingsberegningVilkår {
             rentebeløp = rentebeløp,
             tilbakekrevingsbeløpEtterSkatt = nettoBeløp,
             skattebeløp = skattBeløp,
-            tilbakekrevingsbeløp = tilbakekrevingBeløp
+            tilbakekrevingsbeløp = tilbakekrevingBeløp,
         )
     }
 
@@ -78,7 +78,7 @@ internal object TilbakekrevingsberegningVilkår {
         periode: Månedsperiode,
         bruttoTilbakekrevesBeløp: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
-        bruk6desimalerISkatteberegning: Boolean
+        bruk6desimalerISkatteberegning: Boolean,
     ): BigDecimal {
         val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
         val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {

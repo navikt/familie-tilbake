@@ -5,7 +5,7 @@ import java.time.LocalDate
 enum class Avsnittstype {
     OPPSUMMERING,
     PERIODE,
-    TILLEGGSINFORMASJON
+    TILLEGGSINFORMASJON,
 }
 
 data class Avsnitt(
@@ -13,7 +13,7 @@ data class Avsnitt(
     val underavsnittsliste: List<Underavsnitt> = listOf(),
     val avsnittstype: Avsnittstype? = null,
     val fom: LocalDate? = null,
-    val tom: LocalDate? = null
+    val tom: LocalDate? = null,
 )
 
 class Underavsnitt(
@@ -22,7 +22,7 @@ class Underavsnitt(
     val fritekst: String? = null,
     val fritekstTillatt: Boolean = false,
     val fritekstPåkrevet: Boolean = false,
-    val underavsnittstype: Underavsnittstype? = null
+    val underavsnittstype: Underavsnittstype? = null,
 ) {
 
     init {
@@ -35,5 +35,5 @@ enum class Underavsnittstype {
     FORELDELSE,
     VILKÅR,
     SÆRLIGEGRUNNER,
-    SÆRLIGEGRUNNER_ANNET
+    SÆRLIGEGRUNNER_ANNET,
 }

@@ -18,7 +18,7 @@ import java.util.UUID
 class BehandlingsvedtakService(
     private val behandlingRepository: BehandlingRepository,
     private val tellerService: TellerService,
-    private val tilbakeBeregningService: TilbakekrevingsberegningService
+    private val tilbakeBeregningService: TilbakekrevingsberegningService,
 ) {
 
     @Transactional
@@ -30,11 +30,11 @@ class BehandlingsvedtakService(
 
         val behandlingsvedtak = Behandlingsvedtak(
             vedtaksdato = LocalDate.now(),
-            iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT
+            iverksettingsstatus = Iverksettingsstatus.IKKE_IVERKSATT,
         )
         val behandlingsresultat = Behandlingsresultat(
             type = behandlingsresultatstype,
-            behandlingsvedtak = behandlingsvedtak
+            behandlingsvedtak = behandlingsvedtak,
         )
         behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
         tellerService.tellVedtak(behandlingsresultatstype, behandling)

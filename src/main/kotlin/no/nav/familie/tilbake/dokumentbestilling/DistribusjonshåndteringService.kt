@@ -37,7 +37,7 @@ class DistribusjonshåndteringService(
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val pdfBrevService: PdfBrevService,
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun sendBrev(
@@ -45,7 +45,7 @@ class DistribusjonshåndteringService(
         brevtype: Brevtype,
         varsletBeløp: Long? = null,
         fritekst: String? = null,
-        brevdata: (Brevmottager, Brevmetadata?) -> Brevdata
+        brevdata: (Brevmottager, Brevmetadata?) -> Brevdata,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksbrevgrunnlag = when (brevtype) {
@@ -55,13 +55,13 @@ class DistribusjonshåndteringService(
         val støtterManuelleBrevmottakere: Boolean = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
             behandling = behandling,
             fagsak = fagsak,
-            featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE)
+            featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE),
         )
         val brevmottakere = utledMottakere(
             behandling = behandling,
             fagsak = fagsak,
             erManuelleMottakereStøttet = støtterManuelleBrevmottakere,
-            manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet()
+            manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet(),
         ).toList()
 
         brevmottakere.filterNotNull().forEachIndexed { index, brevmottaker ->
@@ -76,11 +76,11 @@ class DistribusjonshåndteringService(
                         vedtaksbrevgrunnlag,
                         brevmottager = brevmottaker.somBrevmottager,
                         manuellAdresseinfo = brevmottaker.manuellAdresse,
-                        annenMottakersNavn = brevmottakere[brevmottakere.lastIndex - index].navn
-                    )
+                        annenMottakersNavn = brevmottakere[brevmottakere.lastIndex - index].navn,
+                    ),
                 ),
                 varsletBeløp = varsletBeløp,
-                fritekst = fritekst
+                fritekst = fritekst,
             )
         }
     }
@@ -89,7 +89,7 @@ class DistribusjonshåndteringService(
             behandling: Behandling,
             fagsak: Fagsak,
             erManuelleMottakereStøttet: Boolean,
-            manueltRegistrerteMottakere: Set<ManuellBrevmottaker>
+            manueltRegistrerteMottakere: Set<ManuellBrevmottaker>,
         ): Pair<Brevmottaker, Brevmottaker?> {
             return if (erManuelleMottakereStøttet) {
                 require(manueltRegistrerteMottakere.all { it.behandlingId == behandling.id })
@@ -98,14 +98,14 @@ class DistribusjonshåndteringService(
                     .partition { it.type == BRUKER_MED_UTENLANDSK_ADRESSE || it.type == DØDSBO }
                 Pair(
                     first = manuellBrukeradresse.singleOrNull()?.let { ManuellBrevmottakerType(it) } ?: BrevmottagerType(BRUKER),
-                    second = manuellTilleggsmottaker.singleOrNull()?.let { ManuellBrevmottakerType(it) }
+                    second = manuellTilleggsmottaker.singleOrNull()?.let { ManuellBrevmottakerType(it) },
                 )
             } else {
                 val defaultMottaker = if (fagsak.institusjon != null) INSTITUSJON else BRUKER
                 val tilleggsmottaker = if (behandling.harVerge) VERGE else null
                 Pair(
                     first = BrevmottagerType(defaultMottaker),
-                    second = tilleggsmottaker?.let { BrevmottagerType(it) }
+                    second = tilleggsmottaker?.let { BrevmottagerType(it) },
                 )
             }
         }
@@ -138,11 +138,11 @@ val Brevmottaker?.manuellAdresse: Adresseinfo?
                     adresselinje2 = mottaker.adresselinje2,
                     postnummer = mottaker.postnummer,
                     poststed = mottaker.poststed,
-                    land = mottaker.landkode!!
+                    land = mottaker.landkode!!,
                 )
             } else {
                 null
-            }
+            },
         )
     } else {
         null

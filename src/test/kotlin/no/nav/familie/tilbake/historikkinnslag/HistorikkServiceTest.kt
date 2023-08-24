@@ -77,7 +77,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingRepository,
             fagsakRepository,
             brevsporingRepository,
-            spyKafkaProducer
+            spyKafkaProducer,
         )
         val recordMetadata = mockk<RecordMetadata>()
         every { recordMetadata.offset() } returns 1
@@ -91,20 +91,20 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
             Aktør.VEDTAKSLØSNING,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
             Aktør.VEDTAKSLØSNING,
             Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET.tittel,
-            Historikkinnslagstype.HENDELSE
+            Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -114,20 +114,20 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandlingId,
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-            LocalDate.now().plusDays(20)
+            LocalDate.now().plusDays(20),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
             Aktør.VEDTAKSLØSNING,
             opprettetTidspunkt,
-            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse
+            Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING.beskrivelse,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -135,7 +135,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
             tekst = "Årsak: Venter på tilbakemelding fra bruker",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -145,20 +145,20 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.settBehandlingPåVent(
             behandlingId,
             Venteårsak.AVVENTER_DOKUMENTASJON,
-            LocalDate.now().plusDays(20)
+            LocalDate.now().plusDays(20),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
             Aktør.SAKSBEHANDLER,
             opprettetTidspunkt,
-            Venteårsak.AVVENTER_DOKUMENTASJON.beskrivelse
+            Venteårsak.AVVENTER_DOKUMENTASJON.beskrivelse,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -166,7 +166,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = behandling.ansvarligSaksbehandler,
             tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT.tittel,
             tekst = "Årsak: Avventer dokumentasjon",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -176,20 +176,20 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
             Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
             aktør = Aktør.SAKSBEHANDLER,
             aktørIdent = behandling.ansvarligSaksbehandler,
             tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT.tittel,
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -199,20 +199,20 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT,
             Aktør.VEDTAKSLØSNING,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
             aktør = Aktør.VEDTAKSLØSNING,
             aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             tittel = TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT.tittel,
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -223,21 +223,21 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandlingId,
                 brevtype = Brevtype.VARSEL,
                 journalpostId = "testverdi",
-                dokumentId = "testverdi"
-            )
+                dokumentId = "testverdi",
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT,
             aktør = Aktør.VEDTAKSLØSNING,
             opprettetTidspunkt = opprettetTidspunkt,
-            brevtype = Brevtype.VARSEL.name
+            brevtype = Brevtype.VARSEL.name,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -247,7 +247,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             tekst = TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT.tekst,
             type = Historikkinnslagstype.BREV,
             dokumentId = "testverdi",
-            journalpostId = "testverdi"
+            journalpostId = "testverdi",
         )
     }
 
@@ -257,21 +257,21 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 resultater =
-                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))
-            )
+                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)),
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
             Aktør.VEDTAKSLØSNING,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
 
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
 
@@ -280,7 +280,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
             tekst = "Årsak: Kravgrunnlaget er nullstilt",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -290,22 +290,22 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 resultater =
-                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET))
-            )
+                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)),
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT,
             Aktør.VEDTAKSLØSNING,
             opprettetTidspunkt,
-            "testverdi"
+            "testverdi",
         )
 
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
 
@@ -314,7 +314,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             tittel = TilbakekrevingHistorikkinnslagstype.BEHANDLING_HENLAGT.tittel,
             tekst = "Årsak: Henlagt, søknaden er feilopprettet, Begrunnelse: testverdi",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -325,21 +325,21 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandlingId,
                 brevtype = Brevtype.HENLEGGELSE,
                 journalpostId = "testverdi",
-                dokumentId = "testverdi"
-            )
+                dokumentId = "testverdi",
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT,
             aktør = Aktør.VEDTAKSLØSNING,
             opprettetTidspunkt = opprettetTidspunkt,
-            brevtype = Brevtype.HENLEGGELSE.name
+            brevtype = Brevtype.HENLEGGELSE.name,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -349,7 +349,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             tekst = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst,
             type = Historikkinnslagstype.BREV,
             dokumentId = "testverdi",
-            journalpostId = "testverdi"
+            journalpostId = "testverdi",
         )
     }
 
@@ -360,8 +360,8 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                 behandlingId = behandlingId,
                 brevtype = Brevtype.HENLEGGELSE,
                 journalpostId = "testverdi",
-                dokumentId = "testverdi"
-            )
+                dokumentId = "testverdi",
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
@@ -369,13 +369,13 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktør = Aktør.VEDTAKSLØSNING,
             opprettetTidspunkt = opprettetTidspunkt,
             brevtype = Brevtype.HENLEGGELSE.name,
-            beskrivelse = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst
+            beskrivelse = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -385,7 +385,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             tekst = TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT.tekst + " er ikke sendt",
             type = Historikkinnslagstype.BREV,
             dokumentId = "testverdi",
-            journalpostId = "testverdi"
+            journalpostId = "testverdi",
         )
     }
 
@@ -395,13 +395,13 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
             Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -409,7 +409,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = behandling.ansvarligSaksbehandler,
             tittel = TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT.tittel,
             type = Historikkinnslagstype.SKJERMLENKE,
-            steg = Behandlingssteg.FAKTA.name
+            steg = Behandlingssteg.FAKTA.name,
         )
     }
 
@@ -419,13 +419,13 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT,
             Aktør.SAKSBEHANDLER,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -433,7 +433,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = behandling.ansvarligSaksbehandler,
             tittel = TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT.tittel,
             type = Historikkinnslagstype.SKJERMLENKE,
-            steg = Behandlingssteg.FORELDELSE.name
+            steg = Behandlingssteg.FORELDELSE.name,
         )
     }
 
@@ -449,23 +449,23 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
                         behandlingsvedtak = Behandlingsvedtak(
                             vedtaksdato = LocalDate.now(),
                             iverksettingsstatus =
-                            Iverksettingsstatus.IVERKSATT
-                        )
-                    )
-                )
-            )
+                            Iverksettingsstatus.IVERKSATT,
+                        ),
+                    ),
+                ),
+            ),
         )
         historikkService.lagHistorikkinnslag(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
             Aktør.BESLUTTER,
-            opprettetTidspunkt
+            opprettetTidspunkt,
         )
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -473,7 +473,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = requireNotNull(behandling.ansvarligBeslutter),
             tittel = TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET.tittel,
             tekst = "Resultat: Full tilbakebetaling",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -487,14 +487,14 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
             Aktør.SAKSBEHANDLER,
             opprettetTidspunkt,
-            "begrunnelse for endring"
+            "begrunnelse for endring",
         )
 
         verify {
             spyKafkaProducer.sendHistorikkinnslag(
                 capture(behandlingIdSlot),
                 capture(keySlot),
-                capture(historikkinnslagRecordSlot)
+                capture(historikkinnslagRecordSlot),
             )
         }
         assertHistorikkinnslagRequest(
@@ -502,7 +502,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
             aktørIdent = requireNotNull(behandling.ansvarligSaksbehandler),
             tittel = TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET.tittel,
             tekst = "Ny enhet: 3434, Begrunnelse: begrunnelse for endring",
-            type = Historikkinnslagstype.HENDELSE
+            type = Historikkinnslagstype.HENDELSE,
         )
     }
 
@@ -514,7 +514,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         tekst: String? = null,
         steg: String? = null,
         dokumentId: String? = null,
-        journalpostId: String? = null
+        journalpostId: String? = null,
     ) {
         behandlingIdSlot.captured shouldBe behandlingId
         val request = historikkinnslagRecordSlot.captured

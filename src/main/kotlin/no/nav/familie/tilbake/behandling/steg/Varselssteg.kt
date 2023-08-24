@@ -20,7 +20,7 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VARSEL} steg")
         logger.info(
             "Behandling $behandlingId venter på ${Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING}. " +
-                "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen"
+                "Den kan kun tas av vent av saksbehandler ved å gjenoppta behandlingen",
         )
     }
 
@@ -31,8 +31,8 @@ class Varselssteg(private val behandlingskontrollService: BehandlingskontrollSer
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.VARSEL,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }

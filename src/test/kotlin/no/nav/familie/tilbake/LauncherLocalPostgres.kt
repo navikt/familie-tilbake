@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
     // QAD hack for å få riktige profiler til spring 2.4.3
     System.setProperty(
         "spring.profiles.active",
-        "local, mock-pdl, mock-oauth, mock-oppgave, mock-integrasjoner, mock-økonomi"
+        "local, mock-pdl, mock-oauth, mock-oppgave, mock-integrasjoner, mock-økonomi",
     )
 
     SpringApplicationBuilder(LauncherLocalPostgres::class.java)

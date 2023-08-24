@@ -14,15 +14,15 @@ class Meldingstelling(
     val type: Meldingstype,
     val status: Mottaksstatus,
     val antall: Int = 1,
-    val dato: LocalDate = LocalDate.now()
+    val dato: LocalDate = LocalDate.now(),
 )
 
 enum class Mottaksstatus {
     KOBLET,
-    UKOBLET
+    UKOBLET,
 }
 
 enum class Meldingstype {
     KRAVGRUNNLAG,
-    STATUSMELDING
+    STATUSMELDING,
 }

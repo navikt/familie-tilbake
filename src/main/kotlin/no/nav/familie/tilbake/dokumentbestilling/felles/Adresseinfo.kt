@@ -6,5 +6,5 @@ class Adresseinfo(
     val ident: String,
     val mottagernavn: String,
     val annenMottagersNavn: String? = null,
-    val manuellAdresse: ManuellAdresse? = null
+    val manuellAdresse: ManuellAdresse? = null,
 )

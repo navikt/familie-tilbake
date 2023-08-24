@@ -44,17 +44,17 @@ class IntegrasjonerClientConfig {
                 "12345678901" -> ArkiverDokumentResponse(
                     "jpUkjentDødsbo",
                     false,
-                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
                 )
                 "04098203010" -> ArkiverDokumentResponse(
                     "jpUkjentDødsbo",
                     false,
-                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
                 )
                 else -> ArkiverDokumentResponse(
                     "jpId",
                     false,
-                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id"))
+                    listOf(no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo("id")),
                 )
             }
         }
@@ -68,19 +68,19 @@ class IntegrasjonerClientConfig {
                     throw RessursException(
                         httpStatus = HttpStatus.GONE,
                         ressurs = Ressurs.failure("Ukjent adresse dødsbo"),
-                        cause = RestClientResponseException("Ukjent adresse dødsbo", 410, "gone", null, null, null)
+                        cause = RestClientResponseException("Ukjent adresse dødsbo", 410, "gone", null, null, null),
                     )
                 "jpUkjentAdresse" ->
                     throw RessursException(
                         httpStatus = HttpStatus.BAD_REQUEST,
                         ressurs = Ressurs.failure("Mottaker har ukjent adresse"),
-                        cause = RestClientResponseException("Mottaker har ukjent adresse", 401, "not there", null, null, null)
+                        cause = RestClientResponseException("Mottaker har ukjent adresse", 401, "not there", null, null, null),
                     )
                 "jpDuplikatDistribusjon" ->
                     throw RessursException(
                         httpStatus = HttpStatus.CONFLICT,
                         ressurs = Ressurs.failure("Dokumentet er allerede distribuert"),
-                        cause = RestClientResponseException("Dokumentet er allerede distribuert", 409, "conflict", null, null, null)
+                        cause = RestClientResponseException("Dokumentet er allerede distribuert", 409, "conflict", null, null, null),
                     )
                 else -> "42"
             }
@@ -99,23 +99,23 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(7),
-                                datotype = "DATO_REGISTRERT"
+                                datotype = "DATO_REGISTRERT",
                             ),
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(7),
-                                datotype = "DATO_JOURNALFOERT"
-                            )
+                                datotype = "DATO_JOURNALFOERT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 1.1"
+                                tittel = "Dokument 1.1",
                             ),
                             DokumentInfo(
                                 dokumentInfoId = "dokId2",
-                                tittel = "Dokument 1.2"
-                            )
-                        )
+                                tittel = "Dokument 1.2",
+                            ),
+                        ),
                     ),
                     Journalpost(
                         journalpostId = "jpId2",
@@ -125,23 +125,23 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(4),
-                                datotype = "DATO_EKSPEDERT"
+                                datotype = "DATO_EKSPEDERT",
                             ),
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(4),
-                                datotype = "DATO_JOURNALFOERT"
-                            )
+                                datotype = "DATO_JOURNALFOERT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 2.1"
+                                tittel = "Dokument 2.1",
                             ),
                             DokumentInfo(
                                 dokumentInfoId = "dokId2",
-                                tittel = "Dokument 2.2"
-                            )
-                        )
+                                tittel = "Dokument 2.2",
+                            ),
+                        ),
                     ),
                     Journalpost(
                         journalpostId = "jpId3",
@@ -151,19 +151,19 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(2),
-                                datotype = "DATO_JOURNALFOERT"
-                            )
+                                datotype = "DATO_JOURNALFOERT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 3.1"
+                                tittel = "Dokument 3.1",
                             ),
                             DokumentInfo(
                                 dokumentInfoId = "dokId2",
-                                tittel = "Dokument 3.2"
-                            )
-                        )
+                                tittel = "Dokument 3.2",
+                            ),
+                        ),
                     ),
                     Journalpost(
                         journalpostId = "jpId4",
@@ -173,15 +173,15 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(3),
-                                datotype = "DATO_JOURNALFOERT"
-                            )
+                                datotype = "DATO_JOURNALFOERT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 4.1"
-                            )
-                        )
+                                tittel = "Dokument 4.1",
+                            ),
+                        ),
                     ),
                     Journalpost(
                         journalpostId = "jpId5",
@@ -191,15 +191,15 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(1),
-                                datotype = "DATO_JOURNALFOERT"
-                            )
+                                datotype = "DATO_JOURNALFOERT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 5.1"
-                            )
-                        )
+                                tittel = "Dokument 5.1",
+                            ),
+                        ),
                     ),
                     Journalpost(
                         journalpostId = "jpId6",
@@ -209,18 +209,18 @@ class IntegrasjonerClientConfig {
                         relevanteDatoer = listOf(
                             RelevantDato(
                                 dato = LocalDateTime.now().minusDays(6),
-                                datotype = "DATO_DOKUMENT"
-                            )
+                                datotype = "DATO_DOKUMENT",
+                            ),
                         ),
                         dokumenter = listOf(
                             DokumentInfo(
                                 dokumentInfoId = "dokId1",
-                                tittel = "Dokument 6.1"
-                            )
-                        )
-                    )
+                                tittel = "Dokument 6.1",
+                            ),
+                        ),
+                    ),
 
-                )
+                ),
             )
 
         val organisasjonsnummer = slot<String>()
@@ -228,15 +228,15 @@ class IntegrasjonerClientConfig {
             when (organisasjonsnummer.captured) {
                 "998765432" -> Organisasjon(
                     "998765432",
-                    "Testinstitusjon"
+                    "Testinstitusjon",
                 )
                 "999876543" -> Organisasjon(
                     "999876543",
-                    "Testinstitusjon med langt navn for test i frontend"
+                    "Testinstitusjon med langt navn for test i frontend",
                 )
                 else -> Organisasjon(
                     "987654321",
-                    "Bobs Burgers"
+                    "Bobs Burgers",
                 )
             }
         }
@@ -248,7 +248,7 @@ class IntegrasjonerClientConfig {
             "bb1234",
             "Bob",
             "Burger",
-            "enhet"
+            "enhet",
         )
 
         every { integrasjonerClient.finnOppgaver(any()) } answers
@@ -256,12 +256,12 @@ class IntegrasjonerClientConfig {
                 if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 0,
-                        oppgaver = emptyList()
+                        oppgaver = emptyList(),
                     )
                 } else {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 1,
-                        oppgaver = listOf(Oppgave(id = 1))
+                        oppgaver = listOf(Oppgave(id = 1)),
                     )
                 }
             }
@@ -272,7 +272,7 @@ class IntegrasjonerClientConfig {
             enhetId = 4806,
             navn = "Mock NAV Drammen",
             enhetNr = "mock",
-            status = "mock"
+            status = "mock",
         )
 
         return integrasjonerClient

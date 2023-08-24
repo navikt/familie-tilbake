@@ -218,8 +218,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 1000,
                 setOf(
                     lagYtelBeløp(utbetalt1, nyttBeløp1, skatteprosent),
-                    lagFeilBeløp(feilutbetalt1)
-                )
+                    lagFeilBeløp(feilutbetalt1),
+                ),
             )
         val grunnlagPeriode2: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
@@ -227,8 +227,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 1000,
                 setOf(
                     lagYtelBeløp(utbetalt2, nyttBeløp2, skatteprosent),
-                    lagFeilBeløp(feilutbetalt2)
-                )
+                    lagFeilBeløp(feilutbetalt2),
+                ),
             )
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode1, grunnlagPeriode2))
         kravgrunnlagRepository.insert(grunnlag)
@@ -249,7 +249,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val periode1 = Månedsperiode(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 30))
         val logiskPeriode = Månedsperiode(
             LocalDate.of(2019, 5, 1),
-            LocalDate.of(2019, 6, 30)
+            LocalDate.of(2019, 6, 30),
         )
         val grunnlagPeriode: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
@@ -257,8 +257,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 1000,
                 setOf(
                     lagYtelBeløp(BigDecimal.valueOf(10000), BigDecimal.valueOf(10)),
-                    lagFeilBeløp(BigDecimal.valueOf(10000))
-                )
+                    lagFeilBeløp(BigDecimal.valueOf(10000)),
+                ),
             )
         val grunnlagPeriode1: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
@@ -267,10 +267,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 setOf(
                     lagYtelBeløp(
                         BigDecimal.valueOf(10000),
-                        BigDecimal.valueOf(10)
+                        BigDecimal.valueOf(10),
                     ),
-                    lagFeilBeløp(BigDecimal.valueOf(10000))
-                )
+                    lagFeilBeløp(BigDecimal.valueOf(10000)),
+                ),
             )
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode, grunnlagPeriode1))
         kravgrunnlagRepository.insert(grunnlag)
@@ -303,8 +303,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
-                )
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
             )
         val andreKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
             .copy(
@@ -312,16 +312,16 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
                 beløp = setOf(
                     feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID())
-                )
+                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                ),
             )
         kravgrunnlagRepository.insert(
             kravgrunnlag431.copy(
                 perioder = setOf(
                     førsteKravgrunnlagsperiode,
-                    andreKravgrunnlagsperiode
-                )
-            )
+                    andreKravgrunnlagsperiode,
+                ),
+            ),
         )
 
         val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(
@@ -331,27 +331,27 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                     LocalDate.of(
                         2017,
                         1,
-                        1
+                        1,
                     ),
                     LocalDate.of(
                         2017,
                         1,
-                        31
-                    )
+                        31,
+                    ),
                 ),
                 Datoperiode(
                     LocalDate.of(
                         2017,
                         2,
-                        1
+                        1,
                     ),
                     LocalDate.of(
                         2017,
                         2,
-                        28
-                    )
-                )
-            )
+                        28,
+                    ),
+                ),
+            ),
         )
         beregnetPerioderDto.beregnetPerioder.size shouldBe 2
         beregnetPerioderDto.beregnetPerioder[0].periode shouldBe Datoperiode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 1, 31))
@@ -368,20 +368,20 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 perioder = listOf(
                     Datoperiode(
                         LocalDate.of(2017, 1, 1),
-                        LocalDate.of(2017, 1, 31)
+                        LocalDate.of(2017, 1, 31),
                     ),
                     Datoperiode(
                         LocalDate.of(2017, 2, 16),
-                        LocalDate.of(2017, 2, 28)
-                    )
-                )
+                        LocalDate.of(2017, 2, 28),
+                    ),
+                ),
             )
         }
         exception.message shouldBe "Periode med ${
-        Datoperiode(
-            LocalDate.of(2017, 2, 16),
-            LocalDate.of(2017, 2, 28)
-        )
+            Datoperiode(
+                LocalDate.of(2017, 2, 16),
+                LocalDate.of(2017, 2, 28),
+            )
         } er ikke i hele måneder"
     }
 
@@ -393,20 +393,20 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 perioder = listOf(
                     Datoperiode(
                         LocalDate.of(2017, 1, 1),
-                        LocalDate.of(2017, 1, 27)
+                        LocalDate.of(2017, 1, 27),
                     ),
                     Datoperiode(
                         LocalDate.of(2017, 2, 1),
-                        LocalDate.of(2017, 2, 28)
-                    )
-                )
+                        LocalDate.of(2017, 2, 28),
+                    ),
+                ),
             )
         }
         exception.message shouldBe "Periode med ${
-        Datoperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 1, 27)
-        )
+            Datoperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 1, 27),
+            )
         } er ikke i hele måneder"
     }
 
@@ -418,13 +418,13 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 aktsomhet = VilkårsvurderingAktsomhet(
                     aktsomhet = Aktsomhet.FORSETT,
-                    begrunnelse = "foo"
-                )
+                    begrunnelse = "foo",
+                ),
             )
         }.toSet()
         val vurdering = Vilkårsvurdering(
             behandlingId = behandlingId,
-            perioder = vurderingsperioder
+            perioder = vurderingsperioder,
         )
 
         vilkårsvurderingRepository.insert(vurdering)
@@ -434,7 +434,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         periode: Månedsperiode,
         resultat: Foreldelsesvurderingstype,
-        foreldelsesFrist: LocalDate?
+        foreldelsesFrist: LocalDate?,
     ) {
         val vurdertForeldelse =
             VurdertForeldelse(
@@ -444,9 +444,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                         periode = periode,
                         begrunnelse = "foo",
                         foreldelsesvurderingstype = resultat,
-                        foreldelsesfrist = foreldelsesFrist
-                    )
-                )
+                        foreldelsesfrist = foreldelsesFrist,
+                    ),
+                ),
             )
         vurdertForeldelseRepository.insert(vurdertForeldelse)
     }
@@ -457,8 +457,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
             periode = periode,
             beløp = setOf(
                 lagFeilBeløp(BigDecimal.valueOf(10000)),
-                lagYtelBeløp(BigDecimal.valueOf(10000), skattProsent)
-            )
+                lagYtelBeløp(BigDecimal.valueOf(10000), skattProsent),
+            ),
         )
         val grunnlag: Kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(p))
         kravgrunnlagRepository.insert(grunnlag)
@@ -467,12 +467,12 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     private fun lagGrunnlagPeriode(
         periode: Månedsperiode,
         skattMnd: Int,
-        beløp: Set<Kravgrunnlagsbeløp433> = setOf()
+        beløp: Set<Kravgrunnlagsbeløp433> = setOf(),
     ): Kravgrunnlagsperiode432 {
         return Kravgrunnlagsperiode432(
             periode = periode,
             månedligSkattebeløp = BigDecimal.valueOf(skattMnd.toLong()),
-            beløp = beløp
+            beløp = beløp,
         )
     }
 

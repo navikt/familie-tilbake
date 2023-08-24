@@ -42,7 +42,7 @@ object BrevmottagerUtil {
 
     fun utledBrevmottager(
         behandling: Behandling,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): Brevmottager {
         return if (behandling.harVerge) Brevmottager.VERGE else if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
     }

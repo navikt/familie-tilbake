@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.HendelsesundertypePer
 data class HbFakta(
     val hendelsestype: Hendelsestype,
     val hendelsesundertype: Hendelsesundertype,
-    val fritekstFakta: String? = null
+    val fritekstFakta: String? = null,
 ) {
 
     init {

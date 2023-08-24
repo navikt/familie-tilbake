@@ -32,7 +32,7 @@ class InnhentDokumentasjonbrevService(
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
-    private val brevmetadataUtil: BrevmetadataUtil
+    private val brevmetadataUtil: BrevmetadataUtil,
 ) {
 
     fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager? = null) {
@@ -45,7 +45,7 @@ class InnhentDokumentasjonbrevService(
                     mottager = mottaker,
                     metadata = fritekstbrevsdata.brevmetadata,
                     overskrift = fritekstbrevsdata.overskrift,
-                    brevtekst = fritekstbrevsdata.brevtekst
+                    brevtekst = fritekstbrevsdata.brevtekst,
                 )
             }
         } else {
@@ -55,21 +55,21 @@ class InnhentDokumentasjonbrevService(
                 mottager = brevmottager,
                 metadata = fritekstbrevsdata.brevmetadata,
                 overskrift = fritekstbrevsdata.overskrift,
-                brevtekst = fritekstbrevsdata.brevtekst
+                brevtekst = fritekstbrevsdata.brevtekst,
             )
             pdfBrevService.sendBrev(
                 behandling = behandling,
                 fagsak = fagsak,
                 brevtype = Brevtype.INNHENT_DOKUMENTASJON,
                 data = brevdata,
-                fritekst = fritekst
+                fritekst = fritekst,
             )
         }
     }
 
     fun hentForhåndsvisningInnhentDokumentasjonBrev(
         behandlingId: UUID,
-        fritekst: String
+        fritekst: String,
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -83,8 +83,8 @@ class InnhentDokumentasjonbrevService(
                 mottager = brevmottager,
                 metadata = fritekstbrevsdata.brevmetadata,
                 overskrift = fritekstbrevsdata.overskrift,
-                brevtekst = fritekstbrevsdata.brevtekst
-            )
+                brevtekst = fritekstbrevsdata.brevtekst,
+            ),
         )
     }
 
@@ -95,7 +95,7 @@ class InnhentDokumentasjonbrevService(
         return Fritekstbrevsdata(
             overskrift = overskrift,
             brevtekst = brevtekst,
-            brevmetadata = dokument.brevmetadata
+            brevmetadata = dokument.brevmetadata,
         )
     }
 
@@ -104,7 +104,7 @@ class InnhentDokumentasjonbrevService(
         fagsak: Fagsak,
         fritekst: String,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null,
     ): InnhentDokumentasjonsbrevsdokument {
         val brevmetadata = forhåndsgenerertMetadata ?: run {
             val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
@@ -130,13 +130,13 @@ class InnhentDokumentasjonbrevService(
                 gjelderDødsfall = gjelderDødsfall,
                 institusjon = fagsak.institusjon?.let {
                     organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-                }
+                },
             )
         }
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata.copy(tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB]),
             fristdato = Constants.brukersSvarfrist(),
-            fritekstFraSaksbehandler = fritekst
+            fritekstFraSaksbehandler = fritekst,
         )
     }
 

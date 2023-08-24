@@ -38,7 +38,7 @@ object KravgrunnlagMapper {
             saksbehandlerId = kravgrunnlag.saksbehId,
             referanse = kravgrunnlag.referanse,
             eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
-            perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode)
+            perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode),
         )
     }
 
@@ -47,7 +47,7 @@ object KravgrunnlagMapper {
             Kravgrunnlagsperiode432(
                 periode = Månedsperiode(it.periode.fom, it.periode.tom),
                 månedligSkattebeløp = it.belopSkattMnd,
-                beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop)
+                beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop),
             )
         }.toSet()
     }
@@ -65,7 +65,7 @@ object KravgrunnlagMapper {
                 skatteprosent = it.skattProsent,
                 resultatkode = it.kodeResultat,
                 årsakskode = it.kodeAArsak,
-                skyldkode = it.kodeSkyld
+                skyldkode = it.kodeSkyld,
             )
         }.toSet()
     }

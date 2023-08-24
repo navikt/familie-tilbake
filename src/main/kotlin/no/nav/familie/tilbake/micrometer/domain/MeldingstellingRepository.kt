@@ -16,7 +16,7 @@ interface MeldingstellingRepository :
         fagsystem: Fagsystem,
         type: Meldingstype,
         status: Mottaksstatus,
-        dato: LocalDate = LocalDate.now()
+        dato: LocalDate = LocalDate.now(),
     ): Meldingstelling?
 
     fun findByType(type: Meldingstype): List<Meldingstelling>
@@ -24,7 +24,7 @@ interface MeldingstellingRepository :
     @Query(
         """SELECT fagsystem, dato, SUM(antall) as antall FROM meldingstelling
               WHERE type = :type
-              GROUP BY fagsystem, dato"""
+              GROUP BY fagsystem, dato""",
     )
     fun summerAntallForType(type: Meldingstype): List<ForekomsterPerDag>
 
@@ -34,13 +34,13 @@ interface MeldingstellingRepository :
               WHERE fagsystem = :fagsystem
               AND type = :type
               AND status = :status
-              AND dato = :dato"""
+              AND dato = :dato""",
     )
     fun oppdaterTeller(
         fagsystem: Fagsystem,
         type: Meldingstype,
         status: Mottaksstatus,
-        dato: LocalDate = LocalDate.now()
+        dato: LocalDate = LocalDate.now(),
     )
 
     // language=PostgreSQL
@@ -52,7 +52,7 @@ interface MeldingstellingRepository :
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status <> 'AVSLUTTET'
-              GROUP BY fagsystem, år, uke"""
+              GROUP BY fagsystem, år, uke""",
     )
     fun finnÅpneBehandlinger(): List<ForekomsterPerUke>
 
@@ -64,7 +64,7 @@ interface MeldingstellingRepository :
               JOIN behandlingsstegstilstand b ON behandling.id = b.behandling_id
               WHERE status <> 'AVSLUTTET'
               AND behandlingsstegsstatus = 'KLAR'
-              GROUP BY fagsystem, behandlingssteg"""
+              GROUP BY fagsystem, behandlingssteg""",
     )
     fun finnKlarTilBehandling(): List<BehandlingerPerSteg>
 
@@ -76,7 +76,7 @@ interface MeldingstellingRepository :
               JOIN behandlingsstegstilstand b ON behandling.id = b.behandling_id
               WHERE status <> 'AVSLUTTET'
               AND behandlingsstegsstatus = 'VENTER'
-              GROUP BY fagsystem, behandlingssteg"""
+              GROUP BY fagsystem, behandlingssteg""",
     )
     fun finnVentendeBehandlinger(): List<BehandlingerPerSteg>
 
@@ -90,7 +90,7 @@ interface MeldingstellingRepository :
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               JOIN brevsporing b ON behandling.id = b.behandling_id
-              GROUP BY fagsystem, b.brevtype, år, uke"""
+              GROUP BY fagsystem, b.brevtype, år, uke""",
     )
     fun finnSendteBrev(): List<BrevPerUke>
 
@@ -105,7 +105,7 @@ interface MeldingstellingRepository :
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               JOIN behandlingsresultat ON behandling.id = behandlingsresultat.behandling_id
               WHERE status = 'AVSLUTTET'
-              GROUP BY fagsystem, vedtakstype, år, uke"""
+              GROUP BY fagsystem, vedtakstype, år, uke""",
     )
     fun finnVedtak(): List<VedtakPerUke>
 }

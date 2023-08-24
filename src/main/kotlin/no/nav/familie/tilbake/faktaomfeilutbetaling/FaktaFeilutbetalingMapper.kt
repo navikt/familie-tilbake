@@ -21,19 +21,19 @@ object FaktaFeilutbetalingMapper {
         kravgrunnlag: Kravgrunnlag431,
         revurderingsvedtaksdato: LocalDate,
         varsletData: Varsel?,
-        fagsystemsbehandling: Fagsystemsbehandling
+        fagsystemsbehandling: Fagsystemsbehandling,
     ): FaktaFeilutbetalingDto {
         val logiskePerioder =
             LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
         val feilutbetaltePerioder = hentFeilutbetaltePerioder(
             faktaFeilutbetaling = faktaFeilutbetaling,
-            logiskePerioder = logiskePerioder
+            logiskePerioder = logiskePerioder,
         )
         val faktainfo = Faktainfo(
             revurderingsårsak = fagsystemsbehandling.årsak,
             revurderingsresultat = fagsystemsbehandling.resultat,
             tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
-            konsekvensForYtelser = fagsystemsbehandling.konsekvenser.map { it.konsekvens }.toSet()
+            konsekvensForYtelser = fagsystemsbehandling.konsekvenser.map { it.konsekvens }.toSet(),
         )
 
         return FaktaFeilutbetalingDto(
@@ -43,25 +43,25 @@ object FaktaFeilutbetalingMapper {
             faktainfo = faktainfo,
             feilutbetaltePerioder = feilutbetaltePerioder,
             totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
-            totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder)
+            totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
         )
     }
 
     private fun hentFeilutbetaltePerioder(
         faktaFeilutbetaling: FaktaFeilutbetaling?,
-        logiskePerioder: List<LogiskPeriode>
+        logiskePerioder: List<LogiskPeriode>,
     ): List<FeilutbetalingsperiodeDto> {
         return faktaFeilutbetaling?.perioder?.map {
             FeilutbetalingsperiodeDto(
                 periode = it.periode.toDatoperiode(),
                 feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
                 hendelsestype = it.hendelsestype,
-                hendelsesundertype = it.hendelsesundertype
+                hendelsesundertype = it.hendelsesundertype,
             )
         } ?: logiskePerioder.map {
             FeilutbetalingsperiodeDto(
                 periode = it.periode.toDatoperiode(),
-                feilutbetaltBeløp = it.feilutbetaltBeløp
+                feilutbetaltBeløp = it.feilutbetaltBeløp,
             )
         }
     }

@@ -7,5 +7,5 @@ typealias ManuellBrevmottakerRequestDto = Brevmottaker
 
 data class ManuellBrevmottakerResponsDto(
     val id: UUID,
-    val brevmottaker: Brevmottaker
+    val brevmottaker: Brevmottaker,
 )

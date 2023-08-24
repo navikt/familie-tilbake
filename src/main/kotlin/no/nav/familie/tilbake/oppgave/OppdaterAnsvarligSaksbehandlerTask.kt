@@ -14,12 +14,12 @@ import java.util.UUID
     taskStepType = OppdaterAnsvarligSaksbehandlerTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Oppdaterer saksbehandler på oppgave",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class OppdaterAnsvarligSaksbehandlerTask(
     private val oppgaveService: OppgaveService,
     private val behandlingRepository: BehandlingRepository,
-    private val oppgavePrioritetService: OppgavePrioritetService
+    private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)

@@ -38,7 +38,7 @@ class OppgaveService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
     private val taskService: TaskService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -55,14 +55,14 @@ class OppgaveService(
         val finnOppgaveRequest = FinnOppgaveRequest(
             behandlingstype = Behandlingstype.Tilbakekreving,
             saksreferanse = behandling.eksternBrukId.toString(),
-            tema = fagsak.ytelsestype.tilTema()
+            tema = fagsak.ytelsestype.tilTema(),
         )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
                 secureLogger.error(
                     "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                        "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
@@ -70,7 +70,7 @@ class OppgaveService(
             finnOppgaveResponse.oppgaver.isEmpty() -> {
                 secureLogger.error(
                     "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                        "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
                 throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
             }
@@ -88,7 +88,7 @@ class OppgaveService(
         beskrivelse: String?,
         fristForFerdigstillelse: LocalDate,
         saksbehandler: String?,
-        prioritet: OppgavePrioritet
+        prioritet: OppgavePrioritet,
     ): OppgaveResponse {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
@@ -100,14 +100,14 @@ class OppgaveService(
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
             throw Feil(
                 "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
-                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først."
+                    "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
             )
         }
 
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(
                 ident = aktørId,
-                gruppe = IdentGruppe.AKTOERID
+                gruppe = IdentGruppe.AKTOERID,
             ),
             saksId = behandling.eksternBrukId.toString(),
             tema = fagsak.ytelsestype.tilTema(),
@@ -118,14 +118,14 @@ class OppgaveService(
                 fagsak.eksternFagsakId,
                 behandling.eksternBrukId.toString(),
                 fagsak.fagsystem.name,
-                beskrivelse
+                beskrivelse,
             ),
             enhetsnummer = behandling.behandlendeEnhet,
             tilordnetRessurs = saksbehandler,
             behandlingstype = Behandlingstype.Tilbakekreving.value,
             behandlingstema = null,
             mappeId = finnAktuellMappe(enhet, oppgavetype),
-            prioritet = prioritet
+            prioritet = prioritet,
         )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
@@ -179,7 +179,7 @@ class OppgaveService(
             finnOppgaveResponse.oppgaver.size > 1 -> {
                 secureLogger.error(
                     "Mer enn en oppgave åpen for behandling ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                        "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
                 throw Feil("Har mer enn en åpen oppgave for behandling ${behandling.eksternBrukId}")
             }
@@ -188,7 +188,7 @@ class OppgaveService(
                 logger.error("Fant ingen oppgave å ferdigstille for behandling ${behandling.eksternBrukId}")
                 secureLogger.error(
                     "Fant ingen oppgave å ferdigstille ${behandling.eksternBrukId}, " +
-                        "$finnOppgaveRequest, $finnOppgaveResponse"
+                        "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
             }
 
@@ -201,13 +201,13 @@ class OppgaveService(
     private fun finnOppgave(
         behandling: Behandling,
         oppgavetype: Oppgavetype?,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
         val finnOppgaveRequest = FinnOppgaveRequest(
             behandlingstype = Behandlingstype.Tilbakekreving,
             saksreferanse = behandling.eksternBrukId.toString(),
             oppgavetype = oppgavetype,
-            tema = fagsak.ytelsestype.tilTema()
+            tema = fagsak.ytelsestype.tilTema(),
         )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         return Pair(finnOppgaveRequest, finnOppgaveResponse)
@@ -217,7 +217,7 @@ class OppgaveService(
         eksternFagsakId: String,
         eksternbrukBehandlingID: String,
         fagsystem: String,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
     ): String {
         return if (beskrivelse != null) {
             beskrivelse + "\n"
@@ -243,10 +243,10 @@ class OppgaveService(
                 Status.PLUKKET,
                 Status.FEILET,
                 Status.KLAR_TIL_PLUKK,
-                Status.BEHANDLER
+                Status.BEHANDLER,
             ),
             type = FerdigstillOppgaveTask.TYPE,
-            page = Pageable.unpaged()
+            page = Pageable.unpaged(),
         )
         return ubehandledeTasker.any {
             it.payload == behandlingId.toString() &&

@@ -23,7 +23,7 @@ class FaktaFeilutbetalingssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val historikkTaskService: HistorikkTaskService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -44,7 +44,7 @@ class FaktaFeilutbetalingssteg(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-            Aktør.SAKSBEHANDLER
+            Aktør.SAKSBEHANDLER,
         )
 
         if (faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId) != null) {
@@ -60,7 +60,7 @@ class FaktaFeilutbetalingssteg(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FAKTA_VURDERT,
-            Aktør.VEDTAKSLØSNING
+            Aktør.VEDTAKSLØSNING,
         )
 
         flyttBehandlingVidere(behandlingId)
@@ -73,8 +73,8 @@ class FaktaFeilutbetalingssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FAKTA,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 
@@ -92,8 +92,8 @@ class FaktaFeilutbetalingssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FAKTA,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }

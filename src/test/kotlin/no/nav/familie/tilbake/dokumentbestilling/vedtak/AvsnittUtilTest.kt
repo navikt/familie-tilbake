@@ -49,14 +49,14 @@ class AvsnittUtilTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETRYGD,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     private val vedtaksbrevFelles = HbVedtaksbrevFelles(
         brevmetadata = brevmetadata,
         konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
         søker = HbPerson(
-            navn = "Søker Søkersen"
+            navn = "Søker Søkersen",
         ),
         fagsaksvedtaksdato = LocalDate.now(),
         behandling = HbBehandling(erRevurdering = false),
@@ -65,12 +65,12 @@ class AvsnittUtilTest {
             BigDecimal(23002),
             BigDecimal(23002),
             BigDecimal(23002),
-            BigDecimal.ZERO
+            BigDecimal.ZERO,
         ),
         hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
         totaltFeilutbetaltBeløp = BigDecimal.valueOf(20000),
         vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-        ansvarligBeslutter = "ansvarlig person sin signatur"
+        ansvarligBeslutter = "ansvarlig person sin signatur",
     )
 
     @Test
@@ -83,15 +83,15 @@ class AvsnittUtilTest {
                 BigDecimal(23002),
                 BigDecimal(23002),
                 BigDecimal(23002),
-                BigDecimal.ZERO
+                BigDecimal.ZERO,
             ),
             fritekstoppsummering = "Her finner du friteksten til oppsummeringen",
             hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal(33001),
-                varsletDato = LocalDate.of(2020, 4, 4)
+                varsletDato = LocalDate.of(2020, 4, 4),
             ),
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
         )
 
         val perioder =
@@ -112,21 +112,21 @@ class AvsnittUtilTest {
                             listOf(
                                 SærligGrunn.TID_FRA_UTBETALING,
                                 SærligGrunn.STØRRELSE_BELØP,
-                                SærligGrunn.ANNET
+                                SærligGrunn.ANNET,
                             ),
                             "Fritekst særlige grunner",
-                            "Fritekst særlige grunner annet"
-                        )
+                            "Fritekst særlige grunner annet",
+                        ),
                     ),
                     resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
-                    førstePeriode = true
+                    førstePeriode = true,
                 ),
                 HbVedtaksbrevsperiode(
                     periode = februar,
                     kravgrunnlag = HbKravgrunnlag(
                         feilutbetaltBeløp = BigDecimal(3000),
                         riktigBeløp = BigDecimal(3000),
-                        utbetaltBeløp = BigDecimal(6000)
+                        utbetaltBeløp = BigDecimal(6000),
                     ),
                     fakta = HbFakta(Hendelsestype.BOR_MED_SØKER, Hendelsesundertype.BOR_IKKE_MED_BARN),
                     vurderinger =
@@ -139,13 +139,13 @@ class AvsnittUtilTest {
                         HbSærligeGrunner(
                             listOf(
                                 SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL,
-                                SærligGrunn.STØRRELSE_BELØP
-                            )
-                        )
+                                SærligGrunn.STØRRELSE_BELØP,
+                            ),
+                        ),
                     ),
                     resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(3000),
-                    førstePeriode = true
-                )
+                    førstePeriode = true,
+                ),
             )
         val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 

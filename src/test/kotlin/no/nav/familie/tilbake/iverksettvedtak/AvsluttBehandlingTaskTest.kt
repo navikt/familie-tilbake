@@ -57,8 +57,8 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
             Behandlingsstegstilstand(
                 behandlingId = behandlingId,
                 behandlingssteg = Behandlingssteg.AVSLUTTET,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR
-            )
+                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+            ),
         )
 
         avsluttBehandlingTask.doTask(Task(type = AvsluttBehandlingTask.TYPE, payload = behandlingId.toString()))

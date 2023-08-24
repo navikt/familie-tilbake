@@ -23,7 +23,7 @@ class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingSe
     @KafkaListener(
         id = "familie-tilbake",
         topics = [KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC],
-        containerFactory = "concurrentKafkaListenerContainerFactory"
+        containerFactory = "concurrentKafkaListenerContainerFactory",
     )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
         logger.info("Fagsystemsbehandlingsdata er mottatt i kafka med key=${consumerRecord.key()}")

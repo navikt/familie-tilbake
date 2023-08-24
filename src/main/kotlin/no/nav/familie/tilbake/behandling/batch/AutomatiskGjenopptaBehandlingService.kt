@@ -23,7 +23,7 @@ class AutomatiskGjenopptaBehandlingService(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val historikkTaskService: HistorikkTaskService,
     private val stegService: StegService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -42,7 +42,7 @@ class AutomatiskGjenopptaBehandlingService(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
-            Aktør.VEDTAKSLØSNING
+            Aktør.VEDTAKSLØSNING,
         )
         stegService.gjenopptaSteg(behandlingId)
 
@@ -53,7 +53,7 @@ class AutomatiskGjenopptaBehandlingService(
             logger.warn(
                 "Behandling $behandlingId har ikke fått kravgrunnlag ennå " +
                     "eller mottok kravgrunnlag er sperret/avsluttet. " +
-                    "Behandlingen bør analyseres og henlegges ved behov"
+                    "Behandlingen bør analyseres og henlegges ved behov",
             )
         }
 
@@ -61,7 +61,7 @@ class AutomatiskGjenopptaBehandlingService(
             behandlingId = behandlingId,
             beskrivelse = "Behandling er tatt av vent automatisk",
             frist = tidsfrist,
-            saksbehandler = ContextService.hentSaksbehandler()
+            saksbehandler = ContextService.hentSaksbehandler(),
         )
 
         // oppdaterer oppgave hvis saken er fortsatt på vent,
@@ -72,7 +72,7 @@ class AutomatiskGjenopptaBehandlingService(
                 behandlingId = behandlingId,
                 beskrivelse = aktivStegstilstand.venteårsak!!.beskrivelse,
                 frist = aktivStegstilstand.tidsfrist!!,
-                triggerTid = 2L
+                triggerTid = 2L,
             )
         }
     }

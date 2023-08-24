@@ -16,7 +16,7 @@ import java.util.UUID
     taskStepType = OppdaterEnhetOppgaveTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Oppdaterer enhet på oppgave",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class OppdaterEnhetOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 

@@ -6,5 +6,5 @@ import java.math.BigDecimal
 class GrunnlagsperiodeMedSkatteprosent(
     val periode: Månedsperiode,
     val tilbakekrevingsbeløp: BigDecimal,
-    val skatteprosent: BigDecimal
+    val skatteprosent: BigDecimal,
 )

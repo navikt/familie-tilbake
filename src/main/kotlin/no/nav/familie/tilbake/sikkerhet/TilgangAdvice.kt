@@ -37,7 +37,7 @@ enum class HenteParam {
     FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     MOTTATT_XML_ID,
     EKSTERN_KRAVGRUNNLAG_ID,
-    INGEN
+    INGEN,
 }
 
 @Aspect
@@ -49,7 +49,7 @@ class TilgangAdvice(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val auditLogger: AuditLogger,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-    private val integrasjonerClient: IntegrasjonerClient
+    private val integrasjonerClient: IntegrasjonerClient,
 ) {
 
     private val feltnavnFagsystem = "fagsystem"
@@ -73,12 +73,12 @@ class TilgangAdvice(
             validateFagsystemTilgangIGetRequest(
                 rolletilgangssjekk.henteParam,
                 joinpoint.args,
-                rolletilgangssjekk
+                rolletilgangssjekk,
             )
         } else if (HttpMethod.POST.matches(httpRequest.method) || HttpMethod.PUT.matches(httpRequest.method)) {
             validateFagsystemTilgangIPostRequest(
                 joinpoint.args[0],
-                rolletilgangssjekk
+                rolletilgangssjekk,
             )
         } else {
             logger.error("${httpRequest.requestURI} støtter ikke tilgangssjekk")
@@ -88,7 +88,7 @@ class TilgangAdvice(
     private fun validateFagsystemTilgangIGetRequest(
         param: HenteParam,
         requestBody: Array<Any>,
-        rolletilgangssjekk: Rolletilgangssjekk
+        rolletilgangssjekk: Rolletilgangssjekk,
     ) {
         when (param) {
             HenteParam.BEHANDLING_ID -> {
@@ -100,14 +100,14 @@ class TilgangAdvice(
                 if (requestBody.size > 1) {
                     behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(
                         requestBody[1],
-                        rolletilgangssjekk.minimumBehandlerrolle
+                        rolletilgangssjekk.minimumBehandlerrolle,
                     )
                 }
                 validate(
                     fagsystem = fagsak.fagsystem,
                     minimumBehandlerrolle = behandlerRolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak, behandling)
             }
@@ -121,7 +121,7 @@ class TilgangAdvice(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
@@ -134,7 +134,7 @@ class TilgangAdvice(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
@@ -146,7 +146,7 @@ class TilgangAdvice(
                     fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(økonomiXmlMottatt.ytelsestype),
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
             }
             HenteParam.EKSTERN_KRAVGRUNNLAG_ID -> {
@@ -156,7 +156,7 @@ class TilgangAdvice(
                 if (økonomiXmlMottatt == null && kravgrunnlag == null) {
                     throw Feil(
                         message = "Finnes ikke eksternKravgrunnlagId=$eksternKravgrunnlagId",
-                        httpStatus = HttpStatus.BAD_REQUEST
+                        httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }
                 val ytelsestype = økonomiXmlMottatt?.ytelsestype ?: kravgrunnlag!!.fagområdekode.ytelsestype
@@ -165,7 +165,7 @@ class TilgangAdvice(
                     fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
             }
             else -> {
@@ -176,7 +176,7 @@ class TilgangAdvice(
 
     private fun validateFagsystemTilgangIPostRequest(
         requestBody: Any,
-        rolletilgangssjekk: Rolletilgangssjekk
+        rolletilgangssjekk: Rolletilgangssjekk,
     ) {
         val fields: Collection<KProperty1<out Any, *>> = requestBody::class.declaredMemberProperties
 
@@ -196,7 +196,7 @@ class TilgangAdvice(
                     fagsystem = fagsak.fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak, behandling)
             }
@@ -208,7 +208,7 @@ class TilgangAdvice(
                     fagsystem = fagsak.fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
@@ -221,7 +221,7 @@ class TilgangAdvice(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
@@ -235,7 +235,7 @@ class TilgangAdvice(
                     fagsystem = fagsystem,
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = fagsak,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
                 logAccess(rolletilgangssjekk, fagsak)
             }
@@ -246,7 +246,7 @@ class TilgangAdvice(
                     fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
                     minimumBehandlerrolle = rolletilgangssjekk.minimumBehandlerrolle,
                     fagsak = null,
-                    handling = rolletilgangssjekk.handling
+                    handling = rolletilgangssjekk.handling,
                 )
             }
             else -> {
@@ -259,7 +259,7 @@ class TilgangAdvice(
         fagsystem: Fagsystem,
         minimumBehandlerrolle: Behandlerrolle,
         fagsak: Fagsak?,
-        handling: String
+        handling: String,
     ) {
         val brukerRolleOgFagsystemstilgang =
             ContextService.hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, handling)
@@ -269,7 +269,7 @@ class TilgangAdvice(
             validateForvaltingsrolle(
                 brukerRolleOgFagsystemstilgang = brukerRolleOgFagsystemstilgang,
                 minimumBehandlerrolle = minimumBehandlerrolle,
-                handling = handling
+                handling = handling,
             )
             return
         }
@@ -281,12 +281,12 @@ class TilgangAdvice(
         validateRolle(
             brukersrolleTilFagsystemet = brukerRolleOgFagsystemstilgang.tilganger.getValue(tilgangskontrollsfagsystem),
             minimumBehandlerrolle = minimumBehandlerrolle,
-            handling = handling
+            handling = handling,
         )
 
         validateEgenAnsattKode6Kode7(
             fagsak = fagsak,
-            handling = handling
+            handling = handling,
         )
     }
 
@@ -299,15 +299,15 @@ class TilgangAdvice(
                     CustomKeyValue("eksternFagsakId", fagsak.eksternFagsakId),
                     behandling?.let {
                         CustomKeyValue("behandlingEksternBrukId", behandling.eksternBrukId.toString())
-                    }
-                )
+                    },
+                ),
             )
         }
     }
 
     private fun validateEgenAnsattKode6Kode7(
         fagsak: Fagsak?,
-        handling: String
+        handling: String,
     ) {
         val personerIBehandlingen = fagsak?.bruker?.ident?.let { listOf(it) } ?: return
         val tilganger = integrasjonerClient.sjekkTilgangTilPersoner(personerIBehandlingen)
@@ -315,7 +315,7 @@ class TilgangAdvice(
             throw Feil(
                 message = "${ContextService.hentSaksbehandler()} har ikke tilgang til person i $handling",
                 frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til person i $handling",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -323,13 +323,13 @@ class TilgangAdvice(
     private fun validateFagsystem(
         fagsystem: Tilgangskontrollsfagsystem,
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
-        handling: String
+        handling: String,
     ) {
         if (!brukerRolleOgFagsystemstilgang.tilganger.contains(fagsystem)) {
             throw Feil(
                 message = "${ContextService.hentSaksbehandler()} har ikke tilgang til $handling",
                 frontendFeilmelding = "${ContextService.hentSaksbehandler()}  har ikke tilgang til $handling",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -337,14 +337,14 @@ class TilgangAdvice(
     private fun validateRolle(
         brukersrolleTilFagsystemet: Behandlerrolle,
         minimumBehandlerrolle: Behandlerrolle,
-        handling: String
+        handling: String,
     ) {
         if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
             throw Feil(
                 message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
                     "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
@@ -352,7 +352,7 @@ class TilgangAdvice(
                 message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
                     "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -360,7 +360,7 @@ class TilgangAdvice(
     private fun validateForvaltingsrolle(
         brukerRolleOgFagsystemstilgang: InnloggetBrukertilgang,
         minimumBehandlerrolle: Behandlerrolle,
-        handling: String
+        handling: String,
     ) {
         val tilganger = brukerRolleOgFagsystemstilgang.tilganger
         // Forvalter kan kun kalle forvaltningstjenestene og tjenestene som kan kalles av Veileder
@@ -371,7 +371,7 @@ class TilgangAdvice(
                 message = "${ContextService.hentSaksbehandler()} med rolle FORVALTER " +
                     "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
     }
@@ -382,13 +382,13 @@ class TilgangAdvice(
         throw Feil(
             message = feilmelding,
             frontendFeilmelding = feilmelding,
-            httpStatus = HttpStatus.BAD_REQUEST
+            httpStatus = HttpStatus.BAD_REQUEST,
         )
     }
 
     private fun bestemBehandlerRolleForUtførFatteVedtakSteg(
         requestBody: Any,
-        minimumBehandlerrolle: Behandlerrolle
+        minimumBehandlerrolle: Behandlerrolle,
     ): Behandlerrolle {
         // Behandlerrolle blir endret til Beslutter kun når FatteVedtak steg utføres
         if (requestBody is BehandlingsstegFatteVedtaksstegDto) {

@@ -4,5 +4,5 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 
 class SærligeGrunner(
     var erSærligeGrunnerTilReduksjon: Boolean = false,
-    var særligeGrunner: List<SærligGrunn> = emptyList()
+    var særligeGrunner: List<SærligGrunn> = emptyList(),
 )

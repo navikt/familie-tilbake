@@ -23,8 +23,8 @@ class OAuth2AccessTokenTestConfig {
                     "Mock-token-response",
                     60,
                     60,
-                    null
-                )
+                    null,
+                ),
             )
         return tokenMockService
     }

@@ -91,7 +91,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
         opprettBehandlingManueltTask = OpprettBehandlingManueltTask(
             hentFagsystemsbehandlingService,
-            behandlingManuellOpprettelseService
+            behandlingManuellOpprettelseService,
         )
 
         val recordMetadata = mockk<RecordMetadata>()
@@ -112,7 +112,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         verify {
             spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
                 capture(requestIdSlot),
-                capture(hentFagsystemsbehandlingRequestSlot)
+                capture(hentFagsystemsbehandlingRequestSlot),
             )
         }
         val requestId = requestIdSlot.captured
@@ -120,7 +120,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         requestSendt.shouldNotBeNull()
         requestSendt.id shouldBe requestId
@@ -144,7 +144,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         requestSendt.shouldNotBeNull()
     }
@@ -157,7 +157,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -175,7 +175,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -218,7 +218,7 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             .findByEksternFagsakIdAndYtelsestypeAndEksternId(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
+                eksternId,
             )
         val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
@@ -263,13 +263,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 setProperty("ytelsestype", ytelsestype.name)
                 setProperty("eksternId", eksternId)
                 setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
-            }
+            },
         )
     }
 
     private fun lagHentFagsystemsbehandlingRespons(
         erInstitusjon: Boolean = false,
-        feilmelding: String? = null
+        feilmelding: String? = null,
     ): HentFagsystemsbehandlingRespons {
         var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
         val fagsystemsbehandling = HentFagsystemsbehandling(
@@ -285,9 +285,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                 revurderingsårsak = "testverdi",
                 revurderingsresultat = "OPPHØR",
                 tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING
+                    .IGNORER_TILBAKEKREVING,
             ),
-            institusjon = institusjon
+            institusjon = institusjon,
         )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling, feilMelding = feilmelding)
     }

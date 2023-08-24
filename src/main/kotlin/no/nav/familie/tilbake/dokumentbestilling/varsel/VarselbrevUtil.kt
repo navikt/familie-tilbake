@@ -34,7 +34,7 @@ class VarselbrevUtil(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val oppdragClient: OppdragClient,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
 ) {
 
     companion object {
@@ -46,7 +46,7 @@ class VarselbrevUtil(
     fun sammenstillInfoForForhåndvisningVarselbrev(
         adresseinfo: Adresseinfo,
         request: ForhåndsvisVarselbrevRequest,
-        personinfo: Personinfo
+        personinfo: Personinfo,
     ): Varselbrevsdokument {
         val tittel = getTittelForVarselbrev(request.ytelsestype.navn[request.språkkode]!!, false)
         val vergenavn = BrevmottagerUtil.getVergenavn(request.verge, adresseinfo)
@@ -69,7 +69,7 @@ class VarselbrevUtil(
             gjelderDødsfall = personinfo.dødsdato != null,
             institusjon = request.institusjon?.let {
                 organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            }
+            },
         )
 
         return Varselbrevsdokument(
@@ -78,7 +78,7 @@ class VarselbrevUtil(
             revurderingsvedtaksdato = request.vedtaksdato ?: LocalDate.now(),
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
             varseltekstFraSaksbehandler = request.varseltekst,
-            feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto)
+            feilutbetaltePerioder = mapFeilutbetaltePerioder(request.feilutbetaltePerioderDto),
         )
     }
 
@@ -89,7 +89,7 @@ class VarselbrevUtil(
         fagsak: Fagsak,
         vergenavn: String?,
         erKorrigert: Boolean,
-        gjelderDødsfall: Boolean
+        gjelderDødsfall: Boolean,
     ): Brevmetadata {
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
@@ -110,7 +110,7 @@ class VarselbrevUtil(
             gjelderDødsfall = gjelderDødsfall,
             institusjon = fagsak.institusjon?.let {
                 organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            }
+            },
         )
     }
 
@@ -118,7 +118,7 @@ class VarselbrevUtil(
         metadata: Brevmetadata,
         fritekst: String?,
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
-        varsel: Varsel?
+        varsel: Varsel?,
     ): Varselbrevsdokument {
         return Varselbrevsdokument(
             brevmetadata = metadata,
@@ -129,19 +129,19 @@ class VarselbrevUtil(
             feilutbetaltePerioder = mapFeilutbetaltePerioder(feilutbetalingsfakta),
             erKorrigert = varsel != null,
             varsletDato = varsel?.sporbar?.opprettetTid?.toLocalDate(),
-            varsletBeløp = varsel?.varselbeløp
+            varsletBeløp = varsel?.varselbeløp,
         )
     }
 
     private fun sammenstillInfoFraSimuleringForVedlegg(
         varselbrevsdokument: Varselbrevsdokument,
         eksternBehandlingId: String,
-        varsletTotalbeløp: Long
+        varsletTotalbeløp: Long,
     ): Vedleggsdata {
         val request = HentFeilutbetalingerFraSimuleringRequest(
             varselbrevsdokument.ytelsestype,
             varselbrevsdokument.brevmetadata.saksnummer,
-            eksternBehandlingId
+            eksternBehandlingId,
         )
 
         val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request)
@@ -151,7 +151,7 @@ class VarselbrevUtil(
                 YearMonth.from(it.fom),
                 it.nyttBeløp,
                 it.tidligereUtbetaltBeløp,
-                it.feilutbetaltBeløp
+                it.feilutbetaltBeløp,
             )
         }
 
@@ -160,14 +160,14 @@ class VarselbrevUtil(
             varsletTotalbeløp,
             varselbrevsdokument.ytelsestype,
             varselbrevsdokument.brevmetadata.saksnummer,
-            eksternBehandlingId
+            eksternBehandlingId,
         )
         return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
     }
 
     private fun sammenstillInfoFraKravgrunnlag(
         varselbrevsdokument: Varselbrevsdokument,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): Vedleggsdata {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
@@ -178,7 +178,7 @@ class VarselbrevUtil(
                 YearMonth.from(it.key.fom),
                 it.value.riktigYtelsesbeløp,
                 it.value.utbetaltYtelsesbeløp,
-                it.value.feilutbetaltBeløp
+                it.value.feilutbetaltBeløp,
             )
         }
 
@@ -188,13 +188,13 @@ class VarselbrevUtil(
     fun lagVedlegg(
         varselbrevsdokument: Varselbrevsdokument,
         fagsystemsbehandlingId: String?,
-        varsletTotalbeløp: Long
+        varsletTotalbeløp: Long,
     ): String {
         return if (varselbrevsdokument.harVedlegg) {
             if (fagsystemsbehandlingId == null) {
                 error(
                     "fagsystemsbehandlingId mangler for forhåndsvisning av varselbrev. " +
-                        "Saksnummer ${varselbrevsdokument.brevmetadata.saksnummer}"
+                        "Saksnummer ${varselbrevsdokument.brevmetadata.saksnummer}",
                 )
             }
 
@@ -220,12 +220,12 @@ class VarselbrevUtil(
         varsletTotalFeilutbetaltBeløp: Long,
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
-        eksternId: String
+        eksternId: String,
     ) {
         if (feilutbetaltePerioder.sumOf { it.feilutbetaltBeløp.toLong() } != varsletTotalFeilutbetaltBeløp) {
             throw Feil(
                 "Varslet totalFeilutbetaltBeløp matcher ikke med hentet totalFeilutbetaltBeløp fra " +
-                    "simulering for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId"
+                    "simulering for ytelsestype=$ytelsestype, eksternFagsakId=$eksternFagsakId og eksternId=$eksternId",
             )
         }
     }

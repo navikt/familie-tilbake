@@ -39,7 +39,7 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(
             vedtaksbrevsoppsummering,
             Vedtaksbrevsoppsummering::sporbar,
-            Vedtaksbrevsoppsummering::versjon
+            Vedtaksbrevsoppsummering::versjon,
         )
         lagretVedtaksbrevsoppsummering.versjon shouldBe 1
     }
@@ -56,7 +56,7 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
         lagretVedtaksbrevsoppsummering.shouldBeEqualToComparingFieldsExcept(
             oppdatertVedtaksbrevsoppsummering,
             Vedtaksbrevsoppsummering::sporbar,
-            Vedtaksbrevsoppsummering::versjon
+            Vedtaksbrevsoppsummering::versjon,
         )
         lagretVedtaksbrevsoppsummering.versjon shouldBe 2
     }

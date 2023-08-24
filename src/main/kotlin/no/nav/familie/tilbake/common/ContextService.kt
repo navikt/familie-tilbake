@@ -25,7 +25,7 @@ object ContextService {
                         ?: defaultverdi
                         ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag")
                 },
-                onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") }
+                onFailure = { defaultverdi ?: throw Feil("Ingen defaultverdi for bruker ved maskinelt oppslag") },
             )
     }
 
@@ -36,7 +36,7 @@ object ContextService {
                     it.getClaims("azuread")?.get("name")?.toString()
                         ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
                 },
-                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN }
+                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
             )
     }
 
@@ -47,13 +47,13 @@ object ContextService {
                     @Suppress("UNCHECKED_CAST")
                     it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
                 },
-                onFailure = { emptyList() }
+                onFailure = { emptyList() },
             )
     }
 
     fun hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(
         rolleConfig: RolleConfig,
-        handling: String
+        handling: String,
     ): InnloggetBrukertilgang {
         val saksbehandler = hentSaksbehandler()
         val brukerTilganger = mutableMapOf<Tilgangskontrollsfagsystem, Behandlerrolle>()
@@ -67,8 +67,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
                     behandlerrolle = Behandlerrolle.BESLUTTER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleBarnetrygd)) {
@@ -76,8 +76,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
                     behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.veilederRolleBarnetrygd)) {
@@ -85,8 +85,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.BARNETRYGD,
                     behandlerrolle = Behandlerrolle.VEILEDER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.beslutterRolleEnslig)) {
@@ -94,8 +94,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
                     behandlerrolle = Behandlerrolle.BESLUTTER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleEnslig)) {
@@ -103,8 +103,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
                     behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.veilederRolleEnslig)) {
@@ -112,8 +112,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.ENSLIG_FORELDER,
                     behandlerrolle = Behandlerrolle.VEILEDER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.beslutterRolleKontantStøtte)) {
@@ -121,8 +121,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
                     behandlerrolle = Behandlerrolle.BESLUTTER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.saksbehandlerRolleKontantStøtte)) {
@@ -130,8 +130,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
                     behandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (grupper.contains(rolleConfig.veilederRolleKontantStøtte)) {
@@ -139,8 +139,8 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.KONTANTSTØTTE,
                     behandlerrolle = Behandlerrolle.VEILEDER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         // forvalter har system tilgang
@@ -149,15 +149,15 @@ object ContextService {
                 hentTilgangMedRolle(
                     fagsystem = Tilgangskontrollsfagsystem.FORVALTER_TILGANG,
                     behandlerrolle = Behandlerrolle.FORVALTER,
-                    brukerTilganger = brukerTilganger
-                )
+                    brukerTilganger = brukerTilganger,
+                ),
             )
         }
         if (brukerTilganger.isEmpty()) {
             throw Feil(
                 message = "Bruker har mangler tilgang til $handling",
                 frontendFeilmelding = "Bruker har mangler tilgang til $handling",
-                httpStatus = HttpStatus.FORBIDDEN
+                httpStatus = HttpStatus.FORBIDDEN,
             )
         }
 
@@ -174,7 +174,7 @@ object ContextService {
     private fun hentTilgangMedRolle(
         fagsystem: Tilgangskontrollsfagsystem,
         behandlerrolle: Behandlerrolle,
-        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>
+        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>,
     ): Map<Tilgangskontrollsfagsystem, Behandlerrolle> {
         if (!harBrukerAlleredeHøyereTilgangPåSammeFagssystem(fagsystem, behandlerrolle, brukerTilganger)) {
             return mapOf(fagsystem to behandlerrolle)
@@ -185,7 +185,7 @@ object ContextService {
     private fun harBrukerAlleredeHøyereTilgangPåSammeFagssystem(
         fagsystem: Tilgangskontrollsfagsystem,
         behandlerrolle: Behandlerrolle,
-        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>
+        brukerTilganger: Map<Tilgangskontrollsfagsystem, Behandlerrolle>,
     ): Boolean {
         if (brukerTilganger.containsKey(fagsystem)) {
             return brukerTilganger[fagsystem]!!.nivå > behandlerrolle.nivå

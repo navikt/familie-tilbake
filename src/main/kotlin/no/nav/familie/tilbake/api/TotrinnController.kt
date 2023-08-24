@@ -26,13 +26,13 @@ class TotrinnController(private val totrinnService: TotrinnService) {
     @Operation(summary = "Hent totrinnsvurderinger")
     @GetMapping(
         path = ["/{behandlingId}/totrinn/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.VEILEDER,
         "Henter totrinnsvurderinger for en gitt behandling",
         AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun hentTotrinnsvurderinger(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<TotrinnsvurderingDto> {
         return Ressurs.success(totrinnService.hentTotrinnsvurderinger(behandlingId))

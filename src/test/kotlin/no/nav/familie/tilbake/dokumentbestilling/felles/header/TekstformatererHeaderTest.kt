@@ -22,7 +22,7 @@ class TekstformatererHeaderTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     @Test
@@ -36,7 +36,7 @@ class TekstformatererHeaderTest {
         val generertHeader: String =
             TekstformatererHeader.lagHeader(
                 brevmetadata = brevmetadata.copy(institusjon = Institusjon("987654321", "Testinstitusjon")),
-                overskrift = "Dette er en header"
+                overskrift = "Dette er en header",
             )
         generertHeader shouldBe institusjonHeader()
     }

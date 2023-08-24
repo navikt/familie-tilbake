@@ -5,5 +5,5 @@ import java.time.LocalDate
 @Suppress("unused") // Handlebars
 class HbPerson(
     private val navn: String,
-    private val dødsdato: LocalDate? = null
+    private val dødsdato: LocalDate? = null,
 )

@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service
     taskStepType = OppdaterFaktainfoTask.TYPE,
     beskrivelse = "oppdaterer fakta info når kravgrunnlag mottas av ny referanse",
     maxAntallFeil = 10,
-    triggerTidVedFeilISekunder = 5L
+    triggerTidVedFeilISekunder = 5L,
 )
 class OppdaterFaktainfoTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -34,8 +34,8 @@ class OppdaterFaktainfoTask(
             hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
-            )
+                eksternId,
+            ),
         )
         // kaster exception inntil respons-en har mottatt
         val hentFagsystemsbehandlingRespons = requireNotNull(requestSendt.respons) {
@@ -49,7 +49,7 @@ class OppdaterFaktainfoTask(
         if (feilMelding != null) {
             throw Feil(
                 "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
-                    "Feiler med $feilMelding"
+                    "Feiler med $feilMelding",
             )
         }
         behandlingService.oppdaterFaktainfo(eksternFagsakId, ytelsestype, eksternId, respons.hentFagsystemsbehandling!!)

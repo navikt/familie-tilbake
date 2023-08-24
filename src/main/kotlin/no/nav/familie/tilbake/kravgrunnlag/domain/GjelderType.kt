@@ -5,7 +5,8 @@ enum class GjelderType(val navn: String) {
     PERSON("Person"),
     ORGANISASJON("Organisasjon"),
     SAMHANDLER("Samhandler"),
-    APPLIKASJONSBRUKER("Applikasjonsbruker");
+    APPLIKASJONSBRUKER("Applikasjonsbruker"),
+    ;
 
     companion object {
 

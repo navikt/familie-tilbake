@@ -7,7 +7,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 
 data class HbVedtaksbrevsdata(
     @get:JsonUnwrapped val felles: HbVedtaksbrevFelles,
-    val perioder: List<HbVedtaksbrevsperiode>
+    val perioder: List<HbVedtaksbrevsperiode>,
 ) : Språkstøtte {
 
     @Suppress("unused") // Handlebars
