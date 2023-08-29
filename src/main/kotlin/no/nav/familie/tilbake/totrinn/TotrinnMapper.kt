@@ -10,7 +10,7 @@ object TotrinnMapper {
 
     fun tilRespons(
         totrinnsvurderinger: List<Totrinnsvurdering>,
-        behandlingsstegstilstand: List<Behandlingsstegstilstand>
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ): TotrinnsvurderingDto {
         val totrinnsstegsinfo = if (totrinnsvurderinger.isEmpty()) {
             hentStegSomGjelderForTotrinn(behandlingsstegstilstand)
@@ -19,7 +19,7 @@ object TotrinnMapper {
                 Totrinnsstegsinfo(
                     behandlingssteg = it.behandlingssteg,
                     godkjent = it.godkjent,
-                    begrunnelse = it.begrunnelse
+                    begrunnelse = it.begrunnelse,
                 )
             } + hentStegSomGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
                 .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }

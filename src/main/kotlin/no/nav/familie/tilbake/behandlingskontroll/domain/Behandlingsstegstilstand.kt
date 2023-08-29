@@ -21,7 +21,7 @@ data class Behandlingsstegstilstand(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Behandlingssteg(
@@ -29,7 +29,7 @@ enum class Behandlingssteg(
     val kanSaksbehandles: Boolean,
     val kanBesluttes: Boolean,
     val behandlingsstatus: Behandlingsstatus,
-    private val beskrivelse: String
+    private val beskrivelse: String,
 ) {
 
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
@@ -48,16 +48,17 @@ enum class Behandlingssteg(
         false,
         false,
         Behandlingsstatus.IVERKSETTER_VEDTAK,
-        "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet"
+        "Iverksett vedtak fra en behandling.  Forutsetter at et vedtak er fattet",
     ),
-    AVSLUTTET(10, false, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet");
+    AVSLUTTET(10, false, false, Behandlingsstatus.AVSLUTTET, "Behandlingen er ferdig behandlet"),
+    ;
 
     companion object {
 
         fun finnNesteBehandlingssteg(
             behandlingssteg: Behandlingssteg,
             harVerge: Boolean,
-            harManuelleBrevmottakere: Boolean
+            harManuelleBrevmottakere: Boolean,
         ): Behandlingssteg {
             val nesteBehandlingssteg = fraSekvens(behandlingssteg.sekvens + 1, harManuelleBrevmottakere)
             if (nesteBehandlingssteg == VERGE && !harVerge) {
@@ -92,7 +93,8 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
     UTFØRT("Steget er ferdig utført"),
     AUTOUTFØRT("Steget utføres automatisk av systemet"),
     TILBAKEFØRT("Steget er avbrutt og tilbakeført til et tidligere steg"),
-    AVBRUTT("Steget er avbrutt");
+    AVBRUTT("Steget er avbrutt"),
+    ;
 
     companion object {
 
@@ -116,7 +118,8 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
     UTVIDET_TILSVAR_FRIST(0, "Utvidet tilsvarsfrist"),
     ENDRE_TILKJENT_YTELSE(0, "Mulig endring i tilkjent ytelse"),
-    VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse");
+    VENT_PÅ_MULIG_MOTREGNING(0, "Mulig motregning med annen ytelse"),
+    ;
 
     companion object {
 

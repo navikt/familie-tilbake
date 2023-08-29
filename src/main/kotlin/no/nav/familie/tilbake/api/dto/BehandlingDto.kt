@@ -38,12 +38,12 @@ data class BehandlingDto(
     val behandlingsårsakstype: Behandlingsårsakstype? = null,
     val støtterManuelleBrevmottakere: Boolean,
     val harManuelleBrevmottakere: Boolean,
-    val manuelleBrevmottakere: List<ManuellBrevmottakerResponsDto>
+    val manuelleBrevmottakere: List<ManuellBrevmottakerResponsDto>,
 )
 
 data class BehandlingsstegsinfoDto(
     val behandlingssteg: Behandlingssteg,
     val behandlingsstegstatus: Behandlingsstegstatus,
     val venteårsak: Venteårsak? = null,
-    val tidsfrist: LocalDate? = null
+    val tidsfrist: LocalDate? = null,
 )

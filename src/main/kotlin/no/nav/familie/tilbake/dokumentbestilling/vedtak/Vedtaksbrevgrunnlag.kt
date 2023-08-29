@@ -42,7 +42,7 @@ data class Vedtaksbrevgrunnlag(
     val fagsystem: Fagsystem,
     val ytelsestype: Ytelsestype,
     @MappedCollection(idColumn = "fagsak_id") val behandlinger: Set<Vedtaksbrevbehandling>,
-    @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL) val institusjon: Institusjon? = null
+    @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL) val institusjon: Institusjon? = null,
 ) {
 
     val behandling
@@ -152,7 +152,7 @@ data class Vedtaksbrevbehandling(
     @MappedCollection(idColumn = "behandling_id")
     val årsaker: Set<Behandlingsårsak> = setOf(),
     @MappedCollection(idColumn = "behandling_id")
-    val vurderteForeldelser: Set<VurdertForeldelse> = setOf()
+    val vurderteForeldelser: Set<VurdertForeldelse> = setOf(),
 ) {
 
     val erRevurdering get() = type == Behandlingstype.REVURDERING_TILBAKEKREVING

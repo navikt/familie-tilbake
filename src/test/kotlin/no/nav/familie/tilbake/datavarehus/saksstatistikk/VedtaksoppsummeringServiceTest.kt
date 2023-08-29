@@ -91,13 +91,13 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             vilkårsvurderingRepository,
             foreldelseRepository,
             faktaFeilutbetalingRepository,
-            beregningService
+            beregningService,
         )
 
         behandling = Testdata.behandling.copy(
             ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
             ansvarligBeslutter = ANSVARLIG_BESLUTTER,
-            behandlendeEnhet = "8020"
+            behandlendeEnhet = "8020",
         )
         fagsakRepository.insert(Testdata.fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD))
         behandling = behandlingRepository.insert(behandling)
@@ -194,12 +194,12 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             FaktaFeilutbetalingsperiode(
                 periode = periode,
                 hendelsestype = Hendelsestype.BOSATT_I_RIKET,
-                hendelsesundertype = Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE
+                hendelsesundertype = Hendelsesundertype.BRUKER_BOR_IKKE_I_NORGE,
             )
         val faktaFeilutbetaling = FaktaFeilutbetaling(
             behandlingId = behandling.id,
             perioder = setOf(faktaFeilutbetalingPeriode),
-            begrunnelse = "fakta begrunnelse"
+            begrunnelse = "fakta begrunnelse",
         )
 
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
@@ -210,11 +210,11 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             periode = periode,
             foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
             begrunnelse = "foreldelse begrunnelse",
-            foreldelsesfrist = periode.fomDato.plusMonths(8)
+            foreldelsesfrist = periode.fomDato.plusMonths(8),
         )
         val vurdertForeldelse = VurdertForeldelse(
             behandlingId = behandling.id,
-            foreldelsesperioder = setOf(foreldelsePeriode)
+            foreldelsesperioder = setOf(foreldelsePeriode),
         )
 
         foreldelseRepository.insert(vurdertForeldelse)
@@ -224,21 +224,21 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         val særligGrunn =
             VilkårsvurderingSærligGrunn(
                 særligGrunn = no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn.STØRRELSE_BELØP,
-                begrunnelse = "særlig grunner begrunnelse"
+                begrunnelse = "særlig grunner begrunnelse",
             )
         val vilkårVurderingAktsomhet = VilkårsvurderingAktsomhet(
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             ileggRenter = true,
             særligeGrunnerTilReduksjon = false,
             begrunnelse = "aktsomhet begrunnelse",
-            vilkårsvurderingSærligeGrunner = setOf(særligGrunn)
+            vilkårsvurderingSærligeGrunner = setOf(særligGrunn),
         )
         val vilkårVurderingPeriode =
             Vilkårsvurderingsperiode(
                 periode = periode,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 begrunnelse = "vilkår begrunnelse",
-                aktsomhet = vilkårVurderingAktsomhet
+                aktsomhet = vilkårVurderingAktsomhet,
             )
         val vilkårVurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
 
@@ -249,14 +249,14 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
         val vilkårVurderingGodTro = VilkårsvurderingGodTro(
             beløpTilbakekreves = BigDecimal.valueOf(1000),
             beløpErIBehold = false,
-            begrunnelse = "god tro begrunnelse"
+            begrunnelse = "god tro begrunnelse",
         )
         val vilkårVurderingPeriode =
             Vilkårsvurderingsperiode(
                 periode = periode,
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                 begrunnelse = "vilkår begrunnelse",
-                godTro = vilkårVurderingGodTro
+                godTro = vilkårVurderingGodTro,
             )
         val vilkårsvurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
         vilkårsvurderingRepository.insert(vilkårsvurdering)
@@ -265,11 +265,11 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun lagBehandlingVedtak() {
         val behandlingVedtak = Behandlingsvedtak(
             iverksettingsstatus = Iverksettingsstatus.IVERKSATT,
-            vedtaksdato = LocalDate.now()
+            vedtaksdato = LocalDate.now(),
         )
         val behandlingsresultat = Behandlingsresultat(
             type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
-            behandlingsvedtak = behandlingVedtak
+            behandlingsvedtak = behandlingVedtak,
         )
 
         val behandling = behandling.copy(resultater = setOf(behandlingsresultat))
@@ -283,7 +283,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             tilbakekrevesBeløp = BigDecimal.valueOf(1000),
             opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
             nyttBeløp = BigDecimal.ZERO,
-            skatteprosent = BigDecimal.valueOf(10)
+            skatteprosent = BigDecimal.valueOf(10),
         )
         val feilPostering = Kravgrunnlagsbeløp433(
             klassekode = Klassekode.EFOG,
@@ -291,12 +291,12 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             nyttBeløp = BigDecimal.valueOf(1000),
             skatteprosent = BigDecimal.valueOf(10),
             tilbakekrevesBeløp = BigDecimal.valueOf(1000),
-            opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000)
+            opprinneligUtbetalingsbeløp = BigDecimal.valueOf(1000),
         )
         val kravgrunnlagPeriode432 = Kravgrunnlagsperiode432(
             periode = periode,
             månedligSkattebeløp = BigDecimal.valueOf(100),
-            beløp = setOf(feilPostering, ytelPostering)
+            beløp = setOf(feilPostering, ytelPostering),
         )
         val kravgrunnlag431 = Kravgrunnlag431(
             behandlingId = behandling.id,
@@ -315,7 +315,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             saksbehandlerId = ANSVARLIG_SAKSBEHANDLER,
             fagsystemId = saksnummer + "100",
             referanse = "1",
-            perioder = setOf(kravgrunnlagPeriode432)
+            perioder = setOf(kravgrunnlagPeriode432),
         )
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }

@@ -29,11 +29,11 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     // ~8 måneder dersom vi prøver én gang i uka.
     // Tasken skal stoppe etter 6 måneder, så om vi kommer hit har det skjedd noe galt.
     maxAntallFeil = 4 * 8,
-    settTilManuellOppfølgning = true
+    settTilManuellOppfølgning = true,
 )
 class DistribuerDokumentVedDødsfallTask(
     private val integrasjonerClient: IntegrasjonerClient,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -55,7 +55,7 @@ class DistribuerDokumentVedDødsfallTask(
                     journalpostId,
                     Fagsystem.valueOf(fagsystem),
                     Distribusjonstype.valueOf(task.metadata.getProperty("distribusjonstype")),
-                    Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt"))
+                    Distribusjonstidspunkt.valueOf(task.metadata.getProperty("distribusjonstidspunkt")),
                 )
 
                 logger.info("Task \"DistribuerDokumentVedDødsfallTask\" har kjørt suksessfullt, og brev er sendt")
@@ -81,7 +81,7 @@ class DistribuerDokumentVedDødsfallTask(
             historikkinnslagstype = tilbakekrevingHistorikkinnslagstype,
             aktør = LagreBrevsporingTask.utledAktør(brevtype, ansvarligSaksbehandler),
             beskrivelse = opprinneligHistorikkinnslagstype.tekst,
-            brevtype = if (!feilet) brevtype else null
+            brevtype = if (!feilet) brevtype else null,
         )
     }
 

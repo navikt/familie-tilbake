@@ -13,7 +13,7 @@ import java.util.UUID
 class LagreUtkastVedtaksbrevService(
     val behandlingRepository: BehandlingRepository,
     val behandlingskontrollService: BehandlingskontrollService,
-    val vedtaksbrevService: VedtaksbrevService
+    val vedtaksbrevService: VedtaksbrevService,
 ) {
 
     fun lagreUtkast(behandlingId: UUID, fritekstavsnitt: FritekstavsnittDto) {
@@ -25,7 +25,7 @@ class LagreUtkastVedtaksbrevService(
             throw Feil(
                 message = "Behandling med id=$behandlingId er på vent, kan ikke lagre utkast av vedtaksbrevet",
                 frontendFeilmelding = "Behandling med id=$behandlingId er på vent, kan ikke lagre utkast av vedtaksbrevet",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         vedtaksbrevService.lagreUtkastAvFritekster(behandlingId, fritekstavsnitt)

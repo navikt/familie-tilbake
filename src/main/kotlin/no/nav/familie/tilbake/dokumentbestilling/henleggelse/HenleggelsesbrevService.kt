@@ -34,7 +34,7 @@ class HenleggelsesbrevService(
     private val pdfBrevService: PdfBrevService,
     private val organisasjonService: OrganisasjonService,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
-    private val brevmetadataUtil: BrevmetadataUtil
+    private val brevmetadataUtil: BrevmetadataUtil,
 ) {
 
     fun sendHenleggelsebrev(behandlingId: UUID, fritekst: String?, brevmottager: Brevmottager? = null) {
@@ -53,7 +53,7 @@ class HenleggelsesbrevService(
                     mottager = brevmottaker,
                     metadata = fritekstbrevData.brevmetadata,
                     overskrift = fritekstbrevData.overskrift,
-                    brevtekst = fritekstbrevData.brevtekst
+                    brevtekst = fritekstbrevData.brevtekst,
                 )
             }
         } else {
@@ -72,8 +72,8 @@ class HenleggelsesbrevService(
                     mottager = brevmottager,
                     metadata = fritekstbrevData.brevmetadata,
                     overskrift = fritekstbrevData.overskrift,
-                    brevtekst = fritekstbrevData.brevtekst
-                )
+                    brevtekst = fritekstbrevData.brevtekst,
+                ),
             )
         }
     }
@@ -95,8 +95,8 @@ class HenleggelsesbrevService(
                 mottager = brevmottager,
                 metadata = fritekstbrevData.brevmetadata,
                 overskrift = fritekstbrevData.overskrift,
-                brevtekst = fritekstbrevData.brevtekst
-            )
+                brevtekst = fritekstbrevData.brevtekst,
+            ),
         )
     }
 
@@ -105,18 +105,18 @@ class HenleggelsesbrevService(
         fagsak: Fagsak,
         fritekst: String?,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Henleggelsesbrevsdokument {
         val brevSporing = brevsporingService.finnSisteVarsel(behandling.id)
         if (Behandlingstype.TILBAKEKREVING == behandling.type && brevSporing == null) {
             throw IllegalStateException(
                 "Varselbrev er ikke sendt. Kan ikke forhåndsvise/sende " +
-                    "henleggelsesbrev for behandlingId=${behandling.id} når varsel ikke er sendt."
+                    "henleggelsesbrev for behandlingId=${behandling.id} når varsel ikke er sendt.",
             )
         } else if (Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type && fritekst.isNullOrEmpty()) {
             throw IllegalStateException(
                 "Kan ikke forhåndsvise/sende henleggelsesbrev uten fritekst for " +
-                    "Tilbakekreving Revurdering med behandlingsid=${behandling.id}."
+                    "Tilbakekreving Revurdering med behandlingsid=${behandling.id}.",
             )
         }
 
@@ -132,7 +132,7 @@ class HenleggelsesbrevService(
                 personinfo,
                 brevmottager,
                 behandling.aktivVerge,
-                fagsak.fagsystem
+                fagsak.fagsystem,
             )
 
             val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
@@ -153,7 +153,7 @@ class HenleggelsesbrevService(
                 gjelderDødsfall = gjelderDødsfall,
                 institusjon = fagsak.institusjon?.let {
                     organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-                }
+                },
             )
         }
 
@@ -161,10 +161,10 @@ class HenleggelsesbrevService(
             metadata.copy(
                 tittel = TITTEL_HENLEGGELSESBREV,
                 behandlingstype = behandling.type,
-                ansvarligSaksbehandler = ansvarligSaksbehandler
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
             ),
             brevSporing?.sporbar?.opprettetTid?.toLocalDate(),
-            fritekst
+            fritekst,
         )
     }
 
@@ -172,7 +172,7 @@ class HenleggelsesbrevService(
         return Fritekstbrevsdata(
             TekstformatererHenleggelsesbrev.lagOverskrift(dokument.brevmetadata),
             TekstformatererHenleggelsesbrev.lagFritekst(dokument),
-            dokument.brevmetadata
+            dokument.brevmetadata,
         )
     }
 
@@ -180,7 +180,7 @@ class HenleggelsesbrevService(
         return Fritekstbrevsdata(
             TekstformatererHenleggelsesbrev.lagRevurderingsoverskrift(dokument.brevmetadata),
             TekstformatererHenleggelsesbrev.lagRevurderingsfritekst(dokument),
-            dokument.brevmetadata
+            dokument.brevmetadata,
         )
     }
 

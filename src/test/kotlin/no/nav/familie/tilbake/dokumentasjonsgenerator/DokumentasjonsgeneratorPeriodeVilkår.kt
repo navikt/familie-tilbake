@@ -97,7 +97,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                         foreldelseVurdering,
                         fritekst = false,
                         pengerIBehold = false,
-                        lavtBeløp = false
+                        lavtBeløp = false,
                     )
                     lagResultatOgVurderingTekster(
                         ytelsetype,
@@ -107,7 +107,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                         foreldelseVurdering,
                         fritekst = true,
                         pengerIBehold = false,
-                        lavtBeløp = false
+                        lavtBeløp = false,
                     )
                     if (vurdering === Aktsomhet.SIMPEL_UAKTSOMHET) {
                         lagResultatOgVurderingTekster(
@@ -118,7 +118,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                             foreldelseVurdering,
                             fritekst = false,
                             pengerIBehold = false,
-                            lavtBeløp = true
+                            lavtBeløp = true,
                         )
                     }
                 }
@@ -135,7 +135,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                         foreldelseVurdering,
                         fritekst,
                         pengerIBehold,
-                        lavtBeløp = false
+                        lavtBeløp = false,
                     )
                 }
             }
@@ -148,7 +148,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             Foreldelsesvurderingstype.FORELDET,
             fritekst = false,
             pengerIBehold = false,
-            lavtBeløp = false
+            lavtBeløp = false,
         )
         lagResultatOgVurderingTekster(
             ytelsetype,
@@ -158,7 +158,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             Foreldelsesvurderingstype.FORELDET,
             fritekst = true,
             pengerIBehold = false,
-            lavtBeløp = false
+            lavtBeløp = false,
         )
     }
 
@@ -170,7 +170,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         foreldelsevurdering: Foreldelsesvurderingstype,
         fritekst: Boolean,
         pengerIBehold: Boolean,
-        lavtBeløp: Boolean
+        lavtBeløp: Boolean,
     ) {
         val periodeOgFelles = lagPeriodeOgFelles(
             ytelsetype,
@@ -180,7 +180,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             lavtBeløp,
             foreldelsevurdering,
             fritekst,
-            pengerIBehold
+            pengerIBehold,
         )
         val vilkårTekst = lagVilkårTekst(periodeOgFelles)
         val overskrift = overskrift(resultat, vurdering, lavtBeløp, fritekst, pengerIBehold, foreldelsevurdering)
@@ -206,7 +206,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         lavtBeløp: Boolean,
         foreldelsevurdering: Foreldelsesvurderingstype,
         fritekst: Boolean,
-        pengerIBehold: Boolean
+        pengerIBehold: Boolean,
     ): HbVedtaksbrevPeriodeOgFelles {
         val fellesBuilder = lagFelles(ytelsetype, språkkode)
 
@@ -224,7 +224,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 },
                 foreldelsesfrist = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
-                        Foreldelsesvurderingstype.TILLEGGSFRIST
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
                     )
                 ) {
                     FORELDELSESFRIST
@@ -233,7 +233,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 },
                 fritekstForeldelse = if (foreldelsevurdering in setOf(
                         Foreldelsesvurderingstype.FORELDET,
-                        Foreldelsesvurderingstype.TILLEGGSFRIST
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
                     ) &&
                     fritekst
                 ) {
@@ -245,7 +245,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                     OPPDAGELSES_DATO
                 } else {
                     null
-                }
+                },
             )
 
         val periodeBuilder =
@@ -258,21 +258,21 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                     tilbakekrevesBeløp = BigDecimal.valueOf(9999),
                     rentebeløp = BigDecimal.ZERO,
                     tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(9999),
-                    foreldetBeløp = BigDecimal.valueOf(2999)
+                    foreldetBeløp = BigDecimal.valueOf(2999),
                 ),
-                førstePeriode = true
+                førstePeriode = true,
             )
         return HbVedtaksbrevPeriodeOgFelles(fellesBuilder, periodeBuilder)
     }
 
     private fun lagFelles(
         ytelsestype: Ytelsestype,
-        språkkode: Språkkode
+        språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
         val datoer = HbVedtaksbrevDatoer(
             LocalDate.of(2018, 3, 2),
             LocalDate.of(2018, 3, 3),
-            LocalDate.of(2018, 3, 4)
+            LocalDate.of(2018, 3, 4),
         )
 
         return HbVedtaksbrevFelles(
@@ -283,28 +283,28 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.now().minusDays(100),
             ),
             konfigurasjon = HbKonfigurasjon(
                 fireRettsgebyr = BigDecimal.valueOf(4321),
-                klagefristIUker = 4
+                klagefristIUker = 4,
             ),
             totalresultat = HbTotalresultat(
                 hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
                 totaltTilbakekrevesBeløp = BigDecimal.ZERO,
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
-                totaltRentebeløp = BigDecimal.ZERO
+                totaltRentebeløp = BigDecimal.ZERO,
             ),
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
         )
     }
 
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
-        språkkode: Språkkode
+        språkkode: Språkkode,
     ): Brevmetadata {
         return Brevmetadata(
             sakspartId = "",
@@ -315,7 +315,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             saksnummer = "1232456",
             språkkode = språkkode,
             ytelsestype = ytelsestype,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         )
     }
 
@@ -325,7 +325,7 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         lavtBeløp: Boolean,
         fritekst: Boolean,
         pengerIBehold: Boolean,
-        foreldelsevurdering: Foreldelsesvurderingstype
+        foreldelsevurdering: Foreldelsesvurderingstype,
     ): String {
         return (
             "*[ ${hentVilkårresultatOverskriftDel(resultat)}" +
@@ -354,17 +354,17 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         private val vilkårResultat = arrayOf(
             Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
         )
         private val foreldelseVurderinger = arrayOf(
             Foreldelsesvurderingstype.IKKE_VURDERT,
             Foreldelsesvurderingstype.IKKE_FORELDET,
-            Foreldelsesvurderingstype.TILLEGGSFRIST
+            Foreldelsesvurderingstype.TILLEGGSFRIST,
         )
         private val aktsomheter = arrayOf(
             Aktsomhet.SIMPEL_UAKTSOMHET,
             Aktsomhet.GROV_UAKTSOMHET,
-            Aktsomhet.FORSETT
+            Aktsomhet.FORSETT,
         )
         private val trueFalse = booleanArrayOf(true, false)
         private val JANUAR = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))

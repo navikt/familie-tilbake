@@ -7,7 +7,7 @@ import java.net.URI
 @Configuration
 class IntegrasjonerConfig(
     @Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjonUri: URI,
-    @Value("\${application.name}") val applicationName: String
+    @Value("\${application.name}") val applicationName: String,
 ) {
 
     companion object {

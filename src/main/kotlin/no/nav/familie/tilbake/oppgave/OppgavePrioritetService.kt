@@ -14,7 +14,7 @@ import java.util.UUID
 @Service
 class OppgavePrioritetService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun utledOppgaveprioritet(behandlingId: UUID, oppgave: Oppgave? = null): OppgavePrioritet {

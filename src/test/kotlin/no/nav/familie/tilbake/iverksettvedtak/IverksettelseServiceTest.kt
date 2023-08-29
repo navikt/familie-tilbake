@@ -99,7 +99,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val behandlingId = behandling.id
     private val perioder = listOf(
         Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2))
+        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
     )
     private lateinit var kravgrunnlag431: Kravgrunnlag431
 
@@ -124,7 +124,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             beregningService,
             behandlingVedtakService,
             oppdragClient,
-            mockFeatureToggleService
+            mockFeatureToggleService,
         )
     }
 
@@ -143,11 +143,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                         Ressurs.success(
                             lagRespons(
                                 "00",
-                                "OK"
-                            )
-                        ).toJson()
-                    )
-                )
+                                "OK",
+                            ),
+                        ).toJson(),
+                    ),
+                ),
         )
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
@@ -172,11 +172,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                         Ressurs.success(
                             lagRespons(
                                 "10",
-                                "feil"
-                            )
-                        ).toJson()
-                    )
-                )
+                                "feil",
+                            ),
+                        ).toJson(),
+                    ),
+                ),
         )
 
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
@@ -195,14 +195,14 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         val feilPostering = lagKravgrunnlagsbeløp(
             klassetype = Klassetype.FEIL,
             klassekode = Klassekode.KL_KODE_FEIL_BA,
-            nyttBeløp = BigDecimal(5000)
+            nyttBeløp = BigDecimal(5000),
         )
 
         val ytelPostering = lagKravgrunnlagsbeløp(
             klassetype = Klassetype.YTEL,
             klassekode = Klassekode.BATR,
             utbetaltBeløp = BigDecimal(5000),
-            tilbakekrevesBeløp = BigDecimal(5000)
+            tilbakekrevesBeløp = BigDecimal(5000),
         )
 
         val kravgrunnlagsperioder = perioder.map {
@@ -211,8 +211,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 månedligSkattebeløp = BigDecimal.ZERO,
                 beløp = setOf(
                     feilPostering.copy(id = UUID.randomUUID()),
-                    ytelPostering.copy(id = UUID.randomUUID())
-                )
+                    ytelPostering.copy(id = UUID.randomUUID()),
+                ),
             )
         }.toSet()
 
@@ -233,7 +233,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             referanse = behandling.aktivFagsystemsbehandling.eksternId,
             eksternKravgrunnlagId = BigInteger.ZERO,
             saksbehandlerId = "testverdi",
-            perioder = kravgrunnlagsperioder
+            perioder = kravgrunnlagsperioder,
         )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
@@ -245,7 +245,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         klassekode: Klassekode,
         nyttBeløp: BigDecimal = BigDecimal.ZERO,
         utbetaltBeløp: BigDecimal = BigDecimal.ZERO,
-        tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO
+        tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
     ): Kravgrunnlagsbeløp433 {
         return Kravgrunnlagsbeløp433(
             klassetype = klassetype,
@@ -253,7 +253,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             nyttBeløp = nyttBeløp,
             opprinneligUtbetalingsbeløp = utbetaltBeløp,
             tilbakekrevesBeløp = tilbakekrevesBeløp,
-            skatteprosent = BigDecimal.ZERO
+            skatteprosent = BigDecimal.ZERO,
         )
     }
 
@@ -271,11 +271,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                     særligeGrunner = listOf(
                         SærligGrunnDto(
                             særligGrunn = SærligGrunn.ANNET,
-                            begrunnelse = "testverdi"
-                        )
-                    )
+                            begrunnelse = "testverdi",
+                        ),
+                    ),
                 ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
             )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
@@ -283,7 +283,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagRespons(
         alvorlighetsgrad: String,
-        kodeMelding: String
+        kodeMelding: String,
     ): TilbakekrevingsvedtakResponse {
         val mmelDto = lagMmmelDto(alvorlighetsgrad, kodeMelding)
 
@@ -304,7 +304,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private fun assertRespons(
         kvittering: String?,
         alvorlighetsgrad: String,
-        kodeMelding: String
+        kodeMelding: String,
     ) {
         kvittering.shouldNotBeEmpty()
         val mmelDto = objectMapper.readValue(kvittering, MmelDto::class.java)
@@ -330,14 +330,14 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         assertBeløp(
             beløpene = førstePeriode.tilbakekrevingsbelop,
             klassekode = Klassekode.KL_KODE_FEIL_BA,
-            nyttBeløp = BigDecimal(5000)
+            nyttBeløp = BigDecimal(5000),
         )
         assertBeløp(
             beløpene = førstePeriode.tilbakekrevingsbelop,
             klassekode = Klassekode.BATR,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
-            kodeResultat = KodeResultat.FULL_TILBAKEKREVING
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
 
         val andrePeriode = tilbakekrevingsvedtak.tilbakekrevingsperiode[0]
@@ -347,14 +347,14 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         assertBeløp(
             beløpene = andrePeriode.tilbakekrevingsbelop,
             klassekode = Klassekode.KL_KODE_FEIL_BA,
-            nyttBeløp = BigDecimal(5000)
+            nyttBeløp = BigDecimal(5000),
         )
         assertBeløp(
             beløpene = andrePeriode.tilbakekrevingsbelop,
             klassekode = Klassekode.BATR,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
-            kodeResultat = KodeResultat.FULL_TILBAKEKREVING
+            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
         )
     }
 
@@ -366,7 +366,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
         uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
         skattBeløp: BigDecimal = BigDecimal.ZERO,
-        kodeResultat: KodeResultat? = null
+        kodeResultat: KodeResultat? = null,
     ) {
         beløpene.any {
             klassekode.name == it.kodeKlasse &&

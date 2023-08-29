@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class MålerService(
     private val meldingstellingRepository: MeldingstellingRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
 
     private val åpneBehandlingerGauge = MultiGauge.builder("UavsluttedeBehandlinger").register(Metrics.globalRegistry)
@@ -41,7 +41,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Åpne behandlinger for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                        "fordelt på ${forekomster.size} uker."
+                        "fordelt på ${forekomster.size} uker.",
                 )
             }
         }
@@ -51,9 +51,9 @@ class MålerService(
                     "fagsystem",
                     it.fagsystem.name,
                     "uke",
-                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
                 ),
-                it.antall
+                it.antall,
             )
         }
 
@@ -69,7 +69,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Behandlinger klar til saksbehandling for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                        "fordelt på ${forekomster.size} steg."
+                        "fordelt på ${forekomster.size} steg.",
                 )
             }
         }
@@ -79,9 +79,9 @@ class MålerService(
                     "fagsystem",
                     it.fagsystem.name,
                     "steg",
-                    it.behandlingssteg.name
+                    it.behandlingssteg.name,
                 ),
-                it.antall
+                it.antall,
             )
         }
 
@@ -97,7 +97,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Behandlinger på vent for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                        "fordelt på ${forekomster.size} steg."
+                        "fordelt på ${forekomster.size} steg.",
                 )
             }
         }
@@ -108,9 +108,9 @@ class MålerService(
                     "fagsystem",
                     it.fagsystem.name,
                     "steg",
-                    it.behandlingssteg.name
+                    it.behandlingssteg.name,
                 ),
-                it.antall
+                it.antall,
             )
         }
 
@@ -136,9 +136,9 @@ class MålerService(
                     "brevtype",
                     it.brevtype.name,
                     "uke",
-                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
                 ),
-                it.antall
+                it.antall,
             )
         }
         sendteBrevGauge.register(rows, true)
@@ -153,7 +153,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Vedtak for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                        "fordelt på ${forekomster.size} typer/uker."
+                        "fordelt på ${forekomster.size} typer/uker.",
                 )
             }
         }
@@ -172,9 +172,9 @@ class MålerService(
                     "vedtakstype",
                     vedtakstype,
                     "uke",
-                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
                 ),
-                it.antall
+                it.antall,
             )
         }
         vedtakGauge.register(rows, true)
@@ -188,7 +188,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Mottatte kravgrunnlag koblet for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} " +
-                        "fordelt på ${forekomster.size} fagsystem/dager."
+                        "fordelt på ${forekomster.size} fagsystem/dager.",
                 )
             }
         }
@@ -203,9 +203,9 @@ class MålerService(
                     "status",
                     it.status.name,
                     "dato",
-                    it.dato.toString()
+                    it.dato.toString(),
                 ),
-                it.antall
+                it.antall,
             )
         }
         mottatteKravgrunnlagGauge.register(rows, true)
@@ -219,7 +219,7 @@ class MålerService(
             if (forekomster.isNotEmpty()) {
                 logger.info(
                     "Mottatte statusmeldinger for ${fagsystem.name} " +
-                        "returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} fagsystem/dager."
+                        "returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} fagsystem/dager.",
                 )
             }
         }
@@ -230,9 +230,9 @@ class MålerService(
                     "fagsystem",
                     it.fagsystem.name,
                     "dato",
-                    it.dato.toString()
+                    it.dato.toString(),
                 ),
-                it.antall
+                it.antall,
             )
         }
         mottatteStatusmeldingerGauge.register(rows, true)
@@ -246,7 +246,7 @@ class MålerService(
         val rows = Fagsystem.values().map {
             MultiGauge.Row.of(
                 Tags.of("fagsystem", it.name),
-                (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0)
+                (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0),
             )
         }
 

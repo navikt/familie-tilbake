@@ -41,7 +41,7 @@ class IverksettelseService(
     private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -79,7 +79,7 @@ class IverksettelseService(
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,
         kravgrunnlag: Kravgrunnlag431,
-        beregnetPerioder: List<Tilbakekrevingsperiode>
+        beregnetPerioder: List<Tilbakekrevingsperiode>,
     ): TilbakekrevingsvedtakRequest {
         val request = TilbakekrevingsvedtakRequest()
         val vedtak = TilbakekrevingsvedtakDto()
@@ -136,7 +136,7 @@ class IverksettelseService(
                 | Økonomi krever trolig at vi setter full tilbakekreving. 
                 | Dersom kjøringen feiler mot økonomi med feilmelding: Innkrevd beløp = feilutbetalt ved delvis tilbakekreving.
                 | Vurder å skru på featuretoggle familie-tilbake-overstyr-delvis-tilbakekreving og rekjør.
-                | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin()
+                | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin(),
             )
             if (featureToggleService.isEnabled(FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING)) {
                 KodeResultat.FULL_TILBAKEKREVING.kode
@@ -176,7 +176,7 @@ class IverksettelseService(
                     "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
                     "Beregnet beløp i iverksettelse er " +
                     "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
-                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp"
+                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp",
             )
         }
     }

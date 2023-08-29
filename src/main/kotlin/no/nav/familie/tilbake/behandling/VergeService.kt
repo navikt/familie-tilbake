@@ -29,7 +29,7 @@ class VergeService(
     private val historikkTaskService: HistorikkTaskService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val integrasjonerClient: IntegrasjonerClient,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     @Transactional
@@ -45,7 +45,7 @@ class VergeService(
         historikkTaskService.lagHistorikkTask(
             behandling.id,
             TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-            Aktør.SAKSBEHANDLER
+            Aktør.SAKSBEHANDLER,
         )
     }
 
@@ -67,15 +67,15 @@ class VergeService(
             historikkTaskService.lagHistorikkTask(
                 behandling.id,
                 TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                Aktør.SAKSBEHANDLER
+                Aktør.SAKSBEHANDLER,
             )
         }
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.VERGE,
-                Behandlingsstegstatus.TILBAKEFØRT
-            )
+                Behandlingsstegstatus.TILBAKEFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -91,14 +91,14 @@ class VergeService(
             throw Feil(
                 "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         if (behandlingskontrollService.erBehandlingPåVent(behandling.id)) {
             throw Feil(
                 "Behandling med id=${behandling.id} er på vent.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -111,7 +111,7 @@ class VergeService(
                 if (!erGyldig) {
                     throw Feil(
                         message = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
-                        frontendFeilmelding = "Organisasjon ${vergeDto.orgNr} er ikke gyldig"
+                        frontendFeilmelding = "Organisasjon ${vergeDto.orgNr} er ikke gyldig",
                     )
                 }
             }
@@ -131,7 +131,7 @@ class VergeService(
             type = vergeDto.type,
             navn = vergeDto.navn,
             kilde = Applikasjon.FAMILIE_TILBAKE.name,
-            begrunnelse = vergeDto.begrunnelse
+            begrunnelse = vergeDto.begrunnelse,
         )
     }
 
@@ -141,7 +141,7 @@ class VergeService(
             orgNr = verge.orgNr,
             type = verge.type,
             navn = verge.navn,
-            begrunnelse = verge.begrunnelse
+            begrunnelse = verge.begrunnelse,
         )
     }
 }

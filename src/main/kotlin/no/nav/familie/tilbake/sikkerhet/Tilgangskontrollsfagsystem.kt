@@ -9,7 +9,8 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KONT"),
     FORVALTER_TILGANG("FT"), // brukes internt bare for tilgangsskontroll
-    SYSTEM_TILGANG(""); // brukes internt bare for tilgangsskontroll
+    SYSTEM_TILGANG(""), // brukes internt bare for tilgangsskontroll
+    ;
 
     companion object {
 

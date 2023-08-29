@@ -33,7 +33,7 @@ class FagsakService(
     private val taskService: TaskService,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val personService: PersonService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
 ) {
 
     fun hentFagsak(fagsakId: UUID): Fagsak {
@@ -44,16 +44,16 @@ class FagsakService(
     fun hentFagsak(fagsystem: Fagsystem, eksternFagsakId: String): FagsakDto {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId
+            eksternFagsakId = eksternFagsakId,
         )
             ?: throw Feil(
                 message = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
                 frontendFeilmelding = "Fagsak finnes ikke for ${fagsystem.navn} og $eksternFagsakId",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         val personInfo = personService.hentPersoninfo(
             personIdent = fagsak.bruker.ident,
-            fagsystem = fagsak.fagsystem
+            fagsystem = fagsak.fagsystem,
         )
         val behandlinger = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
 
@@ -61,7 +61,7 @@ class FagsakService(
             fagsak = fagsak,
             personinfo = personInfo,
             behandlinger = behandlinger,
-            organisasjonService = organisasjonService
+            organisasjonService = organisasjonService,
         )
     }
 
@@ -69,7 +69,7 @@ class FagsakService(
     fun finnFagsak(fagsystem: Fagsystem, eksternFagsakId: String): Fagsak? {
         return fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId
+            eksternFagsakId = eksternFagsakId,
         )
     }
 
@@ -87,15 +87,15 @@ class FagsakService(
     fun opprettFagsak(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         ytelsestype: Ytelsestype,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
     ): Fagsak {
         val bruker = Bruker(
             ident = opprettTilbakekrevingRequest.personIdent,
-            språkkode = opprettTilbakekrevingRequest.språkkode
+            språkkode = opprettTilbakekrevingRequest.språkkode,
         )
         val institusjon = opprettTilbakekrevingRequest.institusjon?.let {
             Institusjon(
-                organisasjonsnummer = it.organisasjonsnummer
+                organisasjonsnummer = it.organisasjonsnummer,
             )
         }
         return fagsakRepository.insert(
@@ -104,8 +104,8 @@ class FagsakService(
                 eksternFagsakId = opprettTilbakekrevingRequest.eksternFagsakId,
                 ytelsestype = ytelsestype,
                 fagsystem = fagsystem,
-                institusjon = institusjon
-            )
+                institusjon = institusjon,
+            ),
         )
     }
 
@@ -113,15 +113,15 @@ class FagsakService(
     fun finnesÅpenTilbakekrevingsbehandling(fagsystem: Fagsystem, eksternFagsakId: String): FinnesBehandlingResponse {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId
+            eksternFagsakId = eksternFagsakId,
         )
         var finnesÅpenBehandling = false
         if (fagsak != null) {
             finnesÅpenBehandling =
                 behandlingRepository.finnÅpenTilbakekrevingsbehandling(
-                ytelsestype = fagsak.ytelsestype,
-                eksternFagsakId = eksternFagsakId
-            ) != null
+                    ytelsestype = fagsak.ytelsestype,
+                    eksternFagsakId = eksternFagsakId,
+                ) != null
         }
         return FinnesBehandlingResponse(finnesÅpenBehandling = finnesÅpenBehandling)
     }
@@ -129,11 +129,11 @@ class FagsakService(
     @Transactional(readOnly = true)
     fun hentBehandlingerForFagsak(
         fagsystem: Fagsystem,
-        eksternFagsakId: String
+        eksternFagsakId: String,
     ): List<no.nav.familie.kontrakter.felles.tilbakekreving.Behandling> {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId
+            eksternFagsakId = eksternFagsakId,
         )
 
         return fagsak?.let {
@@ -145,11 +145,11 @@ class FagsakService(
     @Transactional(readOnly = true)
     fun hentVedtakForFagsak(
         fagsystem: Fagsystem,
-        eksternFagsakId: String
+        eksternFagsakId: String,
     ): List<no.nav.familie.kontrakter.felles.klage.FagsystemVedtak> {
         val fagsak = fagsakRepository.findByFagsystemAndEksternFagsakId(
             fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId
+            eksternFagsakId = eksternFagsakId,
         )
 
         return fagsak?.let {
@@ -161,7 +161,7 @@ class FagsakService(
     @Transactional(readOnly = true)
     fun kanBehandlingOpprettesManuelt(
         eksternFagsakId: String,
-        ytelsestype: Ytelsestype
+        ytelsestype: Ytelsestype,
     ): KanBehandlingOpprettesManueltRespons {
         val finnesÅpenTilbakekreving: Boolean =
             behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null
@@ -169,7 +169,7 @@ class FagsakService(
             return KanBehandlingOpprettesManueltRespons(
                 kanBehandlingOpprettes = false,
                 melding = "Det finnes allerede en åpen tilbakekrevingsbehandling. " +
-                    "Den ligger i saksoversikten."
+                    "Den ligger i saksoversikten.",
             )
         }
         val kravgrunnlagene = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
@@ -177,7 +177,7 @@ class FagsakService(
             return KanBehandlingOpprettesManueltRespons(
                 kanBehandlingOpprettes = false,
                 melding = "Det finnes ingen feilutbetaling på saken, så du kan " +
-                    "ikke opprette tilbakekrevingsbehandling."
+                    "ikke opprette tilbakekrevingsbehandling.",
             )
         }
         val kravgrunnlagsreferanse = kravgrunnlagene.first().referanse
@@ -188,9 +188,9 @@ class FagsakService(
                     Status.BEHANDLER,
                     Status.KLAR_TIL_PLUKK,
                     Status.PLUKKET,
-                    Status.FEILET
+                    Status.FEILET,
                 ),
-                Pageable.unpaged()
+                Pageable.unpaged(),
             )
                 .any {
                     OpprettBehandlingManueltTask.TYPE == it.type &&
@@ -205,13 +205,13 @@ class FagsakService(
                 melding = "Det finnes allerede en forespørsel om å opprette " +
                     "tilbakekrevingsbehandling. Behandlingen vil snart bli " +
                     "tilgjengelig i saksoversikten. Dersom den ikke dukker opp, " +
-                    "ta kontakt med brukerstøtte for å rapportere feilen."
+                    "ta kontakt med brukerstøtte for å rapportere feilen.",
             )
         }
         return KanBehandlingOpprettesManueltRespons(
             kanBehandlingOpprettes = true,
             kravgrunnlagsreferanse = kravgrunnlagsreferanse,
-            melding = "Det er mulig å opprette behandling manuelt."
+            melding = "Det er mulig å opprette behandling manuelt.",
         )
     }
 
@@ -223,9 +223,9 @@ class FagsakService(
             fagsak.copy(
                 bruker = Bruker(
                     ident = endretPersonIdentEvent.source as String,
-                    språkkode = fagsak.bruker.språkkode
-                )
-            )
+                    språkkode = fagsak.bruker.språkkode,
+                ),
+            ),
         )
     }
 }

@@ -6,7 +6,7 @@ import java.math.BigDecimal
 class HbKravgrunnlag(
     val riktigBeløp: BigDecimal? = null,
     val utbetaltBeløp: BigDecimal? = null,
-    val feilutbetaltBeløp: BigDecimal
+    val feilutbetaltBeløp: BigDecimal,
 ) {
 
     companion object {

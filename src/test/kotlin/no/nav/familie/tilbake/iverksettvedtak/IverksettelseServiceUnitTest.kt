@@ -52,7 +52,7 @@ class IverksettelseServiceUnitTest {
         beregningService,
         behandlingVedtakService,
         oppdragClient,
-        featureToggleService
+        featureToggleService,
     )
 
     @Test
@@ -114,7 +114,7 @@ class IverksettelseServiceUnitTest {
                 skattebeløp = BigDecimal.ZERO,
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal(9983),
                 utbetaltYtelsesbeløp = BigDecimal.ZERO,
-                riktigYtelsesbeløp = BigDecimal.ZERO
+                riktigYtelsesbeløp = BigDecimal.ZERO,
             ),
             Beregningsresultatsperiode(
                 periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
@@ -129,10 +129,10 @@ class IverksettelseServiceUnitTest {
                 skattebeløp = BigDecimal.ZERO,
                 tilbakekrevingsbeløpEtterSkatt = BigDecimal(47),
                 utbetaltYtelsesbeløp = BigDecimal.ZERO,
-                riktigYtelsesbeløp = BigDecimal.ZERO
-            )
+                riktigYtelsesbeløp = BigDecimal.ZERO,
+            ),
         ),
-        vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING
+        vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
     )
 
     private fun lagTilbakekrevingsperiode() =
@@ -149,9 +149,9 @@ class IverksettelseServiceUnitTest {
                         tilbakekrevesBeløp = BigDecimal(9983),
                         uinnkrevdBeløp = BigDecimal(17),
                         skattBeløp = BigDecimal.ZERO,
-                        kodeResultat = DELVIS_TILBAKEKREVING
-                    )
-                )
+                        kodeResultat = DELVIS_TILBAKEKREVING,
+                    ),
+                ),
             ),
             Tilbakekrevingsperiode(
                 periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
@@ -165,10 +165,10 @@ class IverksettelseServiceUnitTest {
                         tilbakekrevesBeløp = BigDecimal(47),
                         uinnkrevdBeløp = BigDecimal(0),
                         skattBeløp = BigDecimal.ZERO,
-                        kodeResultat = DELVIS_TILBAKEKREVING
-                    )
-                )
-            )
+                        kodeResultat = DELVIS_TILBAKEKREVING,
+                    ),
+                ),
+            ),
         )
 
     private fun lagKravgrunnlag() = Testdata.kravgrunnlag431.copy(
@@ -176,28 +176,28 @@ class IverksettelseServiceUnitTest {
             Kravgrunnlagsperiode432(
                 periode = Månedsperiode(
                     YearMonth.now().minusMonths(2),
-                    YearMonth.now().minusMonths(1)
+                    YearMonth.now().minusMonths(1),
                 ),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433,
-                    Testdata.ytelKravgrunnlagsbeløp433
+                    Testdata.ytelKravgrunnlagsbeløp433,
                 ),
-                månedligSkattebeløp = BigDecimal.ZERO
+                månedligSkattebeløp = BigDecimal.ZERO,
             ),
             Kravgrunnlagsperiode432(
                 periode = Månedsperiode(
                     YearMonth.now().minusMonths(1),
-                    YearMonth.now()
+                    YearMonth.now(),
                 ),
                 beløp = setOf(
                     Testdata.feilKravgrunnlagsbeløp433,
                     Testdata.ytelKravgrunnlagsbeløp433.copy(
                         tilbakekrevesBeløp = BigDecimal(47),
-                        opprinneligUtbetalingsbeløp = BigDecimal(47)
-                    )
+                        opprinneligUtbetalingsbeløp = BigDecimal(47),
+                    ),
                 ),
-                månedligSkattebeløp = BigDecimal.ZERO
-            )
-        )
+                månedligSkattebeløp = BigDecimal.ZERO,
+            ),
+        ),
     )
 }

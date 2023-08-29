@@ -63,7 +63,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val response: ResponseEntity<Ressurs<Map<String, String>>> = restTemplate.exchange(
             uriHentSaksnummer,
             HttpMethod.GET,
-            HttpEntity<String>(headers)
+            HttpEntity<String>(headers),
         )
 
         println(response)
@@ -154,7 +154,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         val behandling = opprettBehandling(
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = eksternFagsakId,
-            institusjon = Institusjon(organisasjonsnummer = "998765432")
+            institusjon = Institusjon(organisasjonsnummer = "998765432"),
         )
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
@@ -266,7 +266,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
-    inner class hentVedtakForFagsak {
+    inner class HentVedtakForFagsak {
 
         @Test
         internal fun `skal returnere tom liste hvis det ikke finnes noen vedtak for fagsak`() {
@@ -279,14 +279,14 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
         personIdent: String = "32132132111",
-        institusjon: Institusjon? = null
+        institusjon: Institusjon? = null,
     ): Behandling {
         val fagsak = Fagsak(
             eksternFagsakId = eksternFagsakId,
             bruker = Bruker(personIdent, Språkkode.NB),
             ytelsestype = ytelsestype,
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-            institusjon = institusjon
+            institusjon = institusjon,
         )
         fagsakRepository.insert(fagsak)
 
@@ -296,7 +296,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
             behandlendeEnhet = "8020",
             behandlendeEnhetsNavn = "Oslo",
-            manueltOpprettet = false
+            manueltOpprettet = false,
         )
         behandlingRepository.insert(behandling)
         return behandling

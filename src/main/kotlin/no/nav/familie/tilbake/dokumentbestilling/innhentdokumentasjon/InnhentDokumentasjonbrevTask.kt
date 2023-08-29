@@ -28,7 +28,7 @@ import java.util.UUID
     taskStepType = InnhentDokumentasjonbrevTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Sender innhent dokumentasjonsbrev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class InnhentDokumentasjonbrevTask(
     private val behandlingRepository: BehandlingRepository,
@@ -36,7 +36,7 @@ class InnhentDokumentasjonbrevTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val fagsakRepository: FagsakRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -60,14 +60,14 @@ class InnhentDokumentasjonbrevTask(
             beskrivelse = "Frist er oppdatert. Saksbehandler ${behandling
                 .ansvarligSaksbehandler} har bedt om mer informasjon av bruker",
             frist = fristTid,
-            saksbehandler = behandling.ansvarligSaksbehandler
+            saksbehandler = behandling.ansvarligSaksbehandler,
         )
         // Oppdaterer fristen dersom tasken har tidligere feilet. Behandling ble satt på vent i DokumentBehandlingService.
         if (task.opprettetTid.toLocalDate() < LocalDate.now()) {
             behandlingskontrollService.settBehandlingPåVent(
                 behandling.id,
                 Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                fristTid
+                fristTid,
             )
         }
     }
@@ -77,12 +77,12 @@ class InnhentDokumentasjonbrevTask(
         fun opprettTask(
             behandlingId: UUID,
             fagsystem: Fagsystem,
-            fritekst: String
+            fritekst: String,
         ): Task =
             Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(InnhentDokumentasjonbrevTaskdata(behandlingId, fritekst)),
-                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) }
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             )
                 .medTriggerTid(LocalDateTime.now().plusSeconds(15))
 
@@ -92,5 +92,5 @@ class InnhentDokumentasjonbrevTask(
 
 data class InnhentDokumentasjonbrevTaskdata(
     val behandlingId: UUID,
-    val fritekst: String
+    val fritekst: String,
 )

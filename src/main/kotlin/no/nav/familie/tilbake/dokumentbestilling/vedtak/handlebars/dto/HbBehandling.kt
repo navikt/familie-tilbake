@@ -6,7 +6,7 @@ class HbBehandling(
     val erRevurdering: Boolean = false,
     val erRevurderingEtterKlageNfp: Boolean = false,
     val originalBehandlingsdatoFagsakvedtak: LocalDate? = null,
-    val erRevurderingEtterKlage: Boolean = false
+    val erRevurderingEtterKlage: Boolean = false,
 ) {
 
     init {

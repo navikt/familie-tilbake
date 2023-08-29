@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 class PersonService(
     private val pdlClient: PdlClient,
     private val fagsakRepository: FagsakRepository,
-    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher
+    private val endretPersonIdentEventPublisher: EndretPersonIdentEventPublisher,
 ) {
 
     fun hentPersoninfo(personIdent: String, fagsystem: Fagsystem): Personinfo {

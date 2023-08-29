@@ -48,7 +48,7 @@ object FellesTekstformaterer {
         }
         TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(
             lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
-            språkstøttetFilsti
+            språkstøttetFilsti,
         )
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }

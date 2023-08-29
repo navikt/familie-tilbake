@@ -15,7 +15,7 @@ object VedtakHjemmel {
     private val Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER: List<Vilkårsvurderingsresultat> =
         listOf(
             Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
+            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
         )
 
     fun lagHjemmel(
@@ -24,13 +24,13 @@ object VedtakHjemmel {
         effektForBruker: EffektForBruker,
         språkkode: Språkkode,
         visHjemmelForRenter: Boolean,
-        klagebehandling: Boolean
+        klagebehandling: Boolean,
     ): HbHjemmel {
         val foreldetVanlig = erNoeSattTilVanligForeldet(vedtaksbrevgrunnlag.vurdertForeldelse)
         val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(vedtaksbrevgrunnlag.vurdertForeldelse)
         val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(
             vedtaksresultatstype,
-            vedtaksbrevgrunnlag.vilkårsvurderingsperioder
+            vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
         )
         val renter = visHjemmelForRenter && erRenterBenyttet(vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
         val barnetrygd = Ytelsestype.BARNETRYGD == vedtaksbrevgrunnlag.ytelsestype
@@ -77,7 +77,7 @@ object VedtakHjemmel {
 
     private fun heleVurderingPgaSmåbeløp(
         vedtakResultatType: Vedtaksresultat,
-        vilkårPerioder: Set<Vilkårsvurderingsperiode>
+        vilkårPerioder: Set<Vilkårsvurderingsperiode>,
     ): Boolean {
         return Vedtaksresultat.INGEN_TILBAKEBETALING == vedtakResultatType &&
             vilkårPerioder.any { false == it.aktsomhet?.tilbakekrevSmåbeløp }
@@ -96,7 +96,7 @@ object VedtakHjemmel {
     private fun join(
         elementer: List<Hjemler>,
         sisteSkille: String,
-        lokale: Språkkode
+        lokale: Språkkode,
     ): String {
         val lokalListe = elementer.map { it.hjemmelTekst(lokale) }
         if (lokalListe.size == 1) {
@@ -108,7 +108,7 @@ object VedtakHjemmel {
     enum class EffektForBruker {
         FØRSTEGANGSVEDTAK,
         ENDRET_TIL_GUNST_FOR_BRUKER,
-        ENDRET_TIL_UGUNST_FOR_BRUKER
+        ENDRET_TIL_UGUNST_FOR_BRUKER,
     }
 
     private enum class Hjemler(bokmål: String, nynorsk: String) {
@@ -120,11 +120,12 @@ object VedtakHjemmel {
         FORVALTNING_35_A("forvaltningsloven § 35 a)", "forvaltningslova § 35 a)"),
         FORVALTNING_35_C("forvaltningsloven § 35 c)", "forvaltningslova § 35 c)"),
         KONTANTSTØTTE_11("kontantstøtteloven § 11", "kontantstøttelova § 11"),
-        BARNETRYGD_13("barnetrygdloven § 13", "barnetrygdlova § 13");
+        BARNETRYGD_13("barnetrygdloven § 13", "barnetrygdlova § 13"),
+        ;
 
         private val hjemmelTekster = mapOf(
             Språkkode.NB to bokmål,
-            Språkkode.NN to nynorsk
+            Språkkode.NN to nynorsk,
         )
 
         fun hjemmelTekst(språkkode: Språkkode): String? {

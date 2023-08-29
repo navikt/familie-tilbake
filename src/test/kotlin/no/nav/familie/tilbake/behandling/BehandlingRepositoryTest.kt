@@ -35,7 +35,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandling,
             Behandling::endretTidspunkt,
             Behandling::sporbar,
-            Behandling::versjon
+            Behandling::versjon,
         )
         lagretBehandling.versjon shouldBe 1
     }
@@ -53,7 +53,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             oppdatertBehandling,
             Behandling::endretTidspunkt,
             Behandling::sporbar,
-            Behandling::versjon
+            Behandling::versjon,
         )
         lagretBehandling.versjon shouldBe 2
     }

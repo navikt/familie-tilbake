@@ -21,12 +21,12 @@ import java.util.UUID
     taskStepType = LagreBrevsporingTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Lagrer brev",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class LagreBrevsporingTask(
     private val brevsporingService: BrevsporingService,
     private val taskService: TaskService,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -41,7 +41,7 @@ class LagreBrevsporingTask(
             UUID.fromString(task.payload),
             dokumentId,
             journalpostId,
-            brevtype
+            brevtype,
         )
     }
 
@@ -59,7 +59,7 @@ class LagreBrevsporingTask(
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
                 aktør = utledAktør(brevtype, ansvarligSaksbehandler),
                 beskrivelse = opprinneligHistorikkinnslagstype.tekst,
-                brevtype = brevtype
+                brevtype = brevtype,
             )
         } else if (dødsboUkjentAdresse) {
             historikkTaskService.lagHistorikkTask(
@@ -67,14 +67,14 @@ class LagreBrevsporingTask(
                 historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE,
                 aktør = utledAktør(brevtype, ansvarligSaksbehandler),
                 beskrivelse = opprinneligHistorikkinnslagstype.tekst,
-                brevtype = brevtype
+                brevtype = brevtype,
             )
         } else {
             historikkTaskService.lagHistorikkTask(
                 behandlingId = UUID.fromString(task.payload),
                 historikkinnslagstype = opprinneligHistorikkinnslagstype,
                 aktør = utledAktør(brevtype, ansvarligSaksbehandler),
-                brevtype = brevtype
+                brevtype = brevtype,
             )
         }
 
@@ -112,7 +112,7 @@ class LagreBrevsporingTask(
 
         fun utledAktør(
             brevtype: Brevtype,
-            ansvarligSaksbehandler: String?
+            ansvarligSaksbehandler: String?,
         ): Aktør {
             return when {
                 brevtype == Brevtype.INNHENT_DOKUMENTASJON -> Aktør.SAKSBEHANDLER

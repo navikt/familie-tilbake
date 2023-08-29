@@ -7,7 +7,7 @@ class HbResultat(
     val tilbakekrevesBeløp: BigDecimal,
     val rentebeløp: BigDecimal,
     val foreldetBeløp: BigDecimal? = null,
-    val tilbakekrevesBeløpUtenSkattMedRenter: BigDecimal
+    val tilbakekrevesBeløpUtenSkattMedRenter: BigDecimal,
 ) {
 
     val tilbakekrevesBeløpMedRenter: BigDecimal = tilbakekrevesBeløp.add(rentebeløp)

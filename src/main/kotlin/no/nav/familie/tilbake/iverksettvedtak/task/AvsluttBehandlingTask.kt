@@ -24,12 +24,12 @@ import java.util.UUID
 @TaskStepBeskrivelse(
     taskStepType = AvsluttBehandlingTask.TYPE,
     beskrivelse = "Avslutter behandling",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class AvsluttBehandlingTask(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -48,8 +48,8 @@ class AvsluttBehandlingTask(
         behandlingRepository.update(
             behandling.copy(
                 status = Behandlingsstatus.AVSLUTTET,
-                avsluttetDato = LocalDate.now()
-            )
+                avsluttetDato = LocalDate.now(),
+            ),
         )
 
         behandlingskontrollService
@@ -57,14 +57,14 @@ class AvsluttBehandlingTask(
                 behandlingId,
                 Behandlingsstegsinfo(
                     behandlingssteg = Behandlingssteg.AVSLUTTET,
-                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT
-                )
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
+                ),
             )
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_AVSLUTTET,
-            aktør = Aktør.VEDTAKSLØSNING
+            aktør = Aktør.VEDTAKSLØSNING,
         )
     }
 

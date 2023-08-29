@@ -22,8 +22,8 @@ internal class LogiskPeriodeUtilTest {
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
             mapOf(
                 periode1 to BigDecimal.valueOf(100),
-                periode2 to BigDecimal.valueOf(200)
-            ).toSortedMap()
+                periode2 to BigDecimal.valueOf(200),
+            ).toSortedMap(),
         )
 
         resultat.size shouldBe 1
@@ -40,8 +40,8 @@ internal class LogiskPeriodeUtilTest {
         val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
             mapOf(
                 periode1 to BigDecimal.valueOf(100),
-                periode2 to BigDecimal.valueOf(200)
-            ).toSortedMap()
+                periode2 to BigDecimal.valueOf(200),
+            ).toSortedMap(),
         )
 
         resultat.size shouldBe 2

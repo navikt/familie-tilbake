@@ -55,8 +55,8 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
                 YearMonthTilLocalDateConverter(),
                 LocalDateTilYearMonthConverter(),
                 StringTilPropertiesWrapperConverter(),
-                PropertiesWrapperTilStringConverter()
-            )
+                PropertiesWrapperTilStringConverter(),
+            ),
         )
     }
 

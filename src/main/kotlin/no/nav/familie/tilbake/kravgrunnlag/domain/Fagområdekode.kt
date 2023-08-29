@@ -8,7 +8,8 @@ enum class Fagområdekode(val navn: String, val ytelsestype: Ytelsestype) {
     KS("Kontantstøtte", Ytelsestype.KONTANTSTØTTE),
     EFOG("Enslig forelder - Overgangsstønad", Ytelsestype.OVERGANGSSTØNAD),
     EFBT("Enslig forelder - Barnetilsyn", Ytelsestype.BARNETILSYN),
-    EFSP("Enslig forelder - Skolepenger", Ytelsestype.SKOLEPENGER);
+    EFSP("Enslig forelder - Skolepenger", Ytelsestype.SKOLEPENGER),
+    ;
 
     companion object {
 

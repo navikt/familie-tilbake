@@ -16,14 +16,14 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
         ytelsestype: Ytelsestype,
         eksternId: String,
         ansvarligSaksbehandler: String,
-        fagsystemsbehandlingData: HentFagsystemsbehandling
+        fagsystemsbehandlingData: HentFagsystemsbehandling,
     ) {
         val opprettTilbakekrevingRequest = lagOpprettBehandlingsrequest(
             eksternFagsakId = eksternFagsakId,
             ytelsestype = ytelsestype,
             eksternId = eksternId,
             fagsystemsbehandlingData = fagsystemsbehandlingData,
-            ansvarligSaksbehandler = ansvarligSaksbehandler
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
         )
         behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
     }
@@ -33,7 +33,7 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
         ytelsestype: Ytelsestype,
         eksternId: String,
         fagsystemsbehandlingData: HentFagsystemsbehandling,
-        ansvarligSaksbehandler: String
+        ansvarligSaksbehandler: String,
     ): OpprettTilbakekrevingRequest {
         return OpprettTilbakekrevingRequest(
             fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
@@ -51,7 +51,7 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
             faktainfo = fagsystemsbehandlingData.faktainfo,
             verge = fagsystemsbehandlingData.verge,
             varsel = null,
-            institusjon = fagsystemsbehandlingData.institusjon
+            institusjon = fagsystemsbehandlingData.institusjon,
         )
     }
 }

@@ -25,7 +25,7 @@ internal class AvstemmingsfilRepositoryTest : OppslagSpringRunnerTest() {
             avstemmingsfil,
             Avstemmingsfil::fil,
             Avstemmingsfil::sporbar,
-            Avstemmingsfil::versjon
+            Avstemmingsfil::versjon,
         )
         lagretAvstemmingsfil.versjon shouldBe 1
     }

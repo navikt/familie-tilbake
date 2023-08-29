@@ -12,13 +12,13 @@ object VedtaksbrevFritekstMapper {
     fun tilDomene(behandlingId: UUID, oppsummeringstekst: String?): Vedtaksbrevsoppsummering {
         return Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
-            oppsummeringFritekst = oppsummeringstekst
+            oppsummeringFritekst = oppsummeringstekst,
         )
     }
 
     fun tilDomeneVedtaksbrevsperiode(
         behandlingId: UUID,
-        perioderMedFritekst: List<PeriodeMedTekstDto>
+        perioderMedFritekst: List<PeriodeMedTekstDto>,
     ): List<Vedtaksbrevsperiode> {
         val vedtaksbrevsperioder = mutableListOf<Vedtaksbrevsperiode>()
         perioderMedFritekst.forEach {
@@ -27,7 +27,7 @@ object VedtaksbrevFritekstMapper {
             lagVilkårsvurderingAvsnitt(behandlingId, it)?.let { vilkårAvsnitt -> vedtaksbrevsperioder.add(vilkårAvsnitt) }
             lagSærligGrunnerAvsnitt(
                 behandlingId,
-                it
+                it,
             )?.let { særligGrunnerAvsnitt -> vedtaksbrevsperioder.add(særligGrunnerAvsnitt) }
             lagSærligGrunnerAnnetAvsnitt(behandlingId, it)?.let { annetAvsnitt -> vedtaksbrevsperioder.add(annetAvsnitt) }
         }
@@ -50,7 +50,7 @@ object VedtaksbrevFritekstMapper {
                 foreldelseAvsnitt = avsnittTilTekst[Friteksttype.FORELDELSE],
                 vilkårAvsnitt = avsnittTilTekst[Friteksttype.VILKÅR],
                 særligeGrunnerAvsnitt = avsnittTilTekst[Friteksttype.SÆRLIGE_GRUNNER],
-                særligeGrunnerAnnetAvsnitt = avsnittTilTekst[Friteksttype.SÆRLIGE_GRUNNER_ANNET]
+                særligeGrunnerAnnetAvsnitt = avsnittTilTekst[Friteksttype.SÆRLIGE_GRUNNER_ANNET],
             )
         }
     }
@@ -61,7 +61,7 @@ object VedtaksbrevFritekstMapper {
                 behandlingId = behandlingId,
                 periode = faktaAvsnittMedPeriode.periode.toMånedsperiode(),
                 fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
-                fritekststype = Friteksttype.FAKTA
+                fritekststype = Friteksttype.FAKTA,
             )
         }
     }
@@ -72,49 +72,49 @@ object VedtaksbrevFritekstMapper {
                 behandlingId = behandlingId,
                 periode = foreldelsesAvsnittMedPeriode.periode.toMånedsperiode(),
                 fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
-                fritekststype = Friteksttype.FORELDELSE
+                fritekststype = Friteksttype.FORELDELSE,
             )
         }
     }
 
     private fun lagVilkårsvurderingAvsnitt(
         behandlingId: UUID,
-        vilkårAvsnittMedPeriode: PeriodeMedTekstDto
+        vilkårAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? {
         return vilkårAvsnittMedPeriode.vilkårAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = vilkårAvsnittMedPeriode.periode.toMånedsperiode(),
                 fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
-                fritekststype = Friteksttype.VILKÅR
+                fritekststype = Friteksttype.VILKÅR,
             )
         }
     }
 
     private fun lagSærligGrunnerAvsnitt(
         behandlingId: UUID,
-        særligGrunnerAvsnittMedPeriode: PeriodeMedTekstDto
+        særligGrunnerAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? {
         return særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = særligGrunnerAvsnittMedPeriode.periode.toMånedsperiode(),
                 fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
-                fritekststype = Friteksttype.SÆRLIGE_GRUNNER
+                fritekststype = Friteksttype.SÆRLIGE_GRUNNER,
             )
         }
     }
 
     private fun lagSærligGrunnerAnnetAvsnitt(
         behandlingId: UUID,
-        særligGrunnerAnnetAvsnittMedPeriode: PeriodeMedTekstDto
+        særligGrunnerAnnetAvsnittMedPeriode: PeriodeMedTekstDto,
     ): Vedtaksbrevsperiode? {
         return særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
                 periode = særligGrunnerAnnetAvsnittMedPeriode.periode.toMånedsperiode(),
                 fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
-                fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET
+                fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET,
             )
         }
     }

@@ -18,7 +18,7 @@ import java.util.UUID
 class Grunnlagssteg(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -31,15 +31,15 @@ class Grunnlagssteg(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.GRUNNLAG,
-                    Behandlingsstegstatus.UTFØRT
-                )
+                    Behandlingsstegstatus.UTFØRT,
+                ),
             )
             behandlingskontrollService.fortsettBehandling(behandlingId)
             historikkTaskService.lagHistorikkTask(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT,
                 Aktør.VEDTAKSLØSNING,
-                triggerTid = LocalDateTime.now().plusSeconds(2)
+                triggerTid = LocalDateTime.now().plusSeconds(2),
             )
         }
     }

@@ -21,5 +21,5 @@ class Vedtaksoppsummering(
     val ansvarligBeslutter: String,
     val behandlendeEnhet: String,
     @Size(min = 1, max = 100)
-    val perioder: List<VedtakPeriode>
+    val perioder: List<VedtakPeriode>,
 )

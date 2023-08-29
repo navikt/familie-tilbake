@@ -99,7 +99,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
     private fun lagSærligeGrunnerTekster(
         felles: HbVedtaksbrevFelles,
         forstoBurdeForstått: Vilkårsvurderingsresultat,
-        simpelUaktsom: Aktsomhet
+        simpelUaktsom: Aktsomhet,
     ) {
         val boolske = booleanArrayOf(false, true)
         for (sgNav in boolske) {
@@ -115,7 +115,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
                                 sgBeløp,
                                 sgTid,
                                 reduksjon,
-                                sgAnnet
+                                sgAnnet,
                             )
                         }
                     }
@@ -132,12 +132,12 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         sgBeløp: Boolean,
         sgTid: Boolean,
         reduksjon: Boolean,
-        sgAnnet: Boolean
+        sgAnnet: Boolean,
     ) {
         val periode: HbVedtaksbrevsperiode = lagPeriodeDel(vilkårResultat, aktsomhet, sgNav, sgBeløp, sgTid, sgAnnet, reduksjon)
         val s: String = FellesTekstformaterer.lagDeltekst(
             HbVedtaksbrevPeriodeOgFelles(felles, periode),
-            AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER
+            AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER,
         )
         val overskrift = overskrift(sgNav, sgBeløp, sgTid, sgAnnet, reduksjon)
         val prettyPrint = prettyPrint(s, overskrift)
@@ -173,7 +173,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         sgBeløp: Boolean,
         sgTid: Boolean,
         sgAnnet: Boolean,
-        reduksjon: Boolean
+        reduksjon: Boolean,
     ): HbVedtaksbrevsperiode {
         val sg: MutableList<SærligGrunn> = ArrayList()
         if (sgNav) {
@@ -197,16 +197,16 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
                 foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                 vilkårsvurderingsresultat = vilkårResultat,
                 aktsomhetsresultat = aktsomhet,
-                særligeGrunner = HbSærligeGrunner(sg, null, fritekstSærligeGrunnerAnnet)
+                særligeGrunner = HbSærligeGrunner(sg, null, fritekstSærligeGrunnerAnnet),
             ),
             resultat = HbResultat(
                 tilbakekrevesBeløp =
                 BigDecimal.valueOf(if (reduksjon) 500L else 1000L),
                 tilbakekrevesBeløpUtenSkattMedRenter =
                 BigDecimal.valueOf(if (reduksjon) 400L else 800L),
-                rentebeløp = BigDecimal.ZERO
+                rentebeløp = BigDecimal.ZERO,
             ),
-            førstePeriode = true
+            førstePeriode = true,
         )
     }
 
@@ -214,7 +214,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
         val datoer = HbVedtaksbrevDatoer(
             LocalDate.of(2018, 3, 2),
             LocalDate.of(2018, 3, 3),
-            LocalDate.of(2018, 3, 4)
+            LocalDate.of(2018, 3, 4),
         )
 
         return HbVedtaksbrevFelles(
@@ -228,17 +228,17 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
                 totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                BigDecimal.valueOf(6855)
+                BigDecimal.valueOf(6855),
             ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.now().minusDays(100),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
         )
     }
 
@@ -252,7 +252,7 @@ class DokumentasjonsgeneratorPeriodeSærligeGrunner {
             saksnummer = "1232456",
             språkkode = språkkode,
             ytelsestype = Ytelsestype.BARNETRYGD,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         )
     }
 

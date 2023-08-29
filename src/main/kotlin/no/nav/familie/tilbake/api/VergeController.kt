@@ -31,7 +31,7 @@ class VergeController(private val vergeService: VergeService) {
         Behandlerrolle.SAKSBEHANDLER,
         "Oppretter verge steg på behandling",
         AuditLoggerEvent.CREATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun opprettVergeSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.opprettVergeSteg(behandlingId)
@@ -44,7 +44,7 @@ class VergeController(private val vergeService: VergeService) {
         Behandlerrolle.SAKSBEHANDLER,
         "Deaktiverer ev. eksisterende verge.",
         AuditLoggerEvent.UPDATE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun fjernVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
         vergeService.fjernVerge(behandlingId)
@@ -57,7 +57,7 @@ class VergeController(private val vergeService: VergeService) {
         Behandlerrolle.VEILEDER,
         "Henter verge informasjon",
         AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))

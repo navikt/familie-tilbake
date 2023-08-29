@@ -12,7 +12,7 @@ object HbResultatTestBuilder {
         return HbResultat(
             tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekrevesBeløp.toLong()),
             rentebeløp = BigDecimal.valueOf(renter.toLong()),
-            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(tilbakekrevesBeløp.toLong())
+            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(tilbakekrevesBeløp.toLong()),
         )
     }
 }

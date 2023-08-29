@@ -65,14 +65,14 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
             .insert(
                 brevsporing.copy(
                     id = UUID.randomUUID(),
-                    sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1))
-                )
+                    sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1)),
+                ),
             )
 
         val funnetBrevsporing =
             brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
                 Testdata.behandling.id,
-                Brevtype.VARSEL
+                Brevtype.VARSEL,
             )
 
         funnetBrevsporing?.shouldBeEqualToComparingFieldsExcept(nyesteBrevsporing, Brevsporing::sporbar, Brevsporing::versjon)

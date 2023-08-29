@@ -23,7 +23,7 @@ data class Brevmetadata(
     val behandlingstype: Behandlingstype? = null,
     val tittel: String? = null,
     val gjelderDødsfall: Boolean,
-    val institusjon: Institusjon? = null
+    val institusjon: Institusjon? = null,
 ) : Språkstøtte {
     init {
         if (finnesAnnenMottaker && !finnesVerge) {

@@ -11,8 +11,8 @@ object TekstformatererHeader {
                 språkkode = brevmetadata.språkkode,
                 person = Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
                 brev = Brev(overskrift),
-                institusjon = brevmetadata.institusjon
-            )
+                institusjon = brevmetadata.institusjon,
+            ),
         )
     }
 

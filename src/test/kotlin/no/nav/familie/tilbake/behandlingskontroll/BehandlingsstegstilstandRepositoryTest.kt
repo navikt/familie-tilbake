@@ -41,7 +41,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
         lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
             behandlingsstegstilstand,
             Behandlingsstegstilstand::sporbar,
-            Behandlingsstegstilstand::versjon
+            Behandlingsstegstilstand::versjon,
         )
         lagretBehandlingsstegstilstand.versjon shouldBe 1
     }
@@ -59,7 +59,7 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
         lagretBehandlingsstegstilstand.shouldBeEqualToComparingFieldsExcept(
             oppdatertBehandlingsstegstilstand,
             Behandlingsstegstilstand::sporbar,
-            Behandlingsstegstilstand::versjon
+            Behandlingsstegstilstand::versjon,
         )
         lagretBehandlingsstegstilstand.versjon shouldBe 2
     }

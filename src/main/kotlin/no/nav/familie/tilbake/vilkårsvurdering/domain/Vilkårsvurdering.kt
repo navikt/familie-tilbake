@@ -22,7 +22,7 @@ data class Vilkårsvurdering(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 @Table("vilkarsvurderingsperiode")
@@ -41,7 +41,7 @@ data class Vilkårsvurderingsperiode(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 @Table("vilkarsvurdering_god_tro")
@@ -56,7 +56,7 @@ data class VilkårsvurderingGodTro(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
@@ -83,7 +83,7 @@ data class VilkårsvurderingAktsomhet(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     init {
@@ -115,7 +115,7 @@ data class VilkårsvurderingSærligGrunn(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class SærligGrunn(val navn: String) {
@@ -123,7 +123,7 @@ enum class SærligGrunn(val navn: String) {
     HELT_ELLER_DELVIS_NAVS_FEIL("Om feilen helt eller delvis kan tilskrives NAV"),
     STØRRELSE_BELØP("Størrelsen på feilutbetalt beløp"),
     TID_FRA_UTBETALING("Hvor lang tid siden utbetalingen fant sted"),
-    ANNET("Annet");
+    ANNET("Annet"),
 }
 
 interface Vurdering {
@@ -134,25 +134,25 @@ interface Vurdering {
 enum class Aktsomhet(override val navn: String) : Vurdering {
     FORSETT("Forsett"),
     GROV_UAKTSOMHET("Grov uaktsomhet"),
-    SIMPEL_UAKTSOMHET("Simpel uaktsomhet");
+    SIMPEL_UAKTSOMHET("Simpel uaktsomhet"),
 }
 
 enum class AnnenVurdering(override val navn: String) : Vurdering {
 
     GOD_TRO("Handlet i god tro"),
-    FORELDET("Foreldet");
+    FORELDET("Foreldet"),
 }
 
 enum class Vilkårsvurderingsresultat(val navn: String) {
     FORSTO_BURDE_FORSTÅTT("Ja, mottaker forsto eller burde forstått at utbetalingen skyldtes en feil (1. ledd, 1. punkt)"),
     MANGELFULLE_OPPLYSNINGER_FRA_BRUKER(
         "Ja, mottaker har forårsaket feilutbetalingen ved forsett " +
-            "eller uaktsomt gitt mangelfulle opplysninger (1. ledd, 2 punkt)"
+            "eller uaktsomt gitt mangelfulle opplysninger (1. ledd, 2 punkt)",
     ),
     FEIL_OPPLYSNINGER_FRA_BRUKER(
         "Ja, mottaker har forårsaket feilutbetalingen ved forsett eller " +
-            "uaktsomt gitt feilaktige opplysninger (1. ledd, 2 punkt)"
+            "uaktsomt gitt feilaktige opplysninger (1. ledd, 2 punkt)",
     ),
     GOD_TRO("Nei, mottaker har mottatt beløpet i god tro (1. ledd)"),
-    UDEFINERT("Ikke Definert")
+    UDEFINERT("Ikke Definert"),
 }

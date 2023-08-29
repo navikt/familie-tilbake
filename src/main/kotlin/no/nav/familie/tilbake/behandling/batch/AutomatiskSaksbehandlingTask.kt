@@ -12,7 +12,7 @@ import java.util.UUID
     taskStepType = AutomatiskSaksbehandlingTask.TYPE,
     beskrivelse = "behandler behandling automatisk",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class AutomatiskSaksbehandlingTask(private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService) : AsyncTaskStep {
 

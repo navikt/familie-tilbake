@@ -29,7 +29,7 @@ import java.time.LocalDate
 @Service
 class PdlClient(
     private val pdlConfig: PdlConfig,
-    @Qualifier("azureClientCredential") restTemplate: RestOperations
+    @Qualifier("azureClientCredential") restTemplate: RestOperations,
 ) :
     AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
@@ -38,12 +38,12 @@ class PdlClient(
     fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(ident),
-            query = PdlConfig.hentEnkelPersonQuery
+            query = PdlConfig.hentEnkelPersonQuery,
         )
         val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(mapTilTema(fagsystem))
+            httpHeaders(mapTilTema(fagsystem)),
         )
         if (respons.harAdvarsel()) {
             logger.warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
@@ -57,7 +57,7 @@ class PdlClient(
                     fødselsdato = LocalDate.parse(it.fødsel.first().fødselsdato!!),
                     navn = it.navn.first().fulltNavn(),
                     kjønn = it.kjønn.first().kjønn,
-                    dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) }
+                    dødsdato = it.dødsfall.firstOrNull()?.let { dødsfall -> LocalDate.parse(dødsfall.dødsdato) },
                 )
             }
         } else {
@@ -65,7 +65,7 @@ class PdlClient(
             throw Feil(
                 message = "Feil ved oppslag på person: ${respons.errorMessages()}",
                 frontendFeilmelding = "Feil ved oppslag på person $ident: ${respons.errorMessages()}",
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             )
         }
     }
@@ -73,12 +73,12 @@ class PdlClient(
     fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(personIdent),
-            query = PdlConfig.hentIdenterQuery
+            query = PdlConfig.hentIdenterQuery,
         )
         val response = postForEntity<PdlHentIdenterResponse>(
             pdlConfig.pdlUri,
             pdlPersonRequest,
-            httpHeaders(mapTilTema(fagsystem))
+            httpHeaders(mapTilTema(fagsystem)),
         )
         if (response.harAdvarsel()) {
             logger.warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
@@ -88,22 +88,22 @@ class PdlClient(
         throw Feil(
             message = "Feil mot pdl: ${response.errorMessages()}",
             frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-            httpStatus = HttpStatus.NOT_FOUND
+            httpStatus = HttpStatus.NOT_FOUND,
         )
     }
 
     fun hentAdressebeskyttelseBolk(personIdentList: List<String>, fagsystem: Fagsystem): Map<String, PdlAdressebeskyttelsePerson> {
         val pdlRequest = PdlPersonBolkRequest(
             variables = PdlPersonBolkRequestVariables(personIdentList),
-            query = PdlConfig.hentAdressebeskyttelseBolkQuery
+            query = PdlConfig.hentAdressebeskyttelseBolkQuery,
         )
         val pdlResponse = postForEntity<PdlBolkResponse<PdlAdressebeskyttelsePerson>>(
             pdlConfig.pdlUri,
             pdlRequest,
-            httpHeaders(mapTilTema(fagsystem))
+            httpHeaders(mapTilTema(fagsystem)),
         )
         return feilsjekkOgReturnerData(
-            pdlResponse = pdlResponse
+            pdlResponse = pdlResponse,
         )
     }
 
@@ -136,5 +136,5 @@ class PdlClient(
 private enum class Tema(val fagsaksystem: String, val behandlingsnummer: String) {
     BAR("BA", "B284"),
     ENF("EF", "B288"),
-    KON("KONT", "B278")
+    KON("KONT", "B278"),
 }

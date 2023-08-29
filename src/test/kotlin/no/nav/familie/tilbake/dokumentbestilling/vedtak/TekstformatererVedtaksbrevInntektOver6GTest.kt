@@ -65,7 +65,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
         internal fun `nynorsk - flere perioder, en beløpsperiode og tre beløpsperioder`() {
             val data = HbVedtaksbrevsdata(
                 felles.copy(brevmetadata.copy(språkkode = Språkkode.NN)),
-                listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder)
+                listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder),
             )
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
             val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6G_helt_brev_flere_perioder_flere_beløp_nn.txt")
@@ -85,7 +85,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     private val felles =
@@ -97,21 +97,21 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
                 BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(11000),
                 BigDecimal.valueOf(11000),
-                BigDecimal.valueOf(1000)
+                BigDecimal.valueOf(1000),
             ),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.of(2022, 6, 21)
+                varsletDato = LocalDate.of(2022, 6, 21),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(
-                navn = "Søker Søkersen"
+                navn = "Søker Søkersen",
             ),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
             vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-            ansvarligBeslutter = "Ansvarlig Beslutter"
+            ansvarligBeslutter = "Ansvarlig Beslutter",
         )
 
     private val fakta =
@@ -131,40 +131,40 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
                 HbSærligeGrunner(
                     listOf(
                         SærligGrunn.TID_FRA_UTBETALING,
-                        SærligGrunn.STØRRELSE_BELØP
-                    )
-                )
+                        SærligGrunn.STØRRELSE_BELØP,
+                    ),
+                ),
             ),
             resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
             grunnbeløp = grunnbeløp,
-            førstePeriode = true
+            førstePeriode = true,
         )
 
     private val periodeMedEnBeløpsperiode = lagPeriode(
         lagHbGrunnbeløp(
             Månedsperiode(
                 LocalDate.of(2021, 1, 1),
-                LocalDate.of(2021, 3, 31)
-            )
-        )
+                LocalDate.of(2021, 3, 31),
+            ),
+        ),
     )
 
     private val periodeMedToBeløpsperioder = lagPeriode(
         lagHbGrunnbeløp(
             Månedsperiode(
                 LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 4, 30)
-            )
-        )
+                LocalDate.of(2021, 4, 30),
+            ),
+        ),
     )
 
     private val periodeMedTreBeløpsperioder = lagPeriode(
         lagHbGrunnbeløp(
             Månedsperiode(
                 LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 5, 31)
-            )
-        )
+                LocalDate.of(2021, 5, 31),
+            ),
+        ),
     )
 
     private fun les(filnavn: String): String? {

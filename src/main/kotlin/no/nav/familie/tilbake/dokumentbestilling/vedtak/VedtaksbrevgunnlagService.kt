@@ -17,7 +17,7 @@ class VedtaksbrevgunnlagService(private val vedtaksbrevgrunnlagRepository: Vedta
         return vedtaksbrevgrunnlag.copy(
             behandlinger = vedtaksbrevgrunnlag.behandlinger.filter {
                 it.id == behandlingId || it.id == originalBehandlingId
-            }.toSet()
+            }.toSet(),
         )
     }
 }

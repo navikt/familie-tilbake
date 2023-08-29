@@ -28,7 +28,7 @@ class DokumentbehandlingService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val taskService: TaskService,
     private val manueltVarselBrevService: ManueltVarselbrevService,
-    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
+    private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
 ) {
 
     fun bestillBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String) {
@@ -70,7 +70,7 @@ class DokumentbehandlingService(
         behandlingskontrollService.settBehandlingPåVent(
             behandling.id,
             Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-            tidsfrist
+            tidsfrist,
         )
     }
 

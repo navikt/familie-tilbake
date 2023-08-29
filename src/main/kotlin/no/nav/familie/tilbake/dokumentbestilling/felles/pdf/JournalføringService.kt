@@ -30,7 +30,7 @@ import java.util.UUID
 class JournalføringService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -48,10 +48,10 @@ class JournalføringService(
                     antall = 1000,
                     brukerId = Bruker(
                         id = fagsak.bruker.ident,
-                        type = BrukerIdType.FNR
+                        type = BrukerIdType.FNR,
                     ),
-                    tema = listOf(hentTema(fagsystem = fagsak.fagsystem))
-                )
+                    tema = listOf(hentTema(fagsystem = fagsak.fagsystem)),
+                ),
             )
         }
         return journalposter.filter { it.sak?.fagsakId == fagsak.eksternFagsakId }
@@ -64,7 +64,7 @@ class JournalføringService(
         brevmetadata: Brevmetadata,
         brevmottager: Brevmottager,
         vedleggPdf: ByteArray,
-        eksternReferanseId: String?
+        eksternReferanseId: String?,
     ): JournalpostIdOgDokumentId {
         logger.info("Starter journalføring av {} til {} for behandlingId={}", dokumentkategori, brevmottager, behandling.id)
         val dokument = Dokument(
@@ -72,7 +72,7 @@ class JournalføringService(
             filtype = Filtype.PDFA,
             filnavn = if (dokumentkategori == Dokumentkategori.VEDTAKSBREV) "vedtak.pdf" else "brev.pdf",
             tittel = brevmetadata.tittel,
-            dokumenttype = velgDokumenttype(fagsak, dokumentkategori)
+            dokumenttype = velgDokumenttype(fagsak, dokumentkategori),
         )
         val request = ArkiverDokumentRequest(
             fnr = fagsak.bruker.ident,
@@ -81,7 +81,7 @@ class JournalføringService(
             fagsakId = fagsak.eksternFagsakId,
             journalførendeEnhet = behandling.behandlendeEnhet,
             avsenderMottaker = lagMottager(behandling, brevmottager, brevmetadata),
-            eksternReferanseId = eksternReferanseId
+            eksternReferanseId = eksternReferanseId,
         )
 
         val response = integrasjonerClient.arkiver(request)
@@ -89,14 +89,14 @@ class JournalføringService(
         val dokumentinfoId = response.dokumenter?.first()?.dokumentInfoId
             ?: error(
                 "Feil ved Journalføring av $dokumentkategori " +
-                    "til $brevmottager for behandlingId=${behandling.id}"
+                    "til $brevmottager for behandlingId=${behandling.id}",
             )
         logger.info(
             "Journalførte utgående {} til {} for behandlingId={} med journalpostid={}",
             dokumentkategori,
             brevmottager,
             behandling.id,
-            response.journalpostId
+            response.journalpostId,
         )
         return JournalpostIdOgDokumentId(response.journalpostId, dokumentinfoId)
     }
@@ -107,10 +107,11 @@ class JournalføringService(
         return when (mottager) {
             Brevmottager.BRUKER,
             Brevmottager.MANUELL_BRUKER,
-            Brevmottager.MANUELL_TILLEGGSMOTTAKER -> AvsenderMottaker(
+            Brevmottager.MANUELL_TILLEGGSMOTTAKER,
+            -> AvsenderMottaker(
                 id = mottagerIdent,
                 idType = utledIdType(mottagerIdent),
-                navn = adresseinfo.mottagernavn
+                navn = adresseinfo.mottagernavn,
             )
             Brevmottager.VERGE -> lagVergemottager(behandling)
             Brevmottager.INSTITUSJON -> lagInstitusjonmottager(behandling, brevmetadata)
@@ -127,12 +128,12 @@ class JournalføringService(
     private fun lagInstitusjonmottager(behandling: Behandling, brevmetadata: Brevmetadata): AvsenderMottaker {
         val institusjon = brevmetadata.institusjon ?: throw IllegalStateException(
             "Brevmottager er institusjon, men institusjon finnes ikke. " +
-                "Fagsak ${behandling.fagsakId} og behandling ${behandling.id}"
+                "Fagsak ${behandling.fagsakId} og behandling ${behandling.id}",
         )
         return AvsenderMottaker(
             idType = BrukerIdType.ORGNR,
             id = institusjon.organisasjonsnummer,
-            navn = institusjon.navn
+            navn = institusjon.navn,
         )
     }
 
@@ -140,19 +141,19 @@ class JournalføringService(
         val verge: Verge = behandling.aktivVerge
             ?: throw IllegalStateException(
                 "Brevmottager er verge, men verge finnes ikke. " +
-                    "Behandling ${behandling.id}"
+                    "Behandling ${behandling.id}",
             )
         return if (verge.orgNr != null) {
             AvsenderMottaker(
                 idType = BrukerIdType.ORGNR,
                 id = verge.orgNr,
-                navn = verge.navn
+                navn = verge.navn,
             )
         } else {
             AvsenderMottaker(
                 idType = BrukerIdType.FNR,
                 id = verge.ident!!,
-                navn = verge.navn
+                navn = verge.navn,
             )
         }
     }

@@ -24,7 +24,7 @@ class AvstemmingService(
     private val behandlingRepository: BehandlingRepository,
     private val sendtXmlRepository: ØkonomiXmlSendtRepository,
     private val fagsakRepository: FagsakRepository,
-    private val integrasjonerConfig: IntegrasjonerConfig
+    private val integrasjonerConfig: IntegrasjonerConfig,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -53,7 +53,7 @@ class AvstemmingService(
                 dato,
                 rader.size,
                 sendteVedtak.size,
-                antallFørstegangsvedtakUtenTilbakekreving
+                antallFørstegangsvedtakUtenTilbakekreving,
             )
         } else {
             logger.warn(
@@ -64,7 +64,7 @@ class AvstemmingService(
                 rader.size,
                 sendteVedtak.size,
                 antallFørstegangsvedtakUtenTilbakekreving,
-                antallFeilet
+                antallFeilet,
             )
         }
         return if (rader.isEmpty()) {
@@ -76,14 +76,14 @@ class AvstemmingService(
 
     private fun erFørstegangsvedtakUtenTilbakekreving(
         behandling: Behandling,
-        oppsummering: TilbakekrevingsvedtakOppsummering
+        oppsummering: TilbakekrevingsvedtakOppsummering,
     ): Boolean {
         return behandling.type == Behandlingstype.TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
     }
 
     private fun lagAvstemmingsradForVedtaket(
         behandling: Behandling,
-        oppsummering: TilbakekrevingsvedtakOppsummering
+        oppsummering: TilbakekrevingsvedtakOppsummering,
     ): Rad {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val vedtaksdato = behandling.sisteResultat?.behandlingsvedtak?.vedtaksdato ?: error("Vedtaksdato mangler")
@@ -97,7 +97,7 @@ class AvstemmingService(
             tilbakekrevesNettoUtenRenter = oppsummering.tilbakekrevesNettoUtenRenter,
             skatt = oppsummering.skatt,
             renter = oppsummering.renter,
-            erOmgjøringTilIngenTilbakekreving = erOmgjøringTilIngenTilbakekreving(oppsummering, behandling)
+            erOmgjøringTilIngenTilbakekreving = erOmgjøringTilIngenTilbakekreving(oppsummering, behandling),
         )
     }
 
@@ -107,7 +107,7 @@ class AvstemmingService(
 
     private fun erOmgjøringTilIngenTilbakekreving(
         oppsummering: TilbakekrevingsvedtakOppsummering,
-        behandling: Behandling
+        behandling: Behandling,
     ): Boolean {
         return behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING && oppsummering.harIngenTilbakekreving()
     }

@@ -16,7 +16,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendSakshendelseTilDvhTask.TASK_TYPE,
-    beskrivelse = "Sending av sakshendelser til datavarehus"
+    beskrivelse = "Sending av sakshendelser til datavarehus",
 )
 class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
 
@@ -28,7 +28,7 @@ class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : Asy
         val behandlingstilstand: Behandlingstilstand = objectMapper.readValue(task.metadata.getProperty("behandlingstilstand"))
         kafkaProducer.sendSaksdata(
             behandlingId,
-            behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC))
+            behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC)),
         )
     }
 

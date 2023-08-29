@@ -8,7 +8,7 @@ class TilbakekrevingsvedtakOppsummering(
     val tilbakekrevesBruttoUtenRenter: BigDecimal,
     val tilbakekrevesNettoUtenRenter: BigDecimal,
     val renter: BigDecimal,
-    val skatt: BigDecimal
+    val skatt: BigDecimal,
 ) {
 
     fun harIngenTilbakekreving(): Boolean {
@@ -33,7 +33,7 @@ class TilbakekrevingsvedtakOppsummering(
                 skatt = skatt,
                 tilbakekrevesBruttoUtenRenter = bruttoUtenRenter,
                 tilbakekrevesNettoUtenRenter = bruttoUtenRenter.subtract(skatt),
-                økonomivedtakId = tilbakekrevingsvedtak.vedtakId.toString()
+                økonomivedtakId = tilbakekrevingsvedtak.vedtakId.toString(),
             )
         }
     }

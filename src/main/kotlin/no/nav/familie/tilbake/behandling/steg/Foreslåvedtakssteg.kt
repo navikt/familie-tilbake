@@ -32,7 +32,7 @@ class Foreslåvedtakssteg(
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val totrinnService: TotrinnService,
-    private val historikkTaskService: HistorikkTaskService
+    private val historikkTaskService: HistorikkTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -52,7 +52,7 @@ class Foreslåvedtakssteg(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-            Aktør.SAKSBEHANDLER
+            Aktør.SAKSBEHANDLER,
         )
 
         flyttBehandlingVidere(behandlingId)
@@ -65,7 +65,7 @@ class Foreslåvedtakssteg(
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                 .BEHANDLING_SENDT_TIL_BESLUTTER,
             aktør = Aktør.SAKSBEHANDLER,
-            triggerTid = LocalDateTime.now().plusSeconds(2)
+            triggerTid = LocalDateTime.now().plusSeconds(2),
         )
     }
 
@@ -75,7 +75,7 @@ class Foreslåvedtakssteg(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.FORESLÅ_VEDTAK_VURDERT,
-            Aktør.VEDTAKSLØSNING
+            Aktør.VEDTAKSLØSNING,
         )
         flyttBehandlingVidere(behandlingId)
 
@@ -87,7 +87,7 @@ class Foreslåvedtakssteg(
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
                 .BEHANDLING_SENDT_TIL_BESLUTTER,
             aktør = Aktør.VEDTAKSLØSNING,
-            triggerTid = LocalDateTime.now().plusSeconds(2)
+            triggerTid = LocalDateTime.now().plusSeconds(2),
         )
     }
 
@@ -98,8 +98,8 @@ class Foreslåvedtakssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORESLÅ_VEDTAK,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 
@@ -113,8 +113,8 @@ class Foreslåvedtakssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORESLÅ_VEDTAK,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -132,7 +132,7 @@ class Foreslåvedtakssteg(
             oppgaveTaskService.opprettOppgaveTask(
                 behandling = behandling,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
-                opprettetAv = ContextService.hentSaksbehandlerNavn()
+                opprettetAv = ContextService.hentSaksbehandlerNavn(),
             )
         }
     }

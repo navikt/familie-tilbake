@@ -29,7 +29,7 @@ class Foreldelsessteg(
     private val historikkTaskService: HistorikkTaskService,
     @Value("\${FORELDELSE_ANTALL_MÅNED:30}")
     private val foreldelseAntallMåned: Long,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -44,8 +44,8 @@ class Foreldelsessteg(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.FORELDELSE,
-                    Behandlingsstegstatus.AUTOUTFØRT
-                )
+                    Behandlingsstegstatus.AUTOUTFØRT,
+                ),
             )
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
@@ -64,8 +64,8 @@ class Foreldelsessteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -84,8 +84,8 @@ class Foreldelsessteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -97,8 +97,8 @@ class Foreldelsessteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FORELDELSE,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 

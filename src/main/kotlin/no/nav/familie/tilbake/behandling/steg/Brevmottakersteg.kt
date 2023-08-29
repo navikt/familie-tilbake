@@ -16,7 +16,7 @@ import java.util.UUID
 @Service
 class Brevmottakersteg(
     private val behandlingskontrollService: BehandlingskontrollService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -28,8 +28,8 @@ class Brevmottakersteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
-                AUTOUTFØRT
-            )
+                AUTOUTFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -40,7 +40,7 @@ class Brevmottakersteg(
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
-            Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, UTFØRT)
+            Behandlingsstegsinfo(Behandlingssteg.BREVMOTTAKER, UTFØRT),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -52,8 +52,8 @@ class Brevmottakersteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 

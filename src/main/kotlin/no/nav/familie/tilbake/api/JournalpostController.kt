@@ -28,7 +28,7 @@ class JournalpostController(private val journalføringService: JournalføringSer
     fun hentDokument(
         @PathVariable behandlingId: UUID,
         @PathVariable journalpostId: String,
-        @PathVariable dokumentInfoId: String
+        @PathVariable dokumentInfoId: String,
     ): Ressurs<ByteArray> {
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK")
     }

@@ -29,5 +29,5 @@ data class Behandlingstilstand(
     val forrigeBehandling: UUID?,
     val revurderingOpprettetÅrsak: Behandlingsårsakstype?,
     val totalFeilutbetaltBeløp: BigDecimal?,
-    val totalFeilutbetaltPeriode: Periode?
+    val totalFeilutbetaltPeriode: Periode?,
 )

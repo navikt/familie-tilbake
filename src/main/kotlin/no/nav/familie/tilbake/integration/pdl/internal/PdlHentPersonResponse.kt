@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class PdlHentPersonResponse<T>(
     val data: T,
     override val errors: List<PdlError>?,
-    override val extensions: PdlExtensions?
+    override val extensions: PdlExtensions?,
 ) : PdlBaseResponse(errors, extensions)
 
 data class PdlPerson(val person: PdlPersonData?)
@@ -16,14 +16,14 @@ data class PdlPersonData(
     val navn: List<PdlNavn>,
     @JsonProperty("kjoenn") val kjønn: List<PdlKjønn>,
     @JsonProperty("doedsfall") val dødsfall: List<PdlDødsfall> = emptyList(),
-    @JsonProperty("folkeregisteridentifikator") val identer: List<PdlFolkeregisteridentifikator>
+    @JsonProperty("folkeregisteridentifikator") val identer: List<PdlFolkeregisteridentifikator>,
 )
 
 data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
 
 data class PdlError(
     val message: String,
-    val extensions: PdlErrorExtensions?
+    val extensions: PdlErrorExtensions?,
 )
 
 data class PdlErrorExtensions(val code: String?)
@@ -31,7 +31,7 @@ data class PdlErrorExtensions(val code: String?)
 data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
-    val etternavn: String
+    val etternavn: String,
 ) {
 
     fun fulltNavn(): String {
@@ -47,7 +47,7 @@ data class PdlKjønn(@JsonProperty("kjoenn") val kjønn: Kjønn)
 enum class Kjønn {
     MANN,
     KVINNE,
-    UKJENT
+    UKJENT,
 }
 
 data class PdlDødsfall(@JsonProperty("doedsdato") val dødsdato: String? = null)
@@ -56,7 +56,7 @@ data class PdlDødsfall(@JsonProperty("doedsdato") val dødsdato: String? = null
 data class PdlFolkeregisteridentifikator(
     val identifikasjonsnummer: String?,
     val status: FolkeregisteridentifikatorStatus,
-    val type: FolkeregisteridentifikatorType?
+    val type: FolkeregisteridentifikatorType?,
 )
 
 enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }

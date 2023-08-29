@@ -4,5 +4,5 @@ import java.time.LocalDate
 
 class Brev(
     val overskrift: String?,
-    val dato: LocalDate = LocalDate.now()
+    val dato: LocalDate = LocalDate.now(),
 )

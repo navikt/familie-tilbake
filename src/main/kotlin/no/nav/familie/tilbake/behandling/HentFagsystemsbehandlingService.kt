@@ -15,14 +15,14 @@ import java.util.UUID
 @Service
 class HentFagsystemsbehandlingService(
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-    private val kafkaProducer: KafkaProducer
+    private val kafkaProducer: KafkaProducer,
 ) {
 
     @Transactional
     fun sendHentFagsystemsbehandlingRequest(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        eksternId: String
+        eksternId: String,
     ) {
         val eksisterendeRequestSendt =
             requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(eksternFagsakId, ytelsestype, eksternId)
@@ -34,14 +34,14 @@ class HentFagsystemsbehandlingService(
     private fun opprettOgSendHentFagsystembehandlingRequest(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        eksternId: String
+        eksternId: String,
     ) {
         val requestSendt = requestSendtRepository.insert(
             HentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId = eksternFagsakId,
                 ytelsestype = ytelsestype,
-                eksternId = eksternId
-            )
+                eksternId = eksternId,
+            ),
         )
 
         val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
@@ -53,7 +53,7 @@ class HentFagsystemsbehandlingService(
         requestSendtId: UUID,
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        eksternId: String
+        eksternId: String,
     ) {
         fjernHentFagsystemsbehandlingRequest(requestSendtId)
         opprettOgSendHentFagsystembehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
@@ -62,7 +62,7 @@ class HentFagsystemsbehandlingService(
     @Transactional
     fun lagreHentFagsystemsbehandlingRespons(
         requestId: UUID,
-        respons: String
+        respons: String,
     ) {
         val fagsystemsbehandlingRequestSendt = requestSendtRepository.findByIdOrThrow(requestId)
         requestSendtRepository.update(fagsystemsbehandlingRequestSendt.copy(respons = respons))
@@ -72,12 +72,12 @@ class HentFagsystemsbehandlingService(
     fun hentFagsystemsbehandlingRequestSendt(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        eksternId: String
+        eksternId: String,
     ): HentFagsystemsbehandlingRequestSendt? {
         return requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
             eksternFagsakId,
             ytelsestype,
-            eksternId
+            eksternId,
         )
     }
 

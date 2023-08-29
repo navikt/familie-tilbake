@@ -59,7 +59,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         manuelleBrevmottakerRepository = mockk(relaxed = true),
         eksterneDataForBrevService = eksterneDataForBrevService,
         organisasjonService = organisasjonService,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
 
     @BeforeEach
@@ -73,7 +73,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             spyPdfBrevService,
             organisasjonService,
             distribusjonshåndteringService,
-            brevmetadataUtil
+            brevmetadataUtil,
         )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
@@ -99,7 +99,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
                 Brevtype.HENLEGGELSE,
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -118,7 +118,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
         val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
             behandlingId,
-            REVURDERING_HENLEGGELSESBREV_FRITEKST
+            REVURDERING_HENLEGGELSESBREV_FRITEKST,
         )
 
         PdfaValidator.validatePdf(bytes)
@@ -134,7 +134,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             henleggelsesbrevService.sendHenleggelsebrev(
                 behandlingId,
                 null,
-                Brevmottager.BRUKER
+                Brevmottager.BRUKER,
             )
         }
 
@@ -150,7 +150,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             henleggelsesbrevService.sendHenleggelsebrev(
                 behandlingId,
                 null,
-                Brevmottager.BRUKER
+                Brevmottager.BRUKER,
             )
         }
 
@@ -169,7 +169,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
         verify(exactly = 2) {
             spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata)
+                capture(brevdata),
             )
         }
 

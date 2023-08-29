@@ -5,5 +5,5 @@ enum class KodeAksjon(val kode: String) {
     HENT_KORRIGERT_KRAVGRUNNLAG("4"),
     HENT_GRUNNLAG_OMGJØRING("5"),
     FATTE_VEDTAK("8"),
-    ANNULERE_GRUNNLAG("A");
+    ANNULERE_GRUNNLAG("A"),
 }

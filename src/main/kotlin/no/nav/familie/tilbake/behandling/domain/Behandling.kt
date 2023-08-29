@@ -44,7 +44,7 @@ data class Behandling(
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
-    val regelverk: Regelverk? = null
+    val regelverk: Regelverk? = null,
 ) {
 
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
@@ -104,7 +104,7 @@ data class Fagsystemsbehandling(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 @Table("fagsystemskonsekvens")
@@ -115,7 +115,7 @@ data class Fagsystemskonsekvens(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 data class Varsel(
@@ -130,7 +130,7 @@ data class Varsel(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 data class Varselsperiode(
@@ -141,7 +141,7 @@ data class Varselsperiode(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 data class Verge(
@@ -157,7 +157,7 @@ data class Verge(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 @Table("behandlingsarsak")
@@ -169,7 +169,7 @@ data class Behandlingsårsak(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Behandlingsårsakstype(val navn: String) {
@@ -177,7 +177,7 @@ enum class Behandlingsårsakstype(val navn: String) {
     REVURDERING_KLAGE_KA("Revurdering etter KA-behandlet klage"),
     REVURDERING_OPPLYSNINGER_OM_VILKÅR("Nye opplysninger om vilkårsvurdering"),
     REVURDERING_OPPLYSNINGER_OM_FORELDELSE("Nye opplysninger om foreldelse"),
-    REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt")
+    REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT("Feilutbetalt beløp helt eller delvis bortfalt"),
 }
 
 enum class Behandlingsstatus(val kode: String) {
@@ -186,16 +186,16 @@ enum class Behandlingsstatus(val kode: String) {
     FATTER_VEDTAK("FVED"),
     IVERKSETTER_VEDTAK("IVED"),
     OPPRETTET("OPPRE"),
-    UTREDES("UTRED")
+    UTREDES("UTRED"),
 }
 
 enum class Behandlingstype {
 
     TILBAKEKREVING,
-    REVURDERING_TILBAKEKREVING
+    REVURDERING_TILBAKEKREVING,
 }
 
 enum class Saksbehandlingstype {
     ORDINÆR,
-    AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP
+    AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
 }

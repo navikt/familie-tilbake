@@ -20,12 +20,12 @@ import java.util.UUID
     taskStepType = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Sender tilbakekrevingsvedtak til økonomi",
-    triggerTidVedFeilISekunder = 300L
+    triggerTidVedFeilISekunder = 300L,
 )
 class SendØkonomiTilbakekrevingsvedtakTask(
     private val iverksettelseService: IverksettelseService,
     private val taskService: TaskService,
-    private val behandlingskontrollService: BehandlingskontrollService
+    private val behandlingskontrollService: BehandlingskontrollService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -40,8 +40,8 @@ class SendØkonomiTilbakekrevingsvedtakTask(
                 behandlingId,
                 Behandlingsstegsinfo(
                     behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
-                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT
-                )
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
+                ),
             )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -52,8 +52,8 @@ class SendØkonomiTilbakekrevingsvedtakTask(
             Task(
                 type = SendVedtaksbrevTask.TYPE,
                 payload = task.payload,
-                properties = task.metadata
-            )
+                properties = task.metadata,
+            ),
         )
     }
 

@@ -31,7 +31,7 @@ class SwitchHelper : Helper<Any> {
         }
         throw IllegalArgumentException(
             "Switch-case må treffe i 1 case, men traff i " + antall +
-                " med verdien " + ctx.get("__condition_variable")
+                " med verdien " + ctx.get("__condition_variable"),
         )
     }
 }

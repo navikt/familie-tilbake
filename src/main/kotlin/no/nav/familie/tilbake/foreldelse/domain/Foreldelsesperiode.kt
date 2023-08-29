@@ -20,7 +20,7 @@ data class Foreldelsesperiode(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     fun erForeldet(): Boolean {
@@ -32,5 +32,5 @@ enum class Foreldelsesvurderingstype(val navn: String) {
     IKKE_VURDERT("Perioden er ikke vurdert"),
     FORELDET("Perioden er foreldet"),
     IKKE_FORELDET("Perioden er ikke foreldet"),
-    TILLEGGSFRIST("Perioden er ikke foreldet, regel om tilleggsfrist (10 år) benyttes")
+    TILLEGGSFRIST("Perioden er ikke foreldet, regel om tilleggsfrist (10 år) benyttes"),
 }

@@ -17,37 +17,37 @@ object Vedtaksbrevsfritekst {
                 fritekstFakta = markerFritekst(
                     fritekstTypeForFakta,
                     periode.fakta.fritekstFakta,
-                    Underavsnittstype.FAKTA
-                )
+                    Underavsnittstype.FAKTA,
+                ),
             )
             val vurderinger: HbVurderinger =
                 periode.vurderinger
                     .copy(
                         fritekstForeldelse = markerValgfriFritekst(
                             periode.vurderinger.fritekstForeldelse,
-                            Underavsnittstype.FORELDELSE
+                            Underavsnittstype.FORELDELSE,
                         ),
                         fritekst = markerValgfriFritekst(
                             periode.vurderinger.fritekst,
-                            Underavsnittstype.VILKÅR
+                            Underavsnittstype.VILKÅR,
                         ),
                         særligeGrunner = periode.vurderinger.særligeGrunner
                             ?.copy(
                                 fritekst = markerValgfriFritekst(
                                     periode.vurderinger.særligeGrunner.fritekst,
-                                    Underavsnittstype.SÆRLIGEGRUNNER
+                                    Underavsnittstype.SÆRLIGEGRUNNER,
                                 ),
                                 fritekstAnnet = markerPåkrevetFritekst(
                                     periode.vurderinger
                                         .særligeGrunner
                                         .fritekstAnnet,
-                                    Underavsnittstype.SÆRLIGEGRUNNER_ANNET
-                                )
-                            )
+                                    Underavsnittstype.SÆRLIGEGRUNNER_ANNET,
+                                ),
+                            ),
                     )
             periode.copy(
                 fakta = fakta,
-                vurderinger = vurderinger
+                vurderinger = vurderinger,
             )
         }
 
@@ -56,7 +56,7 @@ object Vedtaksbrevsfritekst {
             .copy(fritekstoppsummering = markerFritekst(fritekstType, vedtaksbrevsdata.felles.fritekstoppsummering, null))
         return vedtaksbrevsdata.copy(
             felles = felles,
-            perioder = perioder
+            perioder = perioder,
         )
     }
 
@@ -79,7 +79,7 @@ object Vedtaksbrevsfritekst {
 
     @JvmOverloads fun markerValgfriFritekst(
         fritekst: String?,
-        underavsnittstype: Underavsnittstype? = null
+        underavsnittstype: Underavsnittstype? = null,
     ): String {
         return markerFritekst(FritekstType.VALGFRI, fritekst, underavsnittstype)
     }
@@ -91,7 +91,7 @@ object Vedtaksbrevsfritekst {
     private fun markerFritekst(
         fritekstType: FritekstType,
         fritekst: String?,
-        underavsnittstype: Underavsnittstype?
+        underavsnittstype: Underavsnittstype?,
     ): String {
         val fritekstTypeMarkør =
             if (fritekstType == FritekstType.PÅKREVET) FRITEKST_PÅKREVET_MARKERING_START else FRITEKST_MARKERING_START
@@ -125,6 +125,6 @@ object Vedtaksbrevsfritekst {
 
     enum class FritekstType {
         VALGFRI,
-        PÅKREVET
+        PÅKREVET,
     }
 }

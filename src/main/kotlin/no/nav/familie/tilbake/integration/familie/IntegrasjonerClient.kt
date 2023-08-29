@@ -37,7 +37,7 @@ import java.net.URI
 @Component
 class IntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
-    private val integrasjonerConfig: IntegrasjonerConfig
+    private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
@@ -141,7 +141,7 @@ class IntegrasjonerClient(
         fagsystem: Fagsystem,
         distribusjonstype: Distribusjonstype,
         distribusjonstidspunkt: Distribusjonstidspunkt,
-        manuellAdresse: ManuellAdresse? = null
+        manuellAdresse: ManuellAdresse? = null,
     ): String {
         val request = DistribuerJournalpostRequest(
             journalpostId,
@@ -149,7 +149,7 @@ class IntegrasjonerClient(
             integrasjonerConfig.applicationName,
             distribusjonstype,
             distribusjonstidspunkt,
-            manuellAdresse
+            manuellAdresse,
         )
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
@@ -214,7 +214,7 @@ class IntegrasjonerClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = "5000")
+        backoff = Backoff(delayExpression = "5000"),
     )
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(tilgangssjekkUri, personIdenter)
@@ -223,7 +223,7 @@ class IntegrasjonerClient(
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         secureLogger.info(
             "henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
-                "og data $journalposterForBrukerRequest"
+                "og data $journalposterForBrukerRequest",
         )
 
         return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()

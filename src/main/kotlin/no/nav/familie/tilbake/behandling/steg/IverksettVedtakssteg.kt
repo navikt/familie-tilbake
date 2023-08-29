@@ -19,7 +19,7 @@ import java.util.UUID
 class IverksettVedtakssteg(
     private val behandlingsvedtakService: BehandlingsvedtakService,
     private val fagsakRepository: FagsakRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -37,8 +37,8 @@ class IverksettVedtakssteg(
             Task(
                 type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
                 payload = behandlingId.toString(),
-                properties = properties
-            )
+                properties = properties,
+            ),
         )
     }
 

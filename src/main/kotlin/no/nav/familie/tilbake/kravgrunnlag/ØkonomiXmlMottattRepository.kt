@@ -21,18 +21,18 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
     fun findByEksternFagsakIdAndYtelsestypeAndVedtakId(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        vedtakId: BigInteger
+        vedtakId: BigInteger,
     ): List<ØkonomiXmlMottatt>
 
     fun findByEksternFagsakIdAndYtelsestype(
         eksternFagsakId: String,
-        ytelsestype: Ytelsestype
+        ytelsestype: Ytelsestype,
     ): List<ØkonomiXmlMottatt>
 
     fun existsByEksternFagsakIdAndYtelsestypeAndReferanse(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
-        referanse: String
+        referanse: String,
     ): Boolean
 
     fun findByEksternKravgrunnlagId(eksternKravgrunnlagId: BigInteger): ØkonomiXmlMottatt?
@@ -49,13 +49,13 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
                     WHEN 'SKOLEPENGER' THEN opprettet_tid < :skolePengerBestemtDato
                     WHEN 'KONTANTSTØTTE' THEN opprettet_tid < :kontantstottebestemtdato
                END
-      """
+      """,
     )
     fun hentFrakobletGamleMottattXmlIds(
         barnetrygdBestemtDato: LocalDate,
         barnetilsynBestemtDato: LocalDate,
         overgangsstonadbestemtdato: LocalDate,
         skolePengerBestemtDato: LocalDate,
-        kontantstottebestemtdato: LocalDate
+        kontantstottebestemtdato: LocalDate,
     ): List<ØkonomiXmlMottattIdOgYtelse>
 }

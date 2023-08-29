@@ -56,8 +56,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                tidsfrist = tidsfrist
-            )
+                tidsfrist = tidsfrist,
+            ),
         )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
 
@@ -98,8 +98,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                tidsfrist = tidsfrist
-            )
+                tidsfrist = tidsfrist,
+            ),
         )
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
 
@@ -155,8 +155,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
                 behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,
-                tidsfrist = tidsfrist
-            )
+                tidsfrist = tidsfrist,
+            ),
         )
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
         shouldNotThrow<RuntimeException> { automatiskGjenopptaBehandlingTask.doTask(lagTask(behandling.id)) }
@@ -190,8 +190,8 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
         Properties().apply {
             setProperty(
                 PropertyName.FAGSYSTEM,
-                Fagsystem.BA.name
+                Fagsystem.BA.name,
             )
-        }
+        },
     )
 }

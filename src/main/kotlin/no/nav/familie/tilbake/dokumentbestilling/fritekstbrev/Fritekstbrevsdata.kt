@@ -5,5 +5,5 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 class Fritekstbrevsdata(
     val overskrift: String,
     val brevtekst: String,
-    val brevmetadata: Brevmetadata
+    val brevmetadata: Brevmetadata,
 )
