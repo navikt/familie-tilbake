@@ -146,6 +146,7 @@ enum class Klassekode(val aktivitet: String) {
     BAOROSMS("Barnetrygd-Infotrygd"),
     BAUTEFMS("BarnetrygdUtvidet-Infotrygd"),
     BAUTEFSM("Småbarnstillegg-Infotrygd"),
+    BAUTMDMS("Barnetrygd-Utvidet-Delt-Bosted"),
     EFOG("Overgangsstønad"),
     EFBT("Barnetilsyn"),
     EFBTOR("Barnetilsyn-Infotrygd"),
