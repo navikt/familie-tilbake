@@ -307,7 +307,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>8.3.0</version>
+            <version>8.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.messaginghub</groupId>
