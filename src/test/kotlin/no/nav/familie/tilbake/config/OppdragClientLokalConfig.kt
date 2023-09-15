@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
 @Configuration
-@ComponentScan(value = ["no.nav.familie.tilbake.kravgrunnlag"])
+@ComponentScan(value = ["no.nav.familie.tilbake.kravgrunnlag", "no.nav.familie.unleash"])
 @Profile("mock-økonomi")
 class OppdragClientLokalConfig(
     private val kravgrunnlagRepository: KravgrunnlagRepository,

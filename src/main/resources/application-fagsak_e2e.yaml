@@ -38,12 +38,8 @@ spring:
       database:
         role: familie
 
-funksjonsbrytere:
-  enabled: false
-  unleash:
-    uri: http://dummy/api/
-    cluster: localhost
-    applicationName: familie-tilbake
+unleash:
+  enabled: true
 
 STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl/
@@ -53,3 +49,7 @@ FAMILIE_INTEGRASJONER_URL: http://familie-integrasjoner:8085/api
 
 CREDENTIAL_USERNAME: srvfamilie-tilbake
 CREDENTIAL_PASSWORD:
+
+NAIS_APP_NAME: familie-klage
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
