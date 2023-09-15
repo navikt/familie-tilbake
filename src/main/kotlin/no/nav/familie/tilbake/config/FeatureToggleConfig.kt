@@ -6,14 +6,12 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.net.URI
 
 class ByClusterStrategy(private val clusterName: String) : Strategy {
 
@@ -24,12 +22,6 @@ class ByClusterStrategy(private val clusterName: String) : Strategy {
 
     override fun getName(): String = "byCluster"
 }
-
-data class Unleash(
-    val uri: URI,
-    val cluster: String,
-    val applicationName: String,
-)
 
 @Configuration
 class FeatureToggleConfig(
@@ -65,7 +57,8 @@ class FeatureToggleConfig(
 
         const val BRUK_6_DESIMALER_I_SKATTEBEREGNING = "familie-tilbake.bruk-seks-desimaler-skatt"
 
-        const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST = "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
+        const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST =
+            "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
     }
 }
 
@@ -96,7 +89,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK,
         FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING,
         FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER,
-        FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST
+        FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST,
     )
 
     @GetMapping
