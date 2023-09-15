@@ -93,7 +93,3 @@ prosessering:
 
 unleash:
   enabled: true
-
-NAIS_APP_NAME: familie-klage
-UNLEASH_SERVER_API_URL: http://localhost:4242/api
-UNLEASH_SERVER_API_TOKEN: token
