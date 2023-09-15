@@ -111,5 +111,6 @@ spec:
       value: prod
   envFrom:
     - secret: familie-tilbake
+    - secret: familie-tilbake-unleash-api-token
   kafka:
     pool: nav-prod
