@@ -35,7 +35,7 @@ class ManueltVarselbrevService(
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
     private val varselbrevUtil: VarselbrevUtil,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
-    private val brevmetadataUtil: BrevmetadataUtil
+    private val brevmetadataUtil: BrevmetadataUtil,
 ) {
 
     fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
@@ -55,7 +55,7 @@ class ManueltVarselbrevService(
             behandling = behandling,
             brevtype = if (erKorrigert) Brevtype.KORRIGERT_VARSEL else Brevtype.VARSEL,
             varsletBeløp = varsletFeilutbetaling,
-            fritekst = fritekst
+            fritekst = fritekst,
         ) { brevmottager, brevmetadata ->
 
             val varselbrevsdokument = lagVarselbrev(
@@ -66,14 +66,14 @@ class ManueltVarselbrevService(
                 erKorrigert = erKorrigert,
                 feilutbetalingsfakta = feilutbetalingsfakta,
                 aktivtVarsel = behandling.aktivtVarsel,
-                forhåndsgenerertMetadata = brevmetadata
+                forhåndsgenerertMetadata = brevmetadata,
             )
             Brevdata(
                 mottager = brevmottager,
                 overskrift = lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert),
                 brevtekst = lagFritekst(varselbrevsdokument, erKorrigert),
                 metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandling.id)
+                vedleggHtml = varselbrevUtil.lagVedlegg(varselbrevsdokument, behandling.id),
             )
         }
     }
@@ -97,17 +97,17 @@ class ManueltVarselbrevService(
                 overskrift = overskrift,
                 brevtekst = brevtekst,
                 metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = vedlegg
+                vedleggHtml = vedlegg,
             ),
             varsletFeilutbetaling,
-            fritekst
+            fritekst,
         )
     }
 
     fun hentForhåndsvisningManueltVarselbrev(
         behandlingId: UUID,
         maltype: Dokumentmalstype,
-        fritekst: String
+        fritekst: String,
     ): ByteArray {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -129,8 +129,8 @@ class ManueltVarselbrevService(
                 overskrift = overskrift,
                 brevtekst = brevtekst,
                 metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = vedlegg
-            )
+                vedleggHtml = vedlegg,
+            ),
         )
     }
 
@@ -142,7 +142,7 @@ class ManueltVarselbrevService(
         erKorrigert: Boolean,
         feilutbetalingsfakta: FaktaFeilutbetalingDto,
         aktivtVarsel: Varsel? = null,
-        forhåndsgenerertMetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Varselbrevsdokument {
         val metadata = forhåndsgenerertMetadata ?: run {
             // Henter data fra pdl
@@ -157,7 +157,7 @@ class ManueltVarselbrevService(
                 fagsak,
                 vergenavn,
                 erKorrigert,
-                personinfo.dødsdato != null
+                personinfo.dødsdato != null,
             )
         }
 
@@ -165,7 +165,7 @@ class ManueltVarselbrevService(
             metadata.copy(tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert)),
             fritekst,
             feilutbetalingsfakta,
-            aktivtVarsel
+            aktivtVarsel,
         )
     }
     private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {

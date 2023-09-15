@@ -14,7 +14,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 @Service
 class EksterneDataForBrevService(
     private val personService: PersonService,
-    private val integrasjonerClient: IntegrasjonerClient
+    private val integrasjonerClient: IntegrasjonerClient,
 ) {
 
     fun hentPerson(ident: String, fagsystem: Fagsystem): Personinfo {
@@ -40,7 +40,7 @@ class EksterneDataForBrevService(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         verge: Verge?,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
     ): Adresseinfo {
         return verge?.let { hentAdresse(it.type, it.orgNr, it.navn, personinfo, brevmottager, it.ident, fagsystem) }
             ?: hentAdresse(personinfo)
@@ -50,7 +50,7 @@ class EksterneDataForBrevService(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         vergeDto: VergeDto?,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
     ): Adresseinfo {
         return vergeDto?.let {
             hentAdresse(
@@ -60,7 +60,7 @@ class EksterneDataForBrevService(
                 personinfo,
                 brevmottager,
                 it.personIdent,
-                fagsystem
+                fagsystem,
             )
         } ?: hentAdresse(personinfo)
     }
@@ -72,14 +72,14 @@ class EksterneDataForBrevService(
         personinfo: Personinfo,
         brevmottager: Brevmottager,
         personIdent: String?,
-        fagsystem: Fagsystem
+        fagsystem: Fagsystem,
     ): Adresseinfo {
         if (Vergetype.ADVOKAT == vergeType) {
             return hentOrganisasjonsadresse(
                 organisasjonsnummer ?: error("organisasjonsnummer er påkrevd for $vergeType"),
                 navn,
                 personinfo,
-                brevmottager
+                brevmottager,
             )
         } else if (Brevmottager.VERGE == brevmottager) {
             val person = hentPerson(personIdent ?: error("personIdent er påkrevd for $vergeType"), fagsystem)
@@ -92,7 +92,7 @@ class EksterneDataForBrevService(
         organisasjonsnummer: String,
         vergenavn: String,
         personinfo: Personinfo,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Adresseinfo {
         val organisasjon = integrasjonerClient.hentOrganisasjon(organisasjonsnummer)
         return lagAdresseinfo(organisasjon, vergenavn, personinfo, brevmottager)
@@ -102,7 +102,7 @@ class EksterneDataForBrevService(
         organisasjon: Organisasjon,
         vergeNavn: String,
         personinfo: Personinfo,
-        brevmottager: Brevmottager
+        brevmottager: Brevmottager,
     ): Adresseinfo {
         val organisasjonsnavn: String = organisasjon.navn
         val vedVergeNavn = "v/ $vergeNavn"

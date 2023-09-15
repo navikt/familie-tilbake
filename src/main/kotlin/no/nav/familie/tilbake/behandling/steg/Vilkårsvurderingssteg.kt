@@ -30,7 +30,7 @@ class Vilkårsvurderingssteg(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val foreldelseService: ForeldelseService,
     private val historikkTaskService: HistorikkTaskService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +46,7 @@ class Vilkårsvurderingssteg(
 
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
-                Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT)
+                Behandlingsstegsinfo(VILKÅRSVURDERING, AUTOUTFØRT),
             )
             behandlingskontrollService.fortsettBehandling(behandlingId)
         }
@@ -59,7 +59,7 @@ class Vilkårsvurderingssteg(
             throw Feil(
                 message = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
                 frontendFeilmelding = "Alle perioder er foreldet for $behandlingId,kan ikke behandle vilkårsvurdering",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         vilkårsvurderingService.lagreVilkårsvurdering(behandlingId, behandlingsstegDto as BehandlingsstegVilkårsvurderingDto)
@@ -85,7 +85,7 @@ class Vilkårsvurderingssteg(
 
         behandlingskontrollService.oppdaterBehandlingsstegStatus(
             behandlingId,
-            Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT)
+            Behandlingsstegsinfo(VILKÅRSVURDERING, UTFØRT),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -97,8 +97,8 @@ class Vilkårsvurderingssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 VILKÅRSVURDERING,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 
@@ -120,7 +120,7 @@ class Vilkårsvurderingssteg(
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,
-            aktør
+            aktør,
         )
     }
 }

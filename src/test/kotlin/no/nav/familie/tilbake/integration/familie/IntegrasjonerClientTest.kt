@@ -39,7 +39,7 @@ internal class IntegrasjonerClientTest {
         wireMockServer.start()
         integrasjonerClient = IntegrasjonerClient(
             restOperations,
-            IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake")
+            IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"),
         )
     }
 
@@ -55,7 +55,7 @@ internal class IntegrasjonerClientTest {
 
         wireMockServer.stubFor(
             post(urlEqualTo("/${IntegrasjonerConfig.PATH_ARKIVER}"))
-                .willReturn(okJson(success(arkiverDokumentResponse).toJson()))
+                .willReturn(okJson(success(arkiverDokumentResponse).toJson())),
         )
 
         integrasjonerClient.arkiver(arkiverDokumentRequest).shouldNotBeNull()
@@ -65,7 +65,7 @@ internal class IntegrasjonerClientTest {
     fun `arkiver skal kaste feil hvis hvis integrasjoner gir ugyldig svar`() {
         wireMockServer.stubFor(
             post(urlEqualTo("/${IntegrasjonerConfig.PATH_ARKIVER}"))
-                .willReturn(okJson(failure<Any>("error").toJson()))
+                .willReturn(okJson(failure<Any>("error").toJson())),
         )
 
         shouldThrow<IllegalStateException> {
@@ -78,14 +78,14 @@ internal class IntegrasjonerClientTest {
         // Gitt
         wireMockServer.stubFor(
             post(urlEqualTo("/${IntegrasjonerConfig.PATH_DISTRIBUER}"))
-                .willReturn(okJson(success("id").toJson()))
+                .willReturn(okJson(success("id").toJson())),
         )
         // Vil gi resultat
         integrasjonerClient.distribuerJournalpost(
             "3216354",
             Fagsystem.EF,
             Distribusjonstype.VIKTIG,
-            Distribusjonstidspunkt.KJERNETID
+            Distribusjonstidspunkt.KJERNETID,
         ).shouldNotBeNull()
     }
 
@@ -93,7 +93,7 @@ internal class IntegrasjonerClientTest {
     fun `distribuerJournalpost skal kaste feil hvis hvis integrasjoner gir ugyldig svar`() {
         wireMockServer.stubFor(
             post(urlEqualTo("/${IntegrasjonerConfig.PATH_DISTRIBUER}"))
-                .willReturn(okJson(failure<Any>("error").toJson()))
+                .willReturn(okJson(failure<Any>("error").toJson())),
         )
 
         shouldThrow<IllegalStateException> {
@@ -101,7 +101,7 @@ internal class IntegrasjonerClientTest {
                 "3216354",
                 Fagsystem.EF,
                 Distribusjonstype.VIKTIG,
-                Distribusjonstidspunkt.KJERNETID
+                Distribusjonstidspunkt.KJERNETID,
             )
         }
     }
@@ -114,9 +114,9 @@ internal class IntegrasjonerClientTest {
                 .willReturn(
                     okJson(
                         success(Organisasjon("Bob AS", "987654321"))
-                            .toJson()
-                    )
-                )
+                            .toJson(),
+                    ),
+                ),
         )
         // Vil gi resultat
         integrasjonerClient.hentOrganisasjon("987654321").shouldNotBeNull()
@@ -126,7 +126,7 @@ internal class IntegrasjonerClientTest {
     fun `hentOrganisasjon skal kaste feil hvis integrasjoner gir ugyldig svar`() {
         wireMockServer.stubFor(
             get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321"))
-                .willReturn(okJson(failure<Any>("error").toJson()))
+                .willReturn(okJson(failure<Any>("error").toJson())),
         )
 
         shouldThrow<IllegalStateException> {
@@ -139,7 +139,7 @@ internal class IntegrasjonerClientTest {
         // Gitt
         wireMockServer.stubFor(
             get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
-                .willReturn(okJson(success(true).toJson()))
+                .willReturn(okJson(success(true).toJson())),
         )
         // Vil gi resultat
         integrasjonerClient.validerOrganisasjon("987654321").shouldBeTrue()
@@ -149,7 +149,7 @@ internal class IntegrasjonerClientTest {
     fun `validerOrganisasjon skal kaste feil hvis organisasjonnr er ugyldig`() {
         wireMockServer.stubFor(
             get(urlEqualTo("/${IntegrasjonerConfig.PATH_ORGANISASJON}/987654321/valider"))
-                .willReturn(okJson(success(false).toJson()))
+                .willReturn(okJson(success(false).toJson())),
         )
 
         integrasjonerClient.validerOrganisasjon("987654321").shouldBeFalse()

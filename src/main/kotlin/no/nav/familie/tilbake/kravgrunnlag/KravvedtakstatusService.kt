@@ -38,7 +38,7 @@ class KravvedtakstatusService(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val behandlingService: BehandlingService,
     private val historikkTaskService: HistorikkTaskService,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) {
 
     @Transactional
@@ -57,7 +57,7 @@ class KravvedtakstatusService(
                 .hentMottattKravgrunnlag(
                     eksternFagsakId = fagsystemId,
                     ytelsestype = ytelsestype,
-                    vedtakId = vedtakId
+                    vedtakId = vedtakId,
                 )
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
             mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
@@ -74,23 +74,23 @@ class KravvedtakstatusService(
         kravOgVedtakstatus.referanse
             ?: throw UgyldigStatusmeldingFeil(
                 melding = "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
-                    "Mangler referanse."
+                    "Mangler referanse.",
             )
     }
 
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
-        fagsystemId: String
+        fagsystemId: String,
     ): Behandling? {
         return behandlingRepository.finnÅpenTilbakekrevingsbehandling(
             ytelsestype = ytelsestype,
-            eksternFagsakId = fagsystemId
+            eksternFagsakId = fagsystemId,
         )
     }
 
     private fun håndterStatusmeldingerUtenBehandling(
         kravgrunnlagXmlListe: List<ØkonomiXmlMottatt>,
-        kravOgVedtakstatus: KravOgVedtakstatus
+        kravOgVedtakstatus: KravOgVedtakstatus,
     ) {
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL ->
@@ -103,7 +103,7 @@ class KravvedtakstatusService(
                 mottattXmlService.arkiverMottattXml(
                     it.melding,
                     it.eksternFagsakId,
-                    it.ytelsestype
+                    it.ytelsestype,
                 )
                 mottattXmlService.slettMottattXml(it.id)
             }
@@ -114,7 +114,7 @@ class KravvedtakstatusService(
     private fun håndterStatusmeldingerMedBehandling(
         kravgrunnlag431: Kravgrunnlag431,
         kravOgVedtakstatus: KravOgVedtakstatus,
-        behandling: Behandling
+        behandling: Behandling,
     ) {
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL -> {
@@ -126,7 +126,7 @@ class KravvedtakstatusService(
                 oppgaveTaskService.oppdaterOppgaveTask(
                     behandlingId = behandling.id,
                     beskrivelse = "Behandling er tatt av vent, pga mottatt ENDR melding",
-                    frist = LocalDate.now()
+                    frist = LocalDate.now(),
                 )
             }
             Kravstatuskode.AVSLUTTET -> {
@@ -137,8 +137,8 @@ class KravvedtakstatusService(
                         HenleggelsesbrevFritekstDto(
                             behandlingsresultatstype = Behandlingsresultatstype
                                 .HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                            begrunnelse = ""
-                        )
+                            begrunnelse = "",
+                        ),
                     )
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
@@ -148,7 +148,7 @@ class KravvedtakstatusService(
     @Transactional
     fun håndterSperMeldingMedBehandling(
         behandlingId: UUID,
-        kravgrunnlag431: Kravgrunnlag431
+        kravgrunnlag431: Kravgrunnlag431,
     ) {
         kravgrunnlagRepository.update(kravgrunnlag431.copy(sperret = true))
         val venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG
@@ -160,14 +160,14 @@ class KravvedtakstatusService(
                     behandlingssteg = Behandlingssteg.GRUNNLAG,
                     behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                     venteårsak = venteårsak,
-                    tidsfrist = tidsfrist
-                )
+                    tidsfrist = tidsfrist,
+                ),
             )
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
             aktør = Aktør.VEDTAKSLØSNING,
-            beskrivelse = venteårsak.beskrivelse
+            beskrivelse = venteårsak.beskrivelse,
         )
 
         // oppgave oppdateres ikke dersom behandling venter på varsel
@@ -176,7 +176,7 @@ class KravvedtakstatusService(
             oppgaveTaskService.oppdaterOppgaveTask(
                 behandlingId = behandlingId,
                 beskrivelse = venteårsak.beskrivelse,
-                frist = tidsfrist
+                frist = tidsfrist,
             )
         }
     }

@@ -286,7 +286,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
         )
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
@@ -324,7 +324,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT)
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.BEHANDLING_PÅ_VENT,
-            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse
+            Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG.beskrivelse,
         )
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.BEHANDLING_GJENOPPTATT)
         assertOppgaveTask("Behandling er tatt av vent, pga mottatt ENDR melding", LocalDate.now())
@@ -394,7 +394,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
         venteårsak: Venteårsak? = null,
-        tidsfrist: LocalDate? = null
+        tidsfrist: LocalDate? = null,
     ) {
         behandlingsstegstilstandRepository.insert(
             Behandlingsstegstilstand(
@@ -402,15 +402,15 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
                 behandlingssteg = behandlingssteg,
                 behandlingsstegsstatus = behandlingsstegstatus,
                 venteårsak = venteårsak,
-                tidsfrist = tidsfrist
-            )
+                tidsfrist = tidsfrist,
+            ),
         )
     }
 
     private fun assertBehandlingstegstilstand(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstand.shouldHaveSingleElement {
             behandlingssteg == it.behandlingssteg &&
@@ -421,11 +421,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     private fun assertArkivertXml(
         size: Int,
         finnesKravgrunnlag: Boolean,
-        vararg statusmeldingKravstatuskode: Kravstatuskode
+        vararg statusmeldingKravstatuskode: Kravstatuskode,
     ) {
         val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(
             fagsak.eksternFagsakId,
-            fagsak.ytelsestype
+            fagsak.ytelsestype,
         )
         arkivertXmlListe.size shouldBe size
 
@@ -444,23 +444,23 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         return taskService.save(
             Task(
                 type = taskType,
-                payload = xml
-            )
+                payload = xml,
+            ),
         )
     }
 
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
     ) {
         taskService.finnTasksMedStatus(
             listOf(
                 Status.KLAR_TIL_PLUKK,
                 Status.UBEHANDLET,
                 Status.BEHANDLER,
-                Status.FERDIG
+                Status.FERDIG,
             ),
-            page = Pageable.unpaged()
+            page = Pageable.unpaged(),
         ).any {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&

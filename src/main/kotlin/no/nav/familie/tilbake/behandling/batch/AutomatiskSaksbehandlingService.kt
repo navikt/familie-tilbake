@@ -37,7 +37,7 @@ class AutomatiskSaksbehandlingService(
     @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_SKOLEPENGER}")
     private val alderGrenseSkolepenger: Long,
     @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
-    private val alderGrenseKontantstøtte: Long
+    private val alderGrenseKontantstøtte: Long,
 ) {
 
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
@@ -49,7 +49,7 @@ class AutomatiskSaksbehandlingService(
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
             val kontrollFelt = LocalDate.parse(
                 kravgrunnlag.kontrollfelt,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
             )
             val sumNyttBeløp: BigDecimal = kravgrunnlag.perioder.sumOf { periode ->
                 periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
@@ -70,8 +70,8 @@ class AutomatiskSaksbehandlingService(
             behandling.copy(
                 saksbehandlingstype = Saksbehandlingstype
                     .AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
-                ansvarligSaksbehandler = "VL"
-            )
+                ansvarligSaksbehandler = "VL",
+            ),
         )
     }
 
@@ -85,14 +85,14 @@ class AutomatiskSaksbehandlingService(
         Ytelsestype.BARNETILSYN to alderGrenseBarnetilsyn,
         Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
         Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
-        Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte
+        Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte,
     )
 }
 
 fun main() {
     val dato = LocalDate.parse(
         "2022-02-10-18.43.15.192503",
-        DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+        DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
     )
     print(dato < LocalDate.now())
 }

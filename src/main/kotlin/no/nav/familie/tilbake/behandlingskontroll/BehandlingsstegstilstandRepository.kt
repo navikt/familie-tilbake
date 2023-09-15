@@ -17,7 +17,7 @@ interface BehandlingsstegstilstandRepository :
 
     fun findByBehandlingIdAndBehandlingsstegsstatusIn(
         behandlingId: UUID,
-        statuser: List<Behandlingsstegstatus>
+        statuser: List<Behandlingsstegstatus>,
     ): Behandlingsstegstilstand?
 
     fun findByBehandlingIdAndBehandlingssteg(behandlingId: UUID, behandlingssteg: Behandlingssteg): Behandlingsstegstilstand?

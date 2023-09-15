@@ -30,7 +30,7 @@ class VedtaksoppsummeringService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val foreldelseRepository: VurdertForeldelseRepository,
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
-    private val beregningService: TilbakekrevingsberegningService
+    private val beregningService: TilbakekrevingsberegningService,
 ) {
 
     fun hentVedtaksoppsummering(behandlingId: UUID): Vedtaksoppsummering {
@@ -57,7 +57,7 @@ class VedtaksoppsummeringService(
             behandlendeEnhet = behandling.behandlendeEnhet,
             erBehandlingManueltOpprettet = behandling.manueltOpprettet,
             forrigeBehandling = forrigeBehandling?.let(Behandling::eksternBrukId),
-            perioder = hentVedtakPerioder(behandlingId)
+            perioder = hentVedtakPerioder(behandlingId),
         )
     }
 
@@ -77,7 +77,7 @@ class VedtaksoppsummeringService(
     private fun hentVilkårPerioder(
         behandlingId: UUID,
         beregningsresultat: Beregningsresultat,
-        vilkårsvurdering: Vilkårsvurdering
+        vilkårsvurdering: Vilkårsvurdering,
     ): List<VedtakPeriode> {
         return vilkårsvurdering.perioder.map { periode ->
             val beregningsresultatsperiode: Beregningsresultatsperiode =
@@ -97,7 +97,7 @@ class VedtaksoppsummeringService(
                 særligeGrunner = hentSærligGrunner(periode),
                 feilutbetaltBeløp = beregningsresultatsperiode.feilutbetaltBeløp,
                 bruttoTilbakekrevingsbeløp = beregningsresultatsperiode.tilbakekrevingsbeløp,
-                rentebeløp = beregningsresultatsperiode.rentebeløp
+                rentebeløp = beregningsresultatsperiode.rentebeløp,
             )
         }
     }
@@ -105,7 +105,7 @@ class VedtaksoppsummeringService(
     private fun hentForeldelsePerioder(
         behandlingId: UUID,
         beregningsresultat: Beregningsresultat,
-        vurdertForeldelse: VurdertForeldelse
+        vurdertForeldelse: VurdertForeldelse,
     ): List<VedtakPeriode> {
         return vurdertForeldelse.foreldelsesperioder.mapNotNull { periode ->
             if (periode.erForeldet()) {
@@ -123,7 +123,7 @@ class VedtaksoppsummeringService(
                     vilkårsresultat = UtvidetVilkårsresultat.FORELDET,
                     feilutbetaltBeløp = resultatPeriode.feilutbetaltBeløp,
                     bruttoTilbakekrevingsbeløp = resultatPeriode.tilbakekrevingsbeløp,
-                    rentebeløp = resultatPeriode.rentebeløp
+                    rentebeløp = resultatPeriode.rentebeløp,
                 )
             } else {
                 null

@@ -12,7 +12,7 @@ import java.util.UUID
 class VarselService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val faktaFeilutbetalingService: FaktaFeilutbetalingService
+    private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
 
     fun lagre(behandlingId: UUID, varseltekst: String, varselbeløp: Long) {
@@ -29,7 +29,7 @@ class VarselService(
             Varsel(
                 varseltekst = varseltekst,
                 varselbeløp = varselbeløp,
-                perioder = varselsperioder
+                perioder = varselsperioder,
             )
         val copy = behandling.copy(varsler = varsler.toSet())
         behandlingRepository.update(copy)

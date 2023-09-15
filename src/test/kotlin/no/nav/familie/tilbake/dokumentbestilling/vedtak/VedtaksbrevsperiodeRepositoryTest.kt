@@ -40,7 +40,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
             vedtaksbrevsperiode,
             Vedtaksbrevsperiode::sporbar,
-            Vedtaksbrevsperiode::versjon
+            Vedtaksbrevsperiode::versjon,
         )
         lagretVedtaksbrevsperiode.versjon shouldBe 1
     }
@@ -57,7 +57,7 @@ internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
         lagretVedtaksbrevsperiode.shouldBeEqualToComparingFieldsExcept(
             oppdatertVedtaksbrevsperiode,
             Vedtaksbrevsperiode::sporbar,
-            Vedtaksbrevsperiode::versjon
+            Vedtaksbrevsperiode::versjon,
         )
         lagretVedtaksbrevsperiode.versjon shouldBe 2
     }

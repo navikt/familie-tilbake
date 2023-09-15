@@ -4,7 +4,7 @@ import java.math.BigDecimal
 
 class Beregningsresultat(
     val beregningsresultatsperioder: List<Beregningsresultatsperiode>,
-    val vedtaksresultat: Vedtaksresultat
+    val vedtaksresultat: Vedtaksresultat,
 ) {
 
     val totaltTilbakekrevesUtenRenter = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløpUtenRenter }

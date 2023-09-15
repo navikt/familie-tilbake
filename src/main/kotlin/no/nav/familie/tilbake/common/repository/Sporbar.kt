@@ -11,12 +11,12 @@ data class Sporbar(
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     @LastModifiedBy
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val endret: Endret = Endret()
+    val endret: Endret = Endret(),
 )
 
 data class Endret(
     val endretAv: String = ContextService.hentSaksbehandler(),
-    val endretTid: LocalDateTime = SporbarUtils.now()
+    val endretTid: LocalDateTime = SporbarUtils.now(),
 )
 
 object SporbarUtils {

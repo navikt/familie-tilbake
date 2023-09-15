@@ -34,7 +34,7 @@ class HistorikkService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val brevsporingRepository: BrevsporingRepository,
-    private val kafkaProducer: KafkaProducer
+    private val kafkaProducer: KafkaProducer,
 ) {
 
     @Transactional
@@ -46,7 +46,7 @@ class HistorikkService(
         beskrivelse: String? = null,
         brevtype: String? = null,
         beslutter: String? = null,
-        tittel: String? = null
+        tittel: String? = null,
     ) {
         val request = lagHistorikkinnslagRequest(
             behandlingId,
@@ -56,7 +56,7 @@ class HistorikkService(
             beskrivelse,
             brevtype,
             beslutter,
-            tittel
+            tittel,
         )
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
@@ -69,7 +69,7 @@ class HistorikkService(
         beskrivelse: String?,
         brevtype: String?,
         beslutter: String?,
-        tittel: String?
+        tittel: String?,
     ): OpprettHistorikkinnslagRequest {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -88,14 +88,14 @@ class HistorikkService(
             tittel = tittel ?: historikkinnslagstype.tittel,
             tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
             journalpostId = brevdata?.journalpostId,
-            dokumentId = brevdata?.dokumentId
+            dokumentId = brevdata?.dokumentId,
         )
     }
 
     private fun lagTekst(
         behandling: Behandling,
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-        beskrivelse: String?
+        beskrivelse: String?,
     ): String? {
         return when (historikkinnslagstype) {
             BEHANDLING_PÅ_VENT -> historikkinnslagstype.tekst + beskrivelse
@@ -103,7 +103,8 @@ class HistorikkService(
             BEHANDLING_HENLAGT -> {
                 when (val resultatstype = requireNotNull(behandling.sisteResultat?.type)) {
                     Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
-                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD -> historikkinnslagstype.tekst + resultatstype.navn
+                    Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    -> historikkinnslagstype.tekst + resultatstype.navn
                     else -> historikkinnslagstype.tekst + resultatstype.navn + ", Begrunnelse: " + beskrivelse
                 }
             }
@@ -120,7 +121,7 @@ class HistorikkService(
     private fun hentAktørIdent(
         behandling: Behandling,
         aktør: Aktør,
-        beslutter: String?
+        beslutter: String?,
     ): String {
         return when (aktør) {
             Aktør.VEDTAKSLØSNING -> Constants.BRUKER_ID_VEDTAKSLØSNINGEN
@@ -134,13 +135,13 @@ class HistorikkService(
 
     private fun hentBrevdata(
         behandling: Behandling,
-        brevtypeIString: String?
+        brevtypeIString: String?,
     ): Brevsporing? {
         val brevtype = brevtypeIString?.let { Brevtype.valueOf(it) }
         return brevtype?.let {
             brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
                 behandling.id,
-                brevtype
+                brevtype,
             )
         }
     }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
     taskStepType = BehandleKravgrunnlagTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagService) : AsyncTaskStep {
 

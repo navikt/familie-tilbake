@@ -39,7 +39,7 @@ class TilbakekrevingsberegningService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagsberegningService: KravgrunnlagsberegningService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
@@ -52,12 +52,12 @@ class TilbakekrevingsberegningService(
                 andelAvBeløp = it.andelAvBeløp,
                 renteprosent = it.renteprosent,
                 tilbakekrevingsbeløp = it.tilbakekrevingsbeløp,
-                tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt
+                tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt,
             )
         }
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder,
-            vedtaksresultat = beregningsresultat.vedtaksresultat
+            vedtaksresultat = beregningsresultat.vedtaksresultat,
         )
     }
 
@@ -74,7 +74,7 @@ class TilbakekrevingsberegningService(
                 vurdertForeldelse,
                 vilkårsvurdering,
                 perioderMedBeløp,
-                skalBeregneRenter(kravgrunnlag.fagområdekode)
+                skalBeregneRenter(kravgrunnlag.fagområdekode),
             )
         val totalTilbakekrevingsbeløp = beregningsresultatperioder.sumOf { it.tilbakekrevingsbeløp }
         val totalFeilutbetaltBeløp = beregningsresultatperioder.sumOf { it.feilutbetaltBeløp }
@@ -82,9 +82,9 @@ class TilbakekrevingsberegningService(
             vedtaksresultat = bestemVedtakResultat(
                 behandlingId,
                 totalTilbakekrevingsbeløp,
-                totalFeilutbetaltBeløp
+                totalFeilutbetaltBeløp,
             ),
-            beregningsresultatsperioder = (beregningsresultatperioder)
+            beregningsresultatsperioder = (beregningsresultatperioder),
         )
     }
 
@@ -99,9 +99,9 @@ class TilbakekrevingsberegningService(
                     KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
                 BeregnetPeriodeDto(
                     periode = it,
-                    feilutbetaltBeløp = feilutbetaltBeløp
+                    feilutbetaltBeløp = feilutbetaltBeløp,
                 )
-            }
+            },
         )
     }
 
@@ -115,7 +115,7 @@ class TilbakekrevingsberegningService(
 
     private fun finnPerioder(
         vurdertForeldelse: VurdertForeldelse?,
-        vilkårsvurdering: Vilkårsvurdering?
+        vilkårsvurdering: Vilkårsvurdering?,
     ): List<Månedsperiode> {
         return finnForeldedePerioder(vurdertForeldelse) + finnIkkeForeldedePerioder(vilkårsvurdering)
     }
@@ -125,7 +125,7 @@ class TilbakekrevingsberegningService(
         vurdertForeldelse: VurdertForeldelse?,
         vilkårsvurdering: Vilkårsvurdering?,
         perioderMedBeløp: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
     ): List<Beregningsresultatsperiode> {
         return (
             beregnForForeldedePerioder(vurdertForeldelse, perioderMedBeløp) +
@@ -150,7 +150,7 @@ class TilbakekrevingsberegningService(
         kravgrunnlag: Kravgrunnlag431,
         vilkårsvurdering: Vilkårsvurdering?,
         kravbeløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
     ): Collection<Beregningsresultatsperiode> {
         return vilkårsvurdering?.perioder
             ?.map { beregnIkkeForeldetPeriode(kravgrunnlag, it, kravbeløpPerPeriode, beregnRenter) }
@@ -159,7 +159,7 @@ class TilbakekrevingsberegningService(
 
     private fun beregnForForeldedePerioder(
         vurdertForeldelse: VurdertForeldelse?,
-        kravbeløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>
+        kravbeløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
     ): Collection<Beregningsresultatsperiode> {
         return vurdertForeldelse?.foreldelsesperioder
             ?.filter { Foreldelsesvurderingstype.FORELDET == it.foreldelsesvurderingstype }
@@ -169,7 +169,7 @@ class TilbakekrevingsberegningService(
 
     private fun beregnForeldetPeriode(
         beløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
-        foreldelsePeriode: Foreldelsesperiode
+        foreldelsePeriode: Foreldelsesperiode,
     ): Beregningsresultatsperiode {
         val periode: Månedsperiode = foreldelsePeriode.periode
         val delresultat: FordeltKravgrunnlagsbeløp =
@@ -186,7 +186,7 @@ class TilbakekrevingsberegningService(
             andelAvBeløp = BigDecimal.ZERO,
             vurdering = AnnenVurdering.FORELDET,
             skattebeløp = BigDecimal.ZERO,
-            tilbakekrevingsbeløpEtterSkatt = BigDecimal.ZERO
+            tilbakekrevingsbeløpEtterSkatt = BigDecimal.ZERO,
         )
     }
 
@@ -194,7 +194,7 @@ class TilbakekrevingsberegningService(
         kravgrunnlag: Kravgrunnlag431,
         vurdering: Vilkårsvurderingsperiode,
         kravbeløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
-        beregnRenter: Boolean
+        beregnRenter: Boolean,
     ): Beregningsresultatsperiode {
         val delresultat = kravbeløpPerPeriode[vurdering.periode]
             ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
@@ -206,13 +206,13 @@ class TilbakekrevingsberegningService(
             delresultat,
             perioderMedSkattProsent,
             beregnRenter,
-            bruk6desimalerISkatteberegning
+            bruk6desimalerISkatteberegning,
         )
     }
 
     private fun lagGrunnlagPeriodeMedSkattProsent(
         vurderingsperiode: Månedsperiode,
-        kravgrunnlag: Kravgrunnlag431
+        kravgrunnlag: Kravgrunnlag431,
     ): List<GrunnlagsperiodeMedSkatteprosent> {
         return kravgrunnlag.perioder
             .sortedBy { it.periode.fom }
@@ -222,7 +222,7 @@ class TilbakekrevingsberegningService(
                         BeløpsberegningUtil.beregnBeløpForPeriode(
                             kgBeløp.tilbakekrevesBeløp,
                             vurderingsperiode,
-                            it.periode
+                            it.periode,
                         )
                     GrunnlagsperiodeMedSkatteprosent(it.periode, maksTilbakekrevesBeløp, kgBeløp.skatteprosent)
                 }
@@ -238,7 +238,7 @@ class TilbakekrevingsberegningService(
     private fun bestemVedtakResultat(
         behandlingId: UUID,
         tilbakekrevingsbeløp: BigDecimal,
-        feilutbetaltBeløp: BigDecimal?
+        feilutbetaltBeløp: BigDecimal?,
     ): Vedtaksresultat {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP == behandling.saksbehandlingstype) {

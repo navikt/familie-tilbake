@@ -15,13 +15,13 @@ import java.net.URI
 @ConfigurationProperties("funksjonsbrytere")
 class FeatureToggleConfig(
     private val enabled: Boolean,
-    val unleash: Unleash
+    val unleash: Unleash,
 ) {
 
     data class Unleash(
         val uri: URI,
         val cluster: String,
-        val applicationName: String
+        val applicationName: String,
     )
 
     @Bean
@@ -31,7 +31,7 @@ class FeatureToggleConfig(
             lagUnleashFeatureToggleService()
         } else {
             logger.warn(
-                "Unleash feature toggle er skrudd AV. Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
+                "Unleash feature toggle er skrudd AV. Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'",
             )
             lagDummyFeatureToggleService()
         }
@@ -44,7 +44,7 @@ class FeatureToggleConfig(
                 .unleashContextProvider(lagUnleashContextProvider())
                 .build(),
             ByClusterStrategy(unleash.cluster),
-            GradualRolloutRandomStrategy()
+            GradualRolloutRandomStrategy(),
         )
 
         return object : FeatureToggleService {
@@ -94,6 +94,8 @@ class FeatureToggleConfig(
         const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
 
         const val BRUK_6_DESIMALER_I_SKATTEBEREGNING = "familie-tilbake.bruk-seks-desimaler-skatt"
+
+        const val IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST = "familie-tilbake.ikke-valider-saerlig-grunnet-annet-fritekst"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

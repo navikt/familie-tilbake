@@ -6,5 +6,5 @@ class ForekomsterPerUke(
     val år: Int,
     val uke: Int,
     val fagsystem: Fagsystem,
-    val antall: Int
+    val antall: Int,
 )

@@ -122,7 +122,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             oppgaveTaskService,
             historikkTaskService,
             hentFagsystemsbehandlingService,
-            endretKravgrunnlagEventPublisher
+            endretKravgrunnlagEventPublisher,
         )
 
         finnKravgrunnlagTask = FinnKravgrunnlagTask(
@@ -131,7 +131,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             økonomiXmlMottattRepository,
             kravgrunnlagRepository,
             kravgrunnlagService,
-            kravvedtakstatusService
+            kravvedtakstatusService,
         )
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
@@ -149,7 +149,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             eksternFagsakId,
-            Ytelsestype.BARNETRYGD
+            Ytelsestype.BARNETRYGD,
         )
         arkivXmlene.shouldNotBeEmpty()
 
@@ -175,7 +175,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             eksternFagsakId,
-            Ytelsestype.BARNETRYGD
+            Ytelsestype.BARNETRYGD,
         )
         arkivXmlene.shouldNotBeEmpty()
 
@@ -204,7 +204,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
             eksternFagsakId,
-            Ytelsestype.BARNETRYGD
+            Ytelsestype.BARNETRYGD,
         )
         arkivXmlene.shouldNotBeEmpty()
         arkivXmlene.size shouldBe 2
@@ -226,14 +226,14 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val faktainfo = Faktainfo(
             revurderingsårsak = "testverdi",
             revurderingsresultat = "testresultat",
-            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
         )
 
         val verge = if (finnesVerge) {
             no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
                 vergetype = Vergetype.VERGE_FOR_BARN,
                 navn = "Andy",
-                personIdent = "321321321"
+                personIdent = "321321321",
             )
         } else {
             null
@@ -253,14 +253,14 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             verge = verge,
             revurderingsvedtaksdato = LocalDate.now(),
             faktainfo = faktainfo,
-            saksbehandlerIdent = "Z0000"
+            saksbehandlerIdent = "Z0000",
         )
         return behandlingService.opprettBehandling(request)
     }
 
     private fun lagreMottattKravgrunnlag(
         kravgrunnlagXml: String,
-        sperret: Boolean = false
+        sperret: Boolean = false,
     ) {
         økonomiXmlMottattRepository.insert(
             ØkonomiXmlMottatt(
@@ -272,15 +272,15 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 eksternKravgrunnlagId = BigInteger.ZERO,
                 vedtakId = BigInteger.ZERO,
                 kontrollfelt = "2021-03-02-18.50.15.236315",
-                sperret = sperret
-            )
+                sperret = sperret,
+            ),
         )
     }
 
     private fun assertBehandlingsstegstilstand(
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstatus: Behandlingsstegstatus
+        behandlingsstegstatus: Behandlingsstegstatus,
     ) {
         behandlingsstegstilstand.any {
             it.behandlingssteg == behandlingssteg &&

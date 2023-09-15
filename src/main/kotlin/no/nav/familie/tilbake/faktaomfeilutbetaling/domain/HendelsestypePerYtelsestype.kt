@@ -16,7 +16,7 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.LOVLIG_OPPHOLD,
             Hendelsestype.DELT_BOSTED,
             Hendelsestype.BARNS_ALDER,
-            Hendelsestype.UTVIDET
+            Hendelsestype.UTVIDET,
         ),
         Ytelsestype.OVERGANGSSTØNAD to setOf(
             Hendelsestype.ANNET,
@@ -28,7 +28,7 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.STØNADSPERIODE,
             Hendelsestype.INNTEKT,
             Hendelsestype.PENSJONSYTELSER,
-            Hendelsestype.DØDSFALL
+            Hendelsestype.DØDSFALL,
         ),
         Ytelsestype.BARNETILSYN to setOf(
             Hendelsestype.ANNET,
@@ -36,7 +36,7 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.OPPHOLD_I_NORGE,
             Hendelsestype.ENSLIG_FORSØRGER,
             Hendelsestype.STØNAD_TIL_BARNETILSYN,
-            Hendelsestype.DØDSFALL
+            Hendelsestype.DØDSFALL,
         ),
         Ytelsestype.SKOLEPENGER to setOf(
             Hendelsestype.ANNET,
@@ -44,7 +44,7 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.OPPHOLD_I_NORGE,
             Hendelsestype.ENSLIG_FORSØRGER,
             Hendelsestype.DØDSFALL,
-            Hendelsestype.SKOLEPENGER
+            Hendelsestype.SKOLEPENGER,
         ),
         Ytelsestype.KONTANTSTØTTE to setOf(
             Hendelsestype.VILKÅR_BARN,
@@ -54,8 +54,8 @@ object HendelsestypePerYtelsestype {
             Hendelsestype.STØTTEPERIODE,
             Hendelsestype.UTBETALING,
             Hendelsestype.KONTANTSTØTTE_FOR_ADOPTERTE_BARN,
-            Hendelsestype.ANNET_KS
-        )
+            Hendelsestype.ANNET_KS,
+        ),
     )
 
     fun getHendelsestyper(ytelsestype: Ytelsestype): Set<Hendelsestype> {

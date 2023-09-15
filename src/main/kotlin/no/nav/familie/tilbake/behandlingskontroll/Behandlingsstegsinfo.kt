@@ -9,5 +9,5 @@ data class Behandlingsstegsinfo(
     val behandlingssteg: Behandlingssteg,
     val behandlingsstegstatus: Behandlingsstegstatus,
     val venteårsak: Venteårsak? = null,
-    val tidsfrist: LocalDate? = null
+    val tidsfrist: LocalDate? = null,
 )

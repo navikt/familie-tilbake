@@ -12,10 +12,10 @@ import java.util.UUID
     taskStepType = AutomatiskGjenopptaBehandlingTask.TYPE,
     beskrivelse = "gjenopptar behandling automatisk",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class AutomatiskGjenopptaBehandlingTask(
-    private val automatiskGjenopptaBehandlingService: AutomatiskGjenopptaBehandlingService
+    private val automatiskGjenopptaBehandlingService: AutomatiskGjenopptaBehandlingService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

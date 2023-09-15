@@ -26,13 +26,13 @@ class ForeldelseController(val foreldelseService: ForeldelseService) {
     @Operation(summary = "Hent foreldelsesinformasjon")
     @GetMapping(
         path = ["{behandlingId}/foreldelse/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.VEILEDER,
         "Henter foreldelsesinformasjon for en gitt behandling",
         AuditLoggerEvent.ACCESS,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun hentVurdertForeldelse(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VurdertForeldelseDto> {
         return Ressurs.success(foreldelseService.hentVurdertForeldelse(behandlingId))

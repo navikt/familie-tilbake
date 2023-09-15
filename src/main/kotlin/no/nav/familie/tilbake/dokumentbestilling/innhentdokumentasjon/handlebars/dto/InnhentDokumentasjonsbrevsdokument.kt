@@ -10,13 +10,13 @@ import java.util.Objects
 data class InnhentDokumentasjonsbrevsdokument(
     val brevmetadata: Brevmetadata,
     val fritekstFraSaksbehandler: String,
-    val fristdato: LocalDate
+    val fristdato: LocalDate,
 ) : BaseDokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall
+    brevmetadata.gjelderDødsfall,
 ) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge

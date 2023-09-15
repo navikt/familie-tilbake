@@ -15,11 +15,11 @@ import java.util.UUID
     taskStepType = HåndterGammelKravgrunnlagTask.TYPE,
     beskrivelse = "Håndter frakoblet gammel kravgrunnlag som er eldre enn en bestemt dato",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class HåndterGammelKravgrunnlagTask(
     private val håndterGamleKravgrunnlagService: HåndterGamleKravgrunnlagService,
-    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
+    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
 ) :
     AsyncTaskStep {
 
@@ -38,8 +38,8 @@ class HåndterGammelKravgrunnlagTask(
             hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
                 eksternFagsakId,
                 ytelsestype,
-                eksternId
-            )
+                eksternId,
+            ),
         )
         // kaster exception inntil respons-en har mottatt
         val respons = requireNotNull(requestSendt.respons) {
@@ -53,7 +53,7 @@ class HåndterGammelKravgrunnlagTask(
         if (feilMelding != null) {
             throw UkjentravgrunnlagFeil(
                 "Noen gikk galt mens henter fagsystemsbehandling fra fagsystem. " +
-                    "Feiler med $feilMelding"
+                    "Feiler med $feilMelding",
             )
         }
         håndterGamleKravgrunnlagService.håndter(hentFagsystemsbehandlingRespons.hentFagsystemsbehandling!!, mottattXml, task)

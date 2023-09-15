@@ -38,7 +38,7 @@ class ManuellBrevmottakerService(
     private val fagsakService: FagsakService,
     private val pdlClient: PdlClient,
     private val integrasjonerClient: IntegrasjonerClient,
-    private val validerBrevmottakerService: ValiderBrevmottakerService
+    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
 
     @Transactional
@@ -54,7 +54,7 @@ class ManuellBrevmottakerService(
             aktør = Aktør.SAKSBEHANDLER,
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(manuellBrevmottaker),
-            tittel = "${manuellBrevmottaker.type.visningsnavn} er lagt til som brevmottaker"
+            tittel = "${manuellBrevmottaker.type.visningsnavn} er lagt til som brevmottaker",
         )
         return id
     }
@@ -65,7 +65,7 @@ class ManuellBrevmottakerService(
     fun oppdaterBrevmottaker(
         behandlingId: UUID,
         manuellBrevmottakerId: UUID,
-        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto
+        manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ) {
         val manuellBrevmottaker = manuellBrevmottakerRepository.findById(manuellBrevmottakerId).getOrNull()
             ?: throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId")
@@ -81,7 +81,7 @@ class ManuellBrevmottakerService(
             postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer,
             poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed,
             landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
-            vergetype = manuellBrevmottakerRequestDto.vergetype
+            vergetype = manuellBrevmottakerRequestDto.vergetype,
         )
 
         val historikkinnslagtittel =
@@ -97,7 +97,7 @@ class ManuellBrevmottakerService(
             aktør = Aktør.SAKSBEHANDLER,
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(oppdatertBrevmottaker),
-            tittel = historikkinnslagtittel
+            tittel = historikkinnslagtittel,
         )
 
         manuellBrevmottakerRepository.update(oppdatertBrevmottaker)
@@ -111,7 +111,7 @@ class ManuellBrevmottakerService(
         }
         fjernBrevmottakerOgLagHistorikkinnslag(
             manuellBrevmottakere.single { it.id == manuellBrevmottakerId },
-            behandlingId
+            behandlingId,
         )
     }
 
@@ -132,8 +132,8 @@ class ManuellBrevmottakerService(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.BREVMOTTAKER,
-                Behandlingsstegstatus.TILBAKEFØRT
-            )
+                Behandlingsstegstatus.TILBAKEFØRT,
+            ),
         )
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
@@ -145,7 +145,7 @@ class ManuellBrevmottakerService(
             aktør = Aktør.SAKSBEHANDLER,
             opprettetTidspunkt = LocalDateTime.now(),
             beskrivelse = lagHistorikkBeskrivelseForBrevmottaker(manuellBrevmottaker),
-            tittel = "${manuellBrevmottaker.type.visningsnavn} er fjernet som brevmottaker"
+            tittel = "${manuellBrevmottaker.type.visningsnavn} er fjernet som brevmottaker",
         )
 
         manuellBrevmottakerRepository.deleteById(manuellBrevmottaker.id)
@@ -156,14 +156,14 @@ class ManuellBrevmottakerService(
             throw Feil(
                 "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er allerede ferdig behandlet.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         if (behandlingskontrollService.erBehandlingPåVent(behandling.id)) {
             throw Feil(
                 "Behandling med id=${behandling.id} er på vent.",
                 frontendFeilmelding = "Behandling med id=${behandling.id} er på vent.",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
@@ -176,23 +176,23 @@ class ManuellBrevmottakerService(
             brevmottaker.adresselinje2,
             brevmottaker.postnummer,
             brevmottaker.poststed,
-            brevmottaker.landkode
+            brevmottaker.landkode,
         ).joinToString(separator = System.lineSeparator())
 
     private fun hentPersonEllerOrganisasjonNavnFraRegister(
         dto: ManuellBrevmottakerRequestDto,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): String? {
         return dto.personIdent?.let {
             pdlClient.hentPersoninfo(
                 ident = it,
-                fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
+                fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId),
             ).navn
         } ?: dto.organisasjonsnummer?.let {
             if (!integrasjonerClient.validerOrganisasjon(it)) {
                 throw Feil(
                     message = "Organisasjon $it er ikke gyldig",
-                    frontendFeilmelding = "Organisasjon $it er ikke gyldig"
+                    frontendFeilmelding = "Organisasjon $it er ikke gyldig",
                 )
             }
             integrasjonerClient.hentOrganisasjon(it).navn + if (dto.navn.isNotBlank()) " v/ ${dto.navn}" else ""
@@ -217,7 +217,7 @@ fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
                 adresselinje2 = manuellBrevmottaker.adresselinje2,
                 postnummer = manuellBrevmottaker.postnummer,
                 poststed = manuellBrevmottaker.poststed,
-                land = manuellBrevmottaker.landkode!!
+                land = manuellBrevmottaker.landkode!!,
             )
         } else {
             null

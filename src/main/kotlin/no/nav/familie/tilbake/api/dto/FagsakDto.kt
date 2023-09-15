@@ -16,7 +16,7 @@ data class FagsakDto(
     val språkkode: Språkkode,
     val bruker: BrukerDto,
     val behandlinger: List<BehandlingsoppsummeringDto>,
-    val institusjon: InstitusjonDto? = null
+    val institusjon: InstitusjonDto? = null,
 )
 
 data class BrukerDto(
@@ -24,17 +24,17 @@ data class BrukerDto(
     val navn: String,
     val fødselsdato: LocalDate,
     val kjønn: Kjønn,
-    val dødsdato: LocalDate? = null
+    val dødsdato: LocalDate? = null,
 )
 
 data class BehandlingsoppsummeringDto(
     val behandlingId: UUID,
     val eksternBrukId: UUID,
     val type: Behandlingstype,
-    val status: Behandlingsstatus
+    val status: Behandlingsstatus,
 )
 
 data class InstitusjonDto(
     val organisasjonsnummer: String,
-    val navn: String
+    val navn: String,
 )

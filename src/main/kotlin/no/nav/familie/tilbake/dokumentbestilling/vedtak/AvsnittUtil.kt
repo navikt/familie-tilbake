@@ -62,7 +62,7 @@ internal object AvsnittUtil {
             avsnittstype = Avsnittstype.PERIODE,
             fom = data.periode.periode.fom,
             tom = data.periode.periode.tom,
-            overskrift = fjernOverskriftFormattering(overskrift)
+            overskrift = fjernOverskriftFormattering(overskrift),
         )
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
@@ -76,7 +76,7 @@ internal object AvsnittUtil {
     fun parseTekst(
         generertTekst: String,
         avsnitt: Avsnitt,
-        underavsnittstype: Underavsnittstype?
+        underavsnittstype: Underavsnittstype?,
     ): Avsnitt {
         var lokaltAvsnitt = avsnitt
         var lokalUnderavsnittstype = underavsnittstype
@@ -112,8 +112,8 @@ internal object AvsnittUtil {
                         fritekst.joinToString("\n"),
                         fritekstTillatt,
                         fritekstPåkrevet,
-                        lokalUnderavsnittstype
-                    )
+                        lokalUnderavsnittstype,
+                    ),
                 )
                 overskrift = null
                 brødtekst = null
@@ -154,8 +154,8 @@ internal object AvsnittUtil {
                     fritekst.joinToString("\n"),
                     fritekstTillatt,
                     fritekstPåkrevet,
-                    lokalUnderavsnittstype
-                )
+                    lokalUnderavsnittstype,
+                ),
             )
         }
 

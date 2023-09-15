@@ -21,7 +21,7 @@ import java.util.UUID
 class TotrinnService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) {
 
     @Transactional(readOnly = true)
@@ -48,8 +48,8 @@ class TotrinnService(
                         behandlingId = behandlingId,
                         behandlingssteg = it.behandlingssteg,
                         godkjent = it.godkjent,
-                        begrunnelse = it.begrunnelse
-                    )
+                        begrunnelse = it.begrunnelse,
+                    ),
                 )
             }
     }
@@ -62,7 +62,7 @@ class TotrinnService(
                 behandlingId = behandlingId,
                 behandlingssteg = it.behandlingssteg,
                 godkjent = true,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
             )
         }
         totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }
@@ -74,7 +74,7 @@ class TotrinnService(
             throw Feil(
                 message = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
                 frontendFeilmelding = "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -97,7 +97,7 @@ class TotrinnService(
 
     private fun finnOmStegKanBesluttes(
         behandlingssteg: Behandlingssteg,
-        behandlingsstegstilstand: List<Behandlingsstegstilstand>
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ): Boolean {
         return behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
@@ -108,7 +108,7 @@ class TotrinnService(
 
     private fun validerOmAlleBesluttendeStegFinnes(
         totrinnsvurderinger: List<VurdertTotrinnDto>,
-        behandlingsstegstilstand: List<Behandlingsstegstilstand>
+        behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ) {
         val stegSomBørVurderes: List<Behandlingssteg> = behandlingsstegstilstand.filter {
             it.behandlingssteg.kanBesluttes &&
@@ -121,7 +121,7 @@ class TotrinnService(
             throw Feil(
                 message = "Stegene $manglendeSteg mangler totrinnsvurdering",
                 frontendFeilmelding = "Stegene $manglendeSteg mangler totrinnsvurdering",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }

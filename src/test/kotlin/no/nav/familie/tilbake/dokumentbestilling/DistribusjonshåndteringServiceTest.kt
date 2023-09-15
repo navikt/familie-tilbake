@@ -51,8 +51,8 @@ class DistribusjonshåndteringServiceTest {
         PdfBrevService(
             journalføringService = journalføringService,
             tellerService = mockk(relaxed = true),
-            taskService = mockk(relaxed = true)
-        )
+            taskService = mockk(relaxed = true),
+        ),
     )
     private val brevmetadataUtil = BrevmetadataUtil(
         behandlingRepository = behandlingRepository,
@@ -60,7 +60,7 @@ class DistribusjonshåndteringServiceTest {
         manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
         eksterneDataForBrevService = eksterneDataForBrevService,
         organisasjonService = mockk(),
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
     private val distribusjonshåndteringService = DistribusjonshåndteringService(
         brevmetadataUtil = brevmetadataUtil,
@@ -68,7 +68,7 @@ class DistribusjonshåndteringServiceTest {
         manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
         pdfBrevService = pdfBrevService,
         vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
     private val brevsporingService: BrevsporingService = mockk()
     private val henleggelsesbrevService = HenleggelsesbrevService(
@@ -79,13 +79,13 @@ class DistribusjonshåndteringServiceTest {
         pdfBrevService = pdfBrevService,
         organisasjonService = mockk(),
         distribusjonshåndteringService = distribusjonshåndteringService,
-        brevmetadataUtil = brevmetadataUtil
+        brevmetadataUtil = brevmetadataUtil,
     )
     private val sendHenleggelsesbrevTask = SendHenleggelsesbrevTask(
         henleggelsesbrevService = henleggelsesbrevService,
         behandlingRepository = behandlingRepository,
         fagsakRepository = fagsakRepository,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
 
     private val behandling = Testdata.behandling
@@ -129,7 +129,7 @@ class DistribusjonshåndteringServiceTest {
                 behandling,
                 fagsak,
                 Brevtype.HENLEGGELSE,
-                capture(brevdata)
+                capture(brevdata),
             )
         }
 
@@ -169,7 +169,7 @@ class DistribusjonshåndteringServiceTest {
                 behandlingUtenVerge,
                 fagsak,
                 Brevtype.HENLEGGELSE,
-                capture(brevdata)
+                capture(brevdata),
             )
         }
 
@@ -193,14 +193,14 @@ class DistribusjonshåndteringServiceTest {
                 adresselinje1 = "adresselinje1",
                 postnummer = "postnummer",
                 poststed = "poststed",
-                landkode = "NO"
+                landkode = "NO",
             ),
             ManuellBrevmottaker(
                 type = MottakerType.VERGE,
                 behandlingId = behandlingId,
                 navn = verge.navn,
-                ident = verge.ident
-            )
+                ident = verge.ident,
+            ),
         )
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
@@ -217,7 +217,7 @@ class DistribusjonshåndteringServiceTest {
                 behandling = behandlingMedManuelleBrevmottakere,
                 fagsak = fagsak,
                 brevtype = Brevtype.HENLEGGELSE,
-                data = capture(brevdata)
+                data = capture(brevdata),
             )
             journalføringService.journalførUtgåendeBrev(
                 behandling = behandlingMedManuelleBrevmottakere,
@@ -226,7 +226,7 @@ class DistribusjonshåndteringServiceTest {
                 brevmetadata = any(),
                 brevmottager = any(),
                 vedleggPdf = any(),
-                eksternReferanseId = capture(eksternReferanseIdVedJournalføring)
+                eksternReferanseId = capture(eksternReferanseIdVedJournalføring),
             )
         }
 

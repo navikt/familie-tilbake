@@ -31,17 +31,17 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.VEILEDER,
         "Henter fagsak informasjon med bruker og behandlinger",
         AuditLoggerEvent.ACCESS,
-        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     )
     fun hentFagsak(
         @PathVariable fagsystem: Fagsystem,
-        @PathVariable eksternFagsakId: String
+        @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
         return Ressurs.success(fagsakService.hentFagsak(fagsystem, eksternFagsakId))
     }
@@ -49,40 +49,40 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Sjekk om det finnes en åpen tilbakekrevingsbehandling")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/finnesApenBehandling/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.VEILEDER,
         "Sjekk om det finnes en åpen tilbakekrevingsbehandling",
         AuditLoggerEvent.ACCESS,
-        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+        HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     )
     fun finnesÅpenTilbakekrevingsbehandling(
         @PathVariable fagsystem: Fagsystem,
-        @PathVariable eksternFagsakId: String
+        @PathVariable eksternFagsakId: String,
     ): Ressurs<FinnesBehandlingResponse> {
         return Ressurs.success(
             fagsakService.finnesÅpenTilbakekrevingsbehandling(
                 fagsystem = fagsystem,
-                eksternFagsakId = eksternFagsakId
-            )
+                eksternFagsakId = eksternFagsakId,
+            ),
         )
     }
 
     @Operation(summary = "Sjekk om det er mulig å opprette behandling manuelt")
     @GetMapping(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/kanBehandlingOpprettesManuelt/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.SAKSBEHANDLER,
         "Sjekk om det er mulig å opprette behandling manuelt",
         AuditLoggerEvent.ACCESS,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID
+        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     )
     fun kanBehandlingOpprettesManuelt(
         @PathVariable ytelsestype: Ytelsestype,
-        @PathVariable eksternFagsakId: String
+        @PathVariable eksternFagsakId: String,
     ): Ressurs<KanBehandlingOpprettesManueltRespons> {
         return Ressurs.success(fagsakService.kanBehandlingOpprettesManuelt(eksternFagsakId, ytelsestype))
     }
@@ -90,17 +90,17 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/behandlinger/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         handling = "Henter behandlinger for bruk i fagsystem",
         AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     )
     fun hentBehandlingerForFagsystem(
         @PathVariable fagsystem: Fagsystem,
-        @PathVariable eksternFagsakId: String
+        @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandling>> {
         return Ressurs.success(fagsakService.hentBehandlingerForFagsak(fagsystem, eksternFagsakId))
     }
@@ -108,17 +108,17 @@ class FagsakController(private val fagsakService: FagsakService) {
     @Operation(summary = "Hent behandlinger, kalles av fagsystem")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/vedtak/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         handling = "Henter behandlinger for bruk i fagsystem",
         AuditLoggerEvent.ACCESS,
-        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID
+        henteParam = HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
     )
     fun hentVedtakForFagsystem(
         @PathVariable fagsystem: Fagsystem,
-        @PathVariable eksternFagsakId: String
+        @PathVariable eksternFagsakId: String,
     ): Ressurs<List<FagsystemVedtak>> {
         return Ressurs.success(fagsakService.hentVedtakForFagsak(fagsystem, eksternFagsakId))
     }

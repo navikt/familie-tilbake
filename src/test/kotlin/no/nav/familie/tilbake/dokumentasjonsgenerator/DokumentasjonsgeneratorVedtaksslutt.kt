@@ -100,7 +100,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         ytelsetype: Ytelsestype,
         språkkode: Språkkode,
         resultatType: Vedtaksresultat,
-        medSkattetrekk: Boolean
+        medSkattetrekk: Boolean,
     ) {
         trueFalse.forEach { flerePerioder ->
             trueFalse.forEach { flereLovhjemler ->
@@ -115,7 +115,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
                             flereLovhjemler,
                             medVerge,
                             feilutbetaltBeløpBortfalt,
-                            false
+                            false,
                         )
                         if (Vedtaksresultat.INGEN_TILBAKEBETALING != resultatType) {
                             lagVedtakSluttTekster(
@@ -127,7 +127,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
                                 flereLovhjemler,
                                 medVerge,
                                 feilutbetaltBeløpBortfalt,
-                                true
+                                true,
                             )
                         }
                     }
@@ -145,7 +145,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         flereLovhjemler: Boolean,
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
-        erRevurdering: Boolean
+        erRevurdering: Boolean,
     ) {
         val felles: HbVedtaksbrevFelles = lagFellesdel(
             ytelsetype,
@@ -155,7 +155,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
             flereLovhjemler,
             medVerge,
             feilutbetaltBeløpBortfalt,
-            erRevurdering
+            erRevurdering,
         )
         val perioder: List<HbVedtaksbrevsperiode> = lagPerioder(flerePerioder)
         val sluttTekst: String = FellesTekstformaterer.lagDeltekst(HbVedtaksbrevsdata(felles, perioder), VEDTAK_SLUTT)
@@ -172,7 +172,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         flereLovhjemler: Boolean,
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
-        erRevurdering: Boolean
+        erRevurdering: Boolean,
     ): HbVedtaksbrevFelles {
         return HbVedtaksbrevFelles(
             brevmetadata = lagMetadata(ytelsetype, språkkode, medVerge),
@@ -184,7 +184,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(1100),
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt =
                 BigDecimal.valueOf(if (medSkattetrekk) 900 else 1100.toLong()),
-                totaltRentebeløp = BigDecimal.valueOf(100)
+                totaltRentebeløp = BigDecimal.valueOf(100),
             ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
             hjemmel = if (flereLovhjemler) {
@@ -194,7 +194,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
             },
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(1000),
-                varsletDato = LocalDate.of(2020, 4, 4)
+                varsletDato = LocalDate.of(2020, 4, 4),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 4),
             ansvarligBeslutter = "<Beslutters navn>",
@@ -210,15 +210,15 @@ class DokumentasjonsgeneratorVedtaksslutt {
                     PERIODE1.fom
                 } else {
                     null
-                }
-            )
+                },
+            ),
         )
     }
 
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
-        medVerge: Boolean
+        medVerge: Boolean,
     ): Brevmetadata {
         val annenMottagersNavn = if (medVerge) "<annen mottaker>" else null
         return Brevmetadata(
@@ -232,7 +232,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
             saksnummer = "1232456",
             språkkode = språkkode,
             ytelsestype = ytelsestype,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         )
     }
 
@@ -253,14 +253,14 @@ class DokumentasjonsgeneratorVedtaksslutt {
                 vilkårsvurderingsresultat =
                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                særligeGrunner = HbSærligeGrunner(emptyList(), null, null)
+                særligeGrunner = HbSærligeGrunner(emptyList(), null, null),
             ),
             resultat = HbResultat(
                 tilbakekrevesBeløp = BigDecimal.valueOf(1000),
                 tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(800),
-                rentebeløp = BigDecimal.ZERO
+                rentebeløp = BigDecimal.ZERO,
             ),
-            førstePeriode = true
+            førstePeriode = true,
         )
     }
 
@@ -270,7 +270,7 @@ class DokumentasjonsgeneratorVedtaksslutt {
         flereLovhjemler: Boolean,
         medVerge: Boolean,
         feilutbetaltBeløpBortfalt: Boolean,
-        erRevurdering: Boolean
+        erRevurdering: Boolean,
     ): String {
         return (
             "*[ " + (if (flerePerioder) "flere perioder" else "en periode") +

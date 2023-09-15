@@ -36,7 +36,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         private val tilbakekrevingsResultat = listOf(
             Vedtaksresultat.FULL_TILBAKEBETALING,
             Vedtaksresultat.DELVIS_TILBAKEBETALING,
-            Vedtaksresultat.INGEN_TILBAKEBETALING
+            Vedtaksresultat.INGEN_TILBAKEBETALING,
         )
         private val trueFalse = booleanArrayOf(true, false)
 
@@ -143,7 +143,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         ytelseType: Ytelsestype,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
-        medVarsel: Boolean
+        medVarsel: Boolean,
     ) {
         genererVedtakStart(ytelseType, nb, resultatType, medVarsel, 10, 100)
         genererVedtakStart(ytelseType, nb, resultatType, medVarsel, 0, 100)
@@ -155,7 +155,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         ytelseType: Ytelsestype,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
-        medVarsel: Boolean
+        medVarsel: Boolean,
     ) {
         genererVedtakStart(ytelseType, nb, resultatType, medVarsel, 0, 0)
     }
@@ -164,7 +164,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         ytelseType: Ytelsestype,
         nb: Språkkode,
         resultatType: Vedtaksresultat,
-        medVarsel: Boolean
+        medVarsel: Boolean,
     ) {
         genererVedtakStart(ytelseType, nb, resultatType, medVarsel, 10, 0)
         genererVedtakStart(ytelseType, nb, resultatType, medVarsel, 0, 0)
@@ -173,7 +173,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     private fun listVedtakStartMedKorrigertBeløpAllePermutasjoner(
         ytelseType: Ytelsestype,
         nb: Språkkode,
-        resultatType: Vedtaksresultat
+        resultatType: Vedtaksresultat,
     ) {
         genererVedtakStartMedKorrigertBeløp(ytelseType, nb, resultatType, 10, 100)
         genererVedtakStartMedKorrigertBeløp(ytelseType, nb, resultatType, 0, 100)
@@ -184,7 +184,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     private fun listVedtakStartMedKorrigertBeløpUtenRenterUtenSkatt(
         ytelseType: Ytelsestype,
         nb: Språkkode,
-        resultatType: Vedtaksresultat
+        resultatType: Vedtaksresultat,
     ) {
         genererVedtakStartMedKorrigertBeløp(ytelseType, nb, resultatType, 0, 0)
     }
@@ -192,7 +192,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     private fun listVedtakStartMedKorrigertBeløpUtenSkatt(
         ytelseType: Ytelsestype,
         nb: Språkkode,
-        resultatType: Vedtaksresultat
+        resultatType: Vedtaksresultat,
     ) {
         genererVedtakStartMedKorrigertBeløp(ytelseType, nb, resultatType, 10, 0)
         genererVedtakStartMedKorrigertBeløp(ytelseType, nb, resultatType, 0, 0)
@@ -204,7 +204,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         tilbakebetaling: Vedtaksresultat,
         medVarsel: Boolean,
         renter: Long,
-        skatt: Long
+        skatt: Long,
     ) {
         genererVedtakStart(ytelseType, språkkode, tilbakebetaling, medVarsel, renter, skatt, false, false, false)
         genererVedtakStart(ytelseType, språkkode, tilbakebetaling, medVarsel, renter, skatt, false, true, false)
@@ -216,7 +216,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         språkkode: Språkkode,
         tilbakebetaling: Vedtaksresultat,
         renter: Long,
-        skatt: Long
+        skatt: Long,
     ) {
         genererVedtakStart(ytelseType, språkkode, tilbakebetaling, true, renter, skatt, true, false, false)
         genererVedtakStart(ytelseType, språkkode, tilbakebetaling, true, renter, skatt, true, true, false)
@@ -232,7 +232,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         skatt: Long,
         medKorrigertBeløp: Boolean,
         erRevurdering: Boolean,
-        erRevurderingEtterKlageNfp: Boolean
+        erRevurderingEtterKlageNfp: Boolean,
     ) {
         val totalt = 1000L
         val totaltMedRenter = totalt + renter
@@ -241,17 +241,17 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
             totaltTilbakekrevesBeløp = BigDecimal.valueOf(totalt),
             totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(totaltMedRenter),
             totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.valueOf(totaltMedRenter - skatt),
-            totaltRentebeløp = BigDecimal.valueOf(renter)
+            totaltRentebeløp = BigDecimal.valueOf(renter),
         )
         val varsel = if (medKorrigertBeløp) {
             HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(25000L),
-                varsletDato = JANUAR_15
+                varsletDato = JANUAR_15,
             )
         } else if (medVarsel) {
             HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(1000L),
-                varsletDato = JANUAR_15
+                varsletDato = JANUAR_15,
             )
         } else {
             null
@@ -260,7 +260,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         val behandling = HbBehandling(
             erRevurdering = erRevurdering,
             erRevurderingEtterKlageNfp = erRevurderingEtterKlageNfp,
-            originalBehandlingsdatoFagsakvedtak = if (erRevurdering) FEBRUAR_15 else null
+            originalBehandlingsdatoFagsakvedtak = if (erRevurdering) FEBRUAR_15 else null,
         )
 
         val felles = HbVedtaksbrevFelles(
@@ -274,7 +274,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
             varsel = varsel,
             erFeilutbetaltBeløpKorrigertNed = medKorrigertBeløp,
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
-            behandling = behandling
+            behandling = behandling,
         )
         val vedtakStart: String = FellesTekstformaterer.lagDeltekst(felles, VEDTAK_START)
         prettyPrint(
@@ -285,13 +285,13 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
             vedtakStart,
             medKorrigertBeløp,
             erRevurdering,
-            erRevurderingEtterKlageNfp
+            erRevurderingEtterKlageNfp,
         )
     }
 
     private fun lagMetadata(
         ytelsestype: Ytelsestype,
-        språkkode: Språkkode
+        språkkode: Språkkode,
     ): Brevmetadata {
         return Brevmetadata(
             sakspartId = "",
@@ -302,7 +302,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
             saksnummer = "1232456",
             språkkode = språkkode,
             ytelsestype = ytelsestype,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         )
     }
 
@@ -314,7 +314,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
         generertTekst: String,
         medKorrigertBeløp: Boolean,
         erRevurdering: Boolean,
-        erRevurderingEtterKlageNfp: Boolean
+        erRevurderingEtterKlageNfp: Boolean,
     ) {
         println(
             ("*[ " + tilbakebetaling.navn) + " - " +
@@ -323,7 +323,7 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                 (if (renter != 0L) "med renter" else "uten renter") +
                 (if (medKorrigertBeløp) " - med korrigert beløp" else "") +
                 (if (erRevurdering) " - revurdering " else "") +
-                (if (erRevurderingEtterKlageNfp) " klage nfp" else "") + " ]*"
+                (if (erRevurderingEtterKlageNfp) " klage nfp" else "") + " ]*",
         )
         val parametrisertTekst = generertTekst
             .replace(" 1\u00A0010\u00A0kroner".toRegex(), " <skyldig beløp> kroner")

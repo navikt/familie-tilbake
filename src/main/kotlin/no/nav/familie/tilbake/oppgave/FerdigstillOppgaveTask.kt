@@ -13,7 +13,7 @@ import java.util.UUID
     taskStepType = FerdigstillOppgaveTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Ferdigstiller oppgave for behandling",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
@@ -28,7 +28,7 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
         }
         oppgaveService.ferdigstillOppgave(
             behandlingId = UUID.fromString(task.payload),
-            oppgavetype = oppgavetype
+            oppgavetype = oppgavetype,
         )
     }
 

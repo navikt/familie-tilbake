@@ -90,7 +90,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.KORRIGERT_VARSELBREV_SENDT,
             Aktør.SAKSBEHANDLER,
-            Brevtype.KORRIGERT_VARSEL
+            Brevtype.KORRIGERT_VARSEL,
         )
     }
 
@@ -108,7 +108,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.HENLEGGELSESBREV_SENDT,
             Aktør.VEDTAKSLØSNING,
-            Brevtype.HENLEGGELSE
+            Brevtype.HENLEGGELSE,
         )
     }
 
@@ -126,7 +126,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.INNHENT_DOKUMENTASJON_BREV_SENDT,
             Aktør.SAKSBEHANDLER,
-            Brevtype.INNHENT_DOKUMENTASJON
+            Brevtype.INNHENT_DOKUMENTASJON,
         )
     }
 
@@ -149,13 +149,13 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         lagreBrevsporingTask.onCompletion(
             opprettTask(behandlingId, Brevtype.VEDTAK).also { task ->
                 task.metadata.also { it["ukjentAdresse"] = "true" }
-            }
+            },
         )
 
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_UKJENT_ADRESSE,
             Aktør.VEDTAKSLØSNING,
-            Brevtype.VEDTAK
+            Brevtype.VEDTAK,
         )
         taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
@@ -169,13 +169,13 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         lagreBrevsporingTask.onCompletion(
             opprettTask(behandlingId, Brevtype.VEDTAK).also { task ->
                 task.metadata.also { it["dødsboUkjentAdresse"] = "true" }
-            }
+            },
         )
 
         assertHistorikkTask(
             TilbakekrevingHistorikkinnslagstype.BREV_IKKE_SENDT_DØDSBO_UKJENT_ADRESSE,
             Aktør.VEDTAKSLØSNING,
-            Brevtype.VEDTAK
+            Brevtype.VEDTAK,
         )
         taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
             .shouldHaveSingleElement {
@@ -199,7 +199,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         brevtype: Brevtype,
         ansvarligSaksbehandler: String? = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-        brevmottager: Brevmottager = Brevmottager.BRUKER
+        brevmottager: Brevmottager = Brevmottager.BRUKER,
     ): Task {
         return Task(
             type = LagreBrevsporingTask.TYPE,
@@ -210,14 +210,14 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
                 this["brevtype"] = brevtype.name
                 this["mottager"] = brevmottager.name
                 this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
-            }
+            },
         )
     }
 
     private fun assertBrevsporing(brevtype: Brevtype) {
         val brevsporing = brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
             behandlingId,
-            brevtype
+            brevtype,
         )
         brevsporing.shouldNotBeNull()
         brevsporing.dokumentId shouldBe dokumentId
@@ -227,7 +227,7 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         aktør: Aktør,
-        brevtype: Brevtype
+        brevtype: Brevtype,
     ) {
         taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&

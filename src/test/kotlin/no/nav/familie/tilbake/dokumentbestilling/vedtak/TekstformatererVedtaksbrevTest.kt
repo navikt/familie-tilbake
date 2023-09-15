@@ -59,7 +59,7 @@ class TekstformatererVedtaksbrevTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     private val felles =
@@ -71,21 +71,21 @@ class TekstformatererVedtaksbrevTest {
                 BigDecimal.valueOf(10000),
                 BigDecimal.valueOf(11000),
                 BigDecimal.valueOf(11000),
-                BigDecimal.valueOf(1000)
+                BigDecimal.valueOf(1000),
             ),
             varsel = HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100)
+                varsletDato = LocalDate.now().minusDays(100),
             ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(
-                navn = "Søker Søkersen"
+                navn = "Søker Søkersen",
             ),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
             vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-            ansvarligBeslutter = "Ansvarlig Beslutter"
+            ansvarligBeslutter = "Ansvarlig Beslutter",
         )
 
     @Nested
@@ -100,18 +100,18 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                            beløpIBehold = BigDecimal.ZERO
+                            beløpIBehold = BigDecimal.ZERO,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 fagsaksvedtaksdato = LocalDate.of(2019, 3, 21),
@@ -121,11 +121,11 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -144,18 +144,18 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                            beløpIBehold = BigDecimal.ZERO
+                            beløpIBehold = BigDecimal.ZERO,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 brevmetadata = felles.brevmetadata.copy(gjelderDødsfall = true),
@@ -166,11 +166,11 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -189,35 +189,35 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                            aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET
+                            aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1000),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 brevmetadata = felles.brevmetadata.copy(gjelderDødsfall = true),
                 fagsaksvedtaksdato = LocalDate.of(2019, 3, 21),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1234567893),
-                    varsletDato = LocalDate.of(2019, 1, 3)
+                    varsletDato = LocalDate.of(2019, 1, 3),
                 ),
                 totalresultat = HbTotalresultat(
                     hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
                     totaltTilbakekrevesBeløp = BigDecimal(10000),
                     totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                     totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                    totaltRentebeløp = BigDecimal(1000)
+                    totaltRentebeløp = BigDecimal(1000),
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -236,18 +236,18 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                            beløpIBehold = BigDecimal.ZERO
+                            beløpIBehold = BigDecimal.ZERO,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 brevmetadata = felles.brevmetadata.copy(gjelderDødsfall = true, språkkode = Språkkode.NN),
@@ -258,15 +258,15 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 søker = HbPerson(
                     navn = "Søker Søkersen",
-                    dødsdato = LocalDate.of(2018, 3, 1)
+                    dødsdato = LocalDate.of(2018, 3, 1),
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -285,35 +285,35 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                            aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET
+                            aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1000),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 brevmetadata = felles.brevmetadata.copy(gjelderDødsfall = true, språkkode = Språkkode.NN),
                 fagsaksvedtaksdato = LocalDate.of(2019, 3, 21),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1234567893),
-                    varsletDato = LocalDate.of(2019, 1, 3)
+                    varsletDato = LocalDate.of(2019, 1, 3),
                 ),
                 totalresultat = HbTotalresultat(
                     hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
                     totaltTilbakekrevesBeløp = BigDecimal(10000),
                     totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                     totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                    totaltRentebeløp = BigDecimal(1000)
+                    totaltRentebeløp = BigDecimal(1000),
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -332,30 +332,30 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(BigDecimal.ZERO, BigDecimal(1000), BigDecimal(1000)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                            beløpIBehold = BigDecimal.ZERO
+                            beløpIBehold = BigDecimal.ZERO,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles.copy(
                 fagsaksvedtaksdato = LocalDate.of(2019, 3, 21),
                 brevmetadata = brevmetadata.copy(
                     mottageradresse = Adresseinfo(
                         "12345678901",
-                        "Semba AS c/o John Doe"
+                        "Semba AS c/o John Doe",
                     ),
                     sakspartsnavn = "Test",
                     vergenavn = "John Doe",
                     finnesVerge = true,
-                    finnesAnnenMottaker = true
+                    finnesAnnenMottaker = true,
                 ),
                 varsel = null,
                 totalresultat = HbTotalresultat(
@@ -363,11 +363,11 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 datoer = HbVedtaksbrevDatoer(perioder = perioder),
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -386,27 +386,27 @@ class TekstformatererVedtaksbrevTest {
                     originalBehandlingsdatoFagsakvedtak = LocalDate.of(
                         2019,
                         1,
-                        1
-                    )
+                        1,
+                    ),
                 ),
                 totalresultat = HbTotalresultat(
                     Vedtaksresultat.DELVIS_TILBAKEBETALING,
                     BigDecimal(1234567892),
                     BigDecimal(1234567892),
                     BigDecimal(1234567000),
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 søker = HbPerson(
                     navn = "Søker Søkersen",
-                    dødsdato = LocalDate.of(2018, 3, 1)
+                    dødsdato = LocalDate.of(2018, 3, 1),
                 ),
                 hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1234567893),
-                    varsletDato = LocalDate.of(2019, 1, 3)
+                    varsletDato = LocalDate.of(2019, 1, 3),
                 ),
                 fritekstoppsummering = "Skynd deg å betale, vi trenger pengene med en gang!",
-                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
             )
             val perioder =
                 listOf(
@@ -417,7 +417,7 @@ class TekstformatererVedtaksbrevTest {
                             Hendelsestype.ANNET,
                             Hendelsesundertype.ANNET_FRITEKST,
                             "Ingen vet riktig hva som har skjedd, " +
-                                "men du har fått utbetalt alt for mye penger."
+                                "men du har fått utbetalt alt for mye penger.",
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -432,28 +432,28 @@ class TekstformatererVedtaksbrevTest {
                                     SærligGrunn.HELT_ELLER_DELVIS_NAVS_FEIL,
                                     SærligGrunn.STØRRELSE_BELØP,
                                     SærligGrunn.TID_FRA_UTBETALING,
-                                    SærligGrunn.ANNET
+                                    SærligGrunn.ANNET,
                                 ),
                                 "Gratulerer, du fikk norgesrekord i feilutbetalt" +
                                     " beløp! Du skal slippe å betale renter!",
                                 "at du jobber med OVERGANGSSTØNAD " +
-                                    "og dermed vet hvordan dette fungerer!"
-                            )
+                                    "og dermed vet hvordan dette fungerer!",
+                            ),
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1234567890),
-                        førstePeriode = true
+                        førstePeriode = true,
                     ),
                     HbVedtaksbrevsperiode(
                         periode = februar,
                         kravgrunnlag = HbKravgrunnlag(
                             riktigBeløp = BigDecimal(0),
                             utbetaltBeløp = BigDecimal(1),
-                            feilutbetaltBeløp = BigDecimal(1)
+                            feilutbetaltBeløp = BigDecimal(1),
                         ),
                         fakta = HbFakta(
                             Hendelsestype.ENSLIG_FORSØRGER,
                             Hendelsesundertype.BARN_FLYTTET,
-                            "Her har økonomisystemet gjort noe helt feil."
+                            "Her har økonomisystemet gjort noe helt feil.",
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -462,21 +462,21 @@ class TekstformatererVedtaksbrevTest {
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
                             fritekst = "Vi skjønner at du ikke har oppdaget beløpet, " +
                                 "siden du hadde så mye annet på konto.",
-                            beløpIBehold = BigDecimal(1)
+                            beløpIBehold = BigDecimal(1),
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1),
-                        førstePeriode = true
+                        førstePeriode = true,
                     ),
                     HbVedtaksbrevsperiode(
                         periode = mars,
                         kravgrunnlag = HbKravgrunnlag(
                             riktigBeløp = BigDecimal(0),
                             utbetaltBeløp = BigDecimal(1),
-                            feilutbetaltBeløp = BigDecimal(1)
+                            feilutbetaltBeløp = BigDecimal(1),
                         ),
                         fakta = HbFakta(
                             Hendelsestype.ENSLIG_FORSØRGER,
-                            Hendelsesundertype.BARN_FLYTTET
+                            Hendelsesundertype.BARN_FLYTTET,
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -484,21 +484,21 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            fritekst = "Her burde du passet mer på!"
+                            fritekst = "Her burde du passet mer på!",
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1),
-                        førstePeriode = true
+                        førstePeriode = true,
                     ),
                     HbVedtaksbrevsperiode(
                         periode = april,
                         kravgrunnlag = HbKravgrunnlag(
                             riktigBeløp = BigDecimal(0),
                             utbetaltBeløp = BigDecimal(1),
-                            feilutbetaltBeløp = BigDecimal(1)
+                            feilutbetaltBeløp = BigDecimal(1),
                         ),
                         fakta = HbFakta(
                             Hendelsestype.ENSLIG_FORSØRGER,
-                            Hendelsesundertype.BARN_FLYTTET
+                            Hendelsesundertype.BARN_FLYTTET,
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -506,11 +506,11 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.FORSETT,
-                            fritekst = "Dette gjorde du med vilje!"
+                            fritekst = "Dette gjorde du med vilje!",
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -530,15 +530,15 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                        totaltRentebeløp = BigDecimal(1000)
+                        totaltRentebeløp = BigDecimal(1000),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder = listOf(
                 HbVedtaksbrevsperiode(
@@ -546,17 +546,17 @@ class TekstformatererVedtaksbrevTest {
                     HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
                     HbFakta(
                         Hendelsestype.ENSLIG_FORSØRGER,
-                        Hendelsesundertype.BARN_FLYTTET
+                        Hendelsesundertype.BARN_FLYTTET,
                     ),
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat =
                         Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        aktsomhetsresultat = Aktsomhet.FORSETT
+                        aktsomhetsresultat = Aktsomhet.FORSETT,
                     ),
                     HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                    true
-                )
+                    true,
+                ),
             )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -574,17 +574,17 @@ class TekstformatererVedtaksbrevTest {
                     HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
                     HbFakta(
                         Hendelsestype.DØDSFALL,
-                        Hendelsesundertype.BRUKER_DØD
+                        Hendelsesundertype.BRUKER_DØD,
                     ),
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat =
                         Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        aktsomhetsresultat = Aktsomhet.FORSETT
+                        aktsomhetsresultat = Aktsomhet.FORSETT,
                     ),
                     HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                    true
-                )
+                    true,
+                ),
             )
             val vedtaksbrevData = felles
                 .copy(
@@ -594,29 +594,29 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                        totaltRentebeløp = BigDecimal(1000)
+                        totaltRentebeløp = BigDecimal(1000),
                     ),
                     behandling = HbBehandling(
                         erRevurdering = true,
                         originalBehandlingsdatoFagsakvedtak = LocalDate.of(
                             2019,
                             1,
-                            1
-                        )
+                            1,
+                        ),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                     brevmetadata = brevmetadata.copy(gjelderDødsfall = true),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -635,18 +635,18 @@ class TekstformatererVedtaksbrevTest {
                     HbFakta(
                         Hendelsestype.ANNET,
                         Hendelsesundertype.ANNET_FRITEKST,
-                        "Død bruker annet fritekst er valgt"
+                        "Død bruker annet fritekst er valgt",
                     ),
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat =
                         Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                         aktsomhetsresultat = Aktsomhet.FORSETT,
-                        fritekst = "Død bruker annet fritekst er valgt"
+                        fritekst = "Død bruker annet fritekst er valgt",
                     ),
                     HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                    true
-                )
+                    true,
+                ),
             )
             val vedtaksbrevData = felles
                 .copy(
@@ -656,29 +656,29 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                        totaltRentebeløp = BigDecimal(1000)
+                        totaltRentebeløp = BigDecimal(1000),
                     ),
                     behandling = HbBehandling(
                         erRevurdering = true,
                         originalBehandlingsdatoFagsakvedtak = LocalDate.of(
                             2019,
                             1,
-                            1
-                        )
+                            1,
+                        ),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                     brevmetadata = brevmetadata.copy(gjelderDødsfall = true),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -696,17 +696,17 @@ class TekstformatererVedtaksbrevTest {
                     HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(10000)),
                     HbFakta(
                         Hendelsestype.DØDSFALL,
-                        Hendelsesundertype.BRUKER_DØD
+                        Hendelsesundertype.BRUKER_DØD,
                     ),
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat =
                         Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                        aktsomhetsresultat = Aktsomhet.FORSETT
+                        aktsomhetsresultat = Aktsomhet.FORSETT,
                     ),
                     HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                    true
-                )
+                    true,
+                ),
             )
             val vedtaksbrevData = felles
                 .copy(
@@ -716,29 +716,29 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                        totaltRentebeløp = BigDecimal(1000)
+                        totaltRentebeløp = BigDecimal(1000),
                     ),
                     behandling = HbBehandling(
                         erRevurdering = true,
                         originalBehandlingsdatoFagsakvedtak = LocalDate.of(
                             2019,
                             1,
-                            1
-                        )
+                            1,
+                        ),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                     brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -757,18 +757,18 @@ class TekstformatererVedtaksbrevTest {
                     HbFakta(
                         Hendelsestype.ANNET,
                         Hendelsesundertype.ANNET_FRITEKST,
-                        "Død bruker annet fritekst er valgt"
+                        "Død bruker annet fritekst er valgt",
                     ),
                     HbVurderinger(
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat =
                         Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                         aktsomhetsresultat = Aktsomhet.FORSETT,
-                        fritekst = "Død bruker annet fritekst er valgt"
+                        fritekst = "Død bruker annet fritekst er valgt",
                     ),
                     HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 1000),
-                    true
-                )
+                    true,
+                ),
             )
             val vedtaksbrevData = felles
                 .copy(
@@ -778,29 +778,29 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(11000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(7011),
-                        totaltRentebeløp = BigDecimal(1000)
+                        totaltRentebeløp = BigDecimal(1000),
                     ),
                     behandling = HbBehandling(
                         erRevurdering = true,
                         originalBehandlingsdatoFagsakvedtak = LocalDate.of(
                             2019,
                             1,
-                            1
-                        )
+                            1,
+                        ),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                     brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -821,15 +821,15 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(10000),
                         totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(10000),
-                        totaltRentebeløp = BigDecimal(0)
+                        totaltRentebeløp = BigDecimal(0),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(10000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder: List<HbVedtaksbrevsperiode> =
                 listOf(
@@ -839,18 +839,18 @@ class TekstformatererVedtaksbrevTest {
                         fakta = HbFakta(
                             hendelsestype = Hendelsestype.ANNET_KS,
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-                            fritekstFakta = "Dette er svindel!"
+                            fritekstFakta = "Dette er svindel!",
                         ),
                         vurderinger =
                         HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                            aktsomhetsresultat = Aktsomhet.FORSETT
+                            aktsomhetsresultat = Aktsomhet.FORSETT,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløpOgRenter(10000, 0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -870,11 +870,11 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal(1000),
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal(1000),
                         totaltRentebeløp = BigDecimal.ZERO,
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(1000)
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(1000),
                     ),
                     varsel = null,
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
-                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder: List<HbVedtaksbrevsperiode> =
                 listOf(
@@ -883,35 +883,35 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag(
                             BigDecimal.ZERO,
                             BigDecimal(1000),
-                            BigDecimal(1000)
+                            BigDecimal(1000),
                         ),
                         fakta = HbFakta(
                             Hendelsestype.ENSLIG_FORSØRGER,
-                            Hendelsesundertype.BARN_FLYTTET
+                            Hendelsesundertype.BARN_FLYTTET,
                         ),
                         vurderinger = HbVurderinger(
                             foreldelsevurdering = Foreldelsesvurderingstype.FORELDET,
                             aktsomhetsresultat = AnnenVurdering.FORELDET,
-                            foreldelsesfrist = januar.fom.plusMonths(11)
+                            foreldelsesfrist = januar.fom.plusMonths(11),
                         ),
                         resultat = HbResultat(
                             tilbakekrevesBeløp = BigDecimal.ZERO,
                             tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.ZERO,
                             rentebeløp = BigDecimal.ZERO,
-                            foreldetBeløp = BigDecimal(1000)
+                            foreldetBeløp = BigDecimal(1000),
                         ),
-                        førstePeriode = true
+                        førstePeriode = true,
                     ),
                     HbVedtaksbrevsperiode(
                         periode = februar,
                         kravgrunnlag = HbKravgrunnlag(
                             BigDecimal.ZERO,
                             BigDecimal(1000),
-                            BigDecimal(1000)
+                            BigDecimal(1000),
                         ),
                         fakta = HbFakta(
                             Hendelsestype.MEDLEMSKAP,
-                            Hendelsesundertype.LOVLIG_OPPHOLD
+                            Hendelsesundertype.LOVLIG_OPPHOLD,
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -920,11 +920,11 @@ class TekstformatererVedtaksbrevTest {
                             oppdagelsesdato = januar.fom.plusMonths(8),
                             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                            beløpIBehold = BigDecimal(1000)
+                            beløpIBehold = BigDecimal(1000),
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(1000),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
@@ -942,14 +942,14 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal.ZERO,
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
                         totaltRentebeløp = BigDecimal.ZERO,
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(500),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
-                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder: List<HbVedtaksbrevsperiode> =
                 listOf(
@@ -959,7 +959,7 @@ class TekstformatererVedtaksbrevTest {
                         fakta = HbFakta(
                             Hendelsestype.ANNET,
                             Hendelsesundertype.ANNET_FRITEKST,
-                            "foo bar baz"
+                            "foo bar baz",
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -967,11 +967,11 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            unntasInnkrevingPgaLavtBeløp = true
+                            unntasInnkrevingPgaLavtBeløp = true,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -991,7 +991,7 @@ class TekstformatererVedtaksbrevTest {
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
                             Hendelsesundertype.BRUKER_DØD,
-                            "foo bar baz"
+                            "foo bar baz",
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -999,11 +999,11 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            unntasInnkrevingPgaLavtBeløp = true
+                            unntasInnkrevingPgaLavtBeløp = true,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles
                 .copy(
@@ -1014,19 +1014,19 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal.ZERO,
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
                         totaltRentebeløp = BigDecimal.ZERO,
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(500),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -1045,7 +1045,7 @@ class TekstformatererVedtaksbrevTest {
                         kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(500)),
                         fakta = HbFakta(
                             Hendelsestype.DØDSFALL,
-                            Hendelsesundertype.BRUKER_DØD
+                            Hendelsesundertype.BRUKER_DØD,
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -1054,18 +1054,18 @@ class TekstformatererVedtaksbrevTest {
                             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
                             unntasInnkrevingPgaLavtBeløp = true,
-                            fritekst = "foo bar baz"
+                            fritekst = "foo bar baz",
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val vedtaksbrevData = felles
                 .copy(
                     brevmetadata = brevmetadata.copy(
                         ytelsestype = Ytelsestype.BARNETRYGD,
                         gjelderDødsfall = true,
-                        språkkode = Språkkode.NN
+                        språkkode = Språkkode.NN,
                     ),
                     fagsaksvedtaksdato = LocalDate.now(),
                     totalresultat = HbTotalresultat(
@@ -1073,19 +1073,19 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal.ZERO,
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
                         totaltRentebeløp = BigDecimal.ZERO,
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(500),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     søker = HbPerson(
                         navn = "Søker Søkersen",
-                        dødsdato = LocalDate.of(2018, 3, 1)
+                        dødsdato = LocalDate.of(2018, 3, 1),
                     ),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-                    datoer = HbVedtaksbrevDatoer(perioder = perioder)
+                    datoer = HbVedtaksbrevDatoer(perioder = perioder),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -1105,16 +1105,16 @@ class TekstformatererVedtaksbrevTest {
                         totaltTilbakekrevesBeløp = BigDecimal.ZERO,
                         totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
                         totaltRentebeløp = BigDecimal.ZERO,
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO
+                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15 6.ledd"),
                     varsel = HbVarsel(
                         varsletBeløp = BigDecimal(15000),
-                        varsletDato = LocalDate.of(2020, 4, 4)
+                        varsletDato = LocalDate.of(2020, 4, 4),
                     ),
                     erFeilutbetaltBeløpKorrigertNed = true,
                     totaltFeilutbetaltBeløp = BigDecimal(1000),
-                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR
+                    vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder: List<HbVedtaksbrevsperiode> =
                 listOf(
@@ -1124,7 +1124,7 @@ class TekstformatererVedtaksbrevTest {
                         fakta = HbFakta(
                             Hendelsestype.ANNET,
                             Hendelsesundertype.ANNET_FRITEKST,
-                            "foo bar baz"
+                            "foo bar baz",
                         ),
                         vurderinger =
                         HbVurderinger(
@@ -1132,11 +1132,11 @@ class TekstformatererVedtaksbrevTest {
                             vilkårsvurderingsresultat =
                             Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                             aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            unntasInnkrevingPgaLavtBeløp = true
+                            unntasInnkrevingPgaLavtBeløp = true,
                         ),
                         resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                        førstePeriode = true
-                    )
+                        førstePeriode = true,
+                    ),
                 )
             val data = HbVedtaksbrevsdata(vedtaksbrevData, perioder)
 
@@ -1172,24 +1172,24 @@ class TekstformatererVedtaksbrevTest {
 
         private fun lagFritekstVedtaksbrevData(
             ytelsestype: Ytelsestype,
-            hovedresultat: Vedtaksresultat
+            hovedresultat: Vedtaksresultat,
         ): HbVedtaksbrevsdata {
             return HbVedtaksbrevsdata(
                 felles.copy(
                     brevmetadata = brevmetadata.copy(
                         språkkode = Språkkode.NB,
-                        ytelsestype = ytelsestype
+                        ytelsestype = ytelsestype,
                     ),
                     totalresultat = felles.totalresultat.copy(hovedresultat = hovedresultat),
                     behandling = HbBehandling(
                         erRevurdering = true,
-                        originalBehandlingsdatoFagsakvedtak = LocalDate.now()
+                        originalBehandlingsdatoFagsakvedtak = LocalDate.now(),
                     ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
                     fritekstoppsummering = "sender fritekst vedtaksbrev",
-                    vedtaksbrevstype = Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
+                    vedtaksbrevstype = Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT,
                 ),
-                emptyList()
+                emptyList(),
             )
         }
     }
@@ -1213,7 +1213,7 @@ class TekstformatererVedtaksbrevTest {
             val data = lagBrevOverskriftTestoppsett(
                 Ytelsestype.KONTANTSTØTTE,
                 Vedtaksresultat.FULL_TILBAKEBETALING,
-                Språkkode.NN
+                Språkkode.NN,
             )
 
             val overskrift = TekstformatererVedtaksbrev.lagVedtaksbrevsoverskrift(data)
@@ -1236,14 +1236,14 @@ class TekstformatererVedtaksbrevTest {
         private fun lagBrevOverskriftTestoppsett(
             ytelsestype: Ytelsestype,
             hovedresultat: Vedtaksresultat,
-            språkkode: Språkkode
+            språkkode: Språkkode,
         ): HbVedtaksbrevsdata {
             return HbVedtaksbrevsdata(
                 felles.copy(
                     brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
-                    totalresultat = felles.totalresultat.copy(hovedresultat = hovedresultat)
+                    totalresultat = felles.totalresultat.copy(hovedresultat = hovedresultat),
                 ),
-                emptyList()
+                emptyList(),
             )
         }
     }
@@ -1261,13 +1261,13 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal(1000),
                     BigDecimal(1100),
                     BigDecimal(1100),
-                    BigDecimal(100)
+                    BigDecimal(100),
                 ),
                 hjemmel = HbHjemmel("foo"),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1000),
-                    varsletDato = LocalDate.of(2020, 4, 4)
-                )
+                    varsletDato = LocalDate.of(2020, 4, 4),
+                ),
             )
             val periode =
                 HbVedtaksbrevsperiode(
@@ -1283,20 +1283,20 @@ class TekstformatererVedtaksbrevTest {
                         HbSærligeGrunner(
                             listOf(SærligGrunn.GRAD_AV_UAKTSOMHET),
                             null,
-                            null
-                        )
+                            null,
+                        ),
                     ),
                     resultat = HbResultat(
                         tilbakekrevesBeløp = BigDecimal(500),
                         rentebeløp = BigDecimal(0),
-                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(500)
+                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(500),
                     ),
-                    førstePeriode = true
+                    førstePeriode = true,
                 )
 
             val generertTekst: String = FellesTekstformaterer.lagDeltekst(
                 HbVedtaksbrevPeriodeOgFelles(felles, periode),
-                AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER
+                AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER,
             )
 
             generertTekst shouldContain "Vi har lagt vekt på at du ikkje har gitt oss alle nødvendige opplysningar tidsnok " +
@@ -1314,20 +1314,20 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal(23002),
                     BigDecimal(23002),
                     BigDecimal(23002),
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 hjemmel = HbHjemmel("foo"),
                 datoer = HbVedtaksbrevDatoer(
                     opphørsdatoIkkeOmsorg = LocalDate.of(
                         2020,
                         4,
-                        4
-                    )
+                        4,
+                    ),
                 ),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(33001),
-                    varsletDato = LocalDate.of(2020, 4, 4)
-                )
+                    varsletDato = LocalDate.of(2020, 4, 4),
+                ),
             )
             val periode =
                 HbVedtaksbrevsperiode(
@@ -1343,12 +1343,12 @@ class TekstformatererVedtaksbrevTest {
                         HbSærligeGrunner(
                             listOf(
                                 SærligGrunn.TID_FRA_UTBETALING,
-                                SærligGrunn.STØRRELSE_BELØP
-                            )
-                        )
+                                SærligGrunn.STØRRELSE_BELØP,
+                            ),
+                        ),
                     ),
                     resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
-                    førstePeriode = true
+                    førstePeriode = true,
                 )
             val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
 
@@ -1368,13 +1368,13 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    BigDecimal.ZERO,
                 ),
                 hjemmel = HbHjemmel("foo"),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1000),
-                    varsletDato = LocalDate.of(2020, 4, 4)
-                )
+                    varsletDato = LocalDate.of(2020, 4, 4),
+                ),
             )
             val periode =
                 HbVedtaksbrevsperiode(
@@ -1385,10 +1385,10 @@ class TekstformatererVedtaksbrevTest {
                         foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                         aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                        beløpIBehold = BigDecimal.ZERO
+                        beløpIBehold = BigDecimal.ZERO,
                     ),
                     resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(0),
-                    førstePeriode = true
+                    førstePeriode = true,
                 )
             val data = HbVedtaksbrevPeriodeOgFelles(felles, periode)
 
@@ -1406,13 +1406,13 @@ class TekstformatererVedtaksbrevTest {
                     BigDecimal(1000),
                     BigDecimal(1100),
                     BigDecimal(1100),
-                    BigDecimal(100)
+                    BigDecimal(100),
                 ),
                 hjemmel = HbHjemmel("foo"),
                 varsel = HbVarsel(
                     varsletBeløp = BigDecimal(1000),
-                    varsletDato = LocalDate.of(2020, 4, 4)
-                )
+                    varsletDato = LocalDate.of(2020, 4, 4),
+                ),
             )
             val periode =
                 HbVedtaksbrevsperiode(
@@ -1425,19 +1425,19 @@ class TekstformatererVedtaksbrevTest {
                             .FEIL_OPPLYSNINGER_FRA_BRUKER,
                         aktsomhetsresultat = Aktsomhet.GROV_UAKTSOMHET,
                         særligeGrunner =
-                        HbSærligeGrunner(listOf(SærligGrunn.GRAD_AV_UAKTSOMHET))
+                        HbSærligeGrunner(listOf(SærligGrunn.GRAD_AV_UAKTSOMHET)),
                     ),
                     resultat = HbResultat(
                         tilbakekrevesBeløp = BigDecimal(1000),
                         rentebeløp = BigDecimal(100),
-                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(1000)
+                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(1000),
                     ),
-                    førstePeriode = true
+                    førstePeriode = true,
                 )
 
             val generertTekst: String = FellesTekstformaterer.lagDeltekst(
                 HbVedtaksbrevPeriodeOgFelles(felles, periode),
-                AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER
+                AvsnittUtil.PARTIAL_PERIODE_SÆRLIGE_GRUNNER,
             )
             generertTekst shouldContain "Vi har vurdert om det er grunner til å redusere beløpet. " +
                 "Vi har lagt vekt på at du ikke har gitt oss alle nødvendige opplysninger tidsnok " +

@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Profile
 @Profile("mock-økonomi")
 class OppdragClientLokalConfig(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
 ) {
 
     @Bean

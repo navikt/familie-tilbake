@@ -10,6 +10,8 @@ jobs:
   build:
     name: Bygg app/image, push til github, deploy til prod-gcp og dev-gcp
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

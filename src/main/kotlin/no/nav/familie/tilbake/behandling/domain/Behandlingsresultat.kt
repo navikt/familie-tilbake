@@ -17,7 +17,7 @@ data class Behandlingsresultat(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     companion object {
@@ -28,13 +28,13 @@ data class Behandlingsresultat(
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_MED_BREV,
-                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV
+                Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
             )
 
         val ALLE_FASTSATTKODER = setOf(
             Behandlingsresultatstype.INGEN_TILBAKEBETALING,
             Behandlingsresultatstype.DELVIS_TILBAKEBETALING,
-            Behandlingsresultatstype.FULL_TILBAKEBETALING
+            Behandlingsresultatstype.FULL_TILBAKEBETALING,
         )
     }
 
@@ -60,13 +60,13 @@ data class Behandlingsvedtak(
     @Version
     val versjon: Long = 0,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Iverksettingsstatus {
     IKKE_IVERKSATT,
     UNDER_IVERKSETTING,
-    IVERKSATT
+    IVERKSATT,
 }
 
 enum class Behandlingsresultatstype(val navn: String) {
@@ -80,5 +80,5 @@ enum class Behandlingsresultatstype(val navn: String) {
 
     INGEN_TILBAKEBETALING("Ingen tilbakebetaling"),
     DELVIS_TILBAKEBETALING("Delvis tilbakebetaling"),
-    FULL_TILBAKEBETALING("Full tilbakebetaling");
+    FULL_TILBAKEBETALING("Full tilbakebetaling"),
 }

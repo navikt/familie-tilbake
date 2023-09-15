@@ -21,7 +21,7 @@ object BeløpsberegningUtil {
     fun beregnBeløpForPeriode(
         tilbakekrevesBeløp: BigDecimal,
         vurderingsperiode: Månedsperiode,
-        kravgrunnlagsperiode: Månedsperiode
+        kravgrunnlagsperiode: Månedsperiode,
     ): BigDecimal {
         val grunnlagBeløpPerMåned: BigDecimal = beregnBeløpPerMåned(tilbakekrevesBeløp, kravgrunnlagsperiode)
         val ytelseBeløp: BigDecimal = beregnBeløp(vurderingsperiode, kravgrunnlagsperiode, grunnlagBeløpPerMåned)

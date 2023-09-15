@@ -30,7 +30,7 @@ class VarselbrevService(
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val pdfBrevService: PdfBrevService,
     private val varselbrevUtil: VarselbrevUtil,
-    private val distribusjonshåndteringService: DistribusjonshåndteringService
+    private val distribusjonshåndteringService: DistribusjonshåndteringService,
 ) {
 
     fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager? = null) {
@@ -47,14 +47,14 @@ class VarselbrevService(
                 val vedlegg = varselbrevUtil.lagVedlegg(
                     varselbrevsdokument,
                     behandling.aktivFagsystemsbehandling.eksternId,
-                    varselbrevsdokument.beløp
+                    varselbrevsdokument.beløp,
                 )
                 Brevdata(
                     mottager = brevmottaker,
                     metadata = varselbrevsdokument.brevmetadata,
                     overskrift = overskrift,
                     brevtekst = brevtekst,
-                    vedleggHtml = vedlegg
+                    vedleggHtml = vedlegg,
                 )
             }
         } else {
@@ -66,7 +66,7 @@ class VarselbrevService(
             val vedlegg = varselbrevUtil.lagVedlegg(
                 varselbrevsdokument,
                 behandling.aktivFagsystemsbehandling.eksternId,
-                varselbrevsdokument.beløp
+                varselbrevsdokument.beløp,
             )
 
             pdfBrevService.sendBrev(
@@ -78,10 +78,10 @@ class VarselbrevService(
                     metadata = varselbrevsdokument.brevmetadata,
                     overskrift = overskrift,
                     brevtekst = brevtekst,
-                    vedleggHtml = vedlegg
+                    vedleggHtml = vedlegg,
                 ),
                 varsletFeilutbetaling,
-                fritekst
+                fritekst,
             )
         }
     }
@@ -90,7 +90,7 @@ class VarselbrevService(
         behandling: Behandling,
         fagsak: Fagsak,
         brevmottager: Brevmottager,
-        forhåndsgenerertMetadata: Brevmetadata? = null
+        forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Varselbrevsdokument {
         val metadata = forhåndsgenerertMetadata ?: run {
             // Henter data fra pdl
@@ -105,7 +105,7 @@ class VarselbrevService(
                 fagsak = fagsak,
                 vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
                 erKorrigert = false,
-                gjelderDødsfall = personinfo.dødsdato != null
+                gjelderDødsfall = personinfo.dødsdato != null,
             )
         }
 
@@ -117,7 +117,7 @@ class VarselbrevService(
             revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
             fristdatoForTilbakemelding = Constants.brukersSvarfrist(),
             varseltekstFraSaksbehandler = varsel?.varseltekst,
-            feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel)
+            feilutbetaltePerioder = mapFeilutbetaltePerioder(varsel),
         )
     }
 
@@ -128,13 +128,13 @@ class VarselbrevService(
         val data = Fritekstbrevsdata(
             overskrift = overskrift,
             brevtekst = brevtekst,
-            brevmetadata = varselbrevsdokument.brevmetadata
+            brevmetadata = varselbrevsdokument.brevmetadata,
         )
         val brevmottager = utledBrevmottager(forhåndsvisVarselbrevRequest)
         val vedlegg = varselbrevUtil.lagVedlegg(
             varselbrevsdokument,
             forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
-            varselbrevsdokument.beløp
+            varselbrevsdokument.beløp,
         )
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
@@ -142,8 +142,8 @@ class VarselbrevService(
                 metadata = data.brevmetadata,
                 overskrift = data.overskrift,
                 brevtekst = data.brevtekst,
-                vedleggHtml = vedlegg
-            )
+                vedleggHtml = vedlegg,
+            ),
         )
     }
 
@@ -154,13 +154,13 @@ class VarselbrevService(
             personinfo,
             brevmottager,
             request.verge,
-            request.fagsystem
+            request.fagsystem,
         )
 
         return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(
             adresseinfo,
             request,
-            personinfo
+            personinfo,
         )
     }
 

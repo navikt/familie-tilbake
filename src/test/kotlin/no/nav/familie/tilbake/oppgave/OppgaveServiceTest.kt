@@ -45,7 +45,7 @@ class OppgaveServiceTest {
         MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
         MappeDto(mappeIdBehandleSak, "50 Tilbakekreving - Klar til behandling", enhetsnr = "4489"),
         MappeDto(mappeIdGodkjenneVedtak, "70 Godkjennevedtak", enhetsnr = "4489"),
-        MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
+        MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
     )
 
     private lateinit var oppgaveService: OppgaveService
@@ -59,7 +59,7 @@ class OppgaveServiceTest {
             integrasjonerClient,
             personService,
             taskService,
-            environment
+            environment,
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
@@ -81,7 +81,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -99,7 +99,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
 
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
@@ -118,7 +118,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -137,7 +137,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -148,7 +148,7 @@ class OppgaveServiceTest {
         fun `skal ikke legge behandleSak i noen mappe når ingen mapper matcher`() {
             val kunMapperSomIkkeKanBrukes = listOf(
                 MappeDto(300, "EF Sak - 50 Behandle sak", enhetsnr = "4489"),
-                MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489")
+                MappeDto(400, "EF Sak - 70 Godkjenne vedtak", enhetsnr = "4489"),
             )
 
             val slot = CapturingSlot<OpprettOppgaveRequest>()
@@ -161,7 +161,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -172,7 +172,7 @@ class OppgaveServiceTest {
         fun `skal fungere også etter rettet skrivefeil i gosys `() {
             val mapperMedOrdelingsfeilRettet = listOf(
                 MappeDto(300, "50 Behandle sak", enhetsnr = "4489"),
-                MappeDto(400, "70 Godkjenne vedtak ", enhetsnr = "4489") // ligger i gosys som Godkjennevedtak 2022-09-01
+                MappeDto(400, "70 Godkjenne vedtak ", enhetsnr = "4489"), // ligger i gosys som Godkjennevedtak 2022-09-01
             )
 
             val slot = CapturingSlot<OpprettOppgaveRequest>()
@@ -185,7 +185,7 @@ class OppgaveServiceTest {
                 "",
                 LocalDate.now().plusDays(5),
                 "bob",
-                OppgavePrioritet.NORM
+                OppgavePrioritet.NORM,
             )
             verify { integrasjonerClient.opprettOppgave(capture(slot)) }
 
@@ -205,7 +205,7 @@ class OppgaveServiceTest {
                     "",
                     LocalDate.now().plusDays(5),
                     "bob",
-                    OppgavePrioritet.NORM
+                    OppgavePrioritet.NORM,
                 )
             }
             exception.message shouldBe "Det finnes allerede en oppgave ${Oppgavetype.GodkjenneVedtak} " +
@@ -231,7 +231,7 @@ class OppgaveServiceTest {
                     "",
                     LocalDate.now().plusDays(5),
                     "bob",
-                    OppgavePrioritet.NORM
+                    OppgavePrioritet.NORM,
                 )
             }
 

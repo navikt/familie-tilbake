@@ -98,7 +98,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
             økonomiXmlMottattService,
             mockHentKravgrunnlagService,
             stegService,
-            historikkService
+            historikkService,
         )
         val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
@@ -134,7 +134,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
             hentFagsystemsbehandlingService.sendHentFagsystemsbehandlingRequest(
                 capture(eksternFagsakIdSlot),
                 capture(ytelsestypeSlot),
-                capture(eksternIdSlot)
+                capture(eksternIdSlot),
             )
         }
         eksternFagsakIdSlot.captured shouldBe xmlMottatt.eksternFagsakId
@@ -144,7 +144,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
             xmlMottatt.eksternFagsakId,
             xmlMottatt.ytelsestype,
-            xmlMottatt.referanse
+            xmlMottatt.referanse,
         ).shouldNotBeNull()
     }
 

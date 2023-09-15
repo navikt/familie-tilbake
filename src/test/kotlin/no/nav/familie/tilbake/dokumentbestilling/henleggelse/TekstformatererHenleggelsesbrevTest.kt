@@ -25,13 +25,13 @@ class TekstformatererHenleggelsesbrevTest {
         saksnummer = "1232456",
         språkkode = Språkkode.NB,
         ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false
+        gjelderDødsfall = false,
     )
 
     private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(
         brevmetadata,
         niendeMars,
-        REVURDERING_HENLEGGELSESBREV_FRITEKST
+        REVURDERING_HENLEGGELSESBREV_FRITEKST,
     )
 
     @Test

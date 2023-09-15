@@ -20,7 +20,7 @@ class ValiderBrevmottakerServiceTest {
     val validerBrevmottakerService = ValiderBrevmottakerService(
         manuellBrevmottakerRepository,
         fagsakService,
-        personService
+        personService,
     )
     private val behandlingId = UUID.randomUUID()
     private val fagsak = Testdata.fagsak
@@ -31,7 +31,7 @@ class ValiderBrevmottakerServiceTest {
         adresselinje1 = "adresselinje1",
         postnummer = "postnummer",
         poststed = "poststed",
-        landkode = "NO"
+        landkode = "NO",
     )
 
     @Test
@@ -40,7 +40,7 @@ class ValiderBrevmottakerServiceTest {
         assertThatNoException().isThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }
     }
@@ -50,12 +50,12 @@ class ValiderBrevmottakerServiceTest {
         every { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) } returns listOf(manuellBrevmottaker)
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident
+            fagsak.bruker.ident,
         )
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }.isInstanceOf(Feil::class.java)
             .hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
@@ -69,7 +69,7 @@ class ValiderBrevmottakerServiceTest {
         assertThatNoException().isThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }
     }
@@ -79,12 +79,12 @@ class ValiderBrevmottakerServiceTest {
         every { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) } returns emptyList()
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident
+            fagsak.bruker.ident,
         )
         assertThatNoException().isThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }
     }
@@ -96,7 +96,7 @@ class ValiderBrevmottakerServiceTest {
         assertThatNoException().isThrownBy {
             validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }
     }
@@ -105,12 +105,12 @@ class ValiderBrevmottakerServiceTest {
     fun `Skal kaste en Feil exception når en behandling inneholder en strengt fortrolig person`() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident
+            fagsak.bruker.ident,
         )
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(
                 behandlingId,
-                fagsak.id
+                fagsak.id,
             )
         }.isInstanceOf(Feil::class.java)
             .hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")

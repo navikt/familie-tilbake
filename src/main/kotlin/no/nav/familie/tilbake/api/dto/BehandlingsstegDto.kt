@@ -27,7 +27,7 @@ import java.time.LocalDate
     JsonSubTypes.Type(value = BehandlingsstegForeldelseDto::class),
     JsonSubTypes.Type(value = BehandlingsstegVilkårsvurderingDto::class),
     JsonSubTypes.Type(value = BehandlingsstegForeslåVedtaksstegDto::class),
-    JsonSubTypes.Type(value = BehandlingsstegFatteVedtaksstegDto::class)
+    JsonSubTypes.Type(value = BehandlingsstegFatteVedtaksstegDto::class),
 )
 abstract class BehandlingsstegDto protected constructor() {
 
@@ -65,19 +65,19 @@ data class VergeDto(
     val type: Vergetype,
     val navn: String,
     @Size(max = 4000, message = "Begrunnelse er for lang")
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 data class BrevmottakerstegDto(
     @Size(max = 4000, message = "Begrunnelse er for lang")
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 @JsonTypeName(BehandlingsstegFaktaDto.STEGNAVN)
 data class BehandlingsstegFaktaDto(
     val feilutbetaltePerioder: List<FaktaFeilutbetalingsperiodeDto>,
     @Size(max = 1500, message = "begrunnelse er for lang")
-    val begrunnelse: String
+    val begrunnelse: String,
 ) : BehandlingsstegDto() {
 
     override fun getSteg(): String {
@@ -93,7 +93,7 @@ data class BehandlingsstegFaktaDto(
 data class FaktaFeilutbetalingsperiodeDto(
     val periode: Datoperiode,
     val hendelsestype: Hendelsestype,
-    val hendelsesundertype: Hendelsesundertype
+    val hendelsesundertype: Hendelsesundertype,
 )
 
 @JsonTypeName(BehandlingsstegForeldelseDto.STEGNAVN)
@@ -115,7 +115,7 @@ data class ForeldelsesperiodeDto(
     val begrunnelse: String,
     val foreldelsesvurderingstype: Foreldelsesvurderingstype,
     val foreldelsesfrist: LocalDate? = null,
-    val oppdagelsesdato: LocalDate? = null
+    val oppdagelsesdato: LocalDate? = null,
 )
 
 @JsonTypeName(BehandlingsstegVilkårsvurderingDto.STEGNAVN)
@@ -138,14 +138,14 @@ data class VilkårsvurderingsperiodeDto(
     @Size(max = 1500, message = "begrunnelse er for lang")
     val begrunnelse: String,
     val godTroDto: GodTroDto? = null,
-    val aktsomhetDto: AktsomhetDto? = null
+    val aktsomhetDto: AktsomhetDto? = null,
 )
 
 data class GodTroDto(
     val beløpErIBehold: Boolean,
     val beløpTilbakekreves: BigDecimal? = null,
     @Size(max = 1500, message = "begrunnelse er for lang")
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 data class AktsomhetDto(
@@ -158,13 +158,13 @@ data class AktsomhetDto(
     val særligeGrunner: List<SærligGrunnDto>? = null,
     val særligeGrunnerTilReduksjon: Boolean = false,
     val tilbakekrevSmåbeløp: Boolean = true,
-    val særligeGrunnerBegrunnelse: String? = null
+    val særligeGrunnerBegrunnelse: String? = null,
 )
 
 data class SærligGrunnDto(
     val særligGrunn: SærligGrunn,
     @Size(max = 1500, message = "begrunnelse er for lang")
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )
 
 @JsonTypeName(BehandlingsstegForeslåVedtaksstegDto.STEGNAVN)
@@ -185,7 +185,7 @@ data class FritekstavsnittDto(
     var oppsummeringstekst: String? = null,
     @Size(max = 100, message = "For mange perioder")
     @Valid
-    var perioderMedTekst: List<PeriodeMedTekstDto>
+    var perioderMedTekst: List<PeriodeMedTekstDto>,
 )
 
 @JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEGNAVN)
@@ -205,5 +205,5 @@ data class VurdertTotrinnDto(
     val behandlingssteg: Behandlingssteg,
     val godkjent: Boolean,
     @Size(max = 2000, message = "begrunnelse er for lang")
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )

@@ -6,5 +6,5 @@ import java.util.UUID
 data class ForhåndsvisningHenleggelsesbrevDto(
     val behandlingId: UUID,
     @Size(max = 1500, message = "Fritekst er for lang")
-    val fritekst: String?
+    val fritekst: String?,
 )

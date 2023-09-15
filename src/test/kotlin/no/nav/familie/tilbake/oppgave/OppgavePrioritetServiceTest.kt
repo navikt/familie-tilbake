@@ -38,7 +38,7 @@ internal class OppgavePrioritetServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) } returns true
 
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) } returns lagKravgrunnlagMedFeilutbetaling(
-            9999
+            9999,
         )
 
         assertThat(oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)).isEqualTo(OppgavePrioritet.LAV)
@@ -52,7 +52,7 @@ internal class OppgavePrioritetServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) } returns true
 
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) } returns lagKravgrunnlagMedFeilutbetaling(
-            30_000
+            30_000,
         )
 
         assertThat(oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)).isEqualTo(OppgavePrioritet.NORM)
@@ -66,7 +66,7 @@ internal class OppgavePrioritetServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId) } returns true
 
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) } returns lagKravgrunnlagMedFeilutbetaling(
-            75_000
+            75_000,
         )
 
         assertThat(oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)).isEqualTo(OppgavePrioritet.HOY)
@@ -88,8 +88,8 @@ internal class OppgavePrioritetServiceTest {
             periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2023, 1)),
             beløp = setOf(
                 lagFeilBeløp(BigDecimal(feilutbetaling)),
-                lagYtelBeløp(BigDecimal(feilutbetaling), BigDecimal(10))
-            )
+                lagYtelBeløp(BigDecimal(feilutbetaling), BigDecimal(10)),
+            ),
         )
 
         return Testdata.kravgrunnlag431.copy(perioder = setOf(periode))

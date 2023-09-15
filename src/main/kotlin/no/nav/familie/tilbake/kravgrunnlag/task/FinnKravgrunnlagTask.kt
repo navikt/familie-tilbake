@@ -19,7 +19,7 @@ import java.util.UUID
     taskStepType = FinnKravgrunnlagTask.TYPE,
     beskrivelse = "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
         "og kobler dem til behandling",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class FinnKravgrunnlagTask(
     private val behandlingRepository: BehandlingRepository,
@@ -27,7 +27,7 @@ class FinnKravgrunnlagTask(
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val kravgrunnlagService: KravgrunnlagService,
-    private val kravvedtakstatusService: KravvedtakstatusService
+    private val kravvedtakstatusService: KravvedtakstatusService,
 ) : AsyncTaskStep {
 
     private val log = LoggerFactory.getLogger(this::class.java)

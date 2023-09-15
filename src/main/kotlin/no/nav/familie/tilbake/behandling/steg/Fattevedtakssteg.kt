@@ -27,7 +27,7 @@ class Fattevedtakssteg(
     private val totrinnService: TotrinnService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val historikkTaskService: HistorikkTaskService,
-    private val behandlingsvedtakService: BehandlingsvedtakService
+    private val behandlingsvedtakService: BehandlingsvedtakService,
 ) : IBehandlingssteg {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -60,26 +60,26 @@ class Fattevedtakssteg(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER,
                 Aktør.BESLUTTER,
-                beslutter = behandling.ansvarligBeslutter
+                beslutter = behandling.ansvarligBeslutter,
             )
             totrinnService.fjernAnsvarligBeslutter(behandlingId)
             oppgaveTaskService.opprettOppgaveTask(
                 behandling,
                 Oppgavetype.BehandleUnderkjentVedtak,
-                behandling.ansvarligSaksbehandler
+                behandling.ansvarligSaksbehandler,
             )
         } else {
             behandlingskontrollService.oppdaterBehandlingsstegStatus(
                 behandlingId,
                 Behandlingsstegsinfo(
                     Behandlingssteg.FATTE_VEDTAK,
-                    Behandlingsstegstatus.UTFØRT
-                )
+                    Behandlingsstegstatus.UTFØRT,
+                ),
             )
             historikkTaskService.lagHistorikkTask(
                 behandlingId,
                 TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-                Aktør.BESLUTTER
+                Aktør.BESLUTTER,
             )
             // step 5: opprett behandlingsvedtak og oppdater behandlingsresultat
             behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
@@ -97,13 +97,13 @@ class Fattevedtakssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FATTE_VEDTAK,
-                Behandlingsstegstatus.UTFØRT
-            )
+                Behandlingsstegstatus.UTFØRT,
+            ),
         )
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET,
-            Aktør.BESLUTTER
+            Aktør.BESLUTTER,
         )
         behandlingsvedtakService.opprettBehandlingsvedtak(behandlingId)
         behandlingskontrollService.fortsettBehandling(behandlingId)
@@ -116,8 +116,8 @@ class Fattevedtakssteg(
             behandlingId,
             Behandlingsstegsinfo(
                 Behandlingssteg.FATTE_VEDTAK,
-                Behandlingsstegstatus.KLAR
-            )
+                Behandlingsstegstatus.KLAR,
+            ),
         )
     }
 

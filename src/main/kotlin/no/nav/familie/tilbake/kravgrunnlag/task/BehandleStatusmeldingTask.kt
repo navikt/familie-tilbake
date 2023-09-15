@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
     taskStepType = BehandleStatusmeldingTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Håndter mottatt statusmelding fra oppdrag",
-    triggerTidVedFeilISekunder = 60 * 5L
+    triggerTidVedFeilISekunder = 60 * 5L,
 )
 class BehandleStatusmeldingTask(private val kravvedtakstatusService: KravvedtakstatusService) : AsyncTaskStep {
 

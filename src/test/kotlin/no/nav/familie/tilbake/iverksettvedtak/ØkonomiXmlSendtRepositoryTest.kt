@@ -43,7 +43,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
             økonomiXmlSendt,
             ØkonomiXmlSendt::sporbar,
-            ØkonomiXmlSendt::versjon
+            ØkonomiXmlSendt::versjon,
         )
         lagretØkonomiXmlSendt.versjon shouldBe 1
     }
@@ -80,7 +80,7 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
         lagretØkonomiXmlSendt.shouldBeEqualToComparingFieldsExcept(
             oppdatertØkonomiXmlSendt,
             ØkonomiXmlSendt::sporbar,
-            ØkonomiXmlSendt::versjon
+            ØkonomiXmlSendt::versjon,
         )
         lagretØkonomiXmlSendt.versjon shouldBe 2
     }

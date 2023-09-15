@@ -151,7 +151,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             TaskLogg::class,
             Meldingstelling::class,
-            ManuellBrevmottaker::class
+            ManuellBrevmottaker::class,
         )
             .reversed()
             .forEach {

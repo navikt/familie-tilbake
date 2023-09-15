@@ -106,8 +106,8 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                     behandlingssteg = Behandlingssteg.GRUNNLAG,
                     behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                     venteårsak = Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                    tidsfrist = LocalDate.now().plusWeeks(3)
-                )
+                    tidsfrist = LocalDate.now().plusWeeks(3),
+                ),
             )
 
         hentKravgrunnlagTask.doTask(lagTask(revurdering.id))
@@ -141,7 +141,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private fun lagTask(behandlingId: UUID): Task {
         return Task(
             type = HentKravgrunnlagTask.TYPE,
-            payload = behandlingId.toString()
+            payload = behandlingId.toString(),
         )
     }
 }

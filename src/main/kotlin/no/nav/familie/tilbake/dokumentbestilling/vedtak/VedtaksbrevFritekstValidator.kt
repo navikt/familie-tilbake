@@ -28,15 +28,19 @@ object VedtaksbrevFritekstValidator {
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
-        validerPåkrevetFritekster: Boolean
+        validerPåkrevetFritekster: Boolean,
+        skalIkkeValidereAnnetFritekst: Boolean,
     ) {
         validerPerioder(behandling, avsnittMedPerioder, faktaFeilutbetaling)
-        vilkårsvurdering?.let {
-            validerFritekstISærligGrunnerAnnetAvsnitt(
-                it,
-                vedtaksbrevFritekstPerioder,
-                validerPåkrevetFritekster
-            )
+
+        if (!skalIkkeValidereAnnetFritekst) {
+            vilkårsvurdering?.let {
+                validerFritekstISærligGrunnerAnnetAvsnitt(
+                    it,
+                    vedtaksbrevFritekstPerioder,
+                    validerPåkrevetFritekster,
+                )
+            }
         }
 
         if (ORDINÆR == vedtaksbrevstype) {
@@ -44,7 +48,7 @@ object VedtaksbrevFritekstValidator {
                 faktaFeilutbetaling,
                 vedtaksbrevFritekstPerioder,
                 avsnittMedPerioder,
-                validerPåkrevetFritekster
+                validerPåkrevetFritekster,
             )
         }
         validerOppsummeringsfritekstLengde(behandling, vedtaksbrevsoppsummering, vedtaksbrevstype)
@@ -56,18 +60,18 @@ object VedtaksbrevFritekstValidator {
     private fun validerPerioder(
         behandling: Behandling,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
-        faktaFeilutbetaling: FaktaFeilutbetaling
+        faktaFeilutbetaling: FaktaFeilutbetaling,
     ) {
         avsnittMedPerioder.forEach {
             if (!faktaFeilutbetaling.perioder.any { faktaPeriode ->
-                faktaPeriode.periode.inneholder(it.periode.toMånedsperiode())
-            }
+                    faktaPeriode.periode.inneholder(it.periode.toMånedsperiode())
+                }
             ) {
                 throw Feil(
                     message = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig for behandling ${behandling.id}",
                     frontendFeilmelding = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
                         "for behandling ${behandling.id}",
-                    httpStatus = HttpStatus.BAD_REQUEST
+                    httpStatus = HttpStatus.BAD_REQUEST,
                 )
             }
         }
@@ -75,12 +79,12 @@ object VedtaksbrevFritekstValidator {
 
     private fun validerNårOppsummeringsfritekstErPåkrevd(
         behandling: Behandling,
-        vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering
+        vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
     ) {
         val revurderingIkkeOpprettetEtterKlage = behandling.årsaker.none {
             it.type in setOf(
                 Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+                Behandlingsårsakstype.REVURDERING_KLAGE_NFP,
             )
         }
         if (Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
@@ -90,7 +94,7 @@ object VedtaksbrevFritekstValidator {
             throw Feil(
                 message = "oppsummering fritekst påkrevet for revurdering ${behandling.id}",
                 frontendFeilmelding = "oppsummering fritekst påkrevet for revurdering ${behandling.id}",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -98,7 +102,7 @@ object VedtaksbrevFritekstValidator {
     private fun validerOppsummeringsfritekstLengde(
         behandling: Behandling,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
-        vedtaksbrevstype: Vedtaksbrevstype
+        vedtaksbrevstype: Vedtaksbrevstype,
     ) {
         val maksTekstLengde = when (vedtaksbrevstype) {
             ORDINÆR -> 4000
@@ -110,7 +114,7 @@ object VedtaksbrevFritekstValidator {
             throw Feil(
                 message = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
                 frontendFeilmelding = "Oppsummeringstekst er for lang for behandling ${behandling.id}",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -119,20 +123,20 @@ object VedtaksbrevFritekstValidator {
         faktaFeilutbetaling: FaktaFeilutbetaling,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         avsnittMedPerioder: List<PeriodeMedTekstDto>,
-        validerPåkrevetFritekster: Boolean
+        validerPåkrevetFritekster: Boolean,
     ) {
         faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
             .forEach { faktaFeilutbetalingsperiode ->
                 val perioder = finnFritekstPerioder(
                     vedtaksbrevFritekstPerioder,
                     faktaFeilutbetalingsperiode.periode,
-                    Friteksttype.FAKTA
+                    Friteksttype.FAKTA,
                 )
                 if (perioder.isEmpty() && validerPåkrevetFritekster) {
                     throw Feil(
                         message = "Mangler fakta fritekst for alle fakta perioder",
                         frontendFeilmelding = "Mangler Fakta fritekst for alle fakta perioder",
-                        httpStatus = HttpStatus.BAD_REQUEST
+                        httpStatus = HttpStatus.BAD_REQUEST,
                     )
                 }
                 // Hvis en av de periodene mangler fritekst
@@ -144,7 +148,7 @@ object VedtaksbrevFritekstValidator {
                         throw Feil(
                             message = "Mangler fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
                             frontendFeilmelding = "Mangler Fakta fritekst for ${it.periode.fom}-${it.periode.tom}",
-                            httpStatus = HttpStatus.BAD_REQUEST
+                            httpStatus = HttpStatus.BAD_REQUEST,
                         )
                     }
                 }
@@ -154,7 +158,7 @@ object VedtaksbrevFritekstValidator {
     private fun validerFritekstISærligGrunnerAnnetAvsnitt(
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
-        validerPåkrevetFritekster: Boolean
+        validerPåkrevetFritekster: Boolean,
     ) {
         vilkårsvurdering.perioder.filter {
             it.aktsomhet?.vilkårsvurderingSærligeGrunner != null &&
@@ -164,14 +168,14 @@ object VedtaksbrevFritekstValidator {
             val perioder = finnFritekstPerioder(
                 vedtaksbrevFritekstPerioder,
                 it.periode,
-                Friteksttype.SÆRLIGE_GRUNNER_ANNET
+                Friteksttype.SÆRLIGE_GRUNNER_ANNET,
             )
 
             if (perioder.isEmpty() && validerPåkrevetFritekster) {
                 throw Feil(
                     message = "Mangler ANNET Særliggrunner fritekst for ${it.periode}",
                     frontendFeilmelding = "Mangler ANNET Særliggrunner fritekst for ${it.periode} ",
-                    httpStatus = HttpStatus.BAD_REQUEST
+                    httpStatus = HttpStatus.BAD_REQUEST,
                 )
             }
         }
@@ -180,7 +184,7 @@ object VedtaksbrevFritekstValidator {
     private fun finnFritekstPerioder(
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
         vurdertPeriode: Månedsperiode,
-        friteksttype: Friteksttype
+        friteksttype: Friteksttype,
     ): List<Vedtaksbrevsperiode> {
         return vedtaksbrevFritekstPerioder.filter {
             friteksttype == it.fritekststype &&

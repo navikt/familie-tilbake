@@ -9,6 +9,7 @@ metadata:
 spec:
   envFrom:
     - secret: familie-tilbake
+    - secret: familie-tilbake-unleash-api-token
   image: {{ image }}
   port: 8030
   leaderElection: true
@@ -28,6 +29,7 @@ spec:
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-custom-1-3840
         name: familie-tilbake
         autoBackupTime: "03:00"
         databases:

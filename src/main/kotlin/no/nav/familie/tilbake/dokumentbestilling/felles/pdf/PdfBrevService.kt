@@ -30,7 +30,7 @@ import java.util.Properties
 class PdfBrevService(
     private val journalføringService: JournalføringService,
     private val tellerService: TellerService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
@@ -47,7 +47,7 @@ class PdfBrevService(
         brevtype: Brevtype,
         data: Brevdata,
         varsletBeløp: Long? = null,
-        fritekst: String? = null
+        fritekst: String? = null,
     ) {
         valider(brevtype, varsletBeløp)
         val dokumentreferanse: JournalpostIdOgDokumentId = lagOgJournalførBrev(behandling, fagsak, brevtype, data)
@@ -67,13 +67,13 @@ class PdfBrevService(
         varsletBeløp: Long?,
         fritekst: String?,
         brevdata: Brevdata,
-        dokumentreferanse: JournalpostIdOgDokumentId
+        dokumentreferanse: JournalpostIdOgDokumentId,
     ) {
         val payload = objectMapper.writeValueAsString(
             PubliserJournalpostTaskData(
                 behandlingId = behandling.id,
-                manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse
-            )
+                manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse,
+            ),
         )
         val properties: Properties = Properties().apply {
             setProperty("journalpostId", dokumentreferanse.journalpostId)
@@ -89,7 +89,7 @@ class PdfBrevService(
             brevdata.tittel?.also { setProperty("tittel", it) }
         }
         logger.info(
-            "Oppretter task for publisering av brev for behandlingId=${behandling.id}, eksternFagsakId=${fagsak.eksternFagsakId}"
+            "Oppretter task for publisering av brev for behandlingId=${behandling.id}, eksternFagsakId=${fagsak.eksternFagsakId}",
         )
         taskService.save(Task(PubliserJournalpostTask.TYPE, payload, properties))
     }
@@ -98,7 +98,7 @@ class PdfBrevService(
         behandling: Behandling,
         fagsak: Fagsak,
         brevtype: Brevtype,
-        data: Brevdata
+        data: Brevdata,
     ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
         val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
@@ -114,7 +114,7 @@ class PdfBrevService(
                 data.metadata,
                 data.mottager,
                 pdf,
-                eksternReferanseId
+                eksternReferanseId,
             )
         } catch (ressursException: RessursException) {
             if (ressursException.httpStatus == HttpStatus.CONFLICT) {
@@ -161,7 +161,7 @@ class PdfBrevService(
     private fun lagHeader(data: Brevdata): String {
         return TekstformatererHeader.lagHeader(
             brevmetadata = data.metadata,
-            overskrift = data.overskrift
+            overskrift = data.overskrift,
         )
     }
 

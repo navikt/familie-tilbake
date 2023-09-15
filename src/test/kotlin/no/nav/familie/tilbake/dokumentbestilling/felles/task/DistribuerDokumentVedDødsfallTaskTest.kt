@@ -51,7 +51,7 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
         distribuerDokumentVedDødsfallTask.doTask(opprettTask("jp1"))
 
         assertHistorikkTask(
-            TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS
+            TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS,
         )
     }
 
@@ -69,12 +69,12 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
         distribuerDokumentVedDødsfallTask.doTask(
             opprettTask("jpUkjentDødsbo").copy(
                 opprettetTid = LocalDateTime.now()
-                    .minusMonths(7)
-            )
+                    .minusMonths(7),
+            ),
         )
 
         assertHistorikkTask(
-            TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND
+            TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_FEILET_6_MND,
         )
     }
 
@@ -90,12 +90,12 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
                 this["mottager"] = Brevmottager.BRUKER.name
                 this["brevtype"] = Brevtype.VEDTAK.name
                 this["ansvarligSaksbehandler"] = Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-            }
+            },
         )
     }
 
     private fun assertHistorikkTask(
-        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype
+        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
     ) {
         taskService.findAll().shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&

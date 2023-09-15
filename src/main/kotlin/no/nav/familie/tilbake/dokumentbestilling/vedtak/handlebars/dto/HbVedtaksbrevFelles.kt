@@ -21,13 +21,13 @@ data class HbVedtaksbrevFelles(
     val behandling: HbBehandling,
     val erFeilutbetaltBeløpKorrigertNed: Boolean = false,
     val totaltFeilutbetaltBeløp: BigDecimal,
-    val datoer: HbVedtaksbrevDatoer? = null
+    val datoer: HbVedtaksbrevDatoer? = null,
 ) : BaseDokument(
     brevmetadata.ytelsestype,
     brevmetadata.språkkode,
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall
+    brevmetadata.gjelderDødsfall,
 ) {
 
     @Suppress("unused") // Handlebars

@@ -39,13 +39,13 @@ object KravgrunnlagsberegningService {
 
     fun fordelKravgrunnlagBeløpPåPerioder(
         kravgrunnlag: Kravgrunnlag431,
-        vurderingsperioder: List<Månedsperiode>
+        vurderingsperioder: List<Månedsperiode>,
     ): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
             FordeltKravgrunnlagsbeløp(
                 beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
                 beregnBeløp(kravgrunnlag, it, utbetaltYtelsesbeløputleder),
-                beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder)
+                beregnBeløp(kravgrunnlag, it, riktigYteslesbeløputleder),
             )
         }
     }
@@ -55,7 +55,7 @@ object KravgrunnlagsberegningService {
             it.periode to FordeltKravgrunnlagsbeløp(
                 feilutbetaltYtelsesbeløputleder(it),
                 utbetaltYtelsesbeløputleder(it),
-                riktigYteslesbeløputleder(it)
+                riktigYteslesbeløputleder(it),
             )
         }
     }
@@ -74,7 +74,7 @@ object KravgrunnlagsberegningService {
             throw Feil(
                 message = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
                 frontendFeilmelding = "Periode med ${perioderSomIkkeErHeleMåneder[0]} er ikke i hele måneder",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -82,7 +82,7 @@ object KravgrunnlagsberegningService {
     private fun beregnBeløp(
         kravgrunnlag: Kravgrunnlag431,
         vurderingsperiode: Månedsperiode,
-        beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>
+        beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>,
     ): BigDecimal {
         val sum = kravgrunnlag.perioder
             .sortedBy { it.periode.fom }

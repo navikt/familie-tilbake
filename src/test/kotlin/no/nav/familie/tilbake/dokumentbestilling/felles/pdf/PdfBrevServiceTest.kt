@@ -31,7 +31,7 @@ internal class PdfBrevServiceTest {
     private val pdfBrevService = PdfBrevService(
         journalføringService,
         tellerService,
-        taskService
+        taskService,
     )
 
     @Test
@@ -48,7 +48,7 @@ internal class PdfBrevServiceTest {
             brevtype = Brevtype.VARSEL,
             brevdata,
             5L,
-            fritekst
+            fritekst,
         )
 
         val task = slot.captured
@@ -107,10 +107,10 @@ internal class PdfBrevServiceTest {
             ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
             saksnummer = "1232456",
             behandlingstype = Behandlingstype.TILBAKEKREVING,
-            gjelderDødsfall = false
+            gjelderDødsfall = false,
         ),
         overskrift = "",
         mottager = Brevmottager.BRUKER,
-        brevtekst = ""
+        brevtekst = "",
     )
 }
