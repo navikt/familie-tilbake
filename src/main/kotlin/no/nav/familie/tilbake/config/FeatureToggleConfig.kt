@@ -63,6 +63,7 @@ class FeatureToggleConfig(
 }
 
 @Service
+@Profile("!integrasjonstest")
 class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
 
     fun isEnabled(toggleId: String): Boolean {
