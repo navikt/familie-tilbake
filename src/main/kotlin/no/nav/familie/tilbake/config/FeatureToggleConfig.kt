@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Service
 import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
@@ -101,11 +102,14 @@ class FeatureToggleConfig(
     }
 }
 
-interface FeatureToggleService {
+@Service
+class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
 
-    fun isEnabled(toggleId: String): Boolean {
-        return isEnabled(toggleId, false)
+    fun isEnabled(toggle: Toggle): Boolean {
+        return defaultUnleashService.isEnabled(toggle.toggleId, false)
     }
 
-    fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
+    fun isEnabled(toggle: Toggle, defaultVerdi: Boolean): Boolean {
+        return defaultUnleashService.isEnabled(toggle.toggleId, defaultVerdi)
+    }
 }
