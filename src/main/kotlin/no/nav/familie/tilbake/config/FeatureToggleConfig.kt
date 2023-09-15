@@ -13,16 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-class ByClusterStrategy(private val clusterName: String) : Strategy {
-
-    override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-        if (parameters.isEmpty()) return false
-        return parameters["cluster"]?.contains(clusterName) ?: false
-    }
-
-    override fun getName(): String = "byCluster"
-}
-
 @Configuration
 class FeatureToggleConfig(
     @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
@@ -97,4 +87,14 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
     fun sjekkAlle(): Map<String, Boolean> {
         return funksjonsbrytere.associate { it to featureToggleService.isEnabled(it) }
     }
+}
+
+class ByClusterStrategy(private val clusterName: String) : Strategy {
+
+    override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
+        if (parameters.isEmpty()) return false
+        return parameters["cluster"]?.contains(clusterName) ?: false
+    }
+
+    override fun getName(): String = "byCluster"
 }
