@@ -1188,10 +1188,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 2
-        behandlingsstegstilstand[0].behandlingssteg shouldBe Behandlingssteg.VARSEL
-        behandlingsstegstilstand[0].behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
-        behandlingsstegstilstand[1].behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
-        behandlingsstegstilstand[1].behandlingsstegsstatus shouldBe Behandlingsstegstatus.AVBRUTT
+        behandlingsstegstilstand.filter { it.behandlingssteg == Behandlingssteg.VARSEL }.size shouldBe 1
+        behandlingsstegstilstand.first { it.behandlingssteg == Behandlingssteg.VARSEL }.behandlingsstegsstatus shouldBe Behandlingsstegstatus.UTFØRT
+        behandlingsstegstilstand.filter { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.size shouldBe 1
+        behandlingsstegstilstand.first { it.behandlingssteg == Behandlingssteg.GRUNNLAG }.behandlingsstegsstatus shouldBe Behandlingsstegstatus.AVBRUTT
 
         val behandlingssresultat = behandling.sisteResultat
         behandlingssresultat.shouldNotBeNull()
