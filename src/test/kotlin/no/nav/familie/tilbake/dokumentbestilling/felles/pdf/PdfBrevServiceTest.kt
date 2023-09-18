@@ -16,6 +16,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.junit.jupiter.api.Test
@@ -84,6 +85,25 @@ internal class PdfBrevServiceTest {
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot)) } returns mockk()
         val brevdata = lagBrevdata()
+
+        pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
+
+        val task = slot.captured
+
+        val distribusjonstype = task.metadata.getProperty("distribusjonstype")
+        distribusjonstype.shouldBe(Distribusjonstype.ANNET.name)
+
+        val distribusjonstidspunkt = task.metadata.getProperty("distribusjonstidspunkt")
+        distribusjonstidspunkt.shouldBe(Distribusjonstidspunkt.KJERNETID.name)
+    }
+
+    @Test
+    fun `sendBrev støtter å sende brev til institusjon med ampsand i navnet`() {
+        val slot = CapturingSlot<Task>()
+        every { taskService.save(capture(slot)) } returns mockk()
+        val brevdata = lagBrevdata().apply {
+            metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))
+        }
 
         pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
