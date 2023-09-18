@@ -9,6 +9,7 @@ metadata:
 spec:
   envFrom:
     - secret: familie-tilbake
+    - secret: familie-tilbake-unleash-api-token
   image: {{ image }}
   port: 8030
   leaderElection: true
