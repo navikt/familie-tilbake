@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHe
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
+import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
@@ -99,7 +100,13 @@ class PdfBrevService(
         data: Brevdata,
     ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
-        val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
+
+        val pdf = try {
+            pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
+        } catch (e: Exception) {
+            secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
+            throw e
+        }
 
         return journalføringService.journalførUtgåendeBrev(
             behandling,
