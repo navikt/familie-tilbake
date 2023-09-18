@@ -79,7 +79,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE,
         FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK,
         FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING,
-        FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER,
         FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST,
     )
 
