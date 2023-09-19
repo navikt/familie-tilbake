@@ -3,8 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -231,24 +229,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         avsnitt.shouldHaveSize(3)
         avsnitt.first().overskrift shouldBe "Du må betale tilbake barnetrygden"
-    }
-
-    @Test
-    fun `metadata generert for vedtaksbrev skal bli den samme uansett toggle-verdi for forhåndsgenerering eller ikke`() {
-        val brevdata = mutableListOf<Brevdata>()
-
-        vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
-        vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
-
-        verify(exactly = 2) {
-            spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
-            )
-        }
-        brevdata shouldHaveSize 2
-        brevdata.first().metadata shouldBeEqualToComparingFields
-            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
-        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
     @Test

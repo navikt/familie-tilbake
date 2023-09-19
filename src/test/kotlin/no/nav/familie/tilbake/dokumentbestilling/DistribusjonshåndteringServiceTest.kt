@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling
 
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.mockk.every
@@ -121,13 +122,9 @@ class DistribusjonshåndteringServiceTest {
             eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any())
         } returns brukerAdresse
 
-        // every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-        //    true andThen false
-
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
 
-        sendHenleggelsesbrevTask.doTask(task)
         sendHenleggelsesbrevTask.doTask(task)
 
         verify {
@@ -139,10 +136,15 @@ class DistribusjonshåndteringServiceTest {
             )
         }
 
-        brevdata shouldHaveSize 2
+        val metadata = brevdata.single().metadata
 
-        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
-        brevdata.first().metadata shouldBeEqual brevdata.last().metadata
+        metadata.mottageradresse shouldBeEqual brukerAdresse
+
+        metadata.finnesVerge.shouldBeFalse()
+        metadata.finnesAnnenMottaker.shouldBeFalse()
+
+        metadata.annenMottakersNavn.isNullOrEmpty().shouldBeTrue()
+        metadata.vergenavn.isNullOrEmpty().shouldBeTrue()
     }
 
     @Test
