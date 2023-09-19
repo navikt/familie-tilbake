@@ -11,12 +11,8 @@ no.nav.security.jwt:
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
 
-funksjonsbrytere:
-  enabled: false
-  unleash:
-    uri: http://dummy/api/
-    cluster: integrasjonstest
-    applicationName: familie-tilbake
+unleash:
+  enabled: true
 
 AZURE_APP_WELL_KNOWN_URL: testverdi
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: testverdi
@@ -27,3 +23,8 @@ CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 API_SCOPE: dummy
 AUTHORIZATION_URL: testverdi
+
+NAIS_APP_NAME: familie-klage
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
+NAIS_CLUSTER_NAME: dev-gcp

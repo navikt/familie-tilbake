@@ -25,11 +25,6 @@ internal class OppgavePrioritetServiceTest {
     val featureToggleService = mockk<FeatureToggleService>()
     val oppgavePrioritetService = OppgavePrioritetService(kravgrunnlagRepository, featureToggleService)
 
-    @BeforeEach
-    fun setUp() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER) } returns true
-    }
-
     @Test
     fun `skal gi prioritet LAV for feilutbetaling på 9999`() {
         val behandlingId = UUID.randomUUID()
