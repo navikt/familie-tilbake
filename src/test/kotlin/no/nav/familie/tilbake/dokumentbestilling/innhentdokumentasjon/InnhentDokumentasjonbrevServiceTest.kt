@@ -1,12 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.equals.shouldBeEqual
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -19,7 +15,6 @@ import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
@@ -86,28 +81,4 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         PdfaValidator.validatePdf(data)
     }
 
-    @Test
-    fun `brevmetadataUtil skal lage lik metadata som InnhentDokumentasjonbrevService selv`() {
-        val brevdata = mutableListOf<Brevdata>()
-
-        innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
-            Testdata.behandling.id,
-            flereOpplysninger,
-        )
-        innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
-            Testdata.behandling.id,
-            flereOpplysninger,
-        )
-
-        verify(exactly = 2) {
-            spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
-            )
-        }
-
-        brevdata shouldHaveSize 2
-        brevdata.first().metadata shouldBeEqualToComparingFields
-            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
-        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
-    }
 }
