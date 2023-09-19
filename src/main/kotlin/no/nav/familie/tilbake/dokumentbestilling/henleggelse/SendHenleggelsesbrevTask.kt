@@ -9,10 +9,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.Properties
@@ -35,17 +33,7 @@ class SendHenleggelsesbrevTask(
     override fun doTask(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
-
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
-            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst)
-        } else {
-            if (behandling.harVerge) {
-                henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, Brevmottager.VERGE)
-            }
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-            henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst, brevmottager)
-        }
+        henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst)
     }
 
     companion object {

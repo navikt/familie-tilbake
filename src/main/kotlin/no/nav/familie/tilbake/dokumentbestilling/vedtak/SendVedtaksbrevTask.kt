@@ -10,11 +10,9 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -68,16 +66,7 @@ class SendVedtaksbrevTask(
             return
         }
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
-            vedtaksbrevService.sendVedtaksbrev(behandling)
-        } else {
-            if (behandling.harVerge) {
-                vedtaksbrevService.sendVedtaksbrev(behandling, Brevmottager.VERGE)
-            }
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-            vedtaksbrevService.sendVedtaksbrev(behandling, brevmottager)
-        }
+        vedtaksbrevService.sendVedtaksbrev(behandling)
         log.info("Utført for behandling: {}", behandlingId)
     }
 

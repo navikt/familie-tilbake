@@ -12,10 +12,8 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,16 +41,8 @@ class InnhentDokumentasjonbrevTask(
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         val fritekst: String = taskdata.fritekst
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
-            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst)
-        } else {
-            if (behandling.harVerge) {
-                innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, Brevmottager.VERGE)
-            }
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-            innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst, brevmottager)
-        }
+
+        innhentDokumentasjonBrevService.sendInnhentDokumentasjonBrev(behandling, fritekst)
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(

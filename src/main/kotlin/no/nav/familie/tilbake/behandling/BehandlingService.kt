@@ -196,7 +196,6 @@ class BehandlingService(
         val støtterManuelleBrevmottakere = sjekkOmManuelleBrevmottakereErStøttet(
             behandling = behandling,
             fagsak = fagsak,
-            featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE),
         )
         val manuelleBrevmottakere = if (støtterManuelleBrevmottakere) {
             manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
@@ -647,7 +646,6 @@ class BehandlingService(
         if (sjekkOmManuelleBrevmottakereErStøttet(
                 behandling = behandling,
                 fagsak = fagsak,
-                featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE),
             )
         ) {
             behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
@@ -658,7 +656,6 @@ class BehandlingService(
         fun sjekkOmManuelleBrevmottakereErStøttet(
             behandling: Behandling,
             fagsak: Fagsak,
-            featureToggleEnabled: Boolean,
-        ): Boolean = featureToggleEnabled && fagsak.institusjon == null && !behandling.harVerge
+        ): Boolean = fagsak.institusjon == null && !behandling.harVerge
     }
 }
