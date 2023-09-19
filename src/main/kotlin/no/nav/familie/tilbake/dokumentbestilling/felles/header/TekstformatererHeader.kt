@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.header
 
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.sanitize
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
 
 object TekstformatererHeader {
@@ -11,7 +12,7 @@ object TekstformatererHeader {
                 språkkode = brevmetadata.språkkode,
                 person = Person(brevmetadata.sakspartsnavn, brevmetadata.sakspartId),
                 brev = Brev(overskrift),
-                institusjon = brevmetadata.institusjon,
+                institusjon = if (brevmetadata.institusjon != null) Institusjon(brevmetadata.institusjon.organisasjonsnummer, sanitize(brevmetadata.institusjon.navn)) else null,
             ),
         )
     }
