@@ -133,8 +133,8 @@ class PdfBrevService(
                 return JournalpostIdOgDokumentId(
                     journalpostId = journalpost.journalpostId,
                     dokumentId = journalpost.dokumenter?.first()?.dokumentInfoId ?: error(
-                        "Feil ved Journalføring av $dokumentkategori til ${data.mottager} for behandlingId=${behandling.id}"
-                    )
+                        "Feil ved Journalføring av $dokumentkategori til ${data.mottager} for behandlingId=${behandling.id}",
+                    ),
                 )
             }
             throw ressursException

@@ -83,23 +83,6 @@ object DokprodTilHtml {
         return ekstraLinjeskiftFørHilsing(konverterNbsp(builder.toString()))
     }
 
-    private fun sanitize(name: String): String {
-        val builder = StringBuilder()
-        for (element in name) {
-            when (element) {
-                '"' -> builder.append("&quot;")
-                '\'' -> builder.append("&apos;")
-                '<' -> builder.append("&lt;")
-                '>' -> builder.append("&gt;")
-                '&' -> builder.append("&amp;")
-                else -> {
-                    builder.append(element)
-                }
-            }
-        }
-        return builder.toString()
-    }
-
     private fun hentAvsnittene(dokprod: String): List<String> {
         // avsnitt ved dobbelt linjeskift
         // avsnitt ved overskrift (linje starter med _)
@@ -116,4 +99,21 @@ object DokprodTilHtml {
         return s.replace("<p>Med vennlig hilsen", "<p class=\"hilsen\">Med vennlig hilsen")
             .replace("<p>Med venleg helsing", "<p class=\"hilsen\">Med venleg helsing")
     }
+}
+
+fun sanitize(name: String): String {
+    val builder = StringBuilder()
+    for (element in name) {
+        when (element) {
+            '"' -> builder.append("&quot;")
+            '\'' -> builder.append("&apos;")
+            '<' -> builder.append("&lt;")
+            '>' -> builder.append("&gt;")
+            '&' -> builder.append("&amp;")
+            else -> {
+                builder.append(element)
+            }
+        }
+    }
+    return builder.toString()
 }
