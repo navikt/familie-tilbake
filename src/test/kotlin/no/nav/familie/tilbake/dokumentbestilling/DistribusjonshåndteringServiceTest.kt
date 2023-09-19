@@ -10,7 +10,6 @@ import io.mockk.verify
 import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -114,39 +113,6 @@ class DistribusjonshåndteringServiceTest {
     }
 
     @Test
-    fun `skal sende brev med likt innhold og til samme mottakere når toggle er på, som sendbrev-tasken når toggle er av`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-            true andThen false
-
-        val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
-        val brevdata = mutableListOf<Brevdata>()
-
-        sendHenleggelsesbrevTask.doTask(task)
-        sendHenleggelsesbrevTask.doTask(task)
-
-        verify(exactly = 4) {
-            pdfBrevService.sendBrev(
-                behandling,
-                fagsak,
-                Brevtype.HENLEGGELSE,
-                capture(brevdata),
-            )
-        }
-
-        brevdata shouldHaveSize 4
-
-        brevdata.first { it.mottager == VERGE }.brevtekst shouldBeEqual
-            brevdata.last { it.mottager == VERGE }.brevtekst
-        brevdata.first { it.mottager == BRUKER }.brevtekst shouldBeEqual
-            brevdata.last { it.mottager == BRUKER }.brevtekst
-
-        brevdata.first { it.mottager == VERGE }.metadata shouldBeEqual
-            brevdata.last { it.mottager == VERGE }.metadata
-        brevdata.first { it.mottager == BRUKER }.metadata shouldBeEqual
-            brevdata.last { it.mottager == BRUKER }.metadata
-    }
-
-    @Test
     fun `skal kun sende til bruker`() {
         val behandlingUtenVerge = behandling.copy(verger = emptySet())
 
@@ -155,8 +121,8 @@ class DistribusjonshåndteringServiceTest {
             eksterneDataForBrevService.hentAdresse(personinfoBruker, BRUKER, behandlingUtenVerge.aktivVerge, any())
         } returns brukerAdresse
 
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-            true andThen false
+        // every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
+        //    true andThen false
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandling.id, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
@@ -202,9 +168,6 @@ class DistribusjonshåndteringServiceTest {
                 ident = verge.ident,
             ),
         )
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns true
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandlingId, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()

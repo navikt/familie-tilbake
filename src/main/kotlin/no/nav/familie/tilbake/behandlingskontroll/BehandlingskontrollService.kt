@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
@@ -341,9 +340,7 @@ class BehandlingskontrollService(
             behandlingssteg = Behandlingssteg.finnNesteBehandlingssteg(
                 behandlingssteg = sisteUtførteSteg,
                 harVerge = behandling.harVerge,
-                harManuelleBrevmottakere =
-                featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) &&
-                    brevmottakerRepository.findByBehandlingId(behandling.id).isNotEmpty(),
+                harManuelleBrevmottakere = brevmottakerRepository.findByBehandlingId(behandling.id).isNotEmpty(),
             ),
             KLAR,
         )

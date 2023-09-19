@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -89,9 +88,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `brevmetadataUtil skal lage lik metadata som InnhentDokumentasjonbrevService selv`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-            true andThen false
-
         val brevdata = mutableListOf<Brevdata>()
 
         innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
@@ -110,7 +106,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
         }
 
         brevdata shouldHaveSize 2
-        brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
+        brevdata.first().metadata shouldBeEqualToComparingFields
             brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
         brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }

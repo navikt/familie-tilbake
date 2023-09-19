@@ -11,9 +11,6 @@ no.nav.security.jwt:
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
 
-unleash:
-  enabled: true
-
 AZURE_APP_WELL_KNOWN_URL: testverdi
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: testverdi
 FAMILIE_INTEGRASJONER_URL: http://localhost:8085

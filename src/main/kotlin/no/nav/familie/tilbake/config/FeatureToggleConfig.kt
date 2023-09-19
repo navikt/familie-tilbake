@@ -2,16 +2,11 @@ package no.nav.familie.tilbake.config
 
 import io.getunleash.strategy.Strategy
 import no.nav.familie.unleash.DefaultUnleashService
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 @Configuration
 class FeatureToggleConfig(
@@ -36,12 +31,6 @@ class FeatureToggleConfig(
 
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
             "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
-
-        const val SETT_PRIORITET_PÅ_OPPGAVER = "familie.tilbake.prioritet-oppgaver"
-
-        const val DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE = "familie-tilbake.manuelle-brev"
-
-        const val KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE = "familie-tilbake.konsolidert-brevdistribusjon"
 
         const val OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING = "familie-tilbake.overstyr-delvis-hvis-full"
 
