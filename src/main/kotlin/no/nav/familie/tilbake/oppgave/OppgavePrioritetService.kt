@@ -20,7 +20,7 @@ class OppgavePrioritetService(
     fun utledOppgaveprioritet(behandlingId: UUID, oppgave: Oppgave? = null): OppgavePrioritet {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)
 
-        return if (finnesKravgrunnlag && featureToggleService.isEnabled(FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER)) {
+        return if (finnesKravgrunnlag) {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
             val feilutbetaltBeløp = utledFeilutbetaling(kravgrunnlag)

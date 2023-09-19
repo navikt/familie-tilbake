@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.felles.header
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import org.junit.jupiter.api.Test
@@ -35,7 +34,7 @@ class TekstformatererHeaderTest {
     fun `lagHeader brev til institusjon`() {
         val generertHeader: String =
             TekstformatererHeader.lagHeader(
-                brevmetadata = brevmetadata.copy(institusjon = Institusjon("987654321", "Testinstitusjon")),
+                brevmetadata = brevmetadata.copy(institusjon = Institusjon("987654321", "Test & institusjon")),
                 overskrift = "Dette er en header",
             )
         generertHeader shouldBe institusjonHeader()
@@ -54,7 +53,7 @@ Fødselsnummer: 12345678901
         return """<div id="dato">Dato: ${dagensDato()}</div>
 <h1 id="hovedoverskrift">Dette er en header</h1>
 <div id="institusjon">
-Navn: Testinstitusjon<br/>
+Navn: Test &amp; institusjon<br/>
 Organisasjonsnummer: 987654321
 </div>
 <div id="person">

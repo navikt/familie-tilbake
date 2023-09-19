@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -15,11 +16,13 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.header.TekstformatererHe
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTaskData
 import no.nav.familie.tilbake.dokumentbestilling.fritekstbrev.JournalpostIdOgDokumentId
+import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.pdfgen.Dokumentvariant
 import no.nav.familie.tilbake.pdfgen.PdfGenerator
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.Base64
 import java.util.Properties
@@ -99,17 +102,43 @@ class PdfBrevService(
         data: Brevdata,
     ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
-        val pdf: ByteArray = pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
 
-        return journalføringService.journalførUtgåendeBrev(
-            behandling,
-            fagsak,
-            mapBrevtypeTilDokumentkategori(brevtype),
-            data.metadata,
-            data.mottager,
-            pdf,
-            lagEksternReferanseId(behandling, brevtype, data.mottager),
-        )
+        val pdf = try {
+            pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
+        } catch (e: Exception) {
+            secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
+            throw e
+        }
+
+        val dokumentkategori = mapBrevtypeTilDokumentkategori(brevtype)
+        val eksternReferanseId = lagEksternReferanseId(behandling, brevtype, data.mottager)
+
+        try {
+            return journalføringService.journalførUtgåendeBrev(
+                behandling,
+                fagsak,
+                dokumentkategori,
+                data.metadata,
+                data.mottager,
+                pdf,
+                eksternReferanseId,
+            )
+        } catch (ressursException: RessursException) {
+            if (ressursException.httpStatus == HttpStatus.CONFLICT) {
+                logger.info("Dokarkiv svarte med 409 CONFLICT. Forsøker å hente eksisterende journalpost for $dokumentkategori")
+                val journalpost =
+                    journalføringService.hentJournalposter(behandling.id).find { it.eksternReferanseId == eksternReferanseId }
+                        ?: error("Klarte ikke finne igjen opprettet journalpost med eksternReferanseId $eksternReferanseId")
+
+                return JournalpostIdOgDokumentId(
+                    journalpostId = journalpost.journalpostId,
+                    dokumentId = journalpost.dokumenter?.first()?.dokumentInfoId ?: error(
+                        "Feil ved Journalføring av $dokumentkategori til ${data.mottager} for behandlingId=${behandling.id}",
+                    ),
+                )
+            }
+            throw ressursException
+        }
     }
 
     private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String {
