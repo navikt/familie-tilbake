@@ -62,7 +62,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
@@ -273,8 +272,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBehandling skal legge inn manuellBrevmottaker fra request og autoutføre behandlingssteg BREVMOTTAKER`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
-
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
                 finnesVerge = false,
@@ -1417,8 +1414,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Behandling på fagsak av type institusjon skal ikke støtte manuelle brevmottakere`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE) } returns true
-
         val opprettTilbakekrevingRequest =
             lagOpprettTilbakekrevingRequest(
                 finnesInstitusjon = true,

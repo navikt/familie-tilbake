@@ -1,8 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.equals.shouldBeEqual
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
@@ -18,7 +15,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
@@ -28,7 +24,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
@@ -210,35 +205,6 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         )
 
         PdfaValidator.validatePdf(data)
-    }
-
-    @Test
-    fun `brevmetadataUtil skal lage lik metadata som ManueltVarselbrevService selv`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE) } returns
-            true andThen false
-
-        val brevdata = mutableListOf<Brevdata>()
-
-        manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
-            behandling.id,
-            Dokumentmalstype.VARSEL,
-            varseltekst,
-        )
-        manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
-            behandling.id,
-            Dokumentmalstype.VARSEL,
-            varseltekst,
-        )
-        verify(exactly = 2) {
-            spyPdfBrevService.genererForhåndsvisning(
-                capture(brevdata),
-            )
-        }
-
-        brevdata shouldHaveSize 2
-        brevdata.first().metadata.copy(annenMottakersNavn = null) shouldBeEqualToComparingFields
-            brevdata.last().metadata // gammel flyt setter ikke annenMottakersNavn i metadata. Utledes lokalt for hvert brev
-        brevdata.first().brevtekst shouldBeEqual brevdata.last().brevtekst
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
