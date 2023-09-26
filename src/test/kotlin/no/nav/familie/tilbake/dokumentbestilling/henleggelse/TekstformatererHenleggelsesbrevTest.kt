@@ -119,6 +119,15 @@ class TekstformatererHenleggelsesbrevTest {
     }
 
     @Test
+    fun `lagFritekst skal generere henleggelsesbrev nynorsk institusjon`() {
+        val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, institusjon = Institusjon("123", "123"))
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_nn_institusjon.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
     fun `lagRevurderingsfritekst skal generere henleggelsesbrev nynorsk for tilbakekreving revurderning`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN)
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
@@ -180,6 +189,14 @@ class TekstformatererHenleggelsesbrevTest {
     @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift nynorsk dødsfall bruker`() {
         val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, gjelderDødsfall = true)
+        val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
+        val fasit = "NAV har avslutta saka om tilbakebetaling"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagOverskrift skal generere henleggelsesbrev overskrift institusjon`() {
+        val brevmetadata = brevmetadata.copy(språkkode = Språkkode.NN, institusjon = Institusjon("123", "123"))
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avslutta saka om tilbakebetaling"
         overskrift shouldBe fasit
