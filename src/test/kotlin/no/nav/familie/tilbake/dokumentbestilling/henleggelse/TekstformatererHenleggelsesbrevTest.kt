@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
@@ -47,6 +48,15 @@ class TekstformatererHenleggelsesbrevTest {
         val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
         val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
         val fasit = les("/henleggelsesbrev/henleggelsesbrev_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagFritekst skal generere henleggelsesbrev institusjon`() {
+        val brevmetadata = brevmetadata.copy(institusjon = Institusjon("test", "test"))
+        val henleggelsesbrevsdokument = henleggelsesbrevsdokument.copy(brevmetadata = brevmetadata)
+        val generertBrev: String = TekstformatererHenleggelsesbrev.lagFritekst(henleggelsesbrevsdokument)
+        val fasit = les("/henleggelsesbrev/henleggelsesbrev_institusjon.txt")
         generertBrev shouldBe fasit
     }
 
@@ -138,6 +148,14 @@ class TekstformatererHenleggelsesbrevTest {
     @Test
     fun `lagOverskrift skal generere henleggelsesbrev overskrift dødsfall bruker`() {
         val brevmetadata = brevmetadata.copy(gjelderDødsfall = true)
+        val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
+        val fasit = "NAV har avsluttet saken om tilbakebetaling"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagOverskrift skal generere henleggelsesbrev institusjon`() {
+        val brevmetadata = brevmetadata.copy(institusjon = Institusjon("test", "test"))
         val overskrift: String = TekstformatererHenleggelsesbrev.lagOverskrift(brevmetadata)
         val fasit = "NAV har avsluttet saken om tilbakebetaling"
         overskrift shouldBe fasit
