@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
@@ -46,6 +47,16 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev institusjon`() {
+        val metadata = metadata.copy(institusjon = Institusjon("test", "123"))
+        val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = metadata)
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
+
+        val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_institusjon.txt")
         generertBrev shouldBe fasit
     }
 
@@ -103,6 +114,18 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
 
         val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn_død_bruker.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev nynorsk institusjon`() {
+        val brevMetadata = metadata.copy(språkkode = Språkkode.NN, institusjon = Institusjon("123", "123"))
+        val dokument =
+            innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata.copy(ytelsestype = Ytelsestype.BARNETRYGD))
+
+        val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
+
+        val fasit = les("/innhentdokumentasjonbrev/innhentdokumentasjonbrev_nn_institusjon.txt")
         generertBrev shouldBe fasit
     }
 

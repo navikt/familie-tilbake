@@ -4,6 +4,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.FagsystemUtil
+import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 
 private const val EF_URL = "nav.no/alene-med-barn"
 
@@ -13,6 +14,7 @@ open class BaseDokument(
     val behandlendeEnhetsNavn: String,
     val ansvarligSaksbehandler: String,
     val gjelderDødsfall: Boolean,
+    val institusjon: Institusjon? = null,
 ) : Språkstøtte {
 
     val avsenderenhet =
