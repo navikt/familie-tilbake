@@ -129,7 +129,6 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
         generertBrev shouldBe fasit
     }
 
-
     @Test
     fun `lagInnhentDokumentasjonBrevOverskrift skal generere innhentdokumentasjonbrev overskrift`() {
         val overskrift = TekstformatererInnhentDokumentasjonsbrev.lagOverskrift(innhentDokumentasjonsbrevsdokument.brevmetadata)

@@ -66,7 +66,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(institusjon = Institusjon("test", "test"))
         val varselbrevsdokument = varselbrevsdokument.copy(
             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
-            brevmetadata = metadata
+            brevmetadata = metadata,
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode_institusjon.txt")
@@ -106,7 +106,7 @@ class TekstformatererVarselbrevTest {
         val metadata = metadata.copy(institusjon = Institusjon("test", "test"), språkkode = Språkkode.NN)
         val varselbrevsdokument = varselbrevsdokument.copy(
             feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
-            brevmetadata = metadata
+            brevmetadata = metadata,
         )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode_institusjon_nn.txt")
@@ -119,7 +119,7 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument =
             varselbrevsdokument.copy(
                 brevmetadata = metadata,
-                feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder()
+                feilutbetaltePerioder = lagFeilutbetalingerMedFlerePerioder(),
             )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_flere_perioder_dødsfall_nn.txt")
@@ -132,7 +132,7 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument =
             varselbrevsdokument.copy(
                 brevmetadata = metadata,
-                feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode()
+                feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(),
             )
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode_dødsfall.txt")

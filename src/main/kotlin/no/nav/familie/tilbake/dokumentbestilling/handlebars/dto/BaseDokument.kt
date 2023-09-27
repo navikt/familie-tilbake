@@ -14,7 +14,7 @@ open class BaseDokument(
     val behandlendeEnhetsNavn: String,
     val ansvarligSaksbehandler: String,
     val gjelderDødsfall: Boolean,
-    val institusjon: Institusjon? = null
+    val institusjon: Institusjon? = null,
 ) : Språkstøtte {
 
     val avsenderenhet =

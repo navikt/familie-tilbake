@@ -23,7 +23,7 @@ data class Varselbrevsdokument(
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
     brevmetadata.gjelderDødsfall,
-    brevmetadata.institusjon
+    brevmetadata.institusjon,
 ) {
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge
