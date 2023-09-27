@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
+import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.FeilutbetaltPeriode
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Varselbrevsdokument
 import no.nav.familie.tilbake.dokumentbestilling.varsel.handlebars.dto.Vedleggsdata
@@ -57,6 +58,24 @@ class TekstformatererVarselbrevTest {
         val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode())
         val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
         val fasit = les("/varselbrev/OS_en_periode.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode institusjon overgangsstønad`() {
+        val metadata = metadata.copy(institusjon = Institusjon("test", "test"))
+        val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(), brevmetadata = metadata)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/OS_en_periode_institusjon.txt")
+        generertBrev shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsfritekst skal generere varseltekst for enkelt periode institusjon overgangsstønad nynorsk`() {
+        val metadata = metadata.copy(institusjon = Institusjon("test", "test"), språkkode = Språkkode.NN)
+        val varselbrevsdokument = varselbrevsdokument.copy(feilutbetaltePerioder = lagFeilutbetalingerMedKunEnPeriode(), brevmetadata = metadata)
+        val generertBrev = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
+        val fasit = les("/varselbrev/OS_en_periode_institusjon_nn.txt")
         generertBrev shouldBe fasit
     }
 
@@ -116,6 +135,22 @@ class TekstformatererVarselbrevTest {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
         val fasit = "NAV vurderer om du må betale tilbake overgangsstønad"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift institusjon`() {
+        val brevMetadata = metadata.copy(institusjon = Institusjon("test", "test"))
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
+        val fasit = "NAV vurderer om institusjonen må betale tilbake overgangsstønad"
+        overskrift shouldBe fasit
+    }
+
+    @Test
+    fun `lagVarselbrevsoverskrift skal generere varselbrevsoverskrift institusjon nynorsk`() {
+        val brevMetadata = metadata.copy(institusjon = Institusjon("test", "test"), språkkode = Språkkode.NN)
+        val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(brevMetadata, false)
+        val fasit = "NAV vurderer om institusjonen må betale tilbake overgangsstønad"
         overskrift shouldBe fasit
     }
 
