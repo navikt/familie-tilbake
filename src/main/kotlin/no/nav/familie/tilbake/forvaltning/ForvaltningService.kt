@@ -84,7 +84,8 @@ class ForvaltningService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
 
-        val kravgrunnlagId = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
+        val kravgrunnlagId =
+            kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
         val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
             kravgrunnlagId,
             KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
@@ -183,7 +184,8 @@ class ForvaltningService(
                 )
             }
         }
-        val økonomiXmlMottatt = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
+        val økonomiXmlMottatt =
+            økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil(
                 "Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
@@ -201,26 +203,6 @@ class ForvaltningService(
                 behandlingId = null,
             )
         }
-    }
-
-    fun deaktiverKopletKravgrunnlag(behandlingId: UUID, kravgrunnlag431Id: UUID) {
-        val kravgrunnlagPåBehandling = kravgrunnlagRepository.findByBehandlingId(behandlingId)
-        val kravgrunnlag431 = kravgrunnlagRepository.findById(kravgrunnlag431Id).get()
-        if (!kravgrunnlagPåBehandling.contains(kravgrunnlag431)) {
-            throw Feil(
-                "Fant ikke kravgrunnlag med id $kravgrunnlag431Id på behandling med id $behandlingId",
-                httpStatus = HttpStatus.BAD_REQUEST,
-            )
-        }
-        if (kravgrunnlagPåBehandling.size < 2) {
-            throw Feil(
-                "Kan ikke deaktivere kravgrunnlag med id $kravgrunnlag431Id på behandling med id $behandlingId. Behandling vil ikke lengre ha aktive kravgrunnlag",
-                httpStatus = HttpStatus.BAD_REQUEST,
-            )
-        }
-
-        val oppdatertKravgrunnlag = kravgrunnlag431.copy(aktiv = false)
-        kravgrunnlagRepository.update(oppdatertKravgrunnlag)
     }
 
     private fun sjekkOmBehandlingErAvsluttet(behandling: Behandling) {
