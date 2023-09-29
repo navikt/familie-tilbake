@@ -19,7 +19,7 @@ De vil få faktura frå Skatteetaten på det beløpet som skal betalast tilbake.
 
 På fakturaen vil det stå informasjon om nøyaktig beløp, kontonummer og forfallsdato. De treng ikkje å gjere noko før du får fakturaen.
 
-De finn meir informasjon på nav.no/innkreving.
+De finn meir informasjon på skatteetaten.no/betale.
 _Rett til å klage
 De kan klage innan 6 veker frå den datoen de fekk vedtaket. De finn skjema og informasjon på nav.no/klage.
 

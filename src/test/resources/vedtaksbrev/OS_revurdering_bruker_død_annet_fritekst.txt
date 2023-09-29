@@ -20,7 +20,7 @@ Skatten som er trukket fra beløpet som skal betales tilbake, er beregnet etter 
 NAV gir opplysninger til Skatteetaten om skattebeløpet og om beløpet som skal betales tilbake før skatt er trukket fra. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betaler du tilbake?
 Skatteetaten vil korrigere beløpet dere skal betale tilbake. Dere finner mer informasjon på
-nav.no/innkreving.
+skatteetaten.no/betale.
 _Rett til å klage
 Dere kan klage innen 6 uker fra den datoen dere mottok vedtaket. Dere finner skjema og informasjon på nav.no/klage.
 
