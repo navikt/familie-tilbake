@@ -30,6 +30,8 @@ rolle:
     beslutter: "4e7f23d9-5db1-45c0-acec-89c86a9ec678"
   teamfamilie:
     forvalter: "3d718ae5-f25e-47a4-b4b3-084a97604c1d"
+  prosessering: "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Gruppen teamfamilie
+
 
 SECURITYTOKENSERVICE_URL:  https://security-token-service.nais.adeo.no/SecurityTokenServiceProvider/
 
