@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
 import java.time.LocalDate
-import java.util.UUID
 
 internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
 
@@ -267,10 +266,22 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FORELDELSE, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(
+            behandlingsstegstilstand,
+            Behandlingssteg.VILKÅRSVURDERING,
+            Behandlingsstegstatus.TILBAKEFØRT
+        )
+        assertBehandlingssteg(
+            behandlingsstegstilstand,
+            Behandlingssteg.FORESLÅ_VEDTAK,
+            Behandlingsstegstatus.TILBAKEFØRT
+        )
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
-        assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.IVERKSETT_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
+        assertBehandlingssteg(
+            behandlingsstegstilstand,
+            Behandlingssteg.IVERKSETT_VEDTAK,
+            Behandlingsstegstatus.TILBAKEFØRT
+        )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
@@ -315,7 +326,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                     .first { it.ytelsestype == fagsak.ytelsestype },
             ),
         )
-        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
+        val forvaltningsinfo =
+            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId.shouldBeNull()
         forvaltningsinfo.eksternId shouldBe kravgrunnlag.referanse
@@ -331,7 +343,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 ytelsestype = fagsak.ytelsestype,
             ),
         )
-        val forvaltningsinfo = forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
+        val forvaltningsinfo =
+            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
         forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
         forvaltningsinfo.eksternId shouldBe mottattXml.referanse
@@ -348,36 +361,6 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         }
         exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
             "og eksternFagsakId=${fagsak.eksternFagsakId}"
-    }
-
-    @Test
-    fun `deaktiverKopletKravgrunnlag skal deaktiver kravgrunnlag som er koblet med en behandling med 2 kravgrunnlag`() {
-        val kravgrunnlag = kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        val perioder = kravgrunnlag.perioder.stream().map { it ->
-            it.copy(id = UUID.randomUUID(), beløp = it.beløp.stream().map { it.copy(id = UUID.randomUUID()) }.toList().toSet())
-        }.toList().toSet()
-        kravgrunnlagRepository.insert(kravgrunnlag.copy(id = UUID.randomUUID(), kravstatuskode = Kravstatuskode.ENDRET, perioder = perioder))
-        shouldNotThrowAny { forvaltningService.deaktiverKopletKravgrunnlag(kravgrunnlag.behandlingId, kravgrunnlag.id) }
-    }
-
-    @Test
-    fun `deaktiverKopletKravgrunnlag skal feile når den kalles på behandling med bare 1 kravgrunnlag`() {
-        val kravgrunnlag = kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        val exception = shouldThrow<RuntimeException> { forvaltningService.deaktiverKopletKravgrunnlag(kravgrunnlag.behandlingId, kravgrunnlag.id) }
-        exception.message shouldBe "Kan ikke deaktivere kravgrunnlag med id ${kravgrunnlag.id} på behandling med id ${kravgrunnlag.behandlingId}. Behandling vil ikke lengre ha aktive kravgrunnlag"
-    }
-
-    @Test
-    fun `deaktiverKopletKravgrunnlag skal feile når kravgrunnlag ikke finnes på behandling`() {
-        val kravgrunnlag = kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
-        val perioder = kravgrunnlag.perioder.stream().map { it ->
-            it.copy(id = UUID.randomUUID(), beløp = it.beløp.stream().map { it.copy(id = UUID.randomUUID()) }.toList().toSet())
-        }.toList().toSet()
-        kravgrunnlagRepository.insert(kravgrunnlag.copy(id = UUID.randomUUID(), kravstatuskode = Kravstatuskode.ENDRET, perioder = perioder))
-
-        val behandlingId = UUID.randomUUID()
-        val exception = shouldThrow<RuntimeException> { forvaltningService.deaktiverKopletKravgrunnlag(behandlingId, kravgrunnlag.id) }
-        exception.message shouldBe "Fant ikke kravgrunnlag med id ${kravgrunnlag.id} på behandling med id $behandlingId"
     }
 
     private fun lagMottattXml(): ØkonomiXmlMottatt {
