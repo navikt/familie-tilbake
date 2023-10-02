@@ -6,7 +6,7 @@ _Skatt og skatteoppgjør
 NAV gir opplysninger til Skatteetaten. Skatteetaten vil vurdere om det er grunnlag for å endre skatteoppgjør.
 _Hvordan betaler du tilbake?
 Skatteetaten vil korrigere beløpet du skal betale tilbake. Du finner mer informasjon på
-nav.no/innkreving.
+skatteetaten.no/betale.
 _Du har rett til å klage
 Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage.
 

@@ -17,6 +17,7 @@ data class Henleggelsesbrevsdokument(
     brevmetadata.behandlendeEnhetsNavn,
     brevmetadata.ansvarligSaksbehandler,
     brevmetadata.gjelderDødsfall,
+    brevmetadata.institusjon,
 ) {
 
     private val tilbakekrevingsrevurdering = Behandlingstype.REVURDERING_TILBAKEKREVING == brevmetadata.behandlingstype

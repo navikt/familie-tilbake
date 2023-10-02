@@ -50,4 +50,11 @@ internal class DokprodTilHtmlTest {
 
         resultat shouldBe "<p class=\"hilsen\">Med vennlig hilsen<br/>NAV Familie- og pensjonsytelser</p>"
     }
+
+    @Test
+    fun `dokprodInnholdTilHtml skal konvertere ampersand`() {
+        val resultat = DokprodTilHtml.dokprodInnholdTilHtml("Foo & Bar")
+
+        resultat shouldBe "<p>Foo &amp; Bar</p>"
+    }
 }

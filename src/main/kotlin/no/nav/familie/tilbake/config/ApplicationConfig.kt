@@ -6,10 +6,13 @@ import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.kafka.KafkaErrorHandler
 import no.nav.familie.log.filter.LogFilter
+import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -28,7 +31,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
-@ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering")
+@ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering", "no.nav.familie.unleash")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @Import(RestTemplateAzure::class, KafkaErrorHandler::class)
 @EnableOAuth2Client(cacheEnabled = true)
@@ -81,6 +84,29 @@ class ApplicationConfig {
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                 .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)),
         )
+    }
+
+    @Bean
+    fun prosesseringInfoProvider(@Value("\${rolle.prosessering}") prosesseringRolle: String) = object :
+        ProsesseringInfoProvider {
+
+        override fun hentBrukernavn(): String = try {
+            SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+                .getStringClaim("preferred_username")
+        } catch (e: Exception) {
+            throw e
+        }
+
+        override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
+
+        private fun grupper(): List<String> {
+            return try {
+                SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+                    ?.get("groups") as List<String>? ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
     }
 
     companion object {

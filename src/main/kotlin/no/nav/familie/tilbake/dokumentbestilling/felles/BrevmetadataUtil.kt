@@ -8,7 +8,6 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
@@ -103,14 +102,9 @@ class BrevmetadataUtil(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
-            logger.info("Dropper forhåndsutfylling av metadata som er felles da toggle er avskrudd")
-            return null to BrevmottagerUtil.utledBrevmottager(behandling, fagsak)
-        }
         val støtterManuelleBrevmottakere = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
             behandling = behandling,
             fagsak = fagsak,
-            featureToggleEnabled = featureToggleService.isEnabled(FeatureToggleConfig.DISTRIBUER_TIL_MANUELLE_BREVMOTTAKERE),
         )
         val (bruker, tilleggsmottaker) = DistribusjonshåndteringService.utledMottakere(
             behandling = behandling,

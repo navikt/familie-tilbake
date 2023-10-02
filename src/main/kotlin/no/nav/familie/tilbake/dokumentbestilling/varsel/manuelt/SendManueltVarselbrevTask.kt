@@ -12,11 +12,9 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleConfig.Companion.KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -45,30 +43,11 @@ class SendManueltVarselbrevTask(
         val maltype = taskdata.maltype
         val fritekst = taskdata.fritekst
 
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-
-        if (featureToggleService.isEnabled(KONSOLIDERT_HÅNDTERING_AV_BREVMOTTAKERE)) {
-            manueltVarselBrevService.sendVarselbrev(
-                behandling = behandling,
-                fritekst = fritekst,
-                erKorrigert = maltype.erKorrigert,
-            )
-        } else {
-            val brevmottager = if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
-
-            // sjekk om behandlingen har verge
-            if (Dokumentmalstype.VARSEL == maltype) {
-                if (behandling.harVerge) {
-                    manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, Brevmottager.VERGE)
-                }
-                manueltVarselBrevService.sendManueltVarselBrev(behandling, fritekst, brevmottager)
-            } else if (Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
-                if (behandling.harVerge) {
-                    manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, Brevmottager.VERGE)
-                }
-                manueltVarselBrevService.sendKorrigertVarselBrev(behandling, fritekst, brevmottager)
-            }
-        }
+        manueltVarselBrevService.sendVarselbrev(
+            behandling = behandling,
+            fritekst = fritekst,
+            erKorrigert = maltype.erKorrigert,
+        )
 
         val fristTid = Constants.saksbehandlersTidsfrist()
         oppgaveTaskService.oppdaterOppgaveTask(

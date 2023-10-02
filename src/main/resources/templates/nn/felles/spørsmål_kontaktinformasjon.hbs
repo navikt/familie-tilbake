@@ -1,5 +1,5 @@
-{{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
-{{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}De{{else}}Du{{/if}}{{~/inline~}}
+{{~#* inline "pronomen"~}}{{#or gjelderDødsfall institusjon}}de{{else}}du{{/or}}{{~/inline~}}
+{{~#* inline "Pronomen"~}}{{#or gjelderDødsfall institusjon}}De{{else}}Du{{/or}}{{~/inline~}}
 _Har {{> pronomen}} spørsmål?
 {{> Pronomen}} finn meir informasjon på {{{ytelseUrl}}}.
 

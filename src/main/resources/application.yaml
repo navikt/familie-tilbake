@@ -114,12 +114,8 @@ management:
     db:
       enabled: true
 
-funksjonsbrytere:
+unleash:
   enabled: true
-  unleash:
-    uri: https://unleash.nais.io/api/
-    cluster: ${NAIS_CLUSTER_NAME}
-    applicationName: ${NAIS_APP_NAME}
 
 prosessering:
   continuousRunning.enabled: true
@@ -156,6 +152,7 @@ rolle:
     beslutter: ""
   teamfamilie:
     forvalter: ""
+  prosessering: ""
 
 SECURITYTOKENSERVICE_URL: https://sts-q1.preprod.local/SecurityTokenServiceProvider/ # brukes kun av integrasjonstester
 STS_URL: https://security-token-service.dev.adeo.no/security-token-service/rest/v1/sts/token?grant_type=client_credentials&scope=openid # brukes kun av integrasjonstester

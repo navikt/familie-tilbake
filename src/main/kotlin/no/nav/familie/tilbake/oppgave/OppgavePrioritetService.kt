@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.oppgave
 
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
@@ -20,7 +19,7 @@ class OppgavePrioritetService(
     fun utledOppgaveprioritet(behandlingId: UUID, oppgave: Oppgave? = null): OppgavePrioritet {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)
 
-        return if (finnesKravgrunnlag && featureToggleService.isEnabled(FeatureToggleConfig.SETT_PRIORITET_PÅ_OPPGAVER)) {
+        return if (finnesKravgrunnlag) {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
             val feilutbetaltBeløp = utledFeilutbetaling(kravgrunnlag)

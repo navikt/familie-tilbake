@@ -9,6 +9,7 @@ metadata:
 spec:
   envFrom:
     - secret: familie-tilbake
+    - secret: familie-tilbake-unleash-api-token
   image: {{ image }}
   port: 8030
   leaderElection: true
@@ -87,7 +88,7 @@ spec:
       rules:
         - application: familie-historikk
       external:
-        - host: unleash.nais.io
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: b27apvl220.preprod.local
