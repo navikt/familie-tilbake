@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.config
 
 import io.getunleash.strategy.Strategy
-import no.nav.familie.unleash.DefaultUnleashService
+import no.nav.familie.unleash.UnleashService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,22 +9,11 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
 @Configuration
-class FeatureToggleConfig(
-    @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
-    @Value("\${UNLEASH_SERVER_API_TOKEN}") private val apiToken: String,
-    @Value("\${NAIS_APP_NAME}") private val appName: String,
-    @Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String,
-
-) {
+class FeatureToggleConfig(@Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String) {
 
     @Bean
     fun strategies(): List<Strategy> {
         return listOf(ByClusterStrategy(clusterName))
-    }
-
-    @Bean
-    fun defaultUnleashService(strategies: List<Strategy>): DefaultUnleashService {
-        return DefaultUnleashService(apiUrl, apiToken, appName, strategies)
     }
 
     companion object {
@@ -43,14 +32,14 @@ class FeatureToggleConfig(
 
 @Service
 @Profile("!integrasjonstest")
-class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
+class FeatureToggleService(val unleashService: UnleashService) {
 
     fun isEnabled(toggleId: String): Boolean {
-        return defaultUnleashService.isEnabled(toggleId, false)
+        return unleashService.isEnabled(toggleId, false)
     }
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-        return defaultUnleashService.isEnabled(toggleId, defaultValue)
+        return unleashService.isEnabled(toggleId, defaultValue)
     }
 }
 
