@@ -29,8 +29,7 @@ rolle:
     beslutter: "52fe1bef-224f-49df-a40a-29f92d4520f8"
   teamfamilie:
     forvalter: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b"
-
-
+  prosessering: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.dev-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
