@@ -48,27 +48,6 @@ class FeatureToggleService(val unleashService: UnleashService) {
     }
 }
 
-/**
- * TODO : Fjern etter testing er utført.
- */
-@RestController
-@RequestMapping(path = ["/api/featuretoggle"])
-@Unprotected
-class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
-
-    private val funksjonsbrytere: Set<String> = setOf(
-        FeatureToggleConfig.BRUK_6_DESIMALER_I_SKATTEBEREGNING,
-        FeatureToggleConfig.KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK,
-        FeatureToggleConfig.OVERSTYR_DELVILS_TILBAKEKREVING_TIL_FULL_TILBAKEKREVING,
-        FeatureToggleConfig.IKKE_VALIDER_SÆRLIG_GRUNNET_ANNET_FRITEKST,
-    )
-
-    @GetMapping
-    fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associate { it to featureToggleService.isEnabled(it) }
-    }
-}
-
 class ByClusterStrategy(private val clusterName: String) : Strategy {
 
     override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
