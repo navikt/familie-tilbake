@@ -16,13 +16,20 @@ updates:
 - package-ecosystem: maven
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: "sunday"
     time: "04:00"
   open-pull-requests-limit: 15
   target-branch: main
   registries:
     - familie-kontrakter
     - familie-felles
+  groups:
+    all-dependencies:
+      patterns:
+        - "*"
+      exclude-patterns:
+        - "*pdf*"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
