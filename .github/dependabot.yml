@@ -23,6 +23,12 @@ updates:
   registries:
     - familie-kontrakter
     - familie-felles
+  groups:
+    all-dependencies:
+      patterns:
+        - "*"
+      exclude-patterns:
+        - "*pdf*"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
