@@ -84,6 +84,9 @@ spec:
         - application: familie-prosessering
           namespace: teamfamilie
           cluster: dev-gcp
+        - application: familie-prosessering-lokal
+          namespace: teamfamilie
+          cluster: dev-gcp
     outbound:
       rules:
         - application: familie-historikk

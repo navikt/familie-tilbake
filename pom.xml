@@ -22,7 +22,6 @@
         <jvmTarget>17</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.9.10</kotlin.version>
-        <felles.version>2.20230508082643_6b28bd8</felles.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>3.0_20230927095952_4b4b09b</kontrakter.version>
         <felles.version>2.20230928165350_3e5b5e9</felles.version>
@@ -43,7 +42,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>4.0.4</spring.cloud-contract>
         <springdoc.version>2.2.0</springdoc.version>
-        <testcontainers.version>1.19.0</testcontainers.version>
+        <testcontainers.version>1.19.1</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20230928100816_3cbdfc5</prosessering-core.version>
@@ -312,7 +311,7 @@
         <dependency>
             <groupId>org.messaginghub</groupId>
             <artifactId>pooled-jms</artifactId>
-            <version>3.1.3</version>
+            <version>3.1.4</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -442,7 +441,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.9.1.2184</version>
+                    <version>3.10.0.2594</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
