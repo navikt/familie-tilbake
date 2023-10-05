@@ -2,16 +2,11 @@ package no.nav.familie.tilbake.config
 
 import io.getunleash.strategy.Strategy
 import no.nav.familie.unleash.UnleashService
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import java.awt.PageAttributes
 
 @Configuration
 class FeatureToggleConfig(@Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String) {
