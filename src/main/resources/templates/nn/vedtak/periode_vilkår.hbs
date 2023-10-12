@@ -1,5 +1,20 @@
 {{~#* inline "pronomen"~}}{{#if gjelderDødsfall}}de{{else}}du{{/if}}{{~/inline~}}
 {{~#* inline "Pronomen"~}}{{#if gjelderDødsfall}}De{{else}}Du{{/if}}{{~/inline~}}
+{{~#* inline "forsettTekst"~}}
+    {{#switch vurderinger.vilkårsvurderingsresultat}}
+        {{#case "FORSTO_BURDE_FORSTÅTT"}}
+            Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje dersom du forsto at beløpet var feil. At du må betale tilbake, betyr ikkje at du sjølv har skuld i feilutbetalinga.
+
+            Ut frå informasjonen du har fått, legg vi til grunn at du forsto at du fekk utbetalt for mykje. Derfor kan vi krevje tilbake.
+        {{/case}}
+        {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
+            Etter vår vurdering forsto du at opplysningane du gav oss var uriktige. Derfor kan vi krevje pengane tilbake.
+        {{/case}}
+        {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
+            Etter vår vurdering forsto du at du ikkje gav oss alle opplysningane vi hadde bruk for tidsnok for å sikre at du fekk riktig utbetaling. Derfor kan vi krevje pengane tilbake.
+        {{/case}}
+    {{/switch}}
+{{~/inline~}}
 {{#* inline "fritekst"}}
 {{#if vurderinger.fritekst}}
 
@@ -90,19 +105,7 @@ Vi har ikkje gitt deg den informasjonen du trong for å forstå at beløpet du f
 {{> fritekst}}
     {{/if}}
     {{#if (eq vurderinger.aktsomhetsresultat "FORSETT")}}
-Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. Sjølv om du har meldt frå til oss, kan vi krevje tilbake det du har fått for mykje dersom du forsto at beløpet var feil. At du må betale tilbake, betyr ikkje at du sjølv har skuld i feilutbetalinga.
+Du har fått vite om du har rett til {{{ytelsesnavnUbestemt}}} og kor mykje du har rett til. {{> forsettTekst ~}}
 {{>fritekst}}
-
-        {{#switch vurderinger.vilkårsvurderingsresultat}}
-        {{#case "FORSTO_BURDE_FORSTÅTT"}}
-Ut frå informasjonen du har fått, legg vi til grunn at du forsto at du fekk utbetalt for mykje. Derfor kan vi krevje tilbake.
-        {{/case}}
-        {{#case "FEIL_OPPLYSNINGER_FRA_BRUKER"}}
-Vi vurderer det slik at du forsto at du gav oss uriktige opplysningar. Derfor må du betale tilbake det du har fått for mykje.
-        {{/case}}
-        {{#case "MANGELFULLE_OPPLYSNINGER_FRA_BRUKER"}}
-Vi vurderer at du forsto at du ikkje gav oss alle nødvendige opplysningar i saka di. Du må derfor betale tilbake det du har fått for mykje.
-        {{/case}}
-        {{/switch}}
     {{/if}}
 {{/if}}
