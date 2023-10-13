@@ -269,18 +269,18 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         assertBehandlingssteg(
             behandlingsstegstilstand,
             Behandlingssteg.VILKÅRSVURDERING,
-            Behandlingsstegstatus.TILBAKEFØRT
+            Behandlingsstegstatus.TILBAKEFØRT,
         )
         assertBehandlingssteg(
             behandlingsstegstilstand,
             Behandlingssteg.FORESLÅ_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT
+            Behandlingsstegstatus.TILBAKEFØRT,
         )
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.TILBAKEFØRT)
         assertBehandlingssteg(
             behandlingsstegstilstand,
             Behandlingssteg.IVERKSETT_VEDTAK,
-            Behandlingsstegstatus.TILBAKEFØRT
+            Behandlingsstegstatus.TILBAKEFØRT,
         )
 
         faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldBeNull()
