@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
@@ -8,6 +9,7 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -60,6 +62,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         eksternFagsakId: String,
         eksternBrukId: UUID,
     ): Behandling?
+
+    @Query(
+        """
+            SELECT b.id
+            FROM behandling b JOIN fagsak f ON b.fagsak_id = f.id
+            WHERE b.status != 'AVSLUTTET'
+            AND b.endret_tid < :ikkeEndretEtterDato
+            AND f.fagsystem = :fagsystem
+        """,
+    )
+    fun finnÅpneBehandlingerIkkeEndretEtter(fagsystem: Fagsystem, ikkeEndretEtterDato: LocalDateTime = LocalDateTime.now().minusMonths(4)): List<UUID>?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
