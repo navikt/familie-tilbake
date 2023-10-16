@@ -15,7 +15,7 @@ class OppgaveManglerLoggerService(
     private val behandlingRepository: BehandlingRepository,
 ) {
 
-    @Scheduled(initialDelay = MINUTT, fixedDelay = DØGN)
+    @Scheduled(initialDelay = MINUTT*5, fixedDelay = DØGN)
     fun loggGamleÅpneBehandlingerUtenOppgave() {
         if (LeaderClient.erLeder()) {
             val gamleBehandlinger: List<UUID> =
@@ -32,6 +32,8 @@ class OppgaveManglerLoggerService(
                 }
             }
             logger.info("Ferdig med å logge gamle åpne behandlinger. ${gamleBehandlinger.size - harIkkeOppgave} har oppgave, $harIkkeOppgave har ikke oppgave.")
+        }else{
+            logger.info("Er ikke leder - starter ikke logging av gamle åpne behandlinger.")
         }
     }
     fun LeaderClient.erLeder() = isLeader() ?: false
