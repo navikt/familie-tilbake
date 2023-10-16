@@ -72,7 +72,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             AND f.fagsystem = :fagsystem
         """,
     )
-    fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime = LocalDateTime.now().minusMonths(3)): List<UUID>?
+    @Deprecated("Endres fortløpende - brukes for å bli kjent med behandlinger åpne oppgaver")
+    fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime): List<UUID>?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
