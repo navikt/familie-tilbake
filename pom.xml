@@ -25,6 +25,7 @@
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>3.0_20231006095938_4f85a1d</kontrakter.version>
         <felles.version>2.20230928165350_3e5b5e9</felles.version>
+        <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.7.2</kotest.version>
         <token-validation-spring.version>3.1.5</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
