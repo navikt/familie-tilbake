@@ -68,11 +68,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             SELECT b.id
             FROM behandling b JOIN fagsak f ON b.fagsak_id = f.id
             WHERE b.status != 'AVSLUTTET'
-            AND b.endret_tid < :ikkeEndretEtterDato
+            AND b.opprettet_tid < :opprettetFørDato
             AND f.fagsystem = :fagsystem
         """,
     )
-    fun finnÅpneBehandlingerIkkeEndretEtter(fagsystem: Fagsystem, ikkeEndretEtterDato: LocalDateTime = LocalDateTime.now().minusMonths(4)): List<UUID>?
+    fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime = LocalDateTime.now().minusMonths(3)): List<UUID>?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
