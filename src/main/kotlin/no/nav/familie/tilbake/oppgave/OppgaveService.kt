@@ -53,7 +53,6 @@ class OppgaveService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
         val finnOppgaveRequest = FinnOppgaveRequest(
-            behandlingstype = Behandlingstype.Tilbakekreving,
             saksreferanse = behandling.eksternBrukId.toString(),
             tema = fagsak.ytelsestype.tilTema(),
         )
