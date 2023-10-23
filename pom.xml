@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.4</version>
+        <version>3.1.5</version>
     </parent>
 
     <properties>
@@ -23,15 +23,15 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.9.10</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20231006095938_4f85a1d</kontrakter.version>
-        <felles.version>2.20230928165350_3e5b5e9</felles.version>
+        <kontrakter.version>3.0_20231020124114_c84c4b4</kontrakter.version>
+        <felles.version>2.20231019123322_0a3df34</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.7.2</kotest.version>
         <token-validation-spring.version>3.1.5</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.3</jaxb-impl.version>
+        <jaxb-impl.version>4.0.4</jaxb-impl.version>
         <verapdf.version>1.24.1</verapdf.version>
         <mockk.version>1.13.8</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.3.3.1</version>
+            <version>9.3.4.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -447,7 +447,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.10</version>
+                    <version>0.8.11</version>
                     <configuration>
                         <excludes>
                             <exclude>**/config/FlywayConfig.kt</exclude>
