@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake
 
 import no.nav.familie.tilbake.config.ApplicationConfig
+import no.nav.familie.tilbake.config.TestLauncherConfig
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
@@ -15,6 +16,8 @@ fun main(args: Array<String>) {
         "spring.profiles.active",
         "local, mock-pdl, mock-oauth, mock-oppgave, mock-integrasjoner, mock-økonomi",
     )
+
+    TestLauncherConfig().settClientIdOgSecretForLokalKjøring()
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
         .initializers(DbContainerInitializer())
