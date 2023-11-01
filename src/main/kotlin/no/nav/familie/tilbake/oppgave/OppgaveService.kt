@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
@@ -71,7 +72,7 @@ class OppgaveService(
                     "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
-                throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
+                throw ManglerOppgaveFeil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
             }
 
             else -> {

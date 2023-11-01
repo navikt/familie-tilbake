@@ -1,12 +1,15 @@
 package no.nav.familie.tilbake.oppgave
 
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.config.Constants
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -34,8 +37,22 @@ class OppdaterOppgaveTask(
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val saksbehandler = task.metadata.getProperty("saksbehandler")
         val behandlingId = UUID.fromString(task.payload)
+        val enhet = task.metadata.getProperty("enhet")
+        val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
 
-        val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        val oppgave = try {
+            oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+        } catch (e: ManglerOppgaveFeil) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                beskrivelse = beskrivelse,
+                enhet = enhet,
+                fristForFerdigstillelse = LocalDate.parse(frist),
+                oppgavetype = oppgavetype,
+                saksbehandler = saksbehandler,
+                prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId),
+            ).let { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId) }
+        }
 
         val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
             beskrivelse + System.lineSeparator() + oppgave.beskrivelse
