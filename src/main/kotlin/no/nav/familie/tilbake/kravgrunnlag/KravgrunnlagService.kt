@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
@@ -14,12 +15,14 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleXmlMottattTask
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
@@ -27,12 +30,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.Properties
+import java.util.UUID
 
 @Service
 class KravgrunnlagService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val behandlingRepository: BehandlingRepository,
     private val mottattXmlService: ØkonomiXmlMottattService,
     private val stegService: StegService,
@@ -48,19 +54,32 @@ class KravgrunnlagService(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
-        val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
+    fun behandleMottattKravgrunnlag(økonomiXmlMottattId: String) {
+        val kravgrunnlagXml = økonomiXmlMottattRepository.findByIdOrThrow(UUID.fromString(økonomiXmlMottattId))
+        val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml.melding)
+
         // valider grunnlag
         KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
 
         val fagsystemId = kravgrunnlag.fagsystemId
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
+        val listeMedKravgrunnlag = økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(fagsystemId, ytelsestype)
+
+        listeMedKravgrunnlag.forEach() {
+            if (it.eksternKravgrunnlagId != kravgrunnlag.kravgrunnlagId && it.kontrollfelt!! < kravgrunnlag.kontrollfelt) {
+                throw RekjørSenereException(
+                    triggerTid = LocalDateTime.now().plusMinutes(6),
+                    årsak = "Feil rekkefølge venter litt med dette kravgrunnlaget.",
+                )
+            }
+        }
+
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
-            mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
             tellerService.tellUkobletKravgrunnlag(fagsystem)
             return
         }
@@ -68,7 +87,7 @@ class KravgrunnlagService(
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
-        mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
+        mottattXmlService.arkiverMottattXml(kravgrunnlagXml.melding, fagsystemId, ytelsestype)
 
         historikkTaskService.lagHistorikkTask(
             behandling.id,
@@ -109,6 +128,23 @@ class KravgrunnlagService(
         }
         stegService.håndterSteg(behandling.id)
         tellerService.tellKobletKravgrunnlag(fagsystem)
+    }
+
+    @Transactional
+    fun lagreMottattKravgrunnlag(kravgrunnlagXml: String) {
+        val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
+        val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
+
+        val lagretxml = mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)
+        taskService.save(
+            Task(
+                type = BehandleXmlMottattTask.TYPE,
+                payload = lagretxml.id.toString(),
+                properties = Properties().apply {
+                    this["callId"] = UUID.randomUUID()
+                },
+            ).medTriggerTid(LocalDateTime.now().plusMinutes(5)),
+        )
     }
 
     private fun finnÅpenBehandling(

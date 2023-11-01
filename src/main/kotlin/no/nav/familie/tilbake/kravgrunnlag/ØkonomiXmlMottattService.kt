@@ -24,8 +24,8 @@ class ØkonomiXmlMottattService(
         kravgrunnlagXml: String,
         kravgrunnlag: DetaljertKravgrunnlagDto,
         ytelsestype: Ytelsestype,
-    ) {
-        mottattXmlRepository.insert(
+    ): ØkonomiXmlMottatt {
+        return mottattXmlRepository.insert(
             ØkonomiXmlMottatt(
                 melding = kravgrunnlagXml,
                 kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
