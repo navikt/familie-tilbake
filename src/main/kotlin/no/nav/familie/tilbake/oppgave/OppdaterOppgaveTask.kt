@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -35,27 +34,39 @@ class OppdaterOppgaveTask(
 
         val frist = task.metadata.getProperty("frist")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
-        val saksbehandler = task.metadata.getProperty("saksbehandler")
+        val saksbehandler = task.metadata.getProperty("saksbehandler").takeIf { saksbehandler ->
+            saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+        }
         val behandlingId = UUID.fromString(task.payload)
         val enhet = task.metadata.getProperty("enhet")
-        val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
 
         val oppgave = try {
             oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
         } catch (e: ManglerOppgaveFeil) {
+            log.warn("Fant ingen oppgave å oppdatere på behandling $behandlingId. Vil forsøke å opprette en ny isteden")
+            null
+        }
+
+        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
+            beskrivelse + System.lineSeparator() + (oppgave?.beskrivelse ?: "")
+
+        if (oppgave == null) {
+            val oppgavetype = oppgaveService.utledOppgavetypeForGjenoppretting(behandlingId)
+            val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId)
+
             oppgaveService.opprettOppgave(
                 behandlingId = behandlingId,
-                beskrivelse = beskrivelse,
+                beskrivelse = nyBeskrivelse,
                 enhet = enhet,
                 fristForFerdigstillelse = LocalDate.parse(frist),
                 oppgavetype = oppgavetype,
                 saksbehandler = saksbehandler,
-                prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId),
-            ).let { oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId) }
+                prioritet = prioritet,
+            ).also {
+                log.info("Ny oppgave (id=${it.oppgaveId}, type=$oppgavetype, frist=$frist) opprettet for behandling $behandlingId")
+            }
+            return
         }
-
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
-            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
 
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
 
@@ -64,7 +75,7 @@ class OppdaterOppgaveTask(
             beskrivelse = nyBeskrivelse,
             prioritet = prioritet,
         )
-        if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
+        if (saksbehandler != null) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
         oppgaveService.patchOppgave(patchetOppgave)
