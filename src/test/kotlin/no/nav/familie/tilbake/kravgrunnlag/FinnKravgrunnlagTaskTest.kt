@@ -112,17 +112,18 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     fun init() {
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
         kravgrunnlagService = KravgrunnlagService(
-            kravgrunnlagRepository,
-            behandlingRepository,
-            mottattXmlService,
-            stegService,
-            behandlingskontrollService,
-            taskService,
-            tellerService,
-            oppgaveTaskService,
-            historikkTaskService,
-            hentFagsystemsbehandlingService,
-            endretKravgrunnlagEventPublisher,
+            kravgrunnlagRepository = kravgrunnlagRepository,
+            økonomiXmlMottattRepository = økonomiXmlMottattRepository,
+            behandlingRepository = behandlingRepository,
+            mottattXmlService = mottattXmlService,
+            stegService = stegService,
+            behandlingskontrollService = behandlingskontrollService,
+            taskService = taskService,
+            tellerService = tellerService,
+            oppgaveTaskService = oppgaveTaskService,
+            historikkTaskService = historikkTaskService,
+            hentFagsystemsbehandlingService = hentFagsystemsbehandlingService,
+            endretKravgrunnlagEventPublisher = endretKravgrunnlagEventPublisher,
         )
 
         finnKravgrunnlagTask = FinnKravgrunnlagTask(
