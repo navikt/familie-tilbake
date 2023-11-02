@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = BehandleKravgrunnlagTask.TYPE,
+    taskStepType = BehandleXmlMottattTask.TYPE,
     maxAntallFeil = 3,
     beskrivelse = "Håndter mottatt kravgrunnlag fra oppdrag",
     triggerTidVedFeilISekunder = 60 * 5L,
