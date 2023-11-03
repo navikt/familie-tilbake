@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagBatch
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -53,18 +54,25 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     fun `utfør skal opprette tasker når det finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
         val førsteXml = Testdata.økonomiXmlMottatt.copy(
             id = UUID.randomUUID(),
+            eksternKravgrunnlagId = BigInteger.ONE,
+            ytelsestype = Ytelsestype.BARNETRYGD,
             sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
         )
         mottattXmlRepository.insert(førsteXml)
 
         val andreXml = Testdata.økonomiXmlMottatt.copy(
             id = UUID.randomUUID(),
+            eksternKravgrunnlagId = BigInteger.TWO,
             sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
             ytelsestype = Ytelsestype.SKOLEPENGER,
         )
         mottattXmlRepository.insert(andreXml)
 
-        val tredjeXml = Testdata.økonomiXmlMottatt
+        val tredjeXml = Testdata.økonomiXmlMottatt.copy(
+            id = UUID.randomUUID(),
+            ytelsestype = Ytelsestype.SKOLEPENGER,
+            eksternKravgrunnlagId = BigInteger.valueOf(3),
+        )
         mottattXmlRepository.insert(tredjeXml)
 
         håndterGamleKravgrunnlagBatch.utfør()

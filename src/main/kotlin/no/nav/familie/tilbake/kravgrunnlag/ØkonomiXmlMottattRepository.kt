@@ -40,7 +40,7 @@ interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt,
     // language=PostgreSQL
     @Query(
         """ 
-        SELECT oko.id, oko.ytelsestype
+        SELECT oko.id, oko.ekstern_kravgrunnlag_id, oko.ytelsestype
         FROM okonomi_xml_mottatt oko
         WHERE CASE (ytelsestype)
                     WHEN 'BARNETRYGD' THEN opprettet_tid < :barnetrygdBestemtDato
