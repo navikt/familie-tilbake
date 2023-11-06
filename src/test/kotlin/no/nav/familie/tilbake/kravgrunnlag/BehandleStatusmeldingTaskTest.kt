@@ -399,11 +399,6 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val uuid = lagrekravgrunnlag(kravgrunnlagXml)
 
         behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
-
-        val task = opprettTask(kravgrunnlagXml, BehandleKravgrunnlagTask.TYPE)
-        behandleKravgrunnlagTask.doTask(task)
-
-        kravgrunnlagRepository.findByBehandlingId(behandling.id) // skrevet for å fikse Optimistic Lock Exception
     }
 
     private fun opprettBehandleXmlMottatTask(uuid: UUID): Task {

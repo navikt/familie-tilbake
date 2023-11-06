@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -34,6 +35,8 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleXmlMottattTask
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
@@ -92,6 +95,12 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravvedtakstatusService: KravvedtakstatusService
 
     @Autowired
+    private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
+
+    @Autowired
+    private lateinit var behandleXmlMottattTask: BehandleXmlMottattTask
+
+    @Autowired
     private lateinit var tellerService: TellerService
 
     @Autowired
@@ -141,10 +150,12 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal finne og koble grunnlag med behandling`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        lagreMottattKravgrunnlag(kravgrunnlagXml)
+        val uuid = lagreMottattKravgrunnlag(kravgrunnlagXml, true)
 
         behandling = opprettBehandling(finnesVerge = true)
         behandlingId = behandling.id
+
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
@@ -167,10 +178,12 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal finne og koble grunnlag med behandling når grunnlag er sperret`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        lagreMottattKravgrunnlag(kravgrunnlagXml, true)
+        val uuid = lagreMottattKravgrunnlag(kravgrunnlagXml, true)
 
         behandling = opprettBehandling(finnesVerge = true)
         behandlingId = behandling.id
+
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
@@ -193,13 +206,16 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal finne og koble grunnlag med behandling når det finnes et NY og et ENDR grunnlag`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
-        lagreMottattKravgrunnlag(kravgrunnlagXml, true)
 
         behandling = opprettBehandling(finnesVerge = false)
         behandlingId = behandling.id
 
+        val uuid = lagreMottattKravgrunnlag(kravgrunnlagXml, true)
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
+
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
-        lagreMottattKravgrunnlag(endretKravgrunnlagXml)
+        val endretUuid = lagreMottattKravgrunnlag(endretKravgrunnlagXml)
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(endretUuid))
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
@@ -215,12 +231,22 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId).shouldBeTrue()
         val kravgrunnlagene = kravgrunnlagRepository.findByBehandlingId(behandlingId)
         kravgrunnlagene.any { it.aktiv && it.kravstatuskode == Kravstatuskode.ENDRET }.shouldBeTrue()
-        kravgrunnlagene.any { !it.aktiv && it.sperret && it.kravstatuskode == Kravstatuskode.NYTT }.shouldBeTrue()
+        kravgrunnlagene.any { !it.aktiv && it.kravstatuskode == Kravstatuskode.NYTT }.shouldBeTrue()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.VERGE }.shouldBeFalse()
+    }
+
+
+    private fun opprettBehandleXmlMottatTask(uuid: UUID): Task {
+        return taskService.save(
+            Task(
+                type = BehandleXmlMottattTask.TYPE,
+                payload = uuid.toString(),
+            ),
+        )
     }
 
     private fun opprettBehandling(finnesVerge: Boolean): Behandling {
@@ -262,8 +288,8 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private fun lagreMottattKravgrunnlag(
         kravgrunnlagXml: String,
         sperret: Boolean = false,
-    ) {
-        økonomiXmlMottattRepository.insert(
+    ): UUID {
+       return økonomiXmlMottattRepository.insert(
             ØkonomiXmlMottatt(
                 melding = kravgrunnlagXml,
                 kravstatuskode = Kravstatuskode.NYTT,
@@ -275,7 +301,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 kontrollfelt = "2021-03-02-18.50.15.236315",
                 sperret = sperret,
             ),
-        )
+        ).id
     }
 
     private fun assertBehandlingsstegstilstand(

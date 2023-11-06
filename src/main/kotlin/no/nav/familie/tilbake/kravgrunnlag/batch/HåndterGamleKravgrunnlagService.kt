@@ -134,7 +134,7 @@ class HåndterGamleKravgrunnlagService(
             "Kobler kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
                 "til behandling=$behandlingId",
         )
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
+        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId, erSperret)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         historikkService.lagHistorikkinnslag(

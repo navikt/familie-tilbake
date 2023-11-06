@@ -16,7 +16,7 @@ import java.util.UUID
 
 object KravgrunnlagMapper {
 
-    fun tilKravgrunnlag431(kravgrunnlag: DetaljertKravgrunnlagDto, behandlingId: UUID): Kravgrunnlag431 {
+    fun tilKravgrunnlag431(kravgrunnlag: DetaljertKravgrunnlagDto, behandlingId: UUID, sperret: Boolean = false): Kravgrunnlag431 {
         return Kravgrunnlag431(
             behandlingId = behandlingId,
             vedtakId = kravgrunnlag.vedtakId,
@@ -37,6 +37,7 @@ object KravgrunnlagMapper {
             kontrollfelt = kravgrunnlag.kontrollfelt,
             saksbehandlerId = kravgrunnlag.saksbehId,
             referanse = kravgrunnlag.referanse,
+            sperret = sperret,
             eksternKravgrunnlagId = kravgrunnlag.kravgrunnlagId,
             perioder = tilKravgrunnlagsperiode(kravgrunnlag.tilbakekrevingsPeriode),
         )

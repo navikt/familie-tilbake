@@ -84,7 +84,7 @@ class KravgrunnlagService(
             return
         }
         // mapper grunnlag til Kravgrunnlag431
-        val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
+        val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id, kravgrunnlagXml.sperret)
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
         mottattXmlService.slettMottattXml(kravgrunnlagXml.id)

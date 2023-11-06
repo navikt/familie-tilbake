@@ -380,6 +380,7 @@ class MockOppdragClient(
             KravgrunnlagMapper.tilKravgrunnlag431(
                 KravgrunnlagUtil.unmarshalKravgrunnlag(it),
                 UUID.randomUUID(),
+                false,
             )
         }
     }

@@ -38,7 +38,7 @@ class HentKravgrunnlagService(
     @Transactional
     fun lagreHentetKravgrunnlag(behandlingId: UUID, kravgrunnlag: DetaljertKravgrunnlagDto) {
         logger.info("Lagrer hentet kravgrunnlag for behandling $behandlingId")
-        val kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandlingId)
+        val kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandlingId, false)
         kravgrunnlagRepository.insert(kravgrunnlag431)
     }
 

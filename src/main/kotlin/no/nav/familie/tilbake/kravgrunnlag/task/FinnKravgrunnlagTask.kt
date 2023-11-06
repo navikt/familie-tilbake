@@ -42,8 +42,8 @@ class FinnKravgrunnlagTask(
             .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
             .sortedBy { it.kontrollfelt }
         mottattKravgrunnlagene.forEach { mottattKravgrunnlag ->
-            kravgrunnlagService.lagreMottattKravgrunnlag(mottattKravgrunnlag.melding)
-            if (mottattKravgrunnlag.sperret) {
+            // kravgrunnlagService.lagreMottattKravgrunnlag(mottattKravgrunnlag.melding)
+            if (mottattKravgrunnlag.sperret && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
                 val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
                 kravvedtakstatusService.håndterSperMeldingMedBehandling(behandlingId, kravgrunnlag)
             }
