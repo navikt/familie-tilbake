@@ -87,6 +87,7 @@ class KravgrunnlagService(
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
+        mottattXmlService.slettMottattXml(kravgrunnlagXml.id)
         mottattXmlService.arkiverMottattXml(kravgrunnlagXml.melding, fagsystemId, ytelsestype)
 
         historikkTaskService.lagHistorikkTask(
