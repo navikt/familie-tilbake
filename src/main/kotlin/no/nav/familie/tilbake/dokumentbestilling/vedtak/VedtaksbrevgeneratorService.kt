@@ -221,14 +221,9 @@ class VedtaksbrevgeneratorService(
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
 
-        val klagefristIUker = if (vedtaksbrevgrunnlag.fagsystem in listOf(
-                Fagsystem.KONT,
-                Fagsystem.KS,
-            )
-        ) {
-            KLAGEFRIST_UKER_KONTANTSTØTTE
-        } else {
-            KLAGEFRIST_UKER
+        val klagefristIUker = when (vedtaksbrevgrunnlag.fagsystem) {
+            Fagsystem.KS, Fagsystem.KONT -> KLAGEFRIST_UKER_KONTANTSTØTTE
+            else -> KLAGEFRIST_UKER
         }
 
         val vedtaksbrevFelles =
