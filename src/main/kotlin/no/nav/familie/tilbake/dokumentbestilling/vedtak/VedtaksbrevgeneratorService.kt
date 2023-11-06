@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.internal.text.WordUtils
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -221,8 +222,8 @@ class VedtaksbrevgeneratorService(
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
 
-        val klagefristIUker = when (vedtaksbrevgrunnlag.fagsystem) {
-            Fagsystem.KS, Fagsystem.KONT -> KLAGEFRIST_UKER_KONTANTSTØTTE
+        val klagefristIUker = when (brevmetadata.ytelsestype) {
+            Ytelsestype.KONTANTSTØTTE-> KLAGEFRIST_UKER_KONTANTSTØTTE
             else -> KLAGEFRIST_UKER
         }
 
