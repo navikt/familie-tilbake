@@ -9,6 +9,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -37,17 +38,24 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleStatusmeldingTask
+import no.nav.familie.tilbake.kravgrunnlag.task.BehandleXmlMottattTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import java.time.LocalDate
+import java.util.UUID
 
 internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
+
+
+    @Autowired
+    private lateinit var mottattXmlService: ØkonomiXmlMottattService
 
     @Autowired
     private lateinit var mottattXmlArkivRepository: ØkonomiXmlMottattArkivRepository
@@ -72,6 +80,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
+
+
+    @Autowired
+    private lateinit var behandleXmlMottattTask: BehandleXmlMottattTask
 
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
@@ -384,12 +396,24 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
 
     private fun opprettGrunnlag() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val uuid = lagrekravgrunnlag(kravgrunnlagXml)
+
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
+
         val task = opprettTask(kravgrunnlagXml, BehandleKravgrunnlagTask.TYPE)
         behandleKravgrunnlagTask.doTask(task)
 
         kravgrunnlagRepository.findByBehandlingId(behandling.id) // skrevet for å fikse Optimistic Lock Exception
     }
 
+    private fun opprettBehandleXmlMottatTask(uuid: UUID): Task {
+        return taskService.save(
+            Task(
+                type = BehandleXmlMottattTask.TYPE,
+                payload = uuid.toString(),
+            ),
+        )
+    }
     private fun lagBehandlingsstegstilstand(
         behandlingssteg: Behandlingssteg,
         behandlingsstegstatus: Behandlingsstegstatus,
@@ -449,6 +473,11 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         )
     }
 
+    private fun lagrekravgrunnlag(kravgrunnlagXml: String): UUID {
+        val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
+        val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
+        return mottattXmlService.lagreMottattXml(kravgrunnlagXml = kravgrunnlagXml, ytelsestype = ytelsestype, kravgrunnlag = kravgrunnlag).id
+    }
     private fun assertHistorikkTask(
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
         beskrivelse: String? = null,

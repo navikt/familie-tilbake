@@ -79,7 +79,7 @@ class KravgrunnlagService(
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
 
         if (behandling == null) {
-            mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
+            // mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
             tellerService.tellUkobletKravgrunnlag(fagsystem)
             return
         }

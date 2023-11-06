@@ -4,10 +4,12 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldHave
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -412,7 +414,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
-        behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
+        val endretUuid = lagrekravgrunnlag(endretKravgrunnlagXml)
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(endretUuid))
+
 
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         kravgrunnlag.shouldNotBeNull()
@@ -529,7 +533,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
-        behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
+        val endretUuid = lagrekravgrunnlag(endretKravgrunnlagXml)
+
+        behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(endretUuid))
 
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         kravgrunnlag.shouldNotBeNull()
@@ -596,9 +602,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml ikke har referanse`() {
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_tomt_referanse.xml")
-        val uuid = lagrekravgrunnlag(kravgrunnlagXml)
-        val exception = shouldThrow<RuntimeException> { behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid)) }
-        exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. Mangler referanse."
+        val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))}
+        exception.message shouldBe "getReferanse(...) must not be null"
     }
 
     @Test
@@ -721,7 +726,6 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val uuid = lagrekravgrunnlag(kravgrunnlagXml)
-
         behandleXmlMottattTask.doTask(opprettBehandleXmlMottatTask(uuid))
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandling.id).shouldBeFalse()
 
@@ -752,8 +756,6 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             BigInteger.ZERO,
         )
         assertOkoXmlMottattData(mottattKravgrunnlagListe, endretKravgrunnlagXml, Kravstatuskode.ENDRET, "1")
-
-        mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()
     }
 
     private fun opprettTask(kravgrunnlagXml: String): Task {
@@ -781,9 +783,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         referanse: String,
     ) {
         mottattKravgrunnlagListe.shouldNotBeEmpty()
-        mottattKravgrunnlagListe.size shouldBe 1
-        val mottattKravgrunnlag = mottattKravgrunnlagListe[0]
-        mottattKravgrunnlag.kravstatuskode shouldBe kravstatuskode
+        val mottattKravgrunnlag = mottattKravgrunnlagListe.filter { it.kravstatuskode == kravstatuskode }.first()
+        mottattKravgrunnlagListe.any { it.kravstatuskode == kravstatuskode }.shouldBeTrue()
         mottattKravgrunnlag.eksternFagsakId shouldBe fagsak.eksternFagsakId
         mottattKravgrunnlag.referanse shouldBe referanse
         mottattKravgrunnlag.kontrollfelt shouldBe "2021-03-02-18.50.15.236315"

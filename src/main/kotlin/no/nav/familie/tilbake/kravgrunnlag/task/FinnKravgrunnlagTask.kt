@@ -40,7 +40,7 @@ class FinnKravgrunnlagTask(
 
         val mottattKravgrunnlagene = økonomiXmlMottattRepository
             .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-            .sortedBy { it.sporbar.opprettetTid }
+            .sortedBy { it.kontrollfelt }
         mottattKravgrunnlagene.forEach { mottattKravgrunnlag ->
             kravgrunnlagService.lagreMottattKravgrunnlag(mottattKravgrunnlag.melding)
             if (mottattKravgrunnlag.sperret) {
