@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -223,7 +222,7 @@ class VedtaksbrevgeneratorService(
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
 
         val klagefristIUker = when (brevmetadata.ytelsestype) {
-            Ytelsestype.KONTANTSTØTTE-> KLAGEFRIST_UKER_KONTANTSTØTTE
+            Ytelsestype.KONTANTSTØTTE -> KLAGEFRIST_UKER_KONTANTSTØTTE
             else -> KLAGEFRIST_UKER
         }
 
