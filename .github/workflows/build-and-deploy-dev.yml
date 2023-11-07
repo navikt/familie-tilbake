@@ -32,6 +32,7 @@ jobs:
         with:
           team: teamfamilie
           push_image: true
+          tag: ${{ github.sha }}
           dockerfile: Dockerfile
           docker_context: .
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
@@ -95,7 +96,7 @@ jobs:
           path: tilbake-e2e
       - name: Setter riktig familie-tilbake versjon i e2e tester
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
-        run: sed -i 's/ghcr.io\/navikt\/familie-tilbake:latest/'${{ needs.build-jar-docker.outputs.image }}'/g' tilbake-e2e/e2e/docker-compose.yml
+        run: sed -i 's/ghcr.io\/navikt\/familie-tilbake:latest/europe-north1-docker.pkg.dev\/nais-management-233d\/teamfamilie\/familie-tilbake:${{ github.sha }}/g' tilbake-e2e/e2e/docker-compose.yml
       - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
