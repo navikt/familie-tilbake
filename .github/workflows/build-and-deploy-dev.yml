@@ -2,15 +2,14 @@ name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
 
-env:
-  IMAGE: ghcr.io/navikt/familie-tilbake:${{ github.sha }}
 jobs:
   build-jar-docker:
     if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      contents: "read"
+      id-token: "write"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,17 +26,18 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B --no-transfer-progress package verify -Dmaven.test.skip=true --settings .m2/maven-settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)
-      - name: Bygg Docker image
-        run: |
-          docker build -t $IMAGE .
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        if: github.triggering_actor != 'dependabot[bot]'
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push Docker image
-        run: docker push $IMAGE
+          team: teamfamilie
+          push_image: true
+          dockerfile: Dockerfile
+          docker_context: .
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
 
   run-junit:
     if: github.event.pull_request.draft == false
@@ -95,7 +95,7 @@ jobs:
           path: tilbake-e2e
       - name: Setter riktig familie-tilbake versjon i e2e tester
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
-        run: sed -i 's/familie-tilbake:latest/familie-tilbake:'$GITHUB_SHA'/g' tilbake-e2e/e2e/docker-compose.yml
+        run: sed -i 's/ghcr.io\/navikt\/familie-tilbake:latest/'${{ needs.build-jar-docker.outputs.image }}'/g' tilbake-e2e/e2e/docker-compose.yml
       - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
@@ -157,6 +157,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-dev-gcp.yaml
+          IMAGE: ${{ needs.build-jar-docker.outputs.image }}
       - name: Deploy dvh_sak_topic
         uses: nais/deploy/actions/deploy@v1
         env:
