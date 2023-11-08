@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -40,8 +39,6 @@ class ForvaltningController(
     private val fagsakRepository: FagsakRepository,
     private val oppgaveService: OppgaveService,
 ) {
-    private val logger = LoggerFactory.getLogger(ForvaltningController::class.java)
-
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/{eksternKravgrunnlagId}/v1"],
@@ -181,7 +178,7 @@ class ForvaltningController(
                 opprettetFørDato = LocalDateTime.now().minusMonths(2),
             ) ?: emptyList()
 
-        logger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
+        secureLogger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
 
         gamleBehandlinger.forEach {
             try {
@@ -193,11 +190,6 @@ class ForvaltningController(
                 secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Kastet feil: ${e.message}")
             }
         }
-    }
-
-    companion object {
-        const val DØGN = 24 * 60 * 60 * 1000L
-        const val MINUTT = 60 * 1000L
     }
 }
 
