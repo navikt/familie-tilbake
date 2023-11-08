@@ -3,9 +3,11 @@ package no.nav.familie.tilbake.oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +20,7 @@ import java.util.UUID
 class OppgaveTaskService(
     private val taskService: TaskService,
     private val fagsakService: FagsakService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
 
     @Transactional
@@ -96,11 +99,13 @@ class OppgaveTaskService(
         triggerTid: Long? = null,
         saksbehandler: String? = null,
     ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
         val properties = Properties().apply {
             setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
             setProperty("beskrivelse", beskrivelse)
             setProperty("frist", frist.toString())
+            setProperty("enhet", behandling.behandlendeEnhet)
             saksbehandler?.let { setProperty("saksbehandler", it) }
         }
         val task = Task(
