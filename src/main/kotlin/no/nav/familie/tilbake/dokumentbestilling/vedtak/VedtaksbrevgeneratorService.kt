@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import com.github.jknack.handlebars.internal.text.WordUtils
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
@@ -129,7 +130,13 @@ class VedtaksbrevgeneratorService(
         val fritekstoppsummering = vedtaksbrevgrunnlag.behandling.vedtaksbrevOppsummering?.oppsummeringFritekst
         val fritekstPerioder: List<PeriodeMedTekstDto> =
             VedtaksbrevFritekstMapper.mapFritekstFraDb(vedtaksbrevgrunnlag.behandling.eksisterendePerioderForBrev)
-        return hentDataForVedtaksbrev(vedtaksbrevgrunnlag, fritekstoppsummering, fritekstPerioder, brevmottager, brevmetadata)
+        return hentDataForVedtaksbrev(
+            vedtaksbrevgrunnlag,
+            fritekstoppsummering,
+            fritekstPerioder,
+            brevmottager,
+            brevmetadata,
+        )
     }
 
     private fun hentDataForVedtaksbrev(
@@ -213,6 +220,12 @@ class VedtaksbrevgeneratorService(
         }
         val erFeilutbetaltBeløpKorrigertNed =
             varsletBeløp != null && beregningsresultat.totaltFeilutbetaltBeløp < varsletBeløp
+
+        val klagefristIUker = when (brevmetadata.ytelsestype) {
+            Ytelsestype.KONTANTSTØTTE -> KLAGEFRIST_UKER_KONTANTSTØTTE
+            else -> KLAGEFRIST_UKER
+        }
+
         val vedtaksbrevFelles =
             HbVedtaksbrevFelles(
                 brevmetadata = brevmetadata,
@@ -226,7 +239,7 @@ class VedtaksbrevgeneratorService(
                 ansvarligBeslutter = ansvarligBeslutter,
                 hjemmel = hbHjemmel,
                 totalresultat = hbTotalresultat,
-                konfigurasjon = HbKonfigurasjon(klagefristIUker = KLAGEFRIST_UKER),
+                konfigurasjon = HbKonfigurasjon(klagefristIUker = klagefristIUker),
                 datoer = HbVedtaksbrevDatoer(perioder),
                 søker = utledSøker(personinfo),
             )
@@ -346,7 +359,11 @@ class VedtaksbrevgeneratorService(
             språkkode = språkkode,
             ytelsestype = vedtaksbrevgrunnlag.ytelsestype,
             gjelderDødsfall = personinfo.dødsdato != null,
-            institusjon = vedtaksbrevgrunnlag.institusjon?.let { organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer) },
+            institusjon = vedtaksbrevgrunnlag.institusjon?.let {
+                organisasjonService.mapTilInstitusjonForBrevgenerering(
+                    it.organisasjonsnummer,
+                )
+            },
         )
     }
 
@@ -472,5 +489,6 @@ class VedtaksbrevgeneratorService(
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
         private const val KLAGEFRIST_UKER = 6
+        private const val KLAGEFRIST_UKER_KONTANTSTØTTE = 3
     }
 }
