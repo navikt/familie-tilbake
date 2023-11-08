@@ -37,11 +37,14 @@ class BehandlingTilstandService(
     private val taskService: TaskService,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
-
-    fun opprettSendingAvBehandlingensTilstand(behandlingId: UUID, info: Behandlingsstegsinfo) {
-        val hendelsesbeskrivelse = "Ny behandlingsstegstilstand " +
-            "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
-            "for behandling $behandlingId"
+    fun opprettSendingAvBehandlingensTilstand(
+        behandlingId: UUID,
+        info: Behandlingsstegsinfo,
+    ) {
+        val hendelsesbeskrivelse =
+            "Ny behandlingsstegstilstand " +
+                "${info.behandlingssteg}:${info.behandlingsstegstatus} " +
+                "for behandling $behandlingId"
 
         val tilstand = hentBehandlingensTilstand(behandlingId)
         opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
@@ -54,19 +57,24 @@ class BehandlingTilstandService(
         opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
     }
 
-    private fun opprettProsessTask(behandlingId: UUID, behandlingstilstand: Behandlingstilstand, hendelsesbeskrivelse: String) {
-        val task = Task(
-            SendSakshendelseTilDvhTask.TASK_TYPE,
-            behandlingId.toString(),
-            Properties().apply {
-                setProperty("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
-                setProperty("beskrivelse", hendelsesbeskrivelse)
-                setProperty(
-                    PropertyName.FAGSYSTEM,
-                    FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name,
-                )
-            },
-        )
+    private fun opprettProsessTask(
+        behandlingId: UUID,
+        behandlingstilstand: Behandlingstilstand,
+        hendelsesbeskrivelse: String,
+    ) {
+        val task =
+            Task(
+                SendSakshendelseTilDvhTask.TASK_TYPE,
+                behandlingId.toString(),
+                Properties().apply {
+                    setProperty("behandlingstilstand", objectMapper.writeValueAsString(behandlingstilstand))
+                    setProperty("beskrivelse", hendelsesbeskrivelse)
+                    setProperty(
+                        PropertyName.FAGSYSTEM,
+                        FagsystemUtil.hentFagsystemFraYtelsestype(behandlingstilstand.ytelsestype).name,
+                    )
+                },
+            )
         taskService.save(task)
     }
 
@@ -75,8 +83,9 @@ class BehandlingTilstandService(
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val eksternBehandling = behandling.aktivFagsystemsbehandling.eksternId
         val behandlingsresultat = behandling.sisteResultat?.type ?: Behandlingsresultatstype.IKKE_FASTSATT
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository
-            .findByBehandlingIdAndBehandlingsstegsstatusIn(behandlingId, Behandlingsstegstatus.aktiveStegStatuser)
+        val behandlingsstegstilstand =
+            behandlingsstegstilstandRepository
+                .findByBehandlingIdAndBehandlingsstegsstatusIn(behandlingId, Behandlingsstegstatus.aktiveStegStatuser)
         val venterPåBruker: Boolean = Venteårsak.venterPåBruker(behandlingsstegstilstand?.venteårsak)
         val venterPåØkonomi: Boolean = Venteårsak.venterPåØkonomi(behandlingsstegstilstand?.venteårsak)
         val behandlingsårsak = behandling.årsaker.firstOrNull()

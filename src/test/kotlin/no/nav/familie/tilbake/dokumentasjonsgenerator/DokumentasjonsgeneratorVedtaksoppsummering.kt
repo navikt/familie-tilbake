@@ -28,16 +28,15 @@ import java.time.LocalDate
  */
 @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorVedtaksoppsummering {
-
     companion object {
-
         private val JANUAR_15: LocalDate = LocalDate.of(2020, 1, 15)
         private val FEBRUAR_15: LocalDate = LocalDate.of(2020, 2, 15)
-        private val tilbakekrevingsResultat = listOf(
-            Vedtaksresultat.FULL_TILBAKEBETALING,
-            Vedtaksresultat.DELVIS_TILBAKEBETALING,
-            Vedtaksresultat.INGEN_TILBAKEBETALING,
-        )
+        private val tilbakekrevingsResultat =
+            listOf(
+                Vedtaksresultat.FULL_TILBAKEBETALING,
+                Vedtaksresultat.DELVIS_TILBAKEBETALING,
+                Vedtaksresultat.INGEN_TILBAKEBETALING,
+            )
         private val trueFalse = booleanArrayOf(true, false)
 
         const val VEDTAK_START = "vedtak/vedtak_start"
@@ -236,46 +235,50 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
     ) {
         val totalt = 1000L
         val totaltMedRenter = totalt + renter
-        val resultat = HbTotalresultat(
-            hovedresultat = tilbakebetaling,
-            totaltTilbakekrevesBeløp = BigDecimal.valueOf(totalt),
-            totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(totaltMedRenter),
-            totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.valueOf(totaltMedRenter - skatt),
-            totaltRentebeløp = BigDecimal.valueOf(renter),
-        )
-        val varsel = if (medKorrigertBeløp) {
-            HbVarsel(
-                varsletBeløp = BigDecimal.valueOf(25000L),
-                varsletDato = JANUAR_15,
+        val resultat =
+            HbTotalresultat(
+                hovedresultat = tilbakebetaling,
+                totaltTilbakekrevesBeløp = BigDecimal.valueOf(totalt),
+                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(totaltMedRenter),
+                totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.valueOf(totaltMedRenter - skatt),
+                totaltRentebeløp = BigDecimal.valueOf(renter),
             )
-        } else if (medVarsel) {
-            HbVarsel(
-                varsletBeløp = BigDecimal.valueOf(1000L),
-                varsletDato = JANUAR_15,
+        val varsel =
+            if (medKorrigertBeløp) {
+                HbVarsel(
+                    varsletBeløp = BigDecimal.valueOf(25000L),
+                    varsletDato = JANUAR_15,
+                )
+            } else if (medVarsel) {
+                HbVarsel(
+                    varsletBeløp = BigDecimal.valueOf(1000L),
+                    varsletDato = JANUAR_15,
+                )
+            } else {
+                null
+            }
+
+        val behandling =
+            HbBehandling(
+                erRevurdering = erRevurdering,
+                erRevurderingEtterKlageNfp = erRevurderingEtterKlageNfp,
+                originalBehandlingsdatoFagsakvedtak = if (erRevurdering) FEBRUAR_15 else null,
             )
-        } else {
-            null
-        }
 
-        val behandling = HbBehandling(
-            erRevurdering = erRevurdering,
-            erRevurderingEtterKlageNfp = erRevurderingEtterKlageNfp,
-            originalBehandlingsdatoFagsakvedtak = if (erRevurdering) FEBRUAR_15 else null,
-        )
-
-        val felles = HbVedtaksbrevFelles(
-            brevmetadata = lagMetadata(ytelseType, språkkode),
-            totalresultat = resultat,
-            søker = HbPerson(navn = ""),
-            konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-            hjemmel = HbHjemmel(""),
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-            fagsaksvedtaksdato = JANUAR_15,
-            varsel = varsel,
-            erFeilutbetaltBeløpKorrigertNed = medKorrigertBeløp,
-            totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
-            behandling = behandling,
-        )
+        val felles =
+            HbVedtaksbrevFelles(
+                brevmetadata = lagMetadata(ytelseType, språkkode),
+                totalresultat = resultat,
+                søker = HbPerson(navn = ""),
+                konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                hjemmel = HbHjemmel(""),
+                vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+                fagsaksvedtaksdato = JANUAR_15,
+                varsel = varsel,
+                erFeilutbetaltBeløpKorrigertNed = medKorrigertBeløp,
+                totaltFeilutbetaltBeløp = BigDecimal.valueOf(1000),
+                behandling = behandling,
+            )
         val vedtakStart: String = FellesTekstformaterer.lagDeltekst(felles, VEDTAK_START)
         prettyPrint(
             tilbakebetaling,
@@ -325,14 +328,15 @@ class DokumentasjonsgeneratorVedtaksoppsummering {
                 (if (erRevurdering) " - revurdering " else "") +
                 (if (erRevurderingEtterKlageNfp) " klage nfp" else "") + " ]*",
         )
-        val parametrisertTekst = generertTekst
-            .replace(" 1\u00A0010\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
-            .replace(" 1\u00A0000\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
-            .replace(" 910\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
-            .replace(" 900\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
-            .replace(" 25\u00A0000\u00A0kroner".toRegex(), " <varslet beløp> kroner")
-            .replace("15. januar 2020", if (medVarsel) "<varseldato>" else "<vedtaksdato>")
-            .replace("15. februar 2020", "<original vedtaksdato>")
+        val parametrisertTekst =
+            generertTekst
+                .replace(" 1\u00A0010\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
+                .replace(" 1\u00A0000\u00A0kroner".toRegex(), " <skyldig beløp> kroner")
+                .replace(" 910\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
+                .replace(" 900\u00A0kroner".toRegex(), " <skyldig beløp uten skatt> kroner")
+                .replace(" 25\u00A0000\u00A0kroner".toRegex(), " <varslet beløp> kroner")
+                .replace("15. januar 2020", if (medVarsel) "<varseldato>" else "<vedtaksdato>")
+                .replace("15. februar 2020", "<original vedtaksdato>")
         println(parametrisertTekst)
         println()
     }

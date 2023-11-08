@@ -11,7 +11,6 @@ import java.util.UUID
 interface MeldingstellingRepository :
     RepositoryInterface<Meldingstelling, UUID>,
     InsertUpdateRepository<Meldingstelling> {
-
     fun findByFagsystemAndTypeAndStatusAndDato(
         fagsystem: Fagsystem,
         type: Meldingstype,

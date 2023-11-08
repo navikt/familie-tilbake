@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class VedtaksbrevsperiodeRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository
 

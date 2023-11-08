@@ -21,7 +21,6 @@ class OppdaterFaktainfoTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -30,19 +29,21 @@ class OppdaterFaktainfoTask(
         val ytelsestype = Ytelsestype.valueOf(task.metadata.getProperty("ytelsestype"))
         val eksternId = task.metadata.getProperty("eksternId")
 
-        val requestSendt = requireNotNull(
-            hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            ),
-        )
+        val requestSendt =
+            requireNotNull(
+                hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                ),
+            )
         // kaster exception inntil respons-en har mottatt
-        val hentFagsystemsbehandlingRespons = requireNotNull(requestSendt.respons) {
-            "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
-                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
-                "Task kan kjøre på nytt manuelt når respons er mottatt."
-        }
+        val hentFagsystemsbehandlingRespons =
+            requireNotNull(requestSendt.respons) {
+                "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
+                    "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
+                    "Task kan kjøre på nytt manuelt når respons er mottatt."
+            }
 
         val respons = hentFagsystemsbehandlingService.lesRespons(hentFagsystemsbehandlingRespons)
         val feilMelding = respons.feilMelding
@@ -56,7 +57,6 @@ class OppdaterFaktainfoTask(
     }
 
     companion object {
-
         const val TYPE = "oppdater.faktainfo"
     }
 }

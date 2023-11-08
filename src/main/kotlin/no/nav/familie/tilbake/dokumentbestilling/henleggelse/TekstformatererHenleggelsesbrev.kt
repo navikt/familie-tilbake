@@ -6,7 +6,6 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.dto.Brevoverskriftsd
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.handlebars.dto.Henleggelsesbrevsdokument
 
 internal object TekstformatererHenleggelsesbrev {
-
     fun lagFritekst(dokument: Henleggelsesbrevsdokument): String {
         return FellesTekstformaterer.lagBrevtekst(dokument, "henleggelse/henleggelse")
     }

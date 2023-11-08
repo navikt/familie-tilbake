@@ -51,7 +51,6 @@ class TilgangAdvice(
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val integrasjonerClient: IntegrasjonerClient,
 ) {
-
     private val feltnavnFagsystem = "fagsystem"
     private val feltnavnYtelsestype = "ytelsestype"
     private val feltnavnBehandlingId = "behandlingId"
@@ -61,7 +60,10 @@ class TilgangAdvice(
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Before("@annotation(rolletilgangssjekk) ")
-    fun sjekkTilgang(joinpoint: JoinPoint, rolletilgangssjekk: Rolletilgangssjekk) {
+    fun sjekkTilgang(
+        joinpoint: JoinPoint,
+        rolletilgangssjekk: Rolletilgangssjekk,
+    ) {
         if (ContextService.hentSaksbehandler() == Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             // når behandler har system tilgang, trenges ikke det validering på fagsystem eller rolle
             return
@@ -98,10 +100,11 @@ class TilgangAdvice(
 
                 var behandlerRolle = rolletilgangssjekk.minimumBehandlerrolle
                 if (requestBody.size > 1) {
-                    behandlerRolle = bestemBehandlerRolleForUtførFatteVedtakSteg(
-                        requestBody[1],
-                        rolletilgangssjekk.minimumBehandlerrolle,
-                    )
+                    behandlerRolle =
+                        bestemBehandlerRolleForUtførFatteVedtakSteg(
+                            requestBody[1],
+                            rolletilgangssjekk.minimumBehandlerrolle,
+                        )
                 }
                 validate(
                     fagsystem = fagsak.fagsystem,
@@ -290,7 +293,11 @@ class TilgangAdvice(
         )
     }
 
-    fun logAccess(rolletilgangssjekk: Rolletilgangssjekk, fagsak: Fagsak?, behandling: Behandling? = null) {
+    fun logAccess(
+        rolletilgangssjekk: Rolletilgangssjekk,
+        fagsak: Fagsak?,
+        behandling: Behandling? = null,
+    ) {
         fagsak?.let {
             auditLogger.log(
                 Sporingsdata(
@@ -341,16 +348,18 @@ class TilgangAdvice(
     ) {
         if (minimumBehandlerrolle == Behandlerrolle.FORVALTER) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
-                    "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
+                message =
+                    "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                        "har ikke tilgang til å kalle forvaltningstjeneste $handling. Krever FORVALTER.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
                 httpStatus = HttpStatus.FORBIDDEN,
             )
         }
         if (minimumBehandlerrolle.nivå > brukersrolleTilFagsystemet.nivå) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
-                    "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                message =
+                    "${ContextService.hentSaksbehandler()} med rolle $brukersrolleTilFagsystemet " +
+                        "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
                 httpStatus = HttpStatus.FORBIDDEN,
             )
@@ -368,8 +377,9 @@ class TilgangAdvice(
             tilganger.all { it.value == Behandlerrolle.FORVALTER }
         ) {
             throw Feil(
-                message = "${ContextService.hentSaksbehandler()} med rolle FORVALTER " +
-                    "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
+                message =
+                    "${ContextService.hentSaksbehandler()} med rolle FORVALTER " +
+                        "har ikke tilgang til å $handling. Krever $minimumBehandlerrolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
                 httpStatus = HttpStatus.FORBIDDEN,
             )
@@ -377,8 +387,9 @@ class TilgangAdvice(
     }
 
     private fun kastTilgangssjekkException(handling: String) {
-        val feilmelding: String = "$handling kan ikke valideres for tilgangssjekk. " +
-            "Det finnes ikke en av de påkrevde parameterne i request"
+        val feilmelding: String =
+            "$handling kan ikke valideres for tilgangssjekk. " +
+                "Det finnes ikke en av de påkrevde parameterne i request"
         throw Feil(
             message = feilmelding,
             frontendFeilmelding = feilmelding,

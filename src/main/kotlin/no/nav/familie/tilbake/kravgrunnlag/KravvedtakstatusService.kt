@@ -40,7 +40,6 @@ class KravvedtakstatusService(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) {
-
     @Transactional
     fun håndterMottattStatusmelding(statusmeldingXml: String) {
         val kravOgVedtakstatus: KravOgVedtakstatus = KravgrunnlagUtil.unmarshalStatusmelding(statusmeldingXml)
@@ -53,12 +52,13 @@ class KravvedtakstatusService(
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         if (behandling == null) {
-            val kravgrunnlagXmlListe = mottattXmlService
-                .hentMottattKravgrunnlag(
-                    eksternFagsakId = fagsystemId,
-                    ytelsestype = ytelsestype,
-                    vedtakId = vedtakId,
-                )
+            val kravgrunnlagXmlListe =
+                mottattXmlService
+                    .hentMottattKravgrunnlag(
+                        eksternFagsakId = fagsystemId,
+                        ytelsestype = ytelsestype,
+                        vedtakId = vedtakId,
+                    )
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
             mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
             tellerService.tellUkobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
@@ -73,8 +73,9 @@ class KravvedtakstatusService(
     private fun validerStatusmelding(kravOgVedtakstatus: KravOgVedtakstatus) {
         kravOgVedtakstatus.referanse
             ?: throw UgyldigStatusmeldingFeil(
-                melding = "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
-                    "Mangler referanse.",
+                melding =
+                    "Ugyldig statusmelding for vedtakId=${kravOgVedtakstatus.vedtakId}, " +
+                        "Mangler referanse.",
             )
     }
 
@@ -95,18 +96,20 @@ class KravvedtakstatusService(
         when (val kravstatuskode = Kravstatuskode.fraKode(kravOgVedtakstatus.kodeStatusKrav)) {
             Kravstatuskode.SPERRET, Kravstatuskode.MANUELL ->
                 kravgrunnlagXmlListe.forEach { mottattXmlService.oppdaterMottattXml(it.copy(sperret = true)) }
-            Kravstatuskode.ENDRET -> kravgrunnlagXmlListe.forEach {
-                mottattXmlService
-                    .oppdaterMottattXml(it.copy(sperret = false))
-            }
-            Kravstatuskode.AVSLUTTET -> kravgrunnlagXmlListe.forEach {
-                mottattXmlService.arkiverMottattXml(
-                    it.melding,
-                    it.eksternFagsakId,
-                    it.ytelsestype,
-                )
-                mottattXmlService.slettMottattXml(it.id)
-            }
+            Kravstatuskode.ENDRET ->
+                kravgrunnlagXmlListe.forEach {
+                    mottattXmlService
+                        .oppdaterMottattXml(it.copy(sperret = false))
+                }
+            Kravstatuskode.AVSLUTTET ->
+                kravgrunnlagXmlListe.forEach {
+                    mottattXmlService.arkiverMottattXml(
+                        it.melding,
+                        it.eksternFagsakId,
+                        it.ytelsestype,
+                    )
+                    mottattXmlService.slettMottattXml(it.id)
+                }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")
         }
     }
@@ -135,8 +138,9 @@ class KravvedtakstatusService(
                     .henleggBehandling(
                         behandlingId = behandling.id,
                         HenleggelsesbrevFritekstDto(
-                            behandlingsresultatstype = Behandlingsresultatstype
-                                .HENLAGT_KRAVGRUNNLAG_NULLSTILT,
+                            behandlingsresultatstype =
+                                Behandlingsresultatstype
+                                    .HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                             begrunnelse = "",
                         ),
                     )

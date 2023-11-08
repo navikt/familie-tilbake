@@ -39,10 +39,8 @@ import java.time.LocalDate
 import java.util.Scanner
 
 class TekstformatererVedtaksbrevInntektOver6GTest {
-
     @Nested
     inner class GenererHeltVedtaksbrev {
-
         @Test
         internal fun `en periode, en beløpsperiode`() {
             val data = HbVedtaksbrevsdata(felles, listOf(periodeMedEnBeløpsperiode))
@@ -63,10 +61,11 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
         @Test
         internal fun `nynorsk - flere perioder, en beløpsperiode og tre beløpsperioder`() {
-            val data = HbVedtaksbrevsdata(
-                felles.copy(brevmetadata.copy(språkkode = Språkkode.NN)),
-                listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder),
-            )
+            val data =
+                HbVedtaksbrevsdata(
+                    felles.copy(brevmetadata.copy(språkkode = Språkkode.NN)),
+                    listOf(periodeMedEnBeløpsperiode, periodeMedTreBeløpsperioder),
+                )
             val generertBrev = TekstformatererVedtaksbrev.lagVedtaksbrevsfritekst(data)
             val fasit = les("/vedtaksbrev/barnetilsyn/BT_beløp_over_6G_helt_brev_flere_perioder_flere_beløp_nn.txt")
 
@@ -76,37 +75,41 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
 
     private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
 
-    private val brevmetadata = Brevmetadata(
-        sakspartId = "123456",
-        sakspartsnavn = "Test",
-        mottageradresse = Adresseinfo("ident", "bob"),
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
-        saksnummer = "1232456",
-        språkkode = Språkkode.NB,
-        ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        gjelderDødsfall = false,
-    )
+    private val brevmetadata =
+        Brevmetadata(
+            sakspartId = "123456",
+            sakspartsnavn = "Test",
+            mottageradresse = Adresseinfo("ident", "bob"),
+            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            ansvarligSaksbehandler = "Ansvarlig Saksbehandler",
+            saksnummer = "1232456",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            gjelderDødsfall = false,
+        )
 
     private val felles =
         HbVedtaksbrevFelles(
             brevmetadata = brevmetadata,
             hjemmel = HbHjemmel("Folketrygdloven"),
-            totalresultat = HbTotalresultat(
-                Vedtaksresultat.FULL_TILBAKEBETALING,
-                BigDecimal.valueOf(10000),
-                BigDecimal.valueOf(11000),
-                BigDecimal.valueOf(11000),
-                BigDecimal.valueOf(1000),
-            ),
-            varsel = HbVarsel(
-                varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.of(2022, 6, 21),
-            ),
+            totalresultat =
+                HbTotalresultat(
+                    Vedtaksresultat.FULL_TILBAKEBETALING,
+                    BigDecimal.valueOf(10000),
+                    BigDecimal.valueOf(11000),
+                    BigDecimal.valueOf(11000),
+                    BigDecimal.valueOf(1000),
+                ),
+            varsel =
+                HbVarsel(
+                    varsletBeløp = BigDecimal.valueOf(10000),
+                    varsletDato = LocalDate.of(2022, 6, 21),
+                ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-            søker = HbPerson(
-                navn = "Søker Søkersen",
-            ),
+            søker =
+                HbPerson(
+                    navn = "Søker Søkersen",
+                ),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
@@ -122,50 +125,55 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
             periode = januar,
             kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
             fakta = fakta,
-            vurderinger = HbVurderinger(
-                foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                særligeGrunner =
-                HbSærligeGrunner(
-                    listOf(
-                        SærligGrunn.TID_FRA_UTBETALING,
-                        SærligGrunn.STØRRELSE_BELØP,
-                    ),
+            vurderinger =
+                HbVurderinger(
+                    foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    vilkårsvurderingsresultat =
+                        Vilkårsvurderingsresultat
+                            .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                    aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                    særligeGrunner =
+                        HbSærligeGrunner(
+                            listOf(
+                                SærligGrunn.TID_FRA_UTBETALING,
+                                SærligGrunn.STØRRELSE_BELØP,
+                            ),
+                        ),
                 ),
-            ),
             resultat = HbResultatTestBuilder.forTilbakekrevesBeløp(20002),
             grunnbeløp = grunnbeløp,
             førstePeriode = true,
         )
 
-    private val periodeMedEnBeløpsperiode = lagPeriode(
-        lagHbGrunnbeløp(
-            Månedsperiode(
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2021, 3, 31),
+    private val periodeMedEnBeløpsperiode =
+        lagPeriode(
+            lagHbGrunnbeløp(
+                Månedsperiode(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 3, 31),
+                ),
             ),
-        ),
-    )
+        )
 
-    private val periodeMedToBeløpsperioder = lagPeriode(
-        lagHbGrunnbeløp(
-            Månedsperiode(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 4, 30),
+    private val periodeMedToBeløpsperioder =
+        lagPeriode(
+            lagHbGrunnbeløp(
+                Månedsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 4, 30),
+                ),
             ),
-        ),
-    )
+        )
 
-    private val periodeMedTreBeløpsperioder = lagPeriode(
-        lagHbGrunnbeløp(
-            Månedsperiode(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2021, 5, 31),
+    private val periodeMedTreBeløpsperioder =
+        lagPeriode(
+            lagHbGrunnbeløp(
+                Månedsperiode(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 5, 31),
+                ),
             ),
-        ),
-    )
+        )
 
     private fun les(filnavn: String): String? {
         javaClass.getResourceAsStream(filnavn).use { resource ->

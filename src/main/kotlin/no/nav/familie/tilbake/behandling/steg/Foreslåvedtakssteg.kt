@@ -34,7 +34,6 @@ class Foreslåvedtakssteg(
     private val totrinnService: TotrinnService,
     private val historikkTaskService: HistorikkTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -44,7 +43,10 @@ class Foreslåvedtakssteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORESLÅ_VEDTAK} steg")
         val foreslåvedtaksstegDto = behandlingsstegDto as BehandlingsstegForeslåVedtaksstegDto
         vedtaksbrevService.lagreFriteksterFraSaksbehandler(behandlingId, foreslåvedtaksstegDto.fritekstavsnitt)
@@ -62,8 +64,9 @@ class Foreslåvedtakssteg(
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
-            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
-                .BEHANDLING_SENDT_TIL_BESLUTTER,
+            historikkinnslagstype =
+                TilbakekrevingHistorikkinnslagstype
+                    .BEHANDLING_SENDT_TIL_BESLUTTER,
             aktør = Aktør.SAKSBEHANDLER,
             triggerTid = LocalDateTime.now().plusSeconds(2),
         )
@@ -84,8 +87,9 @@ class Foreslåvedtakssteg(
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
-            historikkinnslagstype = TilbakekrevingHistorikkinnslagstype
-                .BEHANDLING_SENDT_TIL_BESLUTTER,
+            historikkinnslagstype =
+                TilbakekrevingHistorikkinnslagstype
+                    .BEHANDLING_SENDT_TIL_BESLUTTER,
             aktør = Aktør.VEDTAKSLØSNING,
             triggerTid = LocalDateTime.now().plusSeconds(2),
         )

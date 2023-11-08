@@ -46,7 +46,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OppdragClientTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -73,19 +72,22 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))
 
         val tilbakekrevingsvedtakRequestXml = readXml("/tilbakekrevingsvedtak/tilbakekrevingsvedtak.xml")
-        tilbakekrevingsvedtakRequest = TilbakekrevingsvedtakMarshaller.unmarshall(
-            tilbakekrevingsvedtakRequestXml,
-            behandling.id,
-            UUID.randomUUID(),
-        )
-        hentKravgrunnlagRequest = KravgrunnlagHentDetaljRequest().apply {
-            hentkravgrunnlag = HentKravgrunnlagDetaljDto().apply {
-                kravgrunnlagId = kravgrunnlagId
-                kodeAksjon = KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG.kode
-                saksbehId = "testverdi"
-                enhetAnsvarlig = "testverdi"
+        tilbakekrevingsvedtakRequest =
+            TilbakekrevingsvedtakMarshaller.unmarshall(
+                tilbakekrevingsvedtakRequestXml,
+                behandling.id,
+                UUID.randomUUID(),
+            )
+        hentKravgrunnlagRequest =
+            KravgrunnlagHentDetaljRequest().apply {
+                hentkravgrunnlag =
+                    HentKravgrunnlagDetaljDto().apply {
+                        kravgrunnlagId = kravgrunnlagId
+                        kodeAksjon = KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG.kode
+                        saksbehId = "testverdi"
+                        enhetAnsvarlig = "testverdi"
+                    }
             }
-        }
     }
 
     @AfterEach
@@ -112,12 +114,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 .willReturn(status(HttpStatus.REQUEST_TIMEOUT_408)),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.iverksettVedtak(
-                behandling.id,
-                tilbakekrevingsvedtakRequest,
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.iverksettVedtak(
+                    behandling.id,
+                    tilbakekrevingsvedtakRequest,
+                )
+            }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=${behandling.id}"
@@ -130,12 +133,13 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.iverksettVedtak(
-                behandling.id,
-                tilbakekrevingsvedtakRequest,
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.iverksettVedtak(
+                    behandling.id,
+                    tilbakekrevingsvedtakRequest,
+                )
+            }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=${behandling.id}"
@@ -187,9 +191,10 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                     ),
                 ),
         )
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+            }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
@@ -219,9 +224,10 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                     ),
                 ),
         )
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+            }
         exception.shouldNotBeNull()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
         exception.cause?.message shouldBe "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret"
@@ -237,9 +243,10 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
             )
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.hentKravgrunnlag(kravgrunnlagId, hentKravgrunnlagRequest)
+            }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId"
@@ -248,27 +255,29 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentFeilutbetalingerFraSimulering skal hente feilutbetalinger fra simulering`() {
-        val feilutbetaltPeriode = FeilutbetaltPeriode(
-            fom = YearMonth.now().minusMonths(2).atDay(1),
-            tom = YearMonth.now().minusMonths(1).atDay(1),
-            feilutbetaltBeløp = BigDecimal("20000"),
-            tidligereUtbetaltBeløp = BigDecimal("30000"),
-            nyttBeløp = BigDecimal("10000"),
-        )
+        val feilutbetaltPeriode =
+            FeilutbetaltPeriode(
+                fom = YearMonth.now().minusMonths(2).atDay(1),
+                tom = YearMonth.now().minusMonths(1).atDay(1),
+                feilutbetaltBeløp = BigDecimal("20000"),
+                tidligereUtbetaltBeløp = BigDecimal("30000"),
+                nyttBeløp = BigDecimal("10000"),
+            )
         val feilutbetaltPerioder = FeilutbetalingerFraSimulering(listOf(feilutbetaltPeriode))
         wireMockServer.stubFor(
             post(urlEqualTo("/${DefaultOppdragClient.HENT_FEILUTBETALINGER_PATH}"))
                 .willReturn(okJson(Ressurs.success(feilutbetaltPerioder).toJson())),
         )
 
-        val respons = oppdragClient
-            .hentFeilutbetalingerFraSimulering(
-                HentFeilutbetalingerFraSimuleringRequest(
-                    Ytelsestype.OVERGANGSSTØNAD,
-                    "123",
-                    "1",
-                ),
-            )
+        val respons =
+            oppdragClient
+                .hentFeilutbetalingerFraSimulering(
+                    HentFeilutbetalingerFraSimuleringRequest(
+                        Ytelsestype.OVERGANGSSTØNAD,
+                        "123",
+                        "1",
+                    ),
+                )
         respons shouldNotBe null
     }
 
@@ -279,15 +288,16 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
                 .willReturn(serviceUnavailable().withStatusMessage("Couldn't send message")),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            oppdragClient.hentFeilutbetalingerFraSimulering(
-                HentFeilutbetalingerFraSimuleringRequest(
-                    Ytelsestype.OVERGANGSSTØNAD,
-                    "123",
-                    "1",
-                ),
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                oppdragClient.hentFeilutbetalingerFraSimulering(
+                    HentFeilutbetalingerFraSimuleringRequest(
+                        Ytelsestype.OVERGANGSSTØNAD,
+                        "123",
+                        "1",
+                    ),
+                )
+            }
         exception.shouldNotBeNull()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved henting av feilutbetalinger fra simulering"
@@ -313,12 +323,16 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
         val respons = KravgrunnlagHentDetaljResponse()
         respons.mmel = mmelDto
         respons.detaljertkravgrunnlag = DetaljertKravgrunnlagDto()
-        respons.detaljertkravgrunnlag = KravgrunnlagUtil
-            .unmarshalKravgrunnlag(readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml"))
+        respons.detaljertkravgrunnlag =
+            KravgrunnlagUtil
+                .unmarshalKravgrunnlag(readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml"))
         return respons
     }
 
-    private fun lagMmmelDto(alvorlighetsgrad: String, kodeMelding: String): MmelDto {
+    private fun lagMmmelDto(
+        alvorlighetsgrad: String,
+        kodeMelding: String,
+    ): MmelDto {
         val mmelDto = MmelDto()
         mmelDto.alvorlighetsgrad = alvorlighetsgrad
         mmelDto.kodeMelding = kodeMelding

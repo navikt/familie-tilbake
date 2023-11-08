@@ -18,7 +18,6 @@ class Brevmottakersteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -35,7 +34,10 @@ class Brevmottakersteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.BREVMOTTAKER} steg")
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId)
         behandlingskontrollService.oppdaterBehandlingsstegStatus(

@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsperiode
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 
 object VedtakHjemmel {
-
     private val Vilkårsvurderingsresultat_MED_FORSETT_ALLTID_RENTER: List<Vilkårsvurderingsresultat> =
         listOf(
             Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
@@ -28,10 +27,11 @@ object VedtakHjemmel {
     ): HbHjemmel {
         val foreldetVanlig = erNoeSattTilVanligForeldet(vedtaksbrevgrunnlag.vurdertForeldelse)
         val foreldetMedTilleggsfrist = erTilleggsfristBenyttet(vedtaksbrevgrunnlag.vurdertForeldelse)
-        val ignorerteSmåbeløp = heleVurderingPgaSmåbeløp(
-            vedtaksresultatstype,
-            vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
-        )
+        val ignorerteSmåbeløp =
+            heleVurderingPgaSmåbeløp(
+                vedtaksresultatstype,
+                vedtaksbrevgrunnlag.vilkårsvurderingsperioder,
+            )
         val renter = visHjemmelForRenter && erRenterBenyttet(vedtaksbrevgrunnlag.vilkårsvurderingsperioder)
         val barnetrygd = Ytelsestype.BARNETRYGD == vedtaksbrevgrunnlag.ytelsestype
         val kontantstøtte = Ytelsestype.KONTANTSTØTTE == vedtaksbrevgrunnlag.ytelsestype
@@ -123,10 +123,11 @@ object VedtakHjemmel {
         BARNETRYGD_13("barnetrygdloven § 13", "barnetrygdlova § 13"),
         ;
 
-        private val hjemmelTekster = mapOf(
-            Språkkode.NB to bokmål,
-            Språkkode.NN to nynorsk,
-        )
+        private val hjemmelTekster =
+            mapOf(
+                Språkkode.NB to bokmål,
+                Språkkode.NN to nynorsk,
+            )
 
         fun hjemmelTekst(språkkode: Språkkode): String? {
             return hjemmelTekster.getOrDefault(språkkode, hjemmelTekster[Språkkode.NB])

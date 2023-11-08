@@ -23,7 +23,6 @@ class HentFagsystemsbehandlingTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -53,7 +52,6 @@ class HentFagsystemsbehandlingTask(
     }
 
     companion object {
-
         const val TYPE = "gammelKravgrunnlag.hentFagsystemsbehandling"
     }
 }

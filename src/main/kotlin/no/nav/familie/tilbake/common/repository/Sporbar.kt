@@ -20,6 +20,5 @@ data class Endret(
 )
 
 object SporbarUtils {
-
     fun now(): LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 }

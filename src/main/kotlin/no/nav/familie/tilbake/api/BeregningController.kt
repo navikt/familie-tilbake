@@ -27,7 +27,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
-
     @Operation(summary = "Beregn feilutbetalt beløp for nye delte perioder")
     @PostMapping(
         path = ["{behandlingId}/beregn/v1"],
@@ -58,7 +57,9 @@ class BeregningController(val tilbakekrevingsberegningService: Tilbakekrevingsbe
         AuditLoggerEvent.ACCESS,
         henteParam = HenteParam.BEHANDLING_ID,
     )
-    fun hentBeregningsresultat(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BeregningsresultatDto> {
+    fun hentBeregningsresultat(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<BeregningsresultatDto> {
         return Ressurs.success(tilbakekrevingsberegningService.hentBeregningsresultat(behandlingId))
     }
 }

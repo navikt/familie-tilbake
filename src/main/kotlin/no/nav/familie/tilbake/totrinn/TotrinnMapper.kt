@@ -7,23 +7,24 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.totrinn.domain.Totrinnsvurdering
 
 object TotrinnMapper {
-
     fun tilRespons(
         totrinnsvurderinger: List<Totrinnsvurdering>,
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ): TotrinnsvurderingDto {
-        val totrinnsstegsinfo = if (totrinnsvurderinger.isEmpty()) {
-            hentStegSomGjelderForTotrinn(behandlingsstegstilstand)
-        } else {
-            totrinnsvurderinger.map {
-                Totrinnsstegsinfo(
-                    behandlingssteg = it.behandlingssteg,
-                    godkjent = it.godkjent,
-                    begrunnelse = it.begrunnelse,
-                )
-            } + hentStegSomGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
-                .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }
-        }
+        val totrinnsstegsinfo =
+            if (totrinnsvurderinger.isEmpty()) {
+                hentStegSomGjelderForTotrinn(behandlingsstegstilstand)
+            } else {
+                totrinnsvurderinger.map {
+                    Totrinnsstegsinfo(
+                        behandlingssteg = it.behandlingssteg,
+                        godkjent = it.godkjent,
+                        begrunnelse = it.begrunnelse,
+                    )
+                } +
+                    hentStegSomGjelderForTotrinn(behandlingsstegstilstand) // Ny behandlingssteg kan være gyldig for totrinn
+                        .filter { stegstilstand -> totrinnsvurderinger.none { it.behandlingssteg == stegstilstand.behandlingssteg } }
+            }
         return TotrinnsvurderingDto(totrinnsstegsinfo = totrinnsstegsinfo.sortedBy { it.behandlingssteg.sekvens })
     }
 

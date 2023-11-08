@@ -16,8 +16,10 @@ class EksterneDataForBrevService(
     private val personService: PersonService,
     private val integrasjonerClient: IntegrasjonerClient,
 ) {
-
-    fun hentPerson(ident: String, fagsystem: Fagsystem): Personinfo {
+    fun hentPerson(
+        ident: String,
+        fagsystem: Fagsystem,
+    ): Personinfo {
         return personService.hentPersoninfo(ident, fagsystem)
     }
 

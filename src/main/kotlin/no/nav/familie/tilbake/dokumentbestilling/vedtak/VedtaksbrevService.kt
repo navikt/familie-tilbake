@@ -32,8 +32,10 @@ class VedtaksbrevService(
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    fun sendVedtaksbrev(behandling: Behandling, brevmottager: Brevmottager? = null) {
+    fun sendVedtaksbrev(
+        behandling: Behandling,
+        brevmottager: Brevmottager? = null,
+    ) {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
         if (brevmottager == null) {
             distribusjonshåndteringService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
@@ -67,12 +69,18 @@ class VedtaksbrevService(
     }
 
     @Transactional
-    fun lagreUtkastAvFritekster(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
+    fun lagreUtkastAvFritekster(
+        behandlingId: UUID,
+        fritekstavsnittDto: FritekstavsnittDto,
+    ) {
         lagreFriteksterFraSaksbehandler(behandlingId, fritekstavsnittDto, false)
     }
 
     @Transactional
-    fun lagreFriteksterFraSaksbehandler(behandlingId: UUID, fritekstavsnittDto: FritekstavsnittDto) {
+    fun lagreFriteksterFraSaksbehandler(
+        behandlingId: UUID,
+        fritekstavsnittDto: FritekstavsnittDto,
+    ) {
         lagreFriteksterFraSaksbehandler(behandlingId, fritekstavsnittDto, true)
     }
 
@@ -84,8 +92,9 @@ class VedtaksbrevService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtaksbrevstype = behandling.utledVedtaksbrevstype()
         val vedtaksbrevsoppsummering = VedtaksbrevFritekstMapper.tilDomene(behandlingId, fritekstavsnittDto.oppsummeringstekst)
-        val vedtaksbrevsperioder = VedtaksbrevFritekstMapper
-            .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
+        val vedtaksbrevsperioder =
+            VedtaksbrevFritekstMapper
+                .tilDomeneVedtaksbrevsperiode(behandlingId, fritekstavsnittDto.perioderMedTekst)
 
         // Valider om obligatoriske fritekster er satt
         val faktaFeilutbetaling = faktaRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)

@@ -50,30 +50,35 @@ class AutotestController(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val environment: Environment,
 ) {
-
     @PostMapping(path = ["/opprett/kravgrunnlag/"])
-    fun opprettKravgrunnlag(@RequestBody kravgrunnlag: String): Ressurs<String> {
+    fun opprettKravgrunnlag(
+        @RequestBody kravgrunnlag: String,
+    ): Ressurs<String> {
         taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,
                 payload = kravgrunnlag,
-                properties = Properties().apply {
-                    this["callId"] = UUID.randomUUID()
-                },
+                properties =
+                    Properties().apply {
+                        this["callId"] = UUID.randomUUID()
+                    },
             ),
         )
         return Ressurs.success("OK")
     }
 
     @PostMapping(path = ["/opprett/statusmelding/"])
-    fun opprettStatusmelding(@RequestBody statusmelding: String): Ressurs<String> {
+    fun opprettStatusmelding(
+        @RequestBody statusmelding: String,
+    ): Ressurs<String> {
         taskService.save(
             Task(
                 type = BehandleStatusmeldingTask.TYPE,
                 payload = statusmelding,
-                properties = Properties().apply {
-                    this["callId"] = UUID.randomUUID()
-                },
+                properties =
+                    Properties().apply {
+                        this["callId"] = UUID.randomUUID()
+                    },
             ),
         )
         return Ressurs.success("OK")
@@ -108,38 +113,43 @@ class AutotestController(
         val ytelsestype = opprettManueltTilbakekrevingRequest.ytelsestype
         val eksternId = opprettManueltTilbakekrevingRequest.eksternId
         val institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
-        val fagsystemsbehandling = HentFagsystemsbehandling(
-            eksternFagsakId = eksternFagsakId,
-            ytelsestype = ytelsestype,
-            eksternId = eksternId,
-            personIdent = "12345678901",
-            språkkode = Språkkode.NB,
-            enhetId = "8020",
-            enhetsnavn = "testverdi",
-            revurderingsvedtaksdato = LocalDate.now(),
-            faktainfo = Faktainfo(
-                revurderingsårsak = "testverdi",
-                revurderingsresultat = "OPPHØR",
-                tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING,
-            ),
-            institusjon = institusjon,
-        )
-        val requestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
-            eksternFagsakId,
-            ytelsestype,
-            eksternId,
-        )
+        val fagsystemsbehandling =
+            HentFagsystemsbehandling(
+                eksternFagsakId = eksternFagsakId,
+                ytelsestype = ytelsestype,
+                eksternId = eksternId,
+                personIdent = "12345678901",
+                språkkode = Språkkode.NB,
+                enhetId = "8020",
+                enhetsnavn = "testverdi",
+                revurderingsvedtaksdato = LocalDate.now(),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsårsak = "testverdi",
+                        revurderingsresultat = "OPPHØR",
+                        tilbakekrevingsvalg =
+                            Tilbakekrevingsvalg
+                                .IGNORER_TILBAKEKREVING,
+                    ),
+                institusjon = institusjon,
+            )
+        val requestSendt =
+            requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                eksternFagsakId,
+                ytelsestype,
+                eksternId,
+            )
         val melding =
             objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
         if (environment.activeProfiles.any { it.contains("e2e") }) {
             requestSendtRepository.update(requestSendt!!.copy(respons = melding))
         } else {
-            val producerRecord = ProducerRecord(
-                KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
-                requestSendt?.id.toString(),
-                melding,
-            )
+            val producerRecord =
+                ProducerRecord(
+                    KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC,
+                    requestSendt?.id.toString(),
+                    melding,
+                )
             kafkaTemplate.send(producerRecord)
         }
         return Ressurs.success("OK")

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 

@@ -24,7 +24,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -53,29 +52,34 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         val kravgrunnlag431 = Testdata.kravgrunnlag431
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
-        val førsteKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
-            .copy(
-                periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
-                beløp = setOf(
-                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                ),
-            )
-        val andreKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
-            .copy(
-                id = UUID.randomUUID(),
-                periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
-                beløp = setOf(
-                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                ),
-            )
+        val førsteKravgrunnlagsperiode =
+            Testdata.kravgrunnlagsperiode432
+                .copy(
+                    periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
+                    beløp =
+                        setOf(
+                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                        ),
+                )
+        val andreKravgrunnlagsperiode =
+            Testdata.kravgrunnlagsperiode432
+                .copy(
+                    id = UUID.randomUUID(),
+                    periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
+                    beløp =
+                        setOf(
+                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                        ),
+                )
         kravgrunnlagRepository.insert(
             kravgrunnlag431.copy(
-                perioder = setOf(
-                    førsteKravgrunnlagsperiode,
-                    andreKravgrunnlagsperiode,
-                ),
+                perioder =
+                    setOf(
+                        førsteKravgrunnlagsperiode,
+                        andreKravgrunnlagsperiode,
+                    ),
             ),
         )
     }
@@ -173,60 +177,67 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVurdertForeldelse skal ikke lagre foreldelses data når periode ikke starter med første dato`() {
-        val foreldelsesperiode = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 10),
-            LocalDate.of(2017, 1, 31),
-            Foreldelsesvurderingstype.FORELDET,
-        )
-        val exception = shouldThrow<RuntimeException> {
-            foreldelseService
-                .lagreVurdertForeldelse(
-                    behandling.id,
-                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
-                )
-        }
+        val foreldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 10),
+                LocalDate.of(2017, 1, 31),
+                Foreldelsesvurderingstype.FORELDET,
+            )
+        val exception =
+            shouldThrow<RuntimeException> {
+                foreldelseService
+                    .lagreVurdertForeldelse(
+                        behandling.id,
+                        BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
+                    )
+            }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
     }
 
     @Test
     fun `lagreVurdertForeldelse skal ikke lagre foreldelses data når periode ikke slutter med siste dato`() {
-        val foreldelsesperiode = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 1, 27),
-            Foreldelsesvurderingstype.FORELDET,
-        )
-        val exception = shouldThrow<RuntimeException> {
-            foreldelseService
-                .lagreVurdertForeldelse(
-                    behandling.id,
-                    BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
-                )
-        }
+        val foreldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 1, 27),
+                Foreldelsesvurderingstype.FORELDET,
+            )
+        val exception =
+            shouldThrow<RuntimeException> {
+                foreldelseService
+                    .lagreVurdertForeldelse(
+                        behandling.id,
+                        BehandlingsstegForeldelseDto(listOf(foreldelsesperiode)),
+                    )
+            }
         exception.message shouldBe "Periode med ${foreldelsesperiode.periode} er ikke i hele måneder"
     }
 
     @Test
     fun `lagreVurdertForeldelse skal nullstille forrige vurdert vilkårsvurdering når det er endring i foreldesesperiode`() {
-        val forrigeForeldelsesperiode = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET,
-        )
+        val forrigeForeldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 4, 30),
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+            )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
         vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
 
-        val nyForeldelsesperiode1 = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 2, 28),
-            Foreldelsesvurderingstype.IKKE_FORELDET,
-        )
-        val nyForeldelsesperiode2 = lagForeldelsesperiode(
-            LocalDate.of(2017, 3, 1),
-            LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET,
-        )
+        val nyForeldelsesperiode1 =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 2, 28),
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+            )
+        val nyForeldelsesperiode2 =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 3, 1),
+                LocalDate.of(2017, 4, 30),
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+            )
         foreldelseService.lagreVurdertForeldelse(
             behandling.id,
             BehandlingsstegForeldelseDto(
@@ -241,21 +252,23 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVurdertForeldelse skal ikke nullstille vurdert vilkårsvurdering når det er ingen endring i foreldesesperiode`() {
-        val forrigeForeldelsesperiode = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.IKKE_FORELDET,
-        )
+        val forrigeForeldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 4, 30),
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+            )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
         vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
 
-        val nyForeldelsesperiode = lagForeldelsesperiode(
-            LocalDate.of(2017, 1, 1),
-            LocalDate.of(2017, 4, 30),
-            Foreldelsesvurderingstype.FORELDET,
-        )
+        val nyForeldelsesperiode =
+            lagForeldelsesperiode(
+                LocalDate.of(2017, 1, 1),
+                LocalDate.of(2017, 4, 30),
+                Foreldelsesvurderingstype.FORELDET,
+            )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(nyForeldelsesperiode)))
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
     }

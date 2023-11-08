@@ -16,7 +16,6 @@ open class BaseDokument(
     val gjelderDødsfall: Boolean,
     val institusjon: Institusjon? = null,
 ) : Språkstøtte {
-
     val avsenderenhet =
         if (FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype) == Fagsystem.EF) {
             "NAV Arbeid og ytelser"
@@ -26,90 +25,107 @@ open class BaseDokument(
 
     private val infoMap =
         mapOf(
-            Ytelsestype.BARNETRYGD to Ytelsesinfo(
-                "nav.no/barnetrygd",
-                mapOf(
-                    Språkkode.NB to Ytelsesnavn(
-                        "barnetrygd",
-                        "barnetrygden",
-                        "barnetrygden din",
-                    ),
-                    Språkkode.NN to Ytelsesnavn(
-                        "barnetrygd",
-                        "barnetrygda",
-                        "barnetrygda di",
-                    ),
-                ),
-            ),
-            Ytelsestype.OVERGANGSSTØNAD to Ytelsesinfo(
-                EF_URL,
-                mapOf(
-                    Språkkode.NB to Ytelsesnavn(
-                        "overgangsstønad",
-                        "overgangsstønaden",
-                        "overgangsstønaden din",
-                    ),
-                    Språkkode.NN to Ytelsesnavn(
-                        "overgangsstønad",
-                        "overgangsstønaden",
-                        "overgangsstønaden din",
+            Ytelsestype.BARNETRYGD to
+                Ytelsesinfo(
+                    "nav.no/barnetrygd",
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "barnetrygd",
+                                "barnetrygden",
+                                "barnetrygden din",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "barnetrygd",
+                                "barnetrygda",
+                                "barnetrygda di",
+                            ),
                     ),
                 ),
-            ),
-            Ytelsestype.BARNETILSYN to Ytelsesinfo(
-                EF_URL,
-                mapOf(
-                    Språkkode.NB to Ytelsesnavn(
-                        "stønad til barnetilsyn",
-                        "stønaden til barnetilsyn",
-                        "stønaden din til barnetilsyn",
-                    ),
-                    Språkkode.NN to Ytelsesnavn(
-                        "stønad til barnetilsyn",
-                        "stønaden til barnetilsyn",
-                        "stønaden din til barnetilsyn",
-                    ),
-                ),
-            ),
-            Ytelsestype.SKOLEPENGER to Ytelsesinfo(
-                EF_URL,
-                mapOf(
-                    Språkkode.NB to Ytelsesnavn(
-                        "stønad til skolepenger",
-                        "stønaden til skolepenger",
-                        "stønaden din til skolepenger",
-                    ),
-                    Språkkode.NN to Ytelsesnavn(
-                        "stønad til skulepengar",
-                        "stønaden til skulepengar",
-                        "stønaden din til skulepengar",
+            Ytelsestype.OVERGANGSSTØNAD to
+                Ytelsesinfo(
+                    EF_URL,
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "overgangsstønad",
+                                "overgangsstønaden",
+                                "overgangsstønaden din",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "overgangsstønad",
+                                "overgangsstønaden",
+                                "overgangsstønaden din",
+                            ),
                     ),
                 ),
-            ),
-            Ytelsestype.KONTANTSTØTTE to Ytelsesinfo(
-                "nav.no/kontantstotte",
-                mapOf(
-                    Språkkode.NB to Ytelsesnavn(
-                        "kontantstøtte",
-                        "kontantstøtten",
-                        "kontantstøtten din",
-                    ),
-                    Språkkode.NN to Ytelsesnavn(
-                        "kontantstøtte",
-                        "kontantstøtta",
-                        "kontantstøtta di",
+            Ytelsestype.BARNETILSYN to
+                Ytelsesinfo(
+                    EF_URL,
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "stønad til barnetilsyn",
+                                "stønaden til barnetilsyn",
+                                "stønaden din til barnetilsyn",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "stønad til barnetilsyn",
+                                "stønaden til barnetilsyn",
+                                "stønaden din til barnetilsyn",
+                            ),
                     ),
                 ),
-            ),
+            Ytelsestype.SKOLEPENGER to
+                Ytelsesinfo(
+                    EF_URL,
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "stønad til skolepenger",
+                                "stønaden til skolepenger",
+                                "stønaden din til skolepenger",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "stønad til skulepengar",
+                                "stønaden til skulepengar",
+                                "stønaden din til skulepengar",
+                            ),
+                    ),
+                ),
+            Ytelsestype.KONTANTSTØTTE to
+                Ytelsesinfo(
+                    "nav.no/kontantstotte",
+                    mapOf(
+                        Språkkode.NB to
+                            Ytelsesnavn(
+                                "kontantstøtte",
+                                "kontantstøtten",
+                                "kontantstøtten din",
+                            ),
+                        Språkkode.NN to
+                            Ytelsesnavn(
+                                "kontantstøtte",
+                                "kontantstøtta",
+                                "kontantstøtta di",
+                            ),
+                    ),
+                ),
         )
 
     private val ytelsesinfo
-        get() = infoMap[ytelsestype]
-            ?: error("Dokument forsøkt generert for ugyldig ytelsestype: $ytelsestype ")
+        get() =
+            infoMap[ytelsestype]
+                ?: error("Dokument forsøkt generert for ugyldig ytelsestype: $ytelsestype ")
 
     private val ytelsesnavn
-        get() = ytelsesinfo.navn[språkkode]
-            ?: error("Dokument forsøkt generert for ugyldig språkkode: $språkkode ytelse: $ytelsestype")
+        get() =
+            ytelsesinfo.navn[språkkode]
+                ?: error("Dokument forsøkt generert for ugyldig språkkode: $språkkode ytelse: $ytelsestype")
 
     @Suppress("unused") // Handlebars
     val ytelsesnavnUbestemt = ytelsesnavn.ubestemt

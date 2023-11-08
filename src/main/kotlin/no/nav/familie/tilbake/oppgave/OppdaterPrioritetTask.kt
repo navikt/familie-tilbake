@@ -18,7 +18,6 @@ class OppdaterPrioritetTask(
     private val oppgaveService: OppgaveService,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -32,7 +31,6 @@ class OppdaterPrioritetTask(
     }
 
     companion object {
-
         const val TYPE = "oppdaterPrioritetForOppgave"
     }
 }

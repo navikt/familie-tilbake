@@ -19,9 +19,7 @@ data class Behandlingsresultat(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     companion object {
-
         val ALLE_HENLEGGELSESKODER: Set<Behandlingsresultatstype> =
             setOf(
                 Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
@@ -31,11 +29,12 @@ data class Behandlingsresultat(
                 Behandlingsresultatstype.HENLAGT_FEILOPPRETTET_UTEN_BREV,
             )
 
-        val ALLE_FASTSATTKODER = setOf(
-            Behandlingsresultatstype.INGEN_TILBAKEBETALING,
-            Behandlingsresultatstype.DELVIS_TILBAKEBETALING,
-            Behandlingsresultatstype.FULL_TILBAKEBETALING,
-        )
+        val ALLE_FASTSATTKODER =
+            setOf(
+                Behandlingsresultatstype.INGEN_TILBAKEBETALING,
+                Behandlingsresultatstype.DELVIS_TILBAKEBETALING,
+                Behandlingsresultatstype.FULL_TILBAKEBETALING,
+            )
     }
 
     fun erBehandlingHenlagt(): Boolean {

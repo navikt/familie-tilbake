@@ -39,7 +39,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -60,11 +59,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         headers.setBearerAuth(lokalTestToken())
         val uriHentSaksnummer = UriComponentsBuilder.fromHttpUrl(localhost("/api/fagsystem/EF/fagsak/123456/v1")).toUriString()
 
-        val response: ResponseEntity<Ressurs<Map<String, String>>> = restTemplate.exchange(
-            uriHentSaksnummer,
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-        )
+        val response: ResponseEntity<Ressurs<Map<String, String>>> =
+            restTemplate.exchange(
+                uriHentSaksnummer,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+            )
 
         println(response)
     }
@@ -151,11 +151,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentFagsak skal hente fagsak for barnetrygd med institusjon`() {
         val eksternFagsakId = UUID.randomUUID().toString()
-        val behandling = opprettBehandling(
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            eksternFagsakId = eksternFagsakId,
-            institusjon = Institusjon(organisasjonsnummer = "998765432"),
-        )
+        val behandling =
+            opprettBehandling(
+                ytelsestype = Ytelsestype.BARNETRYGD,
+                eksternFagsakId = eksternFagsakId,
+                institusjon = Institusjon(organisasjonsnummer = "998765432"),
+            )
 
         val fagsakDto = fagsakService.hentFagsak(Fagsystem.BA, eksternFagsakId)
 
@@ -267,7 +268,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class HentVedtakForFagsak {
-
         @Test
         internal fun `skal returnere tom liste hvis det ikke finnes noen vedtak for fagsak`() {
             assertThat(fagsakService.hentVedtakForFagsak(Fagsystem.EF, UUID.randomUUID().toString()))
@@ -281,23 +281,25 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         personIdent: String = "32132132111",
         institusjon: Institusjon? = null,
     ): Behandling {
-        val fagsak = Fagsak(
-            eksternFagsakId = eksternFagsakId,
-            bruker = Bruker(personIdent, Språkkode.NB),
-            ytelsestype = ytelsestype,
-            fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
-            institusjon = institusjon,
-        )
+        val fagsak =
+            Fagsak(
+                eksternFagsakId = eksternFagsakId,
+                bruker = Bruker(personIdent, Språkkode.NB),
+                ytelsestype = ytelsestype,
+                fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype),
+                institusjon = institusjon,
+            )
         fagsakRepository.insert(fagsak)
 
-        val behandling = Behandling(
-            fagsakId = fagsak.id,
-            type = Behandlingstype.TILBAKEKREVING,
-            ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-            behandlendeEnhet = "8020",
-            behandlendeEnhetsNavn = "Oslo",
-            manueltOpprettet = false,
-        )
+        val behandling =
+            Behandling(
+                fagsakId = fagsak.id,
+                type = Behandlingstype.TILBAKEKREVING,
+                ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                behandlendeEnhet = "8020",
+                behandlendeEnhetsNavn = "Oslo",
+                manueltOpprettet = false,
+            )
         behandlingRepository.insert(behandling)
         return behandling
     }

@@ -34,8 +34,11 @@ class InnhentDokumentasjonbrevService(
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val brevmetadataUtil: BrevmetadataUtil,
 ) {
-
-    fun sendInnhentDokumentasjonBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager? = null) {
+    fun sendInnhentDokumentasjonBrev(
+        behandling: Behandling,
+        fritekst: String,
+        brevmottager: Brevmottager? = null,
+    ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         if (brevmottager == null) {
             distribusjonshåndteringService.sendBrev(behandling, Brevtype.INNHENT_DOKUMENTASJON) { mottaker, brevmetadata ->
@@ -51,12 +54,13 @@ class InnhentDokumentasjonbrevService(
         } else {
             val dokument = settOppInnhentDokumentasjonsbrevsdokument(behandling, fagsak, fritekst, brevmottager)
             val fritekstbrevsdata: Fritekstbrevsdata = lagInnhentDokumentasjonsbrev(dokument)
-            val brevdata = Brevdata(
-                mottager = brevmottager,
-                metadata = fritekstbrevsdata.brevmetadata,
-                overskrift = fritekstbrevsdata.overskrift,
-                brevtekst = fritekstbrevsdata.brevtekst,
-            )
+            val brevdata =
+                Brevdata(
+                    mottager = brevmottager,
+                    metadata = fritekstbrevsdata.brevmetadata,
+                    overskrift = fritekstbrevsdata.overskrift,
+                    brevtekst = fritekstbrevsdata.brevtekst,
+                )
             pdfBrevService.sendBrev(
                 behandling = behandling,
                 fagsak = fagsak,
@@ -106,33 +110,35 @@ class InnhentDokumentasjonbrevService(
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
     ): InnhentDokumentasjonsbrevsdokument {
-        val brevmetadata = forhåndsgenerertMetadata ?: run {
-            val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-            val adresseinfo: Adresseinfo =
-                eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
-            val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-            val ansvarligSaksbehandler =
-                eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
-            val gjelderDødsfall = personinfo.dødsdato != null
+        val brevmetadata =
+            forhåndsgenerertMetadata ?: run {
+                val personinfo: Personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val adresseinfo: Adresseinfo =
+                    eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+                val vergenavn = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+                val ansvarligSaksbehandler =
+                    eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler)
+                val gjelderDødsfall = personinfo.dødsdato != null
 
-            Brevmetadata(
-                sakspartId = personinfo.ident,
-                sakspartsnavn = personinfo.navn,
-                finnesVerge = behandling.harVerge,
-                vergenavn = vergenavn,
-                mottageradresse = adresseinfo,
-                behandlendeEnhetId = behandling.behandlendeEnhet,
-                behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
-                ansvarligSaksbehandler = ansvarligSaksbehandler,
-                saksnummer = fagsak.eksternFagsakId,
-                språkkode = fagsak.bruker.språkkode,
-                ytelsestype = fagsak.ytelsestype,
-                gjelderDødsfall = gjelderDødsfall,
-                institusjon = fagsak.institusjon?.let {
-                    organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-                },
-            )
-        }
+                Brevmetadata(
+                    sakspartId = personinfo.ident,
+                    sakspartsnavn = personinfo.navn,
+                    finnesVerge = behandling.harVerge,
+                    vergenavn = vergenavn,
+                    mottageradresse = adresseinfo,
+                    behandlendeEnhetId = behandling.behandlendeEnhet,
+                    behandlendeEnhetsNavn = behandling.behandlendeEnhetsNavn,
+                    ansvarligSaksbehandler = ansvarligSaksbehandler,
+                    saksnummer = fagsak.eksternFagsakId,
+                    språkkode = fagsak.bruker.språkkode,
+                    ytelsestype = fagsak.ytelsestype,
+                    gjelderDødsfall = gjelderDødsfall,
+                    institusjon =
+                        fagsak.institusjon?.let {
+                            organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+                        },
+                )
+            }
         return InnhentDokumentasjonsbrevsdokument(
             brevmetadata = brevmetadata.copy(tittel = getTittel(brevmottager) + fagsak.ytelsestype.navn[Språkkode.NB]),
             fristdato = Constants.brukersSvarfrist(),
@@ -149,7 +155,6 @@ class InnhentDokumentasjonbrevService(
     }
 
     companion object {
-
         const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG = "Innhent dokumentasjon Tilbakekreving"
         const val TITTEL_INNHENTDOKUMENTASJONBREV_HISTORIKKINNSLAG_TIL_VERGE =
             "Innhent dokumentasjon Tilbakekreving til verge"

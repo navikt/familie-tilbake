@@ -20,10 +20,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class BehandlingMapperTest {
-
     @Nested
     inner class TilVedtakForFagsystem {
-
         @Test
         internal fun `mapper avsluttet behandling`() {
             val behandling = behandling()
@@ -65,9 +63,10 @@ internal class BehandlingMapperTest {
         @Test
         internal fun `forventer at behandling inneholder avsluttet dato`() {
             val behandling = behandling(avsluttetDato = null)
-            val exception = shouldThrow<IllegalStateException> {
-                tilVedtakForFagsystem(listOf(behandling))
-            }
+            val exception =
+                shouldThrow<IllegalStateException> {
+                    tilVedtakForFagsystem(listOf(behandling))
+                }
             exception.message shouldContain "Mangler avsluttet dato på behandling="
         }
     }

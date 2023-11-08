@@ -20,7 +20,6 @@ class SendVedtaksoppsummeringTilDvhTask(
     private val vedtaksoppsummeringService: VedtaksoppsummeringService,
     private val kafkaProducer: KafkaProducer,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val validator = Validation.buildDefaultValidatorFactory().validator
@@ -46,7 +45,6 @@ class SendVedtaksoppsummeringTilDvhTask(
     }
 
     companion object {
-
         const val TYPE = "dvh.send.vedtak"
     }
 }

@@ -24,7 +24,6 @@ class Vergessteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -44,7 +43,10 @@ class Vergessteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.VERGE} steg")
         vergeService.lagreVerge(behandlingId, (behandlingsstegDto as BehandlingsstegVergeDto).verge)
 

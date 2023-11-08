@@ -14,9 +14,7 @@ import java.io.InputStream
 import java.util.Locale
 
 class PdfGenerator {
-
     companion object {
-
         private val FONT_CACHE: MutableMap<String, ByteArray?> = HashMap()
 
         private fun lagBodyStartTag(dokumentvariant: Dokumentvariant): String {
@@ -32,12 +30,18 @@ class PdfGenerator {
         }
     }
 
-    fun genererPDFMedLogo(html: String, dokumentvariant: Dokumentvariant): ByteArray {
+    fun genererPDFMedLogo(
+        html: String,
+        dokumentvariant: Dokumentvariant,
+    ): ByteArray {
         val logo = FileStructureUtil.readResourceAsString("formats/pdf/nav_logo_svg.html")
         return genererPDF(logo + html, dokumentvariant)
     }
 
-    fun genererPDF(html: String, dokumentvariant: Dokumentvariant): ByteArray {
+    fun genererPDF(
+        html: String,
+        dokumentvariant: Dokumentvariant,
+    ): ByteArray {
         val baos = ByteArrayOutputStream()
         genererPDF(html, baos, dokumentvariant)
         val bytes = baos.toByteArray()
@@ -49,7 +53,11 @@ class PdfGenerator {
         return bytes
     }
 
-    private fun genererPDF(htmlContent: String, outputStream: ByteArrayOutputStream, dokumentvariant: Dokumentvariant) {
+    private fun genererPDF(
+        htmlContent: String,
+        outputStream: ByteArrayOutputStream,
+        dokumentvariant: Dokumentvariant,
+    ) {
         val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant)
         val builder = PdfRendererBuilder()
         try {
@@ -87,7 +95,11 @@ class PdfGenerator {
         }
     }
 
-    private fun appendHtmlMetadata(html: String, format: DocFormat, dokumentvariant: Dokumentvariant): String {
+    private fun appendHtmlMetadata(
+        html: String,
+        format: DocFormat,
+        dokumentvariant: Dokumentvariant,
+    ): String {
         // nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
             " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +

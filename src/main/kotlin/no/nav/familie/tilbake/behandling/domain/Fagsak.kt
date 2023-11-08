@@ -23,8 +23,8 @@ data class Fagsak(
     @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL)
     val institusjon: Institusjon? = null,
 ) {
-
     val ytelsesnavn
-        get() = ytelsestype.navn[bruker.språkkode]
-            ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
+        get() =
+            ytelsestype.navn[bruker.språkkode]
+                ?: throw IllegalStateException("Programmeringsfeil: Språkkode lagt til uten støtte")
 }

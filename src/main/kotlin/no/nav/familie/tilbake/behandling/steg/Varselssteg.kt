@@ -12,7 +12,6 @@ import java.util.UUID
 
 @Service
 class Varselssteg(private val behandlingskontrollService: BehandlingskontrollService) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional

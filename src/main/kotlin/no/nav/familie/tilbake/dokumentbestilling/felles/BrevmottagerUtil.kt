@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Verge as VergeDto
 import no.nav.familie.tilbake.behandling.domain.Verge as DomainVerge
 
 object BrevmottagerUtil {
-
     fun getAnnenMottagersNavn(brevmetadata: Brevmetadata): String? {
         if (brevmetadata.annenMottakersNavn != null) {
             return brevmetadata.annenMottakersNavn
@@ -24,7 +23,10 @@ object BrevmottagerUtil {
         }
     }
 
-    fun getVergenavn(verge: DomainVerge?, adresseinfo: Adresseinfo): String {
+    fun getVergenavn(
+        verge: DomainVerge?,
+        adresseinfo: Adresseinfo,
+    ): String {
         return if (Vergetype.ADVOKAT == verge?.type) {
             adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
         } else {
@@ -32,7 +34,10 @@ object BrevmottagerUtil {
         }
     }
 
-    fun getVergenavn(verge: VergeDto?, adresseinfo: Adresseinfo): String {
+    fun getVergenavn(
+        verge: VergeDto?,
+        adresseinfo: Adresseinfo,
+    ): String {
         return if (Vergetype.ADVOKAT == verge?.vergetype) {
             adresseinfo.annenMottagersNavn!! // Når verge er advokat, viser vi verge navn som "Virksomhet navn v/ verge navn"
         } else {
@@ -44,6 +49,12 @@ object BrevmottagerUtil {
         behandling: Behandling,
         fagsak: Fagsak,
     ): Brevmottager {
-        return if (behandling.harVerge) Brevmottager.VERGE else if (fagsak.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        return if (behandling.harVerge) {
+            Brevmottager.VERGE
+        } else if (fagsak.institusjon != null) {
+            Brevmottager.INSTITUSJON
+        } else {
+            Brevmottager.BRUKER
+        }
     }
 }

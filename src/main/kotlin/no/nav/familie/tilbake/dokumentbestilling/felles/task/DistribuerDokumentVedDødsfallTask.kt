@@ -35,7 +35,6 @@ class DistribuerDokumentVedDødsfallTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
-
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -71,7 +70,11 @@ class DistribuerDokumentVedDødsfallTask(
         }
     }
 
-    private fun opprettHistorikkinnslag(task: Task, tilbakekrevingHistorikkinnslagstype: TilbakekrevingHistorikkinnslagstype, feilet: Boolean = false) {
+    private fun opprettHistorikkinnslag(
+        task: Task,
+        tilbakekrevingHistorikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
+        feilet: Boolean = false,
+    ) {
         val mottager = Brevmottager.valueOf(task.metadata.getProperty("mottager"))
         val brevtype = Brevtype.valueOf(task.metadata.getProperty("brevtype"))
         val ansvarligSaksbehandler = task.metadata.getProperty("ansvarligSaksbehandler")
@@ -86,7 +89,6 @@ class DistribuerDokumentVedDødsfallTask(
     }
 
     companion object {
-
         const val TYPE = "distribuerDokumentVedDødsfallPåFagsak"
 
         // 410 GONE er unikt for bruker død og ingen dødsboadresse mot Dokdist

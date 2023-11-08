@@ -11,28 +11,30 @@ import no.nav.familie.tilbake.person.PersonService
 import org.assertj.core.api.Assertions.assertThatNoException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class ValiderBrevmottakerServiceTest {
     private val manuellBrevmottakerRepository = mockk<ManuellBrevmottakerRepository>()
     private val fagsakService = mockk<FagsakService>()
     private val personService = mockk<PersonService>()
-    val validerBrevmottakerService = ValiderBrevmottakerService(
-        manuellBrevmottakerRepository,
-        fagsakService,
-        personService,
-    )
+    val validerBrevmottakerService =
+        ValiderBrevmottakerService(
+            manuellBrevmottakerRepository,
+            fagsakService,
+            personService,
+        )
     private val behandlingId = UUID.randomUUID()
     private val fagsak = Testdata.fagsak
-    private val manuellBrevmottaker = ManuellBrevmottaker(
-        type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
-        behandlingId = behandlingId,
-        navn = "Donald Duck",
-        adresselinje1 = "adresselinje1",
-        postnummer = "postnummer",
-        poststed = "poststed",
-        landkode = "NO",
-    )
+    private val manuellBrevmottaker =
+        ManuellBrevmottaker(
+            type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
+            behandlingId = behandlingId,
+            navn = "Donald Duck",
+            adresselinje1 = "adresselinje1",
+            postnummer = "postnummer",
+            poststed = "poststed",
+            landkode = "NO",
+        )
 
     @Test
     fun `Skal ikke kaste en Feil exception når en behandling ikke inneholder noen manuelle brevmottakere`() {
@@ -49,9 +51,10 @@ class ValiderBrevmottakerServiceTest {
     fun `Skal kaste en Feil exception når en behandling inneholder en strengt fortrolig person og minst en manuell brevmottaker`() {
         every { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) } returns listOf(manuellBrevmottaker)
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident,
-        )
+        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns
+            listOf(
+                fagsak.bruker.ident,
+            )
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
@@ -78,9 +81,10 @@ class ValiderBrevmottakerServiceTest {
     fun `Skal ikke kaste Feil exception når en behandling inneholder strengt fortrolig person og ingen manuelle brevmottakere`() {
         every { manuellBrevmottakerRepository.findByBehandlingId(behandlingId) } returns emptyList()
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident,
-        )
+        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns
+            listOf(
+                fagsak.bruker.ident,
+            )
         assertThatNoException().isThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
                 behandlingId,
@@ -104,9 +108,10 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal kaste en Feil exception når en behandling inneholder en strengt fortrolig person`() {
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns listOf(
-            fagsak.bruker.ident,
-        )
+        every { personService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any(), any()) } returns
+            listOf(
+                fagsak.bruker.ident,
+            )
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(
                 behandlingId,

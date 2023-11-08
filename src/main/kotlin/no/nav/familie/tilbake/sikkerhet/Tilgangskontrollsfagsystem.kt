@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 
 // Denne enum-en brukes kun for tilgangskontroll
 enum class Tilgangskontrollsfagsystem(val kode: String) {
-
     BARNETRYGD("BA"),
     ENSLIG_FORELDER("EF"),
     KONTANTSTØTTE("KONT"),
@@ -13,7 +12,6 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
     ;
 
     companion object {
-
         fun fraKode(kode: String): Tilgangskontrollsfagsystem {
             for (fagsystem in values()) {
                 if (fagsystem.kode == kode) {

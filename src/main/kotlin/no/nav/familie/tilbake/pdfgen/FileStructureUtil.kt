@@ -4,7 +4,6 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 
 object FileStructureUtil {
-
     // colorprofile fra https://pippin.gimp.org/sRGBz/
     val colorProfile: ByteArray
         get() = // colorprofile fra https://pippin.gimp.org/sRGBz/

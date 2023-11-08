@@ -15,7 +15,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object FaktaFeilutbetalingMapper {
-
     fun tilRespons(
         faktaFeilutbetaling: FaktaFeilutbetaling?,
         kravgrunnlag: Kravgrunnlag431,
@@ -25,16 +24,18 @@ object FaktaFeilutbetalingMapper {
     ): FaktaFeilutbetalingDto {
         val logiskePerioder =
             LogiskPeriodeUtil.utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
-        val feilutbetaltePerioder = hentFeilutbetaltePerioder(
-            faktaFeilutbetaling = faktaFeilutbetaling,
-            logiskePerioder = logiskePerioder,
-        )
-        val faktainfo = Faktainfo(
-            revurderingsårsak = fagsystemsbehandling.årsak,
-            revurderingsresultat = fagsystemsbehandling.resultat,
-            tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
-            konsekvensForYtelser = fagsystemsbehandling.konsekvenser.map { it.konsekvens }.toSet(),
-        )
+        val feilutbetaltePerioder =
+            hentFeilutbetaltePerioder(
+                faktaFeilutbetaling = faktaFeilutbetaling,
+                logiskePerioder = logiskePerioder,
+            )
+        val faktainfo =
+            Faktainfo(
+                revurderingsårsak = fagsystemsbehandling.årsak,
+                revurderingsresultat = fagsystemsbehandling.resultat,
+                tilbakekrevingsvalg = fagsystemsbehandling.tilbakekrevingsvalg,
+                konsekvensForYtelser = fagsystemsbehandling.konsekvenser.map { it.konsekvens }.toSet(),
+            )
 
         return FaktaFeilutbetalingDto(
             varsletBeløp = varsletData?.varselbeløp,
@@ -66,7 +67,10 @@ object FaktaFeilutbetalingMapper {
         }
     }
 
-    private fun hentFeilutbetaltBeløp(logiskePerioder: List<LogiskPeriode>, faktaPeriode: Månedsperiode): BigDecimal {
+    private fun hentFeilutbetaltBeløp(
+        logiskePerioder: List<LogiskPeriode>,
+        faktaPeriode: Månedsperiode,
+    ): BigDecimal {
         return logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
     }
 

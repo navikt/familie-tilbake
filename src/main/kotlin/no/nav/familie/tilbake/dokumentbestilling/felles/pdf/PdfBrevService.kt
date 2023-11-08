@@ -33,7 +33,6 @@ class PdfBrevService(
     private val tellerService: TellerService,
     private val taskService: TaskService,
 ) {
-
     private val logger = LoggerFactory.getLogger(PdfBrevService::class.java)
     private val pdfGenerator: PdfGenerator = PdfGenerator()
 
@@ -70,25 +69,27 @@ class PdfBrevService(
         brevdata: Brevdata,
         dokumentreferanse: JournalpostIdOgDokumentId,
     ) {
-        val payload = objectMapper.writeValueAsString(
-            PubliserJournalpostTaskData(
-                behandlingId = behandling.id,
-                manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse,
-            ),
-        )
-        val properties: Properties = Properties().apply {
-            setProperty("journalpostId", dokumentreferanse.journalpostId)
-            setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
-            setProperty("dokumentId", dokumentreferanse.dokumentId)
-            setProperty("mottager", brevdata.mottager.name)
-            setProperty("brevtype", brevtype.name)
-            setProperty("ansvarligSaksbehandler", behandling.ansvarligSaksbehandler)
-            setProperty("distribusjonstype", utledDistribusjonstype(brevtype).name)
-            setProperty("distribusjonstidspunkt", distribusjonstidspunkt)
-            varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
-            fritekst?.also { setProperty("fritekst", Base64.getEncoder().encodeToString(fritekst.toByteArray())) }
-            brevdata.tittel?.also { setProperty("tittel", it) }
-        }
+        val payload =
+            objectMapper.writeValueAsString(
+                PubliserJournalpostTaskData(
+                    behandlingId = behandling.id,
+                    manuellAdresse = brevdata.metadata.mottageradresse.manuellAdresse,
+                ),
+            )
+        val properties: Properties =
+            Properties().apply {
+                setProperty("journalpostId", dokumentreferanse.journalpostId)
+                setProperty(PropertyName.FAGSYSTEM, fagsak.fagsystem.name)
+                setProperty("dokumentId", dokumentreferanse.dokumentId)
+                setProperty("mottager", brevdata.mottager.name)
+                setProperty("brevtype", brevtype.name)
+                setProperty("ansvarligSaksbehandler", behandling.ansvarligSaksbehandler)
+                setProperty("distribusjonstype", utledDistribusjonstype(brevtype).name)
+                setProperty("distribusjonstidspunkt", distribusjonstidspunkt)
+                varsletBeløp?.also { setProperty("varselbeløp", varsletBeløp.toString()) }
+                fritekst?.also { setProperty("fritekst", Base64.getEncoder().encodeToString(fritekst.toByteArray())) }
+                brevdata.tittel?.also { setProperty("tittel", it) }
+            }
         logger.info(
             "Oppretter task for publisering av brev for behandlingId=${behandling.id}, eksternFagsakId=${fagsak.eksternFagsakId}",
         )
@@ -103,12 +104,13 @@ class PdfBrevService(
     ): JournalpostIdOgDokumentId {
         val html = lagHtml(data)
 
-        val pdf = try {
-            pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
-        } catch (e: Exception) {
-            secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
-            throw e
-        }
+        val pdf =
+            try {
+                pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
+            } catch (e: Exception) {
+                secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
+                throw e
+            }
 
         val dokumentkategori = mapBrevtypeTilDokumentkategori(brevtype)
         val eksternReferanseId = lagEksternReferanseId(behandling, brevtype, data.mottager)
@@ -132,16 +134,21 @@ class PdfBrevService(
 
                 return JournalpostIdOgDokumentId(
                     journalpostId = journalpost.journalpostId,
-                    dokumentId = journalpost.dokumenter?.first()?.dokumentInfoId ?: error(
-                        "Feil ved Journalføring av $dokumentkategori til ${data.mottager} for behandlingId=${behandling.id}",
-                    ),
+                    dokumentId =
+                        journalpost.dokumenter?.first()?.dokumentInfoId ?: error(
+                            "Feil ved Journalføring av $dokumentkategori til ${data.mottager} for behandlingId=${behandling.id}",
+                        ),
                 )
             }
             throw ressursException
         }
     }
 
-    private fun lagEksternReferanseId(behandling: Behandling, brevtype: Brevtype, mottager: Brevmottager): String {
+    private fun lagEksternReferanseId(
+        behandling: Behandling,
+        brevtype: Brevtype,
+        mottager: Brevmottager,
+    ): String {
         // alle brev kan potensielt bli sendt til både bruker og kopi verge. 2 av breva kan potensielt bli sendt flere gonger
         val callId = MDC.get(MDCConstants.MDC_CALL_ID)
         return "${behandling.eksternBrukId}_${brevtype.name.lowercase()}_${mottager.name.lowercase()}_$callId"
@@ -183,8 +190,10 @@ class PdfBrevService(
     private val distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID.name
 
     companion object {
-
-        private fun valider(brevtype: Brevtype, varsletBeløp: Long?) {
+        private fun valider(
+            brevtype: Brevtype,
+            varsletBeløp: Long?,
+        ) {
             val harVarsletBeløp = varsletBeløp != null
             require(brevtype.gjelderVarsel() == harVarsletBeløp) {
                 "Utvikler-feil: Varslet beløp skal brukes hvis, og bare hvis, brev gjelder varsel"

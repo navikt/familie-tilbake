@@ -37,7 +37,6 @@ class BehandlingController(
     private val behandlingService: BehandlingService,
     private val stegService: StegService,
 ) {
-
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
         path = ["/v1"],
@@ -94,7 +93,9 @@ class BehandlingController(
         AuditLoggerEvent.ACCESS,
         henteParam = HenteParam.BEHANDLING_ID,
     )
-    fun hentBehandling(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<BehandlingDto> {
+    fun hentBehandling(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<BehandlingDto> {
         return Ressurs.success(behandlingService.hentBehandling(behandlingId))
     }
 
@@ -156,7 +157,9 @@ class BehandlingController(
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun taBehandlingAvVent(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun taBehandlingAvVent(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
         behandlingService.taBehandlingAvvent(behandlingId)
         return Ressurs.success("OK")
     }

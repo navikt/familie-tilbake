@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
-
     private val fagsakRepository: FagsakRepository = mockk()
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk(relaxed = true)
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
@@ -39,13 +38,14 @@ internal class VarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        varselbrevService = VarselbrevService(
-            fagsakRepository,
-            eksterneDataForBrevService,
-            pdfBrevService,
-            varselbrevUtil,
-            distribusjonshåndteringService,
-        )
+        varselbrevService =
+            VarselbrevService(
+                fagsakRepository,
+                eksterneDataForBrevService,
+                pdfBrevService,
+                varselbrevUtil,
+                distribusjonshåndteringService,
+            )
 
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 

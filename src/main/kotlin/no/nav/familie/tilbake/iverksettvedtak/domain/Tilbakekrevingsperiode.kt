@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import java.math.BigDecimal
 
-/* Brukes bare for iverksettelse */
+// Brukes bare for iverksettelse
 
 data class Tilbakekrevingsperiode(
     val periode: Månedsperiode,
@@ -25,7 +25,6 @@ data class Tilbakekrevingsbeløp(
 )
 
 enum class KodeResultat(val kode: String) {
-
     FORELDET("FORELDET"),
     FEILREGISTRERT("FEILREGISTRERT"),
     INGEN_TILBAKEKREVING("INGEN_TILBAKEKREV"),

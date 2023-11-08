@@ -53,7 +53,6 @@ enum class Hendelsestype {
 }
 
 enum class Hendelsesundertype {
-
     ANNET_FRITEKST,
     BOR_IKKE_MED_BARN,
     BARN_FLYTTET_FRA_NORGE,

@@ -12,7 +12,6 @@ import java.util.UUID
 interface BehandlingsstegstilstandRepository :
     RepositoryInterface<Behandlingsstegstilstand, UUID>,
     InsertUpdateRepository<Behandlingsstegstilstand> {
-
     fun findByBehandlingId(behandlingId: UUID): List<Behandlingsstegstilstand>
 
     fun findByBehandlingIdAndBehandlingsstegsstatusIn(
@@ -20,5 +19,8 @@ interface BehandlingsstegstilstandRepository :
         statuser: List<Behandlingsstegstatus>,
     ): Behandlingsstegstilstand?
 
-    fun findByBehandlingIdAndBehandlingssteg(behandlingId: UUID, behandlingssteg: Behandlingssteg): Behandlingsstegstilstand?
+    fun findByBehandlingIdAndBehandlingssteg(
+        behandlingId: UUID,
+        behandlingssteg: Behandlingssteg,
+    ): Behandlingsstegstilstand?
 }

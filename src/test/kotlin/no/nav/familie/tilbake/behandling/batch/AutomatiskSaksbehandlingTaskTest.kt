@@ -48,7 +48,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -96,10 +95,12 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsakRepository.insert(fagsak)
-        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
-            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-        )
+        val fagsystemsbehandling =
+            behandling.aktivFagsystemsbehandling.copy(
+                tilbakekrevingsvalg =
+                    Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            )
         behandlingRepository.insert(
             behandling.copy(
                 fagsystemsbehandling = setOf(fagsystemsbehandling),
@@ -113,18 +114,21 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
                 tilbakekrevesBeløp = BigDecimal("100"),
             )
 
-        val kravgrunnlag = Testdata.kravgrunnlag431
-            .copy(
-                kontrollfelt = "2019-11-22-19.09.31.458065",
-                perioder = setOf(
-                    Testdata.kravgrunnlagsperiode432.copy(
-                        beløp = setOf(
-                            feilKravgrunnlagBeløp,
-                            ytelKravgrunnlagsbeløp433,
+        val kravgrunnlag =
+            Testdata.kravgrunnlag431
+                .copy(
+                    kontrollfelt = "2019-11-22-19.09.31.458065",
+                    perioder =
+                        setOf(
+                            Testdata.kravgrunnlagsperiode432.copy(
+                                beløp =
+                                    setOf(
+                                        feilKravgrunnlagBeløp,
+                                        ytelKravgrunnlagsbeløp433,
+                                    ),
+                            ),
                         ),
-                    ),
-                ),
-            )
+                )
 
         kravgrunnlagRepository.insert(kravgrunnlag)
         behandlingsstegstilstandRepository.insert(
@@ -232,16 +236,18 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun mockTaskExecution() {
-        val sendVedtakTilØkonomiTask = Task(
-            type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
-            payload = behandling.id.toString(),
-            properties = Properties().apply {
-                setProperty(
-                    "ansvarligSaksbehandler",
-                    ContextService.hentSaksbehandler(),
-                )
-            },
-        )
+        val sendVedtakTilØkonomiTask =
+            Task(
+                type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,
+                payload = behandling.id.toString(),
+                properties =
+                    Properties().apply {
+                        setProperty(
+                            "ansvarligSaksbehandler",
+                            ContextService.hentSaksbehandler(),
+                        )
+                    },
+            )
         every { taskService.save(sendVedtakTilØkonomiTask) }.run {
             sendØkonomiTilbakekrevingsvedtakTask.doTask(sendVedtakTilØkonomiTask)
         }

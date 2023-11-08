@@ -32,7 +32,6 @@ import java.math.RoundingMode
 import java.time.YearMonth
 
 class IverksettelseServiceUnitTest {
-
     val behandlingRepository = mockk<BehandlingRepository>()
     val kravgrunnlagRepository = mockk<KravgrunnlagRepository>()
     val økonomiXmlSendtRepository = mockk<ØkonomiXmlSendtRepository>()
@@ -44,16 +43,17 @@ class IverksettelseServiceUnitTest {
 
     val behandling = Testdata.behandling
 
-    val iverksettelseService = IverksettelseService(
-        behandlingRepository,
-        kravgrunnlagRepository,
-        økonomiXmlSendtRepository,
-        tilbakekrevingsvedtakBeregningService,
-        beregningService,
-        behandlingVedtakService,
-        oppdragClient,
-        featureToggleService,
-    )
+    val iverksettelseService =
+        IverksettelseService(
+            behandlingRepository,
+            kravgrunnlagRepository,
+            økonomiXmlSendtRepository,
+            tilbakekrevingsvedtakBeregningService,
+            beregningService,
+            behandlingVedtakService,
+            oppdragClient,
+            featureToggleService,
+        )
 
     @Test
     fun `skal endre fra delvis til full tilbakekreving dersom utestående beløp er 0 og featuretoggle skrudd på`() {
@@ -99,105 +99,115 @@ class IverksettelseServiceUnitTest {
         return requestSlot
     }
 
-    private fun lagBeregningsresultat() = Beregningsresultat(
-        beregningsresultatsperioder = listOf(
-            Beregningsresultatsperiode(
-                periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
-                vurdering = null,
-                feilutbetaltBeløp = BigDecimal(10000),
-                andelAvBeløp = BigDecimal(9983).divide(BigDecimal(10000), 2, RoundingMode.HALF_UP),
-                renteprosent = null,
-                manueltSattTilbakekrevingsbeløp = BigDecimal(9983),
-                tilbakekrevingsbeløpUtenRenter = BigDecimal(9983),
-                rentebeløp = BigDecimal.ZERO,
-                tilbakekrevingsbeløp = BigDecimal(9983),
-                skattebeløp = BigDecimal.ZERO,
-                tilbakekrevingsbeløpEtterSkatt = BigDecimal(9983),
-                utbetaltYtelsesbeløp = BigDecimal.ZERO,
-                riktigYtelsesbeløp = BigDecimal.ZERO,
-            ),
-            Beregningsresultatsperiode(
-                periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
-                vurdering = null,
-                feilutbetaltBeløp = BigDecimal(47),
-                andelAvBeløp = BigDecimal.ONE,
-                renteprosent = null,
-                manueltSattTilbakekrevingsbeløp = BigDecimal(47),
-                tilbakekrevingsbeløpUtenRenter = BigDecimal(47),
-                rentebeløp = BigDecimal.ZERO,
-                tilbakekrevingsbeløp = BigDecimal(47),
-                skattebeløp = BigDecimal.ZERO,
-                tilbakekrevingsbeløpEtterSkatt = BigDecimal(47),
-                utbetaltYtelsesbeløp = BigDecimal.ZERO,
-                riktigYtelsesbeløp = BigDecimal.ZERO,
-            ),
-        ),
-        vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
-    )
+    private fun lagBeregningsresultat() =
+        Beregningsresultat(
+            beregningsresultatsperioder =
+                listOf(
+                    Beregningsresultatsperiode(
+                        periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
+                        vurdering = null,
+                        feilutbetaltBeløp = BigDecimal(10000),
+                        andelAvBeløp = BigDecimal(9983).divide(BigDecimal(10000), 2, RoundingMode.HALF_UP),
+                        renteprosent = null,
+                        manueltSattTilbakekrevingsbeløp = BigDecimal(9983),
+                        tilbakekrevingsbeløpUtenRenter = BigDecimal(9983),
+                        rentebeløp = BigDecimal.ZERO,
+                        tilbakekrevingsbeløp = BigDecimal(9983),
+                        skattebeløp = BigDecimal.ZERO,
+                        tilbakekrevingsbeløpEtterSkatt = BigDecimal(9983),
+                        utbetaltYtelsesbeløp = BigDecimal.ZERO,
+                        riktigYtelsesbeløp = BigDecimal.ZERO,
+                    ),
+                    Beregningsresultatsperiode(
+                        periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
+                        vurdering = null,
+                        feilutbetaltBeløp = BigDecimal(47),
+                        andelAvBeløp = BigDecimal.ONE,
+                        renteprosent = null,
+                        manueltSattTilbakekrevingsbeløp = BigDecimal(47),
+                        tilbakekrevingsbeløpUtenRenter = BigDecimal(47),
+                        rentebeløp = BigDecimal.ZERO,
+                        tilbakekrevingsbeløp = BigDecimal(47),
+                        skattebeløp = BigDecimal.ZERO,
+                        tilbakekrevingsbeløpEtterSkatt = BigDecimal(47),
+                        utbetaltYtelsesbeløp = BigDecimal.ZERO,
+                        riktigYtelsesbeløp = BigDecimal.ZERO,
+                    ),
+                ),
+            vedtaksresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+        )
 
     private fun lagTilbakekrevingsperiode() =
         listOf(
             Tilbakekrevingsperiode(
                 periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
                 renter = BigDecimal.ZERO,
-                beløp = listOf(
-                    Tilbakekrevingsbeløp(
-                        klassetype = Klassetype.YTEL,
-                        klassekode = Klassekode.EFOG,
-                        nyttBeløp = BigDecimal.ZERO,
-                        utbetaltBeløp = BigDecimal.ZERO,
-                        tilbakekrevesBeløp = BigDecimal(9983),
-                        uinnkrevdBeløp = BigDecimal(17),
-                        skattBeløp = BigDecimal.ZERO,
-                        kodeResultat = DELVIS_TILBAKEKREVING,
+                beløp =
+                    listOf(
+                        Tilbakekrevingsbeløp(
+                            klassetype = Klassetype.YTEL,
+                            klassekode = Klassekode.EFOG,
+                            nyttBeløp = BigDecimal.ZERO,
+                            utbetaltBeløp = BigDecimal.ZERO,
+                            tilbakekrevesBeløp = BigDecimal(9983),
+                            uinnkrevdBeløp = BigDecimal(17),
+                            skattBeløp = BigDecimal.ZERO,
+                            kodeResultat = DELVIS_TILBAKEKREVING,
+                        ),
                     ),
-                ),
             ),
             Tilbakekrevingsperiode(
                 periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
                 renter = BigDecimal.ZERO,
-                beløp = listOf(
-                    Tilbakekrevingsbeløp(
-                        klassetype = Klassetype.YTEL,
-                        klassekode = Klassekode.EFOG,
-                        nyttBeløp = BigDecimal.ZERO,
-                        utbetaltBeløp = BigDecimal.ZERO,
-                        tilbakekrevesBeløp = BigDecimal(47),
-                        uinnkrevdBeløp = BigDecimal(0),
-                        skattBeløp = BigDecimal.ZERO,
-                        kodeResultat = DELVIS_TILBAKEKREVING,
+                beløp =
+                    listOf(
+                        Tilbakekrevingsbeløp(
+                            klassetype = Klassetype.YTEL,
+                            klassekode = Klassekode.EFOG,
+                            nyttBeløp = BigDecimal.ZERO,
+                            utbetaltBeløp = BigDecimal.ZERO,
+                            tilbakekrevesBeløp = BigDecimal(47),
+                            uinnkrevdBeløp = BigDecimal(0),
+                            skattBeløp = BigDecimal.ZERO,
+                            kodeResultat = DELVIS_TILBAKEKREVING,
+                        ),
                     ),
-                ),
             ),
         )
 
-    private fun lagKravgrunnlag() = Testdata.kravgrunnlag431.copy(
-        perioder = setOf(
-            Kravgrunnlagsperiode432(
-                periode = Månedsperiode(
-                    YearMonth.now().minusMonths(2),
-                    YearMonth.now().minusMonths(1),
-                ),
-                beløp = setOf(
-                    Testdata.feilKravgrunnlagsbeløp433,
-                    Testdata.ytelKravgrunnlagsbeløp433,
-                ),
-                månedligSkattebeløp = BigDecimal.ZERO,
-            ),
-            Kravgrunnlagsperiode432(
-                periode = Månedsperiode(
-                    YearMonth.now().minusMonths(1),
-                    YearMonth.now(),
-                ),
-                beløp = setOf(
-                    Testdata.feilKravgrunnlagsbeløp433,
-                    Testdata.ytelKravgrunnlagsbeløp433.copy(
-                        tilbakekrevesBeløp = BigDecimal(47),
-                        opprinneligUtbetalingsbeløp = BigDecimal(47),
+    private fun lagKravgrunnlag() =
+        Testdata.kravgrunnlag431.copy(
+            perioder =
+                setOf(
+                    Kravgrunnlagsperiode432(
+                        periode =
+                            Månedsperiode(
+                                YearMonth.now().minusMonths(2),
+                                YearMonth.now().minusMonths(1),
+                            ),
+                        beløp =
+                            setOf(
+                                Testdata.feilKravgrunnlagsbeløp433,
+                                Testdata.ytelKravgrunnlagsbeløp433,
+                            ),
+                        månedligSkattebeløp = BigDecimal.ZERO,
+                    ),
+                    Kravgrunnlagsperiode432(
+                        periode =
+                            Månedsperiode(
+                                YearMonth.now().minusMonths(1),
+                                YearMonth.now(),
+                            ),
+                        beløp =
+                            setOf(
+                                Testdata.feilKravgrunnlagsbeløp433,
+                                Testdata.ytelKravgrunnlagsbeløp433.copy(
+                                    tilbakekrevesBeløp = BigDecimal(47),
+                                    opprinneligUtbetalingsbeløp = BigDecimal(47),
+                                ),
+                            ),
+                        månedligSkattebeløp = BigDecimal.ZERO,
                     ),
                 ),
-                månedligSkattebeløp = BigDecimal.ZERO,
-            ),
-        ),
-    )
+        )
 }

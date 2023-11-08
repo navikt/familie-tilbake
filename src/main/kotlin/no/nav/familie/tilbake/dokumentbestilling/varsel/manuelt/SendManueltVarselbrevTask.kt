@@ -36,7 +36,6 @@ class SendManueltVarselbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val taskdata: SendManueltVarselbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
@@ -70,17 +69,22 @@ class SendManueltVarselbrevTask(
     }
 
     companion object {
-
-        fun opprettTask(behandlingId: UUID, fagsystem: Fagsystem, maltype: Dokumentmalstype, fritekst: String): Task =
+        fun opprettTask(
+            behandlingId: UUID,
+            fagsystem: Fagsystem,
+            maltype: Dokumentmalstype,
+            fritekst: String,
+        ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(
-                    SendManueltVarselbrevTaskdata(
-                        behandlingId = behandlingId,
-                        maltype = maltype,
-                        fritekst = fritekst,
+                payload =
+                    objectMapper.writeValueAsString(
+                        SendManueltVarselbrevTaskdata(
+                            behandlingId = behandlingId,
+                            maltype = maltype,
+                            fritekst = fritekst,
+                        ),
                     ),
-                ),
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             )
 
@@ -95,8 +99,9 @@ data class SendManueltVarselbrevTaskdata(
 )
 
 private val Dokumentmalstype.erKorrigert: Boolean
-    get() = when (this) {
-        Dokumentmalstype.KORRIGERT_VARSEL -> true
-        Dokumentmalstype.VARSEL -> false
-        else -> throw IllegalArgumentException("SendManueltVarselbrevTask kan ikke sende Dokumentmalstype.$this")
-    }
+    get() =
+        when (this) {
+            Dokumentmalstype.KORRIGERT_VARSEL -> true
+            Dokumentmalstype.VARSEL -> false
+            else -> throw IllegalArgumentException("SendManueltVarselbrevTask kan ikke sende Dokumentmalstype.$this")
+        }

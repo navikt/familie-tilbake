@@ -15,7 +15,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class AutomatiskSaksbehandlingTask(private val automatiskSaksbehandlingService: AutomatiskSaksbehandlingService) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -27,7 +26,6 @@ class AutomatiskSaksbehandlingTask(private val automatiskSaksbehandlingService: 
     }
 
     companion object {
-
         const val TYPE = "saksbehandle.automatisk"
     }
 }

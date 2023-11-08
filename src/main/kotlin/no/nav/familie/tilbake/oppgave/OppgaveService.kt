@@ -48,22 +48,23 @@ class OppgaveService(
     private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
     private val totrinnService: TotrinnService,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
-    private val antallOppgaveTyper = Oppgavetype.values().associateWith {
-        Metrics.counter("oppgave.opprettet", "type", it.name)
-    }
+    private val antallOppgaveTyper =
+        Oppgavetype.values().associateWith {
+            Metrics.counter("oppgave.opprettet", "type", it.name)
+        }
 
     fun finnOppgaveForBehandlingUtenOppgaveType(behandlingId: UUID): Oppgave {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val finnOppgaveRequest = FinnOppgaveRequest(
-            saksreferanse = behandling.eksternBrukId.toString(),
-            tema = fagsak.ytelsestype.tilTema(),
-        )
+        val finnOppgaveRequest =
+            FinnOppgaveRequest(
+                saksreferanse = behandling.eksternBrukId.toString(),
+                tema = fagsak.ytelsestype.tilTema(),
+            )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         when {
             finnOppgaveResponse.oppgaver.size > 1 -> {
@@ -111,29 +112,32 @@ class OppgaveService(
             )
         }
 
-        val opprettOppgave = OpprettOppgaveRequest(
-            ident = OppgaveIdentV2(
-                ident = aktørId,
-                gruppe = IdentGruppe.AKTOERID,
-            ),
-            saksId = behandling.eksternBrukId.toString(),
-            tema = fagsak.ytelsestype.tilTema(),
-            oppgavetype = oppgavetype,
-            behandlesAvApplikasjon = "familie-tilbake",
-            fristFerdigstillelse = fristForFerdigstillelse,
-            beskrivelse = lagOppgaveTekst(
-                fagsak.eksternFagsakId,
-                behandling.eksternBrukId.toString(),
-                fagsak.fagsystem.name,
-                beskrivelse,
-            ),
-            enhetsnummer = behandling.behandlendeEnhet,
-            tilordnetRessurs = saksbehandler,
-            behandlingstype = Behandlingstype.Tilbakekreving.value,
-            behandlingstema = null,
-            mappeId = finnAktuellMappe(enhet, oppgavetype),
-            prioritet = prioritet,
-        )
+        val opprettOppgave =
+            OpprettOppgaveRequest(
+                ident =
+                    OppgaveIdentV2(
+                        ident = aktørId,
+                        gruppe = IdentGruppe.AKTOERID,
+                    ),
+                saksId = behandling.eksternBrukId.toString(),
+                tema = fagsak.ytelsestype.tilTema(),
+                oppgavetype = oppgavetype,
+                behandlesAvApplikasjon = "familie-tilbake",
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse =
+                    lagOppgaveTekst(
+                        fagsak.eksternFagsakId,
+                        behandling.eksternBrukId.toString(),
+                        fagsak.fagsystem.name,
+                        beskrivelse,
+                    ),
+                enhetsnummer = behandling.behandlendeEnhet,
+                tilordnetRessurs = saksbehandler,
+                behandlingstype = Behandlingstype.Tilbakekreving.value,
+                behandlingstema = null,
+                mappeId = finnAktuellMappe(enhet, oppgavetype),
+                prioritet = prioritet,
+            )
 
         val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
 
@@ -142,7 +146,10 @@ class OppgaveService(
         return opprettetOppgaveId
     }
 
-    private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
+    private fun finnAktuellMappe(
+        enhetsnummer: String?,
+        oppgavetype: Oppgavetype,
+    ): Long? {
         if (enhetsnummer == NAY_ENSLIG_FORSØRGER) {
             val søkemønster = lagSøkeuttrykk(oppgavetype) ?: return null
             val mapper = integrasjonerClient.finnMapper(enhetsnummer)
@@ -158,14 +165,15 @@ class OppgaveService(
     }
 
     private fun lagSøkeuttrykk(oppgavetype: Oppgavetype): Regex? {
-        val pattern = when (oppgavetype) {
-            Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Tilbakekreving?.+"
-            Oppgavetype.GodkjenneVedtak -> "70 Godkjenne?.vedtak?.+"
-            else -> {
-                logger.error("Ukjent oppgavetype = $oppgavetype")
-                return null
+        val pattern =
+            when (oppgavetype) {
+                Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak -> "50 Tilbakekreving?.+"
+                Oppgavetype.GodkjenneVedtak -> "70 Godkjenne?.vedtak?.+"
+                else -> {
+                    logger.error("Ukjent oppgavetype = $oppgavetype")
+                    return null
+                }
             }
-        }
         return Regex(pattern, RegexOption.IGNORE_CASE)
     }
 
@@ -173,11 +181,18 @@ class OppgaveService(
         return integrasjonerClient.patchOppgave(patchOppgave)
     }
 
-    fun tilordneOppgaveNyEnhet(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean): OppgaveResponse {
+    fun tilordneOppgaveNyEnhet(
+        oppgaveId: Long,
+        nyEnhet: String,
+        fjernMappeFraOppgave: Boolean,
+    ): OppgaveResponse {
         return integrasjonerClient.tilordneOppgaveNyEnhet(oppgaveId, nyEnhet, fjernMappeFraOppgave)
     }
 
-    fun ferdigstillOppgave(behandlingId: UUID, oppgavetype: Oppgavetype?) {
+    fun ferdigstillOppgave(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype?,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val (finnOppgaveRequest, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsak)
@@ -207,9 +222,10 @@ class OppgaveService(
 
     fun utledOppgavetypeForGjenoppretting(behandlingId: UUID): Oppgavetype {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository
-            .findByBehandlingIdAndBehandlingsstegsstatusIn(behandling.id, Behandlingsstegstatus.aktiveStegStatuser)
-            ?: throw Feil("Prøvde å gjenopprette oppgave på en inaktiv behandling (id=${behandling.id})")
+        val behandlingsstegstilstand =
+            behandlingsstegstilstandRepository
+                .findByBehandlingIdAndBehandlingsstegsstatusIn(behandling.id, Behandlingsstegstatus.aktiveStegStatuser)
+                ?: throw Feil("Prøvde å gjenopprette oppgave på en inaktiv behandling (id=${behandling.id})")
 
         return when (behandlingsstegstilstand.behandlingssteg) {
             FORESLÅ_VEDTAK -> {
@@ -229,11 +245,12 @@ class OppgaveService(
         oppgavetype: Oppgavetype?,
         fagsak: Fagsak,
     ): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
-        val finnOppgaveRequest = FinnOppgaveRequest(
-            saksreferanse = behandling.eksternBrukId.toString(),
-            oppgavetype = oppgavetype,
-            tema = fagsak.ytelsestype.tilTema(),
-        )
+        val finnOppgaveRequest =
+            FinnOppgaveRequest(
+                saksreferanse = behandling.eksternBrukId.toString(),
+                oppgavetype = oppgavetype,
+                tema = fagsak.ytelsestype.tilTema(),
+            )
         val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
         return Pair(finnOppgaveRequest, finnOppgaveResponse)
     }
@@ -261,18 +278,23 @@ class OppgaveService(
         }
     }
 
-    private fun finnesFerdigstillOppgaveForBehandling(behandlingId: UUID, oppgavetype: Oppgavetype): Boolean {
-        val ubehandledeTasker = taskService.finnTasksMedStatus(
-            status = listOf(
-                Status.UBEHANDLET,
-                Status.PLUKKET,
-                Status.FEILET,
-                Status.KLAR_TIL_PLUKK,
-                Status.BEHANDLER,
-            ),
-            type = FerdigstillOppgaveTask.TYPE,
-            page = Pageable.unpaged(),
-        )
+    private fun finnesFerdigstillOppgaveForBehandling(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): Boolean {
+        val ubehandledeTasker =
+            taskService.finnTasksMedStatus(
+                status =
+                    listOf(
+                        Status.UBEHANDLET,
+                        Status.PLUKKET,
+                        Status.FEILET,
+                        Status.KLAR_TIL_PLUKK,
+                        Status.BEHANDLER,
+                    ),
+                type = FerdigstillOppgaveTask.TYPE,
+                page = Pageable.unpaged(),
+            )
         return ubehandledeTasker.any {
             it.payload == behandlingId.toString() &&
                 it.metadata.getProperty("oppgavetype") == oppgavetype.name
@@ -280,7 +302,6 @@ class OppgaveService(
     }
 
     companion object {
-
         private const val NAY_ENSLIG_FORSØRGER = "4489"
         private const val NAY_EGNE_ANSATTE = "4483"
     }

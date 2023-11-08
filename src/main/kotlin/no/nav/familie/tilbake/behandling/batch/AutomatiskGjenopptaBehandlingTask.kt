@@ -17,7 +17,6 @@ import java.util.UUID
 class AutomatiskGjenopptaBehandlingTask(
     private val automatiskGjenopptaBehandlingService: AutomatiskGjenopptaBehandlingService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -27,7 +26,6 @@ class AutomatiskGjenopptaBehandlingTask(
     }
 
     companion object {
-
         const val TYPE = "gjenoppta.behandling.automatisk"
     }
 }

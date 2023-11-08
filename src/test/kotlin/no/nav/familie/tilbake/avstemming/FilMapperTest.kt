@@ -7,7 +7,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class FilMapperTest {
-
     @Test
     fun `tilFlatfil skal liste ut med forventet format for datoer og tall skal multipliseres med 100`() {
         val avstemmingsfil = FilMapper(listOf(testRad()))
@@ -25,22 +24,23 @@ class FilMapperTest {
 
     @Test
     fun `tilFlatfil skal bruke kode i siste kolonne når det er omgjøring til ingen tilbakekreving`() {
-        val avstemmingsfil = FilMapper(
-            listOf(
-                Rad(
-                    avsender = "familie-tilbake",
-                    vedtakId = "1234",
-                    fnr = "12345678901",
-                    vedtaksdato = LocalDate.of(2019, 12, 31),
-                    fagsakYtelseType = Ytelsestype.BARNETRYGD,
-                    tilbakekrevesBruttoUtenRenter = BigDecimal.ZERO,
-                    tilbakekrevesNettoUtenRenter = BigDecimal.ZERO,
-                    renter = BigDecimal.ZERO,
-                    skatt = BigDecimal.ZERO,
-                    erOmgjøringTilIngenTilbakekreving = true,
+        val avstemmingsfil =
+            FilMapper(
+                listOf(
+                    Rad(
+                        avsender = "familie-tilbake",
+                        vedtakId = "1234",
+                        fnr = "12345678901",
+                        vedtaksdato = LocalDate.of(2019, 12, 31),
+                        fagsakYtelseType = Ytelsestype.BARNETRYGD,
+                        tilbakekrevesBruttoUtenRenter = BigDecimal.ZERO,
+                        tilbakekrevesNettoUtenRenter = BigDecimal.ZERO,
+                        renter = BigDecimal.ZERO,
+                        skatt = BigDecimal.ZERO,
+                        erOmgjøringTilIngenTilbakekreving = true,
+                    ),
                 ),
-            ),
-        )
+            )
         avstemmingsfil.tilFlatfil()
             .decodeToString() shouldBe FORVENTET_HEADER + "familie-tilbake;1234;12345678901;20191231;BA;0;0;0;0;Omgjoring0"
     }
@@ -61,7 +61,6 @@ class FilMapperTest {
     }
 
     companion object {
-
         private const val FORVENTET_HEADER =
             "avsender;vedtakId;fnr;vedtaksdato;fagsakYtelseType;tilbakekrevesBruttoUtenRenter;skatt;" +
                 "tilbakekrevesNettoUtenRenter;renter;erOmgjøringTilIngenTilbakekreving\n"

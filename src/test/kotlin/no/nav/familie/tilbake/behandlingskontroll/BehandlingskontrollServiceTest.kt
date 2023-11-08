@@ -36,7 +36,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -63,16 +62,18 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til varselssteg etter behandling er opprettet med varsel`() {
         val fagsystemsbehandling = lagFagsystemsbehandling(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-        val varsel = Varsel(
-            varseltekst = "testverdi",
-            varselbeløp = 1000L,
-            perioder = setOf(
-                Varselsperiode(
-                    fom = LocalDate.now().minusMonths(2),
-                    tom = LocalDate.now(),
-                ),
-            ),
-        )
+        val varsel =
+            Varsel(
+                varseltekst = "testverdi",
+                varselbeløp = 1000L,
+                perioder =
+                    setOf(
+                        Varselsperiode(
+                            fom = LocalDate.now().minusMonths(2),
+                            tom = LocalDate.now(),
+                        ),
+                    ),
+            )
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(
             lagretBehandling.copy(
@@ -327,7 +328,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             .tilbakehoppBehandlingssteg(
                 behandlingId = behandling.id,
                 behandlingsstegsinfo =
-                lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING),
+                    lagBehandlingsstegsinfo(VARSEL, Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING),
             )
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 5
@@ -363,7 +364,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             .tilbakehoppBehandlingssteg(
                 behandlingId = behandling.id,
                 behandlingsstegsinfo =
-                lagBehandlingsstegsinfo(GRUNNLAG, Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG),
+                    lagBehandlingsstegsinfo(GRUNNLAG, Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG),
             )
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -422,13 +423,14 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val exception = shouldThrow<RuntimeException>(block = {
-            behandlingskontrollService.settBehandlingPåVent(
-                behandlingId = behandling.id,
-                venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                tidsfrist = tidsfrist.minusDays(5),
-            )
-        })
+        val exception =
+            shouldThrow<RuntimeException>(block = {
+                behandlingskontrollService.settBehandlingPåVent(
+                    behandlingId = behandling.id,
+                    venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                    tidsfrist = tidsfrist.minusDays(5),
+                )
+            })
         exception.message shouldBe "Behandling ${behandling.id} har ikke aktivt steg"
     }
 
@@ -501,7 +503,10 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun assertBehandlingsstatus(behandlingId: UUID, behandlingsstatus: Behandlingsstatus) {
+    private fun assertBehandlingsstatus(
+        behandlingId: UUID,
+        behandlingsstatus: Behandlingsstatus,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandling.status shouldBe behandlingsstatus
     }

@@ -16,16 +16,16 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         log.info("FerdigstillOppgaveTask prosesserer med id=${task.id} og metadata ${task.metadata}")
-        val oppgavetype = if (task.metadata.containsKey("oppgavetype")) {
-            Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
-        } else {
-            null
-        }
+        val oppgavetype =
+            if (task.metadata.containsKey("oppgavetype")) {
+                Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))
+            } else {
+                null
+            }
         oppgaveService.ferdigstillOppgave(
             behandlingId = UUID.fromString(task.payload),
             oppgavetype = oppgavetype,
@@ -33,7 +33,6 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
     }
 
     companion object {
-
         const val TYPE = "ferdigstillOppgave"
     }
 }

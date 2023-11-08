@@ -18,7 +18,6 @@ import java.io.InputStream
  * For dokumentasjon, se https://docs.verapdf.org/develop/
  */
 object PdfaValidator {
-
     fun validatePdf(pdf: ByteArray?) {
         try {
             validatePdf(ByteArrayInputStream(pdf))

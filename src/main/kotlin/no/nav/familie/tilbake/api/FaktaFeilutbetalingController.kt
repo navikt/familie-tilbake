@@ -23,7 +23,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FaktaFeilutbetalingController(val faktaFeilutbetalingService: FaktaFeilutbetalingService) {
-
     @Operation(summary = "Hent fakta om feilutbetaling")
     @GetMapping(
         path = ["/behandling/{behandlingId}/fakta/v1"],

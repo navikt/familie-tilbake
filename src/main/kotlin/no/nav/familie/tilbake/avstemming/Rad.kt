@@ -18,7 +18,6 @@ class Rad(
     val renter: BigDecimal,
     val erOmgjøringTilIngenTilbakekreving: Boolean = false,
 ) {
-
     fun toCsvString(): String {
         return (
             format(avsender) +
@@ -31,7 +30,7 @@ class Rad(
                 SKILLETEGN_KOLONNER + format(tilbakekrevesNettoUtenRenter) +
                 SKILLETEGN_KOLONNER + format(renter) +
                 SKILLETEGN_KOLONNER + formatOmgjøring(erOmgjøringTilIngenTilbakekreving)
-            )
+        )
     }
 
     private fun format(verdi: String): String {
@@ -55,7 +54,6 @@ class Rad(
     }
 
     companion object {
-
         const val SKILLETEGN_KOLONNER = ";"
         private val DATOFORMAT = DateTimeFormatter.ofPattern("yyyyMMdd")
     }

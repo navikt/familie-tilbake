@@ -10,7 +10,6 @@ import java.util.UUID
 interface FaktaFeilutbetalingRepository :
     RepositoryInterface<FaktaFeilutbetaling, UUID>,
     InsertUpdateRepository<FaktaFeilutbetaling> {
-
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling?
 
     fun findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId: UUID): FaktaFeilutbetaling

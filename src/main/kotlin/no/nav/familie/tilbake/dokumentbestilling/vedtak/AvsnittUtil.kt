@@ -7,13 +7,15 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 
 internal object AvsnittUtil {
-
     const val PARTIAL_PERIODE_FAKTA = "vedtak/periode_fakta"
     const val PARTIAL_PERIODE_FORELDELSE = "vedtak/periode_foreldelse"
     const val PARTIAL_PERIODE_VILKÅR = "vedtak/periode_vilkår"
     const val PARTIAL_PERIODE_SÆRLIGE_GRUNNER = "vedtak/periode_særlige_grunner"
 
-    fun lagVedtaksbrevDeltIAvsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata, hovedoverskrift: String): List<Avsnitt> {
+    fun lagVedtaksbrevDeltIAvsnitt(
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+        hovedoverskrift: String,
+    ): List<Avsnitt> {
         val resultat: MutableList<Avsnitt> = ArrayList()
         val vedtaksbrevsdataMedFriteksmarkeringer = Vedtaksbrevsfritekst.settInnMarkeringForFritekst(vedtaksbrevsdata)
         resultat.add(lagOppsummeringsavsnitt(vedtaksbrevsdataMedFriteksmarkeringer, hovedoverskrift))
@@ -24,18 +26,22 @@ internal object AvsnittUtil {
         return resultat
     }
 
-    private fun lagOppsummeringsavsnitt(vedtaksbrevsdata: HbVedtaksbrevsdata, hovedoverskrift: String): Avsnitt {
+    private fun lagOppsummeringsavsnitt(
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+        hovedoverskrift: String,
+    ): Avsnitt {
         val tekst = lagVedtaksstart(vedtaksbrevsdata.felles)
         val avsnitt = Avsnitt(avsnittstype = Avsnittstype.OPPSUMMERING, overskrift = hovedoverskrift)
         return parseTekst(tekst, avsnitt, null)
     }
 
     private fun lagVedtaksstart(vedtaksbrevFelles: HbVedtaksbrevFelles): String {
-        val filsti = when (vedtaksbrevFelles.vedtaksbrevstype) {
-            Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
-                "vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt_start"
-            Vedtaksbrevstype.ORDINÆR -> "vedtak/vedtak_start"
-        }
+        val filsti =
+            when (vedtaksbrevFelles.vedtaksbrevstype) {
+                Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
+                    "vedtak/fritekstFeilutbetalingBortfalt/fritekstFeilutbetalingBortfalt_start"
+                Vedtaksbrevstype.ORDINÆR -> "vedtak/vedtak_start"
+            }
         return FellesTekstformaterer.lagDeltekst(vedtaksbrevFelles, filsti)
     }
 
@@ -58,12 +64,13 @@ internal object AvsnittUtil {
         val vilkårstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_VILKÅR)
         val særligeGrunnerstekst = FellesTekstformaterer.lagDeltekst(data, PARTIAL_PERIODE_SÆRLIGE_GRUNNER)
         val avsluttendeTekst = FellesTekstformaterer.lagDeltekst(data, "vedtak/periode_slutt")
-        var avsnitt = Avsnitt(
-            avsnittstype = Avsnittstype.PERIODE,
-            fom = data.periode.periode.fom,
-            tom = data.periode.periode.tom,
-            overskrift = fjernOverskriftFormattering(overskrift),
-        )
+        var avsnitt =
+            Avsnitt(
+                avsnittstype = Avsnittstype.PERIODE,
+                fom = data.periode.periode.fom,
+                tom = data.periode.periode.tom,
+                overskrift = fjernOverskriftFormattering(overskrift),
+            )
 
         avsnitt = parseTekst(faktatekst, avsnitt, Underavsnittstype.FAKTA)
         avsnitt = parseTekst(foreldelsestekst, avsnitt, Underavsnittstype.FORELDELSE)
@@ -95,6 +102,7 @@ internal object AvsnittUtil {
 
         for (linje in splittet) {
             fun nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje: String) = erOverskrift(linje) && overskrift != null
+
             fun avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje: String) =
                 brødtekst != null && !Vedtaksbrevsfritekst.erFritekstStart(linje)
 
@@ -103,7 +111,7 @@ internal object AvsnittUtil {
                     fritekstTillatt ||
                         nyOverskriftOgAvsnittetHarAlleredeOverskrift(linje) ||
                         avsnittHarBrødtekstSomIkkeEtterfølgesAvFritekst(linje)
-                    )
+                )
             ) {
                 underavsnitt.add(
                     Underavsnitt(

@@ -10,6 +10,5 @@ import java.util.UUID
 interface ManuellBrevmottakerRepository :
     RepositoryInterface<ManuellBrevmottaker, UUID>,
     InsertUpdateRepository<ManuellBrevmottaker> {
-
     fun findByBehandlingId(behandlingId: UUID): List<ManuellBrevmottaker>
 }

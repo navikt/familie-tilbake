@@ -12,14 +12,13 @@ data class Henleggelsesbrevsdokument(
     val varsletDato: LocalDate?,
     val fritekstFraSaksbehandler: String?,
 ) : BaseDokument(
-    brevmetadata.ytelsestype,
-    brevmetadata.språkkode,
-    brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall,
-    brevmetadata.institusjon,
-) {
-
+        brevmetadata.ytelsestype,
+        brevmetadata.språkkode,
+        brevmetadata.behandlendeEnhetsNavn,
+        brevmetadata.ansvarligSaksbehandler,
+        brevmetadata.gjelderDødsfall,
+        brevmetadata.institusjon,
+    ) {
     private val tilbakekrevingsrevurdering = Behandlingstype.REVURDERING_TILBAKEKREVING == brevmetadata.behandlingstype
 
     val finnesVerge: Boolean = brevmetadata.finnesVerge

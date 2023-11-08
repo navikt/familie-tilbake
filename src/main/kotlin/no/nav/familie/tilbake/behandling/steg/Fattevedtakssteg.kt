@@ -29,7 +29,6 @@ class Fattevedtakssteg(
     private val historikkTaskService: HistorikkTaskService,
     private val behandlingsvedtakService: BehandlingsvedtakService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun utførSteg(behandlingId: UUID) {
@@ -37,7 +36,10 @@ class Fattevedtakssteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FATTE_VEDTAK} steg")
         // step1: oppdater ansvarligBeslutter
         totrinnService.validerAnsvarligBeslutter(behandlingId)

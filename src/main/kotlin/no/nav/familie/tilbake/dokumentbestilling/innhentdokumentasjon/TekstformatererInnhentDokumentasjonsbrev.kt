@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformatere
 import no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon.handlebars.dto.InnhentDokumentasjonsbrevsdokument
 
 internal object TekstformatererInnhentDokumentasjonsbrev {
-
     fun lagFritekst(dokument: InnhentDokumentasjonsbrevsdokument): String {
         return FellesTekstformaterer.lagBrevtekst(dokument, "innhentdokumentasjon/innhent_dokumentasjon")
     }

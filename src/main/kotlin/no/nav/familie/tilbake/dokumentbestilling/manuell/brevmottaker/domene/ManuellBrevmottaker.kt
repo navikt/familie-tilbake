@@ -39,7 +39,7 @@ data class ManuellBrevmottaker(
                 postnummer.isNullOrBlank() ||
                 poststed.isNullOrBlank() ||
                 landkode.isNullOrBlank()
-            )
+        )
     }
 
     val erTilleggsmottaker get() = type == MottakerType.VERGE || type == MottakerType.FULLMEKTIG

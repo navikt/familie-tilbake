@@ -45,7 +45,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 
@@ -111,28 +110,30 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer)
-        kravgrunnlagService = KravgrunnlagService(
-            kravgrunnlagRepository,
-            behandlingRepository,
-            mottattXmlService,
-            stegService,
-            behandlingskontrollService,
-            taskService,
-            tellerService,
-            oppgaveTaskService,
-            historikkTaskService,
-            hentFagsystemsbehandlingService,
-            endretKravgrunnlagEventPublisher,
-        )
+        kravgrunnlagService =
+            KravgrunnlagService(
+                kravgrunnlagRepository,
+                behandlingRepository,
+                mottattXmlService,
+                stegService,
+                behandlingskontrollService,
+                taskService,
+                tellerService,
+                oppgaveTaskService,
+                historikkTaskService,
+                hentFagsystemsbehandlingService,
+                endretKravgrunnlagEventPublisher,
+            )
 
-        finnKravgrunnlagTask = FinnKravgrunnlagTask(
-            behandlingRepository,
-            fagsakRepository,
-            økonomiXmlMottattRepository,
-            kravgrunnlagRepository,
-            kravgrunnlagService,
-            kravvedtakstatusService,
-        )
+        finnKravgrunnlagTask =
+            FinnKravgrunnlagTask(
+                behandlingRepository,
+                fagsakRepository,
+                økonomiXmlMottattRepository,
+                kravgrunnlagRepository,
+                kravgrunnlagService,
+                kravvedtakstatusService,
+            )
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
     }
@@ -147,10 +148,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
-        val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            eksternFagsakId,
-            Ytelsestype.BARNETRYGD,
-        )
+        val arkivXmlene =
+            økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+                eksternFagsakId,
+                Ytelsestype.BARNETRYGD,
+            )
         arkivXmlene.shouldNotBeEmpty()
 
         (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
@@ -173,10 +175,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
-        val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            eksternFagsakId,
-            Ytelsestype.BARNETRYGD,
-        )
+        val arkivXmlene =
+            økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+                eksternFagsakId,
+                Ytelsestype.BARNETRYGD,
+            )
         arkivXmlene.shouldNotBeEmpty()
 
         (økonomiXmlMottattRepository.findAll() as List<*>).shouldBeEmpty()
@@ -202,10 +205,11 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         finnKravgrunnlagTask.doTask(Task(type = FinnKravgrunnlagTask.TYPE, payload = behandlingId.toString()))
 
-        val arkivXmlene = økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            eksternFagsakId,
-            Ytelsestype.BARNETRYGD,
-        )
+        val arkivXmlene =
+            økonomiXmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+                eksternFagsakId,
+                Ytelsestype.BARNETRYGD,
+            )
         arkivXmlene.shouldNotBeEmpty()
         arkivXmlene.size shouldBe 2
 
@@ -223,38 +227,41 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettBehandling(finnesVerge: Boolean): Behandling {
-        val faktainfo = Faktainfo(
-            revurderingsårsak = "testverdi",
-            revurderingsresultat = "testresultat",
-            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-        )
-
-        val verge = if (finnesVerge) {
-            no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
-                vergetype = Vergetype.VERGE_FOR_BARN,
-                navn = "Andy",
-                personIdent = "321321321",
+        val faktainfo =
+            Faktainfo(
+                revurderingsårsak = "testverdi",
+                revurderingsresultat = "testresultat",
+                tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
             )
-        } else {
-            null
-        }
 
-        val request = OpprettTilbakekrevingRequest(
-            ytelsestype = Ytelsestype.BARNETRYGD,
-            fagsystem = Fagsystem.BA,
-            eksternFagsakId = eksternFagsakId,
-            personIdent = "321321322",
-            eksternId = "0",
-            manueltOpprettet = false,
-            språkkode = Språkkode.NB,
-            enhetId = "8020",
-            enhetsnavn = "Oslo",
-            varsel = null,
-            verge = verge,
-            revurderingsvedtaksdato = LocalDate.now(),
-            faktainfo = faktainfo,
-            saksbehandlerIdent = "Z0000",
-        )
+        val verge =
+            if (finnesVerge) {
+                no.nav.familie.kontrakter.felles.tilbakekreving.Verge(
+                    vergetype = Vergetype.VERGE_FOR_BARN,
+                    navn = "Andy",
+                    personIdent = "321321321",
+                )
+            } else {
+                null
+            }
+
+        val request =
+            OpprettTilbakekrevingRequest(
+                ytelsestype = Ytelsestype.BARNETRYGD,
+                fagsystem = Fagsystem.BA,
+                eksternFagsakId = eksternFagsakId,
+                personIdent = "321321322",
+                eksternId = "0",
+                manueltOpprettet = false,
+                språkkode = Språkkode.NB,
+                enhetId = "8020",
+                enhetsnavn = "Oslo",
+                varsel = null,
+                verge = verge,
+                revurderingsvedtaksdato = LocalDate.now(),
+                faktainfo = faktainfo,
+                saksbehandlerIdent = "Z0000",
+            )
         return behandlingService.opprettBehandling(request)
     }
 

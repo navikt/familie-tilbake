@@ -15,8 +15,10 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriode
 import java.util.UUID
 
 object KravgrunnlagMapper {
-
-    fun tilKravgrunnlag431(kravgrunnlag: DetaljertKravgrunnlagDto, behandlingId: UUID): Kravgrunnlag431 {
+    fun tilKravgrunnlag431(
+        kravgrunnlag: DetaljertKravgrunnlagDto,
+        behandlingId: UUID,
+    ): Kravgrunnlag431 {
         return Kravgrunnlag431(
             behandlingId = behandlingId,
             vedtakId = kravgrunnlag.vedtakId,
