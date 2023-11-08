@@ -203,7 +203,6 @@ class OppgaveService(
         fagsak: Fagsak,
     ): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
         val finnOppgaveRequest = FinnOppgaveRequest(
-            behandlingstype = Behandlingstype.Tilbakekreving,
             saksreferanse = behandling.eksternBrukId.toString(),
             oppgavetype = oppgavetype,
             tema = fagsak.ytelsestype.tilTema(),
