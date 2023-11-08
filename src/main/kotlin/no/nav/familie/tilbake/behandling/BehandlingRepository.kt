@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.behandling
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
@@ -8,6 +9,7 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -46,6 +48,32 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """,
     )
     fun finnAvsluttetTilbakekrevingsbehandlinger(eksternId: String): List<Behandling>
+
+    @Query(
+        """
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
+            AND beh.ekstern_bruk_id=:eksternBrukId
+    """,
+    )
+    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+        eksternBrukId: UUID,
+    ): Behandling?
+
+    @Query(
+        """
+            SELECT b.id
+            FROM behandling b JOIN fagsak f ON b.fagsak_id = f.id
+            WHERE b.status != 'AVSLUTTET'
+            AND b.opprettet_tid < :opprettetFørDato
+            AND f.fagsystem = :fagsystem
+        """,
+    )
+    fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime): List<UUID>?
+
+    fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
     // language=PostgreSQL
 
