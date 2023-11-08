@@ -828,7 +828,7 @@ class TekstformatererVedtaksbrevTest {
                         varsletBeløp = BigDecimal(10000),
                         varsletDato = LocalDate.of(2020, 4, 4),
                     ),
-                    konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+                    konfigurasjon = HbKonfigurasjon(klagefristIUker = 3),
                     vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
                 )
             val perioder: List<HbVedtaksbrevsperiode> =

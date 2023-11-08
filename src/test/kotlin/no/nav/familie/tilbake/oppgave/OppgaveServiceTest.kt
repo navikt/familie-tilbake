@@ -18,11 +18,13 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata.behandling
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -38,6 +40,8 @@ class OppgaveServiceTest {
     private val personService: PersonService = mockk(relaxed = true)
     private val environment: Environment = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
+    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository = mockk(relaxed = true)
+    private val totrinnService: TotrinnService = mockk(relaxed = true)
 
     private val mappeIdGodkjenneVedtak = 100
     private val mappeIdBehandleSak = 200
@@ -60,6 +64,8 @@ class OppgaveServiceTest {
             personService,
             taskService,
             environment,
+            behandlingsstegstilstandRepository,
+            totrinnService,
         )
         every { fagsakRepository.findByIdOrThrow(fagsak.id) } returns fagsak
         every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling

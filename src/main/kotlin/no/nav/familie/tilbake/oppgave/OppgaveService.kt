@@ -17,10 +17,16 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FATTE_VEDTAK
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FORESLÅ_VEDTAK
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.familie.tilbake.totrinn.TotrinnService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -39,6 +45,8 @@ class OppgaveService(
     private val personService: PersonService,
     private val taskService: TaskService,
     private val environment: Environment,
+    private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
+    private val totrinnService: TotrinnService,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -71,7 +79,7 @@ class OppgaveService(
                     "Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}, " +
                         "$finnOppgaveRequest, $finnOppgaveResponse",
                 )
-                throw Feil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
+                throw ManglerOppgaveFeil("Fant ingen oppgave for behandling ${behandling.eksternBrukId} på fagsak ${fagsak.eksternFagsakId}. Oppgaven kan være manuelt lukket.")
             }
 
             else -> {
@@ -197,13 +205,31 @@ class OppgaveService(
         }
     }
 
+    fun utledOppgavetypeForGjenoppretting(behandlingId: UUID): Oppgavetype {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository
+            .findByBehandlingIdAndBehandlingsstegsstatusIn(behandling.id, Behandlingsstegstatus.aktiveStegStatuser)
+            ?: throw Feil("Prøvde å gjenopprette oppgave på en inaktiv behandling (id=${behandling.id})")
+
+        return when (behandlingsstegstilstand.behandlingssteg) {
+            FORESLÅ_VEDTAK -> {
+                if (totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)) {
+                    Oppgavetype.BehandleUnderkjentVedtak
+                } else {
+                    Oppgavetype.BehandleSak
+                }
+            }
+            FATTE_VEDTAK -> Oppgavetype.GodkjenneVedtak
+            else -> Oppgavetype.BehandleSak
+        }
+    }
+
     private fun finnOppgave(
         behandling: Behandling,
         oppgavetype: Oppgavetype?,
         fagsak: Fagsak,
     ): Pair<FinnOppgaveRequest, FinnOppgaveResponseDto> {
         val finnOppgaveRequest = FinnOppgaveRequest(
-            behandlingstype = Behandlingstype.Tilbakekreving,
             saksreferanse = behandling.eksternBrukId.toString(),
             oppgavetype = oppgavetype,
             tema = fagsak.ytelsestype.tilTema(),
