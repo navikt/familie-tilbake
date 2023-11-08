@@ -23,7 +23,6 @@ class SendVarselbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -31,7 +30,6 @@ class SendVarselbrevTask(
     }
 
     companion object {
-
         const val TYPE = "brev.sendVarsel"
     }
 }

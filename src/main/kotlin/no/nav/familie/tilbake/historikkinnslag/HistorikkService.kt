@@ -36,7 +36,6 @@ class HistorikkService(
     private val brevsporingRepository: BrevsporingRepository,
     private val kafkaProducer: KafkaProducer,
 ) {
-
     @Transactional
     fun lagHistorikkinnslag(
         behandlingId: UUID,
@@ -48,16 +47,17 @@ class HistorikkService(
         beslutter: String? = null,
         tittel: String? = null,
     ) {
-        val request = lagHistorikkinnslagRequest(
-            behandlingId,
-            aktør,
-            historikkinnslagstype,
-            opprettetTidspunkt,
-            beskrivelse,
-            brevtype,
-            beslutter,
-            tittel,
-        )
+        val request =
+            lagHistorikkinnslagRequest(
+                behandlingId,
+                aktør,
+                historikkinnslagstype,
+                opprettetTidspunkt,
+                beskrivelse,
+                brevtype,
+                beslutter,
+                tittel,
+            )
         kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
     }
 

@@ -3,8 +3,10 @@ package no.nav.familie.tilbake.kravgrunnlag.domain
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Kravstatuskode(@JsonValue val kode: String, val navn: String) {
-
+enum class Kravstatuskode(
+    @JsonValue val kode: String,
+    val navn: String,
+) {
     ANNULERT("ANNU", "Kravgrunnlag annullert"),
     ANNULLERT_OMG("ANOM", "Kravgrunnlag annullert ved omg"),
     AVSLUTTET("AVSL", "Avsluttet kravgrunnlag"),
@@ -17,7 +19,6 @@ enum class Kravstatuskode(@JsonValue val kode: String, val navn: String) {
     ;
 
     companion object {
-
         @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
         fun fraKode(kode: String): Kravstatuskode {
             for (kravstatuskode in values()) {

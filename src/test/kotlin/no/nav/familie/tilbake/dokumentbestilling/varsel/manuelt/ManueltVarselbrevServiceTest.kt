@@ -36,7 +36,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
-
     private val korrigertVarseltekst = "Sender korrigert varselbrev"
     private val varseltekst = "Sender manuelt varselbrev"
 
@@ -69,24 +68,26 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
 
-        brevmetadataUtil = BrevmetadataUtil(
-            behandlingRepository = behandlingRepository,
-            fagsakRepository = fagsakRepository,
-            manuelleBrevmottakerRepository = mockk(relaxed = true),
-            eksterneDataForBrevService = mockEksterneDataForBrevService,
-            organisasjonService = mockk(),
-            featureToggleService = featureToggleService,
-        )
-        manueltVarselbrevService = ManueltVarselbrevService(
-            behandlingRepository,
-            fagsakRepository,
-            mockEksterneDataForBrevService,
-            spyPdfBrevService,
-            mockFeilutbetalingService,
-            varselbrevUtil,
-            mockDistribusjonshåndteringService,
-            brevmetadataUtil,
-        )
+        brevmetadataUtil =
+            BrevmetadataUtil(
+                behandlingRepository = behandlingRepository,
+                fagsakRepository = fagsakRepository,
+                manuelleBrevmottakerRepository = mockk(relaxed = true),
+                eksterneDataForBrevService = mockEksterneDataForBrevService,
+                organisasjonService = mockk(),
+                featureToggleService = featureToggleService,
+            )
+        manueltVarselbrevService =
+            ManueltVarselbrevService(
+                behandlingRepository,
+                fagsakRepository,
+                mockEksterneDataForBrevService,
+                spyPdfBrevService,
+                mockFeilutbetalingService,
+                varselbrevUtil,
+                mockDistribusjonshåndteringService,
+                brevmetadataUtil,
+            )
 
         every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
             .returns(lagFeilutbetaling())
@@ -122,14 +123,16 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy = behandling.copy(
-            varsler = setOf(
-                Varsel(
-                    varseltekst = varseltekst,
-                    varselbeløp = 100L,
-                ),
-            ),
-        )
+        val behandlingCopy =
+            behandling.copy(
+                varsler =
+                    setOf(
+                        Varsel(
+                            varseltekst = varseltekst,
+                            varselbeløp = 100L,
+                        ),
+                    ),
+            )
         val behandling = behandlingRepository.update(behandlingCopy)
 
         manueltVarselbrevService.sendKorrigertVarselBrev(behandling, korrigertVarseltekst, Brevmottager.BRUKER)
@@ -150,15 +153,17 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
         excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy = behandling.copy(
-            varsler = setOf(
-                Varsel(
-                    varseltekst = varseltekst,
-                    varselbeløp = 100L,
-                ),
-            ),
-            verger = setOf(Testdata.verge),
-        )
+        val behandlingCopy =
+            behandling.copy(
+                varsler =
+                    setOf(
+                        Varsel(
+                            varseltekst = varseltekst,
+                            varselbeløp = 100L,
+                        ),
+                    ),
+                verger = setOf(Testdata.verge),
+            )
         val behandling = behandlingRepository.update(behandlingCopy)
 
         manueltVarselbrevService.sendKorrigertVarselBrev(behandling, varseltekst, Brevmottager.VERGE)
@@ -177,59 +182,66 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise manuelt varselbrev`() {
-        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
-            behandling.id,
-            Dokumentmalstype.VARSEL,
-            varseltekst,
-        )
+        val data =
+            manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+                behandling.id,
+                Dokumentmalstype.VARSEL,
+                varseltekst,
+            )
 
         PdfaValidator.validatePdf(data)
     }
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
-        val behandlingCopy = behandling.copy(
-            varsler = setOf(
-                Varsel(
-                    varseltekst = varseltekst,
-                    varselbeløp = 100L,
-                ),
-            ),
-        )
+        val behandlingCopy =
+            behandling.copy(
+                varsler =
+                    setOf(
+                        Varsel(
+                            varseltekst = varseltekst,
+                            varselbeløp = 100L,
+                        ),
+                    ),
+            )
         behandlingRepository.update(behandlingCopy)
 
-        val data = manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
-            behandling.id,
-            Dokumentmalstype.KORRIGERT_VARSEL,
-            varseltekst,
-        )
+        val data =
+            manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
+                behandling.id,
+                Dokumentmalstype.KORRIGERT_VARSEL,
+                varseltekst,
+            )
 
         PdfaValidator.validatePdf(data)
     }
 
     private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
-        val periode = Månedsperiode(
-            LocalDate.of(2019, 10, 1),
-            LocalDate.of(2019, 10, 30),
-        )
+        val periode =
+            Månedsperiode(
+                LocalDate.of(2019, 10, 1),
+                LocalDate.of(2019, 10, 30),
+            )
 
         return FaktaFeilutbetalingDto(
             totaltFeilutbetaltBeløp = BigDecimal(9000),
             totalFeilutbetaltPeriode = periode.toDatoperiode(),
-            feilutbetaltePerioder = listOf(
-                FeilutbetalingsperiodeDto(
-                    periode.toDatoperiode(),
-                    BigDecimal(9000),
+            feilutbetaltePerioder =
+                listOf(
+                    FeilutbetalingsperiodeDto(
+                        periode.toDatoperiode(),
+                        BigDecimal(9000),
+                    ),
                 ),
-            ),
             revurderingsvedtaksdato = LocalDate.now().minusDays(1),
             begrunnelse = "",
-            faktainfo = Faktainfo(
-                revurderingsårsak = "testverdi",
-                revurderingsresultat = "testverdi",
-                tilbakekrevingsvalg =
-                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-            ),
+            faktainfo =
+                Faktainfo(
+                    revurderingsårsak = "testverdi",
+                    revurderingsresultat = "testverdi",
+                    tilbakekrevingsvalg =
+                        Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                ),
         )
     }
 }

@@ -23,10 +23,12 @@ class HentKravgrunnlagService(
     private val oppdragClient: OppdragClient,
     private val historikkService: HistorikkService,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun hentKravgrunnlagFraØkonomi(kravgrunnlagId: BigInteger, kodeAksjon: KodeAksjon): DetaljertKravgrunnlagDto {
+    fun hentKravgrunnlagFraØkonomi(
+        kravgrunnlagId: BigInteger,
+        kodeAksjon: KodeAksjon,
+    ): DetaljertKravgrunnlagDto {
         logger.info("Henter kravgrunnlag for kravgrunnlagId=$kravgrunnlagId for kodeAksjon=$kodeAksjon")
         return oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon))
     }
@@ -36,7 +38,10 @@ class HentKravgrunnlagService(
     }
 
     @Transactional
-    fun lagreHentetKravgrunnlag(behandlingId: UUID, kravgrunnlag: DetaljertKravgrunnlagDto) {
+    fun lagreHentetKravgrunnlag(
+        behandlingId: UUID,
+        kravgrunnlag: DetaljertKravgrunnlagDto,
+    ) {
         logger.info("Lagrer hentet kravgrunnlag for behandling $behandlingId")
         val kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandlingId)
         kravgrunnlagRepository.insert(kravgrunnlag431)

@@ -17,8 +17,9 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = FinnKravgrunnlagTask.TYPE,
-    beskrivelse = "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
-        "og kobler dem til behandling",
+    beskrivelse =
+        "Finner frakoblet grunnlag og statusmeldinger for samme fagsak " +
+            "og kobler dem til behandling",
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class FinnKravgrunnlagTask(
@@ -29,7 +30,6 @@ class FinnKravgrunnlagTask(
     private val kravgrunnlagService: KravgrunnlagService,
     private val kravvedtakstatusService: KravvedtakstatusService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -38,9 +38,10 @@ class FinnKravgrunnlagTask(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val mottattKravgrunnlagene = økonomiXmlMottattRepository
-            .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
-            .sortedBy { it.sporbar.opprettetTid }
+        val mottattKravgrunnlagene =
+            økonomiXmlMottattRepository
+                .findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
+                .sortedBy { it.sporbar.opprettetTid }
         mottattKravgrunnlagene.forEach { mottattKravgrunnlag ->
             kravgrunnlagService.håndterMottattKravgrunnlag(mottattKravgrunnlag.melding)
             if (mottattKravgrunnlag.sperret) {
@@ -55,7 +56,6 @@ class FinnKravgrunnlagTask(
     }
 
     companion object {
-
         const val TYPE = "finnKravgrunnlag"
     }
 }

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var totrinnsvurderingRepository: TotrinnsvurderingRepository
 

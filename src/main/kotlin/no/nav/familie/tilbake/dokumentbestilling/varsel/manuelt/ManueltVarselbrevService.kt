@@ -37,16 +37,27 @@ class ManueltVarselbrevService(
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
     private val brevmetadataUtil: BrevmetadataUtil,
 ) {
-
-    fun sendManueltVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
+    fun sendManueltVarselBrev(
+        behandling: Behandling,
+        fritekst: String,
+        brevmottager: Brevmottager,
+    ) {
         sendVarselBrev(behandling, fritekst, brevmottager, false)
     }
 
-    fun sendKorrigertVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager) {
+    fun sendKorrigertVarselBrev(
+        behandling: Behandling,
+        fritekst: String,
+        brevmottager: Brevmottager,
+    ) {
         sendVarselBrev(behandling, fritekst, brevmottager, true)
     }
 
-    fun sendVarselbrev(behandling: Behandling, fritekst: String, erKorrigert: Boolean) {
+    fun sendVarselbrev(
+        behandling: Behandling,
+        fritekst: String,
+        erKorrigert: Boolean,
+    ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
         val varsletFeilutbetaling = feilutbetalingsfakta.totaltFeilutbetaltBeløp.toLong()
@@ -58,16 +69,17 @@ class ManueltVarselbrevService(
             fritekst = fritekst,
         ) { brevmottager, brevmetadata ->
 
-            val varselbrevsdokument = lagVarselbrev(
-                behandling = behandling,
-                fagsak = fagsak,
-                brevmottager = brevmottager,
-                fritekst = fritekst,
-                erKorrigert = erKorrigert,
-                feilutbetalingsfakta = feilutbetalingsfakta,
-                aktivtVarsel = behandling.aktivtVarsel,
-                forhåndsgenerertMetadata = brevmetadata,
-            )
+            val varselbrevsdokument =
+                lagVarselbrev(
+                    behandling = behandling,
+                    fagsak = fagsak,
+                    brevmottager = brevmottager,
+                    fritekst = fritekst,
+                    erKorrigert = erKorrigert,
+                    feilutbetalingsfakta = feilutbetalingsfakta,
+                    aktivtVarsel = behandling.aktivtVarsel,
+                    forhåndsgenerertMetadata = brevmetadata,
+                )
             Brevdata(
                 mottager = brevmottager,
                 overskrift = lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, erKorrigert),
@@ -78,7 +90,12 @@ class ManueltVarselbrevService(
         }
     }
 
-    fun sendVarselBrev(behandling: Behandling, fritekst: String, brevmottager: Brevmottager, erKorrigert: Boolean) {
+    fun sendVarselBrev(
+        behandling: Behandling,
+        fritekst: String,
+        brevmottager: Brevmottager,
+        erKorrigert: Boolean,
+    ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val feilutbetalingsfakta = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandling.id)
         val varselbrevsdokument =
@@ -144,22 +161,23 @@ class ManueltVarselbrevService(
         aktivtVarsel: Varsel? = null,
         forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Varselbrevsdokument {
-        val metadata = forhåndsgenerertMetadata ?: run {
-            // Henter data fra pdl
-            val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-            val adresseinfo: Adresseinfo =
-                eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
-            val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
-            varselbrevUtil.sammenstillInfoForBrevmetadata(
-                behandling,
-                personinfo,
-                adresseinfo,
-                fagsak,
-                vergenavn,
-                erKorrigert,
-                personinfo.dødsdato != null,
-            )
-        }
+        val metadata =
+            forhåndsgenerertMetadata ?: run {
+                // Henter data fra pdl
+                val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val adresseinfo: Adresseinfo =
+                    eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, behandling.aktivVerge, fagsak.fagsystem)
+                val vergenavn: String = BrevmottagerUtil.getVergenavn(behandling.aktivVerge, adresseinfo)
+                varselbrevUtil.sammenstillInfoForBrevmetadata(
+                    behandling,
+                    personinfo,
+                    adresseinfo,
+                    fagsak,
+                    vergenavn,
+                    erKorrigert,
+                    personinfo.dødsdato != null,
+                )
+            }
 
         return varselbrevUtil.sammenstillInfoFraFagsystemerForSendingManueltVarselBrev(
             metadata.copy(tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert)),
@@ -168,7 +186,11 @@ class ManueltVarselbrevService(
             aktivtVarsel,
         )
     }
-    private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {
+
+    private fun getTittelForVarselbrev(
+        ytelsesnavn: String,
+        erKorrigert: Boolean,
+    ): String {
         return if (erKorrigert) {
             VarselbrevUtil.TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {

@@ -28,7 +28,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -111,26 +110,31 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         shouldNotThrowAny { oppdaterFaktainfoTask.doTask(lagTask(eksternId = behandling.aktivFagsystemsbehandling.eksternId)) }
         val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         oppdatertBehandling.endretTidspunkt.isEqual(behandling.endretTidspunkt)
-        oppdatertBehandling.aktivFagsystemsbehandling.sporbar.endret.endretTid.isEqual(behandling.aktivFagsystemsbehandling.sporbar.endret.endretTid)
+        oppdatertBehandling.aktivFagsystemsbehandling.sporbar.endret.endretTid.isEqual(
+            behandling.aktivFagsystemsbehandling.sporbar.endret.endretTid,
+        )
     }
 
     private fun lagRespons(eksternId: String): HentFagsystemsbehandlingRespons {
-        val hentFagsystemsbehandling = HentFagsystemsbehandling(
-            eksternFagsakId = fagsak.eksternFagsakId,
-            eksternId = eksternId,
-            ytelsestype = fagsak.ytelsestype,
-            personIdent = fagsak.bruker.ident,
-            språkkode = fagsak.bruker.språkkode,
-            enhetId = behandling.behandlendeEnhet,
-            enhetsnavn = behandling.behandlendeEnhetsNavn,
-            revurderingsvedtaksdato = LocalDate.now(),
-            faktainfo = Faktainfo(
-                revurderingsårsak = "testårsak",
-                revurderingsresultat = "testresultat",
-                tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING,
-            ),
-        )
+        val hentFagsystemsbehandling =
+            HentFagsystemsbehandling(
+                eksternFagsakId = fagsak.eksternFagsakId,
+                eksternId = eksternId,
+                ytelsestype = fagsak.ytelsestype,
+                personIdent = fagsak.bruker.ident,
+                språkkode = fagsak.bruker.språkkode,
+                enhetId = behandling.behandlendeEnhet,
+                enhetsnavn = behandling.behandlendeEnhetsNavn,
+                revurderingsvedtaksdato = LocalDate.now(),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsårsak = "testårsak",
+                        revurderingsresultat = "testresultat",
+                        tilbakekrevingsvalg =
+                            Tilbakekrevingsvalg
+                                .IGNORER_TILBAKEKREVING,
+                    ),
+            )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
@@ -138,11 +142,12 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         return Task(
             type = OppdaterFaktainfoTask.TYPE,
             payload = "",
-            properties = Properties().apply {
-                setProperty("eksternFagsakId", fagsak.eksternFagsakId)
-                setProperty("ytelsestype", fagsak.ytelsestype.name)
-                setProperty("eksternId", eksternId)
-            },
+            properties =
+                Properties().apply {
+                    setProperty("eksternFagsakId", fagsak.eksternFagsakId)
+                    setProperty("ytelsestype", fagsak.ytelsestype.name)
+                    setProperty("eksternId", eksternId)
+                },
         )
     }
 }

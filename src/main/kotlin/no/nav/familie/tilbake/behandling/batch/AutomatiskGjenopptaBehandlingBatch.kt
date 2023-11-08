@@ -22,13 +22,13 @@ class AutomatiskGjenopptaBehandlingBatch(
     private val taskService: TaskService,
     private val environment: Environment,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(cron = "\${CRON_AUTOMATISK_GJENOPPTA}")
     @Transactional
     fun automatiskGjenopptaBehandling() {
-        if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
+        if (LeaderClient.isLeader() != true &&
+            !environment.activeProfiles.any {
                 it.contains("local") || it.contains("integrasjonstest")
             }
         ) {
@@ -41,26 +41,29 @@ class AutomatiskGjenopptaBehandlingBatch(
         logger.info("Det finnes ${behandlinger.size} klar for automatisk gjenoppta")
 
         if (behandlinger.isNotEmpty()) {
-            val alleFeiledeTasker = taskService.finnTasksMedStatus(
-                listOf(Status.FEILET, Status.PLUKKET, Status.KLAR_TIL_PLUKK),
-                Pageable.unpaged(),
-            )
+            val alleFeiledeTasker =
+                taskService.finnTasksMedStatus(
+                    listOf(Status.FEILET, Status.PLUKKET, Status.KLAR_TIL_PLUKK),
+                    Pageable.unpaged(),
+                )
             behandlinger.forEach {
-                val finnesTask = alleFeiledeTasker.any { task ->
-                    task.type == AutomatiskGjenopptaBehandlingTask.TYPE && task.payload == it.id.toString()
-                }
+                val finnesTask =
+                    alleFeiledeTasker.any { task ->
+                        task.type == AutomatiskGjenopptaBehandlingTask.TYPE && task.payload == it.id.toString()
+                    }
                 if (!finnesTask) {
                     val fagsystem = fagsakRepository.findByIdOrThrow(it.fagsakId).fagsystem
                     taskService.save(
                         Task(
                             type = AutomatiskGjenopptaBehandlingTask.TYPE,
                             payload = it.id.toString(),
-                            properties = Properties().apply {
-                                setProperty(
-                                    PropertyName.FAGSYSTEM,
-                                    fagsystem.name,
-                                )
-                            },
+                            properties =
+                                Properties().apply {
+                                    setProperty(
+                                        PropertyName.FAGSYSTEM,
+                                        fagsystem.name,
+                                    )
+                                },
                         ),
                     )
                 } else {

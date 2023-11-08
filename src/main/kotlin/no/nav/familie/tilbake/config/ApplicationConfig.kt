@@ -31,7 +31,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
-@ComponentScan(ApplicationConfig.pakkenavn, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering", "no.nav.familie.unleash")
+@ComponentScan(ApplicationConfig.PAKKENAVN, "no.nav.familie.sikkerhet", "no.nav.familie.prosessering", "no.nav.familie.unleash")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @Import(RestTemplateAzure::class, KafkaErrorHandler::class)
 @EnableOAuth2Client(cacheEnabled = true)
@@ -39,7 +39,6 @@ import java.time.temporal.ChronoUnit
 @EnableCaching
 @ConfigurationPropertiesScan
 class ApplicationConfig {
-
     @Bean
     fun servletWebServerFactory(): ServletWebServerFactory {
         val serverFactory = JettyServletWebServerFactory()
@@ -87,15 +86,17 @@ class ApplicationConfig {
     }
 
     @Bean
-    fun prosesseringInfoProvider(@Value("\${rolle.prosessering}") prosesseringRolle: String) = object :
+    fun prosesseringInfoProvider(
+        @Value("\${rolle.prosessering}") prosesseringRolle: String,
+    ) = object :
         ProsesseringInfoProvider {
-
-        override fun hentBrukernavn(): String = try {
-            SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
-                .getStringClaim("preferred_username")
-        } catch (e: Exception) {
-            throw e
-        }
+        override fun hentBrukernavn(): String =
+            try {
+                SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+                    .getStringClaim("preferred_username")
+            } catch (e: Exception) {
+                throw e
+            }
 
         override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
 
@@ -110,7 +111,6 @@ class ApplicationConfig {
     }
 
     companion object {
-
-        const val pakkenavn = "no.nav.familie.tilbake"
+        const val PAKKENAVN = "no.nav.familie.tilbake"
     }
 }

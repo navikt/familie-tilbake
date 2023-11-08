@@ -10,6 +10,5 @@ data class HbTotalresultat(
     val totaltTilbakekrevesBeløpMedRenterUtenSkatt: BigDecimal,
     val totaltRentebeløp: BigDecimal,
 ) {
-
     val harSkattetrekk = totaltTilbakekrevesBeløpMedRenterUtenSkatt < totaltTilbakekrevesBeløpMedRenter
 }

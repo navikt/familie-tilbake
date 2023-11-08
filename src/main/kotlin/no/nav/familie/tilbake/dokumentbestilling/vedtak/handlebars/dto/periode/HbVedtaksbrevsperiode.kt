@@ -13,7 +13,6 @@ data class HbVedtaksbrevsperiode(
     val førstePeriode: Boolean,
     val grunnbeløp: HbGrunnbeløp? = null,
 ) {
-
     init {
         if (fakta.hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G) {
             require(grunnbeløp != null) { "${Hendelsesundertype.INNTEKT_OVER_6G} krever verdi for grunnbeløp." }

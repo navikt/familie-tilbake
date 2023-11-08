@@ -26,7 +26,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -153,9 +152,10 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
                 behandlingssteg = behandlingssteg,
                 behandlingsstegsstatus = behandlingsstegsstatus,
                 venteårsak = venteårsak,
-                tidsfrist = venteårsak?.let {
-                    dagensDato.plusWeeks(it.defaultVenteTidIUker)
-                },
+                tidsfrist =
+                    venteårsak?.let {
+                        dagensDato.plusWeeks(it.defaultVenteTidIUker)
+                    },
             ),
         )
     }
@@ -164,13 +164,14 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
         return Task(
             type = LagOppgaveTask.TYPE,
             payload = behandling.id.toString(),
-            properties = Properties().apply {
-                setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
-                setProperty(PropertyName.ENHET, "enhet")
-                if (opprettetAv != null) {
-                    setProperty("opprettetAv", opprettetAv)
-                }
-            },
+            properties =
+                Properties().apply {
+                    setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
+                    setProperty(PropertyName.ENHET, "enhet")
+                    if (opprettetAv != null) {
+                        setProperty("opprettetAv", opprettetAv)
+                    }
+                },
         )
     }
 }

@@ -30,7 +30,6 @@ class KafkaConfig(
     @Value("\${KAFKA_CREDSTORE_PASSWORD}") private val kafkaCredstorePassword: String,
     @Value("\${KAFKA_KEYSTORE_PATH}") private val kafkaKeystorePath: String,
 ) {
-
     @Bean
     fun producerFactory(): ProducerFactory<String, String> {
         return DefaultKafkaProducerFactory(producerConfigs())
@@ -47,7 +46,9 @@ class KafkaConfig(
     }
 
     @Bean
-    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun concurrentKafkaListenerContainerFactory(
+        kafkaErrorHandler: KafkaErrorHandler,
+    ): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
@@ -56,30 +57,35 @@ class KafkaConfig(
         return factory
     }
 
-    private fun producerConfigs() = mapOf(
-        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
-        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-        ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
-        ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
-        ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name,
-    ) + securityConfig()
+    private fun producerConfigs() =
+        mapOf(
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            // Den sikrer rekkefølge
+            ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true,
+            // Den sikrer at data ikke mistes
+            ProducerConfig.ACKS_CONFIG to "all",
+            ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_TILBAKE.name,
+        ) + securityConfig()
 
-    fun consumerConfigs() = mapOf(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
-        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-        ConsumerConfig.GROUP_ID_CONFIG to "familie-tilbake",
-        ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-tilbake-1",
-        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
-        CommonClientConfigs.RETRIES_CONFIG to 10,
-        CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100,
-    ) + securityConfig()
+    fun consumerConfigs() =
+        mapOf(
+            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
+            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+            ConsumerConfig.GROUP_ID_CONFIG to "familie-tilbake",
+            ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-tilbake-1",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
+            CommonClientConfigs.RETRIES_CONFIG to 10,
+            CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100,
+        ) + securityConfig()
 
     private fun securityConfig() =
         mapOf(
             CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SSL",
-            SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "", // Disable server host name verification
+            // Disable server host name verification
+            SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "",
             SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "JKS",
             SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
             SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to kafkaTruststorePath,
@@ -90,7 +96,6 @@ class KafkaConfig(
         )
 
     companion object {
-
         const val HISTORIKK_TOPIC = "teamfamilie.privat-historikk-topic"
         const val HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"
         const val HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"

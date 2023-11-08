@@ -22,7 +22,6 @@ data class Foreldelsesperiode(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     fun erForeldet(): Boolean {
         return Foreldelsesvurderingstype.FORELDET == foreldelsesvurderingstype
     }

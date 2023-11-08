@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test
 import java.util.Properties
 
 internal class OppdaterAnsvarligSaksbehandlerTaskTest {
-
     private val behandlingRepository: BehandlingRepository = mockk(relaxed = true)
     private val fagsakRepository: FagsakRepository = mockk(relaxed = true)
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
@@ -90,13 +89,14 @@ internal class OppdaterAnsvarligSaksbehandlerTaskTest {
         return Task(
             type = OppdaterAnsvarligSaksbehandlerTask.TYPE,
             payload = behandling.id.toString(),
-            properties = Properties().apply {
-                setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
-                setProperty(PropertyName.ENHET, "enhet")
-                if (opprettetAv != null) {
-                    setProperty("opprettetAv", opprettetAv)
-                }
-            },
+            properties =
+                Properties().apply {
+                    setProperty("oppgavetype", Oppgavetype.BehandleSak.name)
+                    setProperty(PropertyName.ENHET, "enhet")
+                    if (opprettetAv != null) {
+                        setProperty("opprettetAv", opprettetAv)
+                    }
+                },
         )
     }
 }

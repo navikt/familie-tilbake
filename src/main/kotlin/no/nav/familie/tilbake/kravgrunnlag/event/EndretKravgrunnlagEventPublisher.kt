@@ -6,7 +6,6 @@ import java.util.UUID
 
 @Component
 class EndretKravgrunnlagEventPublisher(val applicationEventPublisher: ApplicationEventPublisher) {
-
     fun fireEvent(behandlingId: UUID) {
         val endretKravgrunnlagEvent = EndretKravgrunnlagEvent(this, behandlingId)
         applicationEventPublisher.publishEvent(endretKravgrunnlagEvent)

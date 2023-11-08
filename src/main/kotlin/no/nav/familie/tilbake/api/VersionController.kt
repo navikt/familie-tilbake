@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 @RequestMapping("/api/info")
 class VersionController {
-
     @Operation(summary = "Hent applikasjonsinformasjon")
     @GetMapping
     fun hentInfo(): Ressurs<Info> {

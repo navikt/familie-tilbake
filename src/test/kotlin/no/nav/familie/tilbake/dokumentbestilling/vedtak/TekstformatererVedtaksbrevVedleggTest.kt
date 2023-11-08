@@ -36,22 +36,22 @@ import java.time.LocalDate
 import java.util.Scanner
 
 class TekstformatererVedtaksbrevVedleggTest {
-
     private val januar = Datoperiode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 31))
     private val februar = Datoperiode(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 28))
     private val mars = Datoperiode(LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31))
 
-    private val brevmetadata = Brevmetadata(
-        sakspartId = "123456",
-        sakspartsnavn = "Test",
-        mottageradresse = Adresseinfo("ident", "bob"),
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        ansvarligSaksbehandler = "Bob",
-        saksnummer = "1232456",
-        språkkode = Språkkode.NB,
-        ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-        gjelderDødsfall = false,
-    )
+    private val brevmetadata =
+        Brevmetadata(
+            sakspartId = "123456",
+            sakspartsnavn = "Test",
+            mottageradresse = Adresseinfo("ident", "bob"),
+            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            ansvarligSaksbehandler = "Bob",
+            saksnummer = "1232456",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+            gjelderDødsfall = false,
+        )
 
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med en periode uten renter`() {
@@ -102,189 +102,214 @@ class TekstformatererVedtaksbrevVedleggTest {
                     brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
                     fagsaksvedtaksdato = LocalDate.now(),
                     totalresultat =
-                    HbTotalresultat(
-                        hovedresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
-                        totaltTilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
-                        totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(
-                            (tilbakekreves + renter)
-                                .toLong(),
+                        HbTotalresultat(
+                            hovedresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+                            totaltTilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
+                            totaltTilbakekrevesBeløpMedRenter =
+                                BigDecimal.valueOf(
+                                    (tilbakekreves + renter)
+                                        .toLong(),
+                                ),
+                            totaltRentebeløp = BigDecimal.valueOf(renter.toLong()),
+                            totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                                BigDecimal
+                                    .valueOf((tilbakekreves + renter - skatt).toLong()),
                         ),
-                        totaltRentebeløp = BigDecimal.valueOf(renter.toLong()),
-                        totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal
-                            .valueOf((tilbakekreves + renter - skatt).toLong()),
-                    ),
                     hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
-                    varsel = HbVarsel(
-                        varsletBeløp = BigDecimal.valueOf(varslet.toLong()),
-                        varsletDato = LocalDate.of(2020, 4, 4),
-                    ),
+                    varsel =
+                        HbVarsel(
+                            varsletBeløp = BigDecimal.valueOf(varslet.toLong()),
+                            varsletDato = LocalDate.of(2020, 4, 4),
+                        ),
                 )
 
         val perioder =
             listOf(
                 HbVedtaksbrevsperiode(
                     periode = januar,
-                    kravgrunnlag = HbKravgrunnlag
-                        .forFeilutbetaltBeløp(BigDecimal.valueOf(feilutbetalt.toLong())),
-                    fakta = HbFakta(
-                        Hendelsestype.BOSATT_I_RIKET,
-                        Hendelsesundertype.BARN_BOR_IKKE_I_NORGE,
-                    ),
-                    vurderinger =
-                    HbVurderinger(
-                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                            .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                        aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        fritekst = "Du er heldig som slapp å betale alt!",
-                        særligeGrunner =
-                        HbSærligeGrunner(
-                            listOf(
-                                SærligGrunn.TID_FRA_UTBETALING,
-                                SærligGrunn.STØRRELSE_BELØP,
-                            ),
+                    kravgrunnlag =
+                        HbKravgrunnlag
+                            .forFeilutbetaltBeløp(BigDecimal.valueOf(feilutbetalt.toLong())),
+                    fakta =
+                        HbFakta(
+                            Hendelsestype.BOSATT_I_RIKET,
+                            Hendelsesundertype.BARN_BOR_IKKE_I_NORGE,
                         ),
-                    ),
+                    vurderinger =
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                                Vilkårsvurderingsresultat
+                                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            fritekst = "Du er heldig som slapp å betale alt!",
+                            særligeGrunner =
+                                HbSærligeGrunner(
+                                    listOf(
+                                        SærligGrunn.TID_FRA_UTBETALING,
+                                        SærligGrunn.STØRRELSE_BELØP,
+                                    ),
+                                ),
+                        ),
                     resultat =
-                    HbResultat(
-                        tilbakekrevesBeløpUtenSkattMedRenter =
-                        BigDecimal.valueOf((tilbakekreves - skatt).toLong()),
-                        tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
-                        rentebeløp = BigDecimal.valueOf(renter.toLong()),
-                    ),
+                        HbResultat(
+                            tilbakekrevesBeløpUtenSkattMedRenter =
+                                BigDecimal.valueOf((tilbakekreves - skatt).toLong()),
+                            tilbakekrevesBeløp = BigDecimal.valueOf(tilbakekreves.toLong()),
+                            rentebeløp = BigDecimal.valueOf(renter.toLong()),
+                        ),
                     førstePeriode = true,
                 ),
             )
         return HbVedtaksbrevsdata(vedtaksbrevData, perioder)
     }
 
-    private fun lagTestBuilder(språkkode: Språkkode = Språkkode.NB, ytelsestype: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD) =
-        HbVedtaksbrevFelles(
-            brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
-            hjemmel = HbHjemmel("Folketrygdloven"),
-            totalresultat = HbTotalresultat(
+    private fun lagTestBuilder(
+        språkkode: Språkkode = Språkkode.NB,
+        ytelsestype: Ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+    ) = HbVedtaksbrevFelles(
+        brevmetadata = brevmetadata.copy(språkkode = språkkode, ytelsestype = ytelsestype),
+        hjemmel = HbHjemmel("Folketrygdloven"),
+        totalresultat =
+            HbTotalresultat(
                 hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
                 totaltRentebeløp = BigDecimal.valueOf(1000),
                 totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
                 totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
                 totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                BigDecimal.valueOf(11000),
+                    BigDecimal.valueOf(11000),
             ),
-            varsel = HbVarsel(
+        varsel =
+            HbVarsel(
                 varsletBeløp = BigDecimal.valueOf(10000),
                 varsletDato = LocalDate.now().minusDays(100),
             ),
-            konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
-            søker = HbPerson(
+        konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
+        søker =
+            HbPerson(
                 navn = "Søker Søkersen",
                 dødsdato = LocalDate.of(2018, 3, 1),
             ),
-            fagsaksvedtaksdato = LocalDate.now(),
-            behandling = HbBehandling(),
-            totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
-            vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
-            ansvarligBeslutter = "ansvarlig person sin signatur",
-        )
+        fagsaksvedtaksdato = LocalDate.now(),
+        behandling = HbBehandling(),
+        totaltFeilutbetaltBeløp = BigDecimal.valueOf(10000),
+        vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
+        ansvarligBeslutter = "ansvarlig person sin signatur",
+    )
 
     @Test
     fun `lagVedtaksbrevVedleggHtml skal generere vedlegg med flere perioder og med renter`() {
-        val vedtaksbrevData = lagTestBuilder()
-            .copy(
-                fagsaksvedtaksdato = LocalDate.now(),
-                totalresultat = HbTotalresultat(
-                    hovedresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
-                    totaltTilbakekrevesBeløp = BigDecimal(23002),
-                    totaltTilbakekrevesBeløpMedRenter = BigDecimal(23302),
-                    totaltRentebeløp = BigDecimal(300),
-                    totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(18537),
-                ),
-                hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
-                varsel = HbVarsel(
-                    varsletBeløp = BigDecimal(33001),
-                    varsletDato = LocalDate.of(2020, 4, 4),
-                ),
-            )
+        val vedtaksbrevData =
+            lagTestBuilder()
+                .copy(
+                    fagsaksvedtaksdato = LocalDate.now(),
+                    totalresultat =
+                        HbTotalresultat(
+                            hovedresultat = Vedtaksresultat.DELVIS_TILBAKEBETALING,
+                            totaltTilbakekrevesBeløp = BigDecimal(23002),
+                            totaltTilbakekrevesBeløpMedRenter = BigDecimal(23302),
+                            totaltRentebeløp = BigDecimal(300),
+                            totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal(18537),
+                        ),
+                    hjemmel = HbHjemmel("Folketrygdloven § 22-15"),
+                    varsel =
+                        HbVarsel(
+                            varsletBeløp = BigDecimal(33001),
+                            varsletDato = LocalDate.of(2020, 4, 4),
+                        ),
+                )
         val perioder =
             listOf(
                 HbVedtaksbrevsperiode(
                     periode = januar,
                     kravgrunnlag = HbKravgrunnlag.forFeilutbetaltBeløp(BigDecimal(30001)),
-                    fakta = HbFakta(
-                        Hendelsestype.ANNET,
-                        Hendelsesundertype.ANNET_FRITEKST,
-                    ),
-                    vurderinger =
-                    HbVurderinger(
-                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                            .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-                        aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
-                        fritekst = "Du er heldig som slapp å betale alt!",
-                        særligeGrunner = HbSærligeGrunner(
-                            listOf(
-                                SærligGrunn
-                                    .TID_FRA_UTBETALING,
-                                SærligGrunn.STØRRELSE_BELØP,
-                            ),
-                            null,
-                            null,
+                    fakta =
+                        HbFakta(
+                            Hendelsestype.ANNET,
+                            Hendelsesundertype.ANNET_FRITEKST,
                         ),
-                    ),
-                    resultat = HbResultat(
-                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(16015),
-                        tilbakekrevesBeløp = BigDecimal(20002),
-                        rentebeløp = BigDecimal.ZERO,
-                    ),
+                    vurderinger =
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                                Vilkårsvurderingsresultat
+                                    .MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                            aktsomhetsresultat = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            fritekst = "Du er heldig som slapp å betale alt!",
+                            særligeGrunner =
+                                HbSærligeGrunner(
+                                    listOf(
+                                        SærligGrunn
+                                            .TID_FRA_UTBETALING,
+                                        SærligGrunn.STØRRELSE_BELØP,
+                                    ),
+                                    null,
+                                    null,
+                                ),
+                        ),
+                    resultat =
+                        HbResultat(
+                            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(16015),
+                            tilbakekrevesBeløp = BigDecimal(20002),
+                            rentebeløp = BigDecimal.ZERO,
+                        ),
                     førstePeriode = true,
                 ),
                 HbVedtaksbrevsperiode(
                     periode = februar,
-                    kravgrunnlag = HbKravgrunnlag(
-                        feilutbetaltBeløp = BigDecimal(3000),
-                        riktigBeløp = BigDecimal(3000),
-                        utbetaltBeløp = BigDecimal(6000),
-                    ),
-                    fakta = HbFakta(
-                        Hendelsestype.BOR_MED_SØKER,
-                        Hendelsesundertype.BOR_IKKE_MED_BARN,
-                    ),
+                    kravgrunnlag =
+                        HbKravgrunnlag(
+                            feilutbetaltBeløp = BigDecimal(3000),
+                            riktigBeløp = BigDecimal(3000),
+                            utbetaltBeløp = BigDecimal(6000),
+                        ),
+                    fakta =
+                        HbFakta(
+                            Hendelsestype.BOR_MED_SØKER,
+                            Hendelsesundertype.BOR_IKKE_MED_BARN,
+                        ),
                     vurderinger =
-                    HbVurderinger(
-                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                        beløpIBehold = BigDecimal.ZERO,
-                    ),
-                    resultat = HbResultat(
-                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.ZERO,
-                        tilbakekrevesBeløp = BigDecimal.ZERO,
-                        rentebeløp = BigDecimal.ZERO,
-                    ),
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                            aktsomhetsresultat = AnnenVurdering.GOD_TRO,
+                            beløpIBehold = BigDecimal.ZERO,
+                        ),
+                    resultat =
+                        HbResultat(
+                            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.ZERO,
+                            tilbakekrevesBeløp = BigDecimal.ZERO,
+                            rentebeløp = BigDecimal.ZERO,
+                        ),
                     førstePeriode = true,
                 ),
                 HbVedtaksbrevsperiode(
                     periode = mars,
-                    kravgrunnlag = HbKravgrunnlag(
-                        feilutbetaltBeløp = BigDecimal(3000),
-                        riktigBeløp = BigDecimal(3000),
-                        utbetaltBeløp = BigDecimal(6000),
-                    ),
-                    fakta = HbFakta(
-                        Hendelsestype.BOR_MED_SØKER,
-                        Hendelsesundertype.BOR_IKKE_MED_BARN,
-                    ),
+                    kravgrunnlag =
+                        HbKravgrunnlag(
+                            feilutbetaltBeløp = BigDecimal(3000),
+                            riktigBeløp = BigDecimal(3000),
+                            utbetaltBeløp = BigDecimal(6000),
+                        ),
+                    fakta =
+                        HbFakta(
+                            Hendelsestype.BOR_MED_SØKER,
+                            Hendelsesundertype.BOR_IKKE_MED_BARN,
+                        ),
                     vurderinger =
-                    HbVurderinger(
-                        foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                        vilkårsvurderingsresultat = Vilkårsvurderingsresultat
-                            .FORSTO_BURDE_FORSTÅTT,
-                        aktsomhetsresultat = Aktsomhet.FORSETT,
-                    ),
-                    resultat = HbResultat(
-                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(2222),
-                        tilbakekrevesBeløp = BigDecimal(3000),
-                        rentebeløp = BigDecimal(300),
-                    ),
+                        HbVurderinger(
+                            foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                            vilkårsvurderingsresultat =
+                                Vilkårsvurderingsresultat
+                                    .FORSTO_BURDE_FORSTÅTT,
+                            aktsomhetsresultat = Aktsomhet.FORSETT,
+                        ),
+                    resultat =
+                        HbResultat(
+                            tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal(2222),
+                            tilbakekrevesBeløp = BigDecimal(3000),
+                            rentebeløp = BigDecimal(300),
+                        ),
                     førstePeriode = true,
                 ),
             )

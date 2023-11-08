@@ -53,7 +53,6 @@ class ForvaltningService(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
@@ -63,10 +62,11 @@ class ForvaltningService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
-        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
-            kravgrunnlagId,
-            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
-        )
+        val hentetKravgrunnlag =
+            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+                kravgrunnlagId,
+                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+            )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
         if (kravgrunnlag != null) {
@@ -78,18 +78,17 @@ class ForvaltningService(
     }
 
     @Transactional
-    fun korrigerKravgrunnlag(
-        behandlingId: UUID,
-    ) {
+    fun korrigerKravgrunnlag(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         sjekkOmBehandlingErAvsluttet(behandling)
 
         val kravgrunnlagId =
             kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }.first().eksternKravgrunnlagId
-        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
-            kravgrunnlagId,
-            KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
-        )
+        val hentetKravgrunnlag =
+            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+                kravgrunnlagId,
+                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+            )
 
         val kravgrunnlag = kravgrunnlagRepository.findByEksternKravgrunnlagIdAndAktivIsTrue(kravgrunnlagId)
         if (kravgrunnlag != null) {
@@ -168,7 +167,10 @@ class ForvaltningService(
         annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId)
     }
 
-    fun hentForvaltningsinfo(ytelsestype: Ytelsestype, eksternFagsakId: String): List<Forvaltningsinfo> {
+    fun hentForvaltningsinfo(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+    ): List<Forvaltningsinfo> {
         val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
         if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }

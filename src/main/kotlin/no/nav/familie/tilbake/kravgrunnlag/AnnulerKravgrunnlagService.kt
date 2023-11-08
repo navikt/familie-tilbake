@@ -9,7 +9,6 @@ import java.math.BigInteger
 
 @Service
 class AnnulerKravgrunnlagService(private val oppdragClient: OppdragClient) {
-
     fun annulerKravgrunnlagRequest(
         eksternKravgrunnlagId: BigInteger,
         vedtakId: BigInteger,

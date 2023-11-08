@@ -9,15 +9,15 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
 @Configuration
-class FeatureToggleConfig(@Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String) {
-
+class FeatureToggleConfig(
+    @Value("\${NAIS_CLUSTER_NAME}") private val clusterName: String,
+) {
     @Bean
     fun strategies(): List<Strategy> {
         return listOf(ByClusterStrategy(clusterName))
     }
 
     companion object {
-
         const val KAN_OPPRETTE_BEH_MED_EKSTERNID_SOM_HAR_AVSLUTTET_TBK =
             "familie-tilbake.beh.kanopprettes.eksternid.avsluttet.tilbakekreving"
 
@@ -33,18 +33,19 @@ class FeatureToggleConfig(@Value("\${NAIS_CLUSTER_NAME}") private val clusterNam
 @Service
 @Profile("!integrasjonstest")
 class FeatureToggleService(val unleashService: UnleashService) {
-
     fun isEnabled(toggleId: String): Boolean {
         return unleashService.isEnabled(toggleId, false)
     }
 
-    fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
+    fun isEnabled(
+        toggleId: String,
+        defaultValue: Boolean,
+    ): Boolean {
         return unleashService.isEnabled(toggleId, defaultValue)
     }
 }
 
 class ByClusterStrategy(private val clusterName: String) : Strategy {
-
     override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
         if (parameters.isEmpty()) return false
         return parameters["cluster"]?.contains(clusterName) ?: false

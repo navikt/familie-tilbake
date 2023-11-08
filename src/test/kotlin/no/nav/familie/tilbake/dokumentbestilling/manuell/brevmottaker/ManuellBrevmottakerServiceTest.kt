@@ -49,7 +49,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
     private val mockHistorikkService: HistorikkService = mockk(relaxed = true)
@@ -79,17 +78,19 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
     private val opprettetTidspunktSlot = mutableListOf<LocalDateTime>()
 
-    private val manuellBrevmottakerRequestDto = ManuellBrevmottakerRequestDto(
-        type = DØDSBO,
-        navn = "John Doe",
-        manuellAdresseInfo = ManuellAdresseInfo(
-            adresselinje1 = "test adresse1",
-            adresselinje2 = "test adresse2",
-            postnummer = "0000",
-            poststed = "Oslo",
-            landkode = "NO",
-        ),
-    )
+    private val manuellBrevmottakerRequestDto =
+        ManuellBrevmottakerRequestDto(
+            type = DØDSBO,
+            navn = "John Doe",
+            manuellAdresseInfo =
+                ManuellAdresseInfo(
+                    adresselinje1 = "test adresse1",
+                    adresselinje2 = "test adresse2",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+        )
 
     private val mockPdlClient: PdlClient = mockk()
 
@@ -100,17 +101,17 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
 
-        manuellBrevmottakerService = ManuellBrevmottakerService(
-            manuellBrevmottakerRepository = manuellBrevmottakerRepository,
-            historikkService = mockHistorikkService,
-            behandlingRepository = behandlingRepository,
-            behandlingskontrollService = behandlingskontrollService,
-            fagsakService = fagsakService,
-            pdlClient = mockPdlClient,
-            integrasjonerClient = mockIntegrasjonerClient,
-            validerBrevmottakerService = validerBrevmottakerService,
-
-        )
+        manuellBrevmottakerService =
+            ManuellBrevmottakerService(
+                manuellBrevmottakerRepository = manuellBrevmottakerRepository,
+                historikkService = mockHistorikkService,
+                behandlingRepository = behandlingRepository,
+                behandlingskontrollService = behandlingskontrollService,
+                fagsakService = fagsakService,
+                pdlClient = mockPdlClient,
+                integrasjonerClient = mockIntegrasjonerClient,
+                validerBrevmottakerService = validerBrevmottakerService,
+            )
 
         every {
             mockHistorikkService.lagHistorikkinnslag(
@@ -167,14 +168,16 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             )
         }
 
-        val oppdatertManuellBrevmottaker = manuellBrevmottakerRequestDto.copy(
-            manuellAdresseInfo = ManuellAdresseInfo(
-                adresselinje1 = "ny",
-                postnummer = "1111",
-                poststed = "stavanger",
-                landkode = "NO",
-            ),
-        )
+        val oppdatertManuellBrevmottaker =
+            manuellBrevmottakerRequestDto.copy(
+                manuellAdresseInfo =
+                    ManuellAdresseInfo(
+                        adresselinje1 = "ny",
+                        postnummer = "1111",
+                        poststed = "stavanger",
+                        landkode = "NO",
+                    ),
+            )
         shouldNotThrow<RuntimeException> {
             manuellBrevmottakerService.oppdaterBrevmottaker(
                 behandling.id,
@@ -290,36 +293,42 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal hente og legge til navn fra registeroppslag når request inneholder identinformasjon`() {
-        val requestMedPersonIdent = manuellBrevmottakerRequestDto.copy(
-            personIdent = "12345678910",
-            manuellAdresseInfo = null,
-        )
+        val requestMedPersonIdent =
+            manuellBrevmottakerRequestDto.copy(
+                personIdent = "12345678910",
+                manuellAdresseInfo = null,
+            )
         manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
         var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
         lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", Fagsystem.BA).navn
 
-        val requestMedOrgnrUtenKontaktperson = manuellBrevmottakerRequestDto.copy(
-            navn = " ",
-            organisasjonsnummer = "123456789",
-            manuellAdresseInfo = null,
-        )
+        val requestMedOrgnrUtenKontaktperson =
+            manuellBrevmottakerRequestDto.copy(
+                navn = " ",
+                organisasjonsnummer = "123456789",
+                manuellAdresseInfo = null,
+            )
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrUtenKontaktperson)
 
         lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
         lagretMottaker.navn shouldBe "Organisasjon AS"
 
-        val requestMedOrgnrMedKontaktperson = manuellBrevmottakerRequestDto.copy(
-            organisasjonsnummer = "123456789",
-            manuellAdresseInfo = null,
-        )
+        val requestMedOrgnrMedKontaktperson =
+            manuellBrevmottakerRequestDto.copy(
+                organisasjonsnummer = "123456789",
+                manuellAdresseInfo = null,
+            )
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrMedKontaktperson)
 
         lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
         lagretMottaker.navn shouldBe "Organisasjon AS v/ ${manuellBrevmottakerRequestDto.navn}"
     }
 
-    private fun assertEqualsManuellBrevmottaker(a: ManuellBrevmottaker, b: ManuellBrevmottakerRequestDto) {
+    private fun assertEqualsManuellBrevmottaker(
+        a: ManuellBrevmottaker,
+        b: ManuellBrevmottakerRequestDto,
+    ) {
         a.id.shouldNotBeNull()
         a.orgNr shouldBe b.organisasjonsnummer
         a.ident shouldBe b.personIdent

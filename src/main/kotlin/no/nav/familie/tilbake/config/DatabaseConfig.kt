@@ -28,7 +28,6 @@ import javax.sql.DataSource
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie.tilbake", "no.nav.familie.prosessering")
 class DatabaseConfig : AbstractJdbcConfiguration() {
-
     @Bean
     fun operations(dataSource: DataSource): NamedParameterJdbcOperations {
         return NamedParameterJdbcTemplate(dataSource)
@@ -62,7 +61,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class KravstatuskodeLesConverter : Converter<String, Kravstatuskode> {
-
         override fun convert(kode: String): Kravstatuskode {
             return Kravstatuskode.fraKode(kode)
         }
@@ -70,7 +68,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class KravstatuskodeSkrivConverter : Converter<Kravstatuskode, String> {
-
         override fun convert(kravstatuskode: Kravstatuskode): String {
             return kravstatuskode.kode
         }
@@ -78,7 +75,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class YearMonthTilLocalDateConverter : Converter<YearMonth?, LocalDate> {
-
         override fun convert(yearMonth: YearMonth): LocalDate {
             return yearMonth.let {
                 LocalDate.of(it.year, it.month, 1)
@@ -88,7 +84,6 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
-
         override fun convert(date: Date): YearMonth {
             return date.let {
                 val localDate = date.toLocalDate()

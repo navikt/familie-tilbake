@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class HbGrunnbeløpUtilTest {
-
     @Test
     internal fun `skal bruke fra og til fra perioden hvis de er innenfor perioden sine datoer `() {
         val result = lagHbGrunnbeløp(Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)))

@@ -14,7 +14,6 @@ import java.math.RoundingMode
 import java.time.YearMonth
 
 object KravgrunnlagValidator {
-
     @Throws(UgyldigKravgrunnlagFeil::class)
     fun validerGrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
         validerReferanse(kravgrunnlag)
@@ -32,8 +31,9 @@ object KravgrunnlagValidator {
 
     private fun validerReferanse(kravgrunnlag: DetaljertKravgrunnlagDto) {
         kravgrunnlag.referanse ?: throw UgyldigKravgrunnlagFeil(
-            melding = "Ugyldig kravgrunnlag for kravgrunnlagId " +
-                "${kravgrunnlag.kravgrunnlagId}. Mangler referanse.",
+            melding =
+                "Ugyldig kravgrunnlag for kravgrunnlagId " +
+                    "${kravgrunnlag.kravgrunnlagId}. Mangler referanse.",
         )
     }
 
@@ -98,9 +98,10 @@ object KravgrunnlagValidator {
     }
 
     private fun validerOverlappendePerioder(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        val sortertePerioder: List<Månedsperiode> = kravgrunnlag.tilbakekrevingsPeriode
-            .map { p -> Månedsperiode(p.periode.fom, p.periode.tom) }
-            .sorted()
+        val sortertePerioder: List<Månedsperiode> =
+            kravgrunnlag.tilbakekrevingsPeriode
+                .map { p -> Månedsperiode(p.periode.fom, p.periode.tom) }
+                .sorted()
         for (i in 1 until sortertePerioder.size) {
             val forrigePeriode = sortertePerioder[i - 1]
             val nåværendePeriode = sortertePerioder[i]
@@ -114,8 +115,9 @@ object KravgrunnlagValidator {
     }
 
     private fun validerSkatt(kravgrunnlag: DetaljertKravgrunnlagDto) {
-        val grupppertPåMåned: Map<YearMonth, List<DetaljertKravgrunnlagPeriodeDto>> = kravgrunnlag.tilbakekrevingsPeriode
-            .groupBy { tilMåned(it.periode) }.toMap()
+        val grupppertPåMåned: Map<YearMonth, List<DetaljertKravgrunnlagPeriodeDto>> =
+            kravgrunnlag.tilbakekrevingsPeriode
+                .groupBy { tilMåned(it.periode) }.toMap()
 
         for ((key, value) in grupppertPåMåned) {
             validerSkattForPeriode(key, value, kravgrunnlag.kravgrunnlagId)
@@ -177,12 +179,14 @@ object KravgrunnlagValidator {
 
     private fun validerYtelseMotFeilutbetaling(kravgrunnlag: DetaljertKravgrunnlagDto) {
         for (kravgrunnlagsperiode in kravgrunnlag.tilbakekrevingsPeriode) {
-            val sumTilbakekrevesFraYtelsePosteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
-                .filter { finnesYtelsespostering(it.typeKlasse) }
-                .sumOf(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
-            val sumNyttBelopFraFeilposteringer = kravgrunnlagsperiode.tilbakekrevingsBelop
-                .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
-                .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
+            val sumTilbakekrevesFraYtelsePosteringer =
+                kravgrunnlagsperiode.tilbakekrevingsBelop
+                    .filter { finnesYtelsespostering(it.typeKlasse) }
+                    .sumOf(DetaljertKravgrunnlagBelopDto::getBelopTilbakekreves)
+            val sumNyttBelopFraFeilposteringer =
+                kravgrunnlagsperiode.tilbakekrevingsBelop
+                    .filter { finnesFeilutbetalingspostering(it.typeKlasse) }
+                    .sumOf(DetaljertKravgrunnlagBelopDto::getBelopNy)
             if (sumNyttBelopFraFeilposteringer.compareTo(sumTilbakekrevesFraYtelsePosteringer) != 0) {
                 throw UgyldigKravgrunnlagFeil(
                     "Ugyldig kravgrunnlag for kravgrunnlagId ${kravgrunnlag.kravgrunnlagId}. " +

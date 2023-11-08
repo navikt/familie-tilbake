@@ -36,7 +36,6 @@ class InnhentDokumentasjonbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
@@ -63,7 +62,6 @@ class InnhentDokumentasjonbrevTask(
     }
 
     companion object {
-
         fun opprettTask(
             behandlingId: UUID,
             fagsystem: Fagsystem,

@@ -20,32 +20,35 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class TilbakekrevingsberegningVilkårTest {
-
     private lateinit var vilkårsvurderingsperiode: Vilkårsvurderingsperiode
     private lateinit var grunnlagsperiodeMedSkatteprosent: GrunnlagsperiodeMedSkatteprosent
     private lateinit var forstodBurdeForståttVurdering: Vilkårsvurderingsperiode
 
-    private val FEILUTBETALT_BELØP = BigDecimal.valueOf(10_000)
-    private val RENTEPROSENT = BigDecimal.valueOf(10)
+    companion object {
+        private val FEILUTBETALT_BELØP = BigDecimal.valueOf(10_000)
+        private val RENTEPROSENT = BigDecimal.valueOf(10)
+    }
 
     @BeforeEach
     fun setup() {
         vilkårsvurderingsperiode =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                periode = Månedsperiode(
-                    LocalDate.of(2019, 5, 1),
-                    LocalDate.of(2019, 5, 3),
-                ),
+                periode =
+                    Månedsperiode(
+                        LocalDate.of(2019, 5, 1),
+                        LocalDate.of(2019, 5, 3),
+                    ),
                 begrunnelse = "foo",
             )
         forstodBurdeForståttVurdering =
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                periode = Månedsperiode(
-                    LocalDate.of(2019, 5, 1),
-                    LocalDate.of(2019, 5, 3),
-                ),
+                periode =
+                    Månedsperiode(
+                        LocalDate.of(2019, 5, 1),
+                        LocalDate.of(2019, 5, 3),
+                    ),
                 begrunnelse = "foo",
             )
 
@@ -59,13 +62,15 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro`() {
             val manueltBeløp = BigDecimal.valueOf(8991)
 
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                godTro = VilkårsvurderingGodTro(
-                    beløpErIBehold = true,
-                    beløpTilbakekreves = manueltBeløp,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    godTro =
+                        VilkårsvurderingGodTro(
+                            beløpErIBehold = true,
+                            beløpTilbakekreves = manueltBeløp,
+                            begrunnelse = "foo",
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -87,12 +92,14 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake ingenting når det er god tro og beløp ikke er i_behold`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                godTro = VilkårsvurderingGodTro(
-                    beløpErIBehold = false,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    godTro =
+                        VilkårsvurderingGodTro(
+                            beløpErIBehold = false,
+                            begrunnelse = "foo",
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -114,13 +121,15 @@ class TilbakekrevingsberegningVilkårTest {
         @Test
         fun `beregn skalkreve tilbake beløp som er i_behold uten renter ved god tro med skatt prosent`() {
             val beløpTilbakekreves = BigDecimal.valueOf(8991)
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                godTro = VilkårsvurderingGodTro(
-                    beløpErIBehold = true,
-                    beløpTilbakekreves = beløpTilbakekreves,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    godTro =
+                        VilkårsvurderingGodTro(
+                            beløpErIBehold = true,
+                            beløpTilbakekreves = beløpTilbakekreves,
+                            begrunnelse = "foo",
+                        ),
+                )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
                     periode = vilkårsvurdering.periode,
@@ -153,12 +162,14 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetForsett {
         @Test
         fun `beregn skal kreve tilbake alt med renter ved forsett og illeggRenter ikke satt`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.FORSETT,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -183,19 +194,21 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skal kreve tilbake alt med renter ved forsett og illeggRenter satt true`() {
             val vilkårsvurdering =
                 forstodBurdeForståttVurdering.copy(
-                    aktsomhet = VilkårsvurderingAktsomhet(
-                        aktsomhet = Aktsomhet.FORSETT,
-                        begrunnelse = "foo",
-                        ileggRenter = true,
-                    ),
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                            ileggRenter = true,
+                        ),
                 )
 
-            val resultat: Beregningsresultatsperiode = beregn(
-                vilkårVurdering = vilkårsvurdering,
-                feilutbetalt = FEILUTBETALT_BELØP,
-                perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-                beregnRenter = true,
-            )
+            val resultat: Beregningsresultatsperiode =
+                beregn(
+                    vilkårVurdering = vilkårsvurdering,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true,
+                )
 
             resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
@@ -212,19 +225,21 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake alt uten renter ved forsett og illeggRenter satt false`() {
             val vilkårsvurdering =
                 forstodBurdeForståttVurdering.copy(
-                    aktsomhet = VilkårsvurderingAktsomhet(
-                        aktsomhet = Aktsomhet.FORSETT,
-                        begrunnelse = "foo",
-                        ileggRenter = false,
-                    ),
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                            ileggRenter = false,
+                        ),
                 )
 
-            val resultat: Beregningsresultatsperiode = beregn(
-                vilkårVurdering = vilkårsvurdering,
-                feilutbetalt = FEILUTBETALT_BELØP,
-                perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
-                beregnRenter = true,
-            )
+            val resultat: Beregningsresultatsperiode =
+                beregn(
+                    vilkårVurdering = vilkårsvurdering,
+                    feilutbetalt = FEILUTBETALT_BELØP,
+                    perioderMedSkatteprosent = Lists.newArrayList(grunnlagsperiodeMedSkatteprosent),
+                    beregnRenter = true,
+                )
 
             resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
@@ -236,12 +251,14 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake alt med renter ved forsett med skatt prosent`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.FORSETT,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                        ),
+                )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
                     periode = vilkårsvurdering.periode,
@@ -270,12 +287,14 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake alt uten renter ved forsett men frisinn med skatt prosent`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.FORSETT,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                        ),
+                )
             val grunnlagPeriodeMedSkattProsent =
                 GrunnlagsperiodeMedSkatteprosent(
                     periode = vilkårsvurdering.periode,
@@ -304,12 +323,14 @@ class TilbakekrevingsberegningVilkårTest {
             val tilbakekrevingsbeløp = BigDecimal.valueOf(4212)
             val skatteprosent = BigDecimal.valueOf(33.9981)
 
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.FORSETT,
-                    begrunnelse = "foo",
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                        ),
+                )
 
             val grunnlagPeriodeMedSkattProsent =
                 listOf(
@@ -320,20 +341,22 @@ class TilbakekrevingsberegningVilkårTest {
                     ),
                 )
 
-            val resultat = beregn(
-                vilkårVurdering = vilkårsvurdering,
-                feilutbetalt = tilbakekrevingsbeløp,
-                perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
-                beregnRenter = true,
-                bruk6desimalerISkatteberegning = false,
-            )
-            val resultatMed6Desimaler = beregn(
-                vilkårVurdering = vilkårsvurdering,
-                feilutbetalt = tilbakekrevingsbeløp,
-                perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
-                beregnRenter = true,
-                bruk6desimalerISkatteberegning = true,
-            )
+            val resultat =
+                beregn(
+                    vilkårVurdering = vilkårsvurdering,
+                    feilutbetalt = tilbakekrevingsbeløp,
+                    perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
+                    beregnRenter = true,
+                    bruk6desimalerISkatteberegning = false,
+                )
+            val resultatMed6Desimaler =
+                beregn(
+                    vilkårVurdering = vilkårsvurdering,
+                    feilutbetalt = tilbakekrevingsbeløp,
+                    perioderMedSkatteprosent = grunnlagPeriodeMedSkattProsent,
+                    beregnRenter = true,
+                    bruk6desimalerISkatteberegning = true,
+                )
 
             resultat.skalHaVerdier(
                 vilkårsvurdering = vilkårsvurdering,
@@ -365,14 +388,16 @@ class TilbakekrevingsberegningVilkårTest {
     inner class VilkårsvurderingAktsomhetGrovUaktsomhet {
         @Test
         fun `beregn skalkreve tilbake alt ved grov uaktsomhet når ikke annet er valgt`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = false,
-                    ileggRenter = true,
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = false,
+                            ileggRenter = true,
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -393,15 +418,17 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skalkreve tilbake deler ved grov uaktsomhet når særlige grunner er valgt og ilegge renter når det er valgt`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = true,
-                    ileggRenter = true,
-                    andelTilbakekreves = BigDecimal.valueOf(70),
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = true,
+                            ileggRenter = true,
+                            andelTilbakekreves = BigDecimal.valueOf(70),
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -424,15 +451,17 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skal kreve tilbake deler ved grov uaktsomhet ved når særlige grunner og ikke ilegge renter når det er false`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = true,
-                    ileggRenter = false,
-                    andelTilbakekreves = BigDecimal.valueOf(70),
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = true,
+                            ileggRenter = false,
+                            andelTilbakekreves = BigDecimal.valueOf(70),
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -453,15 +482,17 @@ class TilbakekrevingsberegningVilkårTest {
 
         @Test
         fun `beregn skaltakle desimaler på prosenter som tilbakekreves`() {
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = true,
-                    ileggRenter = false,
-                    andelTilbakekreves = BigDecimal("0.01"),
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = true,
+                            ileggRenter = false,
+                            andelTilbakekreves = BigDecimal("0.01"),
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -484,16 +515,18 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake manuelt beløp når det er satt`() {
             val manueltSattBeløp = BigDecimal.valueOf(6556)
 
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = true,
-                    ileggRenter = false,
-                    manueltSattBeløp = manueltSattBeløp,
-                ),
-                godTro = null,
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = true,
+                            ileggRenter = false,
+                            manueltSattBeløp = manueltSattBeløp,
+                        ),
+                    godTro = null,
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -517,15 +550,17 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalkreve tilbake manuelt beløp med renter når det er satt`() {
             val manueltSattBeløp = BigDecimal.valueOf(6000)
 
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = true,
-                    ileggRenter = true,
-                    manueltSattBeløp = manueltSattBeløp,
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = true,
+                            ileggRenter = true,
+                            manueltSattBeløp = manueltSattBeløp,
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -554,14 +589,16 @@ class TilbakekrevingsberegningVilkårTest {
         fun `beregn skalikke kreve noe når sjette ledd benyttes for å ikke gjøre innkreving av småbeløp`() {
             val feilutbetaltBeløp = BigDecimal.valueOf(522)
 
-            val vilkårsvurdering = vilkårsvurderingsperiode.copy(
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    begrunnelse = "foo",
-                    særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = false,
-                ),
-            )
+            val vilkårsvurdering =
+                vilkårsvurderingsperiode.copy(
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            begrunnelse = "foo",
+                            særligeGrunnerTilReduksjon = false,
+                            tilbakekrevSmåbeløp = false,
+                        ),
+                )
 
             val resultat: Beregningsresultatsperiode =
                 beregn(
@@ -612,9 +649,11 @@ class TilbakekrevingsberegningVilkårTest {
         manueltSattTilbakekrevingsbeløp: BigDecimal? = null,
         tilbakekrevingsbeløpUtenRenter: BigDecimal = feilutbetalt,
         rentebeløp: BigDecimal = BigDecimal.ZERO,
-        tilbakekrevingsbeløp: BigDecimal = tilbakekrevingsbeløpUtenRenter, // Med mindre annet er fylt inn vil det ikke legges på renter
+        // Med mindre annet er fylt inn vil det ikke legges på renter
+        tilbakekrevingsbeløp: BigDecimal = tilbakekrevingsbeløpUtenRenter,
         skattebeløp: BigDecimal = BigDecimal.ZERO,
-        tilbakekrevingsbeløpEtterSkatt: BigDecimal = tilbakekrevingsbeløp, // Med mindre annet er fylt inn vil det ikke tas hensyn til skatt
+        // Med mindre annet er fylt inn vil det ikke tas hensyn til skatt
+        tilbakekrevingsbeløpEtterSkatt: BigDecimal = tilbakekrevingsbeløp,
         utbetaltYtelsesbeløp: BigDecimal = feilutbetalt,
         riktigYtelsesbeløp: BigDecimal = BigDecimal.ZERO,
     ) {

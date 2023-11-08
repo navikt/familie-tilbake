@@ -66,7 +66,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -158,14 +157,16 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 når behandling finnes med revurdering gamle enn 10 dager`() {
-        val fagsystemsbehandling = Fagsystemsbehandling(
-            eksternId = UUID.randomUUID().toString(),
-            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-            revurderingsvedtaksdato = LocalDate.now().minusDays(10),
-            resultat = "OPPHØR",
-            årsak = "testverdi",
-        )
+        val fagsystemsbehandling =
+            Fagsystemsbehandling(
+                eksternId = UUID.randomUUID().toString(),
+                tilbakekrevingsvalg =
+                    Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                revurderingsvedtaksdato = LocalDate.now().minusDays(10),
+                resultat = "OPPHØR",
+                årsak = "testverdi",
+            )
         behandlingRepository.update(
             behandlingRepository.findByIdOrThrow(behandling.id)
                 .copy(fagsystemsbehandling = setOf(fagsystemsbehandling)),
@@ -295,12 +296,12 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             .tilbakehoppBehandlingssteg(
                 behandlingId = behandling.id,
                 behandlingsstegsinfo =
-                Behandlingsstegsinfo(
-                    Behandlingssteg.GRUNNLAG,
-                    Behandlingsstegstatus.VENTER,
-                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                    LocalDate.now().plusWeeks(4),
-                ),
+                    Behandlingsstegsinfo(
+                        Behandlingssteg.GRUNNLAG,
+                        Behandlingsstegstatus.VENTER,
+                        Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                        LocalDate.now().plusWeeks(4),
+                    ),
             )
         val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
 
@@ -477,12 +478,13 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         // Håndter Vilkårsvurdering steg
-        val periodeMedGodTro = VilkårsvurderingsperiodeDto(
-            periode,
-            Vilkårsvurderingsresultat.GOD_TRO,
-            "Vilkårs begrunnelse",
-            GodTroDto(begrunnelse = "god tro", beløpErIBehold = false),
-        )
+        val periodeMedGodTro =
+            VilkårsvurderingsperiodeDto(
+                periode,
+                Vilkårsvurderingsresultat.GOD_TRO,
+                "Vilkårs begrunnelse",
+                GodTroDto(begrunnelse = "god tro", beløpErIBehold = false),
+            )
         stegService.håndterSteg(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(listOf(periodeMedGodTro)),
@@ -671,10 +673,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har YTEL postering som ikke matcher beregning`() {
-        val kravgrunnlagXml = readXml(
-            "/kravgrunnlagxml/" +
-                "kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml",
-        )
+        val kravgrunnlagXml =
+            readXml(
+                "/kravgrunnlagxml/" +
+                    "kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml",
+            )
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
@@ -693,10 +696,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         behandleKravgrunnlagTask.doTask(task)
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretFalse(behandling.id).shouldBeFalse()
 
-        val mottattKravgrunnlagListe = mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-        )
+        val mottattKravgrunnlagListe =
+            mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+            )
         assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0")
 
         mottattXmlArkivRepository.findAll().toList().shouldBeEmpty()
@@ -713,10 +717,11 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
 
-        val mottattKravgrunnlagListe = mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-        )
+        val mottattKravgrunnlagListe =
+            mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+            )
         assertOkoXmlMottattData(mottattKravgrunnlagListe, endretKravgrunnlagXml, Kravstatuskode.ENDRET, "1")
 
         mottattXmlArkivRepository.findAll().toList().shouldNotBeEmpty()

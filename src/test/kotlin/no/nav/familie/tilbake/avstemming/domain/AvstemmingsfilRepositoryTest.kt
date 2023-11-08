@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class AvstemmingsfilRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var avstemmingsfilRepository: AvstemmingsfilRepository
 

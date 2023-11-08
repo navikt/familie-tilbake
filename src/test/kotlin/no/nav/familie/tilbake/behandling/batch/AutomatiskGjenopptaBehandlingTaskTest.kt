@@ -27,7 +27,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -184,14 +183,15 @@ internal class AutomatiskGjenopptaBehandlingTaskTest : OppslagSpringRunnerTest()
         }.shouldBeTrue()
     }
 
-    private fun lagTask(behandlingId: UUID) = Task(
-        type = AutomatiskGjenopptaBehandlingTask.TYPE,
-        payload = behandlingId.toString(),
-        Properties().apply {
-            setProperty(
-                PropertyName.FAGSYSTEM,
-                Fagsystem.BA.name,
-            )
-        },
-    )
+    private fun lagTask(behandlingId: UUID) =
+        Task(
+            type = AutomatiskGjenopptaBehandlingTask.TYPE,
+            payload = behandlingId.toString(),
+            Properties().apply {
+                setProperty(
+                    PropertyName.FAGSYSTEM,
+                    Fagsystem.BA.name,
+                )
+            },
+        )
 }

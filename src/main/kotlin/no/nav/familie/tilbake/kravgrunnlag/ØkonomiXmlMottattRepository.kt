@@ -15,8 +15,10 @@ import java.util.UUID
 @Repository
 @Transactional
 interface ØkonomiXmlMottattRepository : RepositoryInterface<ØkonomiXmlMottatt, UUID>, InsertUpdateRepository<ØkonomiXmlMottatt> {
-
-    fun findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId: BigInteger, vedtakId: BigInteger): List<ØkonomiXmlMottatt>
+    fun findByEksternKravgrunnlagIdAndVedtakId(
+        eksternKravgrunnlagId: BigInteger,
+        vedtakId: BigInteger,
+    ): List<ØkonomiXmlMottatt>
 
     fun findByEksternFagsakIdAndYtelsestypeAndVedtakId(
         eksternFagsakId: String,

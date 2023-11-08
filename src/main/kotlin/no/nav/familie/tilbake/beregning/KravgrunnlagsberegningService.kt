@@ -18,7 +18,6 @@ import java.util.function.Function
 
 @Service
 object KravgrunnlagsberegningService {
-
     private val feilutbetaltYtelsesbeløputleder: (Kravgrunnlagsperiode432) -> BigDecimal = { kgPeriode: Kravgrunnlagsperiode432 ->
         kgPeriode.beløp
             .filter { it.klassetype == Klassetype.FEIL }
@@ -52,23 +51,28 @@ object KravgrunnlagsberegningService {
 
     fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
         return kravgrunnlag.perioder.associate {
-            it.periode to FordeltKravgrunnlagsbeløp(
-                feilutbetaltYtelsesbeløputleder(it),
-                utbetaltYtelsesbeløputleder(it),
-                riktigYteslesbeløputleder(it),
-            )
+            it.periode to
+                FordeltKravgrunnlagsbeløp(
+                    feilutbetaltYtelsesbeløputleder(it),
+                    utbetaltYtelsesbeløputleder(it),
+                    riktigYteslesbeløputleder(it),
+                )
         }
     }
 
-    fun beregnFeilutbetaltBeløp(kravgrunnlag: Kravgrunnlag431, vurderingsperiode: Månedsperiode): BigDecimal {
+    fun beregnFeilutbetaltBeløp(
+        kravgrunnlag: Kravgrunnlag431,
+        vurderingsperiode: Månedsperiode,
+    ): BigDecimal {
         return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
     }
 
     fun validatePerioder(perioder: List<Datoperiode>) {
-        val perioderSomIkkeErHeleMåneder = perioder.filter {
-            it.fom.dayOfMonth != 1 ||
-                it.tom.dayOfMonth != YearMonth.from(it.tom).lengthOfMonth()
-        }
+        val perioderSomIkkeErHeleMåneder =
+            perioder.filter {
+                it.fom.dayOfMonth != 1 ||
+                    it.tom.dayOfMonth != YearMonth.from(it.tom).lengthOfMonth()
+            }
 
         if (perioderSomIkkeErHeleMåneder.isNotEmpty()) {
             throw Feil(
@@ -84,17 +88,18 @@ object KravgrunnlagsberegningService {
         vurderingsperiode: Månedsperiode,
         beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>,
     ): BigDecimal {
-        val sum = kravgrunnlag.perioder
-            .sortedBy { it.periode.fom }
-            .sumOf {
-                val beløp = beløpsummerer.apply(it)
-                if (beløp.isNotZero()) {
-                    val beløpPerMåned: BigDecimal = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode)
-                    BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
-                } else {
-                    BigDecimal.ZERO
+        val sum =
+            kravgrunnlag.perioder
+                .sortedBy { it.periode.fom }
+                .sumOf {
+                    val beløp = beløpsummerer.apply(it)
+                    if (beløp.isNotZero()) {
+                        val beløpPerMåned: BigDecimal = BeløpsberegningUtil.beregnBeløpPerMåned(beløp, it.periode)
+                        BeløpsberegningUtil.beregnBeløp(vurderingsperiode, it.periode, beløpPerMåned)
+                    } else {
+                        BigDecimal.ZERO
+                    }
                 }
-            }
         return sum.setScale(0, RoundingMode.HALF_UP)
     }
 }

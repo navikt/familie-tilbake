@@ -23,7 +23,6 @@ class OppdaterOppgaveTask(
     val environment: Environment,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -37,16 +36,18 @@ class OppdaterOppgaveTask(
 
         val oppgave = oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
 
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
-            beskrivelse + System.lineSeparator() + oppgave.beskrivelse
+        val nyBeskrivelse =
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
+                beskrivelse + System.lineSeparator() + oppgave.beskrivelse
 
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
 
-        var patchetOppgave = oppgave.copy(
-            fristFerdigstillelse = frist,
-            beskrivelse = nyBeskrivelse,
-            prioritet = prioritet,
-        )
+        var patchetOppgave =
+            oppgave.copy(
+                fristFerdigstillelse = frist,
+                beskrivelse = nyBeskrivelse,
+                prioritet = prioritet,
+            )
         if (!saksbehandler.isNullOrEmpty() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
@@ -54,7 +55,6 @@ class OppdaterOppgaveTask(
     }
 
     companion object {
-
         const val TYPE = "oppdaterOppgave"
     }
 }

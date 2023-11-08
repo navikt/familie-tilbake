@@ -22,7 +22,6 @@ import java.util.UUID
 
 @Service
 class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegningService: TilbakekrevingsberegningService) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun beregnVedtaksperioder(
@@ -69,16 +68,17 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     ): List<Tilbakekrevingsbeløp> {
         return kravgrunnlagsbeløp.mapNotNull {
             when (it.klassetype) {
-                Klassetype.FEIL -> Tilbakekrevingsbeløp(
-                    klassetype = it.klassetype,
-                    klassekode = it.klassekode,
-                    nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
-                    utbetaltBeløp = BigDecimal.ZERO,
-                    tilbakekrevesBeløp = BigDecimal.ZERO,
-                    uinnkrevdBeløp = BigDecimal.ZERO,
-                    skattBeløp = BigDecimal.ZERO,
-                    kodeResultat = utledKodeResulat(beregnetPeriode),
-                )
+                Klassetype.FEIL ->
+                    Tilbakekrevingsbeløp(
+                        klassetype = it.klassetype,
+                        klassekode = it.klassekode,
+                        nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
+                        utbetaltBeløp = BigDecimal.ZERO,
+                        tilbakekrevesBeløp = BigDecimal.ZERO,
+                        uinnkrevdBeløp = BigDecimal.ZERO,
+                        skattBeløp = BigDecimal.ZERO,
+                        kodeResultat = utledKodeResulat(beregnetPeriode),
+                    )
                 Klassetype.YTEL -> {
                     val beregnetTilbakrevesbeløp = beregnTilbakekrevesbeløp(beregnetPeriode, it)
                     val opprinneligTilbakekrevesbeløp: BigDecimal = it.tilbakekrevesBeløp
@@ -89,12 +89,14 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
                         nyttBeløp = it.nyttBeløp.setScale(0, RoundingMode.HALF_UP),
                         utbetaltBeløp = it.opprinneligUtbetalingsbeløp.setScale(0, RoundingMode.HALF_UP),
                         tilbakekrevesBeløp = beregnetTilbakrevesbeløp,
-                        uinnkrevdBeløp = opprinneligTilbakekrevesbeløp
-                            .subtract(beregnetTilbakrevesbeløp).setScale(0, RoundingMode.HALF_UP),
-                        skattBeløp = beregnSkattBeløp(
-                            beregnetTilbakrevesbeløp,
-                            it.skatteprosent,
-                        ),
+                        uinnkrevdBeløp =
+                            opprinneligTilbakekrevesbeløp
+                                .subtract(beregnetTilbakrevesbeløp).setScale(0, RoundingMode.HALF_UP),
+                        skattBeløp =
+                            beregnSkattBeløp(
+                                beregnetTilbakrevesbeløp,
+                                it.skatteprosent,
+                            ),
                         kodeResultat = utledKodeResulat(beregnetPeriode),
                     )
                 }
@@ -141,43 +143,51 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         }
     }
 
-    private fun justerNed(differanse: BigDecimal, perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
+    private fun justerNed(
+        differanse: BigDecimal,
+        perioder: List<Tilbakekrevingsperiode>,
+    ): List<Tilbakekrevingsperiode> {
         var diff = differanse
         return perioder.map { periode ->
             var justertebeløp = periode.beløp
             while (diff.isGreaterThanZero()) {
-                justertebeløp = justertebeløp.map { beløp ->
-                    if (Klassetype.FEIL == beløp.klassetype) {
-                        beløp
-                    } else {
-                        diff = diff.subtract(BigDecimal.ONE)
-                        beløp.copy(
-                            tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.subtract(BigDecimal.ONE),
-                            uinnkrevdBeløp = beløp.uinnkrevdBeløp.add(BigDecimal.ONE),
-                        )
+                justertebeløp =
+                    justertebeløp.map { beløp ->
+                        if (Klassetype.FEIL == beløp.klassetype) {
+                            beløp
+                        } else {
+                            diff = diff.subtract(BigDecimal.ONE)
+                            beløp.copy(
+                                tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.subtract(BigDecimal.ONE),
+                                uinnkrevdBeløp = beløp.uinnkrevdBeløp.add(BigDecimal.ONE),
+                            )
+                        }
                     }
-                }
             }
             periode.copy(beløp = justertebeløp)
         }
     }
 
-    private fun justerOpp(differanse: BigDecimal, perioder: List<Tilbakekrevingsperiode>): List<Tilbakekrevingsperiode> {
+    private fun justerOpp(
+        differanse: BigDecimal,
+        perioder: List<Tilbakekrevingsperiode>,
+    ): List<Tilbakekrevingsperiode> {
         var diff = differanse
         return perioder.map { periode ->
             var justertebeløp = periode.beløp
             while (diff.isLessThanZero()) {
-                justertebeløp = justertebeløp.map { beløp ->
-                    if (Klassetype.FEIL == beløp.klassetype) {
-                        beløp
-                    } else {
-                        diff = diff.add(BigDecimal.ONE)
-                        beløp.copy(
-                            tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.add(BigDecimal.ONE),
-                            uinnkrevdBeløp = beløp.uinnkrevdBeløp.subtract(BigDecimal.ONE),
-                        )
+                justertebeløp =
+                    justertebeløp.map { beløp ->
+                        if (Klassetype.FEIL == beløp.klassetype) {
+                            beløp
+                        } else {
+                            diff = diff.add(BigDecimal.ONE)
+                            beløp.copy(
+                                tilbakekrevesBeløp = beløp.tilbakekrevesBeløp.add(BigDecimal.ONE),
+                                uinnkrevdBeløp = beløp.uinnkrevdBeløp.subtract(BigDecimal.ONE),
+                            )
+                        }
                     }
-                }
             }
             periode.copy(beløp = justertebeløp)
         }
@@ -189,9 +199,10 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     ): Map<Månedsperiode, BigDecimal> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         perioder.forEach {
-            val skattBeløp = it.beløp
-                .filter { beløp -> Klassetype.YTEL == beløp.klassetype }
-                .sumOf { ytelsebeløp -> ytelsebeløp.skattBeløp }
+            val skattBeløp =
+                it.beløp
+                    .filter { beløp -> Klassetype.YTEL == beløp.klassetype }
+                    .sumOf { ytelsebeløp -> ytelsebeløp.skattBeløp }
             val gjenståendeSkattBeløp = kravgrunnlagsperioderMedSkatt.getNotNull(it.periode).subtract(skattBeløp)
             grunnlagsperioderMedSkatt[it.periode] = gjenståendeSkattBeløp
         }
@@ -211,24 +222,27 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return perioder.map {
             val periode = it.periode
             var justertebeløp = it.beløp
-            justertebeløp = justertebeløp.map { beløp ->
-                if (Klassetype.FEIL == beløp.klassetype) {
-                    beløp
-                } else {
-                    val justerSkattOpp = differanse.isLessThanZero() &&
-                        grunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
-                    val justerSkattNed = differanse.isGreaterThanZero() &&
-                        beløp.skattBeløp.compareTo(BigDecimal.ONE) >= 1
-                    if (justerSkattOpp || justerSkattNed) {
-                        val justering = BigDecimal(differanse.signum()).negate()
-                        grunnlagsperioderMedSkatt[periode] = grunnlagsperioderMedSkatt.getNotNull(periode).add(justering)
-                        differanse = differanse.add(justering)
-                        beløp.copy(skattBeløp = beløp.skattBeløp.add(justering))
-                    } else {
+            justertebeløp =
+                justertebeløp.map { beløp ->
+                    if (Klassetype.FEIL == beløp.klassetype) {
                         beløp
+                    } else {
+                        val justerSkattOpp =
+                            differanse.isLessThanZero() &&
+                                grunnlagsperioderMedSkatt.getNotNull(periode) >= BigDecimal.ONE
+                        val justerSkattNed =
+                            differanse.isGreaterThanZero() &&
+                                beløp.skattBeløp.compareTo(BigDecimal.ONE) >= 1
+                        if (justerSkattOpp || justerSkattNed) {
+                            val justering = BigDecimal(differanse.signum()).negate()
+                            grunnlagsperioderMedSkatt[periode] = grunnlagsperioderMedSkatt.getNotNull(periode).add(justering)
+                            differanse = differanse.add(justering)
+                            beløp.copy(skattBeløp = beløp.skattBeløp.add(justering))
+                        } else {
+                            beløp
+                        }
                     }
                 }
-            }
             it.copy(beløp = justertebeløp)
         }
     }
@@ -259,8 +273,9 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
             val tilbakekrevesbeløp = summerTilbakekrevesbeløp(it)
             var renteBeløp = BigDecimal.ZERO
             if (beregnetPeriode.tilbakekrevingsbeløpUtenRenter != BigDecimal.ZERO) {
-                renteBeløp = beregnetPeriode.rentebeløp.multiply(tilbakekrevesbeløp)
-                    .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
+                renteBeløp =
+                    beregnetPeriode.rentebeløp.multiply(tilbakekrevesbeløp)
+                        .divide(beregnetPeriode.tilbakekrevingsbeløpUtenRenter, 0, RoundingMode.HALF_UP)
             }
             it.copy(renter = renteBeløp)
         }

@@ -26,26 +26,26 @@ class AvstemmingService(
     private val fagsakRepository: FagsakRepository,
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun oppsummer(dato: LocalDate): ByteArray? {
         val sendteVedtak = sendtXmlRepository.findByOpprettetPåDato(dato)
         var antallFeilet = 0
         var antallFørstegangsvedtakUtenTilbakekreving = 0
-        val rader = sendteVedtak.mapNotNull { sendtVedtak ->
-            if (!erSendtOK(sendtVedtak)) {
-                antallFeilet++
-                return@mapNotNull null
+        val rader =
+            sendteVedtak.mapNotNull { sendtVedtak ->
+                if (!erSendtOK(sendtVedtak)) {
+                    antallFeilet++
+                    return@mapNotNull null
+                }
+                val behandling = behandlingRepository.findByIdOrThrow(sendtVedtak.behandlingId)
+                val oppsummering: TilbakekrevingsvedtakOppsummering = oppsummer(sendtVedtak)
+                if (erFørstegangsvedtakUtenTilbakekreving(behandling, oppsummering)) {
+                    antallFørstegangsvedtakUtenTilbakekreving++
+                    return@mapNotNull null
+                }
+                lagAvstemmingsradForVedtaket(behandling, oppsummering)
             }
-            val behandling = behandlingRepository.findByIdOrThrow(sendtVedtak.behandlingId)
-            val oppsummering: TilbakekrevingsvedtakOppsummering = oppsummer(sendtVedtak)
-            if (erFørstegangsvedtakUtenTilbakekreving(behandling, oppsummering)) {
-                antallFørstegangsvedtakUtenTilbakekreving++
-                return@mapNotNull null
-            }
-            lagAvstemmingsradForVedtaket(behandling, oppsummering)
-        }
         if (antallFeilet == 0) {
             logger.info(
                 "Avstemmer {}. Sender {} vedtak til avstemming. Totalt ble {} vedtak sendt til OS dette døgnet. " +
@@ -120,7 +120,6 @@ class AvstemmingService(
     }
 
     companion object {
-
         private fun erSendtOK(melding: ØkonomiXmlSendt): Boolean {
             val kvittering: MmelDto = melding.kvittering?.let { objectMapper.readValue(it) } ?: return false
             return ØkonomiKvitteringTolk.erKvitteringOK(kvittering)

@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.kravgrunnlag.domain
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 enum class Fagområdekode(val navn: String, val ytelsestype: Ytelsestype) {
-
     BA("Barnetrygd", Ytelsestype.BARNETRYGD),
     KS("Kontantstøtte", Ytelsestype.KONTANTSTØTTE),
     EFOG("Enslig forelder - Overgangsstønad", Ytelsestype.OVERGANGSSTØNAD),
@@ -12,7 +11,6 @@ enum class Fagområdekode(val navn: String, val ytelsestype: Ytelsestype) {
     ;
 
     companion object {
-
         fun fraKode(kode: String): Fagområdekode {
             for (fagområdekode in values()) {
                 if (fagområdekode.name == kode) {

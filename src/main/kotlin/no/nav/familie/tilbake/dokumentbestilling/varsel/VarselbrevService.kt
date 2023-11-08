@@ -32,23 +32,31 @@ class VarselbrevService(
     private val varselbrevUtil: VarselbrevUtil,
     private val distribusjonshåndteringService: DistribusjonshåndteringService,
 ) {
-
-    fun sendVarselbrev(behandling: Behandling, brevmottager: Brevmottager? = null) {
+    fun sendVarselbrev(
+        behandling: Behandling,
+        brevmottager: Brevmottager? = null,
+    ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val varsletFeilutbetaling = behandling.aktivtVarsel?.varselbeløp ?: 0L
         val fritekst = behandling.aktivtVarsel?.varseltekst
 
         if (brevmottager == null) {
-            distribusjonshåndteringService.sendBrev(behandling, Brevtype.VARSEL, varsletFeilutbetaling, fritekst) { brevmottaker, brevmetadata ->
+            distribusjonshåndteringService.sendBrev(
+                behandling,
+                Brevtype.VARSEL,
+                varsletFeilutbetaling,
+                fritekst,
+            ) { brevmottaker, brevmetadata ->
                 val varselbrevsdokument = lagVarselbrevForSending(behandling, fagsak, brevmottaker, brevmetadata)
                 val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
                 val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
 
-                val vedlegg = varselbrevUtil.lagVedlegg(
-                    varselbrevsdokument,
-                    behandling.aktivFagsystemsbehandling.eksternId,
-                    varselbrevsdokument.beløp,
-                )
+                val vedlegg =
+                    varselbrevUtil.lagVedlegg(
+                        varselbrevsdokument,
+                        behandling.aktivFagsystemsbehandling.eksternId,
+                        varselbrevsdokument.beløp,
+                    )
                 Brevdata(
                     mottager = brevmottaker,
                     metadata = varselbrevsdokument.brevmetadata,
@@ -63,11 +71,12 @@ class VarselbrevService(
             val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
             val varsletFeilutbetaling = varselbrevsdokument.beløp
             val fritekst = varselbrevsdokument.varseltekstFraSaksbehandler
-            val vedlegg = varselbrevUtil.lagVedlegg(
-                varselbrevsdokument,
-                behandling.aktivFagsystemsbehandling.eksternId,
-                varselbrevsdokument.beløp,
-            )
+            val vedlegg =
+                varselbrevUtil.lagVedlegg(
+                    varselbrevsdokument,
+                    behandling.aktivFagsystemsbehandling.eksternId,
+                    varselbrevsdokument.beløp,
+                )
 
             pdfBrevService.sendBrev(
                 behandling,
@@ -92,22 +101,23 @@ class VarselbrevService(
         brevmottager: Brevmottager,
         forhåndsgenerertMetadata: Brevmetadata? = null,
     ): Varselbrevsdokument {
-        val metadata = forhåndsgenerertMetadata ?: run {
-            // Henter data fra pdl
-            val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
-            val verge = behandling.aktivVerge
-            val adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
+        val metadata =
+            forhåndsgenerertMetadata ?: run {
+                // Henter data fra pdl
+                val personinfo = eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem)
+                val verge = behandling.aktivVerge
+                val adresseinfo = eksterneDataForBrevService.hentAdresse(personinfo, brevmottager, verge, fagsak.fagsystem)
 
-            varselbrevUtil.sammenstillInfoForBrevmetadata(
-                behandling = behandling,
-                personinfo = personinfo,
-                adresseinfo = adresseinfo,
-                fagsak = fagsak,
-                vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
-                erKorrigert = false,
-                gjelderDødsfall = personinfo.dødsdato != null,
-            )
-        }
+                varselbrevUtil.sammenstillInfoForBrevmetadata(
+                    behandling = behandling,
+                    personinfo = personinfo,
+                    adresseinfo = adresseinfo,
+                    fagsak = fagsak,
+                    vergenavn = BrevmottagerUtil.getVergenavn(verge, adresseinfo),
+                    erKorrigert = false,
+                    gjelderDødsfall = personinfo.dødsdato != null,
+                )
+            }
 
         val varsel = behandling.aktivtVarsel
 
@@ -125,17 +135,19 @@ class VarselbrevService(
         val varselbrevsdokument = lagVarselbrevForForhåndsvisning(forhåndsvisVarselbrevRequest)
         val overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false)
         val brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false)
-        val data = Fritekstbrevsdata(
-            overskrift = overskrift,
-            brevtekst = brevtekst,
-            brevmetadata = varselbrevsdokument.brevmetadata,
-        )
+        val data =
+            Fritekstbrevsdata(
+                overskrift = overskrift,
+                brevtekst = brevtekst,
+                brevmetadata = varselbrevsdokument.brevmetadata,
+            )
         val brevmottager = utledBrevmottager(forhåndsvisVarselbrevRequest)
-        val vedlegg = varselbrevUtil.lagVedlegg(
-            varselbrevsdokument,
-            forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
-            varselbrevsdokument.beløp,
-        )
+        val vedlegg =
+            varselbrevUtil.lagVedlegg(
+                varselbrevsdokument,
+                forhåndsvisVarselbrevRequest.fagsystemsbehandlingId,
+                varselbrevsdokument.beløp,
+            )
         return pdfBrevService.genererForhåndsvisning(
             Brevdata(
                 mottager = brevmottager,
@@ -150,12 +162,13 @@ class VarselbrevService(
     private fun lagVarselbrevForForhåndsvisning(request: ForhåndsvisVarselbrevRequest): Varselbrevsdokument {
         val brevmottager = utledBrevmottager(request)
         val personinfo = eksterneDataForBrevService.hentPerson(request.ident, request.fagsystem)
-        val adresseinfo: Adresseinfo = eksterneDataForBrevService.hentAdresse(
-            personinfo,
-            brevmottager,
-            request.verge,
-            request.fagsystem,
-        )
+        val adresseinfo: Adresseinfo =
+            eksterneDataForBrevService.hentAdresse(
+                personinfo,
+                brevmottager,
+                request.verge,
+                request.fagsystem,
+            )
 
         return varselbrevUtil.sammenstillInfoForForhåndvisningVarselbrev(
             adresseinfo,
@@ -165,7 +178,13 @@ class VarselbrevService(
     }
 
     private fun utledBrevmottager(request: ForhåndsvisVarselbrevRequest): Brevmottager {
-        return if (request.verge != null) Brevmottager.VERGE else if (request.institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+        return if (request.verge != null) {
+            Brevmottager.VERGE
+        } else if (request.institusjon != null) {
+            Brevmottager.INSTITUSJON
+        } else {
+            Brevmottager.BRUKER
+        }
     }
 
     private fun mapFeilutbetaltePerioder(varsel: Varsel?): List<Datoperiode> {

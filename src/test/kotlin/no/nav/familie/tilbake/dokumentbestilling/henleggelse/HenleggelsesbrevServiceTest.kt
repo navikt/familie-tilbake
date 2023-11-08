@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
-
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
     private lateinit var henleggelsesbrevService: HenleggelsesbrevService
@@ -48,28 +47,30 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
 
-    private val brevmetadataUtil = BrevmetadataUtil(
-        behandlingRepository = behandlingRepository,
-        fagsakRepository = fagsakRepository,
-        manuelleBrevmottakerRepository = mockk(relaxed = true),
-        eksterneDataForBrevService = eksterneDataForBrevService,
-        organisasjonService = organisasjonService,
-        featureToggleService = featureToggleService,
-    )
+    private val brevmetadataUtil =
+        BrevmetadataUtil(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = mockk(relaxed = true),
+            eksterneDataForBrevService = eksterneDataForBrevService,
+            organisasjonService = organisasjonService,
+            featureToggleService = featureToggleService,
+        )
 
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
-        henleggelsesbrevService = HenleggelsesbrevService(
-            behandlingRepository,
-            brevsporingService,
-            fagsakRepository,
-            eksterneDataForBrevService,
-            spyPdfBrevService,
-            organisasjonService,
-            distribusjonshåndteringService,
-            brevmetadataUtil,
-        )
+        henleggelsesbrevService =
+            HenleggelsesbrevService(
+                behandlingRepository,
+                brevsporingService,
+                fagsakRepository,
+                eksterneDataForBrevService,
+                spyPdfBrevService,
+                organisasjonService,
+                distribusjonshåndteringService,
+                brevmetadataUtil,
+            )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FNR_1", LocalDate.now(), "Fiona")
@@ -111,10 +112,11 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
             .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
-        val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
-            behandlingId,
-            REVURDERING_HENLEGGELSESBREV_FRITEKST,
-        )
+        val bytes =
+            henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
+                behandlingId,
+                REVURDERING_HENLEGGELSESBREV_FRITEKST,
+            )
 
         PdfaValidator.validatePdf(bytes)
     }
@@ -125,13 +127,14 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             brevsporingService.finnSisteVarsel(behandlingId)
         } returns (null)
 
-        val e = shouldThrow<IllegalStateException> {
-            henleggelsesbrevService.sendHenleggelsebrev(
-                behandlingId,
-                null,
-                Brevmottager.BRUKER,
-            )
-        }
+        val e =
+            shouldThrow<IllegalStateException> {
+                henleggelsesbrevService.sendHenleggelsebrev(
+                    behandlingId,
+                    null,
+                    Brevmottager.BRUKER,
+                )
+            }
 
         e.message shouldContain "varsel ikke er sendt"
     }
@@ -141,19 +144,19 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) }
             .returns(Testdata.behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
-        val e = shouldThrow<IllegalStateException> {
-            henleggelsesbrevService.sendHenleggelsebrev(
-                behandlingId,
-                null,
-                Brevmottager.BRUKER,
-            )
-        }
+        val e =
+            shouldThrow<IllegalStateException> {
+                henleggelsesbrevService.sendHenleggelsebrev(
+                    behandlingId,
+                    null,
+                    Brevmottager.BRUKER,
+                )
+            }
 
         e.message shouldContain "henleggelsesbrev uten fritekst"
     }
 
     companion object {
-
         private const val REVURDERING_HENLEGGELSESBREV_FRITEKST = "Revurderingen ble henlagt"
     }
 }

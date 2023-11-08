@@ -22,7 +22,6 @@ class StegService(
     val behandlingskontrollService: BehandlingskontrollService,
     val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
-
     @Transactional
     fun håndterSteg(behandlingId: UUID) {
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
@@ -38,7 +37,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    fun håndterSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
@@ -54,7 +56,10 @@ class StegService(
 
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
         if (Behandlingssteg.FORESLÅ_VEDTAK == aktivtBehandlingssteg) {
-            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
+                fagsakId = behandling.fagsakId,
+            )
         }
         // Behandling kan ikke tilbakeføres når er på FatteVedtak/IverksetteVedtak steg
         if (Behandlingssteg.FATTE_VEDTAK == aktivtBehandlingssteg || Behandlingssteg.IVERKSETT_VEDTAK == aktivtBehandlingssteg) {
@@ -73,7 +78,8 @@ class StegService(
 
         // sjekk om aktivtBehandlingssteg kan autoutføres
         aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
-        if (aktivtBehandlingssteg in listOf(
+        if (aktivtBehandlingssteg in
+            listOf(
                 Behandlingssteg.FORELDELSE,
                 Behandlingssteg.VILKÅRSVURDERING,
             )
@@ -98,8 +104,9 @@ class StegService(
         }
         if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
             throw Feil(
-                message = "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
-                    "Kan ikke saksbehandle den automatisk",
+                message =
+                    "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
+                        "Kan ikke saksbehandle den automatisk",
             )
         }
         while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
@@ -137,12 +144,14 @@ class StegService(
     }
 
     private fun hentAktivBehandlingssteg(behandlingId: UUID): Behandlingssteg {
-        val aktivtBehandlingssteg = behandlingskontrollService.finnAktivtSteg(behandlingId)
-            ?: throw Feil(
-                message = "Behandling $behandlingId har ikke noe aktiv steg",
-                frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg",
-            )
-        if (aktivtBehandlingssteg !in setOf(
+        val aktivtBehandlingssteg =
+            behandlingskontrollService.finnAktivtSteg(behandlingId)
+                ?: throw Feil(
+                    message = "Behandling $behandlingId har ikke noe aktiv steg",
+                    frontendFeilmelding = "Behandling $behandlingId har ikke noe aktiv steg",
+                )
+        if (aktivtBehandlingssteg !in
+            setOf(
                 Behandlingssteg.VARSEL,
                 Behandlingssteg.GRUNNLAG,
                 Behandlingssteg.BREVMOTTAKER,

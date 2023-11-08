@@ -13,6 +13,8 @@ import java.util.UUID
 interface ØkonomiXmlMottattArkivRepository :
     RepositoryInterface<ØkonomiXmlMottattArkiv, UUID>,
     InsertUpdateRepository<ØkonomiXmlMottattArkiv> {
-
-    fun findByEksternFagsakIdAndYtelsestype(eksternFagsakId: String, ytelsestype: Ytelsestype): List<ØkonomiXmlMottattArkiv>
+    fun findByEksternFagsakIdAndYtelsestype(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+    ): List<ØkonomiXmlMottattArkiv>
 }

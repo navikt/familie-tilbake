@@ -49,7 +49,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -108,16 +107,17 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val kafkaProducer: KafkaProducer = mockk()
         historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevSporingRepository, kafkaProducer)
-        håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(
-            behandlingRepository,
-            kravgrunnlagRepository,
-            behandlingService,
-            behandlingskontrollService,
-            økonomiXmlMottattService,
-            mockHentKravgrunnlagService,
-            stegService,
-            historikkService,
-        )
+        håndterGamleKravgrunnlagService =
+            HåndterGamleKravgrunnlagService(
+                behandlingRepository,
+                kravgrunnlagRepository,
+                behandlingService,
+                behandlingskontrollService,
+                økonomiXmlMottattService,
+                mockHentKravgrunnlagService,
+                stegService,
+                historikkService,
+            )
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         håndterGammelKravgrunnlagTask =
             HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
@@ -164,10 +164,11 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         håndterGammelKravgrunnlagTask.doTask(lagTask())
 
-        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
-            xmlMottatt.ytelsestype,
-            hentetKravgrunnlag.fagsystemId,
-        )
+        val behandling =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                xmlMottatt.ytelsestype,
+                hentetKravgrunnlag.fagsystemId,
+            )
         behandling.shouldNotBeNull()
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
@@ -200,10 +201,11 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             SperretKravgrunnlagFeil("Hentet kravgrunnlag er sperret")
 
         håndterGammelKravgrunnlagTask.doTask(lagTask())
-        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(
-            xmlMottatt.ytelsestype,
-            hentetKravgrunnlag.fagsystemId,
-        )
+        val behandling =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                xmlMottatt.ytelsestype,
+                hentetKravgrunnlag.fagsystemId,
+            )
         behandling.shouldNotBeNull()
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrueAndSperretTrue(behandling.id).shouldBeTrue()
 
@@ -249,17 +251,19 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
 
         økonomiXmlMottattService.arkiverMottattXml(
-            mottattXml = mottattXMl
-                .replace("<urn:vedtakId>", "<urn:vedtakId>2")
-                .replace("<urn:kravgrunnlagId>", "<urn:kravgrunnlagId>2")
-                .replace("<urn:kontrollfelt>", "<urn:kontrollfelt>2"),
+            mottattXml =
+                mottattXMl
+                    .replace("<urn:vedtakId>", "<urn:vedtakId>2")
+                    .replace("<urn:kravgrunnlagId>", "<urn:kravgrunnlagId>2")
+                    .replace("<urn:kontrollfelt>", "<urn:kontrollfelt>2"),
             fagsystemId = xmlMottatt.eksternFagsakId,
             ytelsestype = xmlMottatt.ytelsestype,
         )
 
         økonomiXmlMottattService.arkiverMottattXml(
-            mottattXml = readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
-                .replace("<urn:vedtakId>", "<urn:vedtakId>2"),
+            mottattXml =
+                readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
+                    .replace("<urn:vedtakId>", "<urn:vedtakId>2"),
             fagsystemId = xmlMottatt.eksternFagsakId,
             ytelsestype = xmlMottatt.ytelsestype,
         )
@@ -282,22 +286,25 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagHentFagsystemsbehandlingRespons(xmlMottatt: ØkonomiXmlMottatt): String {
-        val fagsystemsbehandling = HentFagsystemsbehandling(
-            eksternFagsakId = xmlMottatt.eksternFagsakId,
-            ytelsestype = xmlMottatt.ytelsestype,
-            eksternId = xmlMottatt.referanse,
-            personIdent = "testverdi",
-            språkkode = Språkkode.NB,
-            enhetId = "8020",
-            enhetsnavn = "testverdi",
-            revurderingsvedtaksdato = LocalDate.now(),
-            faktainfo = Faktainfo(
-                revurderingsårsak = "testverdi",
-                revurderingsresultat = "OPPHØR",
-                tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING,
-            ),
-        )
+        val fagsystemsbehandling =
+            HentFagsystemsbehandling(
+                eksternFagsakId = xmlMottatt.eksternFagsakId,
+                ytelsestype = xmlMottatt.ytelsestype,
+                eksternId = xmlMottatt.referanse,
+                personIdent = "testverdi",
+                språkkode = Språkkode.NB,
+                enhetId = "8020",
+                enhetsnavn = "testverdi",
+                revurderingsvedtaksdato = LocalDate.now(),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsårsak = "testverdi",
+                        revurderingsresultat = "OPPHØR",
+                        tilbakekrevingsvalg =
+                            Tilbakekrevingsvalg
+                                .IGNORER_TILBAKEKREVING,
+                    ),
+            )
 
         return objectMapper.writeValueAsString(HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling))
     }

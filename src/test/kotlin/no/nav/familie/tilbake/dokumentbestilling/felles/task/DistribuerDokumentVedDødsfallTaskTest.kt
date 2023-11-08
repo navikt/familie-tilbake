@@ -24,7 +24,6 @@ import java.time.LocalDateTime
 import java.util.Properties
 
 internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -57,9 +56,10 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
 
     @Test
     fun `skal feile når adressen ikke har blitt oppdatert`() {
-        val exception = shouldThrow<java.lang.RuntimeException> {
-            distribuerDokumentVedDødsfallTask.doTask(opprettTask("jpUkjentDødsbo"))
-        }
+        val exception =
+            shouldThrow<java.lang.RuntimeException> {
+                distribuerDokumentVedDødsfallTask.doTask(opprettTask("jpUkjentDødsbo"))
+            }
 
         exception.message shouldBe "org.springframework.web.client.RestClientResponseException: Ukjent adresse dødsbo"
     }
@@ -68,8 +68,9 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
     fun `skal opprette historikkinnslag når tasken er for gammel`() {
         distribuerDokumentVedDødsfallTask.doTask(
             opprettTask("jpUkjentDødsbo").copy(
-                opprettetTid = LocalDateTime.now()
-                    .minusMonths(7),
+                opprettetTid =
+                    LocalDateTime.now()
+                        .minusMonths(7),
             ),
         )
 
@@ -82,21 +83,20 @@ internal class DistribuerDokumentVedDødsfallTaskTest : OppslagSpringRunnerTest(
         return Task(
             type = DistribuerDokumentVedDødsfallTask.TYPE,
             payload = behandling.id.toString(),
-            properties = Properties().apply {
-                this["journalpostId"] = journalpostId
-                this["fagsystem"] = Fagsystem.BA.name
-                this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
-                this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
-                this["mottager"] = Brevmottager.BRUKER.name
-                this["brevtype"] = Brevtype.VEDTAK.name
-                this["ansvarligSaksbehandler"] = Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-            },
+            properties =
+                Properties().apply {
+                    this["journalpostId"] = journalpostId
+                    this["fagsystem"] = Fagsystem.BA.name
+                    this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
+                    this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
+                    this["mottager"] = Brevmottager.BRUKER.name
+                    this["brevtype"] = Brevtype.VEDTAK.name
+                    this["ansvarligSaksbehandler"] = Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+                },
         )
     }
 
-    private fun assertHistorikkTask(
-        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-    ) {
+    private fun assertHistorikkTask(historikkinnslagstype: TilbakekrevingHistorikkinnslagstype) {
         taskService.findAll().shouldHaveSingleElement {
             LagHistorikkinnslagTask.TYPE == it.type &&
                 historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&

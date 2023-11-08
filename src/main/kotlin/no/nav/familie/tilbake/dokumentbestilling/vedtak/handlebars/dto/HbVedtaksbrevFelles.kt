@@ -23,14 +23,13 @@ data class HbVedtaksbrevFelles(
     val totaltFeilutbetaltBeløp: BigDecimal,
     val datoer: HbVedtaksbrevDatoer? = null,
 ) : BaseDokument(
-    brevmetadata.ytelsestype,
-    brevmetadata.språkkode,
-    brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall,
-    brevmetadata.institusjon,
-) {
-
+        brevmetadata.ytelsestype,
+        brevmetadata.språkkode,
+        brevmetadata.behandlendeEnhetsNavn,
+        brevmetadata.ansvarligSaksbehandler,
+        brevmetadata.gjelderDødsfall,
+        brevmetadata.institusjon,
+    ) {
     @Suppress("unused") // Handlebars
     val opphørsdatoDødSøker = datoer?.opphørsdatoDødSøker
 

@@ -16,7 +16,6 @@ class HistorikkTaskService(
     private val taskService: TaskService,
     private val fagsakService: FagsakService,
 ) {
-
     fun lagHistorikkTask(
         behandlingId: UUID,
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
@@ -27,21 +26,23 @@ class HistorikkTaskService(
         beslutter: String? = null,
     ) {
         val fagsystem = fagsakService.finnFagsystemForBehandlingId(behandlingId)
-        val properties = Properties().apply {
-            setProperty("historikkinnslagstype", historikkinnslagstype.name)
-            setProperty("aktør", aktør.name)
-            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
-            setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
-            beslutter?.let { setProperty(PropertyName.BESLUTTER, beslutter) }
-            beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
-            brevtype?.let { setProperty("brevtype", brevtype.name) }
-        }
+        val properties =
+            Properties().apply {
+                setProperty("historikkinnslagstype", historikkinnslagstype.name)
+                setProperty("aktør", aktør.name)
+                setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+                setProperty("opprettetTidspunkt", LocalDateTime.now().toString())
+                beslutter?.let { setProperty(PropertyName.BESLUTTER, beslutter) }
+                beskrivelse?.let { setProperty("beskrivelse", fjernNewlinesFraString(it)) }
+                brevtype?.let { setProperty("brevtype", brevtype.name) }
+            }
 
-        val task = Task(
-            type = LagHistorikkinnslagTask.TYPE,
-            payload = behandlingId.toString(),
-            properties = properties,
-        )
+        val task =
+            Task(
+                type = LagHistorikkinnslagTask.TYPE,
+                payload = behandlingId.toString(),
+                properties = properties,
+            )
         triggerTid?.let { taskService.save(task.medTriggerTid(triggerTid)) } ?: taskService.save(task)
     }
 

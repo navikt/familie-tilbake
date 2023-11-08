@@ -27,7 +27,6 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 internal class IntegrasjonerClientTest {
-
     private val wireMockServer = WireMockServer(wireMockConfig().dynamicPort())
     private val restOperations: RestOperations = RestTemplateBuilder().build()
 
@@ -37,10 +36,11 @@ internal class IntegrasjonerClientTest {
     @BeforeEach
     fun setUp() {
         wireMockServer.start()
-        integrasjonerClient = IntegrasjonerClient(
-            restOperations,
-            IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"),
-        )
+        integrasjonerClient =
+            IntegrasjonerClient(
+                restOperations,
+                IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"),
+            )
     }
 
     @AfterEach

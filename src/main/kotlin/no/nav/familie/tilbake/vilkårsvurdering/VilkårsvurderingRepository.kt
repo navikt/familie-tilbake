@@ -10,6 +10,5 @@ import java.util.UUID
 @Repository
 @Transactional
 interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
-
     fun findByBehandlingIdAndAktivIsTrue(behandlingId: UUID): Vilkårsvurdering?
 }

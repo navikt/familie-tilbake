@@ -32,7 +32,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -63,10 +62,12 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsakRepository.insert(fagsak)
-        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
-            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-        )
+        val fagsystemsbehandling =
+            behandling.aktivFagsystemsbehandling.copy(
+                tilbakekrevingsvalg =
+                    Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            )
         behandlingRepository.insert(
             behandling.copy(
                 fagsystemsbehandling = setOf(fagsystemsbehandling),
@@ -80,18 +81,21 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
                 tilbakekrevesBeløp = BigDecimal("100"),
             )
 
-        val kravgrunnlag = Testdata.kravgrunnlag431
-            .copy(
-                kontrollfelt = "2019-11-22-19.09.31.458065",
-                perioder = setOf(
-                    Testdata.kravgrunnlagsperiode432.copy(
-                        beløp = setOf(
-                            feilKravgrunnlagBeløp,
-                            ytelKravgrunnlagsbeløp433,
+        val kravgrunnlag =
+            Testdata.kravgrunnlag431
+                .copy(
+                    kontrollfelt = "2019-11-22-19.09.31.458065",
+                    perioder =
+                        setOf(
+                            Testdata.kravgrunnlagsperiode432.copy(
+                                beløp =
+                                    setOf(
+                                        feilKravgrunnlagBeløp,
+                                        ytelKravgrunnlagsbeløp433,
+                                    ),
+                            ),
                         ),
-                    ),
-                ),
-            )
+                )
 
         kravgrunnlagRepository.insert(kravgrunnlag)
         behandlingsstegstilstandRepository.insert(
@@ -119,8 +123,9 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker for EØS-behandlinger`() {
-        val behandling = behandlingRepository.findByIdOrThrow(behandling.id).copy(regelverk = Regelverk.EØS)
-            .also { behandlingRepository.update(it) }
+        val behandling =
+            behandlingRepository.findByIdOrThrow(behandling.id).copy(regelverk = Regelverk.EØS)
+                .also { behandlingRepository.update(it) }
 
         automatiskSaksbehandlingBatch.behandleAutomatisk()
         taskService.findAll().any {
@@ -132,10 +137,12 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `behandleAutomatisk skal ikke opprette tasker når behandlingen allerede sendte varselsbrev`() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        val fagsystemsbehandling = behandling.aktivFagsystemsbehandling.copy(
-            tilbakekrevingsvalg = Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_MED_VARSEL,
-        )
+        val fagsystemsbehandling =
+            behandling.aktivFagsystemsbehandling.copy(
+                tilbakekrevingsvalg =
+                    Tilbakekrevingsvalg
+                        .OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            )
         behandlingRepository.update(behandling.copy(fagsystemsbehandling = setOf(fagsystemsbehandling)))
         brevsporingRepository.insert(Testdata.brevsporing)
 
@@ -166,8 +173,9 @@ internal class AutomatiskSaksbehandlingBatchTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.update(
             kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
                 .copy(
-                    kontrollfelt = LocalDateTime.now()
-                        .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
+                    kontrollfelt =
+                        LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
                 ),
         )
 

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class GrunnbeløpsperioderTest {
-
     @Test
     internal fun `skal kaste feil hvis man ikke får noen treff på grunnbeløpsperioder bak i tiden`() {
         shouldThrow<IllegalArgumentException> {
@@ -74,7 +73,10 @@ internal class GrunnbeløpsperioderTest {
         resultat[2].grunnbeløp shouldBe 106_399.toBigDecimal()
     }
 
-    private fun assertGrunnbeløp(periode: Månedsperiode, beløp: Int) {
+    private fun assertGrunnbeløp(
+        periode: Månedsperiode,
+        beløp: Int,
+    ) {
         val resultat = finnGrunnbeløpsperioder(periode)
         resultat shouldHaveSize 1
         resultat[0].periode.inneholder(periode) shouldBe true

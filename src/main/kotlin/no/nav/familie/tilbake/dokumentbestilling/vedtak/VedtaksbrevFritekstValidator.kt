@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import org.springframework.http.HttpStatus
 
 object VedtaksbrevFritekstValidator {
-
     @Throws(Feil::class)
     fun validerObligatoriskeFritekster(
         behandling: Behandling,
@@ -69,8 +68,9 @@ object VedtaksbrevFritekstValidator {
             ) {
                 throw Feil(
                     message = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig for behandling ${behandling.id}",
-                    frontendFeilmelding = "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
-                        "for behandling ${behandling.id}",
+                    frontendFeilmelding =
+                        "Periode ${it.periode.fom}-${it.periode.tom} er ugyldig " +
+                            "for behandling ${behandling.id}",
                     httpStatus = HttpStatus.BAD_REQUEST,
                 )
             }
@@ -81,12 +81,14 @@ object VedtaksbrevFritekstValidator {
         behandling: Behandling,
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
     ) {
-        val revurderingIkkeOpprettetEtterKlage = behandling.årsaker.none {
-            it.type in setOf(
-                Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-                Behandlingsårsakstype.REVURDERING_KLAGE_NFP,
-            )
-        }
+        val revurderingIkkeOpprettetEtterKlage =
+            behandling.årsaker.none {
+                it.type in
+                    setOf(
+                        Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+                        Behandlingsårsakstype.REVURDERING_KLAGE_NFP,
+                    )
+            }
         if (Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
             revurderingIkkeOpprettetEtterKlage &&
             vedtaksbrevsoppsummering.oppsummeringFritekst.isNullOrEmpty()
@@ -104,10 +106,11 @@ object VedtaksbrevFritekstValidator {
         vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering,
         vedtaksbrevstype: Vedtaksbrevstype,
     ) {
-        val maksTekstLengde = when (vedtaksbrevstype) {
-            ORDINÆR -> 4000
-            else -> 10000
-        }
+        val maksTekstLengde =
+            when (vedtaksbrevstype) {
+                ORDINÆR -> 4000
+                else -> 10000
+            }
         if (vedtaksbrevsoppsummering.oppsummeringFritekst != null &&
             vedtaksbrevsoppsummering.oppsummeringFritekst.length > maksTekstLengde
         ) {
@@ -127,11 +130,12 @@ object VedtaksbrevFritekstValidator {
     ) {
         faktaFeilutbetaling.perioder.filter { Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype }
             .forEach { faktaFeilutbetalingsperiode ->
-                val perioder = finnFritekstPerioder(
-                    vedtaksbrevFritekstPerioder,
-                    faktaFeilutbetalingsperiode.periode,
-                    Friteksttype.FAKTA,
-                )
+                val perioder =
+                    finnFritekstPerioder(
+                        vedtaksbrevFritekstPerioder,
+                        faktaFeilutbetalingsperiode.periode,
+                        Friteksttype.FAKTA,
+                    )
                 if (perioder.isEmpty() && validerPåkrevetFritekster) {
                     throw Feil(
                         message = "Mangler fakta fritekst for alle fakta perioder",
@@ -140,9 +144,10 @@ object VedtaksbrevFritekstValidator {
                     )
                 }
                 // Hvis en av de periodene mangler fritekst
-                val omsluttetPerioder = avsnittMedPerioder.filter {
-                    faktaFeilutbetalingsperiode.periode.inneholder(it.periode.toMånedsperiode())
-                }
+                val omsluttetPerioder =
+                    avsnittMedPerioder.filter {
+                        faktaFeilutbetalingsperiode.periode.inneholder(it.periode.toMånedsperiode())
+                    }
                 omsluttetPerioder.forEach {
                     if (it.faktaAvsnitt.isNullOrBlank() && validerPåkrevetFritekster) {
                         throw Feil(
@@ -165,11 +170,12 @@ object VedtaksbrevFritekstValidator {
                 it.aktsomhet.vilkårsvurderingSærligeGrunner
                     .any { særligGrunn -> SærligGrunn.ANNET == særligGrunn.særligGrunn }
         }.forEach {
-            val perioder = finnFritekstPerioder(
-                vedtaksbrevFritekstPerioder,
-                it.periode,
-                Friteksttype.SÆRLIGE_GRUNNER_ANNET,
-            )
+            val perioder =
+                finnFritekstPerioder(
+                    vedtaksbrevFritekstPerioder,
+                    it.periode,
+                    Friteksttype.SÆRLIGE_GRUNNER_ANNET,
+                )
 
             if (perioder.isEmpty() && validerPåkrevetFritekster) {
                 throw Feil(

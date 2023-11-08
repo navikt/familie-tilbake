@@ -27,15 +27,15 @@ class PubliserJournalpostTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
         log.info("${this::class.simpleName} prosesserer med id=${task.id} og metadata ${task.metadata}")
 
         val journalpostId = task.metadata.getProperty("journalpostId")
-        val (behandlingId, manuellAdresse) = objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java)
-            .let { it.behandlingId to it.manuellAdresse }
+        val (behandlingId, manuellAdresse) =
+            objectMapper.readValue(task.payload, PubliserJournalpostTaskData::class.java)
+                .let { it.behandlingId to it.manuellAdresse }
 
         prøvDistribuerJournalpost(journalpostId, task, behandlingId, manuellAdresse)
     }
@@ -91,11 +91,9 @@ class PubliserJournalpostTask(
 
     // 409 Conflict betyr duplikatdistribusjon
     // https://nav-it.slack.com/archives/C6W9E5GPJ/p1657610907144549?thread_ts=1657610829.116619&cid=C6W9E5GPJ
-    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) =
-        ressursException.httpStatus == HttpStatus.CONFLICT
+    fun dokumentetErAlleredeDistribuert(ressursException: RessursException) = ressursException.httpStatus == HttpStatus.CONFLICT
 
     companion object {
-
         const val TYPE = "publiserJournalpost"
     }
 }

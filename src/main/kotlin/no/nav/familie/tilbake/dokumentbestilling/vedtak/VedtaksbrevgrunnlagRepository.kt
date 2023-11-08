@@ -9,7 +9,6 @@ import java.util.UUID
 interface VedtaksbrevgrunnlagRepository :
     RepositoryInterface<Vedtaksbrevgrunnlag, UUID>,
     InsertUpdateRepository<Vedtaksbrevgrunnlag> {
-
     @Language("PostgreSQL")
     @Query("SELECT fagsak_id FROM behandling WHERE id = :behandlingId")
     fun finnFagsakIdForBehandlingId(behandlingId: UUID): UUID

@@ -22,13 +22,13 @@ class AutomatiskSaksbehandlingBatch(
     private val taskService: TaskService,
     private val environment: Environment,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(cron = "\${CRON_AUTOMATISK_SAKSBEHANDLING}")
     @Transactional
     fun behandleAutomatisk() {
-        if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
+        if (LeaderClient.isLeader() != true &&
+            !environment.activeProfiles.any {
                 it.contains("local") ||
                     it.contains("integrasjonstest")
             }
@@ -42,30 +42,33 @@ class AutomatiskSaksbehandlingBatch(
         logger.info("Det finnes ${behandlinger.size} behandlinger som kan behandles automatisk")
 
         if (behandlinger.isNotEmpty()) {
-            val alleFeiledeTasker = taskService.finnTasksMedStatus(
-                listOf(
-                    Status.FEILET,
-                    Status.PLUKKET,
-                    Status.KLAR_TIL_PLUKK,
-                ),
-                Pageable.unpaged(),
-            )
+            val alleFeiledeTasker =
+                taskService.finnTasksMedStatus(
+                    listOf(
+                        Status.FEILET,
+                        Status.PLUKKET,
+                        Status.KLAR_TIL_PLUKK,
+                    ),
+                    Pageable.unpaged(),
+                )
             behandlinger.forEach {
-                val finnesTask = alleFeiledeTasker.any { task ->
-                    task.type == AutomatiskSaksbehandlingTask.TYPE && task.payload == it.id.toString()
-                }
+                val finnesTask =
+                    alleFeiledeTasker.any { task ->
+                        task.type == AutomatiskSaksbehandlingTask.TYPE && task.payload == it.id.toString()
+                    }
                 if (!finnesTask) {
                     val fagsystem = fagsakRepository.findByIdOrThrow(it.fagsakId).fagsystem
                     taskService.save(
                         Task(
                             type = AutomatiskSaksbehandlingTask.TYPE,
                             payload = it.id.toString(),
-                            properties = Properties().apply {
-                                setProperty(
-                                    PropertyName.FAGSYSTEM,
-                                    fagsystem.name,
-                                )
-                            },
+                            properties =
+                                Properties().apply {
+                                    setProperty(
+                                        PropertyName.FAGSYSTEM,
+                                        fagsystem.name,
+                                    )
+                                },
                         ),
                     )
                 } else {

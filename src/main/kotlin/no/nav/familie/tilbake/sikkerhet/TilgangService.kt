@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service
 
 @Service
 class TilgangService(private val rolleConfig: RolleConfig) {
-
     fun tilgangTilÅOppretteRevurdering(fagsystem: Fagsystem): Boolean {
         return finnBehandlerrolle(fagsystem) !in listOf(Behandlerrolle.VEILEDER, Behandlerrolle.FORVALTER)
     }
 
     fun finnBehandlerrolle(fagsystem: Fagsystem): Behandlerrolle? {
-        val inloggetBrukerstilgang = ContextService
-            .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
+        val inloggetBrukerstilgang =
+            ContextService
+                .hentHøyesteRolletilgangOgYtelsestypeForInnloggetBruker(rolleConfig, "henter behandling")
 
         val tilganger = inloggetBrukerstilgang.tilganger
         var behandlerrolle: Behandlerrolle? = Behandlerrolle.VEILEDER

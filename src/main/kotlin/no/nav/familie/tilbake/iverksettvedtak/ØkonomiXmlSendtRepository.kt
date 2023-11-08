@@ -12,7 +12,6 @@ import java.util.UUID
 @Repository
 @Transactional
 interface ØkonomiXmlSendtRepository : RepositoryInterface<ØkonomiXmlSendt, UUID>, InsertUpdateRepository<ØkonomiXmlSendt> {
-
     fun findByBehandlingId(behandlingId: UUID): ØkonomiXmlSendt?
 
     // language=PostgreSQL

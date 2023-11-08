@@ -11,7 +11,6 @@ import java.util.UUID
 interface HentFagsystemsbehandlingRequestSendtRepository :
     RepositoryInterface<HentFagsystemsbehandlingRequestSendt, UUID>,
     InsertUpdateRepository<HentFagsystemsbehandlingRequestSendt> {
-
     fun findByEksternFagsakIdAndYtelsestypeAndEksternId(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,

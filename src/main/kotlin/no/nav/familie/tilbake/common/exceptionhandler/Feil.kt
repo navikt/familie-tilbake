@@ -10,7 +10,6 @@ class Feil(
     val httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     throwable: Throwable? = null,
 ) : RuntimeException(message, throwable) {
-
     constructor(message: String, throwable: Throwable?, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) :
         this(message, null, httpStatus, throwable)
 }

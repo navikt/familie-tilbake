@@ -15,7 +15,6 @@ import java.util.UUID
 @Repository
 @Transactional
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
-
     // language=PostgreSQL
     @Query(
         """
@@ -71,7 +70,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             AND f.fagsystem = :fagsystem
         """,
     )
-    fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime): List<UUID>?
+    fun finnÅpneBehandlingerOpprettetFør(
+        fagsystem: Fagsystem,
+        opprettetFørDato: LocalDateTime,
+    ): List<UUID>?
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 

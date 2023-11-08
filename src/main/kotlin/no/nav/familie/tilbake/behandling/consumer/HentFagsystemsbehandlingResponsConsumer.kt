@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch
 @Service
 @Profile("!integrasjonstest & !e2e")
 class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingService: HentFagsystemsbehandlingService) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -25,7 +24,10 @@ class HentFagsystemsbehandlingResponsConsumer(private val fagsystemsbehandlingSe
         topics = [KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_RESPONS_TOPIC],
         containerFactory = "concurrentKafkaListenerContainerFactory",
     )
-    fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
+    fun listen(
+        consumerRecord: ConsumerRecord<String, String>,
+        ack: Acknowledgment,
+    ) {
         logger.info("Fagsystemsbehandlingsdata er mottatt i kafka med key=${consumerRecord.key()}")
         secureLogger.info("Fagsystemsbehandlingsdata er mottatt i kafka $consumerRecord")
 

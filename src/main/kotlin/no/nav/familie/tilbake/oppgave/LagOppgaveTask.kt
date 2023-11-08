@@ -24,7 +24,6 @@ class LagOppgaveTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -36,11 +35,12 @@ class LagOppgaveTask(
 
         val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
 
-        val sendtTilBeslutningAv: String? = if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.FATTE_VEDTAK) {
-            task.metadata.getProperty("opprettetAv")?.let { "Sendt til godkjenning av $it" }
-        } else {
-            null
-        }
+        val sendtTilBeslutningAv: String? =
+            if (behandlingsstegstilstand?.behandlingssteg == Behandlingssteg.FATTE_VEDTAK) {
+                task.metadata.getProperty("opprettetAv")?.let { "Sendt til godkjenning av $it" }
+            } else {
+                null
+            }
 
         val fristeUker = behandlingsstegstilstand?.venteårsak?.defaultVenteTidIUker ?: 0
         val venteårsak = behandlingsstegstilstand?.venteårsak?.beskrivelse ?: ""
@@ -59,7 +59,6 @@ class LagOppgaveTask(
     }
 
     companion object {
-
         const val TYPE = "lagOppgave"
     }
 }

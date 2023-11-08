@@ -43,7 +43,6 @@ class IverksettelseService(
     private val oppdragClient: OppdragClient,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
@@ -72,7 +71,10 @@ class IverksettelseService(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun lagreIverksettelsesvedtakRequest(behandlingId: UUID, requestXml: String): ØkonomiXmlSendt {
+    fun lagreIverksettelsesvedtakRequest(
+        behandlingId: UUID,
+        requestXml: String,
+    ): ØkonomiXmlSendt {
         return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
     }
 
@@ -151,7 +153,10 @@ class IverksettelseService(
     private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) =
         tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
 
-    fun validerBeløp(behandlingId: UUID, beregnetPerioder: List<Tilbakekrevingsperiode>) {
+    fun validerBeløp(
+        behandlingId: UUID,
+        beregnetPerioder: List<Tilbakekrevingsperiode>,
+    ) {
         val beregnetResultat = beregningService.beregn(behandlingId)
         val beregnetPerioderForVedtaksbrev = beregnetResultat.beregningsresultatsperioder
 
@@ -170,13 +175,14 @@ class IverksettelseService(
             totalRenteBeløp != beregnetTotalRenteBeløp || totalSkatteBeløp != beregnetSkattBeløp
         ) {
             throw Feil(
-                message = "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
-                    "Beregnet beløp i vedtaksbrev er " +
-                    "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
-                    "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
-                    "Beregnet beløp i iverksettelse er " +
-                    "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
-                    "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp",
+                message =
+                    "Det gikk noe feil i beregning under iverksettelse for behandlingId=$behandlingId." +
+                        "Beregnet beløp i vedtaksbrev er " +
+                        "totalTilbakekrevingsbeløpUtenRenter=$totalTilbakekrevingsbeløpUtenRenter," +
+                        "totalRenteBeløp=$totalRenteBeløp, totalSkatteBeløp=$totalSkatteBeløp mens " +
+                        "Beregnet beløp i iverksettelse er " +
+                        "beregnetTotatlTilbakekrevingsbeløpUtenRenter=$beregnetTotatlTilbakekrevingsbeløpUtenRenter," +
+                        "beregnetTotalRenteBeløp=$beregnetTotalRenteBeløp, beregnetSkattBeløp=$beregnetSkattBeløp",
             )
         }
     }

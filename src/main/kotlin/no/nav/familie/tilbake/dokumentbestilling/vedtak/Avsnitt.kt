@@ -24,7 +24,6 @@ class Underavsnitt(
     val fritekstPåkrevet: Boolean = false,
     val underavsnittstype: Underavsnittstype? = null,
 ) {
-
     init {
         require(!(!fritekstTillatt && fritekstPåkrevet)) { "Det gir ikke mening at fritekst er påkrevet når fritekst ikke er tillatt" }
     }

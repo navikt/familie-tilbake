@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -163,23 +162,24 @@ internal class TotrinnServiceTest : OppslagSpringRunnerTest() {
         lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         lagBehandlingsstegstilstand(Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val exception = shouldThrow<RuntimeException> {
-            totrinnService.lagreTotrinnsvurderinger(
-                behandlingId,
-                listOf(
-                    VurdertTotrinnDto(
-                        behandlingssteg = Behandlingssteg.FAKTA,
-                        godkjent = true,
-                        begrunnelse = "testverdi",
+        val exception =
+            shouldThrow<RuntimeException> {
+                totrinnService.lagreTotrinnsvurderinger(
+                    behandlingId,
+                    listOf(
+                        VurdertTotrinnDto(
+                            behandlingssteg = Behandlingssteg.FAKTA,
+                            godkjent = true,
+                            begrunnelse = "testverdi",
+                        ),
+                        VurdertTotrinnDto(
+                            behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
+                            godkjent = false,
+                            begrunnelse = "testverdi",
+                        ),
                     ),
-                    VurdertTotrinnDto(
-                        behandlingssteg = Behandlingssteg.FORESLÅ_VEDTAK,
-                        godkjent = false,
-                        begrunnelse = "testverdi",
-                    ),
-                ),
-            )
-        }
+                )
+            }
 
         exception.message shouldBe "Stegene [FORELDELSE, VILKÅRSVURDERING] mangler totrinnsvurdering"
     }

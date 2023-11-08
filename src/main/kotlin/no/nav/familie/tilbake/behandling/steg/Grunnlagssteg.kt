@@ -20,7 +20,6 @@ class Grunnlagssteg(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val historikkTaskService: HistorikkTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional

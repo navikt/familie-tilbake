@@ -11,7 +11,6 @@ enum class TilbakekrevingHistorikkinnslagstype(
     val type: Historikkinnslagstype = Historikkinnslagstype.HENDELSE,
     val steg: Behandlingssteg? = null,
 ) {
-
     // Hendelse type
     BEHANDLING_OPPRETTET(tittel = "Behandling opprettet"),
     BEHANDLING_PÅ_VENT(tittel = "Behandling er satt på vent", tekst = "Årsak: "),

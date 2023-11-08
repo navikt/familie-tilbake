@@ -41,20 +41,20 @@ class TilbakekrevingsberegningService(
     private val kravgrunnlagsberegningService: KravgrunnlagsberegningService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
         val beregningsresultat = beregn(behandlingId)
-        val beregningsresultatsperioder = beregningsresultat.beregningsresultatsperioder.map {
-            BeregningsresultatsperiodeDto(
-                periode = it.periode.toDatoperiode(),
-                vurdering = it.vurdering,
-                feilutbetaltBeløp = it.feilutbetaltBeløp,
-                andelAvBeløp = it.andelAvBeløp,
-                renteprosent = it.renteprosent,
-                tilbakekrevingsbeløp = it.tilbakekrevingsbeløp,
-                tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt,
-            )
-        }
+        val beregningsresultatsperioder =
+            beregningsresultat.beregningsresultatsperioder.map {
+                BeregningsresultatsperiodeDto(
+                    periode = it.periode.toDatoperiode(),
+                    vurdering = it.vurdering,
+                    feilutbetaltBeløp = it.feilutbetaltBeløp,
+                    andelAvBeløp = it.andelAvBeløp,
+                    renteprosent = it.renteprosent,
+                    tilbakekrevingsbeløp = it.tilbakekrevingsbeløp,
+                    tilbakekrevesBeløpEtterSkatt = it.tilbakekrevingsbeløpEtterSkatt,
+                )
+            }
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder,
             vedtaksresultat = beregningsresultat.vedtaksresultat,
@@ -79,29 +79,34 @@ class TilbakekrevingsberegningService(
         val totalTilbakekrevingsbeløp = beregningsresultatperioder.sumOf { it.tilbakekrevingsbeløp }
         val totalFeilutbetaltBeløp = beregningsresultatperioder.sumOf { it.feilutbetaltBeløp }
         return Beregningsresultat(
-            vedtaksresultat = bestemVedtakResultat(
-                behandlingId,
-                totalTilbakekrevingsbeløp,
-                totalFeilutbetaltBeløp,
-            ),
+            vedtaksresultat =
+                bestemVedtakResultat(
+                    behandlingId,
+                    totalTilbakekrevingsbeløp,
+                    totalFeilutbetaltBeløp,
+                ),
             beregningsresultatsperioder = (beregningsresultatperioder),
         )
     }
 
-    fun beregnBeløp(behandlingId: UUID, perioder: List<Datoperiode>): BeregnetPerioderDto {
+    fun beregnBeløp(
+        behandlingId: UUID,
+        perioder: List<Datoperiode>,
+    ): BeregnetPerioderDto {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned.
         KravgrunnlagsberegningService.validatePerioder(perioder)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
         return BeregnetPerioderDto(
-            beregnetPerioder = perioder.map {
-                val feilutbetaltBeløp =
-                    KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
-                BeregnetPeriodeDto(
-                    periode = it,
-                    feilutbetaltBeløp = feilutbetaltBeløp,
-                )
-            },
+            beregnetPerioder =
+                perioder.map {
+                    val feilutbetaltBeløp =
+                        KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
+                    BeregnetPeriodeDto(
+                        periode = it,
+                        feilutbetaltBeløp = feilutbetaltBeløp,
+                    )
+                },
         )
     }
 
@@ -130,7 +135,7 @@ class TilbakekrevingsberegningService(
         return (
             beregnForForeldedePerioder(vurdertForeldelse, perioderMedBeløp) +
                 beregnForIkkeForeldedePerioder(kravgrunnlag, vilkårsvurdering, perioderMedBeløp, beregnRenter)
-            )
+        )
             .sortedBy { it.periode.fom }
     }
 
@@ -196,8 +201,9 @@ class TilbakekrevingsberegningService(
         kravbeløpPerPeriode: Map<Månedsperiode, FordeltKravgrunnlagsbeløp>,
         beregnRenter: Boolean,
     ): Beregningsresultatsperiode {
-        val delresultat = kravbeløpPerPeriode[vurdering.periode]
-            ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
+        val delresultat =
+            kravbeløpPerPeriode[vurdering.periode]
+                ?: throw IllegalStateException("Periode i finnes ikke i map kravbeløpPerPeriode")
         val perioderMedSkattProsent = lagGrunnlagPeriodeMedSkattProsent(vurdering.periode, kravgrunnlag)
 
         val bruk6desimalerISkatteberegning = featureToggleService.isEnabled(BRUK_6_DESIMALER_I_SKATTEBEREGNING)

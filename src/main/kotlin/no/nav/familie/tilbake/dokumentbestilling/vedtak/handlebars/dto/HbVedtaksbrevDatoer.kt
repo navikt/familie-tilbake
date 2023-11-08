@@ -9,7 +9,6 @@ class HbVedtaksbrevDatoer(
     val opphørsdatoDødtBarn: LocalDate? = null,
     val opphørsdatoIkkeOmsorg: LocalDate? = null,
 ) {
-
     constructor(perioder: List<HbVedtaksbrevsperiode>) : this(
         getFørsteDagForHendelsesundertype(
             perioder,
@@ -22,7 +21,6 @@ class HbVedtaksbrevDatoer(
     )
 
     companion object {
-
         private fun getFørsteDagForHendelsesundertype(
             perioder: List<HbVedtaksbrevsperiode>,
             vararg hendelsesundertyper: Hendelsesundertype,

@@ -5,12 +5,18 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 object BeløpsberegningUtil {
-
-    fun beregnBeløpPerMåned(beløp: BigDecimal, kravgrunnlagsperiode: Månedsperiode): BigDecimal {
+    fun beregnBeløpPerMåned(
+        beløp: BigDecimal,
+        kravgrunnlagsperiode: Månedsperiode,
+    ): BigDecimal {
         return beløp.divide(BigDecimal.valueOf(kravgrunnlagsperiode.lengdeIHeleMåneder()), 2, RoundingMode.HALF_UP)
     }
 
-    fun beregnBeløp(vurderingsperiode: Månedsperiode, kravgrunnlagsperiode: Månedsperiode, beløpPerMåned: BigDecimal): BigDecimal {
+    fun beregnBeløp(
+        vurderingsperiode: Månedsperiode,
+        kravgrunnlagsperiode: Månedsperiode,
+        beløpPerMåned: BigDecimal,
+    ): BigDecimal {
         val overlapp = kravgrunnlagsperiode.snitt(vurderingsperiode)
         if (overlapp != null) {
             return beløpPerMåned.multiply(BigDecimal.valueOf(overlapp.lengdeIHeleMåneder()))

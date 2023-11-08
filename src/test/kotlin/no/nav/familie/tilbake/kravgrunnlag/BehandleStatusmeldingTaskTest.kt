@@ -45,7 +45,6 @@ import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 
 internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
 
@@ -113,7 +112,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
         mottattXmlListe.size shouldBe 1
         val mottattXml = mottattXmlListe[0]
-        mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement).shouldBeTrue()
+        mottattXml.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT).shouldBeTrue()
         mottattXml.sperret.shouldBeTrue()
 
         assertArkivertXml(1, false, Kravstatuskode.SPERRET)
@@ -136,7 +135,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val mottattXmlListe = mottattXmlRepository.findByEksternFagsakIdAndYtelsestype(fagsak.eksternFagsakId, fagsak.ytelsestype)
         mottattXmlListe.size shouldBe 1
         val mottattXml = mottattXmlListe[0]
-        mottattXml.melding.contains(Constants.kravgrunnlagXmlRootElement).shouldBeTrue()
+        mottattXml.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT).shouldBeTrue()
         mottattXml.sperret.shouldBeFalse()
 
         assertArkivertXml(2, false, Kravstatuskode.SPERRET, Kravstatuskode.ENDRET)
@@ -370,8 +369,9 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         opprettGrunnlag()
 
         // oppdater FAKTA steg manuelt til UTFØRT
-        val aktivtBehandlingsstegstilstand = behandlingsstegstilstandRepository
-            .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
+        val aktivtBehandlingsstegstilstand =
+            behandlingsstegstilstandRepository
+                .findByBehandlingIdAndBehandlingssteg(behandling.id, FAKTA)
         aktivtBehandlingsstegstilstand.shouldNotBeNull()
         aktivtBehandlingsstegstilstand.let {
             behandlingsstegstilstandRepository.update(it.copy(behandlingsstegsstatus = Behandlingsstegstatus.UTFØRT))
@@ -423,24 +423,28 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         finnesKravgrunnlag: Boolean,
         vararg statusmeldingKravstatuskode: Kravstatuskode,
     ) {
-        val arkivertXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(
-            fagsak.eksternFagsakId,
-            fagsak.ytelsestype,
-        )
+        val arkivertXmlListe =
+            mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(
+                fagsak.eksternFagsakId,
+                fagsak.ytelsestype,
+            )
         arkivertXmlListe.size shouldBe size
 
         if (finnesKravgrunnlag) {
-            arkivertXmlListe.any { it.melding.contains(Constants.kravgrunnlagXmlRootElement) }.shouldBeTrue()
+            arkivertXmlListe.any { it.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT) }.shouldBeTrue()
         }
         statusmeldingKravstatuskode.forEach { kravstatuskode ->
             arkivertXmlListe.shouldHaveSingleElement {
-                it.melding.contains(Constants.statusmeldingXmlRootElement) &&
+                it.melding.contains(Constants.STATUSMELDING_XML_ROOT_ELEMENT) &&
                     it.melding.contains(kravstatuskode.kode)
             }
         }
     }
 
-    private fun opprettTask(xml: String, taskType: String): Task {
+    private fun opprettTask(
+        xml: String,
+        taskType: String,
+    ): Task {
         return taskService.save(
             Task(
                 type = taskType,
@@ -470,7 +474,10 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         }.shouldBeTrue()
     }
 
-    private fun assertOppgaveTask(beskrivelse: String, fristTid: LocalDate) {
+    private fun assertOppgaveTask(
+        beskrivelse: String,
+        fristTid: LocalDate,
+    ) {
         taskService.findAll().any {
             it.type == OppdaterOppgaveTask.TYPE &&
                 it.payload == behandling.id.toString() &&

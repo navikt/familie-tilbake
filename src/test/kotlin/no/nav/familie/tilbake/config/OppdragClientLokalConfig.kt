@@ -17,7 +17,6 @@ class OppdragClientLokalConfig(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
 ) {
-
     @Bean
     @Primary
     fun oppdragClient(): OppdragClient {

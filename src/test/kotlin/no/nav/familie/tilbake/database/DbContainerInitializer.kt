@@ -6,7 +6,6 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer
 
 class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
         postgres.start()
         TestPropertyValues.of(
@@ -17,7 +16,6 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
     }
 
     companion object {
-
         // Lazy because we only want it to be initialized when accessed
         private val postgres: KPostgreSQLContainer by lazy {
             KPostgreSQLContainer("postgres:14.6")

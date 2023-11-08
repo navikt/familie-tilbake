@@ -29,7 +29,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class ManuellBrevmottakerController(private val manuellBrevmottakerService: ManuellBrevmottakerService) {
-
     @Operation(summary = "Legger til brevmottaker manuelt")
     @PostMapping(
         path = ["/{behandlingId}"],
@@ -62,7 +61,9 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         henteParam = HenteParam.BEHANDLING_ID,
     )
-    fun hentManuellBrevmottakere(@PathVariable behandlingId: UUID): Ressurs<List<ManuellBrevmottakerResponsDto>> {
+    fun hentManuellBrevmottakere(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<ManuellBrevmottakerResponsDto>> {
         return Ressurs
             .success(
                 manuellBrevmottakerService.hentBrevmottakere(behandlingId)
@@ -115,7 +116,9 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         AuditLoggerEvent.CREATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun opprettBrevmottakerSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun opprettBrevmottakerSteg(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
         manuellBrevmottakerService.opprettBrevmottakerSteg(behandlingId)
         return Ressurs.success("OK")
     }
@@ -128,7 +131,9 @@ class ManuellBrevmottakerController(private val manuellBrevmottakerService: Manu
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun fjernBrevmottakerSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun fjernBrevmottakerSteg(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
         manuellBrevmottakerService.fjernManuelleBrevmottakereOgTilbakeførSteg(behandlingId)
         return Ressurs.success("OK")
     }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class KroneFormattererMedTusenskilleTest {
-
     @Test
     fun `medTusenskille skal gi riktig tusenskille`() {
         KroneFormattererMedTusenskille.medTusenskille(BigDecimal.valueOf(1), ' ') shouldBe "1"

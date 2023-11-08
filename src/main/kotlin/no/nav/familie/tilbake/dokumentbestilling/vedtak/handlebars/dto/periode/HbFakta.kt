@@ -9,7 +9,6 @@ data class HbFakta(
     val hendelsesundertype: Hendelsesundertype,
     val fritekstFakta: String? = null,
 ) {
-
     init {
         require(HendelsesundertypePerHendelsestype.getHendelsesundertyper(hendelsestype).contains(hendelsesundertype))
     }

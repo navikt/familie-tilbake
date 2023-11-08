@@ -28,7 +28,6 @@ class LagreBrevsporingTask(
     private val taskService: TaskService,
     private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -90,8 +89,10 @@ class LagreBrevsporingTask(
     }
 
     companion object {
-
-        fun utledHistorikkinnslagType(brevtype: Brevtype, mottager: Brevmottager): TilbakekrevingHistorikkinnslagstype {
+        fun utledHistorikkinnslagType(
+            brevtype: Brevtype,
+            mottager: Brevmottager,
+        ): TilbakekrevingHistorikkinnslagstype {
             if (Brevmottager.VERGE == mottager) {
                 return when (brevtype) {
                     Brevtype.VARSEL -> TilbakekrevingHistorikkinnslagstype.VARSELBREV_SENDT_TIL_VERGE

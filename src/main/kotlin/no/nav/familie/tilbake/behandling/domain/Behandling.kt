@@ -46,7 +46,6 @@ data class Behandling(
     val sporbar: Sporbar = Sporbar(),
     val regelverk: Regelverk? = null,
 ) {
-
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
 
     val erUnderIverksettelse get() = Behandlingsstatus.IVERKSETTER_VEDTAK == status
@@ -181,7 +180,6 @@ enum class Behandlingsårsakstype(val navn: String) {
 }
 
 enum class Behandlingsstatus(val kode: String) {
-
     AVSLUTTET("AVSLU"),
     FATTER_VEDTAK("FVED"),
     IVERKSETTER_VEDTAK("IVED"),
@@ -190,7 +188,6 @@ enum class Behandlingsstatus(val kode: String) {
 }
 
 enum class Behandlingstype {
-
     TILBAKEKREVING,
     REVURDERING_TILBAKEKREVING,
 }

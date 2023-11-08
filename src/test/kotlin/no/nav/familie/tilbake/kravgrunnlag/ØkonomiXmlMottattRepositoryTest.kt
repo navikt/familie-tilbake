@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class ØkonomiXmlMottattRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var økonomiXmlMottattRepository: ØkonomiXmlMottattRepository
 

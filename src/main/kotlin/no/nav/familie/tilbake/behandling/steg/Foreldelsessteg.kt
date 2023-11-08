@@ -31,7 +31,6 @@ class Foreldelsessteg(
     private val foreldelseAntallMåned: Long,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -52,7 +51,10 @@ class Foreldelsessteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg")
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto))
 
@@ -107,7 +109,10 @@ class Foreldelsessteg(
         return kravgrunnlag.perioder.any { it.periode.fom.atDay(1) < LocalDate.now().minusMonths(foreldelseAntallMåned) }
     }
 
-    private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
+    private fun lagHistorikkinnslag(
+        behandlingId: UUID,
+        aktør: Aktør,
+    ) {
         historikkTaskService.lagHistorikkTask(behandlingId, TilbakekrevingHistorikkinnslagstype.FORELDELSE_VURDERT, aktør)
     }
 

@@ -24,26 +24,26 @@ class TellerService(
     private val fagsakRepository: FagsakRepository,
     private val meldingstellingRepository: MeldingstellingRepository,
 ) {
+    fun tellKobletKravgrunnlag(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
 
-    fun tellKobletKravgrunnlag(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.KOBLET)
+    fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
 
-    fun tellUkobletKravgrunnlag(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.KRAVGRUNNLAG, Mottaksstatus.UKOBLET)
+    fun tellKobletStatusmelding(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
 
-    fun tellKobletStatusmelding(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.KOBLET)
+    fun tellUkobletStatusmelding(fagsystem: Fagsystem) = tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
 
-    fun tellUkobletStatusmelding(fagsystem: Fagsystem) =
-        tellMelding(fagsystem, Meldingstype.STATUSMELDING, Mottaksstatus.UKOBLET)
-
-    fun tellMelding(fagsystem: Fagsystem, type: Meldingstype, status: Mottaksstatus) {
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            fagsystem,
-            type,
-            status,
-            LocalDate.now(),
-        )
+    fun tellMelding(
+        fagsystem: Fagsystem,
+        type: Meldingstype,
+        status: Mottaksstatus,
+    ) {
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                fagsystem,
+                type,
+                status,
+                LocalDate.now(),
+            )
         if (meldingstelling == null) {
             meldingstellingRepository.insert(
                 Meldingstelling(
@@ -57,7 +57,10 @@ class TellerService(
         }
     }
 
-    fun tellBrevSendt(fagsak: Fagsak, brevtype: Brevtype) {
+    fun tellBrevSendt(
+        fagsak: Fagsak,
+        brevtype: Brevtype,
+    ) {
         Metrics.counter(
             "Brevteller",
             Tags.of(
@@ -69,13 +72,17 @@ class TellerService(
         ).increment()
     }
 
-    fun tellVedtak(behandlingsresultatstype: Behandlingsresultatstype, behandling: Behandling) {
+    fun tellVedtak(
+        behandlingsresultatstype: Behandlingsresultatstype,
+        behandling: Behandling,
+    ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val vedtakstype = if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER) {
-            Behandlingsresultatstype.HENLAGT.name
-        } else {
-            behandlingsresultatstype.name
-        }
+        val vedtakstype =
+            if (behandlingsresultatstype in Behandlingsresultat.ALLE_HENLEGGELSESKODER) {
+                Behandlingsresultatstype.HENLAGT.name
+            } else {
+                behandlingsresultatstype.name
+            }
 
         Metrics.counter(
             "Vedtaksteller",

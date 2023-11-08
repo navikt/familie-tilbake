@@ -42,9 +42,7 @@ import java.time.YearMonth
  * Confluence:
  * https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
  */
-// @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorPeriodeVilkår {
-
     @Test
     fun `generer vilkår for BA bokmål`() {
         lagVilkårstekster(Ytelsestype.BARNETRYGD, Språkkode.NB)
@@ -85,7 +83,10 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         lagVilkårstekster(Ytelsestype.SKOLEPENGER, Språkkode.NN)
     }
 
-    private fun lagVilkårstekster(ytelsetype: Ytelsestype, språkkode: Språkkode) {
+    private fun lagVilkårstekster(
+        ytelsetype: Ytelsestype,
+        språkkode: Språkkode,
+    ) {
         vilkårResultat.forEach { resultat ->
             aktsomheter.forEach { vurdering ->
                 foreldelseVurderinger.forEach { foreldelseVurdering ->
@@ -172,16 +173,17 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         pengerIBehold: Boolean,
         lavtBeløp: Boolean,
     ) {
-        val periodeOgFelles = lagPeriodeOgFelles(
-            ytelsetype,
-            språkkode,
-            resultat,
-            vurdering,
-            lavtBeløp,
-            foreldelsevurdering,
-            fritekst,
-            pengerIBehold,
-        )
+        val periodeOgFelles =
+            lagPeriodeOgFelles(
+                ytelsetype,
+                språkkode,
+                resultat,
+                vurdering,
+                lavtBeløp,
+                foreldelsevurdering,
+                fritekst,
+                pengerIBehold,
+            )
         val vilkårTekst = lagVilkårTekst(periodeOgFelles)
         val overskrift = overskrift(resultat, vurdering, lavtBeløp, fritekst, pengerIBehold, foreldelsevurdering)
         val prettyprint = prettyprint(vilkårTekst, overskrift)
@@ -217,35 +219,41 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 unntasInnkrevingPgaLavtBeløp = lavtBeløp,
                 fritekst = if (fritekst) "[ fritekst her ]" else null,
                 vilkårsvurderingsresultat = vilkårResultat,
-                beløpIBehold = if (AnnenVurdering.GOD_TRO === vurdering) {
-                    if (pengerIBehold) BigDecimal.valueOf(3999) else BigDecimal.ZERO
-                } else {
-                    null
-                },
-                foreldelsesfrist = if (foreldelsevurdering in setOf(
-                        Foreldelsesvurderingstype.FORELDET,
-                        Foreldelsesvurderingstype.TILLEGGSFRIST,
-                    )
-                ) {
-                    FORELDELSESFRIST
-                } else {
-                    null
-                },
-                fritekstForeldelse = if (foreldelsevurdering in setOf(
-                        Foreldelsesvurderingstype.FORELDET,
-                        Foreldelsesvurderingstype.TILLEGGSFRIST,
-                    ) &&
-                    fritekst
-                ) {
-                    "[ fritekst her ]"
-                } else {
-                    null
-                },
-                oppdagelsesdato = if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering) {
-                    OPPDAGELSES_DATO
-                } else {
-                    null
-                },
+                beløpIBehold =
+                    if (AnnenVurdering.GOD_TRO === vurdering) {
+                        if (pengerIBehold) BigDecimal.valueOf(3999) else BigDecimal.ZERO
+                    } else {
+                        null
+                    },
+                foreldelsesfrist =
+                    if (foreldelsevurdering in
+                        setOf(
+                            Foreldelsesvurderingstype.FORELDET,
+                            Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        )
+                    ) {
+                        FORELDELSESFRIST
+                    } else {
+                        null
+                    },
+                fritekstForeldelse =
+                    if (foreldelsevurdering in
+                        setOf(
+                            Foreldelsesvurderingstype.FORELDET,
+                            Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        ) &&
+                        fritekst
+                    ) {
+                        "[ fritekst her ]"
+                    } else {
+                        null
+                    },
+                oppdagelsesdato =
+                    if (Foreldelsesvurderingstype.TILLEGGSFRIST == foreldelsevurdering) {
+                        OPPDAGELSES_DATO
+                    } else {
+                        null
+                    },
             )
 
         val periodeBuilder =
@@ -254,12 +262,13 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 kravgrunnlag = HbKravgrunnlag(feilutbetaltBeløp = BigDecimal.ZERO),
                 fakta = HbFakta(Hendelsestype.ANNET, Hendelsesundertype.ANNET_FRITEKST),
                 vurderinger = vurderinger,
-                resultat = HbResultat(
-                    tilbakekrevesBeløp = BigDecimal.valueOf(9999),
-                    rentebeløp = BigDecimal.ZERO,
-                    tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(9999),
-                    foreldetBeløp = BigDecimal.valueOf(2999),
-                ),
+                resultat =
+                    HbResultat(
+                        tilbakekrevesBeløp = BigDecimal.valueOf(9999),
+                        rentebeløp = BigDecimal.ZERO,
+                        tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(9999),
+                        foreldetBeløp = BigDecimal.valueOf(2999),
+                    ),
                 førstePeriode = true,
             )
         return HbVedtaksbrevPeriodeOgFelles(fellesBuilder, periodeBuilder)
@@ -269,11 +278,12 @@ class DokumentasjonsgeneratorPeriodeVilkår {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
-        val datoer = HbVedtaksbrevDatoer(
-            LocalDate.of(2018, 3, 2),
-            LocalDate.of(2018, 3, 3),
-            LocalDate.of(2018, 3, 4),
-        )
+        val datoer =
+            HbVedtaksbrevDatoer(
+                LocalDate.of(2018, 3, 2),
+                LocalDate.of(2018, 3, 3),
+                LocalDate.of(2018, 3, 4),
+            )
 
         return HbVedtaksbrevFelles(
             brevmetadata = lagMetadata(ytelsestype, språkkode),
@@ -281,21 +291,24 @@ class DokumentasjonsgeneratorPeriodeVilkår {
             behandling = HbBehandling(),
             hjemmel = HbHjemmel("Folketrygdloven"),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
-            varsel = HbVarsel(
-                varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100),
-            ),
-            konfigurasjon = HbKonfigurasjon(
-                fireRettsgebyr = BigDecimal.valueOf(4321),
-                klagefristIUker = 4,
-            ),
-            totalresultat = HbTotalresultat(
-                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
-                totaltTilbakekrevesBeløp = BigDecimal.ZERO,
-                totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
-                totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
-                totaltRentebeløp = BigDecimal.ZERO,
-            ),
+            varsel =
+                HbVarsel(
+                    varsletBeløp = BigDecimal.valueOf(10000),
+                    varsletDato = LocalDate.now().minusDays(100),
+                ),
+            konfigurasjon =
+                HbKonfigurasjon(
+                    fireRettsgebyr = BigDecimal.valueOf(4321),
+                    klagefristIUker = 4,
+                ),
+            totalresultat =
+                HbTotalresultat(
+                    hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                    totaltTilbakekrevesBeløp = BigDecimal.ZERO,
+                    totaltTilbakekrevesBeløpMedRenterUtenSkatt = BigDecimal.ZERO,
+                    totaltTilbakekrevesBeløpMedRenter = BigDecimal.ZERO,
+                    totaltRentebeløp = BigDecimal.ZERO,
+                ),
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,
             vedtaksbrevstype = Vedtaksbrevstype.ORDINÆR,
@@ -335,10 +348,13 @@ class DokumentasjonsgeneratorPeriodeVilkår {
                 (if (pengerIBehold) " - penger i behold" else "") +
                 (if (lavtBeløp) " - lavt beløp" else "") +
                 " ]*"
-            )
+        )
     }
 
-    private fun prettyprint(vilkårTekst: String, overskrift: String): String {
+    private fun prettyprint(
+        vilkårTekst: String,
+        overskrift: String,
+    ): String {
         return vilkårTekst.replace("__.+".toRegex(), overskrift)
             .replace(" 4\u00A0321\u00A0kroner", " <4 rettsgebyr> kroner")
             .replace(" 2\u00A0999\u00A0kroner", " <foreldet beløp> kroner")
@@ -350,22 +366,24 @@ class DokumentasjonsgeneratorPeriodeVilkår {
     }
 
     companion object {
-
-        private val vilkårResultat = arrayOf(
-            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-            Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
-        private val foreldelseVurderinger = arrayOf(
-            Foreldelsesvurderingstype.IKKE_VURDERT,
-            Foreldelsesvurderingstype.IKKE_FORELDET,
-            Foreldelsesvurderingstype.TILLEGGSFRIST,
-        )
-        private val aktsomheter = arrayOf(
-            Aktsomhet.SIMPEL_UAKTSOMHET,
-            Aktsomhet.GROV_UAKTSOMHET,
-            Aktsomhet.FORSETT,
-        )
+        private val vilkårResultat =
+            arrayOf(
+                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                Vilkårsvurderingsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
+                Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
+        private val foreldelseVurderinger =
+            arrayOf(
+                Foreldelsesvurderingstype.IKKE_VURDERT,
+                Foreldelsesvurderingstype.IKKE_FORELDET,
+                Foreldelsesvurderingstype.TILLEGGSFRIST,
+            )
+        private val aktsomheter =
+            arrayOf(
+                Aktsomhet.SIMPEL_UAKTSOMHET,
+                Aktsomhet.GROV_UAKTSOMHET,
+                Aktsomhet.FORSETT,
+            )
         private val trueFalse = booleanArrayOf(true, false)
         private val JANUAR = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
         private val FORELDELSESFRIST = LocalDate.of(2019, 12, 1)
