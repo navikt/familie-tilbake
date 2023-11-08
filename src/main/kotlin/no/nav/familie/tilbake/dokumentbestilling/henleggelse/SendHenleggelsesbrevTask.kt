@@ -29,7 +29,6 @@ class SendHenleggelsesbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
@@ -37,7 +36,6 @@ class SendHenleggelsesbrevTask(
     }
 
     companion object {
-
         fun opprettTask(
             behandlingId: UUID,
             fagsystem: Fagsystem,

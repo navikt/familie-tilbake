@@ -41,7 +41,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -73,12 +72,13 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
 
         spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
-        historikkService = HistorikkService(
-            behandlingRepository,
-            fagsakRepository,
-            brevsporingRepository,
-            spyKafkaProducer,
-        )
+        historikkService =
+            HistorikkService(
+                behandlingRepository,
+                fagsakRepository,
+                brevsporingRepository,
+                spyKafkaProducer,
+            )
         val recordMetadata = mockk<RecordMetadata>()
         every { recordMetadata.offset() } returns 1
         val result = SendResult<String, String>(mockk(), recordMetadata)
@@ -257,7 +257,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 resultater =
-                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)),
+                    setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)),
             ),
         )
         historikkService.lagHistorikkinnslag(
@@ -290,7 +290,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 resultater =
-                setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)),
+                    setOf(Behandlingsresultat(type = Behandlingsresultatstype.HENLAGT_FEILOPPRETTET)),
             ),
         )
         historikkService.lagHistorikkinnslag(
@@ -443,16 +443,17 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 resultater =
-                setOf(
-                    Behandlingsresultat(
-                        type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
-                        behandlingsvedtak = Behandlingsvedtak(
-                            vedtaksdato = LocalDate.now(),
-                            iverksettingsstatus =
-                            Iverksettingsstatus.IVERKSATT,
+                    setOf(
+                        Behandlingsresultat(
+                            type = Behandlingsresultatstype.FULL_TILBAKEBETALING,
+                            behandlingsvedtak =
+                                Behandlingsvedtak(
+                                    vedtaksdato = LocalDate.now(),
+                                    iverksettingsstatus =
+                                        Iverksettingsstatus.IVERKSATT,
+                                ),
                         ),
                     ),
-                ),
             ),
         )
         historikkService.lagHistorikkinnslag(

@@ -14,23 +14,28 @@ class VarselService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
-
-    fun lagre(behandlingId: UUID, varseltekst: String, varselbeløp: Long) {
+    fun lagre(
+        behandlingId: UUID,
+        varseltekst: String,
+        varselbeløp: Long,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val varselsperioder: Set<Varselsperiode> = if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
-            val perioder = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder
-            perioder.map { Varselsperiode(fom = it.periode.fom, tom = it.periode.tom) }.toSet()
-        } else {
-            behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
-                ?: error("Aktivt varsel har ikke med varselsperioder")
-        }
+        val varselsperioder: Set<Varselsperiode> =
+            if (kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)) {
+                val perioder = faktaFeilutbetalingService.hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder
+                perioder.map { Varselsperiode(fom = it.periode.fom, tom = it.periode.tom) }.toSet()
+            } else {
+                behandling.aktivtVarsel?.perioder?.map { Varselsperiode(fom = it.fom, tom = it.tom) }?.toSet()
+                    ?: error("Aktivt varsel har ikke med varselsperioder")
+            }
 
-        val varsler = behandling.varsler.map { it.copy(aktiv = false) } +
-            Varsel(
-                varseltekst = varseltekst,
-                varselbeløp = varselbeløp,
-                perioder = varselsperioder,
-            )
+        val varsler =
+            behandling.varsler.map { it.copy(aktiv = false) } +
+                Varsel(
+                    varseltekst = varseltekst,
+                    varselbeløp = varselbeløp,
+                    perioder = varselsperioder,
+                )
         val copy = behandling.copy(varsler = varsler.toSet())
         behandlingRepository.update(copy)
     }

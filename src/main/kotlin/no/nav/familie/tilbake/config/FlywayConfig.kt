@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 
 data class FlywayConfig(private val role: String) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Bean

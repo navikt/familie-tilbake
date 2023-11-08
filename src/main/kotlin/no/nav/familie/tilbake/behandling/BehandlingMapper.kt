@@ -36,7 +36,6 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBre
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 
 object BehandlingMapper {
-
     fun tilDomeneBehandling(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         fagsystem: Fagsystem,
@@ -83,9 +82,10 @@ object BehandlingMapper {
         manuelleBrevmottakere: List<ManuellBrevmottaker>,
         støtterManuelleBrevmottakere: Boolean,
     ): BehandlingDto {
-        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
-            it.sporbar.endret.endretTid
-        }
+        val resultat: Behandlingsresultat? =
+            behandling.resultater.maxByOrNull {
+                it.sporbar.endret.endretTid
+            }
 
         return BehandlingDto(
             eksternBrukId = behandling.eksternBrukId,
@@ -145,7 +145,10 @@ object BehandlingMapper {
         } ?: emptySet()
     }
 
-    private fun tilDomeneVerge(fagsystem: Fagsystem, opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Set<Verge> {
+    private fun tilDomeneVerge(
+        fagsystem: Fagsystem,
+        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
+    ): Set<Verge> {
         opprettTilbakekrevingRequest.verge?.let {
             return setOf(
                 Verge(
@@ -161,9 +164,10 @@ object BehandlingMapper {
     }
 
     fun tilBehandlingerForFagsystem(behandling: Behandling): no.nav.familie.kontrakter.felles.tilbakekreving.Behandling {
-        val resultat: Behandlingsresultat? = behandling.resultater.maxByOrNull {
-            it.sporbar.endret.endretTid
-        }
+        val resultat: Behandlingsresultat? =
+            behandling.resultater.maxByOrNull {
+                it.sporbar.endret.endretTid
+            }
         return no.nav.familie.kontrakter.felles.tilbakekreving.Behandling(
             behandlingId = behandling.eksternBrukId,
             opprettetTidspunkt = behandling.opprettetTidspunkt,
@@ -256,12 +260,13 @@ object BehandlingMapper {
             behandlendeEnhet = originalBehandling.behandlendeEnhet,
             behandlendeEnhetsNavn = originalBehandling.behandlendeEnhetsNavn,
             manueltOpprettet = false,
-            årsaker = setOf(
-                Behandlingsårsak(
-                    type = behandlingsårsakstype,
-                    originalBehandlingId = originalBehandling.id,
+            årsaker =
+                setOf(
+                    Behandlingsårsak(
+                        type = behandlingsårsakstype,
+                        originalBehandlingId = originalBehandling.id,
+                    ),
                 ),
-            ),
             fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
             verger = verger,
             regelverk = originalBehandling.regelverk,

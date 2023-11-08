@@ -12,14 +12,13 @@ data class InnhentDokumentasjonsbrevsdokument(
     val fritekstFraSaksbehandler: String,
     val fristdato: LocalDate,
 ) : BaseDokument(
-    brevmetadata.ytelsestype,
-    brevmetadata.språkkode,
-    brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall,
-    brevmetadata.institusjon,
-) {
-
+        brevmetadata.ytelsestype,
+        brevmetadata.språkkode,
+        brevmetadata.behandlendeEnhetsNavn,
+        brevmetadata.ansvarligSaksbehandler,
+        brevmetadata.gjelderDødsfall,
+        brevmetadata.institusjon,
+    ) {
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
     val annenMottagersNavn: String? = BrevmottagerUtil.getAnnenMottagersNavn(brevmetadata)

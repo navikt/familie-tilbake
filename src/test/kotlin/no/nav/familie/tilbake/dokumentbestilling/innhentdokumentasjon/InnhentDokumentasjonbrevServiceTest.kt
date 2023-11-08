@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
-
     private val flereOpplysninger = "Vi trenger flere opplysninger"
     private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
 
@@ -40,27 +39,29 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
     private val organisasjonService: OrganisasjonService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
-    private val brevmetadataUtil = BrevmetadataUtil(
-        behandlingRepository = behandlingRepository,
-        fagsakRepository = fagsakRepository,
-        manuelleBrevmottakerRepository = mockk(relaxed = true),
-        eksterneDataForBrevService = mockEksterneDataForBrevService,
-        organisasjonService = organisasjonService,
-        featureToggleService = featureToggleService,
-    )
+    private val brevmetadataUtil =
+        BrevmetadataUtil(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = mockk(relaxed = true),
+            eksterneDataForBrevService = mockEksterneDataForBrevService,
+            organisasjonService = organisasjonService,
+            featureToggleService = featureToggleService,
+        )
 
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
-        innhentDokumentasjonBrevService = InnhentDokumentasjonbrevService(
-            fagsakRepository,
-            behandlingRepository,
-            mockEksterneDataForBrevService,
-            spyPdfBrevService,
-            organisasjonService,
-            distribusjonshåndteringService,
-            brevmetadataUtil,
-        )
+        innhentDokumentasjonBrevService =
+            InnhentDokumentasjonbrevService(
+                fagsakRepository,
+                behandlingRepository,
+                mockEksterneDataForBrevService,
+                spyPdfBrevService,
+                organisasjonService,
+                distribusjonshåndteringService,
+                brevmetadataUtil,
+            )
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
         every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
@@ -73,10 +74,11 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
-        val data = innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
-            Testdata.behandling.id,
-            flereOpplysninger,
-        )
+        val data =
+            innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
+                Testdata.behandling.id,
+                flereOpplysninger,
+            )
 
         PdfaValidator.validatePdf(data)
     }

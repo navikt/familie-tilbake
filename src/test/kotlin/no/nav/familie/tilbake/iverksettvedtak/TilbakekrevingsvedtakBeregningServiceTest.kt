@@ -48,7 +48,6 @@ import java.math.BigInteger
 import java.time.YearMonth
 
 internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -73,10 +72,11 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
 
-    private val perioder = listOf(
-        Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-    )
+    private val perioder =
+        listOf(
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+        )
 
     private lateinit var kravgrunnlag: Kravgrunnlag431
 
@@ -86,14 +86,15 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         behandlingRepository.insert(behandling)
 
         val månedligSkattBeløp = BigDecimal.ZERO
-        val kravgrunnlagsbeløpene = listOf(
-            Kravgrunnlagsbeløp(klassetype = Klassetype.FEIL, nyttBeløp = BigDecimal(5000)),
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.YTEL,
-                opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                tilbakekrevesBeløp = BigDecimal(5000),
-            ),
-        )
+        val kravgrunnlagsbeløpene =
+            listOf(
+                Kravgrunnlagsbeløp(klassetype = Klassetype.FEIL, nyttBeløp = BigDecimal(5000)),
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.YTEL,
+                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                    tilbakekrevesBeløp = BigDecimal(5000),
+                ),
+            )
 
         kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
@@ -102,19 +103,21 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med 50 prosent andel tilbakekrevesbeløp`() {
         lagAktsomhetVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(50),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -151,19 +154,21 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med 33 prosent andel tilbakekrevesbeløp`() {
         lagAktsomhetVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(33),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -200,17 +205,19 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med Forsett aktsomhet`() {
         lagAktsomhetVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             aktsomhet = Aktsomhet.FORSETT,
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -247,16 +254,18 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og ingen tilbakekreving`() {
         lagGodTroVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -293,18 +302,20 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og bestemt tilbakekrevesbeløp`() {
         lagGodTroVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             beløpErIBehold = true,
             beløpTilbakekreves = BigDecimal(3000),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -341,18 +352,20 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     @Test
     fun `beregnVedtaksperioder skal beregne når vilkårsvurderte med God tro og bestemt tilbakekrevesbeløp med avrunding`() {
         lagGodTroVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             beløpErIBehold = true,
             beløpTilbakekreves = BigDecimal(1999),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -391,37 +404,40 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         val månedligSkattBeløp = BigDecimal(500)
 
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
-        val kravgrunnlagsbeløpene = listOf(
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.FEIL,
-                nyttBeløp = BigDecimal(5000),
-                skatteprosent = BigDecimal(10),
-            ),
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.YTEL,
-                opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                tilbakekrevesBeløp = BigDecimal(5000),
-                skatteprosent = BigDecimal(10),
-            ),
-        )
+        val kravgrunnlagsbeløpene =
+            listOf(
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.FEIL,
+                    nyttBeløp = BigDecimal(5000),
+                    skatteprosent = BigDecimal(10),
+                ),
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.YTEL,
+                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                    tilbakekrevesBeløp = BigDecimal(5000),
+                    skatteprosent = BigDecimal(10),
+                ),
+            )
 
         val kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         lagAktsomhetVilkårsvurdering(
-            perioder = listOf(
-                Månedsperiode(
-                    YearMonth.of(2021, 1),
-                    YearMonth.of(2021, 2),
+            perioder =
+                listOf(
+                    Månedsperiode(
+                        YearMonth.of(2021, 1),
+                        YearMonth.of(2021, 2),
+                    ),
                 ),
-            ),
             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
             andelTilbakreves = BigDecimal(50),
             særligeGrunnerTilReduksjon = true,
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -463,8 +479,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
         lagAktsomhetVilkårsvurdering(listOf(perioder[1]), Aktsomhet.GROV_UAKTSOMHET)
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -505,25 +522,27 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
 
         val månedligSkattBeløp = BigDecimal(750)
-        val perioder = listOf(
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-            Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
-        )
+        val perioder =
+            listOf(
+                Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+                Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+                Månedsperiode(YearMonth.of(2021, 3), YearMonth.of(2021, 3)),
+            )
 
-        val kravgrunnlagsbeløpene = listOf(
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.FEIL,
-                nyttBeløp = BigDecimal(5000),
-                skatteprosent = BigDecimal(15),
-            ),
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.YTEL,
-                opprinneligUtbetalingsbeløp = BigDecimal(5000),
-                tilbakekrevesBeløp = BigDecimal(5000),
-                skatteprosent = BigDecimal(15),
-            ),
-        )
+        val kravgrunnlagsbeløpene =
+            listOf(
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.FEIL,
+                    nyttBeløp = BigDecimal(5000),
+                    skatteprosent = BigDecimal(15),
+                ),
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.YTEL,
+                    opprinneligUtbetalingsbeløp = BigDecimal(5000),
+                    tilbakekrevesBeløp = BigDecimal(5000),
+                    skatteprosent = BigDecimal(15),
+                ),
+            )
         val kravgrunnlag = lagKravgrunnlag(perioder, månedligSkattBeløp, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
@@ -533,8 +552,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             Aktsomhet.GROV_UAKTSOMHET,
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 3
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -589,27 +609,29 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     fun `beregnVedtaksperioder skal beregne med 2 foreldet, 2 god tro og 3 periode med 100 prosent tilbakekreving`() {
         kravgrunnlagRepository.deleteById(kravgrunnlag.id)
 
-        val perioder = listOf(
-            Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
-            Månedsperiode(YearMonth.of(2020, 3), YearMonth.of(2020, 3)),
-            Månedsperiode(YearMonth.of(2020, 5), YearMonth.of(2020, 5)),
-            Månedsperiode(YearMonth.of(2020, 7), YearMonth.of(2020, 7)),
-            Månedsperiode(YearMonth.of(2020, 9), YearMonth.of(2020, 9)),
-            Månedsperiode(YearMonth.of(2020, 11), YearMonth.of(2020, 11)),
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-        )
+        val perioder =
+            listOf(
+                Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                Månedsperiode(YearMonth.of(2020, 3), YearMonth.of(2020, 3)),
+                Månedsperiode(YearMonth.of(2020, 5), YearMonth.of(2020, 5)),
+                Månedsperiode(YearMonth.of(2020, 7), YearMonth.of(2020, 7)),
+                Månedsperiode(YearMonth.of(2020, 9), YearMonth.of(2020, 9)),
+                Månedsperiode(YearMonth.of(2020, 11), YearMonth.of(2020, 11)),
+                Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+            )
 
-        val kravgrunnlagsbeløpene = listOf(
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.FEIL,
-                nyttBeløp = BigDecimal(952.38),
-            ),
-            Kravgrunnlagsbeløp(
-                klassetype = Klassetype.YTEL,
-                opprinneligUtbetalingsbeløp = BigDecimal(952.38),
-                tilbakekrevesBeløp = BigDecimal(952.38),
-            ),
-        )
+        val kravgrunnlagsbeløpene =
+            listOf(
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.FEIL,
+                    nyttBeløp = BigDecimal(952.38),
+                ),
+                Kravgrunnlagsbeløp(
+                    klassetype = Klassetype.YTEL,
+                    opprinneligUtbetalingsbeløp = BigDecimal(952.38),
+                    tilbakekrevesBeløp = BigDecimal(952.38),
+                ),
+            )
         val kravgrunnlag = lagKravgrunnlag(perioder, BigDecimal.ZERO, kravgrunnlagsbeløpene)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
@@ -617,24 +639,26 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         lagForeldelse(listOf(perioder[0], perioder[1]))
 
         // 3,4 beregnet periode er godtro med ingen tilbakekreving
-        val godtroPerioder = listOf(perioder[2], perioder[3]).map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.toDatoperiode(),
-                begrunnelse = "testverdi",
-                godTroDto = GodTroDto(begrunnelse = "testverdi", beløpErIBehold = false),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-            )
-        }
+        val godtroPerioder =
+            listOf(perioder[2], perioder[3]).map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
+                    begrunnelse = "testverdi",
+                    godTroDto = GodTroDto(begrunnelse = "testverdi", beløpErIBehold = false),
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                )
+            }
 
         // 5,6,7 beregnet periode er Forsett aktsomhet med Full tilbakekreving
-        val aktsomhetPerioder = listOf(perioder[4], perioder[5], perioder[6]).map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.toDatoperiode(),
-                begrunnelse = "testverdi",
-                aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "testverdi"),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-            )
-        }
+        val aktsomhetPerioder =
+            listOf(perioder[4], perioder[5], perioder[6]).map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
+                    begrunnelse = "testverdi",
+                    aktsomhetDto = AktsomhetDto(aktsomhet = Aktsomhet.FORSETT, begrunnelse = "testverdi"),
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                )
+            }
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(
@@ -643,8 +667,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -754,69 +779,76 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
         // 1,2 perioder er vilkårsvurdert med god tro(ingen tilbakebetaling)
-        val godTroPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(sortedPerioder[0].fom, sortedPerioder[1].tom),
-            begrunnelse = "testverdi",
-            godTroDto = GodTroDto(
+        val godTroPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode = Datoperiode(sortedPerioder[0].fom, sortedPerioder[1].tom),
                 begrunnelse = "testverdi",
-                beløpErIBehold = false,
-            ),
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-        )
+                godTroDto =
+                    GodTroDto(
+                        begrunnelse = "testverdi",
+                        beløpErIBehold = false,
+                    ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+            )
 
         val særligGrunner = listOf(SærligGrunnDto(ANNET, "testverdi"))
         // 3,4 perioder er vilkårsvurdert med SIMPEL UAKTSOMHET(50 prosent tilbakebetaling)
-        val simpelUaktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[2].fom,
-                sortedPerioder[3].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto =
-            AktsomhetDto(
-                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                ileggRenter = false,
-                andelTilbakekreves = BigDecimal(50),
+        val simpelUaktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[2].fom,
+                        sortedPerioder[3].tom,
+                    ),
                 begrunnelse = "testverdi",
-                særligeGrunnerTilReduksjon = true,
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "testverdi",
-                særligeGrunner = særligGrunner,
-            ),
-            vilkårsvurderingsresultat =
-            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-        )
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        ileggRenter = false,
+                        andelTilbakekreves = BigDecimal(50),
+                        begrunnelse = "testverdi",
+                        særligeGrunnerTilReduksjon = true,
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "testverdi",
+                        særligeGrunner = særligGrunner,
+                    ),
+                vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+            )
 
         // 5,6,7 perioder er vilkårsvurdert med GROV UAKTSOMHET(100 prosent tilbakebetaling)
-        val grovUaktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[4].fom,
-                sortedPerioder[6].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto =
-            AktsomhetDto(
-                aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-                ileggRenter = true,
-                andelTilbakekreves = null,
+        val grovUaktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[4].fom,
+                        sortedPerioder[6].tom,
+                    ),
                 begrunnelse = "testverdi",
-                særligeGrunnerTilReduksjon = false,
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "testverdi",
-                særligeGrunner = særligGrunner,
-            ),
-            vilkårsvurderingsresultat =
-            Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-        )
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                        ileggRenter = true,
+                        andelTilbakekreves = null,
+                        begrunnelse = "testverdi",
+                        særligeGrunnerTilReduksjon = false,
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "testverdi",
+                        særligeGrunner = særligGrunner,
+                    ),
+                vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+            )
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(
@@ -828,8 +860,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -951,10 +984,11 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter_avrundingsfeil_ned.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val periode = kravgrunnlag.perioder.first().periode
@@ -968,8 +1002,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 1
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
 
@@ -984,10 +1019,11 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
@@ -1001,8 +1037,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
 
@@ -1024,10 +1061,11 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_3_perioder_med_renter_avrunding_ned.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
@@ -1043,8 +1081,9 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
             ),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.size shouldBe 3
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
 
@@ -1060,32 +1099,37 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_renter_avrunding.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[0].fom,
-                sortedPerioder[6].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto = AktsomhetDto(
-                aktsomhet = Aktsomhet.FORSETT,
-                begrunnelse = "fortsett begrunnelse",
-            ),
-            vilkårsvurderingsresultat =
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
+        val aktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[0].fom,
+                        sortedPerioder[6].tom,
+                    ),
+                begrunnelse = "testverdi",
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.FORSETT,
+                        begrunnelse = "fortsett begrunnelse",
+                    ),
+                vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 7
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1209,41 +1253,47 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[0].fom,
-                sortedPerioder[1].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto = AktsomhetDto(
-                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                begrunnelse = "simpel uaktsomhet begrunnelse",
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "test",
-                særligeGrunnerTilReduksjon = true,
-                særligeGrunner = listOf(
-                    SærligGrunnDto(
-                        HELT_ELLER_DELVIS_NAVS_FEIL,
+        val aktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[0].fom,
+                        sortedPerioder[1].tom,
                     ),
-                ),
-                andelTilbakekreves = BigDecimal(50),
-            ),
-            vilkårsvurderingsresultat =
-            Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
+                begrunnelse = "testverdi",
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        begrunnelse = "simpel uaktsomhet begrunnelse",
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "test",
+                        særligeGrunnerTilReduksjon = true,
+                        særligeGrunner =
+                            listOf(
+                                SærligGrunnDto(
+                                    HELT_ELLER_DELVIS_NAVS_FEIL,
+                                ),
+                            ),
+                        andelTilbakekreves = BigDecimal(50),
+                    ),
+                vilkårsvurderingsresultat =
+                    Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 2
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1287,57 +1337,65 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding_3.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[0].fom,
-                sortedPerioder[2].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto = AktsomhetDto(
-                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                begrunnelse = "simpel uaktsomhet begrunnelse",
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "test",
-                særligeGrunnerTilReduksjon = false,
-                særligeGrunner = listOf(SærligGrunnDto(GRAD_AV_UAKTSOMHET), SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
-                andelTilbakekreves = BigDecimal(100),
-            ),
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
+        val aktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[0].fom,
+                        sortedPerioder[2].tom,
+                    ),
+                begrunnelse = "testverdi",
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        begrunnelse = "simpel uaktsomhet begrunnelse",
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "test",
+                        særligeGrunnerTilReduksjon = false,
+                        særligeGrunner = listOf(SærligGrunnDto(GRAD_AV_UAKTSOMHET), SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
+                        andelTilbakekreves = BigDecimal(100),
+                    ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
 
-        val aktsomhetPeriode1 = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[3].fom,
-                sortedPerioder[3].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto = AktsomhetDto(
-                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                begrunnelse = "simpel uaktsomhet begrunnelse",
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "test",
-                særligeGrunnerTilReduksjon = true,
-                særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
-                andelTilbakekreves = BigDecimal(68),
-            ),
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
+        val aktsomhetPeriode1 =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[3].fom,
+                        sortedPerioder[3].tom,
+                    ),
+                begrunnelse = "testverdi",
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        begrunnelse = "simpel uaktsomhet begrunnelse",
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "test",
+                        særligeGrunnerTilReduksjon = true,
+                        særligeGrunner = listOf(SærligGrunnDto(HELT_ELLER_DELVIS_NAVS_FEIL)),
+                        andelTilbakekreves = BigDecimal(68),
+                    ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
 
         vilkårsvurderingService.lagreVilkårsvurdering(
             behandling.id,
             BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode, aktsomhetPeriode1)),
         )
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1409,40 +1467,46 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         fagsakRepository.update(fagsakRepository.findByIdOrThrow(fagsak.id).copy(fagsystem = Fagsystem.EF))
 
         val kravgrunnlagxml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_med_skatt_avrunding_2.xml")
-        val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(
-            KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
-            behandling.id,
-        )
+        val kravgrunnlag =
+            KravgrunnlagMapper.tilKravgrunnlag431(
+                KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagxml),
+                behandling.id,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         val sortedPerioder = kravgrunnlag.perioder.map { it.periode }.sortedBy { it.fom }
 
-        val aktsomhetPeriode = VilkårsvurderingsperiodeDto(
-            periode = Datoperiode(
-                sortedPerioder[0].fom,
-                sortedPerioder[3].tom,
-            ),
-            begrunnelse = "testverdi",
-            aktsomhetDto = AktsomhetDto(
-                aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                begrunnelse = "simpel uaktsomhet begrunnelse",
-                tilbakekrevSmåbeløp = true,
-                særligeGrunnerBegrunnelse = "test",
-                særligeGrunnerTilReduksjon = true,
-                særligeGrunner = listOf(
-                    SærligGrunnDto(
-                        HELT_ELLER_DELVIS_NAVS_FEIL,
+        val aktsomhetPeriode =
+            VilkårsvurderingsperiodeDto(
+                periode =
+                    Datoperiode(
+                        sortedPerioder[0].fom,
+                        sortedPerioder[3].tom,
                     ),
-                ),
-                andelTilbakekreves = BigDecimal(100),
-            ),
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-        )
+                begrunnelse = "testverdi",
+                aktsomhetDto =
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        begrunnelse = "simpel uaktsomhet begrunnelse",
+                        tilbakekrevSmåbeløp = true,
+                        særligeGrunnerBegrunnelse = "test",
+                        særligeGrunnerTilReduksjon = true,
+                        særligeGrunner =
+                            listOf(
+                                SærligGrunnDto(
+                                    HELT_ELLER_DELVIS_NAVS_FEIL,
+                                ),
+                            ),
+                        andelTilbakekreves = BigDecimal(100),
+                    ),
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+            )
 
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(listOf(aktsomhetPeriode)))
 
-        val tilbakekrevingsperioder = vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
-            .sortedBy { it.periode.fom }
+        val tilbakekrevingsperioder =
+            vedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag)
+                .sortedBy { it.periode.fom }
         tilbakekrevingsperioder.shouldNotBeNull()
         tilbakekrevingsperioder.size shouldBe 4
         shouldNotThrowAny { iverksettelseService.validerBeløp(behandling.id, tilbakekrevingsperioder) }
@@ -1509,16 +1573,17 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
     }
 
     private fun lagForeldelse(perioder: List<Månedsperiode>) {
-        val foreldelsesdata = BehandlingsstegForeldelseDto(
-            perioder.map {
-                ForeldelsesperiodeDto(
-                    periode = it.toDatoperiode(),
-                    begrunnelse = "testverdi",
-                    foreldelsesvurderingstype =
-                    Foreldelsesvurderingstype.FORELDET,
-                )
-            },
-        )
+        val foreldelsesdata =
+            BehandlingsstegForeldelseDto(
+                perioder.map {
+                    ForeldelsesperiodeDto(
+                        periode = it.toDatoperiode(),
+                        begrunnelse = "testverdi",
+                        foreldelsesvurderingstype =
+                            Foreldelsesvurderingstype.FORELDET,
+                    )
+                },
+            )
         foreldelsesService.lagreVurdertForeldelse(behandling.id, foreldelsesdata)
     }
 
@@ -1529,28 +1594,31 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         beløpTilbakekreves: BigDecimal? = null,
         særligeGrunnerTilReduksjon: Boolean = false,
     ) {
-        val vilkårsperioder = perioder.map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.toDatoperiode(),
-                begrunnelse = "testverdi",
-                aktsomhetDto = AktsomhetDto(
-                    aktsomhet = aktsomhet,
-                    andelTilbakekreves = andelTilbakreves,
-                    beløpTilbakekreves = beløpTilbakekreves,
+        val vilkårsperioder =
+            perioder.map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
                     begrunnelse = "testverdi",
-                    særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
-                    tilbakekrevSmåbeløp = true,
-                    særligeGrunnerBegrunnelse = "testverdi",
-                    særligeGrunner = listOf(
-                        SærligGrunnDto(
-                            ANNET,
-                            "testverdi",
+                    aktsomhetDto =
+                        AktsomhetDto(
+                            aktsomhet = aktsomhet,
+                            andelTilbakekreves = andelTilbakreves,
+                            beløpTilbakekreves = beløpTilbakekreves,
+                            begrunnelse = "testverdi",
+                            særligeGrunnerTilReduksjon = særligeGrunnerTilReduksjon,
+                            tilbakekrevSmåbeløp = true,
+                            særligeGrunnerBegrunnelse = "testverdi",
+                            særligeGrunner =
+                                listOf(
+                                    SærligGrunnDto(
+                                        ANNET,
+                                        "testverdi",
+                                    ),
+                                ),
                         ),
-                    ),
-                ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-            )
-        }
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                )
+            }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
@@ -1559,18 +1627,20 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
         beløpErIBehold: Boolean = false,
         beløpTilbakekreves: BigDecimal? = null,
     ) {
-        val vilkårsperioder = perioder.map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.toDatoperiode(),
-                begrunnelse = "testverdi",
-                godTroDto = GodTroDto(
+        val vilkårsperioder =
+            perioder.map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
                     begrunnelse = "testverdi",
-                    beløpErIBehold = beløpErIBehold,
-                    beløpTilbakekreves = beløpTilbakekreves,
-                ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-            )
-        }
+                    godTroDto =
+                        GodTroDto(
+                            begrunnelse = "testverdi",
+                            beløpErIBehold = beløpErIBehold,
+                            beløpTilbakekreves = beløpTilbakekreves,
+                        ),
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                )
+            }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 

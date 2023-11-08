@@ -9,7 +9,6 @@ data class HbVedtaksbrevsdata(
     @get:JsonUnwrapped val felles: HbVedtaksbrevFelles,
     val perioder: List<HbVedtaksbrevsperiode>,
 ) : Språkstøtte {
-
     @Suppress("unused") // Handlebars
     val antallPerioder = perioder.size
 

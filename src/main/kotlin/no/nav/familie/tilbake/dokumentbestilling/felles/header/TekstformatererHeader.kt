@@ -5,8 +5,10 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.sanitize
 import no.nav.familie.tilbake.dokumentbestilling.handlebars.FellesTekstformaterer
 
 object TekstformatererHeader {
-
-    fun lagHeader(brevmetadata: Brevmetadata, overskrift: String): String {
+    fun lagHeader(
+        brevmetadata: Brevmetadata,
+        overskrift: String,
+    ): String {
         return lagHeader(
             HeaderData(
                 språkkode = brevmetadata.språkkode,

@@ -10,7 +10,6 @@ data class HbSærligeGrunner(
     val fritekst: String? = null,
     val fritekstAnnet: String? = null,
 ) {
-
     constructor(
         grunner: Collection<SærligGrunn>,
         fritekst: String? = null,

@@ -24,7 +24,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VergeController(private val vergeService: VergeService) {
-
     @Operation(summary = "Opprett verge steg på behandling")
     @PostMapping
     @Rolletilgangssjekk(
@@ -33,7 +32,9 @@ class VergeController(private val vergeService: VergeService) {
         AuditLoggerEvent.CREATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun opprettVergeSteg(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun opprettVergeSteg(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
         vergeService.opprettVergeSteg(behandlingId)
         return Ressurs.success("OK")
     }
@@ -46,7 +47,9 @@ class VergeController(private val vergeService: VergeService) {
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun fjernVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
+    fun fjernVerge(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
         vergeService.fjernVerge(behandlingId)
         return Ressurs.success("OK")
     }
@@ -59,7 +62,9 @@ class VergeController(private val vergeService: VergeService) {
         AuditLoggerEvent.ACCESS,
         HenteParam.BEHANDLING_ID,
     )
-    fun hentVerge(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<VergeDto?> {
+    fun hentVerge(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<VergeDto?> {
         return Ressurs.success(vergeService.hentVerge(behandlingId))
     }
 }

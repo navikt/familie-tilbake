@@ -15,8 +15,10 @@ class LagreUtkastVedtaksbrevService(
     val behandlingskontrollService: BehandlingskontrollService,
     val vedtaksbrevService: VedtaksbrevService,
 ) {
-
-    fun lagreUtkast(behandlingId: UUID, fritekstavsnitt: FritekstavsnittDto) {
+    fun lagreUtkast(
+        behandlingId: UUID,
+        fritekstavsnitt: FritekstavsnittDto,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.erSaksbehandlingAvsluttet) {
             throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")

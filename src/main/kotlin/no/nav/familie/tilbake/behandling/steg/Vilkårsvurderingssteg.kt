@@ -32,7 +32,6 @@ class Vilkårsvurderingssteg(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -53,7 +52,10 @@ class Vilkårsvurderingssteg(
     }
 
     @Transactional
-    override fun utførSteg(behandlingId: UUID, behandlingsstegDto: BehandlingsstegDto) {
+    override fun utførSteg(
+        behandlingId: UUID,
+        behandlingsstegDto: BehandlingsstegDto,
+    ) {
         logger.info("Behandling $behandlingId er på $VILKÅRSVURDERING steg")
         if (harAllePerioderForeldet(behandlingId)) {
             throw Feil(
@@ -116,7 +118,10 @@ class Vilkårsvurderingssteg(
             ?.foreldelsesperioder?.all { it.erForeldet() } ?: false
     }
 
-    private fun lagHistorikkinnslag(behandlingId: UUID, aktør: Aktør) {
+    private fun lagHistorikkinnslag(
+        behandlingId: UUID,
+        aktør: Aktør,
+    ) {
         historikkTaskService.lagHistorikkTask(
             behandlingId,
             TilbakekrevingHistorikkinnslagstype.VILKÅRSVURDERING_VURDERT,

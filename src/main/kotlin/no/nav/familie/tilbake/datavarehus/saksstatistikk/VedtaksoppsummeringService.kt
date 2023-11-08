@@ -32,13 +32,13 @@ class VedtaksoppsummeringService(
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
     private val beregningService: TilbakekrevingsberegningService,
 ) {
-
     fun hentVedtaksoppsummering(behandlingId: UUID): Vedtaksoppsummering {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val eksternBehandling = behandling.aktivFagsystemsbehandling.eksternId
-        val behandlingsvedtak = behandling.sisteResultat?.behandlingsvedtak
-            ?: error("Behandling med id=$behandlingId mangler vedtak.Kan ikke sende data til DVH")
+        val behandlingsvedtak =
+            behandling.sisteResultat?.behandlingsvedtak
+                ?: error("Behandling med id=$behandlingId mangler vedtak.Kan ikke sende data til DVH")
         val behandlingsårsak = behandling.årsaker.firstOrNull()
         val forrigeBehandling = behandlingsårsak?.originalBehandlingId?.let { behandlingRepository.findByIdOrNull(it) }
         val ansvarligBeslutter =
@@ -65,12 +65,14 @@ class VedtaksoppsummeringService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val beregningsresultat = beregningService.beregn(behandlingId)
-        val vilkårsperioder = vilkårsvurdering?.let {
-            hentVilkårPerioder(behandlingId, beregningsresultat, it)
-        } ?: emptyList()
-        val foreldelsesperioder = vurdertForeldelse?.let {
-            hentForeldelsePerioder(behandlingId, beregningsresultat, it)
-        } ?: emptyList()
+        val vilkårsperioder =
+            vilkårsvurdering?.let {
+                hentVilkårPerioder(behandlingId, beregningsresultat, it)
+            } ?: emptyList()
+        val foreldelsesperioder =
+            vurdertForeldelse?.let {
+                hentForeldelsePerioder(behandlingId, beregningsresultat, it)
+            } ?: emptyList()
         return vilkårsperioder + foreldelsesperioder
     }
 

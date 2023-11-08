@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Profile
 @TestConfiguration
 @Profile("integrasjonstest")
 class FeatureToggleMockConfig {
-
     @Bean
     fun featureToggle(): FeatureToggleService {
         val mockFeatureToggleService: FeatureToggleService = mockk()

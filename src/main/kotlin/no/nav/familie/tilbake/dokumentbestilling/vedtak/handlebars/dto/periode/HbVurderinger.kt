@@ -19,11 +19,12 @@ data class HbVurderinger(
     val fritekstForeldelse: String? = null,
     val beløpIBehold: BigDecimal? = null,
 ) {
-
-    val harForeldelsesavsnitt = foreldelsevurdering in setOf(
-        Foreldelsesvurderingstype.FORELDET,
-        Foreldelsesvurderingstype.TILLEGGSFRIST,
-    )
+    val harForeldelsesavsnitt =
+        foreldelsevurdering in
+            setOf(
+                Foreldelsesvurderingstype.FORELDET,
+                Foreldelsesvurderingstype.TILLEGGSFRIST,
+            )
 
     init {
         if (Foreldelsesvurderingstype.IKKE_VURDERT == foreldelsevurdering ||

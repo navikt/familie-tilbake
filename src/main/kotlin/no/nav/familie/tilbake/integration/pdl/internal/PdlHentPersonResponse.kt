@@ -19,7 +19,9 @@ data class PdlPersonData(
     @JsonProperty("folkeregisteridentifikator") val identer: List<PdlFolkeregisteridentifikator>,
 )
 
-data class PdlFødselsDato(@JsonProperty("foedselsdato") val fødselsdato: String?)
+data class PdlFødselsDato(
+    @JsonProperty("foedselsdato") val fødselsdato: String?,
+)
 
 data class PdlError(
     val message: String,
@@ -33,7 +35,6 @@ data class PdlNavn(
     val mellomnavn: String? = null,
     val etternavn: String,
 ) {
-
     fun fulltNavn(): String {
         return when (mellomnavn) {
             null -> "$fornavn $etternavn"
@@ -42,7 +43,9 @@ data class PdlNavn(
     }
 }
 
-data class PdlKjønn(@JsonProperty("kjoenn") val kjønn: Kjønn)
+data class PdlKjønn(
+    @JsonProperty("kjoenn") val kjønn: Kjønn,
+)
 
 enum class Kjønn {
     MANN,
@@ -50,7 +53,9 @@ enum class Kjønn {
     UKJENT,
 }
 
-data class PdlDødsfall(@JsonProperty("doedsdato") val dødsdato: String? = null)
+data class PdlDødsfall(
+    @JsonProperty("doedsdato") val dødsdato: String? = null,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFolkeregisteridentifikator(
@@ -60,4 +65,5 @@ data class PdlFolkeregisteridentifikator(
 )
 
 enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
+
 enum class FolkeregisteridentifikatorType { FNR, DNR }

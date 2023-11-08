@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.DokprodTilHtml
 import org.junit.jupiter.api.Test
 
 class DokprodTilHtmlTest {
-
     @Test
     fun `dokprodInnholdTilHtml skal konvertere overskrift og avsnitt`() {
         val resultat: String =

@@ -7,7 +7,8 @@ import java.time.YearMonth
 
 class Vedleggsdata(
     override val språkkode: Språkkode,
-    @Suppress("unused") // Handlebars
+    // Handlebars
+    @Suppress("unused")
     val ytelseMedSkatt: Boolean,
     val feilutbetaltePerioder: List<FeilutbetaltPeriode>,
 ) : Språkstøtte

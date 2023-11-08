@@ -21,7 +21,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class JournalpostController(private val journalføringService: JournalføringService) {
-
     @Operation(summary = "Hent dokument fra journalføring")
     @GetMapping("/{behandlingId}/journalpost/{journalpostId}/dokument/{dokumentInfoId}")
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
@@ -36,7 +35,9 @@ class JournalpostController(private val journalføringService: JournalføringSer
     @Operation(summary = "Hent journalpost informasjon")
     @GetMapping("/{behandlingId}/journalposter")
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter journalført dokument", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
-    fun hentJournalposter(@PathVariable behandlingId: UUID): Ressurs<List<Journalpost>> {
+    fun hentJournalposter(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<Journalpost>> {
         return Ressurs.success(journalføringService.hentJournalposter(behandlingId))
     }
 }

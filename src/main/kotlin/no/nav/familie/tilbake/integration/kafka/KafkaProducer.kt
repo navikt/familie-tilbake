@@ -15,36 +15,68 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 interface KafkaProducer {
+    fun sendHistorikkinnslag(
+        behandlingId: UUID,
+        key: String,
+        request: OpprettHistorikkinnslagRequest,
+    )
 
-    fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest)
-    fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand)
-    fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering)
-    fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest)
+    fun sendSaksdata(
+        behandlingId: UUID,
+        request: Behandlingstilstand,
+    )
+
+    fun sendVedtaksdata(
+        behandlingId: UUID,
+        request: Vedtaksoppsummering,
+    )
+
+    fun sendHentFagsystemsbehandlingRequest(
+        requestId: UUID,
+        request: HentFagsystemsbehandlingRequest,
+    )
 }
 
 @Service
 @Profile("!integrasjonstest & !e2e")
 class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) : KafkaProducer {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
+    override fun sendHistorikkinnslag(
+        behandlingId: UUID,
+        key: String,
+        request: OpprettHistorikkinnslagRequest,
+    ) {
         sendKafkamelding(behandlingId, KafkaConfig.HISTORIKK_TOPIC, key, request)
     }
 
-    override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand) {
+    override fun sendSaksdata(
+        behandlingId: UUID,
+        request: Behandlingstilstand,
+    ) {
         sendKafkamelding(behandlingId, KafkaConfig.SAK_TOPIC, request.behandlingUuid.toString(), request)
     }
 
-    override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering) {
+    override fun sendVedtaksdata(
+        behandlingId: UUID,
+        request: Vedtaksoppsummering,
+    ) {
         sendKafkamelding(behandlingId, KafkaConfig.VEDTAK_TOPIC, request.behandlingUuid.toString(), request)
     }
 
-    override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest) {
+    override fun sendHentFagsystemsbehandlingRequest(
+        requestId: UUID,
+        request: HentFagsystemsbehandlingRequest,
+    ) {
         sendKafkamelding(requestId, KafkaConfig.HENT_FAGSYSTEMSBEHANDLING_REQUEST_TOPIC, requestId.toString(), request)
     }
 
-    private fun sendKafkamelding(behandlingId: UUID, topic: String, key: String, request: Any) {
+    private fun sendKafkamelding(
+        behandlingId: UUID,
+        topic: String,
+        key: String,
+        request: Any,
+    ) {
         val melding = objectMapper.writeValueAsString(request)
         val producerRecord = ProducerRecord(topic, key, melding)
         kotlin.runCatching {
@@ -54,8 +86,9 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
                     "Fikk offset ${callback?.recordMetadata?.offset()}",
             )
         }.onFailure {
-            val feilmelding = "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
-                "Feiler med ${it.message}"
+            val feilmelding =
+                "Melding på topic $topic kan ikke sendes for $behandlingId med $key. " +
+                    "Feiler med ${it.message}"
             log.warn(feilmelding)
             throw Feil(message = feilmelding)
         }
@@ -65,25 +98,36 @@ class DefaultKafkaProducer(private val kafkaTemplate: KafkaTemplate<String, Stri
 @Service
 @Profile("e2e", "integrasjonstest")
 class E2EKafkaProducer : KafkaProducer {
-
-    override fun sendHistorikkinnslag(behandlingId: UUID, key: String, request: OpprettHistorikkinnslagRequest) {
+    override fun sendHistorikkinnslag(
+        behandlingId: UUID,
+        key: String,
+        request: OpprettHistorikkinnslagRequest,
+    ) {
         logger.info("Skipper sending av historikkinnslag for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
-    override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand) {
+    override fun sendSaksdata(
+        behandlingId: UUID,
+        request: Behandlingstilstand,
+    ) {
         logger.info("Skipper sending av saksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
-    override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering) {
+    override fun sendVedtaksdata(
+        behandlingId: UUID,
+        request: Vedtaksoppsummering,
+    ) {
         logger.info("Skipper sending av vedtaksstatistikk for behandling $behandlingId fordi kafka ikke er enablet")
     }
 
-    override fun sendHentFagsystemsbehandlingRequest(requestId: UUID, request: HentFagsystemsbehandlingRequest) {
+    override fun sendHentFagsystemsbehandlingRequest(
+        requestId: UUID,
+        request: HentFagsystemsbehandlingRequest,
+    ) {
         logger.info("Skipper sending av info-request for fagsystembehandling ${request.eksternId} fordi kafka ikke er enablet")
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(E2EKafkaProducer::class.java)
     }
 }

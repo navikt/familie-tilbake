@@ -29,13 +29,14 @@ class VilkårsvurderingService(
     val foreldelseService: ForeldelseService,
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
-
     fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
-        val faktaOmFeilutbetaling = faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
-            ?: throw Feil(
-                message = "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
-                    "kan ikke hente vilkårsvurdering",
-            )
+        val faktaOmFeilutbetaling =
+            faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
+                ?: throw Feil(
+                    message =
+                        "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
+                            "kan ikke hente vilkårsvurdering",
+                )
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val perioder = mutableListOf<Månedsperiode>()
@@ -65,7 +66,10 @@ class VilkårsvurderingService(
     }
 
     @Transactional
-    fun lagreVilkårsvurdering(behandlingId: UUID, behandlingsstegVilkårsvurderingDto: BehandlingsstegVilkårsvurderingDto) {
+    fun lagreVilkårsvurdering(
+        behandlingId: UUID,
+        behandlingsstegVilkårsvurderingDto: BehandlingsstegVilkårsvurderingDto,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -75,8 +79,9 @@ class VilkårsvurderingService(
             kravgrunnlag431 = kravgrunnlag,
         )
         // filter bort perioder som er foreldet
-        val ikkeForeldetPerioder = behandlingsstegVilkårsvurderingDto.vilkårsvurderingsperioder
-            .filter { !foreldelseService.erPeriodeForeldet(behandlingId, Månedsperiode(it.periode.fom, it.periode.tom)) }
+        val ikkeForeldetPerioder =
+            behandlingsstegVilkårsvurderingDto.vilkårsvurderingsperioder
+                .filter { !foreldelseService.erPeriodeForeldet(behandlingId, Månedsperiode(it.periode.fom, it.periode.tom)) }
         deaktiverEksisterendeVilkårsvurdering(behandlingId)
         vilkårsvurderingRepository.insert(
             VilkårsvurderingMapper.tilDomene(
@@ -93,18 +98,20 @@ class VilkårsvurderingService(
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
 
         val perioder = hentVilkårsvurdering(behandlingId).perioder
-        val vurdertePerioder = perioder.filter { !it.foreldet }.map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.periode,
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                aktsomhetDto = AktsomhetDto(
-                    aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                    tilbakekrevSmåbeløp = false,
+        val vurdertePerioder =
+            perioder.filter { !it.foreldet }.map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.periode,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                     begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                ),
-            )
-        }
+                    aktsomhetDto =
+                        AktsomhetDto(
+                            aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                            tilbakekrevSmåbeløp = false,
+                            begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                        ),
+                )
+            }
         vilkårsvurderingRepository.insert(
             VilkårsvurderingMapper.tilDomene(
                 behandlingId = behandlingId,
@@ -121,7 +128,10 @@ class VilkårsvurderingService(
         }
     }
 
-    private fun erPeriodeAlleredeVurdert(vilkårsvurdering: Vilkårsvurdering?, periode: Månedsperiode): Boolean {
+    private fun erPeriodeAlleredeVurdert(
+        vilkårsvurdering: Vilkårsvurdering?,
+        periode: Månedsperiode,
+    ): Boolean {
         return vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
     }
 }

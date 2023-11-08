@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 
 object FagsystemUtil {
-
     fun hentFagsystemFraYtelsestype(type: Ytelsestype): Fagsystem {
         return when (type) {
             Ytelsestype.BARNETRYGD -> Fagsystem.BA

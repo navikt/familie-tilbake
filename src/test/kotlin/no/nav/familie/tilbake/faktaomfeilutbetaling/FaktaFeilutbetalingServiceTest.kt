@@ -25,7 +25,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
@@ -42,28 +41,32 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
     private val behandling = Testdata.behandling
-    private val periode = Månedsperiode(
-        fom = YearMonth.now().minusMonths(2),
-        tom = YearMonth.now(),
-    )
+    private val periode =
+        Månedsperiode(
+            fom = YearMonth.now().minusMonths(2),
+            tom = YearMonth.now(),
+        )
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
-        val kravgrunnlag = Testdata.kravgrunnlag431
-            .copy(
-                perioder = setOf(
-                    Kravgrunnlagsperiode432(
-                        periode = periode,
-                        beløp = setOf(
-                            Testdata.feilKravgrunnlagsbeløp433,
-                            Testdata.ytelKravgrunnlagsbeløp433,
+        val kravgrunnlag =
+            Testdata.kravgrunnlag431
+                .copy(
+                    perioder =
+                        setOf(
+                            Kravgrunnlagsperiode432(
+                                periode = periode,
+                                beløp =
+                                    setOf(
+                                        Testdata.feilKravgrunnlagsbeløp433,
+                                        Testdata.ytelKravgrunnlagsbeløp433,
+                                    ),
+                                månedligSkattebeløp = BigDecimal("123.11"),
+                            ),
                         ),
-                        månedligSkattebeløp = BigDecimal("123.11"),
-                    ),
-                ),
-            )
+                )
         kravgrunnlagRepository.insert(kravgrunnlag)
     }
 
@@ -119,16 +122,18 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFaktaomfeilutbetaling(behandlingId: UUID) {
-        val faktaPerioder = FaktaFeilutbetalingsperiode(
-            periode = periode,
-            hendelsestype = Hendelsestype.ANNET,
-            hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-        )
-        val faktaFeilutbetaling = FaktaFeilutbetaling(
-            behandlingId = behandlingId,
-            begrunnelse = "Fakta begrunnelse",
-            perioder = setOf(faktaPerioder),
-        )
+        val faktaPerioder =
+            FaktaFeilutbetalingsperiode(
+                periode = periode,
+                hendelsestype = Hendelsestype.ANNET,
+                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+            )
+        val faktaFeilutbetaling =
+            FaktaFeilutbetaling(
+                behandlingId = behandlingId,
+                begrunnelse = "Fakta begrunnelse",
+                perioder = setOf(faktaPerioder),
+            )
         faktaFeilutbetalingRepository.insert(faktaFeilutbetaling)
     }
 

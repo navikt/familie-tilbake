@@ -27,7 +27,6 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     private val taskService: TaskService,
     private val behandlingskontrollService: BehandlingskontrollService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -58,7 +57,6 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     }
 
     companion object {
-
         const val TYPE = "sendØkonomiVedtak"
     }
 }

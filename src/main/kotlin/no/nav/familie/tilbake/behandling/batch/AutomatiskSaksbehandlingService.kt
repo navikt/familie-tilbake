@@ -39,22 +39,23 @@ class AutomatiskSaksbehandlingService(
     @Value("\${AUTOMATISK_SAKSBEHANDLING_ALDERGRENSE_KONTANTSTØTTE}")
     private val alderGrenseKontantstøtte: Long,
 ) {
-
     fun hentAlleBehandlingerSomKanBehandleAutomatisk(): List<Behandling> {
         val behandlinger =
             behandlingRepository.finnAlleBehandlingerKlarForSaksbehandling().filter { it.regelverk != Regelverk.EØS }
         return behandlinger.filter {
             val fagsak = fagsakRepository.findByIdOrThrow(it.fagsakId)
-            val bestemtDato = LocalDate.now().minusWeeks(ALDERSGRENSE_I_UKER.getValue(fagsak.ytelsestype))
+            val bestemtDato = LocalDate.now().minusWeeks(aldersgrenseIUker.getValue(fagsak.ytelsestype))
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(it.id)
-            val kontrollFelt = LocalDate.parse(
-                kravgrunnlag.kontrollfelt,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
-            )
-            val sumNyttBeløp: BigDecimal = kravgrunnlag.perioder.sumOf { periode ->
-                periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
-                    .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
-            }
+            val kontrollFelt =
+                LocalDate.parse(
+                    kravgrunnlag.kontrollfelt,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
+                )
+            val sumNyttBeløp: BigDecimal =
+                kravgrunnlag.perioder.sumOf { periode ->
+                    periode.beløp.filter { beløp -> beløp.klassetype == Klassetype.FEIL }
+                        .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+                }
 
             kontrollFelt < bestemtDato &&
                 sumNyttBeløp < Constants.MAKS_FEILUTBETALTBELØP_PER_YTELSE.getValue(fagsak.ytelsestype) &&
@@ -68,8 +69,9 @@ class AutomatiskSaksbehandlingService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         behandlingRepository.update(
             behandling.copy(
-                saksbehandlingstype = Saksbehandlingstype
-                    .AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
+                saksbehandlingstype =
+                    Saksbehandlingstype
+                        .AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP,
                 ansvarligSaksbehandler = "VL",
             ),
         )
@@ -80,19 +82,21 @@ class AutomatiskSaksbehandlingService(
         stegService.håndterStegAutomatisk(behandlingId)
     }
 
-    private val ALDERSGRENSE_I_UKER = mapOf(
-        Ytelsestype.BARNETRYGD to alderGrenseBarnetrygd,
-        Ytelsestype.BARNETILSYN to alderGrenseBarnetilsyn,
-        Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
-        Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
-        Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte,
-    )
+    private val aldersgrenseIUker =
+        mapOf(
+            Ytelsestype.BARNETRYGD to alderGrenseBarnetrygd,
+            Ytelsestype.BARNETILSYN to alderGrenseBarnetilsyn,
+            Ytelsestype.OVERGANGSSTØNAD to alderGrenseOvergangsstønad,
+            Ytelsestype.SKOLEPENGER to alderGrenseSkolepenger,
+            Ytelsestype.KONTANTSTØTTE to alderGrenseKontantstøtte,
+        )
 }
 
 fun main() {
-    val dato = LocalDate.parse(
-        "2022-02-10-18.43.15.192503",
-        DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
-    )
+    val dato =
+        LocalDate.parse(
+            "2022-02-10-18.43.15.192503",
+            DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"),
+        )
     print(dato < LocalDate.now())
 }

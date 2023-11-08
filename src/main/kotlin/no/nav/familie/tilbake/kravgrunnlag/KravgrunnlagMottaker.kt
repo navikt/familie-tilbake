@@ -17,7 +17,6 @@ import java.util.UUID
 @Service
 @Profile("!e2e & !integrasjonstest")
 class KravgrunnlagMottaker(private val taskService: TaskService) {
-
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
 
@@ -28,14 +27,15 @@ class KravgrunnlagMottaker(private val taskService: TaskService) {
 
         log.info("Mottatt melding fra oppdrag")
         secureLog.info(meldingFraOppdrag)
-        if (meldingFraOppdrag.contains(Constants.kravgrunnlagXmlRootElement)) {
+        if (meldingFraOppdrag.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT)) {
             taskService.save(
                 Task(
                     type = BehandleKravgrunnlagTask.TYPE,
                     payload = meldingFraOppdrag,
-                    properties = Properties().apply {
-                        this["callId"] = UUID.randomUUID()
-                    },
+                    properties =
+                        Properties().apply {
+                            this["callId"] = UUID.randomUUID()
+                        },
                 ),
             )
         } else {
@@ -43,9 +43,10 @@ class KravgrunnlagMottaker(private val taskService: TaskService) {
                 Task(
                     type = BehandleStatusmeldingTask.TYPE,
                     payload = meldingFraOppdrag,
-                    properties = Properties().apply {
-                        this["callId"] = UUID.randomUUID()
-                    },
+                    properties =
+                        Properties().apply {
+                            this["callId"] = UUID.randomUUID()
+                        },
                 ),
             )
         }

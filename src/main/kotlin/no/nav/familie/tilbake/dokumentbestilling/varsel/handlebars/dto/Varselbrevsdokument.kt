@@ -18,23 +18,23 @@ data class Varselbrevsdokument(
     val varsletBeløp: Long? = null,
     val erKorrigert: Boolean = false,
 ) : BaseDokument(
-    brevmetadata.ytelsestype,
-    brevmetadata.språkkode,
-    brevmetadata.behandlendeEnhetsNavn,
-    brevmetadata.ansvarligSaksbehandler,
-    brevmetadata.gjelderDødsfall,
-    brevmetadata.institusjon,
-) {
-
+        brevmetadata.ytelsestype,
+        brevmetadata.språkkode,
+        brevmetadata.behandlendeEnhetsNavn,
+        brevmetadata.ansvarligSaksbehandler,
+        brevmetadata.gjelderDødsfall,
+        brevmetadata.institusjon,
+    ) {
     val finnesVerge: Boolean = brevmetadata.finnesVerge
 
     val harVedlegg: Boolean = brevmetadata.ytelsestype in setOf(Ytelsestype.BARNETILSYN, Ytelsestype.OVERGANGSSTØNAD)
 
-    private val datoerHvisSammenhengendePeriode: Datoperiode? = if (feilutbetaltePerioder.size == 1) {
-        Datoperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
-    } else {
-        null
-    }
+    private val datoerHvisSammenhengendePeriode: Datoperiode? =
+        if (feilutbetaltePerioder.size == 1) {
+            Datoperiode(feilutbetaltePerioder.first().fom, feilutbetaltePerioder.first().tom)
+        } else {
+            null
+        }
 
     val annenMottagersNavn: String? = BrevmottagerUtil.getAnnenMottagersNavn(brevmetadata)
 

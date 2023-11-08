@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class TellerServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var tellerService: TellerService
 
@@ -21,11 +20,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
     fun `tellKobletKravgrunnlag oppretter ny forekomst ved dagnes første telling`() {
         tellerService.tellKobletKravgrunnlag(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.KOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.KRAVGRUNNLAG,
+                Mottaksstatus.KOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 1
     }
@@ -34,11 +34,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
     fun `tellUkobletKravgrunnlag oppretter ny forekomst ved dagnes første telling`() {
         tellerService.tellUkobletKravgrunnlag(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.UKOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.KRAVGRUNNLAG,
+                Mottaksstatus.UKOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 1
     }
@@ -47,11 +48,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
     fun `tellKobletStatusmelding oppretter ny forekomst ved dagnes første telling`() {
         tellerService.tellKobletStatusmelding(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.STATUSMELDING,
-            Mottaksstatus.KOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.STATUSMELDING,
+                Mottaksstatus.KOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 1
     }
@@ -60,11 +62,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
     fun `tellUkobletStatusmelding oppretter ny forekomst ved dagnes første telling`() {
         tellerService.tellUkobletStatusmelding(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.STATUSMELDING,
-            Mottaksstatus.UKOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.STATUSMELDING,
+                Mottaksstatus.UKOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 1
     }
@@ -74,11 +77,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         tellerService.tellKobletKravgrunnlag(fagsystem = Fagsystem.EF)
         tellerService.tellKobletKravgrunnlag(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.KOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.KRAVGRUNNLAG,
+                Mottaksstatus.KOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 2
     }
@@ -88,11 +92,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         tellerService.tellUkobletKravgrunnlag(fagsystem = Fagsystem.EF)
         tellerService.tellUkobletKravgrunnlag(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.KRAVGRUNNLAG,
-            Mottaksstatus.UKOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.KRAVGRUNNLAG,
+                Mottaksstatus.UKOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 2
     }
@@ -102,11 +107,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         tellerService.tellKobletStatusmelding(fagsystem = Fagsystem.EF)
         tellerService.tellKobletStatusmelding(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.STATUSMELDING,
-            Mottaksstatus.KOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.STATUSMELDING,
+                Mottaksstatus.KOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 2
     }
@@ -116,11 +122,12 @@ internal class TellerServiceTest : OppslagSpringRunnerTest() {
         tellerService.tellUkobletStatusmelding(fagsystem = Fagsystem.EF)
         tellerService.tellUkobletStatusmelding(fagsystem = Fagsystem.EF)
 
-        val meldingstelling = meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
-            Fagsystem.EF,
-            Meldingstype.STATUSMELDING,
-            Mottaksstatus.UKOBLET,
-        )
+        val meldingstelling =
+            meldingstellingRepository.findByFagsystemAndTypeAndStatusAndDato(
+                Fagsystem.EF,
+                Meldingstype.STATUSMELDING,
+                Mottaksstatus.UKOBLET,
+            )
 
         meldingstelling!!.antall shouldBe 2
     }

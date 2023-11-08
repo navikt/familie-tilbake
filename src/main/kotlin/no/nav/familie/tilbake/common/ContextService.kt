@@ -10,7 +10,6 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.springframework.http.HttpStatus
 
 object ContextService {
-
     private const val SYSTEM_NAVN = "System"
 
     fun hentSaksbehandler(): String {

@@ -58,7 +58,6 @@ data class VilkårsvurderingGodTro(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     val beløpSomErIBehold get() = if (this.beløpErIBehold) beløpTilbakekreves else BigDecimal.ZERO
 }
 
@@ -85,7 +84,6 @@ data class VilkårsvurderingAktsomhet(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     init {
         require(!(andelTilbakekreves != null && manueltSattBeløp != null)) { "Kan ikke sette både prosenterSomTilbakekreves og beløpSomTilbakekreves" }
         if (aktsomhet == Aktsomhet.FORSETT) {
@@ -127,7 +125,6 @@ enum class SærligGrunn(val navn: String) {
 }
 
 interface Vurdering {
-
     val navn: String
 }
 
@@ -138,7 +135,6 @@ enum class Aktsomhet(override val navn: String) : Vurdering {
 }
 
 enum class AnnenVurdering(override val navn: String) : Vurdering {
-
     GOD_TRO("Handlet i god tro"),
     FORELDET("Foreldet"),
 }

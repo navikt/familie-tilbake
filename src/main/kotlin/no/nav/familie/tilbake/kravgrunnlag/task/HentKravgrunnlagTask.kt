@@ -26,7 +26,6 @@ class HentKravgrunnlagTask(
     private val hentKravgrunnlagService: HentKravgrunnlagService,
     private val stegService: StegService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -40,10 +39,11 @@ class HentKravgrunnlagTask(
         val originalBehandlingId = requireNotNull(behandling.sisteÅrsak?.originalBehandlingId)
 
         val tilbakekrevingsgrunnlag = hentKravgrunnlagService.hentTilbakekrevingskravgrunnlag(originalBehandlingId)
-        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
-            tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
-            KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
-        )
+        val hentetKravgrunnlag =
+            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+                tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
+                KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
+            )
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
         hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId)
@@ -52,7 +52,6 @@ class HentKravgrunnlagTask(
     }
 
     companion object {
-
         const val TYPE = "hentKravgrunnlag"
     }
 }

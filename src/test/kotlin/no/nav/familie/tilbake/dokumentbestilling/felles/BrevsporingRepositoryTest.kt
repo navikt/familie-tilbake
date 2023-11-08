@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var brevsporingRepository: BrevsporingRepository
 
@@ -61,13 +60,14 @@ internal class BrevsporingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc rerturnerer siste brevsporing`() {
         brevsporingRepository.insert(brevsporing)
-        val nyesteBrevsporing = brevsporingRepository
-            .insert(
-                brevsporing.copy(
-                    id = UUID.randomUUID(),
-                    sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1)),
-                ),
-            )
+        val nyesteBrevsporing =
+            brevsporingRepository
+                .insert(
+                    brevsporing.copy(
+                        id = UUID.randomUUID(),
+                        sporbar = Sporbar(opprettetTid = LocalDateTime.now().plusSeconds(1)),
+                    ),
+                )
 
         val funnetBrevsporing =
             brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(

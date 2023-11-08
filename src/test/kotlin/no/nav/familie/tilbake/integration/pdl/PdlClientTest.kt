@@ -21,9 +21,7 @@ import java.net.URI
 import java.time.LocalDate
 
 class PdlClientTest {
-
     companion object {
-
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer
@@ -88,10 +86,11 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("pdlPersonIkkeFunnetResponse.json"))),
         )
 
-        val exception = shouldThrow<RuntimeException>(
-            block =
-            { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) },
-        )
+        val exception =
+            shouldThrow<RuntimeException>(
+                block =
+                    { pdlClient.hentPersoninfo("11111122222", Fagsystem.BA) },
+            )
         exception.message shouldBe "Feil ved oppslag på person: Person ikke funnet"
     }
 

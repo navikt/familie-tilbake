@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.HbVedtaks
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.Vedtaksbrevstype
 
 internal object TekstformatererVedtaksbrev {
-
     fun lagVedtaksbrevsfritekst(vedtaksbrevsdata: HbVedtaksbrevsdata): String {
         return when (vedtaksbrevsdata.felles.vedtaksbrevstype) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT ->
@@ -14,7 +13,10 @@ internal object TekstformatererVedtaksbrev {
         }
     }
 
-    private fun lagVedtaksbrev(mal: String, vedtaksbrevsdata: HbVedtaksbrevsdata): String {
+    private fun lagVedtaksbrev(
+        mal: String,
+        vedtaksbrevsdata: HbVedtaksbrevsdata,
+    ): String {
         return FellesTekstformaterer.lagBrevtekst(vedtaksbrevsdata, mal)
     }
 

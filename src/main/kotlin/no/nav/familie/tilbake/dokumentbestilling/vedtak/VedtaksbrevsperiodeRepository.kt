@@ -12,6 +12,5 @@ import java.util.UUID
 interface VedtaksbrevsperiodeRepository :
     RepositoryInterface<Vedtaksbrevsperiode, UUID>,
     InsertUpdateRepository<Vedtaksbrevsperiode> {
-
     fun findByBehandlingId(behandlingId: UUID): List<Vedtaksbrevsperiode>
 }

@@ -22,7 +22,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TotrinnController(private val totrinnService: TotrinnService) {
-
     @Operation(summary = "Hent totrinnsvurderinger")
     @GetMapping(
         path = ["/{behandlingId}/totrinn/v1"],
@@ -34,7 +33,9 @@ class TotrinnController(private val totrinnService: TotrinnService) {
         AuditLoggerEvent.ACCESS,
         HenteParam.BEHANDLING_ID,
     )
-    fun hentTotrinnsvurderinger(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<TotrinnsvurderingDto> {
+    fun hentTotrinnsvurderinger(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<TotrinnsvurderingDto> {
         return Ressurs.success(totrinnService.hentTotrinnsvurderinger(behandlingId))
     }
 }

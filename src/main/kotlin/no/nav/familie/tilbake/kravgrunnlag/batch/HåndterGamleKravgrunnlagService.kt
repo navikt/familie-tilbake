@@ -53,7 +53,6 @@ class HåndterGamleKravgrunnlagService(
     private val stegService: StegService,
     private val historikkService: HistorikkService,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentFrakobletKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
@@ -68,24 +67,28 @@ class HåndterGamleKravgrunnlagService(
         logger.info("Sjekker om det finnes en aktiv behandling for fagsak=$eksternFagsakId og ytelsestype=$ytelsestype")
         if (behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId) != null) {
             throw UgyldigKravgrunnlagFeil(
-                melding = "Kravgrunnlag med $mottattXmlId er ugyldig." +
-                    "Det finnes allerede en åpen behandling for " +
-                    "fagsak=$eksternFagsakId og ytelsestype=$ytelsestype. " +
-                    "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
-                    "ved å bruke forvaltningsrutine etter feilundersøkelse.",
+                melding =
+                    "Kravgrunnlag med $mottattXmlId er ugyldig." +
+                        "Det finnes allerede en åpen behandling for " +
+                        "fagsak=$eksternFagsakId og ytelsestype=$ytelsestype. " +
+                        "Kravgrunnlaget skulle være koblet. Kravgrunnlaget arkiveres manuelt" +
+                        "ved å bruke forvaltningsrutine etter feilundersøkelse.",
             )
         }
     }
 
     fun sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet: ØkonomiXmlMottatt): Boolean {
-        val arkiverteXmlMottattPåSammeFagsak = økonomiXmlMottattService.hentArkiverteMottattXml(
-            eksternFagsakId = kravgrunnlagIkkeFunnet.eksternFagsakId,
-            ytelsestype = kravgrunnlagIkkeFunnet.ytelsestype,
-        )
-        val arkiverteKravgrunnlag = arkiverteXmlMottattPåSammeFagsak
-            .filter { it.melding.contains(Constants.kravgrunnlagXmlRootElement) }
-        val arkiverteStatusmeldinger = arkiverteXmlMottattPåSammeFagsak
-            .filter { it.melding.contains(Constants.statusmeldingXmlRootElement) }
+        val arkiverteXmlMottattPåSammeFagsak =
+            økonomiXmlMottattService.hentArkiverteMottattXml(
+                eksternFagsakId = kravgrunnlagIkkeFunnet.eksternFagsakId,
+                ytelsestype = kravgrunnlagIkkeFunnet.ytelsestype,
+            )
+        val arkiverteKravgrunnlag =
+            arkiverteXmlMottattPåSammeFagsak
+                .filter { it.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT) }
+        val arkiverteStatusmeldinger =
+            arkiverteXmlMottattPåSammeFagsak
+                .filter { it.melding.contains(Constants.STATUSMELDING_XML_ROOT_ELEMENT) }
 
         return arkiverteKravgrunnlag
             .any { arkivertKravgrunnlag ->
@@ -100,24 +103,29 @@ class HåndterGamleKravgrunnlagService(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    fun håndter(fagsystemsbehandlingData: HentFagsystemsbehandling, mottattXml: ØkonomiXmlMottatt, task: Task) {
+    fun håndter(
+        fagsystemsbehandlingData: HentFagsystemsbehandling,
+        mottattXml: ØkonomiXmlMottatt,
+        task: Task,
+    ) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> = try {
-            hentKravgrunnlagFraØkonomi(mottattXml)
-        } catch (e: KravgrunnlagIkkeFunnetFeil) {
-            if (sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet = mottattXml)) {
-                logger.warn(
-                    "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
-                        " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet.",
-                )
-                arkiverKravgrunnlag(mottattXml.id)
-                task.metadata["merknad"] =
-                    "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
-                return
-            } else {
-                throw e
+        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> =
+            try {
+                hentKravgrunnlagFraØkonomi(mottattXml)
+            } catch (e: KravgrunnlagIkkeFunnetFeil) {
+                if (sjekkArkivForDuplikatKravgrunnlagMedKravstatusAvsluttet(kravgrunnlagIkkeFunnet = mottattXml)) {
+                    logger.warn(
+                        "Kravgrunnlag(id=${mottattXml.id}, eksternFagsakId=${mottattXml.eksternFagsakId}) ble ikke funnet hos økonomi," +
+                            " men identisk kravgrunnlag med påfølgende melding om at kravet er avsluttet ble funnet i arkivet.",
+                    )
+                    arkiverKravgrunnlag(mottattXml.id)
+                    task.metadata["merknad"] =
+                        "Arkivert da kravgrunnlag ikke ble funnet hos økonomi, og duplikat kravgrunnlag med kravstatus AVSLUTTET funnet i arkivet"
+                    return
+                } else {
+                    throw e
+                }
             }
-        }
         val hentetKravgrunnlag = hentetData.first
         val erSperret = hentetData.second
 
@@ -180,8 +188,9 @@ class HåndterGamleKravgrunnlagService(
         val opprettTilbakekrevingRequest =
             lagOpprettBehandlingsrequest(
                 eksternFagsakId = hentetKravgrunnlag.fagsystemId,
-                ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
-                    .ytelsestype,
+                ytelsestype =
+                    Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade)
+                        .ytelsestype,
                 eksternId = hentetKravgrunnlag.referanse,
                 fagsystemsbehandlingData = fagsystemsbehandlingData,
             )
@@ -224,8 +233,9 @@ class HåndterGamleKravgrunnlagService(
                     behandlingssteg = Behandlingssteg.GRUNNLAG,
                     behandlingsstegstatus = Behandlingsstegstatus.VENTER,
                     venteårsak = venteårsak,
-                    tidsfrist = LocalDate.now()
-                        .plusWeeks(venteårsak.defaultVenteTidIUker),
+                    tidsfrist =
+                        LocalDate.now()
+                            .plusWeeks(venteårsak.defaultVenteTidIUker),
                 ),
             )
         historikkService.lagHistorikkinnslag(

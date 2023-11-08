@@ -12,9 +12,11 @@ import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 
 object VilkårsvurderingValidator {
-
     @Throws(Feil::class)
-    fun validerVilkårsvurdering(vilkårsvurderingDto: BehandlingsstegVilkårsvurderingDto, kravgrunnlag431: Kravgrunnlag431) {
+    fun validerVilkårsvurdering(
+        vilkårsvurderingDto: BehandlingsstegVilkårsvurderingDto,
+        kravgrunnlag431: Kravgrunnlag431,
+    ) {
         vilkårsvurderingDto.vilkårsvurderingsperioder.forEach {
             validerAndelTilbakekrevesBeløp(it.aktsomhetDto)
             validerAnnetBegrunnelse(it.aktsomhetDto)

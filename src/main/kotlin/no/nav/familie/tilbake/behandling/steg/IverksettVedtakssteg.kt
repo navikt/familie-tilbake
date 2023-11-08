@@ -21,7 +21,6 @@ class IverksettVedtakssteg(
     private val fagsakRepository: FagsakRepository,
     private val taskService: TaskService,
 ) : IBehandlingssteg {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun utførSteg(behandlingId: UUID) {
@@ -29,10 +28,11 @@ class IverksettVedtakssteg(
 
         val behandling = behandlingsvedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.UNDER_IVERKSETTING)
         val fagsystem = fagsakRepository.findByIdOrThrow(behandling.fagsakId).fagsystem
-        val properties = Properties().apply {
-            setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
-            setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
-        }
+        val properties =
+            Properties().apply {
+                setProperty("ansvarligSaksbehandler", ContextService.hentSaksbehandler())
+                setProperty(PropertyName.FAGSYSTEM, fagsystem.name)
+            }
         taskService.save(
             Task(
                 type = SendØkonomiTilbakekrevingsvedtakTask.TYPE,

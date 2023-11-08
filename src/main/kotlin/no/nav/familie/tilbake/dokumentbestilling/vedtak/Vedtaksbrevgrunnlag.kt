@@ -44,47 +44,60 @@ data class Vedtaksbrevgrunnlag(
     @MappedCollection(idColumn = "fagsak_id") val behandlinger: Set<Vedtaksbrevbehandling>,
     @Embedded(prefix = "institusjon_", onEmpty = Embedded.OnEmpty.USE_NULL) val institusjon: Institusjon? = null,
 ) {
-
     val behandling
-        get() = behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX }
-            ?: error("Behandling finnes ikke for vedtak")
+        get() =
+            behandlinger.maxByOrNull { it.avsluttetDato ?: LocalDate.MAX }
+                ?: error("Behandling finnes ikke for vedtak")
 
     val klagebehandling get() = behandling.sisteÅrsak?.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
 
     val harVerge get() = behandling.verger.any { it.aktiv }
 
-    val brevmottager get() = if (harVerge) Brevmottager.VERGE else if (institusjon != null) Brevmottager.INSTITUSJON else Brevmottager.BRUKER
+    val brevmottager get() =
+        if (harVerge) {
+            Brevmottager.VERGE
+        } else if (institusjon != null) {
+            Brevmottager.INSTITUSJON
+        } else {
+            Brevmottager.BRUKER
+        }
 
     val aktivVerge get() = behandling.verger.firstOrNull { it.aktiv }
 
     val erRevurdering get() = behandling.type == Behandlingstype.REVURDERING_TILBAKEKREVING
 
     val erRevurderingEtterKlage
-        get() = behandling.erRevurdering && behandling.årsaker.any {
-            it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP)
-        }
+        get() =
+            behandling.erRevurdering &&
+                behandling.årsaker.any {
+                    it.type in setOf(Behandlingsårsakstype.REVURDERING_KLAGE_KA, Behandlingsårsakstype.REVURDERING_KLAGE_NFP)
+                }
 
     val varsletBeløp get() = behandling.aktivtVarsel?.varselbeløp?.let { BigDecimal(it) }
 
     val aktivFagsystemsbehandling get() = behandling.fagsystemsbehandling.first { it.aktiv }
 
     val erRevurderingEtterKlageNfp
-        get() = behandling.erRevurdering && behandling.årsaker.any {
-            it.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
-        }
+        get() =
+            behandling.erRevurdering &&
+                behandling.årsaker.any {
+                    it.type == Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+                }
 
     val vilkårsvurderingsperioder get() = behandling.vilkårsvurdering.firstOrNull { it.aktiv }?.perioder ?: emptySet()
     val vurdertForeldelse get() = behandling.vurderteForeldelser.firstOrNull { it.aktiv }
     val faktaFeilutbetaling get() = behandling.faktaFeilutbetaling.firstOrNull { it.aktiv }
 
     val aktivtSteg
-        get() = behandling.behandlingsstegstilstander.firstOrNull {
-            Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus)
-        }?.behandlingssteg
+        get() =
+            behandling.behandlingsstegstilstander.firstOrNull {
+                Behandlingsstegstatus.erStegAktiv(it.behandlingsstegsstatus)
+            }?.behandlingssteg
 
     val sisteVarsel
-        get() = behandling.brevsporing.filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
-            .maxByOrNull { it.sporbar.opprettetTid }
+        get() =
+            behandling.brevsporing.filter { it.brevtype in setOf(Brevtype.VARSEL, Brevtype.KORRIGERT_VARSEL) }
+                .maxByOrNull { it.sporbar.opprettetTid }
 
     fun finnOriginalBehandlingVedtaksdato(): LocalDate? {
         return if (erRevurdering) {
@@ -110,9 +123,10 @@ data class Vedtaksbrevgrunnlag(
     }
 
     private fun erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt(): Boolean {
-        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type && behandling.årsaker.any {
-            Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
-        }
+        return Behandlingstype.REVURDERING_TILBAKEKREVING == behandling.type &&
+            behandling.årsaker.any {
+                Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT == it.type
+            }
     }
 }
 
@@ -154,7 +168,6 @@ data class Vedtaksbrevbehandling(
     @MappedCollection(idColumn = "behandling_id")
     val vurderteForeldelser: Set<VurdertForeldelse> = setOf(),
 ) {
-
     val erRevurdering get() = type == Behandlingstype.REVURDERING_TILBAKEKREVING
 
     val sisteResultat get() = resultater.maxByOrNull { it.sporbar.endret.endretTid }

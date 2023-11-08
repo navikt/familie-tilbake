@@ -13,18 +13,18 @@ import java.time.LocalDate
 import java.util.Scanner
 
 class TekstformatererInnhentDokumentasjonsbrevTest {
-
-    private val metadata = Brevmetadata(
-        sakspartId = "12345678901",
-        sakspartsnavn = "Test",
-        mottageradresse = Adresseinfo("12345678901", "Test"),
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        ansvarligSaksbehandler = "Bob",
-        saksnummer = "1232456",
-        språkkode = Språkkode.NB,
-        ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false,
-    )
+    private val metadata =
+        Brevmetadata(
+            sakspartId = "12345678901",
+            sakspartsnavn = "Test",
+            mottageradresse = Adresseinfo("12345678901", "Test"),
+            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            ansvarligSaksbehandler = "Bob",
+            saksnummer = "1232456",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.BARNETILSYN,
+            gjelderDødsfall = false,
+        )
     private val innhentDokumentasjonsbrevsdokument =
         InnhentDokumentasjonsbrevsdokument(
             brevmetadata = metadata,
@@ -74,16 +74,18 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
 
     @Test
     fun `lagInnhentDokumentasjonBrevFritekst skal generere innhentdokumentasjonbrev for verge organisasjon`() {
-        val brevMetadata = metadata.copy(
-            mottageradresse = Adresseinfo(
-                ident = "12345678901",
-                mottagernavn = "Semba AS c/o John Doe",
-            ),
-            sakspartsnavn = "Test",
-            vergenavn = "John Doe",
-            finnesVerge = true,
-            finnesAnnenMottaker = true,
-        )
+        val brevMetadata =
+            metadata.copy(
+                mottageradresse =
+                    Adresseinfo(
+                        ident = "12345678901",
+                        mottagernavn = "Semba AS c/o John Doe",
+                    ),
+                sakspartsnavn = "Test",
+                vergenavn = "John Doe",
+                finnesVerge = true,
+                finnesAnnenMottaker = true,
+            )
         val dokument = innhentDokumentasjonsbrevsdokument.copy(brevmetadata = brevMetadata)
 
         val generertBrev = TekstformatererInnhentDokumentasjonsbrev.lagFritekst(dokument)
@@ -141,8 +143,9 @@ class TekstformatererInnhentDokumentasjonsbrevTest {
     fun `lagInnhentDokumentasjonBrevOverskrift skal generere innhentdokumentasjonbrev overskrift nynorsk`() {
         val brevMetadata = metadata.copy(språkkode = Språkkode.NN)
 
-        val overskrift = TekstformatererInnhentDokumentasjonsbrev
-            .lagOverskrift(brevMetadata)
+        val overskrift =
+            TekstformatererInnhentDokumentasjonsbrev
+                .lagOverskrift(brevMetadata)
 
         val fasit = "Vi trenger fleire opplysningar"
         overskrift shouldBe fasit

@@ -31,7 +31,6 @@ class AvsluttBehandlingTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val historikkTaskService: HistorikkTaskService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -69,7 +68,6 @@ class AvsluttBehandlingTask(
     }
 
     companion object {
-
         const val TYPE = "avsluttBehandling"
     }
 }

@@ -32,7 +32,6 @@ class AvstemmingTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val environment: Environment,
 ) : AsyncTaskStep {
-
     private val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
 
@@ -58,17 +57,17 @@ class AvstemmingTask(
         if (environment.activeProfiles.contains("e2e")) return
 
         val dato = LocalDate.parse(task.payload)
-        val nesteAvstemming = Task(
-            type = TYPE,
-            payload = dato.plusDays(1).toString(),
-            properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) },
-        )
-            .medTriggerTid(dato.plusDays(2).atTime(8, 0))
+        val nesteAvstemming =
+            Task(
+                type = TYPE,
+                payload = dato.plusDays(1).toString(),
+                properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, task.fagsystem()) },
+            )
+                .medTriggerTid(dato.plusDays(2).atTime(8, 0))
         taskService.save(nesteAvstemming)
     }
 
     companion object {
-
         const val TYPE = "task.avstemming"
         private val DATO_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd")
         private val DATO_TIDSPUNKT_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm")

@@ -33,7 +33,6 @@ class SendVedtaksbrevTask(
     private val taskService: TaskService,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -81,7 +80,6 @@ class SendVedtaksbrevTask(
     }
 
     companion object {
-
         const val TYPE = "iverksetteVedtak.sendVedtaksbrev"
     }
 }

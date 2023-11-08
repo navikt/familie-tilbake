@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagService) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
 
@@ -26,7 +25,6 @@ class BehandleKravgrunnlagTask(private val kravgrunnlagService: KravgrunnlagServ
     }
 
     companion object {
-
         const val TYPE = "behandleKravgrunnlag"
     }
 }

@@ -9,9 +9,7 @@ class IntegrasjonerConfig(
     @Value("\${FAMILIE_INTEGRASJONER_URL}") val integrasjonUri: URI,
     @Value("\${application.name}") val applicationName: String,
 ) {
-
     companion object {
-
         const val PATH_PING = "internal/status/isAlive"
         const val PATH_ORGANISASJON = "api/organisasjon"
         const val PATH_SAKSBEHANDLER = "api/saksbehandler"

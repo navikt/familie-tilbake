@@ -38,7 +38,6 @@ class DistribusjonshåndteringService(
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     fun sendBrev(
         behandling: Behandling,
         brevtype: Brevtype,
@@ -47,41 +46,46 @@ class DistribusjonshåndteringService(
         brevdata: (Brevmottager, Brevmetadata?) -> Brevdata,
     ) {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val vedtaksbrevgrunnlag = when (brevtype) {
-            Brevtype.VEDTAK -> vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
-            else -> null
-        }
-        val støtterManuelleBrevmottakere: Boolean = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
-            behandling = behandling,
-            fagsak = fagsak,
-        )
-        val brevmottakere = utledMottakere(
-            behandling = behandling,
-            fagsak = fagsak,
-            erManuelleMottakereStøttet = støtterManuelleBrevmottakere,
-            manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet(),
-        ).toList()
+        val vedtaksbrevgrunnlag =
+            when (brevtype) {
+                Brevtype.VEDTAK -> vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
+                else -> null
+            }
+        val støtterManuelleBrevmottakere: Boolean =
+            BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
+                behandling = behandling,
+                fagsak = fagsak,
+            )
+        val brevmottakere =
+            utledMottakere(
+                behandling = behandling,
+                fagsak = fagsak,
+                erManuelleMottakereStøttet = støtterManuelleBrevmottakere,
+                manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet(),
+            ).toList()
 
         brevmottakere.filterNotNull().forEachIndexed { index, brevmottaker ->
             pdfBrevService.sendBrev(
                 behandling = behandling,
                 fagsak = fagsak,
                 brevtype = brevtype,
-                data = brevdata(
-                    brevmottaker.somBrevmottager,
-                    brevmetadataUtil.genererMetadataForBrev(
-                        behandling.id,
-                        vedtaksbrevgrunnlag,
-                        brevmottager = brevmottaker.somBrevmottager,
-                        manuellAdresseinfo = brevmottaker.manuellAdresse,
-                        annenMottakersNavn = brevmottakere[brevmottakere.lastIndex - index].navn,
+                data =
+                    brevdata(
+                        brevmottaker.somBrevmottager,
+                        brevmetadataUtil.genererMetadataForBrev(
+                            behandling.id,
+                            vedtaksbrevgrunnlag,
+                            brevmottager = brevmottaker.somBrevmottager,
+                            manuellAdresseinfo = brevmottaker.manuellAdresse,
+                            annenMottakersNavn = brevmottakere[brevmottakere.lastIndex - index].navn,
+                        ),
                     ),
-                ),
                 varsletBeløp = varsletBeløp,
                 fritekst = fritekst,
             )
         }
     }
+
     companion object {
         fun utledMottakere(
             behandling: Behandling,
@@ -92,8 +96,9 @@ class DistribusjonshåndteringService(
             return if (erManuelleMottakereStøttet) {
                 require(manueltRegistrerteMottakere.all { it.behandlingId == behandling.id })
 
-                val (manuellBrukeradresse, manuellTilleggsmottaker) = manueltRegistrerteMottakere
-                    .partition { it.type == BRUKER_MED_UTENLANDSK_ADRESSE || it.type == DØDSBO }
+                val (manuellBrukeradresse, manuellTilleggsmottaker) =
+                    manueltRegistrerteMottakere
+                        .partition { it.type == BRUKER_MED_UTENLANDSK_ADRESSE || it.type == DØDSBO }
                 Pair(
                     first = manuellBrukeradresse.singleOrNull()?.let { ManuellBrevmottakerType(it) } ?: BrevmottagerType(BRUKER),
                     second = manuellTilleggsmottaker.singleOrNull()?.let { ManuellBrevmottakerType(it) },
@@ -113,35 +118,40 @@ class DistribusjonshåndteringService(
 sealed interface Brevmottaker
 
 class BrevmottagerType(val mottaker: Brevmottager) : Brevmottaker
+
 class ManuellBrevmottakerType(val mottaker: ManuellBrevmottaker) : Brevmottaker
 
 val Brevmottaker?.navn: String?
     get() = if (this is ManuellBrevmottakerType) mottaker.navn else null
 val Brevmottaker.somBrevmottager: Brevmottager
-    get() = (this as? BrevmottagerType)?.mottaker ?: (this as ManuellBrevmottakerType).run {
-        if (mottaker.erTilleggsmottaker) MANUELL_TILLEGGSMOTTAKER else MANUELL_BRUKER
-    }
+    get() =
+        (this as? BrevmottagerType)?.mottaker ?: (this as ManuellBrevmottakerType).run {
+            if (mottaker.erTilleggsmottaker) MANUELL_TILLEGGSMOTTAKER else MANUELL_BRUKER
+        }
 val Brevmottaker?.manuellAdresse: Adresseinfo?
-    get() = if (this is ManuellBrevmottakerType) {
-        Adresseinfo(
-            ident = mottaker.ident.orEmpty(),
-            mottagernavn = mottaker.navn,
-            manuellAdresse = if (mottaker.hasManuellAdresse()) {
-                ManuellAdresse(
-                    adresseType = when (mottaker.landkode) {
-                        "NO" -> AdresseType.norskPostadresse
-                        else -> AdresseType.utenlandskPostadresse
+    get() =
+        if (this is ManuellBrevmottakerType) {
+            Adresseinfo(
+                ident = mottaker.ident.orEmpty(),
+                mottagernavn = mottaker.navn,
+                manuellAdresse =
+                    if (mottaker.hasManuellAdresse()) {
+                        ManuellAdresse(
+                            adresseType =
+                                when (mottaker.landkode) {
+                                    "NO" -> AdresseType.norskPostadresse
+                                    else -> AdresseType.utenlandskPostadresse
+                                },
+                            adresselinje1 = mottaker.adresselinje1,
+                            adresselinje2 = mottaker.adresselinje2,
+                            postnummer = mottaker.postnummer,
+                            poststed = mottaker.poststed,
+                            land = mottaker.landkode!!,
+                        )
+                    } else {
+                        null
                     },
-                    adresselinje1 = mottaker.adresselinje1,
-                    adresselinje2 = mottaker.adresselinje2,
-                    postnummer = mottaker.postnummer,
-                    poststed = mottaker.poststed,
-                    land = mottaker.landkode!!,
-                )
-            } else {
-                null
-            },
-        )
-    } else {
-        null
-    }
+            )
+        } else {
+            null
+        }

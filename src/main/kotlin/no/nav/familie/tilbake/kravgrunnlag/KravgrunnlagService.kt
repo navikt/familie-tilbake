@@ -44,7 +44,6 @@ class KravgrunnlagService(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -121,7 +120,10 @@ class KravgrunnlagService(
         )
     }
 
-    private fun lagreKravgrunnlag(kravgrunnlag431: Kravgrunnlag431, ytelsestype: Ytelsestype) {
+    private fun lagreKravgrunnlag(
+        kravgrunnlag431: Kravgrunnlag431,
+        ytelsestype: Ytelsestype,
+    ) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
             val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(kravgrunnlag431.behandlingId)
@@ -165,12 +167,13 @@ class KravgrunnlagService(
             Task(
                 type = OppdaterFaktainfoTask.TYPE,
                 payload = "",
-                properties = Properties().apply {
-                    setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
-                    setProperty("ytelsestype", ytelsestype.name)
-                    setProperty("eksternId", kravgrunnlag431.referanse)
-                    setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
-                },
+                properties =
+                    Properties().apply {
+                        setProperty("eksternFagsakId", kravgrunnlag431.fagsystemId)
+                        setProperty("ytelsestype", ytelsestype.name)
+                        setProperty("eksternId", kravgrunnlag431.referanse)
+                        setProperty(PropertyName.FAGSYSTEM, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype).name)
+                    },
             ),
         )
     }
@@ -185,10 +188,11 @@ class KravgrunnlagService(
                 frist = LocalDate.now().plusDays(1),
             )
         } else {
-            val beskrivelse = "Behandling er tatt av vent, " +
-                "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
-                "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
-                "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
+            val beskrivelse =
+                "Behandling er tatt av vent, " +
+                    "men revurderingsvedtaksdato er mindre enn $FRIST_DATO_GRENSE dager fra dagens dato." +
+                    "Fristen settes derfor $FRIST_DATO_GRENSE dager fra revurderingsvedtaksdato " +
+                    "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag"
             oppgaveTaskService.oppdaterOppgaveTask(
                 behandlingId = behandling.id,
                 beskrivelse = beskrivelse,
@@ -201,7 +205,10 @@ class KravgrunnlagService(
         oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId)
     }
 
-    private fun sjekkIdentiskKravgrunnlag(endretKravgrunnlag: Kravgrunnlag431, behandling: Behandling) {
+    private fun sjekkIdentiskKravgrunnlag(
+        endretKravgrunnlag: Kravgrunnlag431,
+        behandling: Behandling,
+    ) {
         if (endretKravgrunnlag.kravstatuskode != Kravstatuskode.ENDRET ||
             // sjekker ikke identisk kravgrunnlag for behandlinger som har sendt varselbrev
             behandling.aktivtVarsel != null ||
@@ -235,7 +242,6 @@ class KravgrunnlagService(
     }
 
     companion object {
-
         const val FRIST_DATO_GRENSE = 10L
     }
 }

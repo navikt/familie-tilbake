@@ -40,9 +40,11 @@ class ManuellBrevmottakerService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
-
     @Transactional
-    fun leggTilBrevmottaker(behandlingId: UUID, requestDto: ManuellBrevmottakerRequestDto): UUID {
+    fun leggTilBrevmottaker(
+        behandlingId: UUID,
+        requestDto: ManuellBrevmottakerRequestDto,
+    ): UUID {
         val navnFraRegister: String? = hentPersonEllerOrganisasjonNavnFraRegister(requestDto, behandlingId)
         val manuellBrevmottaker = ManuellBrevmottakerMapper.tilDomene(behandlingId, requestDto, navnFraRegister)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -67,22 +69,25 @@ class ManuellBrevmottakerService(
         manuellBrevmottakerId: UUID,
         manuellBrevmottakerRequestDto: ManuellBrevmottakerRequestDto,
     ) {
-        val manuellBrevmottaker = manuellBrevmottakerRepository.findById(manuellBrevmottakerId).getOrNull()
-            ?: throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId")
+        val manuellBrevmottaker =
+            manuellBrevmottakerRepository.findById(manuellBrevmottakerId).getOrNull()
+                ?: throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId")
 
-        val oppdatertBrevmottaker = manuellBrevmottaker.copy(
-            type = manuellBrevmottakerRequestDto.type,
-            navn = hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId)
-                ?: manuellBrevmottakerRequestDto.navn,
-            ident = manuellBrevmottakerRequestDto.personIdent,
-            orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
-            adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
-            adresselinje2 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje2,
-            postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer,
-            poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed,
-            landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
-            vergetype = manuellBrevmottakerRequestDto.vergetype,
-        )
+        val oppdatertBrevmottaker =
+            manuellBrevmottaker.copy(
+                type = manuellBrevmottakerRequestDto.type,
+                navn =
+                    hentPersonEllerOrganisasjonNavnFraRegister(manuellBrevmottakerRequestDto, behandlingId)
+                        ?: manuellBrevmottakerRequestDto.navn,
+                ident = manuellBrevmottakerRequestDto.personIdent,
+                orgNr = manuellBrevmottakerRequestDto.organisasjonsnummer,
+                adresselinje1 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje1,
+                adresselinje2 = manuellBrevmottakerRequestDto.manuellAdresseInfo?.adresselinje2,
+                postnummer = manuellBrevmottakerRequestDto.manuellAdresseInfo?.postnummer,
+                poststed = manuellBrevmottakerRequestDto.manuellAdresseInfo?.poststed,
+                landkode = manuellBrevmottakerRequestDto.manuellAdresseInfo?.landkode,
+                vergetype = manuellBrevmottakerRequestDto.vergetype,
+            )
 
         val historikkinnslagtittel =
             if (manuellBrevmottaker.type == oppdatertBrevmottaker.type) {
@@ -104,7 +109,10 @@ class ManuellBrevmottakerService(
     }
 
     @Transactional
-    fun fjernBrevmottaker(behandlingId: UUID, manuellBrevmottakerId: UUID) {
+    fun fjernBrevmottaker(
+        behandlingId: UUID,
+        manuellBrevmottakerId: UUID,
+    ) {
         val manuellBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId)
         if (manuellBrevmottakere.none { it.id == manuellBrevmottakerId }) {
             throw Feil("Finnes ikke brevmottakere med id=$manuellBrevmottakerId for behandlingId=$behandlingId")
@@ -138,7 +146,10 @@ class ManuellBrevmottakerService(
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-    private fun fjernBrevmottakerOgLagHistorikkinnslag(manuellBrevmottaker: ManuellBrevmottaker, behandlingId: UUID) {
+    private fun fjernBrevmottakerOgLagHistorikkinnslag(
+        manuellBrevmottaker: ManuellBrevmottaker,
+        behandlingId: UUID,
+    ) {
         historikkService.lagHistorikkinnslag(
             behandlingId = behandlingId,
             historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,

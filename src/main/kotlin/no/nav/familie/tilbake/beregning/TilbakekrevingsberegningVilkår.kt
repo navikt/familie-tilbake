@@ -15,7 +15,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 internal object TilbakekrevingsberegningVilkår {
-
     private val HUNDRE_PROSENT: BigDecimal = BigDecimal.valueOf(100)
     private val RENTESATS: BigDecimal = BigDecimal.valueOf(10)
     private val RENTEFAKTOR: BigDecimal = RENTESATS.divide(HUNDRE_PROSENT, 2, RoundingMode.UNNECESSARY)
@@ -70,7 +69,10 @@ internal object TilbakekrevingsberegningVilkår {
         )
     }
 
-    private fun beregnRentebeløp(beløp: BigDecimal, renter: Boolean): BigDecimal {
+    private fun beregnRentebeløp(
+        beløp: BigDecimal,
+        renter: Boolean,
+    ): BigDecimal {
         return if (renter) beløp.multiply(RENTEFAKTOR).setScale(0, RoundingMode.DOWN) else BigDecimal.ZERO
     }
 
@@ -81,25 +83,31 @@ internal object TilbakekrevingsberegningVilkår {
         bruk6desimalerISkatteberegning: Boolean,
     ): BigDecimal {
         val totalKgTilbakekrevesBeløp: BigDecimal = perioderMedSkatteprosent.sumOf { it.tilbakekrevingsbeløp }
-        val andel: BigDecimal = if (totalKgTilbakekrevesBeløp.isZero()) {
-            BigDecimal.ZERO
-        } else {
-            bruttoTilbakekrevesBeløp.divide(totalKgTilbakekrevesBeløp, 4, RoundingMode.HALF_UP)
-        }
+        val andel: BigDecimal =
+            if (totalKgTilbakekrevesBeløp.isZero()) {
+                BigDecimal.ZERO
+            } else {
+                bruttoTilbakekrevesBeløp.divide(totalKgTilbakekrevesBeløp, 4, RoundingMode.HALF_UP)
+            }
         var skattBeløp: BigDecimal = BigDecimal.ZERO
         for (grunnlagPeriodeMedSkattProsent in perioderMedSkatteprosent) {
             if (periode.overlapper(grunnlagPeriodeMedSkattProsent.periode)) {
                 val scale = if (bruk6desimalerISkatteberegning) 6 else 4
                 val delTilbakekrevesBeløp: BigDecimal = grunnlagPeriodeMedSkattProsent.tilbakekrevingsbeløp.multiply(andel)
-                val beregnetSkattBeløp = delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
-                    .divide(BigDecimal.valueOf(100), scale, RoundingMode.HALF_UP)
+                val beregnetSkattBeløp =
+                    delTilbakekrevesBeløp.multiply(grunnlagPeriodeMedSkattProsent.skatteprosent)
+                        .divide(BigDecimal.valueOf(100), scale, RoundingMode.HALF_UP)
                 skattBeløp = skattBeløp.add(beregnetSkattBeløp).setScale(0, RoundingMode.DOWN)
             }
         }
         return skattBeløp
     }
 
-    private fun finnBeløpUtenRenter(kravgrunnlagBeløp: BigDecimal, andel: BigDecimal?, manueltBeløp: BigDecimal?): BigDecimal {
+    private fun finnBeløpUtenRenter(
+        kravgrunnlagBeløp: BigDecimal,
+        andel: BigDecimal?,
+        manueltBeløp: BigDecimal?,
+    ): BigDecimal {
         if (manueltBeløp != null) {
             return manueltBeløp
         }

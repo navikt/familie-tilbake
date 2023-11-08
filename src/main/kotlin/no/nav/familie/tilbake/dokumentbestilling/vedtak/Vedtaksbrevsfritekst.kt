@@ -5,55 +5,63 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 
 object Vedtaksbrevsfritekst {
-
     private const val FRITEKST_MARKERING_START = "\\\\FRITEKST_START"
     private const val FRITEKST_PÅKREVET_MARKERING_START = "\\\\PÅKREVET_FRITEKST_START"
     private const val FRITEKST_MARKERING_SLUTT = "\\\\FRITEKST_SLUTT"
 
     fun settInnMarkeringForFritekst(vedtaksbrevsdata: HbVedtaksbrevsdata): HbVedtaksbrevsdata {
-        val perioder = vedtaksbrevsdata.perioder.map { periode ->
-            val fritekstTypeForFakta = utledFritekstTypeFakta(periode.fakta.hendelsesundertype)
-            val fakta = periode.fakta.copy(
-                fritekstFakta = markerFritekst(
-                    fritekstTypeForFakta,
-                    periode.fakta.fritekstFakta,
-                    Underavsnittstype.FAKTA,
-                ),
-            )
-            val vurderinger: HbVurderinger =
-                periode.vurderinger
-                    .copy(
-                        fritekstForeldelse = markerValgfriFritekst(
-                            periode.vurderinger.fritekstForeldelse,
-                            Underavsnittstype.FORELDELSE,
-                        ),
-                        fritekst = markerValgfriFritekst(
-                            periode.vurderinger.fritekst,
-                            Underavsnittstype.VILKÅR,
-                        ),
-                        særligeGrunner = periode.vurderinger.særligeGrunner
-                            ?.copy(
-                                fritekst = markerValgfriFritekst(
-                                    periode.vurderinger.særligeGrunner.fritekst,
-                                    Underavsnittstype.SÆRLIGEGRUNNER,
-                                ),
-                                fritekstAnnet = markerPåkrevetFritekst(
-                                    periode.vurderinger
-                                        .særligeGrunner
-                                        .fritekstAnnet,
-                                    Underavsnittstype.SÆRLIGEGRUNNER_ANNET,
-                                ),
+        val perioder =
+            vedtaksbrevsdata.perioder.map { periode ->
+                val fritekstTypeForFakta = utledFritekstTypeFakta(periode.fakta.hendelsesundertype)
+                val fakta =
+                    periode.fakta.copy(
+                        fritekstFakta =
+                            markerFritekst(
+                                fritekstTypeForFakta,
+                                periode.fakta.fritekstFakta,
+                                Underavsnittstype.FAKTA,
                             ),
                     )
-            periode.copy(
-                fakta = fakta,
-                vurderinger = vurderinger,
-            )
-        }
+                val vurderinger: HbVurderinger =
+                    periode.vurderinger
+                        .copy(
+                            fritekstForeldelse =
+                                markerValgfriFritekst(
+                                    periode.vurderinger.fritekstForeldelse,
+                                    Underavsnittstype.FORELDELSE,
+                                ),
+                            fritekst =
+                                markerValgfriFritekst(
+                                    periode.vurderinger.fritekst,
+                                    Underavsnittstype.VILKÅR,
+                                ),
+                            særligeGrunner =
+                                periode.vurderinger.særligeGrunner
+                                    ?.copy(
+                                        fritekst =
+                                            markerValgfriFritekst(
+                                                periode.vurderinger.særligeGrunner.fritekst,
+                                                Underavsnittstype.SÆRLIGEGRUNNER,
+                                            ),
+                                        fritekstAnnet =
+                                            markerPåkrevetFritekst(
+                                                periode.vurderinger
+                                                    .særligeGrunner
+                                                    .fritekstAnnet,
+                                                Underavsnittstype.SÆRLIGEGRUNNER_ANNET,
+                                            ),
+                                    ),
+                        )
+                periode.copy(
+                    fakta = fakta,
+                    vurderinger = vurderinger,
+                )
+            }
 
         val fritekstType = utledFritekstTypeForOppsummering(vedtaksbrevsdata)
-        val felles = vedtaksbrevsdata.felles
-            .copy(fritekstoppsummering = markerFritekst(fritekstType, vedtaksbrevsdata.felles.fritekstoppsummering, null))
+        val felles =
+            vedtaksbrevsdata.felles
+                .copy(fritekstoppsummering = markerFritekst(fritekstType, vedtaksbrevsdata.felles.fritekstoppsummering, null))
         return vedtaksbrevsdata.copy(
             felles = felles,
             perioder = perioder,
@@ -84,7 +92,10 @@ object Vedtaksbrevsfritekst {
         return markerFritekst(FritekstType.VALGFRI, fritekst, underavsnittstype)
     }
 
-    fun markerPåkrevetFritekst(fritekst: String?, underavsnittstype: Underavsnittstype?): String {
+    fun markerPåkrevetFritekst(
+        fritekst: String?,
+        underavsnittstype: Underavsnittstype?,
+    ): String {
         return markerFritekst(FritekstType.PÅKREVET, fritekst, underavsnittstype)
     }
 

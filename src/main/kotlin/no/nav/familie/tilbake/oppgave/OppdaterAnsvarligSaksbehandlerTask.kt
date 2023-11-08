@@ -21,7 +21,6 @@ class OppdaterAnsvarligSaksbehandlerTask(
     private val behandlingRepository: BehandlingRepository,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -38,7 +37,6 @@ class OppdaterAnsvarligSaksbehandlerTask(
     }
 
     companion object {
-
         const val TYPE = "oppdaterSaksbehandlerOppgave"
     }
 }

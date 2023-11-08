@@ -10,22 +10,25 @@ import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresulta
 import java.time.YearMonth
 
 object VilkårsvurderingsPeriodeDomainUtil {
-
-    fun lagGrovtUaktsomVilkårsvurderingsperiode(fom: YearMonth, tom: YearMonth) = VilkårsvurderingsperiodeDto(
-        periode = Datoperiode(fom, tom),
-        begrunnelse = "testverdi",
-        aktsomhetDto =
-        AktsomhetDto(
-            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
-            ileggRenter = true,
-            andelTilbakekreves = null,
+    fun lagGrovtUaktsomVilkårsvurderingsperiode(
+        fom: YearMonth,
+        tom: YearMonth,
+    ) =
+        VilkårsvurderingsperiodeDto(
+            periode = Datoperiode(fom, tom),
             begrunnelse = "testverdi",
-            særligeGrunnerTilReduksjon = false,
-            tilbakekrevSmåbeløp = true,
-            særligeGrunnerBegrunnelse = "testverdi",
-            særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi")),
-        ),
-        vilkårsvurderingsresultat =
-        Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-    )
+            aktsomhetDto =
+                AktsomhetDto(
+                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+                    ileggRenter = true,
+                    andelTilbakekreves = null,
+                    begrunnelse = "testverdi",
+                    særligeGrunnerTilReduksjon = false,
+                    tilbakekrevSmåbeløp = true,
+                    særligeGrunnerBegrunnelse = "testverdi",
+                    særligeGrunner = listOf(SærligGrunnDto(SærligGrunn.ANNET, "testverdi")),
+                ),
+            vilkårsvurderingsresultat =
+                Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+        )
 }

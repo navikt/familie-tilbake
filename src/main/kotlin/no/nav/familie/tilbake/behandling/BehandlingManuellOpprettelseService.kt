@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BehandlingManuellOpprettelseService(private val behandlingService: BehandlingService) {
-
     @Transactional
     fun opprettBehandlingManuell(
         eksternFagsakId: String,
@@ -18,13 +17,14 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
         ansvarligSaksbehandler: String,
         fagsystemsbehandlingData: HentFagsystemsbehandling,
     ) {
-        val opprettTilbakekrevingRequest = lagOpprettBehandlingsrequest(
-            eksternFagsakId = eksternFagsakId,
-            ytelsestype = ytelsestype,
-            eksternId = eksternId,
-            fagsystemsbehandlingData = fagsystemsbehandlingData,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-        )
+        val opprettTilbakekrevingRequest =
+            lagOpprettBehandlingsrequest(
+                eksternFagsakId = eksternFagsakId,
+                ytelsestype = ytelsestype,
+                eksternId = eksternId,
+                fagsystemsbehandlingData = fagsystemsbehandlingData,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+            )
         behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
     }
 

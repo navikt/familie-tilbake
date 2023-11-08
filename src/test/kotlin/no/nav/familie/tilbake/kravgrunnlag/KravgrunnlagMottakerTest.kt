@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class KravgrunnlagMottakerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var taskService: TaskService
 

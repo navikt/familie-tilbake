@@ -9,13 +9,11 @@ data class LogiskPeriode(
     val periode: Månedsperiode,
     val feilutbetaltBeløp: BigDecimal,
 ) {
-
     val fom get() = periode.fom
     val tom get() = periode.tom
 }
 
 object LogiskPeriodeUtil {
-
     fun utledLogiskPeriode(feilutbetalingPrPeriode: SortedMap<Månedsperiode, BigDecimal>): List<LogiskPeriode> {
         var førsteMåned: YearMonth? = null
         var sisteMåned: YearMonth? = null
@@ -51,7 +49,10 @@ object LogiskPeriodeUtil {
         return resultat.toList()
     }
 
-    private fun harOppholdMellom(måned1: YearMonth, måned2: YearMonth): Boolean {
+    private fun harOppholdMellom(
+        måned1: YearMonth,
+        måned2: YearMonth,
+    ): Boolean {
         require(måned2 > måned1) { "dag2 må være etter dag1" }
         return måned1.plusMonths(1) != måned2
     }

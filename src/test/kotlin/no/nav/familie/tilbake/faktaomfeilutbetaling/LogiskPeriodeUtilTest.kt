@@ -7,7 +7,6 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 internal class LogiskPeriodeUtilTest {
-
     private val januar = YearMonth.of(2021, 1)
     private val februar = YearMonth.of(2021, 2)
     private val mars = YearMonth.of(2021, 3)
@@ -19,12 +18,13 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Månedsperiode(januar, februar)
         val periode2 = Månedsperiode(mars, mai)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-            mapOf(
-                periode1 to BigDecimal.valueOf(100),
-                periode2 to BigDecimal.valueOf(200),
-            ).toSortedMap(),
-        )
+        val resultat =
+            LogiskPeriodeUtil.utledLogiskPeriode(
+                mapOf(
+                    periode1 to BigDecimal.valueOf(100),
+                    periode2 to BigDecimal.valueOf(200),
+                ).toSortedMap(),
+            )
 
         resultat.size shouldBe 1
         resultat[0].fom shouldBe januar
@@ -37,12 +37,13 @@ internal class LogiskPeriodeUtilTest {
         val periode1 = Månedsperiode(januar, februar)
         val periode2 = Månedsperiode(april, mai)
 
-        val resultat = LogiskPeriodeUtil.utledLogiskPeriode(
-            mapOf(
-                periode1 to BigDecimal.valueOf(100),
-                periode2 to BigDecimal.valueOf(200),
-            ).toSortedMap(),
-        )
+        val resultat =
+            LogiskPeriodeUtil.utledLogiskPeriode(
+                mapOf(
+                    periode1 to BigDecimal.valueOf(100),
+                    periode2 to BigDecimal.valueOf(200),
+                ).toSortedMap(),
+            )
 
         resultat.size shouldBe 2
         resultat[0].fom shouldBe januar

@@ -8,7 +8,6 @@ class HbBehandling(
     val originalBehandlingsdatoFagsakvedtak: LocalDate? = null,
     val erRevurderingEtterKlage: Boolean = false,
 ) {
-
     init {
         if (erRevurdering) {
             requireNotNull(originalBehandlingsdatoFagsakvedtak) { "vedtaksdato for original behandling er ikke satt" }

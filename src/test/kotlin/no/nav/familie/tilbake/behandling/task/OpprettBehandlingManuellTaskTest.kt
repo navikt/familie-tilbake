@@ -50,7 +50,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository
 
@@ -89,10 +88,11 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate))
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
         behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
-        opprettBehandlingManueltTask = OpprettBehandlingManueltTask(
-            hentFagsystemsbehandlingService,
-            behandlingManuellOpprettelseService,
-        )
+        opprettBehandlingManueltTask =
+            OpprettBehandlingManueltTask(
+                hentFagsystemsbehandlingService,
+                behandlingManuellOpprettelseService,
+            )
 
         val recordMetadata = mockk<RecordMetadata>()
         every { recordMetadata.offset() } returns 1
@@ -116,12 +116,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             )
         }
         val requestId = requestIdSlot.captured
-        val requestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            )
+        val requestSendt =
+            requestSendtRepository
+                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                )
         requestSendt.shouldNotBeNull()
         requestSendt.id shouldBe requestId
         requestSendt.eksternFagsakId shouldBe eksternFagsakId
@@ -140,12 +141,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
             "eksternId=$eksternId." +
             "Task-en kan kjøre på nytt manuelt når respons-en er mottatt"
 
-        val requestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            )
+        val requestSendt =
+            requestSendtRepository
+                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                )
         requestSendt.shouldNotBeNull()
     }
 
@@ -153,12 +155,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal ikke opprette behandling når responsen har mottatt fra fagsystem men finnes ikke kravgrunnlag`() {
         opprettBehandlingManueltTask.preCondition(lagTask())
 
-        val requestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            )
+        val requestSendt =
+            requestSendtRepository
+                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
@@ -171,12 +174,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal opprette behandling når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
         opprettBehandlingManueltTask.preCondition(lagTask())
 
-        val requestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            )
+        val requestSendt =
+            requestSendtRepository
+                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                )
         val respons = lagHentFagsystemsbehandlingRespons()
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
@@ -214,12 +218,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     fun `doTask skal opprette behandling for institusjon når responsen har mottatt fra fagsystem og finnes kravgrunnlag`() {
         opprettBehandlingManueltTask.preCondition(lagTask())
 
-        val requestSendt = requestSendtRepository
-            .findByEksternFagsakIdAndYtelsestypeAndEksternId(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            )
+        val requestSendt =
+            requestSendtRepository
+                .findByEksternFagsakIdAndYtelsestypeAndEksternId(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                )
         val respons = lagHentFagsystemsbehandlingRespons(erInstitusjon = true)
         requestSendt?.let { requestSendtRepository.update(it.copy(respons = objectMapper.writeValueAsString(respons))) }
 
@@ -258,12 +263,13 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         return Task(
             type = OpprettBehandlingManueltTask.TYPE,
             payload = "",
-            properties = Properties().apply {
-                setProperty("eksternFagsakId", eksternFagsakId)
-                setProperty("ytelsestype", ytelsestype.name)
-                setProperty("eksternId", eksternId)
-                setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
-            },
+            properties =
+                Properties().apply {
+                    setProperty("eksternFagsakId", eksternFagsakId)
+                    setProperty("ytelsestype", ytelsestype.name)
+                    setProperty("eksternId", eksternId)
+                    setProperty("ansvarligSaksbehandler", ansvarligSaksbehandler)
+                },
         )
     }
 
@@ -272,23 +278,26 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         feilmelding: String? = null,
     ): HentFagsystemsbehandlingRespons {
         var institusjon = if (erInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
-        val fagsystemsbehandling = HentFagsystemsbehandling(
-            eksternFagsakId = eksternFagsakId,
-            ytelsestype = ytelsestype,
-            eksternId = eksternId,
-            personIdent = "testverdi",
-            språkkode = Språkkode.NB,
-            enhetId = "8020",
-            enhetsnavn = "testverdi",
-            revurderingsvedtaksdato = LocalDate.now(),
-            faktainfo = Faktainfo(
-                revurderingsårsak = "testverdi",
-                revurderingsresultat = "OPPHØR",
-                tilbakekrevingsvalg = Tilbakekrevingsvalg
-                    .IGNORER_TILBAKEKREVING,
-            ),
-            institusjon = institusjon,
-        )
+        val fagsystemsbehandling =
+            HentFagsystemsbehandling(
+                eksternFagsakId = eksternFagsakId,
+                ytelsestype = ytelsestype,
+                eksternId = eksternId,
+                personIdent = "testverdi",
+                språkkode = Språkkode.NB,
+                enhetId = "8020",
+                enhetsnavn = "testverdi",
+                revurderingsvedtaksdato = LocalDate.now(),
+                faktainfo =
+                    Faktainfo(
+                        revurderingsårsak = "testverdi",
+                        revurderingsresultat = "OPPHØR",
+                        tilbakekrevingsvalg =
+                            Tilbakekrevingsvalg
+                                .IGNORER_TILBAKEKREVING,
+                    ),
+                institusjon = institusjon,
+            )
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = fagsystemsbehandling, feilMelding = feilmelding)
     }
 }

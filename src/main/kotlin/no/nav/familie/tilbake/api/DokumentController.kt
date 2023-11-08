@@ -39,7 +39,6 @@ class DokumentController(
     private val vedtaksbrevService: VedtaksbrevService,
     private val lagreUtkastVedtaksbrevService: LagreUtkastVedtaksbrevService,
 ) {
-
     @Operation(summary = "Bestill brevsending")
     @PostMapping("/bestill")
     @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Sender brev", AuditLoggerEvent.CREATE)
@@ -59,11 +58,12 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
-        val dokument: ByteArray = dokumentbehandlingService.forhåndsvisBrev(
-            bestillBrevDto.behandlingId,
-            bestillBrevDto.brevmalkode,
-            bestillBrevDto.fritekst,
-        )
+        val dokument: ByteArray =
+            dokumentbehandlingService.forhåndsvisBrev(
+                bestillBrevDto.behandlingId,
+                bestillBrevDto.brevmalkode,
+                bestillBrevDto.fritekst,
+            )
         return Ressurs.success(dokument)
     }
 
@@ -112,7 +112,9 @@ class DokumentController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(Behandlerrolle.VEILEDER, "Henter vedtaksbrevtekst", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
-    fun hentVedtaksbrevtekst(@PathVariable behandlingId: UUID): Ressurs<List<Avsnitt>> {
+    fun hentVedtaksbrevtekst(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<Avsnitt>> {
         return Ressurs.success(vedtaksbrevService.hentVedtaksbrevSomTekst(behandlingId))
     }
 

@@ -38,7 +38,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VergeServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -64,25 +63,27 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     private val historikkTaskService: HistorikkTaskService = mockk(relaxed = true)
 
-    private val vergeDto = VergeDto(
-        orgNr = "987654321",
-        type = Vergetype.ADVOKAT,
-        navn = "Stor Herlig Straff",
-        begrunnelse = "Det var nødvendig",
-    )
+    private val vergeDto =
+        VergeDto(
+            orgNr = "987654321",
+            type = Vergetype.ADVOKAT,
+            navn = "Stor Herlig Straff",
+            begrunnelse = "Det var nødvendig",
+        )
 
     @BeforeEach
     fun setUp() {
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(Testdata.behandling)
-        vergeService = VergeService(
-            behandlingRepository,
-            fagsakRepository,
-            historikkTaskService,
-            behandlingskontrollService,
-            integrasjonerClient,
-            personService,
-        )
+        vergeService =
+            VergeService(
+                behandlingRepository,
+                fagsakRepository,
+                historikkTaskService,
+                behandlingskontrollService,
+                integrasjonerClient,
+                personService,
+            )
         clearAllMocks(answers = false)
     }
 
@@ -137,14 +138,15 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreVerge skal ikke lagre verge når organisasjonen ikke er gyldig`() {
         val mockIntegrasjonerClient = mockk<IntegrasjonerClient>()
-        val vergeService = VergeService(
-            behandlingRepository,
-            fagsakRepository,
-            historikkTaskService,
-            behandlingskontrollService,
-            mockIntegrasjonerClient,
-            personService,
-        )
+        val vergeService =
+            VergeService(
+                behandlingRepository,
+                fagsakRepository,
+                historikkTaskService,
+                behandlingskontrollService,
+                mockIntegrasjonerClient,
+                personService,
+            )
 
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
 
@@ -164,14 +166,15 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         val mockPdlClient = mockk<PdlClient>()
         val mockEndretPersonIdentEventPublisher: EndretPersonIdentEventPublisher = mockk()
         val personService = PersonService(mockPdlClient, fagsakRepository, mockEndretPersonIdentEventPublisher)
-        val vergeService = VergeService(
-            behandlingRepository,
-            fagsakRepository,
-            historikkTaskService,
-            behandlingskontrollService,
-            integrasjonerClient,
-            personService,
-        )
+        val vergeService =
+            VergeService(
+                behandlingRepository,
+                fagsakRepository,
+                historikkTaskService,
+                behandlingskontrollService,
+                integrasjonerClient,
+                personService,
+            )
 
         every { mockPdlClient.hentPersoninfo(any(), any()) } throws Feil(message = "Feil ved oppslag på person")
 

@@ -21,7 +21,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var mottattXmlRepository: ØkonomiXmlMottattRepository
 
@@ -51,17 +50,19 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `utfør skal opprette tasker når det finnes noen kravgrunnlag som er gamle enn bestemte uker`() {
-        val førsteXml = Testdata.økonomiXmlMottatt.copy(
-            id = UUID.randomUUID(),
-            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
-        )
+        val førsteXml =
+            Testdata.økonomiXmlMottatt.copy(
+                id = UUID.randomUUID(),
+                sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
+            )
         mottattXmlRepository.insert(førsteXml)
 
-        val andreXml = Testdata.økonomiXmlMottatt.copy(
-            id = UUID.randomUUID(),
-            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
-            ytelsestype = Ytelsestype.SKOLEPENGER,
-        )
+        val andreXml =
+            Testdata.økonomiXmlMottatt.copy(
+                id = UUID.randomUUID(),
+                sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusWeeks(9)),
+                ytelsestype = Ytelsestype.SKOLEPENGER,
+            )
         mottattXmlRepository.insert(andreXml)
 
         val tredjeXml = Testdata.økonomiXmlMottatt

@@ -62,7 +62,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -97,10 +96,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val fagsak = Testdata.fagsak
     private val behandling = Testdata.behandling
     private val behandlingId = behandling.id
-    private val perioder = listOf(
-        Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-        Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
-    )
+    private val perioder =
+        listOf(
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+        )
     private lateinit var kravgrunnlag431: Kravgrunnlag431
 
     @BeforeEach
@@ -116,16 +116,17 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         wireMockServer.start()
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))
 
-        iverksettelseService = IverksettelseService(
-            behandlingRepository,
-            kravgrunnlagRepository,
-            økonomiXmlSendtRepository,
-            tilbakekrevingsvedtakBeregningService,
-            beregningService,
-            behandlingVedtakService,
-            oppdragClient,
-            mockFeatureToggleService,
-        )
+        iverksettelseService =
+            IverksettelseService(
+                behandlingRepository,
+                kravgrunnlagRepository,
+                økonomiXmlSendtRepository,
+                tilbakekrevingsvedtakBeregningService,
+                beregningService,
+                behandlingVedtakService,
+                oppdragClient,
+                mockFeatureToggleService,
+            )
     }
 
     @AfterEach
@@ -192,49 +193,54 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {
-        val feilPostering = lagKravgrunnlagsbeløp(
-            klassetype = Klassetype.FEIL,
-            klassekode = Klassekode.KL_KODE_FEIL_BA,
-            nyttBeløp = BigDecimal(5000),
-        )
-
-        val ytelPostering = lagKravgrunnlagsbeløp(
-            klassetype = Klassetype.YTEL,
-            klassekode = Klassekode.BATR,
-            utbetaltBeløp = BigDecimal(5000),
-            tilbakekrevesBeløp = BigDecimal(5000),
-        )
-
-        val kravgrunnlagsperioder = perioder.map {
-            Kravgrunnlagsperiode432(
-                periode = it,
-                månedligSkattebeløp = BigDecimal.ZERO,
-                beløp = setOf(
-                    feilPostering.copy(id = UUID.randomUUID()),
-                    ytelPostering.copy(id = UUID.randomUUID()),
-                ),
+        val feilPostering =
+            lagKravgrunnlagsbeløp(
+                klassetype = Klassetype.FEIL,
+                klassekode = Klassekode.KL_KODE_FEIL_BA,
+                nyttBeløp = BigDecimal(5000),
             )
-        }.toSet()
 
-        val kravgrunnlag = Kravgrunnlag431(
-            behandlingId = behandlingId,
-            vedtakId = BigInteger.ZERO,
-            kravstatuskode = Kravstatuskode.NYTT,
-            fagområdekode = Fagområdekode.BA,
-            fagsystemId = fagsak.eksternFagsakId,
-            gjelderVedtakId = "testverdi",
-            gjelderType = GjelderType.PERSON,
-            utbetalesTilId = "testverdi",
-            utbetIdType = GjelderType.PERSON,
-            ansvarligEnhet = "testverdi",
-            bostedsenhet = "testverdi",
-            behandlingsenhet = "testverdi",
-            kontrollfelt = "testverdi",
-            referanse = behandling.aktivFagsystemsbehandling.eksternId,
-            eksternKravgrunnlagId = BigInteger.ZERO,
-            saksbehandlerId = "testverdi",
-            perioder = kravgrunnlagsperioder,
-        )
+        val ytelPostering =
+            lagKravgrunnlagsbeløp(
+                klassetype = Klassetype.YTEL,
+                klassekode = Klassekode.BATR,
+                utbetaltBeløp = BigDecimal(5000),
+                tilbakekrevesBeløp = BigDecimal(5000),
+            )
+
+        val kravgrunnlagsperioder =
+            perioder.map {
+                Kravgrunnlagsperiode432(
+                    periode = it,
+                    månedligSkattebeløp = BigDecimal.ZERO,
+                    beløp =
+                        setOf(
+                            feilPostering.copy(id = UUID.randomUUID()),
+                            ytelPostering.copy(id = UUID.randomUUID()),
+                        ),
+                )
+            }.toSet()
+
+        val kravgrunnlag =
+            Kravgrunnlag431(
+                behandlingId = behandlingId,
+                vedtakId = BigInteger.ZERO,
+                kravstatuskode = Kravstatuskode.NYTT,
+                fagområdekode = Fagområdekode.BA,
+                fagsystemId = fagsak.eksternFagsakId,
+                gjelderVedtakId = "testverdi",
+                gjelderType = GjelderType.PERSON,
+                utbetalesTilId = "testverdi",
+                utbetIdType = GjelderType.PERSON,
+                ansvarligEnhet = "testverdi",
+                bostedsenhet = "testverdi",
+                behandlingsenhet = "testverdi",
+                kontrollfelt = "testverdi",
+                referanse = behandling.aktivFagsystemsbehandling.eksternId,
+                eksternKravgrunnlagId = BigInteger.ZERO,
+                saksbehandlerId = "testverdi",
+                perioder = kravgrunnlagsperioder,
+            )
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         return kravgrunnlag
@@ -258,26 +264,29 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagVilkårsvurdering() {
-        val vilkårsperioder = perioder.map {
-            VilkårsvurderingsperiodeDto(
-                periode = it.toDatoperiode(),
-                begrunnelse = "testverdi",
-                aktsomhetDto = AktsomhetDto(
-                    aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
+        val vilkårsperioder =
+            perioder.map {
+                VilkårsvurderingsperiodeDto(
+                    periode = it.toDatoperiode(),
                     begrunnelse = "testverdi",
-                    særligeGrunnerTilReduksjon = false,
-                    tilbakekrevSmåbeløp = true,
-                    særligeGrunnerBegrunnelse = "testverdi",
-                    særligeGrunner = listOf(
-                        SærligGrunnDto(
-                            særligGrunn = SærligGrunn.ANNET,
+                    aktsomhetDto =
+                        AktsomhetDto(
+                            aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                             begrunnelse = "testverdi",
+                            særligeGrunnerTilReduksjon = false,
+                            tilbakekrevSmåbeløp = true,
+                            særligeGrunnerBegrunnelse = "testverdi",
+                            særligeGrunner =
+                                listOf(
+                                    SærligGrunnDto(
+                                        særligGrunn = SærligGrunn.ANNET,
+                                        begrunnelse = "testverdi",
+                                    ),
+                                ),
                         ),
-                    ),
-                ),
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-            )
-        }
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                )
+            }
         vilkårsvurderingService.lagreVilkårsvurdering(behandling.id, BehandlingsstegVilkårsvurderingDto(vilkårsperioder))
     }
 
@@ -294,7 +303,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         return respons
     }
 
-    private fun lagMmmelDto(alvorlighetsgrad: String, kodeMelding: String): MmelDto {
+    private fun lagMmmelDto(
+        alvorlighetsgrad: String,
+        kodeMelding: String,
+    ): MmelDto {
         val mmelDto = MmelDto()
         mmelDto.alvorlighetsgrad = alvorlighetsgrad
         mmelDto.kodeMelding = kodeMelding
@@ -312,7 +324,11 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         mmelDto.kodeMelding shouldBe kodeMelding
     }
 
-    private fun assertRequestXml(melding: String, behandlingId: UUID, xmlId: UUID) {
+    private fun assertRequestXml(
+        melding: String,
+        behandlingId: UUID,
+        xmlId: UUID,
+    ) {
         val request = TilbakekrevingsvedtakMarshaller.unmarshall(melding, behandlingId, xmlId)
         request.shouldNotBeNull()
 

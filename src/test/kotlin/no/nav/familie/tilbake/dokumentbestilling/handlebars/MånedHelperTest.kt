@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class MånedHelperTest {
-
     @Test
     fun `apply returnerer alle måneder på korrekt format`() {
         val januar = MånedHelper().apply(YearMonth.of(2022, 1), null)

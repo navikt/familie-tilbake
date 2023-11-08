@@ -63,7 +63,6 @@ data class Kravgrunnlagsperiode432(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     fun harIdentiskKravgrunnlagsperiode(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -98,7 +97,6 @@ data class Kravgrunnlagsbeløp433(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -154,9 +152,12 @@ enum class Klassekode(val aktivitet: String) {
     KS("Kontantstøtte"),
     TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
     ;
-    companion object {
 
-        fun fraKode(kode: String, klassetype: Klassetype): Klassekode {
+    companion object {
+        fun fraKode(
+            kode: String,
+            klassetype: Klassetype,
+        ): Klassekode {
             if (klassetype == Klassetype.TREK) return TREK_KODER
             return values().firstOrNull { it.name == kode }
                 ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
@@ -173,7 +174,6 @@ enum class Klassetype(val navn: String) {
     ;
 
     companion object {
-
         fun fraKode(kode: String): Klassetype {
             return values().firstOrNull { it.name == kode }
                 ?: throw IllegalArgumentException("Ukjent Klassetype $kode")

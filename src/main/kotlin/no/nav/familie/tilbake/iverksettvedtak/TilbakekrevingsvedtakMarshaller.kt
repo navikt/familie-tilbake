@@ -11,10 +11,12 @@ import java.io.StringWriter
 import java.util.UUID
 
 object TilbakekrevingsvedtakMarshaller {
-
     private val context = JAXBContext.newInstance(TilbakekrevingsvedtakRequest::class.java)
 
-    fun marshall(behandlingId: UUID, request: TilbakekrevingsvedtakRequest): String {
+    fun marshall(
+        behandlingId: UUID,
+        request: TilbakekrevingsvedtakRequest,
+    ): String {
         return try {
             val marshaller = context.createMarshaller()
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false)
@@ -27,7 +29,11 @@ object TilbakekrevingsvedtakMarshaller {
         }
     }
 
-    fun unmarshall(xml: String, behandlingId: UUID, xmlId: UUID): TilbakekrevingsvedtakRequest {
+    fun unmarshall(
+        xml: String,
+        behandlingId: UUID,
+        xmlId: UUID,
+    ): TilbakekrevingsvedtakRequest {
         return try {
             val unmarshaller: Unmarshaller = context.createUnmarshaller()
 

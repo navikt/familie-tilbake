@@ -8,8 +8,10 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Vedtaksbrevsperio
 import java.util.UUID
 
 object VedtaksbrevFritekstMapper {
-
-    fun tilDomene(behandlingId: UUID, oppsummeringstekst: String?): Vedtaksbrevsoppsummering {
+    fun tilDomene(
+        behandlingId: UUID,
+        oppsummeringstekst: String?,
+    ): Vedtaksbrevsoppsummering {
         return Vedtaksbrevsoppsummering(
             behandlingId = behandlingId,
             oppsummeringFritekst = oppsummeringstekst,
@@ -55,7 +57,10 @@ object VedtaksbrevFritekstMapper {
         }
     }
 
-    private fun lagFaktaAvsnitt(behandlingId: UUID, faktaAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
+    private fun lagFaktaAvsnitt(
+        behandlingId: UUID,
+        faktaAvsnittMedPeriode: PeriodeMedTekstDto,
+    ): Vedtaksbrevsperiode? {
         return faktaAvsnittMedPeriode.faktaAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
@@ -66,7 +71,10 @@ object VedtaksbrevFritekstMapper {
         }
     }
 
-    private fun lagForeldelseAvsnitt(behandlingId: UUID, foreldelsesAvsnittMedPeriode: PeriodeMedTekstDto): Vedtaksbrevsperiode? {
+    private fun lagForeldelseAvsnitt(
+        behandlingId: UUID,
+        foreldelsesAvsnittMedPeriode: PeriodeMedTekstDto,
+    ): Vedtaksbrevsperiode? {
         return foreldelsesAvsnittMedPeriode.foreldelseAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,

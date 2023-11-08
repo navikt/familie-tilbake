@@ -31,7 +31,6 @@ enum class Behandlingssteg(
     val behandlingsstatus: Behandlingsstatus,
     private val beskrivelse: String,
 ) {
-
     VARSEL(1, false, false, Behandlingsstatus.UTREDES, "Vurdere om varsel om tilbakekreving skal sendes til søker"),
     GRUNNLAG(2, false, false, Behandlingsstatus.UTREDES, "Mottat kravgrunnlag fra økonomi for tilbakekrevingsrevurdering"),
     BREVMOTTAKER(3, true, false, Behandlingsstatus.UTREDES, "Registrere brevmottakere manuelt. Erstatter Verge-steget"),
@@ -54,7 +53,6 @@ enum class Behandlingssteg(
     ;
 
     companion object {
-
         fun finnNesteBehandlingssteg(
             behandlingssteg: Behandlingssteg,
             harVerge: Boolean,
@@ -68,7 +66,10 @@ enum class Behandlingssteg(
             return nesteBehandlingssteg
         }
 
-        fun fraSekvens(sekvens: Int, brevmottakerErstatterVerge: Boolean = false): Behandlingssteg {
+        fun fraSekvens(
+            sekvens: Int,
+            brevmottakerErstatterVerge: Boolean = false,
+        ): Behandlingssteg {
             for (behandlingssteg in values()) {
                 if (sekvens == behandlingssteg.sekvens) {
                     return when (behandlingssteg) {
@@ -97,7 +98,6 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
     ;
 
     companion object {
-
         val aktiveStegStatuser = listOf(VENTER, KLAR)
         private val utførteStegStatuser = listOf(UTFØRT, AUTOUTFØRT)
 
@@ -112,7 +112,6 @@ enum class Behandlingsstegstatus(private val beskrivelse: String) {
 }
 
 enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) {
-
     VENT_PÅ_BRUKERTILBAKEMELDING(3, "Venter på tilbakemelding fra bruker"),
     VENT_PÅ_TILBAKEKREVINGSGRUNNLAG(4, "Venter på kravgrunnlag fra økonomi"),
     AVVENTER_DOKUMENTASJON(0, "Avventer dokumentasjon"),
@@ -122,7 +121,6 @@ enum class Venteårsak(val defaultVenteTidIUker: Long, val beskrivelse: String) 
     ;
 
     companion object {
-
         fun venterPåBruker(venteårsak: Venteårsak?): Boolean {
             return venteårsak in listOf(VENT_PÅ_BRUKERTILBAKEMELDING, UTVIDET_TILSVAR_FRIST, AVVENTER_DOKUMENTASJON)
         }

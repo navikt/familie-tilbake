@@ -46,7 +46,6 @@ import java.math.BigInteger
 import java.time.LocalDate
 
 internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -111,12 +110,13 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            forvaltningService.korrigerKravgrunnlag(
-                behandling.id,
-                BigInteger.ZERO,
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                forvaltningService.korrigerKravgrunnlag(
+                    behandling.id,
+                    BigInteger.ZERO,
+                )
+            }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
@@ -171,9 +171,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            forvaltningService.tvingHenleggBehandling(behandling.id)
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                forvaltningService.tvingHenleggBehandling(behandling.id)
+            }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
@@ -222,9 +223,10 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                 .copy(status = Behandlingsstatus.AVSLUTTET),
         )
 
-        val exception = shouldThrow<RuntimeException> {
-            forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandling.id)
+            }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
     }
 
@@ -290,7 +292,8 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         taskService.findAll().shouldHaveSingleElement {
             it.type == LagHistorikkinnslagTask.TYPE &&
                 it.payload == behandling.id.toString() &&
-                it.metadata["historikkinnslagstype"] == TilbakekrevingHistorikkinnslagstype
+                it.metadata["historikkinnslagstype"] ==
+                TilbakekrevingHistorikkinnslagstype
                     .BEHANDLING_FLYTTET_MED_FORVALTNING.name &&
                 it.metadata["aktør"] == Aktør.VEDTAKSLØSNING.name
         }
@@ -322,8 +325,9 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.insert(
             kravgrunnlag.copy(
                 fagsystemId = fagsak.eksternFagsakId,
-                fagområdekode = Fagområdekode.values()
-                    .first { it.ytelsestype == fagsak.ytelsestype },
+                fagområdekode =
+                    Fagområdekode.values()
+                        .first { it.ytelsestype == fagsak.ytelsestype },
             ),
         )
         val forvaltningsinfo =
@@ -353,12 +357,13 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentForvaltningsinfo skal ikke hente forvaltningsinfo når behandling venter på kravgrunnlag`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        val exception = shouldThrow<RuntimeException> {
-            forvaltningService.hentForvaltningsinfo(
-                fagsak.ytelsestype,
-                fagsak.eksternFagsakId,
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                forvaltningService.hentForvaltningsinfo(
+                    fagsak.ytelsestype,
+                    fagsak.eksternFagsakId,
+                )
+            }
         exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
             "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }

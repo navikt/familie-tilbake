@@ -16,22 +16,30 @@ import java.nio.charset.StandardCharsets
 import java.util.Locale
 
 object FellesTekstformaterer {
-
     private val TEMPLATE_CACHE: MutableMap<String, Template> = HashMap()
 
     private val OM = ObjectMapperForUtvekslingAvDataMedHandlebars.INSTANCE
 
-    fun lagBrevtekst(data: Språkstøtte, filsti: String): String {
+    fun lagBrevtekst(
+        data: Språkstøtte,
+        filsti: String,
+    ): String {
         val template = getTemplate(data.språkkode, filsti)
         return applyTemplate(data, template)
     }
 
-    fun lagDeltekst(data: Språkstøtte, filsti: String): String {
+    fun lagDeltekst(
+        data: Språkstøtte,
+        filsti: String,
+    ): String {
         val template = getTemplateFraPartial(data.språkkode, filsti)
         return applyTemplate(data, template)
     }
 
-    private fun getTemplate(språkkode: Språkkode, filsti: String): Template {
+    private fun getTemplate(
+        språkkode: Språkkode,
+        filsti: String,
+    ): Template {
         val språkstøttetFilsti: String = lagSpråkstøttetFilsti(filsti, språkkode)
         if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
             return TEMPLATE_CACHE[språkstøttetFilsti]!!
@@ -41,15 +49,19 @@ object FellesTekstformaterer {
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
-    private fun getTemplateFraPartial(språkkode: Språkkode, partial: String): Template {
+    private fun getTemplateFraPartial(
+        språkkode: Språkkode,
+        partial: String,
+    ): Template {
         val språkstøttetFilsti: String = lagSpråkstøttetFilsti(partial, språkkode)
         if (TEMPLATE_CACHE.containsKey(språkstøttetFilsti)) {
             return TEMPLATE_CACHE[språkstøttetFilsti]!!
         }
-        TEMPLATE_CACHE[språkstøttetFilsti] = opprettTemplateFraPartials(
-            lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
-            språkstøttetFilsti,
-        )
+        TEMPLATE_CACHE[språkstøttetFilsti] =
+            opprettTemplateFraPartials(
+                lagSpråkstøttetFilsti("vedtak/vedtak_felles", språkkode),
+                språkstøttetFilsti,
+            )
         return TEMPLATE_CACHE[språkstøttetFilsti]!!
     }
 
@@ -66,16 +78,20 @@ object FellesTekstformaterer {
         }
     }
 
-    private fun applyTemplate(data: Any, template: Template): String {
+    private fun applyTemplate(
+        data: Any,
+        template: Template,
+    ): String {
         return try {
             // Går via JSON for å
             // 1. tilrettelegger for å flytte generering til PDF etc til ekstern applikasjon
             // 2. ha egen navngiving på variablene i template for enklere å lese template
             // 3. unngår at template feiler når variable endrer navn
             val jsonNode: JsonNode = OM.valueToTree(data)
-            val context = Context.newBuilder(jsonNode)
-                .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
-                .build()
+            val context =
+                Context.newBuilder(jsonNode)
+                    .resolver(JsonNodeValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, MapValueResolver.INSTANCE)
+                    .build()
             template.apply(context).trim()
         } catch (e: IOException) {
             throw IllegalStateException("Feil ved tekstgenerering.")
@@ -83,11 +99,12 @@ object FellesTekstformaterer {
     }
 
     private fun opprettHandlebarsKonfigurasjon(): Handlebars {
-        val loader = ClassPathTemplateLoader().apply {
-            charset = StandardCharsets.UTF_8
-            prefix = "/templates/"
-            suffix = ".hbs"
-        }
+        val loader =
+            ClassPathTemplateLoader().apply {
+                charset = StandardCharsets.UTF_8
+                prefix = "/templates/"
+                suffix = ".hbs"
+            }
 
         return Handlebars(loader).apply {
             charset = StandardCharsets.UTF_8
@@ -106,7 +123,10 @@ object FellesTekstformaterer {
         }
     }
 
-    private fun lagSpråkstøttetFilsti(filsti: String, språkkode: Språkkode): String {
+    private fun lagSpråkstøttetFilsti(
+        filsti: String,
+        språkkode: Språkkode,
+    ): String {
         return String.format("%s/%s", språkkode.name.lowercase(Locale.getDefault()), filsti)
     }
 }

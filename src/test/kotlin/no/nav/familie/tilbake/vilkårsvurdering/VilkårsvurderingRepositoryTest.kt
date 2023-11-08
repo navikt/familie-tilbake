@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 

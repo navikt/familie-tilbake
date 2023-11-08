@@ -23,16 +23,16 @@ import javax.xml.XMLConstants
 import javax.xml.validation.SchemaFactory
 
 object KravgrunnlagUtil {
-
     private val jaxbContext: JAXBContext = JAXBContext.newInstance(DetaljertKravgrunnlagMelding::class.java)
     private val statusmeldingJaxbContext: JAXBContext = JAXBContext.newInstance(EndringKravOgVedtakstatus::class.java)
 
     fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Månedsperiode, BigDecimal> {
         val feilutbetalingPrPeriode = mutableMapOf<Månedsperiode, BigDecimal>()
         for (kravgrunnlagPeriode432 in kravgrunnlag.perioder) {
-            val feilutbetaltBeløp = kravgrunnlagPeriode432.beløp
-                .filter { Klassetype.FEIL == it.klassetype }
-                .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
+            val feilutbetaltBeløp =
+                kravgrunnlagPeriode432.beløp
+                    .filter { Klassetype.FEIL == it.klassetype }
+                    .sumOf(Kravgrunnlagsbeløp433::nyttBeløp)
             if (feilutbetaltBeløp.compareTo(BigDecimal.ZERO) != 0) {
                 feilutbetalingPrPeriode[kravgrunnlagPeriode432.periode] = feilutbetaltBeløp
             }
@@ -77,21 +77,25 @@ object KravgrunnlagUtil {
             ?: throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
     }
 
-    fun sammenlignKravgrunnlag(mottattKravgrunnlag: DetaljertKravgrunnlagDto, hentetKravgrunnlag: DetaljertKravgrunnlagDto): String {
-        val builder = DiffBuilder(mottattKravgrunnlag, hentetKravgrunnlag, ToStringStyle.JSON_STYLE)
-            .append("kravgrunnlagId", mottattKravgrunnlag.kravgrunnlagId, hentetKravgrunnlag.kravgrunnlagId)
-            .append("vedtakId", mottattKravgrunnlag.vedtakId, hentetKravgrunnlag.vedtakId)
-            .append("kodeStatusKrav", mottattKravgrunnlag.kodeStatusKrav, hentetKravgrunnlag.kodeStatusKrav)
-            .append("kodeFagomraade", mottattKravgrunnlag.kodeFagomraade, hentetKravgrunnlag.kodeFagomraade)
-            .append("fagsystemId", mottattKravgrunnlag.fagsystemId, hentetKravgrunnlag.fagsystemId)
-            .append("datoVedtakFagsystem", mottattKravgrunnlag.datoVedtakFagsystem, hentetKravgrunnlag.datoVedtakFagsystem)
-            .append("vedtakIdOmgjort", mottattKravgrunnlag.vedtakIdOmgjort, hentetKravgrunnlag.vedtakIdOmgjort)
-            .append("vedtakGjelderId", mottattKravgrunnlag.vedtakGjelderId, hentetKravgrunnlag.vedtakGjelderId)
-            .append("typeGjelderId", mottattKravgrunnlag.typeGjelderId, hentetKravgrunnlag.typeGjelderId)
-            .append("utbetalesTilId", mottattKravgrunnlag.utbetalesTilId, hentetKravgrunnlag.utbetalesTilId)
-            .append("typeUtbetId", mottattKravgrunnlag.typeUtbetId, hentetKravgrunnlag.typeUtbetId)
-            .append("kontrollfelt", mottattKravgrunnlag.kontrollfelt, hentetKravgrunnlag.kontrollfelt)
-            .append("referanse", mottattKravgrunnlag.referanse, hentetKravgrunnlag.referanse)
+    fun sammenlignKravgrunnlag(
+        mottattKravgrunnlag: DetaljertKravgrunnlagDto,
+        hentetKravgrunnlag: DetaljertKravgrunnlagDto,
+    ): String {
+        val builder =
+            DiffBuilder(mottattKravgrunnlag, hentetKravgrunnlag, ToStringStyle.JSON_STYLE)
+                .append("kravgrunnlagId", mottattKravgrunnlag.kravgrunnlagId, hentetKravgrunnlag.kravgrunnlagId)
+                .append("vedtakId", mottattKravgrunnlag.vedtakId, hentetKravgrunnlag.vedtakId)
+                .append("kodeStatusKrav", mottattKravgrunnlag.kodeStatusKrav, hentetKravgrunnlag.kodeStatusKrav)
+                .append("kodeFagomraade", mottattKravgrunnlag.kodeFagomraade, hentetKravgrunnlag.kodeFagomraade)
+                .append("fagsystemId", mottattKravgrunnlag.fagsystemId, hentetKravgrunnlag.fagsystemId)
+                .append("datoVedtakFagsystem", mottattKravgrunnlag.datoVedtakFagsystem, hentetKravgrunnlag.datoVedtakFagsystem)
+                .append("vedtakIdOmgjort", mottattKravgrunnlag.vedtakIdOmgjort, hentetKravgrunnlag.vedtakIdOmgjort)
+                .append("vedtakGjelderId", mottattKravgrunnlag.vedtakGjelderId, hentetKravgrunnlag.vedtakGjelderId)
+                .append("typeGjelderId", mottattKravgrunnlag.typeGjelderId, hentetKravgrunnlag.typeGjelderId)
+                .append("utbetalesTilId", mottattKravgrunnlag.utbetalesTilId, hentetKravgrunnlag.utbetalesTilId)
+                .append("typeUtbetId", mottattKravgrunnlag.typeUtbetId, hentetKravgrunnlag.typeUtbetId)
+                .append("kontrollfelt", mottattKravgrunnlag.kontrollfelt, hentetKravgrunnlag.kontrollfelt)
+                .append("referanse", mottattKravgrunnlag.referanse, hentetKravgrunnlag.referanse)
 
         val mottattPerioder = mottattKravgrunnlag.tilbakekrevingsPeriode.sortedBy { it.periode.fom }
         val hentetPerioder = hentetKravgrunnlag.tilbakekrevingsPeriode.sortedBy { it.periode.fom }
@@ -107,8 +111,9 @@ object KravgrunnlagUtil {
             builder.append("periode", periode, konvertPeriode(it.second))
                 .append("belopSkattMnd", it.first.belopSkattMnd, it.second.belopSkattMnd)
 
-            val beløper = it.first.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse }
-                .zip(it.second.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse })
+            val beløper =
+                it.first.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse }
+                    .zip(it.second.tilbakekrevingsBelop.sortedBy { beløp -> beløp.typeKlasse })
 
             beløper.forEach { beløp ->
                 builder.append("kodeKlasse", beløp.first.kodeKlasse, beløp.second.kodeKlasse)
