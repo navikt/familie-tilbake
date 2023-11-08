@@ -34,7 +34,7 @@ class OppdaterOppgaveTask(
         val frist = task.metadata.getProperty("frist")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
         val saksbehandler =
-            task.metadata.getProperty("saksbehandler").takeIf { saksbehandler ->
+            task.metadata.getProperty("saksbehandler")?.takeIf { saksbehandler ->
                 saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             }
         val behandlingId = UUID.fromString(task.payload)
