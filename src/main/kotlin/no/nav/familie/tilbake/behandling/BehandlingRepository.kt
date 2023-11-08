@@ -51,19 +51,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     @Query(
         """
-            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
-             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
-            AND beh.ekstern_bruk_id=:eksternBrukId
-    """,
-    )
-    fun findByYtelsestypeAndEksternFagsakIdAndEksternBrukId(
-        ytelsestype: Ytelsestype,
-        eksternFagsakId: String,
-        eksternBrukId: UUID,
-    ): Behandling?
-
-    @Query(
-        """
             SELECT b.id
             FROM behandling b JOIN fagsak f ON b.fagsak_id = f.id
             WHERE b.status != 'AVSLUTTET'
@@ -72,8 +59,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """,
     )
     fun finnÅpneBehandlingerOpprettetFør(fagsystem: Fagsystem, opprettetFørDato: LocalDateTime): List<UUID>?
-
-    fun findByEksternBrukId(eksternBrukId: UUID): Behandling
 
     // language=PostgreSQL
 
