@@ -173,9 +173,8 @@ class ForvaltningController(
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
-        "Henter forvaltningsinformasjon",
+        "Sjekk åpne behandlinger uten oppgave",
         AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     )
     fun finnGamleÅpneBehandlingerUtenOppgave(
         @PathVariable fagsystem: Fagsystem,
