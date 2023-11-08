@@ -38,7 +38,7 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvaltningController::class.java)
 
@@ -104,7 +104,7 @@ class ForvaltningController(
         Behandlerrolle.FORVALTER,
         "Tving henlegger behandling",
         AuditLoggerEvent.NONE,
-        HenteParam.BEHANDLING_ID
+        HenteParam.BEHANDLING_ID,
     )
     fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
         forvaltningService.tvingHenleggBehandling(behandlingId)
@@ -173,12 +173,12 @@ class ForvaltningController(
         HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     )
     fun finnGamleÅpneBehandlingerUtenOppgave(
-        @PathVariable fagsystem: Fagsystem
+        @PathVariable fagsystem: Fagsystem,
     ) {
         val gamleBehandlinger: List<UUID> =
             behandlingRepository.finnÅpneBehandlingerOpprettetFør(
                 fagsystem = fagsystem,
-                opprettetFørDato = LocalDateTime.now().minusMonths(2)
+                opprettetFørDato = LocalDateTime.now().minusMonths(2),
             ) ?: emptyList()
 
         logger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
