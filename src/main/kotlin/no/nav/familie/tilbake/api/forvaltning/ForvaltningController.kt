@@ -171,11 +171,6 @@ class ForvaltningController(
         path = ["/hentBehandlingerUtenOppgave/fagsystem/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Sjekk åpne behandlinger uten oppgave",
-        AuditLoggerEvent.NONE,
-    )
     fun finnGamleÅpneBehandlingerUtenOppgave(
         @PathVariable fagsystem: Fagsystem,
     ) {
