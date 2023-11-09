@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
@@ -204,17 +205,19 @@ class ForvaltningController(
 
     @Operation(summary = "Lag oppdaterOppgaveTask for behandling")
     @PostMapping(
-        path = ["/lagOppdaterOppgaveTask/behandlingId7{behandlingId}"],
+        path = ["/lagOppdaterOppgaveTask"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun lagOppdaterOppgaveTaskForBehandling(
-        @PathVariable behandlingId: UUID
+        @RequestBody behandlingIder: List<UUID>
     ) {
-        oppgaveTaskService.oppdaterOppgaveTask(
-            behandlingId = behandlingId,
-            beskrivelse = "Gjenopprettet oppgave",
-            frist = LocalDate.now(),
-        )
+        behandlingIder.forEach { behandlingID ->
+            oppgaveTaskService.oppdaterOppgaveTask(
+                behandlingId = behandlingID,
+                beskrivelse = "Gjenopprettet oppgave",
+                frist = LocalDate.now(),
+            )
+        }
     }
 }
 
