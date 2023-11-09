@@ -3,13 +3,14 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
+import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
-import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -37,7 +38,7 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
-    private val oppgaveService: OppgaveService,
+    private val integrasjonerClient: IntegrasjonerClient,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -183,13 +184,17 @@ class ForvaltningController(
         secureLogger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
 
         gamleBehandlinger.forEach {
-            try {
-                oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(it)
-            } catch (e: Exception) {
-                val behandling = behandlingRepository.findByIdOrThrow(it)
-                val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+            val behandling = behandlingRepository.findByIdOrThrow(it)
+            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Kastet feil: ${e.message}")
+            val finnOppgaveRequest =
+                FinnOppgaveRequest(
+                    saksreferanse = behandling.eksternBrukId.toString(),
+                    tema = fagsak.ytelsestype.tilTema(),
+                )
+            val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
+            if (finnOppgaveResponse.antallTreffTotalt == 0L) {
+                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}")
             }
         }
     }
