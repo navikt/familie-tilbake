@@ -197,15 +197,24 @@ class ForvaltningController(
                 )
             val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
             if (finnOppgaveResponse.antallTreffTotalt == 0L) {
-                oppgaveTaskService.oppdaterOppgaveTask(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Gjenopprettet oppgave",
-                    frist = LocalDate.now(),
-                )
-
                 secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
             }
         }
+    }
+
+    @Operation(summary = "Lag oppdaterOppgaveTask for behandling")
+    @PostMapping(
+        path = ["/lagOppdaterOppgaveTask/behandlingId7{behandlingId}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun lagOppdaterOppgaveTaskForBehandling(
+        @PathVariable behandlingId: UUID
+    ) {
+        oppgaveTaskService.oppdaterOppgaveTask(
+            behandlingId = behandlingId,
+            beskrivelse = "Gjenopprettet oppgave",
+            frist = LocalDate.now(),
+        )
     }
 }
 
