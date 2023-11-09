@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
+import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -39,6 +41,7 @@ class ForvaltningController(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val integrasjonerClient: IntegrasjonerClient,
+    private val oppgaveTaskService: OppgaveTaskService
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -194,7 +197,13 @@ class ForvaltningController(
                 )
             val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
             if (finnOppgaveResponse.antallTreffTotalt == 0L) {
-                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}")
+                oppgaveTaskService.oppdaterOppgaveTask(
+                    behandlingId = behandling.id,
+                    beskrivelse = "Gjenopprettet oppgave",
+                    frist = LocalDate.now(),
+                )
+
+                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
             }
         }
     }
