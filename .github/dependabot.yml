@@ -4,12 +4,12 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/familie-kontrakter
     username: x-access-token
-    password: "${{secrets.NAV_PACKAGES_PAT}}"
+    password: "${{secrets.READER_TOKEN}}"
   familie-felles:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/familie-felles
     username: x-access-token
-    password: "${{secrets.NAV_PACKAGES_PAT}}"
+    password: "${{secrets.READER_TOKEN}}"
 
 
 updates:
