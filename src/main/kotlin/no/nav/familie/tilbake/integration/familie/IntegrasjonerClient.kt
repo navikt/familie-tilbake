@@ -40,59 +40,73 @@ class IntegrasjonerClient(
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-
     override val pingUri: URI =
         UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri).path(IntegrasjonerConfig.PATH_PING).build().toUri()
 
-    private val arkiverUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
-        .build()
-        .toUri()
+    private val arkiverUri: URI =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_ARKIVER)
+            .build()
+            .toUri()
 
-    private val distribuerUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_DISTRIBUER)
-        .build()
-        .toUri()
+    private val distribuerUri: URI =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_DISTRIBUER)
+            .build()
+            .toUri()
 
-    private val sftpUri: URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_SFTP)
-        .build()
-        .toUri()
+    private val sftpUri: URI =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_SFTP)
+            .build()
+            .toUri()
 
-    private val tilgangssjekkUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
-        .build()
-        .toUri()
+    private val tilgangssjekkUri =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_TILGANGSSJEKK)
+            .build()
+            .toUri()
 
-    private fun hentSaksbehandlerUri(id: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
-        .build()
-        .toUri()
+    private fun hentSaksbehandlerUri(id: String) =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_SAKSBEHANDLER, id)
+            .build()
+            .toUri()
 
-    private val opprettOppgaveUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
-        .build()
-        .toUri()
+    private val opprettOppgaveUri =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "opprett")
+            .build()
+            .toUri()
 
-    private fun patchOppgaveUri(oppgave: Oppgave) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
-        .build()
-        .toUri()
-    private fun tilordneOppgaveNyEnhetUri(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
-        .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
-        .build()
-        .toUri()
+    private fun patchOppgaveUri(oppgave: Oppgave) =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
+            .build()
+            .toUri()
 
-    private val finnoppgaverUri = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "v4")
-        .build()
-        .toUri()
+    private fun tilordneOppgaveNyEnhetUri(
+        oppgaveId: Long,
+        nyEnhet: String,
+        fjernMappeFraOppgave: Boolean,
+    ) =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
+            .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
+            .build()
+            .toUri()
 
-    private fun ferdigstillOppgaveUri(oppgaveId: Long) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
-        .build()
-        .toUri()
+    private val finnoppgaverUri =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "v4")
+            .build()
+            .toUri()
+
+    private fun ferdigstillOppgaveUri(oppgaveId: Long) =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
+            .build()
+            .toUri()
 
     private fun hentOrganisasjonUri(organisasjonsnummer: String) =
         UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
@@ -106,26 +120,32 @@ class IntegrasjonerClient(
             .build()
             .toUri()
 
-    private fun hentJournalpostUri() = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
-        .build()
-        .toUri()
+    private fun hentJournalpostUri() =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_JOURNALPOST)
+            .build()
+            .toUri()
 
-    private fun hentJournalpostHentDokumentUri(journalpostId: String, dokumentInfoId: String) =
+    private fun hentJournalpostHentDokumentUri(
+        journalpostId: String,
+        dokumentInfoId: String,
+    ) =
         UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
             .pathSegment(IntegrasjonerConfig.PATH_HENTDOKUMENT, journalpostId, dokumentInfoId)
             .build()
             .toUri()
 
-    private fun hentNavkontorUri(enhetsId: String) = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
-        .build()
-        .toUri()
+    private fun hentNavkontorUri(enhetsId: String) =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_NAVKONTOR, enhetsId)
+            .build()
+            .toUri()
 
-    private fun finnMapperUri(enhetNr: String): URI = UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
-        .build()
-        .toUri()
+    private fun finnMapperUri(enhetNr: String): URI =
+        UriComponentsBuilder.fromUri(integrasjonerConfig.integrasjonUri)
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, "mappe", "finn", enhetNr)
+            .build()
+            .toUri()
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val response = postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
@@ -143,18 +163,22 @@ class IntegrasjonerClient(
         distribusjonstidspunkt: Distribusjonstidspunkt,
         manuellAdresse: ManuellAdresse? = null,
     ): String {
-        val request = DistribuerJournalpostRequest(
-            journalpostId,
-            fagsystem,
-            integrasjonerConfig.applicationName,
-            distribusjonstype,
-            distribusjonstidspunkt,
-            manuellAdresse,
-        )
+        val request =
+            DistribuerJournalpostRequest(
+                journalpostId,
+                fagsystem,
+                integrasjonerConfig.applicationName,
+                distribusjonstype,
+                distribusjonstidspunkt,
+                manuellAdresse,
+            )
         return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
     }
 
-    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+    fun hentDokument(
+        dokumentInfoId: String,
+        journalpostId: String,
+    ): ByteArray {
         return getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
     }
 
@@ -184,7 +208,11 @@ class IntegrasjonerClient(
         return patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave).getDataOrThrow()
     }
 
-    internal fun tilordneOppgaveNyEnhet(oppgaveId: Long, nyEnhet: String, fjernMappeFraOppgave: Boolean): OppgaveResponse {
+    internal fun tilordneOppgaveNyEnhet(
+        oppgaveId: Long,
+        nyEnhet: String,
+        fjernMappeFraOppgave: Boolean,
+    ): OppgaveResponse {
         val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave)
         return patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
     }

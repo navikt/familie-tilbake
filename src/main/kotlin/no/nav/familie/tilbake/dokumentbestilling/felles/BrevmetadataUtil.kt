@@ -47,16 +47,18 @@ class BrevmetadataUtil(
 
         val aktivVerge = vedtaksbrevgrunnlag?.aktivVerge ?: behandling.aktivVerge
 
-        val personinfo = eksterneDataForBrevService.hentPerson(
-            ident = vedtaksbrevgrunnlag?.bruker?.ident ?: fagsak.bruker.ident,
-            fagsystem = fagsystem,
-        )
-        val adresseinfo = manuellAdresseinfo ?: eksterneDataForBrevService.hentAdresse(
-            personinfo = personinfo,
-            brevmottager = brevmottager,
-            verge = aktivVerge,
-            fagsystem = fagsystem,
-        )
+        val personinfo =
+            eksterneDataForBrevService.hentPerson(
+                ident = vedtaksbrevgrunnlag?.bruker?.ident ?: fagsak.bruker.ident,
+                fagsystem = fagsystem,
+            )
+        val adresseinfo =
+            manuellAdresseinfo ?: eksterneDataForBrevService.hentAdresse(
+                personinfo = personinfo,
+                brevmottager = brevmottager,
+                verge = aktivVerge,
+                fagsystem = fagsystem,
+            )
         val vergenavn = BrevmottagerUtil.getVergenavn(aktivVerge, adresseinfo)
 
         val gjelderDødsfall = personinfo.dødsdato != null
@@ -64,25 +66,27 @@ class BrevmetadataUtil(
         val persistertSaksbehandlerId =
             vedtaksbrevgrunnlag?.behandling?.ansvarligSaksbehandler ?: behandling.ansvarligSaksbehandler
 
-        val brevmetadata = Brevmetadata(
-            sakspartId = personinfo.ident,
-            sakspartsnavn = personinfo.navn,
-            finnesVerge = aktivVerge != null,
-            vergenavn = vergenavn,
-            finnesAnnenMottaker = annenMottakersNavn != null || aktivVerge != null,
-            annenMottakersNavn = annenMottakersNavn,
-            mottageradresse = adresseinfo,
-            behandlendeEnhetId = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhet ?: behandling.behandlendeEnhet,
-            behandlendeEnhetsNavn = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhetsNavn ?: behandling.behandlendeEnhetsNavn,
-            ansvarligSaksbehandler = hentAnsvarligSaksbehandlerNavn(persistertSaksbehandlerId, vedtaksbrevgrunnlag),
-            saksnummer = vedtaksbrevgrunnlag?.eksternFagsakId ?: fagsak.eksternFagsakId,
-            språkkode = vedtaksbrevgrunnlag?.bruker?.språkkode ?: fagsak.bruker.språkkode,
-            ytelsestype = vedtaksbrevgrunnlag?.ytelsestype ?: fagsak.ytelsestype,
-            gjelderDødsfall = gjelderDødsfall,
-            institusjon = (vedtaksbrevgrunnlag?.institusjon ?: fagsak.institusjon)?.let {
-                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            },
-        )
+        val brevmetadata =
+            Brevmetadata(
+                sakspartId = personinfo.ident,
+                sakspartsnavn = personinfo.navn,
+                finnesVerge = aktivVerge != null,
+                vergenavn = vergenavn,
+                finnesAnnenMottaker = annenMottakersNavn != null || aktivVerge != null,
+                annenMottakersNavn = annenMottakersNavn,
+                mottageradresse = adresseinfo,
+                behandlendeEnhetId = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhet ?: behandling.behandlendeEnhet,
+                behandlendeEnhetsNavn = vedtaksbrevgrunnlag?.behandling?.behandlendeEnhetsNavn ?: behandling.behandlendeEnhetsNavn,
+                ansvarligSaksbehandler = hentAnsvarligSaksbehandlerNavn(persistertSaksbehandlerId, vedtaksbrevgrunnlag),
+                saksnummer = vedtaksbrevgrunnlag?.eksternFagsakId ?: fagsak.eksternFagsakId,
+                språkkode = vedtaksbrevgrunnlag?.bruker?.språkkode ?: fagsak.bruker.språkkode,
+                ytelsestype = vedtaksbrevgrunnlag?.ytelsestype ?: fagsak.ytelsestype,
+                gjelderDødsfall = gjelderDødsfall,
+                institusjon =
+                    (vedtaksbrevgrunnlag?.institusjon ?: fagsak.institusjon)?.let {
+                        organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+                    },
+            )
         return brevmetadata
     }
 
@@ -102,29 +106,34 @@ class BrevmetadataUtil(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
 
-        val støtterManuelleBrevmottakere = BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
-            behandling = behandling,
-            fagsak = fagsak,
-        )
-        val (bruker, tilleggsmottaker) = DistribusjonshåndteringService.utledMottakere(
-            behandling = behandling,
-            fagsak = fagsak,
-            erManuelleMottakereStøttet = støtterManuelleBrevmottakere,
-            manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet(),
-        )
-        val (brevmottager, manuellAdresseinfo) = when (tilleggsmottaker) {
-            null -> bruker.somBrevmottager to bruker.manuellAdresse
-            else -> tilleggsmottaker.somBrevmottager to tilleggsmottaker.manuellAdresse
-        }
-        val metadata = genererMetadataForBrev(
-            behandlingId = behandling.id,
-            vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
-            brevmottager = brevmottager,
-            manuellAdresseinfo = manuellAdresseinfo,
-            annenMottakersNavn = tilleggsmottaker?.let {
-                eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
-            },
-        )
+        val støtterManuelleBrevmottakere =
+            BehandlingService.sjekkOmManuelleBrevmottakereErStøttet(
+                behandling = behandling,
+                fagsak = fagsak,
+            )
+        val (bruker, tilleggsmottaker) =
+            DistribusjonshåndteringService.utledMottakere(
+                behandling = behandling,
+                fagsak = fagsak,
+                erManuelleMottakereStøttet = støtterManuelleBrevmottakere,
+                manueltRegistrerteMottakere = manuelleBrevmottakerRepository.findByBehandlingId(behandling.id).toSet(),
+            )
+        val (brevmottager, manuellAdresseinfo) =
+            when (tilleggsmottaker) {
+                null -> bruker.somBrevmottager to bruker.manuellAdresse
+                else -> tilleggsmottaker.somBrevmottager to tilleggsmottaker.manuellAdresse
+            }
+        val metadata =
+            genererMetadataForBrev(
+                behandlingId = behandling.id,
+                vedtaksbrevgrunnlag = vedtaksbrevgrunnlag,
+                brevmottager = brevmottager,
+                manuellAdresseinfo = manuellAdresseinfo,
+                annenMottakersNavn =
+                    tilleggsmottaker?.let {
+                        eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, fagsak.fagsystem).navn
+                    },
+            )
         return metadata to brevmottager
     }
 
@@ -148,9 +157,10 @@ class BrevmetadataUtil(
 }
 
 private val Brevmottager.MANUELL
-    get() = when (this) {
-        Brevmottager.MANUELL_BRUKER,
-        Brevmottager.MANUELL_TILLEGGSMOTTAKER,
-        -> this
-        else -> null
-    }
+    get() =
+        when (this) {
+            Brevmottager.MANUELL_BRUKER,
+            Brevmottager.MANUELL_TILLEGGSMOTTAKER,
+            -> this
+            else -> null
+        }

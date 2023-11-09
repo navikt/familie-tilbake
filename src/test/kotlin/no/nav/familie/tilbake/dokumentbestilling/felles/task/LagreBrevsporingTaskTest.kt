@@ -27,7 +27,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -204,21 +203,23 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
         return Task(
             type = LagreBrevsporingTask.TYPE,
             payload = behandlingId.toString(),
-            properties = Properties().apply {
-                this["dokumentId"] = dokumentId
-                this["journalpostId"] = journalpostId
-                this["brevtype"] = brevtype.name
-                this["mottager"] = brevmottager.name
-                this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
-            },
+            properties =
+                Properties().apply {
+                    this["dokumentId"] = dokumentId
+                    this["journalpostId"] = journalpostId
+                    this["brevtype"] = brevtype.name
+                    this["mottager"] = brevmottager.name
+                    this["ansvarligSaksbehandler"] = ansvarligSaksbehandler
+                },
         )
     }
 
     private fun assertBrevsporing(brevtype: Brevtype) {
-        val brevsporing = brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
-            behandlingId,
-            brevtype,
-        )
+        val brevsporing =
+            brevsporingRepository.findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
+                behandlingId,
+                brevtype,
+            )
         brevsporing.shouldNotBeNull()
         brevsporing.dokumentId shouldBe dokumentId
         brevsporing.journalpostId shouldBe journalpostId

@@ -33,8 +33,9 @@ enum class AuditLoggerEvent(val type: String) {
 data class CustomKeyValue(val key: String, val value: String)
 
 @Component
-class AuditLogger(@Value("\${NAIS_APP_NAME:appName}") private val applicationName: String) {
-
+class AuditLogger(
+    @Value("\${NAIS_APP_NAME:appName}") private val applicationName: String,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val audit = LoggerFactory.getLogger("auditLogger")
 
@@ -55,7 +56,10 @@ class AuditLogger(@Value("\${NAIS_APP_NAME:appName}") private val applicationNam
             ?.request
     }
 
-    private fun createAuditLogString(data: Sporingsdata, request: HttpServletRequest): String {
+    private fun createAuditLogString(
+        data: Sporingsdata,
+        request: HttpServletRequest,
+    ): String {
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
         return "CEF:0|Familie|$applicationName|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +

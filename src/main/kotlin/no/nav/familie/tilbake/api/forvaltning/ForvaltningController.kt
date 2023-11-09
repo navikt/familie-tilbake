@@ -87,7 +87,9 @@ class ForvaltningController(
         AuditLoggerEvent.NONE,
         HenteParam.MOTTATT_XML_ID,
     )
-    fun arkiverMottattKravgrunnlag(@PathVariable mottattXmlId: UUID): Ressurs<String> {
+    fun arkiverMottattKravgrunnlag(
+        @PathVariable mottattXmlId: UUID,
+    ): Ressurs<String> {
         forvaltningService.arkiverMottattKravgrunnlag(mottattXmlId)
         return Ressurs.success("OK")
     }
@@ -103,7 +105,9 @@ class ForvaltningController(
         AuditLoggerEvent.NONE,
         HenteParam.BEHANDLING_ID,
     )
-    fun tvingHenleggBehandling(@PathVariable behandlingId: UUID): Ressurs<String> {
+    fun tvingHenleggBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String> {
         forvaltningService.tvingHenleggBehandling(behandlingId)
         return Ressurs.success("OK")
     }
@@ -119,7 +123,9 @@ class ForvaltningController(
         AuditLoggerEvent.UPDATE,
         HenteParam.BEHANDLING_ID,
     )
-    fun flyttBehandlingTilFakta(@PathVariable behandlingId: UUID): Ressurs<String> {
+    fun flyttBehandlingTilFakta(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String> {
         forvaltningService.flyttBehandlingsstegTilbakeTilFakta(behandlingId)
         return Ressurs.success("OK")
     }
@@ -135,7 +141,9 @@ class ForvaltningController(
         AuditLoggerEvent.NONE,
         HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
     )
-    fun annulerKravgrunnlag(@PathVariable eksternKravgrunnlagId: BigInteger): Ressurs<String> {
+    fun annulerKravgrunnlag(
+        @PathVariable eksternKravgrunnlagId: BigInteger,
+    ): Ressurs<String> {
         forvaltningService.annulerKravgrunnlag(eksternKravgrunnlagId)
         return Ressurs.success("OK")
     }
@@ -162,12 +170,6 @@ class ForvaltningController(
     @PostMapping(
         path = ["/hentBehandlingerUtenOppgave/fagsystem/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter forvaltningsinformasjon",
-        AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
     )
     fun finnGamleÅpneBehandlingerUtenOppgave(
         @PathVariable fagsystem: Fagsystem,

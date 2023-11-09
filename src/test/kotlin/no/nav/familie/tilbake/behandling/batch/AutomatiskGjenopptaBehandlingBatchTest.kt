@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

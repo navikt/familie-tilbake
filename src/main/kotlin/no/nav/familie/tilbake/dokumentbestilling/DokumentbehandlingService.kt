@@ -30,8 +30,11 @@ class DokumentbehandlingService(
     private val manueltVarselBrevService: ManueltVarselbrevService,
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
 ) {
-
-    fun bestillBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String) {
+    fun bestillBrev(
+        behandlingId: UUID,
+        maltype: Dokumentmalstype,
+        fritekst: String,
+    ) {
         val behandling: Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val ansvarligSaksbehandler = ContextService.hentSaksbehandler()
         if (behandling.ansvarligSaksbehandler != ansvarligSaksbehandler) {
@@ -44,7 +47,11 @@ class DokumentbehandlingService(
         }
     }
 
-    fun forhåndsvisBrev(behandlingId: UUID, maltype: Dokumentmalstype, fritekst: String): ByteArray {
+    fun forhåndsvisBrev(
+        behandlingId: UUID,
+        maltype: Dokumentmalstype,
+        fritekst: String,
+    ): ByteArray {
         var dokument = ByteArray(0)
         if (Dokumentmalstype.VARSEL == maltype || Dokumentmalstype.KORRIGERT_VARSEL == maltype) {
             dokument = manueltVarselBrevService.hentForhåndsvisningManueltVarselbrev(behandlingId, maltype, fritekst)
@@ -54,7 +61,11 @@ class DokumentbehandlingService(
         return dokument
     }
 
-    private fun håndterManueltSendVarsel(behandling: Behandling, maltype: Dokumentmalstype, fritekst: String) {
+    private fun håndterManueltSendVarsel(
+        behandling: Behandling,
+        maltype: Dokumentmalstype,
+        fritekst: String,
+    ) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende varselbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }
@@ -74,7 +85,10 @@ class DokumentbehandlingService(
         )
     }
 
-    private fun håndterInnhentDokumentasjon(behandling: Behandling, fritekst: String) {
+    private fun håndterInnhentDokumentasjon(
+        behandling: Behandling,
+        fritekst: String,
+    ) {
         if (!kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
             error("Kan ikke sende innhent dokumentasjonsbrev fordi grunnlag finnes ikke for behandlingId = ${behandling.id}")
         }

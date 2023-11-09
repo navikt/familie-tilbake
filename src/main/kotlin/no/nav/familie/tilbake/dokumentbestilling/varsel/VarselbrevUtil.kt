@@ -36,9 +36,7 @@ class VarselbrevUtil(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val organisasjonService: OrganisasjonService,
 ) {
-
     companion object {
-
         const val TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING = "Korrigert Varsel tilbakebetaling "
         const val TITTEL_VARSEL_TILBAKEBETALING = "Varsel tilbakebetaling "
     }
@@ -53,24 +51,26 @@ class VarselbrevUtil(
         val ansvarligSaksbehandler =
             eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(ContextService.hentSaksbehandler())
 
-        val metadata = Brevmetadata(
-            sakspartId = personinfo.ident,
-            sakspartsnavn = personinfo.navn,
-            finnesVerge = request.verge != null,
-            vergenavn = vergenavn,
-            mottageradresse = adresseinfo,
-            behandlendeEnhetId = request.behandlendeEnhetId,
-            behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
-            ansvarligSaksbehandler = ansvarligSaksbehandler,
-            saksnummer = request.eksternFagsakId,
-            språkkode = request.språkkode,
-            ytelsestype = request.ytelsestype,
-            tittel = tittel,
-            gjelderDødsfall = personinfo.dødsdato != null,
-            institusjon = request.institusjon?.let {
-                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            },
-        )
+        val metadata =
+            Brevmetadata(
+                sakspartId = personinfo.ident,
+                sakspartsnavn = personinfo.navn,
+                finnesVerge = request.verge != null,
+                vergenavn = vergenavn,
+                mottageradresse = adresseinfo,
+                behandlendeEnhetId = request.behandlendeEnhetId,
+                behandlendeEnhetsNavn = request.behandlendeEnhetsNavn,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                saksnummer = request.eksternFagsakId,
+                språkkode = request.språkkode,
+                ytelsestype = request.ytelsestype,
+                tittel = tittel,
+                gjelderDødsfall = personinfo.dødsdato != null,
+                institusjon =
+                    request.institusjon?.let {
+                        organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+                    },
+            )
 
         return Varselbrevsdokument(
             brevmetadata = metadata,
@@ -108,9 +108,10 @@ class VarselbrevUtil(
             ytelsestype = fagsak.ytelsestype,
             tittel = getTittelForVarselbrev(fagsak.ytelsesnavn, erKorrigert),
             gjelderDødsfall = gjelderDødsfall,
-            institusjon = fagsak.institusjon?.let {
-                organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
-            },
+            institusjon =
+                fagsak.institusjon?.let {
+                    organisasjonService.mapTilInstitusjonForBrevgenerering(it.organisasjonsnummer)
+                },
         )
     }
 
@@ -138,22 +139,24 @@ class VarselbrevUtil(
         eksternBehandlingId: String,
         varsletTotalbeløp: Long,
     ): Vedleggsdata {
-        val request = HentFeilutbetalingerFraSimuleringRequest(
-            varselbrevsdokument.ytelsestype,
-            varselbrevsdokument.brevmetadata.saksnummer,
-            eksternBehandlingId,
-        )
+        val request =
+            HentFeilutbetalingerFraSimuleringRequest(
+                varselbrevsdokument.ytelsestype,
+                varselbrevsdokument.brevmetadata.saksnummer,
+                eksternBehandlingId,
+            )
 
         val feilutbetalingerFraSimulering = oppdragClient.hentFeilutbetalingerFraSimulering(request)
 
-        val perioder = feilutbetalingerFraSimulering.feilutbetaltePerioder.map {
-            FeilutbetaltPeriode(
-                YearMonth.from(it.fom),
-                it.nyttBeløp,
-                it.tidligereUtbetaltBeløp,
-                it.feilutbetaltBeløp,
-            )
-        }
+        val perioder =
+            feilutbetalingerFraSimulering.feilutbetaltePerioder.map {
+                FeilutbetaltPeriode(
+                    YearMonth.from(it.fom),
+                    it.nyttBeløp,
+                    it.tidligereUtbetaltBeløp,
+                    it.feilutbetaltBeløp,
+                )
+            }
 
         validerKorrektTotalbeløp(
             perioder,
@@ -173,14 +176,15 @@ class VarselbrevUtil(
 
         val beregningsresultat = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
 
-        val perioder = beregningsresultat.map {
-            FeilutbetaltPeriode(
-                YearMonth.from(it.key.fom),
-                it.value.riktigYtelsesbeløp,
-                it.value.utbetaltYtelsesbeløp,
-                it.value.feilutbetaltBeløp,
-            )
-        }
+        val perioder =
+            beregningsresultat.map {
+                FeilutbetaltPeriode(
+                    YearMonth.from(it.key.fom),
+                    it.value.riktigYtelsesbeløp,
+                    it.value.utbetaltYtelsesbeløp,
+                    it.value.feilutbetaltBeløp,
+                )
+            }
 
         return Vedleggsdata(varselbrevsdokument.språkkode, varselbrevsdokument.isYtelseMedSkatt, perioder)
     }
@@ -206,7 +210,10 @@ class VarselbrevUtil(
         }
     }
 
-    fun lagVedlegg(varselbrevsdokument: Varselbrevsdokument, behandlingId: UUID): String {
+    fun lagVedlegg(
+        varselbrevsdokument: Varselbrevsdokument,
+        behandlingId: UUID,
+    ): String {
         return if (varselbrevsdokument.harVedlegg) {
             val vedleggsdata = sammenstillInfoFraKravgrunnlag(varselbrevsdokument, behandlingId)
             TekstformatererVarselbrev.lagVarselbrevsvedleggHtml(vedleggsdata)
@@ -230,7 +237,10 @@ class VarselbrevUtil(
         }
     }
 
-    private fun getTittelForVarselbrev(ytelsesnavn: String, erKorrigert: Boolean): String {
+    private fun getTittelForVarselbrev(
+        ytelsesnavn: String,
+        erKorrigert: Boolean,
+    ): String {
         return if (erKorrigert) {
             TITTEL_KORRIGERT_VARSEL_TILBAKEBETALING + ytelsesnavn
         } else {

@@ -33,7 +33,6 @@ class OppdragMQConfig(
     @Value("\${CREDENTIAL_PASSWORD}") val password: String,
     val environment: Environment,
 ) {
-
     private val logger = LoggerFactory.getLogger(OppdragMQConfig::class.java)
 
     @Bean

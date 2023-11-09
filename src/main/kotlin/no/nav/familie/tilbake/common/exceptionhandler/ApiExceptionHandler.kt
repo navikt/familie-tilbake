@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 @Suppress("unused")
 @ControllerAdvice
 class ApiExceptionHandler {
-
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 

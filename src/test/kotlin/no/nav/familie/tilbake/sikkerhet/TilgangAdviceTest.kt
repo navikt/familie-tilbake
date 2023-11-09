@@ -69,9 +69,7 @@ import java.util.Calendar
     ],
 )
 internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
-
     companion object {
-
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
         const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"
         const val BARNETRYGD_VEILEDER_ROLLE = "bv123"
@@ -124,44 +122,48 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             enhetsnavn = "Oslo",
             revurderingsvedtaksdato = LocalDate.now(),
             varsel = Varsel("hello", BigDecimal.valueOf(1000), emptyList()),
-            faktainfo = Faktainfo(
-                "testårsak",
-                "testresultat",
-                Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            ),
+            faktainfo =
+                Faktainfo(
+                    "testårsak",
+                    "testresultat",
+                    Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                ),
             saksbehandlerIdent = "bob",
         )
 
     @BeforeEach
     fun init() {
-        tilgangAdvice = TilgangAdvice(
-            rolleConfig,
-            fagsakRepository,
-            behandlingRepository,
-            kravgrunnlagRepository,
-            auditLogger,
-            mottattXmlRepository,
-            mockIntegrasjonerClient,
-        )
+        tilgangAdvice =
+            TilgangAdvice(
+                rolleConfig,
+                fagsakRepository,
+                behandlingRepository,
+                kravgrunnlagRepository,
+                auditLogger,
+                mottattXmlRepository,
+                mockIntegrasjonerClient,
+            )
 
-        fagsak = fagsakRepository.insert(
-            Fagsak(
-                bruker = Bruker("1232"),
-                eksternFagsakId = "123",
-                fagsystem = Fagsystem.BA,
-                ytelsestype = Ytelsestype.BARNETRYGD,
-            ),
-        )
-        behandling = behandlingRepository.insert(
-            Behandling(
-                fagsakId = fagsak.id,
-                type = Behandlingstype.TILBAKEKREVING,
-                ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                behandlendeEnhet = "8020",
-                behandlendeEnhetsNavn = "Oslo",
-                manueltOpprettet = false,
-            ),
-        )
+        fagsak =
+            fagsakRepository.insert(
+                Fagsak(
+                    bruker = Bruker("1232"),
+                    eksternFagsakId = "123",
+                    fagsystem = Fagsystem.BA,
+                    ytelsestype = Ytelsestype.BARNETRYGD,
+                ),
+            )
+        behandling =
+            behandlingRepository.insert(
+                Behandling(
+                    fagsakId = fagsak.id,
+                    type = Behandlingstype.TILBAKEKREVING,
+                    ansvarligSaksbehandler = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
+                    behandlendeEnhet = "8020",
+                    behandlendeEnhetsNavn = "Oslo",
+                    manueltOpprettet = false,
+                ),
+            )
     }
 
     @Test
@@ -207,16 +209,18 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/v1/$behandling.id", HttpMethod.GET, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true))
         every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.VEILEDER,
-            "barnetrygd hent behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.VEILEDER,
+                "barnetrygd hent behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
-        val exception = shouldThrow<RuntimeException>(block = {
-            tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
-        })
+        val exception =
+            shouldThrow<RuntimeException>(block = {
+                tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
+            })
 
         exception.message shouldBe "abc har ikke tilgang til ${rolletilgangssjekk.handling}"
     }
@@ -227,16 +231,18 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/v1", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true))
         every { mockJoinpoint.args } returns arrayOf(opprettTilbakekrevingRequest)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "barnetrygd opprett behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "barnetrygd opprett behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.INGEN,
+            )
 
-        val exception = shouldThrow<RuntimeException>(block = {
-            tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
-        })
+        val exception =
+            shouldThrow<RuntimeException>(block = {
+                tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
+            })
 
         exception.message shouldBe "abc med rolle VEILEDER har ikke tilgang til å barnetrygd opprett behandling. " +
             "Krever ${rolletilgangssjekk.minimumBehandlerrolle}."
@@ -248,12 +254,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/v1", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(emptyList()) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(opprettTilbakekrevingRequest)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "barnetrygd opprett behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "barnetrygd opprett behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.INGEN,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -291,12 +298,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val rolletilgangssjekk =
             Rolletilgangssjekk(Behandlerrolle.VEILEDER, "hent behandling", AuditLoggerEvent.ACCESS, HenteParam.BEHANDLING_ID)
 
-        val exception = shouldThrow<RuntimeException>(block = {
-            tilgangAdvice.sjekkTilgang(
-                mockJoinpoint,
-                rolletilgangssjekk,
-            )
-        })
+        val exception =
+            shouldThrow<RuntimeException>(block = {
+                tilgangAdvice.sjekkTilgang(
+                    mockJoinpoint,
+                    rolletilgangssjekk,
+                )
+            })
 
         exception.message shouldBe "Bruker har mangler tilgang til hent behandling"
     }
@@ -308,12 +316,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFaktaDto(emptyList(), "testverdi"))
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -325,12 +334,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFatteVedtaksstegDto(emptyList()))
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
 
@@ -345,12 +355,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/behandling/$behandling.id/steg/v1/", HttpMethod.POST, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id, BehandlingsstegFatteVedtaksstegDto(emptyList()))
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Håndterer behandlingens aktiv steg og fortsetter den til neste steg",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -360,19 +371,21 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
         opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(
-            behandling.id,
-            BehandlingPåVentDto(
-                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2),
-            ),
-        )
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        every { mockJoinpoint.args } returns
+            arrayOf(
+                behandling.id,
+                BehandlingPåVentDto(
+                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                    LocalDate.now().plusWeeks(2),
+                ),
+            )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -382,19 +395,21 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(
-            behandling.id,
-            BehandlingPåVentDto(
-                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2),
-            ),
-        )
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        every { mockJoinpoint.args } returns
+            arrayOf(
+                behandling.id,
+                BehandlingPåVentDto(
+                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                    LocalDate.now().plusWeeks(2),
+                ),
+            )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
 
@@ -408,12 +423,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.FORVALTER,
-            "Tving henlegger behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.FORVALTER,
+                "Tving henlegger behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         val exception = shouldThrow<RuntimeException> { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
 
@@ -427,12 +443,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.FORVALTER,
-            "Tving henlegger behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.FORVALTER,
+                "Tving henlegger behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -442,19 +459,21 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE, TEAMFAMILIE_FORVALTER_ROLLE))
         opprettRequestContext("/api/behandling/$behandling.id/vent/v1/", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns arrayOf(
-            behandling.id,
-            BehandlingPåVentDto(
-                Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
-                LocalDate.now().plusWeeks(2),
-            ),
-        )
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        every { mockJoinpoint.args } returns
+            arrayOf(
+                behandling.id,
+                BehandlingPåVentDto(
+                    Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
+                    LocalDate.now().plusWeeks(2),
+                ),
+            )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -466,12 +485,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("/api/forvaltning//behandling/$behandling.id/tving-henleggelse/v1", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(behandling.id)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.FORVALTER,
-            "Tving henlegger behandling",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.BEHANDLING_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.FORVALTER,
+                "Tving henlegger behandling",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.BEHANDLING_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -483,12 +503,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         // PUT request uten body
         opprettRequestContext("/arkiver/kravgrunnlag/${økonomiXmlMottatt.id}/v1", HttpMethod.PUT, token)
         every { mockJoinpoint.args } returns arrayOf(økonomiXmlMottatt.id)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.FORVALTER,
-            "Arkiverer mottatt kravgrunnlag",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.MOTTATT_XML_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.FORVALTER,
+                "Arkiverer mottatt kravgrunnlag",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.MOTTATT_XML_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -500,12 +521,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         // PUT request uten body
         opprettRequestContext("/annuler/kravgrunnlag/${økonomiXmlMottatt.eksternKravgrunnlagId}/v1", HttpMethod.PUT, token)
         every { mockJoinpoint.args } returns arrayOf(økonomiXmlMottatt.eksternKravgrunnlagId)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.FORVALTER,
-            "Annulerer mottatt kravgrunnlag",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.FORVALTER,
+                "Annulerer mottatt kravgrunnlag",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.EKSTERN_KRAVGRUNNLAG_ID,
+            )
 
         shouldNotThrowAny { tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk) }
     }
@@ -516,12 +538,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("dummy", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
+            )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
 
@@ -535,12 +558,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns
             arrayOf(HentFagsystemsbehandlingRequestDto(Ytelsestype.BARNETRYGD, fagsak.eksternFagsakId, ""))
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.INGEN,
+            )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
 
@@ -553,12 +577,13 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         opprettRequestContext("dummy", HttpMethod.PUT, token)
         every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
         every { mockJoinpoint.args } returns arrayOf(Fagsystem.BA, fagsak.eksternFagsakId)
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
-        )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.FAGSYSTEM_OG_EKSTERN_FAGSAK_ID,
+            )
 
         tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
 
@@ -581,47 +606,6 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                     listOf(),
                 ),
             )
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN,
-        )
-
-        tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
-
-        verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
-    }
-
-    @Test
-    fun `sjekkTilgang skal finne personer basert på dto med behandlingId`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext("dummy", HttpMethod.PUT, token)
-        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns
-            arrayOf(HentForhåndvisningVedtaksbrevPdfDto(behandlingId = behandling.id, perioderMedTekst = listOf()))
-        val rolletilgangssjekk = Rolletilgangssjekk(
-            Behandlerrolle.SAKSBEHANDLER,
-            "Setter behandling på vent",
-            AuditLoggerEvent.ACCESS,
-            HenteParam.INGEN,
-        )
-
-        tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
-
-        verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
-    }
-
-    @Test
-    fun `sjekkTilgang skal finne personer basert på dto med eksternBrukId`() {
-        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
-        opprettRequestContext("dummy", HttpMethod.PUT, token)
-        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
-        every { mockJoinpoint.args } returns
-            arrayOf(object {
-                @Suppress("unused")
-                val eksternBrukId = behandling.eksternBrukId
-            })
         val rolletilgangssjekk =
             Rolletilgangssjekk(
                 Behandlerrolle.SAKSBEHANDLER,
@@ -635,7 +619,55 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
         verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
     }
 
-    private fun opprettToken(behandlerNavn: String, gruppeNavn: List<String>): String {
+    @Test
+    fun `sjekkTilgang skal finne personer basert på dto med behandlingId`() {
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext("dummy", HttpMethod.PUT, token)
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
+        every { mockJoinpoint.args } returns
+            arrayOf(HentForhåndvisningVedtaksbrevPdfDto(behandlingId = behandling.id, perioderMedTekst = listOf()))
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.INGEN,
+            )
+
+        tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
+
+        verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
+    }
+
+    @Test
+    fun `sjekkTilgang skal finne personer basert på dto med eksternBrukId`() {
+        val token = opprettToken("abc", listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE))
+        opprettRequestContext("dummy", HttpMethod.PUT, token)
+        every { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) } returns listOf(Tilgang(personIdent, true, null))
+        every { mockJoinpoint.args } returns
+            arrayOf(
+                object {
+                    @Suppress("unused")
+                    val eksternBrukId = behandling.eksternBrukId
+                },
+            )
+        val rolletilgangssjekk =
+            Rolletilgangssjekk(
+                Behandlerrolle.SAKSBEHANDLER,
+                "Setter behandling på vent",
+                AuditLoggerEvent.ACCESS,
+                HenteParam.INGEN,
+            )
+
+        tilgangAdvice.sjekkTilgang(mockJoinpoint, rolletilgangssjekk)
+
+        verify { mockIntegrasjonerClient.sjekkTilgangTilPersoner(listOf("1232")) }
+    }
+
+    private fun opprettToken(
+        behandlerNavn: String,
+        gruppeNavn: List<String>,
+    ): String {
         val additionalParameters = mapOf("NAVident" to behandlerNavn, "groups" to gruppeNavn)
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.SECOND, 60)
@@ -644,7 +676,11 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
             .addClaims(additionalParameters).compact()
     }
 
-    private fun opprettRequestContext(requestUri: String, requestMethod: HttpMethod, token: String) {
+    private fun opprettRequestContext(
+        requestUri: String,
+        requestMethod: HttpMethod,
+        token: String,
+    ) {
         val mockHttpServletRequest =
             MockHttpServletRequest(requestMethod.name(), requestUri)
 

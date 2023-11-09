@@ -23,7 +23,6 @@ class TotrinnService(
     private val behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) {
-
     @Transactional(readOnly = true)
     fun hentTotrinnsvurderinger(behandlingId: UUID): TotrinnsvurderingDto {
         val totrinnsvurderinger = totrinnsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -32,7 +31,10 @@ class TotrinnService(
     }
 
     @Transactional
-    fun lagreTotrinnsvurderinger(behandlingId: UUID, totrinnsvurderinger: List<VurdertTotrinnDto>) {
+    fun lagreTotrinnsvurderinger(
+        behandlingId: UUID,
+        totrinnsvurderinger: List<VurdertTotrinnDto>,
+    ) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         // valider request
         validerOmAlleBesluttendeStegFinnes(totrinnsvurderinger, behandlingsstegstilstand)
@@ -57,14 +59,15 @@ class TotrinnService(
     @Transactional
     fun lagreFastTotrinnsvurderingerForAutomatiskSaksbehandling(behandlingId: UUID) {
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        val totrinnsvurderinger = behandlingsstegstilstand.filter { it.behandlingssteg.kanBesluttes }.map {
-            Totrinnsvurdering(
-                behandlingId = behandlingId,
-                behandlingssteg = it.behandlingssteg,
-                godkjent = true,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-            )
-        }
+        val totrinnsvurderinger =
+            behandlingsstegstilstand.filter { it.behandlingssteg.kanBesluttes }.map {
+                Totrinnsvurdering(
+                    behandlingId = behandlingId,
+                    behandlingssteg = it.behandlingssteg,
+                    godkjent = true,
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                )
+            }
         totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }
     }
 
@@ -110,10 +113,11 @@ class TotrinnService(
         totrinnsvurderinger: List<VurdertTotrinnDto>,
         behandlingsstegstilstand: List<Behandlingsstegstilstand>,
     ) {
-        val stegSomBørVurderes: List<Behandlingssteg> = behandlingsstegstilstand.filter {
-            it.behandlingssteg.kanBesluttes &&
-                it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
-        }.map { it.behandlingssteg }
+        val stegSomBørVurderes: List<Behandlingssteg> =
+            behandlingsstegstilstand.filter {
+                it.behandlingssteg.kanBesluttes &&
+                    it.behandlingsstegsstatus != Behandlingsstegstatus.AUTOUTFØRT
+            }.map { it.behandlingssteg }
 
         val vurderteSteg: List<Behandlingssteg> = totrinnsvurderinger.map { it.behandlingssteg }
         val manglendeSteg = stegSomBørVurderes.minus(vurderteSteg)

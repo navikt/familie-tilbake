@@ -22,7 +22,6 @@ class HåndterGammelKravgrunnlagTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
 ) :
     AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -34,19 +33,21 @@ class HåndterGammelKravgrunnlagTask(
         val ytelsestype = mottattXml.ytelsestype
         val eksternId = mottattXml.referanse
 
-        val requestSendt = requireNotNull(
-            hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
-                eksternFagsakId,
-                ytelsestype,
-                eksternId,
-            ),
-        )
+        val requestSendt =
+            requireNotNull(
+                hentFagsystemsbehandlingService.hentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId,
+                    ytelsestype,
+                    eksternId,
+                ),
+            )
         // kaster exception inntil respons-en har mottatt
-        val respons = requireNotNull(requestSendt.respons) {
-            "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
-                "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
-                "Task-en kan kjøre på nytt manuelt når respons-en er mottatt."
-        }
+        val respons =
+            requireNotNull(requestSendt.respons) {
+                "HentFagsystemsbehandling respons-en har ikke mottatt fra fagsystem for " +
+                    "eksternFagsakId=$eksternFagsakId,ytelsestype=$ytelsestype,eksternId=$eksternId." +
+                    "Task-en kan kjøre på nytt manuelt når respons-en er mottatt."
+            }
 
         val hentFagsystemsbehandlingRespons = hentFagsystemsbehandlingService.lesRespons(respons)
         val feilMelding = hentFagsystemsbehandlingRespons.feilMelding
@@ -60,7 +61,6 @@ class HåndterGammelKravgrunnlagTask(
     }
 
     companion object {
-
         const val TYPE = "gammelKravgrunnlag.håndter"
     }
 }

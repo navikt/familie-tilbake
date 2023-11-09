@@ -18,7 +18,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 60 * 5L,
 )
 class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -45,7 +44,6 @@ class LagHistorikkinnslagTask(private val historikkService: HistorikkService) : 
     }
 
     companion object {
-
         const val TYPE = "lagHistorikkinnslag"
     }
 }

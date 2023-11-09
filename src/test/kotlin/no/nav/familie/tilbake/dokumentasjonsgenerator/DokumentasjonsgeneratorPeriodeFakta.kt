@@ -46,7 +46,6 @@ import java.time.YearMonth
  */
 @Disabled("Kjøres ved behov for å regenerere dokumentasjon")
 class DokumentasjonsgeneratorPeriodeFakta {
-
     private val januar = Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 1))
 
     @Test
@@ -108,15 +107,16 @@ class DokumentasjonsgeneratorPeriodeFakta {
     private fun prettyPrint(resultat: Map<HendelseMedUndertype, String>) {
         resultat.forEach { (typer, generertTekst) ->
             println("*[ ${typer.hendelsestype.name} - ${typer.hendelsesundertype.name} ]*")
-            val parametrisertTekst = generertTekst
-                .replace(" 10\u00A0000\u00A0kroner".toRegex(), " <feilutbetalt beløp> kroner")
-                .replace(" 33\u00A0333\u00A0kroner".toRegex(), " <utbetalt beløp> kroner")
-                .replace(" 23\u00A0333\u00A0kroner".toRegex(), " <riktig beløp> kroner")
-                .replace("Søker Søkersen".toRegex(), "<søkers navn>")
-                .replace("2. mars 2018".toRegex(), "<opphørsdato søker døde>")
-                .replace("3. mars 2018".toRegex(), "<opphørsdato barn døde>")
-                .replace("4. mars 2018".toRegex(), "<opphørsdato ikke omsorg>")
-                .replace("ektefellen".toRegex(), "<ektefellen/partneren/samboeren>")
+            val parametrisertTekst =
+                generertTekst
+                    .replace(" 10\u00A0000\u00A0kroner".toRegex(), " <feilutbetalt beløp> kroner")
+                    .replace(" 33\u00A0333\u00A0kroner".toRegex(), " <utbetalt beløp> kroner")
+                    .replace(" 23\u00A0333\u00A0kroner".toRegex(), " <riktig beløp> kroner")
+                    .replace("Søker Søkersen".toRegex(), "<søkers navn>")
+                    .replace("2. mars 2018".toRegex(), "<opphørsdato søker døde>")
+                    .replace("3. mars 2018".toRegex(), "<opphørsdato barn døde>")
+                    .replace("4. mars 2018".toRegex(), "<opphørsdato ikke omsorg>")
+                    .replace("ektefellen".toRegex(), "<ektefellen/partneren/samboeren>")
             println(parametrisertTekst)
             println()
         }
@@ -133,22 +133,25 @@ class DokumentasjonsgeneratorPeriodeFakta {
     private fun lagPeriodeBuilder(undertype: HendelseMedUndertype): HbVedtaksbrevsperiode {
         return HbVedtaksbrevsperiode(
             periode = januar,
-            vurderinger = HbVurderinger(
-                foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
-                aktsomhetsresultat = AnnenVurdering.GOD_TRO,
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                beløpIBehold = BigDecimal.valueOf(5000),
-            ),
-            kravgrunnlag = HbKravgrunnlag(
-                feilutbetaltBeløp = BigDecimal.valueOf(10000),
-                riktigBeløp = BigDecimal.valueOf(23333),
-                utbetaltBeløp = BigDecimal.valueOf(33333),
-            ),
-            resultat = HbResultat(
-                tilbakekrevesBeløp = BigDecimal.valueOf(5000),
-                tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(4002),
-                rentebeløp = BigDecimal.ZERO,
-            ),
+            vurderinger =
+                HbVurderinger(
+                    foreldelsevurdering = Foreldelsesvurderingstype.IKKE_VURDERT,
+                    aktsomhetsresultat = AnnenVurdering.GOD_TRO,
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
+                    beløpIBehold = BigDecimal.valueOf(5000),
+                ),
+            kravgrunnlag =
+                HbKravgrunnlag(
+                    feilutbetaltBeløp = BigDecimal.valueOf(10000),
+                    riktigBeløp = BigDecimal.valueOf(23333),
+                    utbetaltBeløp = BigDecimal.valueOf(33333),
+                ),
+            resultat =
+                HbResultat(
+                    tilbakekrevesBeløp = BigDecimal.valueOf(5000),
+                    tilbakekrevesBeløpUtenSkattMedRenter = BigDecimal.valueOf(4002),
+                    rentebeløp = BigDecimal.ZERO,
+                ),
             fakta = HbFakta(undertype.hendelsestype, undertype.hendelsesundertype),
             grunnbeløp = HbGrunnbeløp(BigDecimal.TEN, "120"),
             førstePeriode = true,
@@ -159,30 +162,33 @@ class DokumentasjonsgeneratorPeriodeFakta {
         ytelsestype: Ytelsestype,
         språkkode: Språkkode,
     ): HbVedtaksbrevFelles {
-        val datoer = HbVedtaksbrevDatoer(
-            LocalDate.of(2018, 3, 2),
-            LocalDate.of(2018, 3, 3),
-            LocalDate.of(2018, 3, 4),
-        )
+        val datoer =
+            HbVedtaksbrevDatoer(
+                LocalDate.of(2018, 3, 2),
+                LocalDate.of(2018, 3, 3),
+                LocalDate.of(2018, 3, 4),
+            )
 
         return HbVedtaksbrevFelles(
             brevmetadata = lagMetadata(ytelsestype, språkkode),
             fagsaksvedtaksdato = LocalDate.now(),
             behandling = HbBehandling(),
             hjemmel = HbHjemmel("Folketrygdloven"),
-            totalresultat = HbTotalresultat(
-                hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
-                totaltRentebeløp = BigDecimal.valueOf(1000),
-                totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
-                totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
-                totaltTilbakekrevesBeløpMedRenterUtenSkatt =
-                BigDecimal.valueOf(6855),
-            ),
+            totalresultat =
+                HbTotalresultat(
+                    hovedresultat = Vedtaksresultat.FULL_TILBAKEBETALING,
+                    totaltRentebeløp = BigDecimal.valueOf(1000),
+                    totaltTilbakekrevesBeløp = BigDecimal.valueOf(10000),
+                    totaltTilbakekrevesBeløpMedRenter = BigDecimal.valueOf(11000),
+                    totaltTilbakekrevesBeløpMedRenterUtenSkatt =
+                        BigDecimal.valueOf(6855),
+                ),
             totaltFeilutbetaltBeløp = BigDecimal.valueOf(6855),
-            varsel = HbVarsel(
-                varsletBeløp = BigDecimal.valueOf(10000),
-                varsletDato = LocalDate.now().minusDays(100),
-            ),
+            varsel =
+                HbVarsel(
+                    varsletBeløp = BigDecimal.valueOf(10000),
+                    varsletDato = LocalDate.now().minusDays(100),
+                ),
             konfigurasjon = HbKonfigurasjon(klagefristIUker = 6),
             søker = HbPerson(navn = "Søker Søkersen"),
             datoer = datoer,

@@ -64,7 +64,6 @@ import org.springframework.transaction.annotation.Transactional
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
-
     private val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
@@ -171,8 +170,8 @@ abstract class OppslagSpringRunnerTest {
     }
 
     companion object {
-
         private const val LOCALHOST = "http://localhost:"
+
         protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {
             val listAppender = ListAppender<ILoggingEvent>()
             listAppender.start()

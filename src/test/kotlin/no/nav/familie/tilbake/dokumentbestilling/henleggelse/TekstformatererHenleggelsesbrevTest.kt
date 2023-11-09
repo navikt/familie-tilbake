@@ -13,27 +13,28 @@ import java.time.LocalDate
 import java.util.Scanner
 
 class TekstformatererHenleggelsesbrevTest {
-
     private val niendeMars = LocalDate.of(2019, 3, 9)
 
-    private val brevmetadata = Brevmetadata(
-        sakspartId = "12345678901",
-        sakspartsnavn = "Test",
-        vergenavn = "John Doe",
-        mottageradresse = Adresseinfo("12345678901", "Test"),
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        ansvarligSaksbehandler = "Bob",
-        saksnummer = "1232456",
-        språkkode = Språkkode.NB,
-        ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false,
-    )
+    private val brevmetadata =
+        Brevmetadata(
+            sakspartId = "12345678901",
+            sakspartsnavn = "Test",
+            vergenavn = "John Doe",
+            mottageradresse = Adresseinfo("12345678901", "Test"),
+            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            ansvarligSaksbehandler = "Bob",
+            saksnummer = "1232456",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.BARNETILSYN,
+            gjelderDødsfall = false,
+        )
 
-    private val henleggelsesbrevsdokument = Henleggelsesbrevsdokument(
-        brevmetadata,
-        niendeMars,
-        REVURDERING_HENLEGGELSESBREV_FRITEKST,
-    )
+    private val henleggelsesbrevsdokument =
+        Henleggelsesbrevsdokument(
+            brevmetadata,
+            niendeMars,
+            REVURDERING_HENLEGGELSESBREV_FRITEKST,
+        )
 
     @Test
     fun `lagFritekst skal generere henleggelsesbrev`() {
@@ -212,7 +213,6 @@ class TekstformatererHenleggelsesbrevTest {
     }
 
     companion object {
-
         private const val REVURDERING_HENLEGGELSESBREV_FRITEKST = "Revurderingen ble henlagt"
     }
 }

@@ -28,13 +28,13 @@ class HåndterGamleKravgrunnlagBatch(
     private val taskService: TaskService,
     private val environment: Environment,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(cron = "\${CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG}")
     @Transactional
     fun utfør() {
-        if (LeaderClient.isLeader() != true && !environment.activeProfiles.any {
+        if (LeaderClient.isLeader() != true &&
+            !environment.activeProfiles.any {
                 it.contains("local") ||
                     it.contains("integrasjonstest")
             }
@@ -44,13 +44,14 @@ class HåndterGamleKravgrunnlagBatch(
 
         logger.info("Starter HåndterGamleKravgrunnlagBatch..")
         logger.info("Henter kravgrunnlag som er eldre enn $ALDERSGRENSE_I_UKER uker")
-        val mottattXmlIdsMedYtelse = mottattXmlService.hentFrakobletGamleMottattXmlIds(
-            beregnBestemtDato(BARNETRYGD),
-            beregnBestemtDato(BARNETILSYN),
-            beregnBestemtDato(OVERGANGSSTØNAD),
-            beregnBestemtDato(SKOLEPENGER),
-            beregnBestemtDato(KONTANTSTØTTE),
-        )
+        val mottattXmlIdsMedYtelse =
+            mottattXmlService.hentFrakobletGamleMottattXmlIds(
+                beregnBestemtDato(BARNETRYGD),
+                beregnBestemtDato(BARNETILSYN),
+                beregnBestemtDato(OVERGANGSSTØNAD),
+                beregnBestemtDato(SKOLEPENGER),
+                beregnBestemtDato(KONTANTSTØTTE),
+            )
 
         if (mottattXmlIdsMedYtelse.isNotEmpty()) {
             logger.info(
@@ -58,31 +59,34 @@ class HåndterGamleKravgrunnlagBatch(
                     "$ALDERSGRENSE_I_UKER uker fra dagens dato",
             )
 
-            val alleFeiledeTasker = taskService.finnTasksMedStatus(
-                listOf(
-                    Status.FEILET,
-                    Status.KLAR_TIL_PLUKK,
-                    Status.MANUELL_OPPFØLGING,
-                ),
-                Pageable.unpaged(),
-            )
+            val alleFeiledeTasker =
+                taskService.finnTasksMedStatus(
+                    listOf(
+                        Status.FEILET,
+                        Status.KLAR_TIL_PLUKK,
+                        Status.MANUELL_OPPFØLGING,
+                    ),
+                    Pageable.unpaged(),
+                )
             mottattXmlIdsMedYtelse.forEach { mottattXmlIdOgYtelse ->
-                val finnesTask = alleFeiledeTasker.any {
-                    it.payload == mottattXmlIdOgYtelse.id.toString() &&
-                        (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
-                }
+                val finnesTask =
+                    alleFeiledeTasker.any {
+                        it.payload == mottattXmlIdOgYtelse.id.toString() &&
+                            (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
+                    }
                 if (!finnesTask) {
                     val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(mottattXmlIdOgYtelse.ytelsestype)
                     taskService.save(
                         Task(
                             type = HentFagsystemsbehandlingTask.TYPE,
                             payload = mottattXmlIdOgYtelse.id.toString(),
-                            properties = Properties().apply {
-                                setProperty(
-                                    PropertyName.FAGSYSTEM,
-                                    fagsystem.name,
-                                )
-                            },
+                            properties =
+                                Properties().apply {
+                                    setProperty(
+                                        PropertyName.FAGSYSTEM,
+                                        fagsystem.name,
+                                    )
+                                },
                         ),
                     )
                 } else {
@@ -104,13 +108,13 @@ class HåndterGamleKravgrunnlagBatch(
     }
 
     companion object {
-
-        val ALDERSGRENSE_I_UKER = mapOf<Ytelsestype, Long>(
-            BARNETRYGD to 8,
-            BARNETILSYN to 8,
-            OVERGANGSSTØNAD to 8,
-            SKOLEPENGER to 8,
-            KONTANTSTØTTE to 8,
-        )
+        val ALDERSGRENSE_I_UKER =
+            mapOf<Ytelsestype, Long>(
+                BARNETRYGD to 8,
+                BARNETILSYN to 8,
+                OVERGANGSSTØNAD to 8,
+                SKOLEPENGER to 8,
+                KONTANTSTØTTE to 8,
+            )
     }
 }

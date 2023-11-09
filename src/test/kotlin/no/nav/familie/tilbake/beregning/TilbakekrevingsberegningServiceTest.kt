@@ -40,7 +40,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var tilbakekrevingsberegningService: TilbakekrevingsberegningService
 
@@ -247,10 +246,11 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregn skal beregne tilbakekrevingsbeløp for ikkeForeldetPeriode når beregnetPeriode er på tvers av grunnlagPeriode`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31))
         val periode1 = Månedsperiode(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 30))
-        val logiskPeriode = Månedsperiode(
-            LocalDate.of(2019, 5, 1),
-            LocalDate.of(2019, 6, 30),
-        )
+        val logiskPeriode =
+            Månedsperiode(
+                LocalDate.of(2019, 5, 1),
+                LocalDate.of(2019, 6, 30),
+            )
         val grunnlagPeriode: Kravgrunnlagsperiode432 =
             lagGrunnlagPeriode(
                 periode,
@@ -298,61 +298,68 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val kravgrunnlag431 = Testdata.kravgrunnlag431
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
-        val førsteKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
-            .copy(
-                periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
-                beløp = setOf(
-                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                ),
-            )
-        val andreKravgrunnlagsperiode = Testdata.kravgrunnlagsperiode432
-            .copy(
-                id = UUID.randomUUID(),
-                periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
-                beløp = setOf(
-                    feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                    yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
-                ),
-            )
+        val førsteKravgrunnlagsperiode =
+            Testdata.kravgrunnlagsperiode432
+                .copy(
+                    periode = Månedsperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 1)),
+                    beløp =
+                        setOf(
+                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                        ),
+                )
+        val andreKravgrunnlagsperiode =
+            Testdata.kravgrunnlagsperiode432
+                .copy(
+                    id = UUID.randomUUID(),
+                    periode = Månedsperiode(YearMonth.of(2017, 2), YearMonth.of(2017, 2)),
+                    beløp =
+                        setOf(
+                            feilkravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                            yteseskravgrunnlagsbeløp.copy(id = UUID.randomUUID()),
+                        ),
+                )
         kravgrunnlagRepository.insert(
             kravgrunnlag431.copy(
-                perioder = setOf(
-                    førsteKravgrunnlagsperiode,
-                    andreKravgrunnlagsperiode,
-                ),
+                perioder =
+                    setOf(
+                        førsteKravgrunnlagsperiode,
+                        andreKravgrunnlagsperiode,
+                    ),
             ),
         )
 
-        val beregnetPerioderDto = tilbakekrevingsberegningService.beregnBeløp(
-            behandlingId = Testdata.behandling.id,
-            perioder = listOf(
-                Datoperiode(
-                    LocalDate.of(
-                        2017,
-                        1,
-                        1,
+        val beregnetPerioderDto =
+            tilbakekrevingsberegningService.beregnBeløp(
+                behandlingId = Testdata.behandling.id,
+                perioder =
+                    listOf(
+                        Datoperiode(
+                            LocalDate.of(
+                                2017,
+                                1,
+                                1,
+                            ),
+                            LocalDate.of(
+                                2017,
+                                1,
+                                31,
+                            ),
+                        ),
+                        Datoperiode(
+                            LocalDate.of(
+                                2017,
+                                2,
+                                1,
+                            ),
+                            LocalDate.of(
+                                2017,
+                                2,
+                                28,
+                            ),
+                        ),
                     ),
-                    LocalDate.of(
-                        2017,
-                        1,
-                        31,
-                    ),
-                ),
-                Datoperiode(
-                    LocalDate.of(
-                        2017,
-                        2,
-                        1,
-                    ),
-                    LocalDate.of(
-                        2017,
-                        2,
-                        28,
-                    ),
-                ),
-            ),
-        )
+            )
         beregnetPerioderDto.beregnetPerioder.size shouldBe 2
         beregnetPerioderDto.beregnetPerioder[0].periode shouldBe Datoperiode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 1, 31))
         beregnetPerioderDto.beregnetPerioder[0].feilutbetaltBeløp shouldBe BigDecimal("10000")
@@ -362,21 +369,23 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke starter første dato`() {
-        val exception = shouldThrow<RuntimeException> {
-            tilbakekrevingsberegningService.beregnBeløp(
-                behandlingId = Testdata.behandling.id,
-                perioder = listOf(
-                    Datoperiode(
-                        LocalDate.of(2017, 1, 1),
-                        LocalDate.of(2017, 1, 31),
-                    ),
-                    Datoperiode(
-                        LocalDate.of(2017, 2, 16),
-                        LocalDate.of(2017, 2, 28),
-                    ),
-                ),
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                tilbakekrevingsberegningService.beregnBeløp(
+                    behandlingId = Testdata.behandling.id,
+                    perioder =
+                        listOf(
+                            Datoperiode(
+                                LocalDate.of(2017, 1, 1),
+                                LocalDate.of(2017, 1, 31),
+                            ),
+                            Datoperiode(
+                                LocalDate.of(2017, 2, 16),
+                                LocalDate.of(2017, 2, 28),
+                            ),
+                        ),
+                )
+            }
         exception.message shouldBe "Periode med ${
             Datoperiode(
                 LocalDate.of(2017, 2, 16),
@@ -387,21 +396,23 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `beregnBeløp skal ikke beregne feilutbetaltBeløp når saksbehandler deler opp periode som ikke slutter siste dato`() {
-        val exception = shouldThrow<RuntimeException> {
-            tilbakekrevingsberegningService.beregnBeløp(
-                behandlingId = Testdata.behandling.id,
-                perioder = listOf(
-                    Datoperiode(
-                        LocalDate.of(2017, 1, 1),
-                        LocalDate.of(2017, 1, 27),
-                    ),
-                    Datoperiode(
-                        LocalDate.of(2017, 2, 1),
-                        LocalDate.of(2017, 2, 28),
-                    ),
-                ),
-            )
-        }
+        val exception =
+            shouldThrow<RuntimeException> {
+                tilbakekrevingsberegningService.beregnBeløp(
+                    behandlingId = Testdata.behandling.id,
+                    perioder =
+                        listOf(
+                            Datoperiode(
+                                LocalDate.of(2017, 1, 1),
+                                LocalDate.of(2017, 1, 27),
+                            ),
+                            Datoperiode(
+                                LocalDate.of(2017, 2, 1),
+                                LocalDate.of(2017, 2, 28),
+                            ),
+                        ),
+                )
+            }
         exception.message shouldBe "Periode med ${
             Datoperiode(
                 LocalDate.of(2017, 1, 1),
@@ -410,22 +421,28 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         } er ikke i hele måneder"
     }
 
-    private fun lagVilkårsvurderingMedForsett(behandlingId: UUID, vararg perioder: Månedsperiode) {
-        val vurderingsperioder = perioder.map {
-            Vilkårsvurderingsperiode(
-                periode = Månedsperiode(it.fom, it.tom),
-                begrunnelse = "foo",
-                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
-                aktsomhet = VilkårsvurderingAktsomhet(
-                    aktsomhet = Aktsomhet.FORSETT,
+    private fun lagVilkårsvurderingMedForsett(
+        behandlingId: UUID,
+        vararg perioder: Månedsperiode,
+    ) {
+        val vurderingsperioder =
+            perioder.map {
+                Vilkårsvurderingsperiode(
+                    periode = Månedsperiode(it.fom, it.tom),
                     begrunnelse = "foo",
-                ),
+                    vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
+                    aktsomhet =
+                        VilkårsvurderingAktsomhet(
+                            aktsomhet = Aktsomhet.FORSETT,
+                            begrunnelse = "foo",
+                        ),
+                )
+            }.toSet()
+        val vurdering =
+            Vilkårsvurdering(
+                behandlingId = behandlingId,
+                perioder = vurderingsperioder,
             )
-        }.toSet()
-        val vurdering = Vilkårsvurdering(
-            behandlingId = behandlingId,
-            perioder = vurderingsperioder,
-        )
 
         vilkårsvurderingRepository.insert(vurdering)
     }
@@ -439,27 +456,33 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val vurdertForeldelse =
             VurdertForeldelse(
                 behandlingId = behandlingId,
-                foreldelsesperioder = setOf(
-                    Foreldelsesperiode(
-                        periode = periode,
-                        begrunnelse = "foo",
-                        foreldelsesvurderingstype = resultat,
-                        foreldelsesfrist = foreldelsesFrist,
+                foreldelsesperioder =
+                    setOf(
+                        Foreldelsesperiode(
+                            periode = periode,
+                            begrunnelse = "foo",
+                            foreldelsesvurderingstype = resultat,
+                            foreldelsesfrist = foreldelsesFrist,
+                        ),
                     ),
-                ),
             )
         vurdertForeldelseRepository.insert(vurdertForeldelse)
     }
 
-    private fun lagKravgrunnlag(periode: Månedsperiode, skattProsent: BigDecimal) {
-        val p = Testdata.kravgrunnlagsperiode432.copy(
-            id = UUID.randomUUID(),
-            periode = periode,
-            beløp = setOf(
-                lagFeilBeløp(BigDecimal.valueOf(10000)),
-                lagYtelBeløp(BigDecimal.valueOf(10000), skattProsent),
-            ),
-        )
+    private fun lagKravgrunnlag(
+        periode: Månedsperiode,
+        skattProsent: BigDecimal,
+    ) {
+        val p =
+            Testdata.kravgrunnlagsperiode432.copy(
+                id = UUID.randomUUID(),
+                periode = periode,
+                beløp =
+                    setOf(
+                        lagFeilBeløp(BigDecimal.valueOf(10000)),
+                        lagYtelBeløp(BigDecimal.valueOf(10000), skattProsent),
+                    ),
+            )
         val grunnlag: Kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(p))
         kravgrunnlagRepository.insert(grunnlag)
     }

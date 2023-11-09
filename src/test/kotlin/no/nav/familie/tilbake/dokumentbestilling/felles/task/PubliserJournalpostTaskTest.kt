@@ -16,7 +16,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var taskService: TaskService
 
@@ -65,12 +64,13 @@ internal class PubliserJournalpostTaskTest : OppslagSpringRunnerTest() {
         return Task(
             type = PubliserJournalpostTask.TYPE,
             payload = objectMapper.writeValueAsString(PubliserJournalpostTaskData(UUID.randomUUID(), manuellAdresse = null)),
-            properties = Properties().apply {
-                this["journalpostId"] = journalpostId
-                this["fagsystem"] = Fagsystem.BA.name
-                this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
-                this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
-            },
+            properties =
+                Properties().apply {
+                    this["journalpostId"] = journalpostId
+                    this["fagsystem"] = Fagsystem.BA.name
+                    this["distribusjonstype"] = Distribusjonstype.VIKTIG.name
+                    this["distribusjonstidspunkt"] = Distribusjonstidspunkt.KJERNETID.name
+                },
         )
     }
 

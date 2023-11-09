@@ -32,19 +32,23 @@ class PdlClient(
     @Qualifier("azureClientCredential") restTemplate: RestOperations,
 ) :
     AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
-
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun hentPersoninfo(ident: String, fagsystem: Fagsystem): Personinfo {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(ident),
-            query = PdlConfig.hentEnkelPersonQuery,
-        )
-        val respons: PdlHentPersonResponse<PdlPerson> = postForEntity(
-            pdlConfig.pdlUri,
-            pdlPersonRequest,
-            httpHeaders(mapTilTema(fagsystem)),
-        )
+    fun hentPersoninfo(
+        ident: String,
+        fagsystem: Fagsystem,
+    ): Personinfo {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident),
+                query = PdlConfig.hentEnkelPersonQuery,
+            )
+        val respons: PdlHentPersonResponse<PdlPerson> =
+            postForEntity(
+                pdlConfig.pdlUri,
+                pdlPersonRequest,
+                httpHeaders(mapTilTema(fagsystem)),
+            )
         if (respons.harAdvarsel()) {
             logger.warn("Advarsel ved henting av personinfo fra PDL. Se securelogs for detaljer.")
             secureLogger.warn("Advarsel ved henting av personinfo fra PDL: ${respons.extensions?.warnings}")
@@ -70,16 +74,21 @@ class PdlClient(
         }
     }
 
-    fun hentIdenter(personIdent: String, fagsystem: Fagsystem): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(personIdent),
-            query = PdlConfig.hentIdenterQuery,
-        )
-        val response = postForEntity<PdlHentIdenterResponse>(
-            pdlConfig.pdlUri,
-            pdlPersonRequest,
-            httpHeaders(mapTilTema(fagsystem)),
-        )
+    fun hentIdenter(
+        personIdent: String,
+        fagsystem: Fagsystem,
+    ): PdlHentIdenterResponse {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(personIdent),
+                query = PdlConfig.hentIdenterQuery,
+            )
+        val response =
+            postForEntity<PdlHentIdenterResponse>(
+                pdlConfig.pdlUri,
+                pdlPersonRequest,
+                httpHeaders(mapTilTema(fagsystem)),
+            )
         if (response.harAdvarsel()) {
             logger.warn("Advarsel ved henting av personidenter fra PDL. Se securelogs for detaljer.")
             secureLogger.warn("Advarsel ved henting av personidenter fra PDL: ${response.extensions?.warnings}")
@@ -92,16 +101,21 @@ class PdlClient(
         )
     }
 
-    fun hentAdressebeskyttelseBolk(personIdentList: List<String>, fagsystem: Fagsystem): Map<String, PdlAdressebeskyttelsePerson> {
-        val pdlRequest = PdlPersonBolkRequest(
-            variables = PdlPersonBolkRequestVariables(personIdentList),
-            query = PdlConfig.hentAdressebeskyttelseBolkQuery,
-        )
-        val pdlResponse = postForEntity<PdlBolkResponse<PdlAdressebeskyttelsePerson>>(
-            pdlConfig.pdlUri,
-            pdlRequest,
-            httpHeaders(mapTilTema(fagsystem)),
-        )
+    fun hentAdressebeskyttelseBolk(
+        personIdentList: List<String>,
+        fagsystem: Fagsystem,
+    ): Map<String, PdlAdressebeskyttelsePerson> {
+        val pdlRequest =
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(personIdentList),
+                query = PdlConfig.hentAdressebeskyttelseBolkQuery,
+            )
+        val pdlResponse =
+            postForEntity<PdlBolkResponse<PdlAdressebeskyttelsePerson>>(
+                pdlConfig.pdlUri,
+                pdlRequest,
+                httpHeaders(mapTilTema(fagsystem)),
+            )
         return feilsjekkOgReturnerData(
             pdlResponse = pdlResponse,
         )
@@ -120,6 +134,7 @@ class PdlClient(
     override fun ping() {
         operations.optionsForAllow(pingUri)
     }
+
     private fun mapTilTema(fagsystem: Fagsystem): Tema {
         return when (fagsystem) {
             Fagsystem.EF -> Tema.ENF

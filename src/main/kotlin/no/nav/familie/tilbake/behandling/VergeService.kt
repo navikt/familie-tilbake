@@ -31,9 +31,11 @@ class VergeService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val personService: PersonService,
 ) {
-
     @Transactional
-    fun lagreVerge(behandlingId: UUID, vergeDto: VergeDto) {
+    fun lagreVerge(
+        behandlingId: UUID,
+        vergeDto: VergeDto,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         validerBehandling(behandling)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
@@ -103,7 +105,10 @@ class VergeService(
         }
     }
 
-    private fun validerVergeData(vergeDto: VergeDto, fagsystem: Fagsystem) {
+    private fun validerVergeData(
+        vergeDto: VergeDto,
+        fagsystem: Fagsystem,
+    ) {
         when (vergeDto.type) {
             Vergetype.ADVOKAT -> {
                 requireNotNull(vergeDto.orgNr) { "orgNr kan ikke være null for ${Vergetype.ADVOKAT}" }

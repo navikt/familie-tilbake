@@ -6,7 +6,6 @@ class Beregningsresultat(
     val beregningsresultatsperioder: List<Beregningsresultatsperiode>,
     val vedtaksresultat: Vedtaksresultat,
 ) {
-
     val totaltTilbakekrevesUtenRenter = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløpUtenRenter }
     val totaltTilbakekrevesMedRenter = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp }
     val totaltRentebeløp = beregningsresultatsperioder.sumOf { it.rentebeløp }

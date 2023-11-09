@@ -10,13 +10,13 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import java.math.BigDecimal
 
 object HbGrunnbeløpUtil {
-
     fun lagHbGrunnbeløp(periode: Månedsperiode): HbGrunnbeløp {
         val grunnbeløpsperioder = Grunnbeløpsperioder.finnGrunnbeløpsperioder(periode)
 
-        val formattertPerioder = grunnbeløpsperioder.map {
-            formatterGrunnbeløp(it, periode)
-        }
+        val formattertPerioder =
+            grunnbeløpsperioder.map {
+                formatterGrunnbeløp(it, periode)
+            }
 
         return if (grunnbeløpsperioder.size > 1) {
             val kommaSeparertePerioder = formattertPerioder.dropLast(1).joinToString(", ")
@@ -29,7 +29,10 @@ object HbGrunnbeløpUtil {
         }
     }
 
-    private fun formatterGrunnbeløp(grunnbeløp: Grunnbeløp, periode: Månedsperiode): String {
+    private fun formatterGrunnbeløp(
+        grunnbeløp: Grunnbeløp,
+        periode: Månedsperiode,
+    ): String {
         val format = DatoUtil.DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
         val snitt = grunnbeløp.periode.snitt(periode) ?: error("Finner ikke snitt for ${grunnbeløp.periode} og $periode")
 

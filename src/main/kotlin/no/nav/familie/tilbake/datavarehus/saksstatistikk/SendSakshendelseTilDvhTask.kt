@@ -19,7 +19,6 @@ import java.util.UUID
     beskrivelse = "Sending av sakshendelser til datavarehus",
 )
 class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -33,7 +32,6 @@ class SendSakshendelseTilDvhTask(private val kafkaProducer: KafkaProducer) : Asy
     }
 
     companion object {
-
         const val TASK_TYPE = "dvh.send.sakshendelse"
     }
 }

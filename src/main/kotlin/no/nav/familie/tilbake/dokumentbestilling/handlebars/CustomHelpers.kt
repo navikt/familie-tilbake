@@ -15,8 +15,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class SwitchHelper : Helper<Any> {
-
-    override fun apply(variabel: Any, options: Options): Any {
+    override fun apply(
+        variabel: Any,
+        options: Options,
+    ): Any {
         val variabelnavn: MutableList<String> = ArrayList()
         val variabelverdier: MutableList<Any> = ArrayList()
         variabelnavn.add("__condition_fulfilled")
@@ -37,8 +39,10 @@ class SwitchHelper : Helper<Any> {
 }
 
 class CaseHelper : Helper<Any?> {
-
-    override fun apply(caseKonstant: Any?, options: Options): Any {
+    override fun apply(
+        caseKonstant: Any?,
+        options: Options,
+    ): Any {
         val konstant = if (options.hash.isEmpty()) caseKonstant else options.hash
 
         @Suppress("UNCHECKED_CAST")
@@ -54,8 +58,10 @@ class CaseHelper : Helper<Any?> {
 }
 
 class VariableHelper : Helper<Any?> {
-
-    override fun apply(context: Any?, options: Options): Any {
+    override fun apply(
+        context: Any?,
+        options: Options,
+    ): Any {
         val variabelnavn: MutableList<String> = ArrayList()
         val variabelverdier: MutableList<Any> = ArrayList()
         for ((key, value) in options.hash.entries) {
@@ -68,8 +74,10 @@ class VariableHelper : Helper<Any?> {
 }
 
 class MapLookupHelper : Helper<Any> {
-
-    override fun apply(context: Any?, options: Options): Any {
+    override fun apply(
+        context: Any?,
+        options: Options,
+    ): Any {
         val key = context.toString()
         val defaultVerdi: Any? = options.param(0, null)
         return options.hash(key, defaultVerdi)
@@ -78,45 +86,55 @@ class MapLookupHelper : Helper<Any> {
 }
 
 class DatoHelper : Helper<Any> {
-
     private val format = DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
 
-    override fun apply(context: Any, options: Options?): Any {
+    override fun apply(
+        context: Any,
+        options: Options?,
+    ): Any {
         val date = objectMapper.convertValue(context, LocalDate::class.java)
         return format.format(date)
     }
 }
 
 class KortdatoHelper : Helper<Any> {
-
     private val format = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-    override fun apply(context: Any, options: Options?): Any {
+    override fun apply(
+        context: Any,
+        options: Options?,
+    ): Any {
         val date = objectMapper.convertValue(context, LocalDate::class.java)
         return format.format(date)
     }
 }
 
 class MånedHelper : Helper<Any> {
-
     private val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("NO"))
 
-    override fun apply(context: Any, options: Options?): Any {
+    override fun apply(
+        context: Any,
+        options: Options?,
+    ): Any {
         val date = objectMapper.convertValue(context, YearMonth::class.java)
         return format.format(date)
     }
 }
 
 class StorBokstavHelper : Helper<String> {
-
-    override fun apply(context: String, options: Options?): Any {
+    override fun apply(
+        context: String,
+        options: Options?,
+    ): Any {
         return StringUtils.capitalize(context)
     }
 }
 
 class KroneFormattererMedTusenskille : Helper<Any> {
-
-    override fun apply(context: Any?, options: Options?): Any {
+    override fun apply(
+        context: Any?,
+        options: Options?,
+    ): Any {
         if (context == null) {
             return "ERROR"
         }
@@ -128,14 +146,20 @@ class KroneFormattererMedTusenskille : Helper<Any> {
     companion object {
         val utf8nonBreakingSpace = '\u00A0'
 
-        fun formatterKronerMedTusenskille(verdi: BigDecimal, space: Char): String {
+        fun formatterKronerMedTusenskille(
+            verdi: BigDecimal,
+            space: Char,
+        ): String {
             val beløp = verdi
             val beløpMedTusenskille = medTusenskille(beløp, space)
             val benevning = if (beløp.compareTo(BigDecimal.ONE) == 0) "krone" else "kroner"
             return beløpMedTusenskille + space + benevning
         }
 
-        fun medTusenskille(verdi: BigDecimal, tusenskille: Char): String {
+        fun medTusenskille(
+            verdi: BigDecimal,
+            tusenskille: Char,
+        ): String {
             val symbols = DecimalFormatSymbols.getInstance()
             symbols.groupingSeparator = tusenskille
             val formatter = DecimalFormat("###,###", symbols)

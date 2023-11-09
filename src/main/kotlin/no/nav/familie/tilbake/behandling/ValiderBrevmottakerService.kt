@@ -12,7 +12,10 @@ class ValiderBrevmottakerService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
 ) {
-    fun validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId: UUID, fagsakId: UUID) {
+    fun validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(
+        behandlingId: UUID,
+        fagsakId: UUID,
+    ) {
         val manuelleBrevmottakere = manuellBrevmottakerRepository.findByBehandlingId(behandlingId).takeIf { it.isNotEmpty() } ?: return
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val bruker = fagsak.bruker
@@ -29,7 +32,10 @@ class ValiderBrevmottakerService(
         }
     }
 
-    fun validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(behandlingId: UUID, fagsakId: UUID) {
+    fun validerAtBehandlingenIkkeInneholderStrengtFortroligPerson(
+        behandlingId: UUID,
+        fagsakId: UUID,
+    ) {
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val bruker = fagsak.bruker
         val fagsystem = fagsak.fagsystem

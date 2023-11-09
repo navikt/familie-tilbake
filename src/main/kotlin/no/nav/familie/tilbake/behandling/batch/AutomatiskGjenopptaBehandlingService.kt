@@ -25,7 +25,6 @@ class AutomatiskGjenopptaBehandlingService(
     private val stegService: StegService,
     private val oppgaveTaskService: OppgaveTaskService,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> {
@@ -34,10 +33,12 @@ class AutomatiskGjenopptaBehandlingService(
 
     @Transactional
     fun gjenopptaBehandling(behandlingId: UUID) {
-        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
-            ?: error("Behandling $behandlingId har ikke aktivt steg")
-        val tidsfrist = behandlingsstegstilstand.tidsfrist
-            ?: error("Behandling $behandlingId er på vent uten tidsfrist")
+        val behandlingsstegstilstand =
+            behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+                ?: error("Behandling $behandlingId har ikke aktivt steg")
+        val tidsfrist =
+            behandlingsstegstilstand.tidsfrist
+                ?: error("Behandling $behandlingId er på vent uten tidsfrist")
 
         historikkTaskService.lagHistorikkTask(
             behandlingId,

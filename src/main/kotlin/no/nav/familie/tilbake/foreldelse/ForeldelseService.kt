@@ -22,13 +22,13 @@ class ForeldelseService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
-
     fun hentVurdertForeldelse(behandlingId: UUID): VurdertForeldelseDto {
         val vurdertForeldelse: VurdertForeldelse? = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         // Faktaperioder kan ikke deles. Så logisk periode er samme som faktaperiode
-        val feilutbetaltePerioder = LogiskPeriodeUtil
-            .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
+        val feilutbetaltePerioder =
+            LogiskPeriodeUtil
+                .utledLogiskPeriode(KravgrunnlagUtil.finnFeilutbetalingPrPeriode(kravgrunnlag))
 
         return ForeldelseMapper.tilRespons(feilutbetaltePerioder, kravgrunnlag, vurdertForeldelse)
     }
@@ -37,14 +37,20 @@ class ForeldelseService(
         return foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
     }
 
-    fun erPeriodeForeldet(behandlingId: UUID, periode: Månedsperiode): Boolean {
+    fun erPeriodeForeldet(
+        behandlingId: UUID,
+        periode: Månedsperiode,
+    ): Boolean {
         return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
             ?.any { periode == it.periode && it.erForeldet() }
             ?: false
     }
 
     @Transactional
-    fun lagreVurdertForeldelse(behandlingId: UUID, behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto) {
+    fun lagreVurdertForeldelse(
+        behandlingId: UUID,
+        behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto,
+    ) {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned
         KravgrunnlagsberegningService.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
         val vurdertForeldelse = ForeldelseMapper.tilDomene(behandlingId, behandlingsstegForeldelseDto.foreldetPerioder)
@@ -56,13 +62,14 @@ class ForeldelseService(
 
     @Transactional
     fun lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId: UUID) {
-        val foreldetPerioder = hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
-            ForeldelsesperiodeDto(
-                periode = it.periode,
-                begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
-            )
-        }
+        val foreldetPerioder =
+            hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
+                ForeldelsesperiodeDto(
+                    periode = it.periode,
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                    foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
+                )
+            }
         foreldelseRepository.insert(ForeldelseMapper.tilDomene(behandlingId, foreldetPerioder))
     }
 
@@ -74,7 +81,10 @@ class ForeldelseService(
     }
 
     @Transactional
-    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId: UUID, vurdertForeldelse: VurdertForeldelse) {
+    fun nullstillVilkårsvurderingForEndringerIForeldelsesperiode(
+        behandlingId: UUID,
+        vurdertForeldelse: VurdertForeldelse,
+    ) {
         val eksisterendeVurdertForeldelse = foreldelseRepository.findByBehandlingIdAndAktivIsTrue(behandlingId) ?: return
         val eksisterendeVurdertForeldelsesperioder = eksisterendeVurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()
         val nyVurdertForeldelsesperioder = vurdertForeldelse.foreldelsesperioder.map { it.periode }.toSet()

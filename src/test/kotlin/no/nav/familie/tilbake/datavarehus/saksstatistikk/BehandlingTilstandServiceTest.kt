@@ -43,7 +43,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -71,13 +70,14 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setup() {
-        service = BehandlingTilstandService(
-            behandlingRepository,
-            behandlingsstegstilstandRepository,
-            fagsakRepository,
-            taskService,
-            faktaFeilutbetalingService,
-        )
+        service =
+            BehandlingTilstandService(
+                behandlingRepository,
+                behandlingsstegstilstandRepository,
+                fagsakRepository,
+                taskService,
+                faktaFeilutbetalingService,
+            )
 
         fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
@@ -85,12 +85,13 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling`() {
-        val behandling = behandlingService.opprettBehandling(
-            lagOpprettTilbakekrevingRequest(
-                true,
-                OPPRETT_TILBAKEKREVING_MED_VARSEL,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                lagOpprettTilbakekrevingRequest(
+                    true,
+                    OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                ),
+            )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
@@ -119,12 +120,13 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for nyopprettet behandling uten varsel`() {
-        val behandling = behandlingService.opprettBehandling(
-            lagOpprettTilbakekrevingRequest(
-                false,
-                OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                lagOpprettTilbakekrevingRequest(
+                    false,
+                    OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                ),
+            )
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
         tilstand.ytelsestype shouldBe Ytelsestype.BARNETRYGD
@@ -150,13 +152,14 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingtilstand for fattet behandling`() {
         val behandlingsresultat = Behandlingsresultat(type = Behandlingsresultatstype.FULL_TILBAKEBETALING)
-        val fattetBehandling = behandling.copy(
-            behandlendeEnhet = "1234",
-            behandlendeEnhetsNavn = "foo bar",
-            ansvarligSaksbehandler = "Z111111",
-            ansvarligBeslutter = "Z111112",
-            resultater = setOf(behandlingsresultat),
-        )
+        val fattetBehandling =
+            behandling.copy(
+                behandlendeEnhet = "1234",
+                behandlendeEnhetsNavn = "foo bar",
+                ansvarligSaksbehandler = "Z111111",
+                ansvarligBeslutter = "Z111112",
+                resultater = setOf(behandlingsresultat),
+            )
         behandlingRepository.update(fattetBehandling)
         behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand.copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
@@ -230,21 +233,23 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         val fom = YearMonth.now().minusMonths(1).atDay(1)
         val tom = YearMonth.now().atEndOfMonth()
 
-        val varsel = if (finnesVarsel) {
-            Varsel(
-                varseltekst = "testverdi",
-                sumFeilutbetaling = BigDecimal.valueOf(1500L),
-                perioder = listOf(Periode(fom, tom)),
-            )
-        } else {
-            null
-        }
+        val varsel =
+            if (finnesVarsel) {
+                Varsel(
+                    varseltekst = "testverdi",
+                    sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                    perioder = listOf(Periode(fom, tom)),
+                )
+            } else {
+                null
+            }
 
-        val faktainfo = Faktainfo(
-            revurderingsårsak = "testverdi",
-            revurderingsresultat = "testresultat",
-            tilbakekrevingsvalg = tilbakekrevingsvalg,
-        )
+        val faktainfo =
+            Faktainfo(
+                revurderingsårsak = "testverdi",
+                revurderingsresultat = "testresultat",
+                tilbakekrevingsvalg = tilbakekrevingsvalg,
+            )
 
         return OpprettTilbakekrevingRequest(
             ytelsestype = Ytelsestype.BARNETRYGD,

@@ -19,7 +19,6 @@ import java.time.LocalDate
 @Configuration
 @Profile("mock-pdl")
 class PdlClientConfig {
-
     @Bean
     @Primary
     fun pdlClient(): PdlClient {
@@ -28,11 +27,12 @@ class PdlClientConfig {
         val identerDødePersoner = listOf("doed1234")
         val ident = slot<String>()
         every { pdlClient.hentPersoninfo(capture(ident), any()) } answers {
-            val dødsdato = if (identerDødePersoner.contains(ident.captured)) {
-                LocalDate.of(2022, 4, 1)
-            } else {
-                null
-            }
+            val dødsdato =
+                if (identerDødePersoner.contains(ident.captured)) {
+                    LocalDate.of(2022, 4, 1)
+                } else {
+                    null
+                }
             Personinfo(
                 ident = ident.captured ?: "32132132111",
                 fødselsdato = LocalDate.now().minusYears(20),

@@ -25,7 +25,6 @@ class OppdaterOppgaveTask(
     val environment: Environment,
     private val oppgavePrioritetService: OppgavePrioritetService,
 ) : AsyncTaskStep {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -34,21 +33,24 @@ class OppdaterOppgaveTask(
 
         val frist = task.metadata.getProperty("frist")
         val beskrivelse = task.metadata.getProperty("beskrivelse")
-        val saksbehandler = task.metadata.getProperty("saksbehandler").takeIf { saksbehandler ->
-            saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
-        }
+        val saksbehandler =
+            task.metadata.getProperty("saksbehandler")?.takeIf { saksbehandler ->
+                saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
+            }
         val behandlingId = UUID.fromString(task.payload)
         val enhet = task.metadata.getProperty("enhet")
 
-        val oppgave = try {
-            oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
-        } catch (e: ManglerOppgaveFeil) {
-            log.error("Fant ingen oppgave å oppdatere på behandling $behandlingId. Vil forsøke å opprette en ny isteden")
-            null
-        }
+        val oppgave =
+            try {
+                oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
+            } catch (e: ManglerOppgaveFeil) {
+                log.error("Fant ingen oppgave å oppdatere på behandling $behandlingId. Vil forsøke å opprette en ny isteden")
+                null
+            }
 
-        val nyBeskrivelse = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
-            beskrivelse + System.lineSeparator() + (oppgave?.beskrivelse ?: "")
+        val nyBeskrivelse =
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yy HH:mm")) + ":" +
+                beskrivelse + System.lineSeparator() + (oppgave?.beskrivelse ?: "")
 
         if (oppgave == null) {
             val oppgavetype = oppgaveService.utledOppgavetypeForGjenoppretting(behandlingId)
@@ -70,11 +72,12 @@ class OppdaterOppgaveTask(
 
         val prioritet = oppgavePrioritetService.utledOppgaveprioritet(behandlingId, oppgave)
 
-        var patchetOppgave = oppgave.copy(
-            fristFerdigstillelse = frist,
-            beskrivelse = nyBeskrivelse,
-            prioritet = prioritet,
-        )
+        var patchetOppgave =
+            oppgave.copy(
+                fristFerdigstillelse = frist,
+                beskrivelse = nyBeskrivelse,
+                prioritet = prioritet,
+            )
         if (saksbehandler != null) {
             patchetOppgave = patchetOppgave.copy(tilordnetRessurs = saksbehandler)
         }
@@ -82,7 +85,6 @@ class OppdaterOppgaveTask(
     }
 
     companion object {
-
         const val TYPE = "oppdaterOppgave"
     }
 }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(private val fagsakService: FagsakService) {
-
     @Operation(summary = "Hent fagsak informasjon med bruker og behandlinger")
     @GetMapping(
         path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/v1"],

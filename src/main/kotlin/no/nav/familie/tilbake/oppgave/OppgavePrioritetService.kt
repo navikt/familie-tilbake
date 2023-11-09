@@ -15,8 +15,10 @@ class OppgavePrioritetService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    fun utledOppgaveprioritet(behandlingId: UUID, oppgave: Oppgave? = null): OppgavePrioritet {
+    fun utledOppgaveprioritet(
+        behandlingId: UUID,
+        oppgave: Oppgave? = null,
+    ): OppgavePrioritet {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandlingId)
 
         return if (finnesKravgrunnlag) {

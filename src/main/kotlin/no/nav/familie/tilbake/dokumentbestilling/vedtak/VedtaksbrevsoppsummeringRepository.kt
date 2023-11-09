@@ -12,6 +12,5 @@ import java.util.UUID
 interface VedtaksbrevsoppsummeringRepository :
     RepositoryInterface<Vedtaksbrevsoppsummering, UUID>,
     InsertUpdateRepository<Vedtaksbrevsoppsummering> {
-
     fun findByBehandlingId(behandlingId: UUID): Vedtaksbrevsoppsummering?
 }

@@ -23,17 +23,17 @@ import org.junit.jupiter.api.Test
 import java.util.Base64
 
 internal class PdfBrevServiceTest {
-
     private val journalføringService: JournalføringService = mockk(relaxed = true)
     private val tellerService: TellerService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
     private val organisasjonService: OrganisasjonService = mockk(relaxed = true)
 
-    private val pdfBrevService = PdfBrevService(
-        journalføringService,
-        tellerService,
-        taskService,
-    )
+    private val pdfBrevService =
+        PdfBrevService(
+            journalføringService,
+            tellerService,
+            taskService,
+        )
 
     @Test
     fun `sendBrev oppretter en task med korrekt fritekst`() {
@@ -101,9 +101,10 @@ internal class PdfBrevServiceTest {
     fun `sendBrev støtter å sende brev til institusjon med ampsand i navnet`() {
         val slot = CapturingSlot<Task>()
         every { taskService.save(capture(slot)) } returns mockk()
-        val brevdata = lagBrevdata().apply {
-            metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))
-        }
+        val brevdata =
+            lagBrevdata().apply {
+                metadata = this.metadata.copy(institusjon = Institusjon("876543210", "Foo & Bar AS"))
+            }
 
         pdfBrevService.sendBrev(Testdata.behandling, Testdata.fagsak, brevtype = Brevtype.HENLEGGELSE, brevdata)
 
@@ -116,21 +117,23 @@ internal class PdfBrevServiceTest {
         distribusjonstidspunkt.shouldBe(Distribusjonstidspunkt.KJERNETID.name)
     }
 
-    private fun lagBrevdata() = Brevdata(
-        metadata = Brevmetadata(
-            sakspartId = "",
-            sakspartsnavn = "",
-            mottageradresse = Adresseinfo(" ", ""),
-            behandlendeEnhetsNavn = "",
-            ansvarligSaksbehandler = "Bob",
-            språkkode = Språkkode.NB,
-            ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
-            saksnummer = "1232456",
-            behandlingstype = Behandlingstype.TILBAKEKREVING,
-            gjelderDødsfall = false,
-        ),
-        overskrift = "",
-        mottager = Brevmottager.BRUKER,
-        brevtekst = "",
-    )
+    private fun lagBrevdata() =
+        Brevdata(
+            metadata =
+                Brevmetadata(
+                    sakspartId = "",
+                    sakspartsnavn = "",
+                    mottageradresse = Adresseinfo(" ", ""),
+                    behandlendeEnhetsNavn = "",
+                    ansvarligSaksbehandler = "Bob",
+                    språkkode = Språkkode.NB,
+                    ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                    saksnummer = "1232456",
+                    behandlingstype = Behandlingstype.TILBAKEKREVING,
+                    gjelderDødsfall = false,
+                ),
+            overskrift = "",
+            mottager = Brevmottager.BRUKER,
+            brevtekst = "",
+        )
 }

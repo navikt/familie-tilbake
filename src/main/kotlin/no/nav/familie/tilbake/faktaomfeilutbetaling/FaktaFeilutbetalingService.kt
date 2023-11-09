@@ -21,7 +21,6 @@ class FaktaFeilutbetalingService(
     private val faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
 ) {
-
     @Transactional(readOnly = true)
     fun hentFaktaomfeilutbetaling(behandlingId: UUID): FaktaFeilutbetalingDto {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
@@ -38,16 +37,20 @@ class FaktaFeilutbetalingService(
     }
 
     @Transactional
-    fun lagreFaktaomfeilutbetaling(behandlingId: UUID, behandlingsstegFaktaDto: BehandlingsstegFaktaDto) {
+    fun lagreFaktaomfeilutbetaling(
+        behandlingId: UUID,
+        behandlingsstegFaktaDto: BehandlingsstegFaktaDto,
+    ) {
         deaktiverEksisterendeFaktaOmFeilutbetaling(behandlingId)
 
-        val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> = behandlingsstegFaktaDto.feilutbetaltePerioder.map {
-            FaktaFeilutbetalingsperiode(
-                periode = Månedsperiode(it.periode.fom, it.periode.tom),
-                hendelsestype = it.hendelsestype,
-                hendelsesundertype = it.hendelsesundertype,
-            )
-        }.toSet()
+        val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> =
+            behandlingsstegFaktaDto.feilutbetaltePerioder.map {
+                FaktaFeilutbetalingsperiode(
+                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                    hendelsestype = it.hendelsestype,
+                    hendelsesundertype = it.hendelsesundertype,
+                )
+            }.toSet()
 
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
@@ -60,13 +63,14 @@ class FaktaFeilutbetalingService(
 
     @Transactional
     fun lagreFastFaktaForAutomatiskSaksbehandling(behandlingId: UUID) {
-        val feilutbetaltePerioder = hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
-            FaktaFeilutbetalingsperiode(
-                periode = it.periode.toMånedsperiode(),
-                hendelsestype = Hendelsestype.ANNET,
-                hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
-            )
-        }.toSet()
+        val feilutbetaltePerioder =
+            hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
+                FaktaFeilutbetalingsperiode(
+                    periode = it.periode.toMånedsperiode(),
+                    hendelsestype = Hendelsestype.ANNET,
+                    hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
+                )
+            }.toSet()
         faktaFeilutbetalingRepository.insert(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,

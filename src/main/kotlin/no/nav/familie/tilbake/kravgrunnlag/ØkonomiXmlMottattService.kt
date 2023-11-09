@@ -19,7 +19,6 @@ class ØkonomiXmlMottattService(
     private val mottattXmlRepository: ØkonomiXmlMottattRepository,
     private val mottattXmlArkivRepository: ØkonomiXmlMottattArkivRepository,
 ) {
-
     fun lagreMottattXml(
         kravgrunnlagXml: String,
         kravgrunnlag: DetaljertKravgrunnlagDto,
@@ -39,7 +38,10 @@ class ØkonomiXmlMottattService(
         )
     }
 
-    fun hentMottattKravgrunnlag(eksternKravgrunnlagId: BigInteger, vedtakId: BigInteger): List<ØkonomiXmlMottatt> {
+    fun hentMottattKravgrunnlag(
+        eksternKravgrunnlagId: BigInteger,
+        vedtakId: BigInteger,
+    ): List<ØkonomiXmlMottatt> {
         return mottattXmlRepository.findByEksternKravgrunnlagIdAndVedtakId(eksternKravgrunnlagId, vedtakId)
     }
 
@@ -64,13 +66,15 @@ class ØkonomiXmlMottattService(
         ytelsestype: Ytelsestype,
         vedtakId: BigInteger,
     ): List<ØkonomiXmlMottatt> {
-        val mottattXmlListe = mottattXmlRepository
-            .findByEksternFagsakIdAndYtelsestypeAndVedtakId(eksternFagsakId, ytelsestype, vedtakId)
-        val kravgrunnlagXmlListe = mottattXmlListe.filter { it.melding.contains(Constants.kravgrunnlagXmlRootElement) }
+        val mottattXmlListe =
+            mottattXmlRepository
+                .findByEksternFagsakIdAndYtelsestypeAndVedtakId(eksternFagsakId, ytelsestype, vedtakId)
+        val kravgrunnlagXmlListe = mottattXmlListe.filter { it.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT) }
         if (kravgrunnlagXmlListe.isEmpty()) {
             throw Feil(
-                message = "Det finnes intet kravgrunnlag for fagsystemId=$eksternFagsakId og " +
-                    "ytelsestype=$ytelsestype",
+                message =
+                    "Det finnes intet kravgrunnlag for fagsystemId=$eksternFagsakId og " +
+                        "ytelsestype=$ytelsestype",
             )
         }
         return kravgrunnlagXmlListe

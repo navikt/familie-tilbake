@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 object RessursUtils {
-
     private val LOG = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -16,16 +15,23 @@ object RessursUtils {
     fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)
 
-    fun <T> badRequest(errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
+    fun <T> badRequest(
+        errorMessage: String,
+        throwable: Throwable?,
+    ): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.FORBIDDEN, errorMessage, null)
 
-    fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
+    fun <T> illegalState(
+        errorMessage: String,
+        throwable: Throwable,
+    ): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
+
     fun <T> created(): ResponseEntity<Ressurs<T>> = ResponseEntity.status(HttpStatus.CREATED).build()
 
     fun <T> noContent(): ResponseEntity<Ressurs<T>> = ResponseEntity.noContent().build()

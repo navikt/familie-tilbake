@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.pdf
 
 object DokprodTilHtml {
-
     fun dokprodInnholdTilHtml(tekst: String): String {
         val dokprod: String = sanitize(tekst)
         val builder = StringBuilder()

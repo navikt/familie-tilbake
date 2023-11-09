@@ -38,7 +38,6 @@ import java.util.Optional
 import java.util.UUID
 
 class DistribusjonshåndteringServiceTest {
-
     private val behandlingRepository: BehandlingRepository = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository = mockk(relaxed = true)
@@ -47,46 +46,51 @@ class DistribusjonshåndteringServiceTest {
     private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService = mockk()
 
-    private val pdfBrevService = spyk(
-        PdfBrevService(
-            journalføringService = journalføringService,
-            tellerService = mockk(relaxed = true),
-            taskService = mockk(relaxed = true),
-        ),
-    )
-    private val brevmetadataUtil = BrevmetadataUtil(
-        behandlingRepository = behandlingRepository,
-        fagsakRepository = fagsakRepository,
-        manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
-        eksterneDataForBrevService = eksterneDataForBrevService,
-        organisasjonService = mockk(),
-        featureToggleService = featureToggleService,
-    )
-    private val distribusjonshåndteringService = DistribusjonshåndteringService(
-        brevmetadataUtil = brevmetadataUtil,
-        fagsakRepository = fagsakRepository,
-        manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
-        pdfBrevService = pdfBrevService,
-        vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
-        featureToggleService = featureToggleService,
-    )
+    private val pdfBrevService =
+        spyk(
+            PdfBrevService(
+                journalføringService = journalføringService,
+                tellerService = mockk(relaxed = true),
+                taskService = mockk(relaxed = true),
+            ),
+        )
+    private val brevmetadataUtil =
+        BrevmetadataUtil(
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
+            eksterneDataForBrevService = eksterneDataForBrevService,
+            organisasjonService = mockk(),
+            featureToggleService = featureToggleService,
+        )
+    private val distribusjonshåndteringService =
+        DistribusjonshåndteringService(
+            brevmetadataUtil = brevmetadataUtil,
+            fagsakRepository = fagsakRepository,
+            manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
+            pdfBrevService = pdfBrevService,
+            vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
+            featureToggleService = featureToggleService,
+        )
     private val brevsporingService: BrevsporingService = mockk()
-    private val henleggelsesbrevService = HenleggelsesbrevService(
-        behandlingRepository = behandlingRepository,
-        brevsporingService = brevsporingService,
-        fagsakRepository = fagsakRepository,
-        eksterneDataForBrevService = eksterneDataForBrevService,
-        pdfBrevService = pdfBrevService,
-        organisasjonService = mockk(),
-        distribusjonshåndteringService = distribusjonshåndteringService,
-        brevmetadataUtil = brevmetadataUtil,
-    )
-    private val sendHenleggelsesbrevTask = SendHenleggelsesbrevTask(
-        henleggelsesbrevService = henleggelsesbrevService,
-        behandlingRepository = behandlingRepository,
-        fagsakRepository = fagsakRepository,
-        featureToggleService = featureToggleService,
-    )
+    private val henleggelsesbrevService =
+        HenleggelsesbrevService(
+            behandlingRepository = behandlingRepository,
+            brevsporingService = brevsporingService,
+            fagsakRepository = fagsakRepository,
+            eksterneDataForBrevService = eksterneDataForBrevService,
+            pdfBrevService = pdfBrevService,
+            organisasjonService = mockk(),
+            distribusjonshåndteringService = distribusjonshåndteringService,
+            brevmetadataUtil = brevmetadataUtil,
+        )
+    private val sendHenleggelsesbrevTask =
+        SendHenleggelsesbrevTask(
+            henleggelsesbrevService = henleggelsesbrevService,
+            behandlingRepository = behandlingRepository,
+            fagsakRepository = fagsakRepository,
+            featureToggleService = featureToggleService,
+        )
 
     private val behandling = Testdata.behandling
     private val fagsak = Testdata.fagsak
@@ -153,23 +157,24 @@ class DistribusjonshåndteringServiceTest {
         val behandlingMedManuelleBrevmottakere = behandling.copy(id = behandlingId, verger = emptySet())
 
         every { behandlingRepository.findById(behandlingId) } returns Optional.of(behandlingMedManuelleBrevmottakere)
-        every { manuelleBrevmottakerRepository.findByBehandlingId(behandlingId) } returns listOf(
-            ManuellBrevmottaker(
-                type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
-                behandlingId = behandlingId,
-                navn = personinfoBruker.navn,
-                adresselinje1 = "adresselinje1",
-                postnummer = "postnummer",
-                poststed = "poststed",
-                landkode = "NO",
-            ),
-            ManuellBrevmottaker(
-                type = MottakerType.VERGE,
-                behandlingId = behandlingId,
-                navn = verge.navn,
-                ident = verge.ident,
-            ),
-        )
+        every { manuelleBrevmottakerRepository.findByBehandlingId(behandlingId) } returns
+            listOf(
+                ManuellBrevmottaker(
+                    type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
+                    behandlingId = behandlingId,
+                    navn = personinfoBruker.navn,
+                    adresselinje1 = "adresselinje1",
+                    postnummer = "postnummer",
+                    poststed = "poststed",
+                    landkode = "NO",
+                ),
+                ManuellBrevmottaker(
+                    type = MottakerType.VERGE,
+                    behandlingId = behandlingId,
+                    navn = verge.navn,
+                    ident = verge.ident,
+                ),
+            )
 
         val task = SendHenleggelsesbrevTask.opprettTask(behandlingId, fagsak.fagsystem, "fritekst")
         val brevdata = mutableListOf<Brevdata>()
@@ -203,10 +208,12 @@ class DistribusjonshåndteringServiceTest {
         val brevdataTilBruker = brevdata.first { it.mottager == MANUELL_BRUKER }
         val brevdataTilManuellVerge = brevdata.first { it.mottager == MANUELL_TILLEGGSMOTTAKER }
 
-        val (brødtekstTilManuellVerge, annenMottakerOppgittTilVerge) = brevdataTilManuellVerge.brevtekst
-            .split("Brev med likt innhold er sendt til ")
-        val (brødtekstTilBruker, annenMottakerOppgittTilBruker) = brevdataTilBruker.brevtekst
-            .split("Brev med likt innhold er sendt til ")
+        val (brødtekstTilManuellVerge, annenMottakerOppgittTilVerge) =
+            brevdataTilManuellVerge.brevtekst
+                .split("Brev med likt innhold er sendt til ")
+        val (brødtekstTilBruker, annenMottakerOppgittTilBruker) =
+            brevdataTilBruker.brevtekst
+                .split("Brev med likt innhold er sendt til ")
 
         brødtekstTilManuellVerge shouldBeEqual brødtekstTilBruker
 

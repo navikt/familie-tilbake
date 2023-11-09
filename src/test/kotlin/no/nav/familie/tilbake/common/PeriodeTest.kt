@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class PeriodeTest {
-
     @Test
     fun `snitt returnerer lik periode for like perioder`() {
         val periode1 = Månedsperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 5))

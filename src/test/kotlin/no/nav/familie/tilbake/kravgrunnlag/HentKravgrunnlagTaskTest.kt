@@ -43,7 +43,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

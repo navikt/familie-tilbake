@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("mock-oauth")
 class OAuth2AccessTokenTestConfig {
-
     @Bean
     @Primary
     fun oAuth2AccessTokenServiceMock(): OAuth2AccessTokenService {

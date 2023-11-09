@@ -17,7 +17,6 @@ class HentFagsystemsbehandlingService(
     private val requestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
     private val kafkaProducer: KafkaProducer,
 ) {
-
     @Transactional
     fun sendHentFagsystemsbehandlingRequest(
         eksternFagsakId: String,
@@ -36,13 +35,14 @@ class HentFagsystemsbehandlingService(
         ytelsestype: Ytelsestype,
         eksternId: String,
     ) {
-        val requestSendt = requestSendtRepository.insert(
-            HentFagsystemsbehandlingRequestSendt(
-                eksternFagsakId = eksternFagsakId,
-                ytelsestype = ytelsestype,
-                eksternId = eksternId,
-            ),
-        )
+        val requestSendt =
+            requestSendtRepository.insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = eksternFagsakId,
+                    ytelsestype = ytelsestype,
+                    eksternId = eksternId,
+                ),
+            )
 
         val request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype, eksternId)
         kafkaProducer.sendHentFagsystemsbehandlingRequest(requestSendt.id, request)

@@ -11,10 +11,15 @@ import java.util.UUID
 @Repository
 @Transactional
 interface BrevsporingRepository : RepositoryInterface<Brevsporing, UUID>, InsertUpdateRepository<Brevsporing> {
+    fun findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(
+        behandlingId: UUID,
+        brevtype: Brevtype,
+    ): Brevsporing?
 
-    fun findFirstByBehandlingIdAndBrevtypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, brevtype: Brevtype): Brevsporing?
-
-    fun existsByBehandlingIdAndBrevtypeIn(behandlingId: UUID, brevtype: Set<Brevtype>): Boolean
+    fun existsByBehandlingIdAndBrevtypeIn(
+        behandlingId: UUID,
+        brevtype: Set<Brevtype>,
+    ): Boolean
 
     fun existsByBehandlingId(behandlingId: UUID): Boolean
 }

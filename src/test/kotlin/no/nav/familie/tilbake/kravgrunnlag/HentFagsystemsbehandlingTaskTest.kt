@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -90,16 +89,17 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
-        håndterGamleKravgrunnlagService = HåndterGamleKravgrunnlagService(
-            behandlingRepository,
-            kravgrunnlagRepository,
-            behandlingService,
-            behandlingskontrollService,
-            økonomiXmlMottattService,
-            mockHentKravgrunnlagService,
-            stegService,
-            historikkService,
-        )
+        håndterGamleKravgrunnlagService =
+            HåndterGamleKravgrunnlagService(
+                behandlingRepository,
+                kravgrunnlagRepository,
+                behandlingService,
+                behandlingskontrollService,
+                økonomiXmlMottattService,
+                mockHentKravgrunnlagService,
+                stegService,
+                historikkService,
+            )
         val kafkaProducer: KafkaProducer = mockk()
         hentFagsystemsbehandlingService = spyk(HentFagsystemsbehandlingService(requestSendtRepository, kafkaProducer))
         hentFagsystemsbehandlingTask =

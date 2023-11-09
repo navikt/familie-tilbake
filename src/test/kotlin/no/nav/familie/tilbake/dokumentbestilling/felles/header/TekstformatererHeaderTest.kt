@@ -10,19 +10,19 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class TekstformatererHeaderTest {
-
-    private val brevmetadata = Brevmetadata(
-        sakspartId = "12345678901",
-        sakspartsnavn = "Test",
-        vergenavn = "John Doe",
-        mottageradresse = Adresseinfo("12345678901", "Test"),
-        behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
-        ansvarligSaksbehandler = "Bob",
-        saksnummer = "1232456",
-        språkkode = Språkkode.NB,
-        ytelsestype = Ytelsestype.BARNETILSYN,
-        gjelderDødsfall = false,
-    )
+    private val brevmetadata =
+        Brevmetadata(
+            sakspartId = "12345678901",
+            sakspartsnavn = "Test",
+            vergenavn = "John Doe",
+            mottageradresse = Adresseinfo("12345678901", "Test"),
+            behandlendeEnhetsNavn = "NAV Familie- og pensjonsytelser Skien",
+            ansvarligSaksbehandler = "Bob",
+            saksnummer = "1232456",
+            språkkode = Språkkode.NB,
+            ytelsestype = Ytelsestype.BARNETILSYN,
+            gjelderDødsfall = false,
+        )
 
     @Test
     fun `lagHeader brev til bruker`() {
@@ -63,6 +63,7 @@ Fødselsnummer: 12345678901
     }
 
     private val format = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
     private fun dagensDato(): String {
         return format.format(LocalDate.now())
     }
