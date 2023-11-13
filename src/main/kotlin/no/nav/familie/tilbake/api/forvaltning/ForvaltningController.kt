@@ -3,14 +3,8 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -39,10 +33,7 @@ import java.util.UUID
 @Validated
 class ForvaltningController(
     private val forvaltningService: ForvaltningService,
-    private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val integrasjonerClient: IntegrasjonerClient,
-    private val oppgaveTaskService: OppgaveTaskService
+    private val oppgaveTaskService: OppgaveTaskService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -171,7 +162,7 @@ class ForvaltningController(
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
 
-    @Operation(summary = "Hent gamle åpne behandlinger uten oppgave")
+    @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(
         path = ["/hentBehandlingerUtenOppgave/fagsystem/{fagsystem}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -179,28 +170,7 @@ class ForvaltningController(
     fun finnGamleÅpneBehandlingerUtenOppgave(
         @PathVariable fagsystem: Fagsystem,
     ) {
-        val gamleBehandlinger: List<UUID> =
-            behandlingRepository.finnÅpneBehandlingerOpprettetFør(
-                fagsystem = fagsystem,
-                opprettetFørDato = LocalDateTime.now().minusMonths(2),
-            ) ?: emptyList()
-
-        secureLogger.info("Fant ${gamleBehandlinger.size} gamle åpne behandlinger. Prøver å finne ut om noen mangler oppgave.")
-
-        gamleBehandlinger.forEach {
-            val behandling = behandlingRepository.findByIdOrThrow(it)
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-
-            val finnOppgaveRequest =
-                FinnOppgaveRequest(
-                    saksreferanse = behandling.eksternBrukId.toString(),
-                    tema = fagsak.ytelsestype.tilTema(),
-                )
-            val finnOppgaveResponse = integrasjonerClient.finnOppgaver(finnOppgaveRequest)
-            if (finnOppgaveResponse.antallTreffTotalt == 0L) {
-                secureLogger.info("Ingen oppgave for behandlingId: ${behandling.id} fagsakId: ${fagsak.id}. Oppretter ny oppgave.")
-            }
-        }
+        oppgaveTaskService.opprettFinnGammelBehandlingUtenOppgaveTask(fagsystem)
     }
 
     @Operation(summary = "Lag oppdaterOppgaveTask for behandling")
@@ -209,7 +179,7 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun lagOppdaterOppgaveTaskForBehandling(
-        @RequestBody behandlingIder: List<UUID>
+        @RequestBody behandlingIder: List<UUID>,
     ) {
         behandlingIder.forEach { behandlingID ->
             oppgaveTaskService.oppdaterOppgaveTask(
