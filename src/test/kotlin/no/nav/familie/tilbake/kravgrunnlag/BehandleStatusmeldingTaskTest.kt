@@ -86,7 +86,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
         val task = opprettTask(statusmeldingXml, BehandleStatusmeldingTask.TYPE)
 
         val exception = shouldThrow<Feil> { behandleStatusmeldingTask.doTask(task) }
-        exception.message shouldBe "Det finnes intet kravgrunnlag for fagsystemId=${fagsak.eksternFagsakId} " +
+        exception.message shouldBe "Det finnes ikke noe kravgrunnlag for fagsystemId=${fagsak.eksternFagsakId} " +
             "og ytelsestype=${fagsak.ytelsestype}"
     }
 
