@@ -71,11 +71,14 @@ class ØkonomiXmlMottattService(
                 .findByEksternFagsakIdAndYtelsestypeAndVedtakId(eksternFagsakId, ytelsestype, vedtakId)
         val kravgrunnlagXmlListe = mottattXmlListe.filter { it.melding.contains(Constants.KRAVGRUNNLAG_XML_ROOT_ELEMENT) }
         if (kravgrunnlagXmlListe.isEmpty()) {
-            throw Feil(
-                message =
-                    "Det finnes intet kravgrunnlag for fagsystemId=$eksternFagsakId og " +
-                        "ytelsestype=$ytelsestype",
-            )
+            val arkivertMottattXmlListe = mottattXmlArkivRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
+            if (arkivertMottattXmlListe.isNotEmpty()) {
+                return emptyList()
+            } else {
+                throw Feil(
+                    message = "Det finnes ikke noe kravgrunnlag for fagsystemId=$eksternFagsakId og ytelsestype=$ytelsestype"
+                )
+            }
         }
         return kravgrunnlagXmlListe
     }

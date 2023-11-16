@@ -1,5 +1,7 @@
 package no.nav.familie.tilbake.oppgave
 
+import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -183,6 +185,18 @@ class OppgaveTaskService(
                 type = OppdaterPrioritetTask.TYPE,
                 payload = behandlingId.toString(),
                 properties = properties,
+            ),
+        )
+    }
+
+    @Transactional
+    fun opprettFinnGammelBehandlingUtenOppgaveTask(
+        fagsystem: Fagsystem,
+    ) {
+        taskService.save(
+            Task(
+                type = FinnGammelBehandlingUtenOppgaveTask.TYPE,
+                payload = objectMapper.writeValueAsString(FinnGammelBehandlingUtenOppgaveTask.FinnGammelBehandlingUtenOppgaveDto(fagsystem)),
             ),
         )
     }

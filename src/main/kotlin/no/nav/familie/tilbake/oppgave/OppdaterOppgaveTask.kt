@@ -44,7 +44,7 @@ class OppdaterOppgaveTask(
             try {
                 oppgaveService.finnOppgaveForBehandlingUtenOppgaveType(behandlingId)
             } catch (e: ManglerOppgaveFeil) {
-                log.error("Fant ingen oppgave å oppdatere på behandling $behandlingId. Vil forsøke å opprette en ny isteden")
+                log.warn("Fant ingen oppgave å oppdatere på behandling $behandlingId. Vil forsøke å opprette en ny isteden")
                 null
             }
 
