@@ -13,6 +13,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
@@ -28,11 +29,14 @@ import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
@@ -102,7 +106,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var vedtaksbrevService: VedtaksbrevService
 
-    @Autowired
     private lateinit var sendBrevService: DistribusjonshåndteringService
 
     @Autowired
@@ -111,9 +114,22 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
 
+    @Autowired
+    private lateinit var brevmetadataUtil: BrevmetadataUtil
+
+    private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
+
     @BeforeEach
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
+        manuellBrevmottakerRepository = mockk(relaxed = true)
+        sendBrevService = DistribusjonshåndteringService(
+            fagsakRepository = fagsakRepository,
+            pdfBrevService = spyPdfBrevService,
+            vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
+            brevmetadataUtil = brevmetadataUtil,
+            manuelleBrevmottakerRepository = manuellBrevmottakerRepository,
+        )
         vedtaksbrevService =
             VedtaksbrevService(
                 behandlingRepository,
@@ -174,7 +190,8 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val brevtypeSlot = slot<Brevtype>()
         val brevdataSlot = slot<Brevdata>()
 
-        vedtaksbrevService.sendVedtaksbrev(Testdata.behandling, Brevmottager.BRUKER)
+        val behandlingUtenVerge = behandling.copy(verger = emptySet())
+        vedtaksbrevService.sendVedtaksbrev(behandlingUtenVerge)
 
         verify {
             spyPdfBrevService.sendBrev(
@@ -184,10 +201,37 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 capture(brevdataSlot),
             )
         }
-        behandlingSlot.captured shouldBe Testdata.behandling
+        behandlingSlot.captured shouldBe behandlingUtenVerge
         fagsakSlot.captured shouldBe fagsak
         brevtypeSlot.captured shouldBe Brevtype.VEDTAK
         brevdataSlot.captured.overskrift shouldBe "Du må betale tilbake barnetrygden"
+    }
+
+    @Test
+    fun `sendVedtaksbrev til organisasjon skal sette orgnr som mottakerident i brevdata`() {
+        val orgNr = "123456789"
+        val brevdataSlot = mutableListOf<Brevdata>()
+
+        every { manuellBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
+            ManuellBrevmottaker(
+                type = MottakerType.FULLMEKTIG,
+                behandlingId = behandling.id,
+                navn = "Organisasjonen v/ advokatfullmektig",
+                orgNr = orgNr,
+            )
+        )
+        vedtaksbrevService.sendVedtaksbrev(behandling.copy(verger = emptySet()))
+
+        verify {
+            spyPdfBrevService.sendBrev(
+                any(),
+                any(),
+                any(),
+                capture(brevdataSlot),
+            )
+        }
+        brevdataSlot.last().mottager shouldBe Brevmottager.MANUELL_TILLEGGSMOTTAKER
+        brevdataSlot.last().metadata.mottageradresse.ident shouldBe orgNr
     }
 
     @Test

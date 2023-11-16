@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
@@ -34,22 +33,11 @@ class VedtaksbrevService(
 ) {
     fun sendVedtaksbrev(
         behandling: Behandling,
-        brevmottager: Brevmottager? = null,
     ) {
         val vedtaksbrevgrunnlag = vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(behandling.id)
-        if (brevmottager == null) {
-            distribusjonshåndteringService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
-                vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata)
-            }
-        } else {
-            val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-            val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottager)
-            pdfBrevService.sendBrev(
-                behandling,
-                fagsak,
-                Brevtype.VEDTAK,
-                brevdata,
-            )
+
+        distribusjonshåndteringService.sendBrev(behandling, Brevtype.VEDTAK) { brevmottaker, brevmetadata ->
+            vedtaksbrevgeneratorService.genererVedtaksbrevForSending(vedtaksbrevgrunnlag, brevmottaker, brevmetadata)
         }
     }
 
