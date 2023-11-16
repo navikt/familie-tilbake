@@ -70,7 +70,6 @@ class DistribusjonshåndteringServiceTest {
             manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
             pdfBrevService = pdfBrevService,
             vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
-            featureToggleService = featureToggleService,
         )
     private val brevsporingService: BrevsporingService = mockk()
     private val henleggelsesbrevService =

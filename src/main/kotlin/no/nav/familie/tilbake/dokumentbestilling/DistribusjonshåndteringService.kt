@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmetadata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
@@ -36,7 +35,6 @@ class DistribusjonshåndteringService(
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val pdfBrevService: PdfBrevService,
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun sendBrev(
         behandling: Behandling,
@@ -132,7 +130,7 @@ val Brevmottaker?.manuellAdresse: Adresseinfo?
     get() =
         if (this is ManuellBrevmottakerType) {
             Adresseinfo(
-                ident = mottaker.ident.orEmpty(),
+                ident = (mottaker.ident ?: mottaker.orgNr).orEmpty(),
                 mottagernavn = mottaker.navn,
                 manuellAdresse =
                     if (mottaker.hasManuellAdresse()) {
