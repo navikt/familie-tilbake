@@ -26,6 +26,6 @@ spec:
       sla: respond within 1h, during office hours
       severity: danger
     - alert: familie-tilbake - høy feilrate i logger
-      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake",log_level=~"Error"}[10m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake"}[10m]))) > 15
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake",log_level=~"Error"}[10m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake"}[10m]))) > 1
       for: 5m
       action: "<https://logs.adeo.no/goto/cd9d896bb5d08e8e7efae0289320c040|Check logs>"
