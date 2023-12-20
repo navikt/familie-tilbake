@@ -158,7 +158,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-dev-gcp.yaml
-          IMAGE: ${{ needs.build-jar-docker.outputs.image }}
+          VAR: image=${{ needs.build-jar-docker.outputs.image }}
       - name: Deploy dvh_sak_topic
         uses: nais/deploy/actions/deploy@v1
         env:

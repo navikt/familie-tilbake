@@ -123,13 +123,14 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun init() {
         spyPdfBrevService = spyk(pdfBrevService)
         manuellBrevmottakerRepository = mockk(relaxed = true)
-        sendBrevService = DistribusjonshåndteringService(
-            fagsakRepository = fagsakRepository,
-            pdfBrevService = spyPdfBrevService,
-            vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
-            brevmetadataUtil = brevmetadataUtil,
-            manuelleBrevmottakerRepository = manuellBrevmottakerRepository,
-        )
+        sendBrevService =
+            DistribusjonshåndteringService(
+                fagsakRepository = fagsakRepository,
+                pdfBrevService = spyPdfBrevService,
+                vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
+                brevmetadataUtil = brevmetadataUtil,
+                manuelleBrevmottakerRepository = manuellBrevmottakerRepository,
+            )
         vedtaksbrevService =
             VedtaksbrevService(
                 behandlingRepository,
@@ -212,14 +213,15 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val orgNr = "123456789"
         val brevdataSlot = mutableListOf<Brevdata>()
 
-        every { manuellBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
-            ManuellBrevmottaker(
-                type = MottakerType.FULLMEKTIG,
-                behandlingId = behandling.id,
-                navn = "Organisasjonen v/ advokatfullmektig",
-                orgNr = orgNr,
+        every { manuellBrevmottakerRepository.findByBehandlingId(any()) } returns
+            listOf(
+                ManuellBrevmottaker(
+                    type = MottakerType.FULLMEKTIG,
+                    behandlingId = behandling.id,
+                    navn = "Organisasjonen v/ advokatfullmektig",
+                    orgNr = orgNr,
+                ),
             )
-        )
         vedtaksbrevService.sendVedtaksbrev(behandling.copy(verger = emptySet()))
 
         verify {

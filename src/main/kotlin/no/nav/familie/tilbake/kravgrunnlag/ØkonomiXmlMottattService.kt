@@ -76,7 +76,7 @@ class ØkonomiXmlMottattService(
                 return emptyList()
             } else {
                 throw Feil(
-                    message = "Det finnes ikke noe kravgrunnlag for fagsystemId=$eksternFagsakId og ytelsestype=$ytelsestype"
+                    message = "Det finnes ikke noe kravgrunnlag for fagsystemId=$eksternFagsakId og ytelsestype=$ytelsestype",
                 )
             }
         }

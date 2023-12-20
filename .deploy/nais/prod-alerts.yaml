@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: familie-tilbake-alerts
+  labels:
+    team: teamfamilie
+    app: familie-tilbake
+  namespace: teamfamilie
+spec:
+  receivers:
+    slack:
+      channel: '#team-familie-alerts'
+  alerts:
+    - alert: familie-tilbake - app nede
+      expr: kube_deployment_status_replicas_unavailable{deployment="familie-tilbake",job="kubernetes-service-endpoints"} > 0
+      for: 10m
+      description: "familie-tilbake har utilgjengelige podder i teamfamilie"
+      action: "kubectl describe pod -l app=familie-tilbake -n teamfamilie` for events og `kubectl get pods -l app=familie-tilbake -n teamfamilie` for å se feilende podder"
+      sla: respond within 1h, during office hours
+      severity: danger
+    - alert: familie-tilbake -kontinuerlig restart
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"familie-tilbake"}[5m])) by (container) > 2
+      for: 2m
+      description: "familie-tilbake har restartet flere ganger de siste 5 minuttene!"
+      action: "Se `kubectl describe pod familie-tilbake` for events, og `kubectl logs familie-tilbake` for logger"
+      sla: respond within 1h, during office hours
+      severity: danger
+    - alert: familie-tilbake - høy feilrate i logger
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake",log_level=~"Error"}[10m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake"}[10m]))) > 1
+      for: 5m
+      action: "<https://logs.adeo.no/goto/cd9d896bb5d08e8e7efae0289320c040|Check logs>"

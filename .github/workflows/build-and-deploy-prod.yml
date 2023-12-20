@@ -60,14 +60,14 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-dev-gcp.yaml
-          IMAGE: ${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .deploy/nais/app-prod-gcp.yaml
-          IMAGE: ${{ needs.build.outputs.image }}
+          RESOURCE: .deploy/nais/app-prod-gcp.yaml,.deploy/nais/prod-alerts.yaml
+          VAR: image= ${{ needs.build.outputs.image }}
       - name: Deploy dvh_sak_topic
         uses: nais/deploy/actions/deploy@v1
         env:
