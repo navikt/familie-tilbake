@@ -1,3 +1,4 @@
+---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -7,25 +8,70 @@ metadata:
     app: familie-tilbake
   namespace: teamfamilie
 spec:
+  groups:
+    - name: familie-tilbake-alerts
+      rules:
+        - alert: familie-tilbake - app nede
+          expr: kube_deployment_status_replicas_unavailable{deployment="familie-tilbake",job="kubernetes-service-endpoints"} > 0
+          for: 10m
+          annotations:
+            summary: "familie-tilbake er nede -> 0 kjørende podder"
+            description: "familie-tilbake har utilgjengelige replicas i teamfamilie"
+            action: "kubectl describe pod -l app=familie-tilbake -n teamfamilie` for events og `kubectl get pods -l app=familie-tilbake -n teamfamilie` for å se feilende podder"
+            sla: respond within 1h, during office hours
+            severity: critical
+        - alert: familie-tilbake -kontinuerlig restart
+          expr: sum(increase(kube_pod_container_status_restarts_total{container=~"familie-tilbake"}[5m])) by (container) > 2
+          for: 2m
+          annotations:
+            summary: "familie-tilbake har restartet flere ganger de siste 5 minuttene!"
+            description: "familie-tilbake har restartet flere ganger de siste 5 minuttene!"
+            action: "Se `kubectl describe pod familie-tilbake` for events, og `kubectl logs familie-tilbake` for logger"
+            sla: respond within 1h, during office hours
+            severity: critical
+        - alert: familie-tilbake - høy feilrate i logger
+          expr: sum by (app, namespace) (increase(log_messages_errors{app="familie-tilbake",level="Error"}[5m])) > 2
+          for: 2m
+          annotations:
+            summary: "familie-tilbake har høy feilrate i logger"
+            description: "familie-tilbake har høy feilrate i logger"
+            sla: respond within 1h, during office hours
+            severity: critical
+            action: "<https://logs.adeo.no/goto/cd9d896bb5d08e8e7efae0289320c040|Check logs>"
+          labels:
+            namespace: teamfamilie
+            severity: critical
+            alert_team: teamfamilie
+            alert_type: custom
+
+---
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: teamfamilie-tilbake-slackalert
+  namespace: teamfamilie
+  labels:
+    alertmanagerConfig: teamfamilie-tilbake-slackalert
+spec:
   receivers:
-    slack:
-      channel: '#team-familie-alerts'
-  alerts:
-    - alert: familie-tilbake - app nede
-      expr: kube_deployment_status_replicas_unavailable{deployment="familie-tilbake",job="kubernetes-service-endpoints"} > 0
-      for: 10m
-      description: "familie-tilbake har utilgjengelige podder i teamfamilie"
-      action: "kubectl describe pod -l app=familie-tilbake -n teamfamilie` for events og `kubectl get pods -l app=familie-tilbake -n teamfamilie` for å se feilende podder"
-      sla: respond within 1h, during office hours
-      severity: danger
-    - alert: familie-tilbake -kontinuerlig restart
-      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"familie-tilbake"}[5m])) by (container) > 2
-      for: 2m
-      description: "familie-tilbake har restartet flere ganger de siste 5 minuttene!"
-      action: "Se `kubectl describe pod familie-tilbake` for events, og `kubectl logs familie-tilbake` for logger"
-      sla: respond within 1h, during office hours
-      severity: danger
-    - alert: familie-tilbake - høy feilrate i logger
-      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake",log_level=~"Error"}[10m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="familie-tilbake"}[10m]))) > 1
-      for: 5m
-      action: "<https://logs.adeo.no/goto/cd9d896bb5d08e8e7efae0289320c040|Check logs>"
+    - name: teamfamilie-tilbake-slack-alerts
+      slackConfigs:
+        - apiURL:
+            key: apiUrl
+            name: slack-webhook
+          channel: '#team-familie-alerts'
+          username: James
+          iconURL: https://avatars.slack-edge.com/2020-12-16/1576455251653_e4916620a0aee4a47970_512.jpg
+          sendResolved: true
+  route:
+    groupBy:
+      - alertname
+    matchers:
+      - name: "alert_team"
+        matchType: "="
+        value: "teamfamilie"
+    groupInterval: 10s
+    groupWait: 5s
+    receiver: teamfamilie-tilbake-slack-alerts
+    repeatInterval: 2m
