@@ -5,13 +5,12 @@ ARG JAVA_OTEL_VERSION=v1.32.0
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/$JAVA_OTEL_VERSION/opentelemetry-javaagent.jar /instrumentations/java/javaagent.jar
 
 # Final image
-FROM gcr.io/distroless/java21:nonroot
+FROM gcr.io/distroless/java21-debian12:nonroot
 COPY --from=javaagent --chown=nonroot:nonroot /instrumentations/java/javaagent.jar /app/javaagent.jar
 COPY --chown=nonroot:nonroot ./target/familie-tilbake.jar /app/app.jar
 WORKDIR /app
 
 ENV APP_NAME=familie-tilbake
-ENV LC_ALL="nb_NO.UTF-8"
 ENV LANG="nb_NO.UTF-8"
 ENV TZ="Europe/Oslo"
 # TLS Config works around an issue in OpenJDK... See: https://github.com/kubernetes-client/java/issues/854
