@@ -174,7 +174,7 @@ class ForvaltningController(
         Behandlerrolle.FORVALTER,
         "Henter forvaltningsinformasjon",
         AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
+        HenteParam.INGEN,
     )
     fun hentlocale(
     ): Ressurs<String> {
