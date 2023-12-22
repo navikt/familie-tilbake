@@ -64,6 +64,18 @@ spec:
           username: James
           iconURL: https://avatars.slack-edge.com/2020-12-16/1576455251653_e4916620a0aee4a47970_512.jpg
           sendResolved: true
+          title: |-
+            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+          text: >-
+            {{ range .Alerts }}
+            {{ if or .Annotations.summary .Annotations.message }}
+            {{ or .Annotations.summary .Annotations.message }}
+            {{ println " " }}
+            {{- end }}
+            {{- if .Annotations.action }}
+            • *action*: {{ .Annotations.action }} {{ println " " }}
+            {{- end }}
+            {{ end }}
   route:
     groupBy:
       - alertname
