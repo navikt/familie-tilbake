@@ -170,15 +170,9 @@ class ForvaltningController(
         path = ["/hentlocale"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter forvaltningsinformasjon",
-        AuditLoggerEvent.NONE,
-        HenteParam.INGEN,
-    )
     fun hentlocale(
     ): Ressurs<String> {
-        return Ressurs.success(LocaleContextHolder.getLocale().toString() + " "  + ZonedDateTime.now())
+        return Ressurs.success(LocaleContextHolder.getLocale().toString() + " " + ZonedDateTime.now())
     }
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
