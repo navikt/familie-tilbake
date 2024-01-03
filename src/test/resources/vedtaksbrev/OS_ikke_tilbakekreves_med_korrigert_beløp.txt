@@ -4,7 +4,7 @@ foo bar baz
 
 Du har fått 500 kroner for mye utbetalt.
 __Hvordan har vi kommet fram til at du ikke må betale tilbake?
-Du har fått vite om du har rett til overgangsstønad og hvor mye du har rett til. Selv om du burde forstått at beløpet var feil, er beløpet lavere enn 4 972 kroner. Du må derfor ikke betale tilbake beløpet.
+Du har fått vite om du har rett til overgangsstønad og hvor mye du har rett til. Selv om du burde forstått at beløpet var feil, er beløpet lavere enn 5 108 kroner. Du må derfor ikke betale tilbake beløpet.
 
 Vedtaket er gjort etter Folketrygdloven § 22-15 6.ledd.
 _Du har rett til å klage
