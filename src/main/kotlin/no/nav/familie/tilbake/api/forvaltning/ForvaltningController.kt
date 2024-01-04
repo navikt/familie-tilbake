@@ -192,7 +192,7 @@ class ForvaltningController(
         path = ["/settiverksettingTilUtfort/{taskId}/behandling/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun finnGamleÅpneBehandlingerUtenOppgave(
+    fun settIverksettStegTilUtførtOgFortsett(
         @PathVariable taskId: Long, @PathVariable behandlingId: UUID,
     ) {
         forvaltningService.hoppOverIverksettingMotOppdrag(behandlingId = behandlingId, taskId = taskId)
