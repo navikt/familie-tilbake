@@ -1,21 +1,30 @@
 package no.nav.familie.tilbake.forvaltning
 
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
+import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
@@ -39,6 +48,7 @@ import java.util.UUID
 @Service
 class ForvaltningService(
     private val behandlingRepository: BehandlingRepository,
+    private val behandlingVedtakService: BehandlingsvedtakService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
@@ -50,6 +60,7 @@ class ForvaltningService(
     private val historikkTaskService: HistorikkTaskService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val tellerService: TellerService,
+    private val taskService: TaskService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
@@ -99,6 +110,32 @@ class ForvaltningService(
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag)
 
         stegService.håndterSteg(behandlingId)
+    }
+
+    @Transactional
+    fun hoppOverIverksettingMotOppdrag(behandlingId: UUID, taskId: Long) {
+        behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
+
+        behandlingskontrollService
+            .oppdaterBehandlingsstegStatus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    behandlingssteg = Behandlingssteg.IVERKSETT_VEDTAK,
+                    behandlingsstegstatus = Behandlingsstegstatus.UTFØRT,
+                ),
+            )
+        behandlingskontrollService.fortsettBehandling(behandlingId)
+
+        val task = taskService.findById(taskId)
+        taskService.save(
+            Task(
+                type = SendVedtaksbrevTask.TYPE,
+                payload = task.payload,
+                properties = task.metadata,
+            ),
+        )
+        //Setter feilet task til ferdig.
+        taskService.save(task.copy(status = Status.FERDIG))
     }
 
     @Transactional
