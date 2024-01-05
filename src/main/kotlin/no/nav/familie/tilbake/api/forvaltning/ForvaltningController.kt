@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -184,6 +185,17 @@ class ForvaltningController(
         @PathVariable fagsystem: Fagsystem,
     ) {
         oppgaveTaskService.opprettFinnGammelBehandlingUtenOppgaveTask(fagsystem)
+    }
+
+    @Operation(summary = "Manuellt ufører iverksettingssteget uten å sende til oppdrag")
+    @PostMapping(
+        path = ["/settiverksettingTilUtfort/{taskId}/behandling/{behandlingId}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun settIverksettStegTilUtførtOgFortsett(
+        @PathVariable taskId: Long, @PathVariable behandlingId: UUID,
+    ) {
+        forvaltningService.hoppOverIverksettingMotOppdrag(behandlingId = behandlingId, taskId = taskId)
     }
 
     @Operation(summary = "Lag oppdaterOppgaveTask for behandling")
