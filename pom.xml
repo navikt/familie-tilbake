@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.6</version>
+        <version>3.2.1</version>
     </parent>
 
     <properties>
@@ -21,10 +21,10 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.9.21</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20231109091547_fd2cae7</kontrakter.version>
-        <felles.version>2.20231023162434_fa320ce</felles.version>
+        <kontrakter.version>3.0_20240105130251_97f8128</kontrakter.version>
+        <felles.version>2.20231201131108_ea25dd3</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.8.0</kotest.version>
         <token-validation-spring.version>3.1.7</token-validation-spring.version>
@@ -41,12 +41,12 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.0.4</spring.cloud-contract>
-        <springdoc.version>2.2.0</springdoc.version>
-        <testcontainers.version>1.19.1</testcontainers.version>
+        <spring.cloud-contract>4.1.0</spring.cloud-contract>
+        <springdoc.version>2.3.0</springdoc.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20231026103714_2f17845</prosessering-core.version>
+        <prosessering-core.version>2.20231212093500_bfa0e7c</prosessering-core.version>
     </properties>
 
 
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.3.4.0</version>
+            <version>9.3.4.1</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -312,7 +312,7 @@
         <dependency>
             <groupId>org.messaginghub</groupId>
             <artifactId>pooled-jms</artifactId>
-            <version>3.1.4</version>
+            <version>3.1.5</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -533,7 +533,7 @@
                     <dependency>
                         <groupId>com.pinterest.ktlint</groupId>
                         <artifactId>ktlint-cli</artifactId>
-                        <version>1.0.1</version>
+                        <version>1.1.0</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
                 </dependencies>
