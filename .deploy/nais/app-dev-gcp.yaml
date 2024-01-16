@@ -37,7 +37,7 @@ spec:
       - type: POSTGRES_14
         tier: db-custom-1-3840
         name: familie-tilbake
-        autoBackupTime: "03:00"
+        autoBackupHour: 3
         databases:
           - name: familie-tilbake
             envVarPrefix: DB
@@ -102,9 +102,7 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: b27apvl220.preprod.local
           ports:
-            - name: mq
-              port: 1413
-              protocol: TCP
+            - port: 1413
   replicas:
     min: 2
     max: 4
