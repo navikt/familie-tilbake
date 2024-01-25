@@ -54,10 +54,6 @@ class StegService(
             )
         }
 
-        if (behandledeSteg.behandlingsstatus != behandling.status){
-            throw Feil("Kan ikke gjøre steg $behandledeSteg mens status er ${behandling.status}")
-        }
-
         var aktivtBehandlingssteg: Behandlingssteg = hentAktivBehandlingssteg(behandlingId)
         if (Behandlingssteg.FORESLÅ_VEDTAK == aktivtBehandlingssteg) {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligPersonMedManuelleBrevmottakere(behandlingId = behandling.id, fagsakId = behandling.fagsakId)
@@ -74,6 +70,10 @@ class StegService(
             }
             return
         }
+        if (behandledeSteg.behandlingsstatus != behandling.status){
+            throw Feil("Kan ikke gjøre steg $behandledeSteg mens behandlingstatus er ${behandling.status}")
+        }
+
         behandlingskontrollService.behandleStegPåNytt(behandlingId, behandledeSteg)
         hentStegInstans(behandledeSteg).utførSteg(behandlingId, behandlingsstegDto)
 
