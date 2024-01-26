@@ -21,7 +21,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.test.EmbeddedKafkaBroker
-import org.springframework.kafka.test.EmbeddedKafkaKraftBroker
 
 @Configuration
 @EnableKafka
@@ -32,7 +31,7 @@ class KafkaLokalConfig(
 ) {
     @Bean
     fun broker(): EmbeddedKafkaBroker {
-        return EmbeddedKafkaKraftBroker(1, 1)
+        return EmbeddedKafkaBroker(1)
             // For å teste historikkinnslag, må EmbeddedKafkaBroker kjøre på port 8093
             // For å teste opprett behandling manuelt, må EmbeddedKafkaBroker kjøre på port 9092
             .kafkaPorts(brokerKafkaPort)
@@ -40,6 +39,11 @@ class KafkaLokalConfig(
                 "listeners",
                 "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort",
             )
+            .brokerProperty(
+                "advertised.listeners",
+                "PLAINTEXT://localhost:$brokerKafkaPort,REMOTE://localhost:$brokerRemotePort",
+            )
+            .brokerProperty("listener.security.protocol.map", "PLAINTEXT:PLAINTEXT,REMOTE:PLAINTEXT")
             .brokerListProperty("spring.kafka.bootstrap-servers")
     }
 
