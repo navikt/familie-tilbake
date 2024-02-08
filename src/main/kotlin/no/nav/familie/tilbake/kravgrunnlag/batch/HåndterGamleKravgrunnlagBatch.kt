@@ -34,14 +34,10 @@ class HåndterGamleKravgrunnlagBatch(
     @Transactional
     fun utfør() {
         val erLeader = LeaderClient.isLeader() == true
-        if (!erLeader) {
-            return
-        }
-
-        val erLokaltMiljø = !environment.activeProfiles.any {
+        val erLokaltMiljø = environment.activeProfiles.any {
             it.contains("local") || it.contains("integrasjonstest")
         }
-        if (erLokaltMiljø) {
+        if (!erLeader && !erLokaltMiljø) {
             return
         }
 
