@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teamfamilie
 spec:
-  image: europe-north1-docker.pkg.dev/nais-management-233d/poao/kafka-manager:2023.12.13-06.32-bd9f953 # See https://github.com/navikt/kafka-manager/packages
+  image: europe-north1-docker.pkg.dev/nais-management-233d/poao/kafka-manager:2024.02.06-12.20-dabf3e1 # See https://github.com/navikt/kafka-manager/actions
   port: 8080
   ingresses:
     - https://familie-tilbake-kafka-manager.intern.nav.no
