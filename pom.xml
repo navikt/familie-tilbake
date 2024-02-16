@@ -159,6 +159,11 @@
             <artifactId>openhtmltopdf-slf4j</artifactId>
             <version>${openhtmltopdf.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.1</version>
+        </dependency>
         <!-- PDF/A-2U-validering -->
         <dependency>
             <groupId>org.verapdf</groupId>
