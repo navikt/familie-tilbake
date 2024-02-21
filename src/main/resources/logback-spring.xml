@@ -55,5 +55,6 @@
     <logger name="org.apache.cxf.service" level="INFO"/>
     <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
     <logger name="org.apache.wss4j.common.crypto.CryptoBase" level="ERROR"/>
+    <logger name="org.apache.pdfbox.pdmodel.font.PDType1Font" level="ERROR"/>
 
 </configuration>
