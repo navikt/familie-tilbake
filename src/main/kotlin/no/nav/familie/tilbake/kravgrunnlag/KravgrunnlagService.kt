@@ -49,14 +49,16 @@ class KravgrunnlagService(
     @Transactional
     fun håndterMottattKravgrunnlag(kravgrunnlagXml: String) {
         val kravgrunnlag: DetaljertKravgrunnlagDto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlagXml)
-        // valider grunnlag
-        KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
-
         val fagsystemId = kravgrunnlag.fagsystemId
         val ytelsestype: Ytelsestype = KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.kodeFagomraade)
 
         val behandling: Behandling? = finnÅpenBehandling(ytelsestype, fagsystemId)
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)
+
+        log.info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
+
+        KravgrunnlagValidator.validerGrunnlag(kravgrunnlag)
+
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
             mottattXmlService.lagreMottattXml(kravgrunnlagXml, kravgrunnlag, ytelsestype)

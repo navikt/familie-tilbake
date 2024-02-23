@@ -24,6 +24,9 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  observability:
+    tracing:
+      enabled: true
   vault:
     enabled: false
   gcp: # Database
@@ -33,7 +36,7 @@ spec:
         name: familie-tilbake
         diskAutoresize: true
         highAvailability: true
-        autoBackupTime: "03:00"
+        autoBackupHour: 3
         databases:
           - name: familie-tilbake
             envVarPrefix: DB
@@ -93,9 +96,7 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: mpls02.adeo.no
           ports:
-            - name: mq
-              port: 1414
-              protocol: TCP
+            - port: 1414
   replicas:
     min: 2
     max: 4

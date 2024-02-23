@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.6</version>
+        <version>3.1.8</version>
     </parent>
 
     <properties>
@@ -21,19 +21,19 @@
         <java.version>21</java.version>
         <jvmTarget>21</jvmTarget>
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
-        <kotlin.version>1.9.21</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20231109091547_fd2cae7</kontrakter.version>
-        <felles.version>2.20231023162434_fa320ce</felles.version>
+        <kontrakter.version>3.0_20240116082529_ee44807</kontrakter.version>
+        <felles.version>2.20240117140616_50f71cd</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.8.0</kotest.version>
-        <token-validation-spring.version>3.1.7</token-validation-spring.version>
+        <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
-        <com.openhtmltopdf.version>1.0.10</com.openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.4</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.4</jaxb-impl.version>
         <verapdf.version>1.24.1</verapdf.version>
-        <mockk.version>1.13.8</mockk.version>
+        <mockk.version>1.13.9</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -41,12 +41,12 @@
         <sonar.coverage.exclusions>**/config/FlywayConfig.kt</sonar.coverage.exclusions>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-        <spring.cloud-contract>4.0.4</spring.cloud-contract>
-        <springdoc.version>2.2.0</springdoc.version>
-        <testcontainers.version>1.19.1</testcontainers.version>
+        <spring.cloud-contract>4.1.0</spring.cloud-contract>
+        <springdoc.version>2.3.0</springdoc.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
-        <prosessering-core.version>2.20231026103714_2f17845</prosessering-core.version>
+        <prosessering-core.version>2.20240110093731_0eda75e</prosessering-core.version>
     </properties>
 
 
@@ -134,19 +134,19 @@
             <version>4.3.1</version>
         </dependency>
         <dependency>
-            <groupId>com.openhtmltopdf</groupId>
+            <groupId>at.datenwort.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-core</artifactId>
-            <version>${com.openhtmltopdf.version}</version>
+            <version>${openhtmltopdf.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.openhtmltopdf</groupId>
+            <groupId>at.datenwort.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-pdfbox</artifactId>
-            <version>${com.openhtmltopdf.version}</version>
+            <version>${openhtmltopdf.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.openhtmltopdf</groupId>
+            <groupId>at.datenwort.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
-            <version>${com.openhtmltopdf.version}</version>
+            <version>${openhtmltopdf.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>xalan</groupId>
@@ -155,9 +155,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.openhtmltopdf</groupId>
+            <groupId>at.datenwort.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-slf4j</artifactId>
-            <version>${com.openhtmltopdf.version}</version>
+            <version>${openhtmltopdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.jakarta.client</artifactId>
-            <version>9.3.4.0</version>
+            <version>9.3.4.1</version>
         </dependency>
         <dependency>
             <groupId>jakarta.jms</groupId>
@@ -312,7 +312,12 @@
         <dependency>
             <groupId>org.messaginghub</groupId>
             <artifactId>pooled-jms</artifactId>
-            <version>3.1.4</version>
+            <version>3.1.5</version>
+        </dependency>
+        <dependency> <!-- Overstyrer versjon default i spring pga sikkerhetshull https://security.snyk.io/package/maven/org.yaml:snakeyaml -->
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
         </dependency>
         <!-- Test -->
         <dependency>
@@ -533,7 +538,7 @@
                     <dependency>
                         <groupId>com.pinterest.ktlint</groupId>
                         <artifactId>ktlint-cli</artifactId>
-                        <version>1.0.1</version>
+                        <version>1.1.1</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
                 </dependencies>

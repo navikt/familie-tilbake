@@ -153,32 +153,32 @@ jobs:
         with:
           fetch-depth: 0
       - name: Deploy til dev-gcp
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-dev-gcp.yaml
-          IMAGE: ${{ needs.build-jar-docker.outputs.image }}
+          VAR: image=${{ needs.build-jar-docker.outputs.image }}
       - name: Deploy dvh_sak_topic
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/dvh_sak_topic.yaml
       - name: Deploy dvh_vedtak_topic
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/dvh_vedtak_topic.yaml
       - name: Deploy hentfagsystemsbehandling_request_topic
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/hentfagsystemsbehandling_request_topic.yaml
       - name: Deploy hentfagsystemsbehandling_respons_topic
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
