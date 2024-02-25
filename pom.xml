@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.8</version>
+        <version>3.2.3</version>
     </parent>
 
     <properties>
@@ -24,7 +24,7 @@
         <kotlin.version>1.9.22</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
         <kontrakter.version>3.0_20240215101759_cea211f</kontrakter.version>
-        <felles.version>2.20240123084817_35f03aa</felles.version>
+        <felles.version>2.20240221144438_022879d_token-support-4</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.8.0</kotest.version>
         <token-validation-spring.version>3.2.0</token-validation-spring.version>
@@ -43,7 +43,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>4.1.1</spring.cloud-contract>
         <springdoc.version>2.3.0</springdoc.version>
-        <testcontainers.version>1.19.5</testcontainers.version>
+        <testcontainers.version>1.19.6</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20240214140223_83c31de</prosessering-core.version>
@@ -378,7 +378,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.4.0</version>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
