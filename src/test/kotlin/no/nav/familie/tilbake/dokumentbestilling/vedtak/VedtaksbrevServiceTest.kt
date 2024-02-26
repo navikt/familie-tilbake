@@ -553,6 +553,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         lokalBehandling = behandlingRepository.insert(lokalBehandling)
 
+        // Er nødt til å opprette kravgrunnlag for revurderingen
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(id = UUID.randomUUID(), behandlingId = lokalBehandling.id, perioder = emptySet()))
+
         lagFakta(lokalBehandling.id)
         lagVilkårsvurdering(lokalBehandling.id)
 
