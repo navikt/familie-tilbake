@@ -6,7 +6,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
-import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 
 // Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
@@ -39,7 +36,6 @@ class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
     private val behandlingTilstandService: BehandlingTilstandService,
-    private val kafkaProducer: KafkaProducer,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -217,11 +213,7 @@ class ForvaltningController(
         @RequestBody behandlingIder: List<UUID>,
     ) {
         behandlingIder.forEach { behandlingID ->
-            val behandlingstilstand = behandlingTilstandService.hentBehandlingensTilstand(behandlingId = behandlingID)
-            kafkaProducer.sendSaksdata(
-                behandlingstilstand.behandlingUuid,
-                behandlingstilstand.copy(tekniskTidspunkt = OffsetDateTime.now(ZoneOffset.UTC)),
-            )
+            behandlingTilstandService.opprettSendingAvBehandlingenManuellt(behandlingId = behandlingID)
         }
     }
 }
