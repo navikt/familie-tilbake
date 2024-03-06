@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.forvaltning
 
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
@@ -113,7 +112,10 @@ class ForvaltningService(
     }
 
     @Transactional
-    fun hoppOverIverksettingMotOppdrag(behandlingId: UUID, taskId: Long) {
+    fun hoppOverIverksettingMotOppdrag(
+        behandlingId: UUID,
+        taskId: Long,
+    ) {
         behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
 
         behandlingskontrollService
@@ -134,7 +136,7 @@ class ForvaltningService(
                 properties = task.metadata,
             ),
         )
-        //Setter feilet task til ferdig.
+        // Setter feilet task til ferdig.
         taskService.save(task.copy(status = Status.FERDIG))
     }
 

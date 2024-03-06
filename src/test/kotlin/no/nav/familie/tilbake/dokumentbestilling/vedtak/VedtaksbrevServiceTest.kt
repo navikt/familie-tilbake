@@ -148,7 +148,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.behandling.copy(avsluttetDato = LocalDate.now()))
         val kravgrunnlagsperiode432 = Testdata.kravgrunnlag431.perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
@@ -545,6 +545,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             Testdata.revurdering.copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
+                avsluttetDato = null,
                 årsaker =
                     setOf(
                         Behandlingsårsak(
@@ -554,6 +555,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                     ),
             )
         lokalBehandling = behandlingRepository.insert(lokalBehandling)
+
+        // Er nødt til å opprette kravgrunnlag for revurderingen
+        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(id = UUID.randomUUID(), behandlingId = lokalBehandling.id, perioder = emptySet()))
 
         lagFakta(lokalBehandling.id)
         lagVilkårsvurdering(lokalBehandling.id)

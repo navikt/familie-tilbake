@@ -33,12 +33,11 @@ class HåndterGamleKravgrunnlagBatch(
     @Scheduled(cron = "\${CRON_HÅNDTER_GAMMEL_KRAVGRUNNLAG}")
     @Transactional
     fun utfør() {
-        if (LeaderClient.isLeader() != true &&
-            !environment.activeProfiles.any {
-                it.contains("local") ||
-                    it.contains("integrasjonstest")
-            }
-        ) {
+        val erLeader = LeaderClient.isLeader() == true
+        val erLokaltMiljø = environment.activeProfiles.any {
+            it.contains("local") || it.contains("integrasjonstest")
+        }
+        if (!erLeader && !erLokaltMiljø) {
             return
         }
 
