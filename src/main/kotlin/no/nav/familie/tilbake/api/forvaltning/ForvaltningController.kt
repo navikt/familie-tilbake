@@ -179,7 +179,8 @@ class ForvaltningController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun settIverksettStegTilUtførtOgFortsett(
-        @PathVariable taskId: Long, @PathVariable behandlingId: UUID,
+        @PathVariable taskId: Long,
+        @PathVariable behandlingId: UUID,
     ) {
         forvaltningService.hoppOverIverksettingMotOppdrag(behandlingId = behandlingId, taskId = taskId)
     }
