@@ -104,7 +104,7 @@ spec:
     limits:
       memory: 1024Mi
     requests:
-      memory: 512Mi
+      memory: 1024Mi
       cpu: 50m
   secureLogs:
     enabled: true
