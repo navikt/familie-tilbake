@@ -105,7 +105,7 @@ spec:
       memory: 1024Mi
     requests:
       memory: 512Mi
-      cpu: 500m
+      cpu: 50m
   secureLogs:
     enabled: true
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.

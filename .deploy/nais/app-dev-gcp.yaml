@@ -111,7 +111,7 @@ spec:
       memory: 1024Mi
     requests:
       memory: 512Mi
-      cpu: 500m
+      cpu: 25m
   ingresses:
     - https://familie-tilbake.intern.dev.nav.no
   secureLogs:
