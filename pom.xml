@@ -31,7 +31,7 @@
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.4</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.4</jaxb-impl.version>
+        <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.24.1</verapdf.version>
         <mockk.version>1.13.10</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
