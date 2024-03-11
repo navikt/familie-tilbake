@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -34,6 +35,7 @@ import java.util.UUID
 class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val behandlingTilstandService: BehandlingTilstandService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -199,6 +201,19 @@ class ForvaltningController(
                 beskrivelse = "Gjenopprettet oppgave",
                 frist = LocalDate.now(),
             )
+        }
+    }
+
+    @Operation(summary = "Send siste tilstand for behandling til DVH")
+    @PostMapping(
+        path = ["/sendTilstandTilDVH"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun sendSisteTilstandForBehandlingerTilDVH(
+        @RequestBody behandlingIder: List<UUID>,
+    ) {
+        behandlingIder.forEach { behandlingID ->
+            behandlingTilstandService.opprettSendingAvBehandlingenManuellt(behandlingId = behandlingID)
         }
     }
 }

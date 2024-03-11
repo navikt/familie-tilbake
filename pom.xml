@@ -31,7 +31,7 @@
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.4</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.4</jaxb-impl.version>
+        <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <verapdf.version>1.24.1</verapdf.version>
         <mockk.version>1.13.10</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -43,7 +43,7 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
         <spring.cloud-contract>4.1.1</spring.cloud-contract>
         <springdoc.version>2.3.0</springdoc.version>
-        <testcontainers.version>1.19.6</testcontainers.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
         <tjenestespesifikasjoner.version>2618.0448179</tjenestespesifikasjoner.version>
         <familie-tjenestespesifikasjoner.version>1.0_20230808160403_18dbb48</familie-tjenestespesifikasjoner.version>
         <prosessering-core.version>2.20240214140223_83c31de</prosessering-core.version>
@@ -539,7 +539,7 @@
                     <dependency>
                         <groupId>com.pinterest.ktlint</groupId>
                         <artifactId>ktlint-cli</artifactId>
-                        <version>1.2.0</version>
+                        <version>1.2.1</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
                 </dependencies>
