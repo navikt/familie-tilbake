@@ -59,6 +59,10 @@ class HåndterGamleKravgrunnlagService(
         return økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
     }
 
+    fun hentFrakobletKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? {
+        return økonomiXmlMottattService.hentMottattKravgrunnlagNullable(mottattXmlId)
+    }
+
     fun sjekkOmDetFinnesEnAktivBehandling(mottattXml: ØkonomiXmlMottatt) {
         val eksternFagsakId = mottattXml.eksternFagsakId
         val ytelsestype = mottattXml.ytelsestype
