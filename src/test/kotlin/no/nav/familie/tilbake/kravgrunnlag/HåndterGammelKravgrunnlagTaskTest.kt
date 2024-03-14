@@ -199,7 +199,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
 
-        behandlingRepository.insert(Testdata.behandling.copy(fagsakId = UUID.fromString(xmlMottatt.eksternFagsakId)))
+        fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
+        behandlingRepository.insert(Testdata.behandling)
 
         håndterGammelKravgrunnlagTask.doTask(lagTask())
 
