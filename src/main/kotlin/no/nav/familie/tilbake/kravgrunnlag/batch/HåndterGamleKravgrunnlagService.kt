@@ -130,6 +130,10 @@ class HåndterGamleKravgrunnlagService(
         val erSperret = hentetData.second
 
         arkiverKravgrunnlag(mottattXml.id)
+
+        // behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
+        // if(mottattKravgrunnlag.kontrollfelt < kravgrunnlag431.kontrollfelt) forkast dette da det er eldre
+
         val behandling = opprettBehandling(hentetKravgrunnlag, fagsystemsbehandlingData)
         val behandlingId = behandling.id
 
@@ -165,7 +169,7 @@ class HåndterGamleKravgrunnlagService(
     @Transactional
     fun arkiverKravgrunnlag(mottattXmlId: UUID) {
         val mottattXml = hentFrakobletKravgrunnlag(mottattXmlId)
-        økonomiXmlMottattService.arkiverMottattXml(mottattXml.melding, mottattXml.eksternFagsakId, mottattXml.ytelsestype)
+        økonomiXmlMottattService.arkiverMottattXml(mottattXmlId = mottattXmlId, mottattXml.melding, mottattXml.eksternFagsakId, mottattXml.ytelsestype)
         økonomiXmlMottattService.slettMottattXml(mottattXmlId)
     }
 

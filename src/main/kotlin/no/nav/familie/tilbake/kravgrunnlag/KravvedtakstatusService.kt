@@ -60,13 +60,13 @@ class KravvedtakstatusService(
                         vedtakId = vedtakId,
                     )
             håndterStatusmeldingerUtenBehandling(kravgrunnlagXmlListe, kravOgVedtakstatus)
-            mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+            mottattXmlService.arkiverMottattXml(kravgrunnlagXmlListe.maxByOrNull { it.kontrollfelt!! }?.id, statusmeldingXml, fagsystemId, ytelsestype)
             tellerService.tellUkobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
             return
         }
         val kravgrunnlag431: Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         håndterStatusmeldingerMedBehandling(kravgrunnlag431, kravOgVedtakstatus, behandling)
-        mottattXmlService.arkiverMottattXml(statusmeldingXml, fagsystemId, ytelsestype)
+        mottattXmlService.arkiverMottattXml(mottattXmlId = null, statusmeldingXml, fagsystemId, ytelsestype)
         tellerService.tellKobletStatusmelding(FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype))
     }
 
@@ -104,6 +104,7 @@ class KravvedtakstatusService(
             Kravstatuskode.AVSLUTTET ->
                 kravgrunnlagXmlListe.forEach {
                     mottattXmlService.arkiverMottattXml(
+                        mottattXmlId = it.id,
                         it.melding,
                         it.eksternFagsakId,
                         it.ytelsestype,

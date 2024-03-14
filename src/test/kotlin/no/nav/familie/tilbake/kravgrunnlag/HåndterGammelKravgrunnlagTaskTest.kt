@@ -184,6 +184,45 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `doTask skal ikke feile hvis det finnes en åpen behandling`() {
+        requestSendtRepository
+            .insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = xmlMottatt.eksternFagsakId,
+                    ytelsestype = xmlMottatt.ytelsestype,
+                    eksternId = xmlMottatt.referanse,
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt),
+                ),
+            )
+
+        val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
+
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
+
+        behandlingRepository.insert(Testdata.behandling.copy(fagsakId = UUID.fromString(xmlMottatt.eksternFagsakId)))
+
+        håndterGammelKravgrunnlagTask.doTask(lagTask())
+
+        val behandling =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                xmlMottatt.ytelsestype,
+                hentetKravgrunnlag.fagsystemId,
+            )
+        behandling.shouldNotBeNull()
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
+
+        val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
+        assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
+        assertSteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
+        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+            xmlMottatt.eksternFagsakId,
+            xmlMottatt.ytelsestype,
+        ).shouldNotBeNull()
+    }
+
+    @Test
     fun `doTask skal opprette en behandling og venter på kravgrunnlag når hentet kravgrunnlag er sperret hos økonomi`() {
         requestSendtRepository
             .insert(
@@ -251,6 +290,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
 
         økonomiXmlMottattService.arkiverMottattXml(
+            mottattXmlId = null,
             mottattXml =
                 mottattXMl
                     .replace("<urn:vedtakId>", "<urn:vedtakId>2")
@@ -261,6 +301,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         økonomiXmlMottattService.arkiverMottattXml(
+            mottattXmlId = null,
             mottattXml =
                 readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
                     .replace("<urn:vedtakId>", "<urn:vedtakId>2"),
