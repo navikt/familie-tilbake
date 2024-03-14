@@ -122,7 +122,7 @@ class KravgrunnlagService(
         )
     }
 
-    private fun lagreKravgrunnlag(
+    fun lagreKravgrunnlag(
         kravgrunnlag431: Kravgrunnlag431,
         ytelsestype: Ytelsestype,
     ) {
@@ -207,7 +207,7 @@ class KravgrunnlagService(
         oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId)
     }
 
-    private fun sjekkIdentiskKravgrunnlag(
+    fun sjekkIdentiskKravgrunnlag(
         endretKravgrunnlag: Kravgrunnlag431,
         behandling: Behandling,
     ) {

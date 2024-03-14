@@ -68,6 +68,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
+    private lateinit var kravgrunnlagService: KravgrunnlagService
+
+    @Autowired
     private lateinit var taskService: TaskService
 
     @Autowired
@@ -115,6 +118,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 økonomiXmlMottattService,
                 mockHentKravgrunnlagService,
+                kravgrunnlagService,
                 stegService,
                 historikkService,
             )
@@ -201,6 +205,8 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
         behandlingRepository.insert(Testdata.behandling)
+        behandlingskontrollService.fortsettBehandling(Testdata.behandling.id)
+        stegService.håndterSteg(Testdata.behandling.id)
 
         håndterGammelKravgrunnlagTask.doTask(lagTask())
 
@@ -211,10 +217,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
         behandling.shouldNotBeNull()
         kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
-
-        val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
-        assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
-        assertSteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
         xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(

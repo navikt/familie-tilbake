@@ -27,6 +27,7 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
@@ -50,6 +51,7 @@ class HåndterGamleKravgrunnlagService(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val økonomiXmlMottattService: ØkonomiXmlMottattService,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
+    private val kravgrunnlagService: KravgrunnlagService,
     private val stegService: StegService,
     private val historikkService: HistorikkService,
 ) {
@@ -131,10 +133,16 @@ class HåndterGamleKravgrunnlagService(
 
         arkiverKravgrunnlag(mottattXml.id)
 
-        // behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-        // if(mottattKravgrunnlag.kontrollfelt < kravgrunnlag431.kontrollfelt) forkast dette da det er eldre
+        // sjekk om det finnes en åpen behandling for fagsak og ytelsestype
+        // hvis det finnes en åpen behandling for fagsak og ytelsestype, så skal kravgrunnlaget knyttes til denne behandlingen og arkiveres
+        val åpenBehandling =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade).ytelsestype,
+                eksternFagsakId = hentetKravgrunnlag.fagsystemId,
+            )
 
-        val behandling = opprettBehandling(hentetKravgrunnlag, fagsystemsbehandlingData)
+        val behandling = åpenBehandling ?: opprettBehandling(hentetKravgrunnlag, fagsystemsbehandlingData)
+
         val behandlingId = behandling.id
 
         val mottattKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXml.melding)
@@ -147,6 +155,7 @@ class HåndterGamleKravgrunnlagService(
                 "til behandling=$behandlingId",
         )
         val kravgrunnlag = KravgrunnlagMapper.tilKravgrunnlag431(hentetKravgrunnlag, behandlingId)
+        kravgrunnlagService.sjekkIdentiskKravgrunnlag(kravgrunnlag, behandling)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         historikkService.lagHistorikkinnslag(
