@@ -133,8 +133,7 @@ class HåndterGamleKravgrunnlagService(
 
         arkiverKravgrunnlag(mottattXml.id)
 
-        // sjekk om det finnes en åpen behandling for fagsak og ytelsestype
-        // hvis det finnes en åpen behandling for fagsak og ytelsestype, så skal kravgrunnlaget knyttes til denne behandlingen og arkiveres
+        // Hvis det finnes en åpen behandling for fagsak og ytelsestype, så skal kravgrunnlaget knyttes til denne behandlingen og arkiveres
         val åpenBehandling =
             behandlingRepository.finnÅpenTilbakekrevingsbehandling(
                 ytelsestype = Fagområdekode.fraKode(hentetKravgrunnlag.kodeFagomraade).ytelsestype,
