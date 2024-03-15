@@ -331,6 +331,7 @@ object Testdata {
 
     val økonomiXmlMottattArkiv =
         ØkonomiXmlMottattArkiv(
+            gammel_okonomi_xml_mottatt_id = null,
             melding = "testverdi",
             eksternFagsakId = "testverdi",
             ytelsestype = Ytelsestype.BARNETRYGD,

@@ -145,6 +145,7 @@ class ForvaltningService(
         logger.info("Arkiverer mottattXml for Id=$mottattXmlId")
         val mottattKravgrunnlag = økonomiXmlMottattService.hentMottattKravgrunnlag(mottattXmlId)
         økonomiXmlMottattService.arkiverMottattXml(
+            mottattKravgrunnlag.id,
             mottattKravgrunnlag.melding,
             mottattKravgrunnlag.eksternFagsakId,
             mottattKravgrunnlag.ytelsestype,
