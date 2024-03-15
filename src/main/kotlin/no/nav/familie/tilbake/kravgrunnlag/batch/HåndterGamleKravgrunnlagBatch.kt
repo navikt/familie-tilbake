@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
-import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -59,22 +58,27 @@ class HåndterGamleKravgrunnlagBatch(
                     "$ALDERSGRENSE_I_UKER uker fra dagens dato",
             )
 
-            val alleFeiledeTasker =
+            val taskTyperSomKanKjøreEllerKjører = listOf(
+                Status.FEILET,
+                Status.KLAR_TIL_PLUKK,
+                Status.PLUKKET,
+                Status.MANUELL_OPPFØLGING,
+                Status.BEHANDLER,
+                Status.UBEHANDLET,
+            )
+
+            val ikkeFullførteTasker =
                 taskService.finnTasksMedStatus(
-                    listOf(
-                        Status.FEILET,
-                        Status.KLAR_TIL_PLUKK,
-                        Status.MANUELL_OPPFØLGING,
-                    ),
-                    Pageable.unpaged(),
+                    taskTyperSomKanKjøreEllerKjører,
+                    type = HåndterGammelKravgrunnlagTask.TYPE,
+                ) + taskService.finnTasksMedStatus(
+                    taskTyperSomKanKjøreEllerKjører,
+                    type = HentFagsystemsbehandlingTask.TYPE,
                 )
+
             mottattXmlIdsMedYtelse.forEach { mottattXmlIdOgYtelse ->
-                val finnesTask =
-                    alleFeiledeTasker.any {
-                        it.payload == mottattXmlIdOgYtelse.id.toString() &&
-                            (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
-                    }
-                if (!finnesTask) {
+                val erTaskPåSammeXmlId = ikkeFullførteTasker.any { it.payload == mottattXmlIdOgYtelse.id.toString() }
+                if (!erTaskPåSammeXmlId) {
                     val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(mottattXmlIdOgYtelse.ytelsestype)
                     taskService.save(
                         Task(
