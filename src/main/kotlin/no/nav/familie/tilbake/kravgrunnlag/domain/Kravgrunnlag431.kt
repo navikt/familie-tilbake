@@ -149,6 +149,7 @@ enum class Klassekode(val aktivitet: String) {
     EFBT("Barnetilsyn"),
     EFBTOR("Barnetilsyn-Infotrygd"),
     EFSP("Skolepenger"),
+    FEILUTB_0986(""), // Inntektsytelser feilutbetaling, manuell
     KS("Kontantstøtte"),
     TREK_KODER(""), // Felles klassekode for alle TREK klassetyper
     ;
@@ -159,7 +160,7 @@ enum class Klassekode(val aktivitet: String) {
             klassetype: Klassetype,
         ): Klassekode {
             if (klassetype == Klassetype.TREK) return TREK_KODER
-            return values().firstOrNull { it.name == kode }
+            return entries.firstOrNull { it.name == kode }
                 ?: throw IllegalArgumentException("Ukjent KlasseKode $kode")
         }
     }
