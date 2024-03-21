@@ -28,7 +28,12 @@ class HåndterGammelKravgrunnlagTask(
     override fun doTask(task: Task) {
         logger.info("HåndterGammelKravgrunnlagTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val mottattXmlId = UUID.fromString(task.payload)
-        val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlag(mottattXmlId)
+        val mottattXml = håndterGamleKravgrunnlagService.hentFrakobletKravgrunnlagNullable(mottattXmlId)
+        if (mottattXml == null) {
+            logger.warn("MottattXml med id=$mottattXmlId finnes ikke. Task-en blir avbrutt.")
+            return
+        }
+
         val eksternFagsakId = mottattXml.eksternFagsakId
         val ytelsestype = mottattXml.ytelsestype
         val eksternId = mottattXml.referanse
