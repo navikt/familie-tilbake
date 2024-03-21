@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
@@ -11,7 +12,6 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.HenteParam
 import no.nav.familie.tilbake.sikkerhet.Rolletilgangssjekk
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.util.UUID
 
 // Denne kontrollen inneholder tjenester som kun brukes av forvaltningsteam via swagger. Frontend bør ikke kalle disse tjenestene.
@@ -36,6 +35,7 @@ import java.util.UUID
 class ForvaltningController(
     private val forvaltningService: ForvaltningService,
     private val oppgaveTaskService: OppgaveTaskService,
+    private val behandlingTilstandService: BehandlingTilstandService,
 ) {
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
@@ -164,15 +164,6 @@ class ForvaltningController(
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
 
-    @Operation(summary = "Hent locale og klokkeslett")
-    @GetMapping(
-        path = ["/hentlocale"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun hentlocale(): Ressurs<String> {
-        return Ressurs.success(LocaleContextHolder.getLocale().toString() + " " + ZonedDateTime.now())
-    }
-
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(
         path = ["/hentBehandlingerUtenOppgave/fagsystem/{fagsystem}"],
@@ -210,6 +201,19 @@ class ForvaltningController(
                 beskrivelse = "Gjenopprettet oppgave",
                 frist = LocalDate.now(),
             )
+        }
+    }
+
+    @Operation(summary = "Send siste tilstand for behandling til DVH")
+    @PostMapping(
+        path = ["/sendTilstandTilDVH"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun sendSisteTilstandForBehandlingerTilDVH(
+        @RequestBody behandlingIder: List<UUID>,
+    ) {
+        behandlingIder.forEach { behandlingID ->
+            behandlingTilstandService.opprettSendingAvBehandlingenManuellt(behandlingId = behandlingID)
         }
     }
 }
