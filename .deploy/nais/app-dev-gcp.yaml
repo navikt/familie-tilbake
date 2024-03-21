@@ -95,7 +95,6 @@ spec:
           cluster: dev-gcp
     outbound:
       rules:
-        - application: familie-historikk
       external:
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
