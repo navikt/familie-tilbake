@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.beregning
 
 import com.google.common.collect.Lists
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
@@ -33,7 +34,7 @@ class TilbakekrevingsberegningVilkårTest {
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 periode =
-                    Månedsperiode(
+                    Datoperiode(
                         LocalDate.of(2019, 5, 1),
                         LocalDate.of(2019, 5, 3),
                     ),
@@ -43,7 +44,7 @@ class TilbakekrevingsberegningVilkårTest {
             Vilkårsvurderingsperiode(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 periode =
-                    Månedsperiode(
+                    Datoperiode(
                         LocalDate.of(2019, 5, 1),
                         LocalDate.of(2019, 5, 3),
                     ),

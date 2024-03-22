@@ -103,8 +103,8 @@ class IverksettelseService(
             val tilbakekrevingsperiode = TilbakekrevingsperiodeDto()
             tilbakekrevingsperiode.apply {
                 val periode = PeriodeDto()
-                periode.fom = it.periode.fom.atDay(1)
-                periode.tom = it.periode.tom.atEndOfMonth()
+                periode.fom = it.periode.fom
+                periode.tom = it.periode.tom
                 this.periode = periode
                 belopRenter = it.renter
                 tilbakekrevingsbelop.addAll(lagVedtaksbeløp(it.beløp))

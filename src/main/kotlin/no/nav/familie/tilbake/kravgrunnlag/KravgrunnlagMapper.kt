@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -47,7 +48,7 @@ object KravgrunnlagMapper {
     private fun tilKravgrunnlagsperiode(perioder: List<DetaljertKravgrunnlagPeriodeDto>): Set<Kravgrunnlagsperiode432> {
         return perioder.map {
             Kravgrunnlagsperiode432(
-                periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                periode = Datoperiode(it.periode.fom, it.periode.tom),
                 månedligSkattebeløp = it.belopSkattMnd,
                 beløp = tilKravgrunnlagsbeløp(it.tilbakekrevingsBelop),
             )

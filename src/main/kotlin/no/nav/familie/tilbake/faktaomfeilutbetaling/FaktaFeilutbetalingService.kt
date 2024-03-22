@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
@@ -46,7 +47,7 @@ class FaktaFeilutbetalingService(
         val feilutbetaltePerioder: Set<FaktaFeilutbetalingsperiode> =
             behandlingsstegFaktaDto.feilutbetaltePerioder.map {
                 FaktaFeilutbetalingsperiode(
-                    periode = Månedsperiode(it.periode.fom, it.periode.tom),
+                    periode = it.periode,
                     hendelsestype = it.hendelsestype,
                     hendelsesundertype = it.hendelsesundertype,
                 )
@@ -66,7 +67,7 @@ class FaktaFeilutbetalingService(
         val feilutbetaltePerioder =
             hentFaktaomfeilutbetaling(behandlingId).feilutbetaltePerioder.map {
                 FaktaFeilutbetalingsperiode(
-                    periode = it.periode.toMånedsperiode(),
+                    periode = it.periode,
                     hendelsestype = Hendelsestype.ANNET,
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                 )

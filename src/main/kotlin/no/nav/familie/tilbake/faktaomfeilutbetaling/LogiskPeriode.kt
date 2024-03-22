@@ -1,12 +1,14 @@
 package no.nav.familie.tilbake.faktaomfeilutbetaling
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.SortedMap
 
 data class LogiskPeriode(
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     val feilutbetaltBeløp: BigDecimal,
 ) {
     val fom get() = periode.fom
@@ -14,9 +16,9 @@ data class LogiskPeriode(
 }
 
 object LogiskPeriodeUtil {
-    fun utledLogiskPeriode(feilutbetalingPrPeriode: SortedMap<Månedsperiode, BigDecimal>): List<LogiskPeriode> {
-        var førsteMåned: YearMonth? = null
-        var sisteMåned: YearMonth? = null
+    fun utledLogiskPeriode(feilutbetalingPrPeriode: SortedMap<Datoperiode, BigDecimal>): List<LogiskPeriode> {
+        var førsteMåned: LocalDate? = null
+        var sisteMåned: LocalDate? = null
         var logiskPeriodeBeløp = BigDecimal.ZERO
         val resultat = mutableListOf<LogiskPeriode>()
         for ((periode, feilutbetaltBeløp) in feilutbetalingPrPeriode) {
@@ -27,7 +29,7 @@ object LogiskPeriodeUtil {
                 if (harOppholdMellom(sisteMåned!!, periode.fom)) {
                     resultat.add(
                         LogiskPeriode(
-                            periode = Månedsperiode(førsteMåned!!, sisteMåned),
+                            periode = Datoperiode(førsteMåned!!, sisteMåned),
                             feilutbetaltBeløp = logiskPeriodeBeløp,
                         ),
                     )
@@ -41,7 +43,7 @@ object LogiskPeriodeUtil {
         if (BigDecimal.ZERO.compareTo(logiskPeriodeBeløp) != 0) {
             resultat.add(
                 LogiskPeriode(
-                    periode = Månedsperiode(førsteMåned!!, sisteMåned!!),
+                    periode = Månedsperiode(førsteMåned!!, sisteMåned!!).toDatoperiode(),
                     feilutbetaltBeløp = logiskPeriodeBeløp,
                 ),
             )
@@ -50,8 +52,8 @@ object LogiskPeriodeUtil {
     }
 
     private fun harOppholdMellom(
-        måned1: YearMonth,
-        måned2: YearMonth,
+        måned1: LocalDate,
+        måned2: LocalDate,
     ): Boolean {
         require(måned2 > måned1) { "dag2 må være etter dag1" }
         return måned1.plusMonths(1) != måned2

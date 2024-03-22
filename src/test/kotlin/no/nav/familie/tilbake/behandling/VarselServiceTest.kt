@@ -52,8 +52,8 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
         val varselsperioder = aktivVarsel.perioder
         varselsperioder.shouldNotBeEmpty()
         varselsperioder.any {
-            it.fom == kravgrunnlag.perioder.first().periode.fomDato &&
-                it.tom == kravgrunnlag.perioder.first().periode.tomDato
+            it.fom == kravgrunnlag.perioder.first().periode.fom &&
+                it.tom == kravgrunnlag.perioder.first().periode.tom
         }.shouldBeTrue()
     }
 

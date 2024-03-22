@@ -9,7 +9,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktivitetDto
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
@@ -84,7 +83,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             Testdata.kravgrunnlagsperiode432
                 .copy(
                     id = UUID.randomUUID(),
-                    periode = Månedsperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
+                    periode = Datoperiode(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 1)),
                     beløp =
                         setOf(
                             Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
@@ -95,7 +94,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
             Testdata.kravgrunnlagsperiode432
                 .copy(
                     id = UUID.randomUUID(),
-                    periode = Månedsperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
+                    periode = Datoperiode(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 2)),
                     beløp =
                         setOf(
                             Testdata.feilKravgrunnlagsbeløp433.copy(id = UUID.randomUUID()),
@@ -108,7 +107,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
         val periode =
             FaktaFeilutbetalingsperiode(
-                periode = Månedsperiode(førstePeriode.periode.fom, andrePeriode.periode.tom),
+                periode = Datoperiode(førstePeriode.periode.fom, andrePeriode.periode.tom),
                 hendelsestype = Hendelsestype.ANNET,
                 hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
             )
@@ -585,7 +584,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurdering.perioder.shouldNotBeEmpty()
         vilkårsvurdering.perioder.size shouldBe 1
         val vurdertPeriode = vilkårsvurdering.perioder.toList()[0]
-        vurdertPeriode.periode shouldBe Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
+        vurdertPeriode.periode shouldBe Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 2))
         vurdertPeriode.begrunnelse shouldBe "Vilkårsvurdering begrunnelse"
 
         vurdertPeriode.aktsomhet.shouldNotBeNull()
@@ -702,12 +701,12 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperioder =
             setOf(
                 Foreldelsesperiode(
-                    periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                    periode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
                     begrunnelse = "foreldelse begrunnelse 1",
                 ),
                 Foreldelsesperiode(
-                    periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                    periode = Datoperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                     begrunnelse = "foreldelse begrunnelse 2",
                 ),
@@ -722,12 +721,12 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
         val foreldelsesperioder =
             setOf(
                 Foreldelsesperiode(
-                    periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
+                    periode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[0],
                     begrunnelse = "foreldelse begrunnelse 1",
                 ),
                 Foreldelsesperiode(
-                    periode = Månedsperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
+                    periode = Datoperiode(YearMonth.of(2020, 2), YearMonth.of(2020, 2)),
                     foreldelsesvurderingstype = foreldelsesvurderingstyper[1],
                     begrunnelse = "foreldelse begrunnelse 2",
                 ),

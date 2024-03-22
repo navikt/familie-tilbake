@@ -7,12 +7,13 @@ import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
+import java.time.LocalDate
 import java.time.YearMonth
 
 object VilkårsvurderingsPeriodeDomainUtil {
     fun lagGrovtUaktsomVilkårsvurderingsperiode(
-        fom: YearMonth,
-        tom: YearMonth,
+        fom: LocalDate,
+        tom: LocalDate,
     ) =
         VilkårsvurderingsperiodeDto(
             periode = Datoperiode(fom, tom),

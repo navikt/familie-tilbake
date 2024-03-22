@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.domain.Friteksttype
@@ -37,7 +38,7 @@ object VedtaksbrevFritekstMapper {
     }
 
     fun mapFritekstFraDb(fritekstPerioder: Set<Vedtaksbrevsperiode>): List<PeriodeMedTekstDto> {
-        val perioderTilMap = HashMap<Månedsperiode, MutableMap<Friteksttype, String>>()
+        val perioderTilMap = HashMap<Datoperiode, MutableMap<Friteksttype, String>>()
 
         fritekstPerioder.forEach {
             val avsnittTilTekst = perioderTilMap.getOrDefault(it.periode, mutableMapOf())
@@ -47,7 +48,7 @@ object VedtaksbrevFritekstMapper {
 
         return perioderTilMap.entries.map { (periode, avsnittTilTekst) ->
             PeriodeMedTekstDto(
-                periode = periode.toDatoperiode(),
+                periode = periode,
                 faktaAvsnitt = avsnittTilTekst[Friteksttype.FAKTA],
                 foreldelseAvsnitt = avsnittTilTekst[Friteksttype.FORELDELSE],
                 vilkårAvsnitt = avsnittTilTekst[Friteksttype.VILKÅR],
@@ -64,7 +65,7 @@ object VedtaksbrevFritekstMapper {
         return faktaAvsnittMedPeriode.faktaAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
-                periode = faktaAvsnittMedPeriode.periode.toMånedsperiode(),
+                periode = faktaAvsnittMedPeriode.periode,
                 fritekst = faktaAvsnittMedPeriode.faktaAvsnitt,
                 fritekststype = Friteksttype.FAKTA,
             )
@@ -78,7 +79,7 @@ object VedtaksbrevFritekstMapper {
         return foreldelsesAvsnittMedPeriode.foreldelseAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
-                periode = foreldelsesAvsnittMedPeriode.periode.toMånedsperiode(),
+                periode = foreldelsesAvsnittMedPeriode.periode,
                 fritekst = foreldelsesAvsnittMedPeriode.foreldelseAvsnitt,
                 fritekststype = Friteksttype.FORELDELSE,
             )
@@ -92,7 +93,7 @@ object VedtaksbrevFritekstMapper {
         return vilkårAvsnittMedPeriode.vilkårAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
-                periode = vilkårAvsnittMedPeriode.periode.toMånedsperiode(),
+                periode = vilkårAvsnittMedPeriode.periode,
                 fritekst = vilkårAvsnittMedPeriode.vilkårAvsnitt,
                 fritekststype = Friteksttype.VILKÅR,
             )
@@ -106,7 +107,7 @@ object VedtaksbrevFritekstMapper {
         return særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
-                periode = særligGrunnerAvsnittMedPeriode.periode.toMånedsperiode(),
+                periode = særligGrunnerAvsnittMedPeriode.periode,
                 fritekst = særligGrunnerAvsnittMedPeriode.særligeGrunnerAvsnitt,
                 fritekststype = Friteksttype.SÆRLIGE_GRUNNER,
             )
@@ -120,7 +121,7 @@ object VedtaksbrevFritekstMapper {
         return særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt?.let {
             Vedtaksbrevsperiode(
                 behandlingId = behandlingId,
-                periode = særligGrunnerAnnetAvsnittMedPeriode.periode.toMånedsperiode(),
+                periode = særligGrunnerAnnetAvsnittMedPeriode.periode,
                 fritekst = særligGrunnerAnnetAvsnittMedPeriode.særligeGrunnerAnnetAvsnitt,
                 fritekststype = Friteksttype.SÆRLIGE_GRUNNER_ANNET,
             )

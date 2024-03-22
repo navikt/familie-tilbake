@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -80,7 +81,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var behandling: Behandling
     private lateinit var saksnummer: String
 
-    private val periode: Månedsperiode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
+    private val periode: Datoperiode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
 
     @BeforeEach
     fun setup() {
@@ -183,8 +184,8 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
     private fun fellesAssertVedtakPeriode(vedtakPerioder: List<VedtakPeriode>): VedtakPeriode {
         vedtakPerioder.size shouldBe 1
         val vedtakPeriode: VedtakPeriode = vedtakPerioder[0]
-        vedtakPeriode.fom shouldBe periode.fomDato
-        vedtakPeriode.tom shouldBe periode.tomDato
+        vedtakPeriode.fom shouldBe periode.fom
+        vedtakPeriode.tom shouldBe periode.tom
         vedtakPeriode.hendelsestype shouldBe "BOSATT_I_RIKET"
         vedtakPeriode.hendelsesundertype shouldBe "BRUKER_BOR_IKKE_I_NORGE"
         return vedtakPeriode
@@ -213,7 +214,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 periode = periode,
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.FORELDET,
                 begrunnelse = "foreldelse begrunnelse",
-                foreldelsesfrist = periode.fomDato.plusMonths(8),
+                foreldelsesfrist = periode.fom.plusMonths(8),
             )
         val vurdertForeldelse =
             VurdertForeldelse(

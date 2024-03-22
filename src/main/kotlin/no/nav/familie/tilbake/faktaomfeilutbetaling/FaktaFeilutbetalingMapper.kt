@@ -54,14 +54,14 @@ object FaktaFeilutbetalingMapper {
     ): List<FeilutbetalingsperiodeDto> {
         return faktaFeilutbetaling?.perioder?.map {
             FeilutbetalingsperiodeDto(
-                periode = it.periode.toDatoperiode(),
+                periode = it.periode,
                 feilutbetaltBeløp = hentFeilutbetaltBeløp(logiskePerioder, it.periode),
                 hendelsestype = it.hendelsestype,
                 hendelsesundertype = it.hendelsesundertype,
             )
         } ?: logiskePerioder.map {
             FeilutbetalingsperiodeDto(
-                periode = it.periode.toDatoperiode(),
+                periode = it.periode,
                 feilutbetaltBeløp = it.feilutbetaltBeløp,
             )
         }
@@ -69,18 +69,12 @@ object FaktaFeilutbetalingMapper {
 
     private fun hentFeilutbetaltBeløp(
         logiskePerioder: List<LogiskPeriode>,
-        faktaPeriode: Månedsperiode,
+        faktaPeriode: Datoperiode,
     ): BigDecimal {
         return logiskePerioder.first { faktaPeriode == it.periode }.feilutbetaltBeløp
     }
 
     private fun utledTotalFeilutbetaltPeriode(perioder: List<LogiskPeriode>): Datoperiode {
-        var totalPeriodeFom: YearMonth? = null
-        var totalPeriodeTom: YearMonth? = null
-        for (periode in perioder) {
-            totalPeriodeFom = if (totalPeriodeFom == null || totalPeriodeFom > periode.fom) periode.fom else totalPeriodeFom
-            totalPeriodeTom = if (totalPeriodeTom == null || totalPeriodeTom < periode.tom) periode.tom else totalPeriodeTom
-        }
-        return Datoperiode(totalPeriodeFom!!, totalPeriodeTom!!)
+        return Datoperiode(perioder.minOf { it.fom }, perioder.maxOf { it.tom })
     }
 }

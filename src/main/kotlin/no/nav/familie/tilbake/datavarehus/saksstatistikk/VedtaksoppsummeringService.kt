@@ -89,8 +89,8 @@ class VedtaksoppsummeringService(
             val faktaperiode = faktaFeilutbetaling.perioder.first { it.periode.overlapper(periode.periode) }
 
             VedtakPeriode(
-                fom = periode.periode.fomDato,
-                tom = periode.periode.tomDato,
+                fom = periode.periode.fom,
+                tom = periode.periode.tom,
                 hendelsestype = faktaperiode.hendelsestype.name,
                 hendelsesundertype = faktaperiode.hendelsesundertype.name,
                 harBruktSjetteLedd = periode.aktsomhet?.tilbakekrevSmåbeløp == false,
@@ -118,8 +118,8 @@ class VedtaksoppsummeringService(
                 val faktaPeriode = faktaFeilutbetalingEntitet.perioder.first { it.periode.overlapper(periode.periode) }
 
                 VedtakPeriode(
-                    fom = periode.periode.fomDato,
-                    tom = periode.periode.tomDato,
+                    fom = periode.periode.fom,
+                    tom = periode.periode.tom,
                     hendelsestype = faktaPeriode.hendelsestype.name,
                     hendelsesundertype = faktaPeriode.hendelsesundertype.name,
                     vilkårsresultat = UtvidetVilkårsresultat.FORELDET,

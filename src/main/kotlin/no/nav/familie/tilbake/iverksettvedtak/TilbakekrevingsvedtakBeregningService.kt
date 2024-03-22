@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
@@ -195,8 +196,8 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
 
     private fun oppdaterGjenståendeSkattetrekk(
         perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>,
-    ): Map<Månedsperiode, BigDecimal> {
+        kravgrunnlagsperioderMedSkatt: Map<Datoperiode, BigDecimal>,
+    ): Map<Datoperiode, BigDecimal> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         perioder.forEach {
             val skattBeløp =
@@ -212,7 +213,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
     private fun justerAvrundingSkatt(
         beregnetPeriode: Beregningsresultatsperiode,
         perioder: List<Tilbakekrevingsperiode>,
-        kravgrunnlagsperioderMedSkatt: Map<Månedsperiode, BigDecimal>,
+        kravgrunnlagsperioderMedSkatt: Map<Datoperiode, BigDecimal>,
     ): List<Tilbakekrevingsperiode> {
         val grunnlagsperioderMedSkatt = kravgrunnlagsperioderMedSkatt.toMutableMap()
         val totalSkattBeløp = perioder.sumOf { it.beløp.sumOf { beløp -> beløp.skattBeløp } }
@@ -263,7 +264,7 @@ class TilbakekrevingsvedtakBeregningService(private val tilbakekrevingsberegning
         return periode.beløp.sumOf { it.tilbakekrevesBeløp }
     }
 
-    private fun Map<Månedsperiode, BigDecimal>.getNotNull(key: Månedsperiode) = requireNotNull(this[key])
+    private fun Map<Datoperiode, BigDecimal>.getNotNull(key: Datoperiode) = requireNotNull(this[key])
 
     private fun beregnRenter(
         beregnetPeriode: Beregningsresultatsperiode,

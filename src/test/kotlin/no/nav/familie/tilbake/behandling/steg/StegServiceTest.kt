@@ -13,7 +13,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
@@ -272,7 +271,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         setOf(
                             grunnlagsperiode.copy(
                                 periode =
-                                    Månedsperiode(
+                                Datoperiode(
                                         fom = LocalDate.of(2010, 1, 1),
                                         tom = LocalDate.of(2010, 1, 31),
                                     ),
@@ -335,7 +334,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         setOf(
                             grunnlagsperiode.copy(
                                 periode =
-                                    Månedsperiode(
+                                    Datoperiode(
                                         fom = LocalDate.of(2010, 1, 1),
                                         tom = LocalDate.of(2010, 1, 31),
                                     ),
@@ -390,7 +389,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 .copy(
                     id = UUID.randomUUID(),
                     periode =
-                        Månedsperiode(
+                        Datoperiode(
                             fom = LocalDate.of(2018, 1, 1),
                             tom = LocalDate.of(2018, 1, 31),
                         ),
@@ -405,7 +404,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 .copy(
                     id = UUID.randomUUID(),
                     periode =
-                        Månedsperiode(
+                        Datoperiode(
                             fom = LocalDate.of(2018, 2, 1),
                             tom = LocalDate.of(2018, 2, 28),
                         ),
@@ -422,12 +421,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             BehandlingsstegForeldelseDto(
                 listOf(
                     ForeldelsesperiodeDto(
-                        førstePeriode.periode.toDatoperiode(),
+                        førstePeriode.periode,
                         "foreldelses begrunnelse",
                         Foreldelsesvurderingstype.FORELDET,
                     ),
                     ForeldelsesperiodeDto(
-                        andrePeriode.periode.toDatoperiode(),
+                        andrePeriode.periode,
                         "foreldelses begrunnelse",
                         Foreldelsesvurderingstype.IKKE_FORELDET,
                     ),
@@ -461,7 +460,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         setOf(
                             grunnlagsperiode.copy(
                                 periode =
-                                    Månedsperiode(
+                                    Datoperiode(
                                         LocalDate.of(2010, 1, 1),
                                         LocalDate.of(2010, 1, 31),
                                     ),
@@ -1050,7 +1049,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         faktaFeilutbetalingsperioder.size shouldBe 1
         val faktaFeilutbetaltePerioderDto: FaktaFeilutbetalingsperiodeDto =
             behandlingsstegFaktaDto.feilutbetaltePerioder[0]
-        faktaFeilutbetalingsperioder[0].periode.toDatoperiode() shouldBe faktaFeilutbetaltePerioderDto.periode
+        faktaFeilutbetalingsperioder[0].periode shouldBe faktaFeilutbetaltePerioderDto.periode
         faktaFeilutbetalingsperioder[0].hendelsestype shouldBe faktaFeilutbetaltePerioderDto.hendelsestype
         faktaFeilutbetalingsperioder[0].hendelsesundertype shouldBe faktaFeilutbetaltePerioderDto.hendelsesundertype
         "testverdi" shouldBe faktaFeilutbetaling.begrunnelse

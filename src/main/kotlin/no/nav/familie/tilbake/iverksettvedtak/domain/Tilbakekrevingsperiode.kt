@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.iverksettvedtak.domain
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
@@ -8,7 +9,7 @@ import java.math.BigDecimal
 // Brukes bare for iverksettelse
 
 data class Tilbakekrevingsperiode(
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     val renter: BigDecimal = BigDecimal.ZERO,
     val beløp: List<Tilbakekrevingsbeløp> = listOf(),
 )

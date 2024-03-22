@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.dokumentbestilling
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
@@ -146,7 +147,7 @@ class DokumentBehandlingServiceTest : OppslagSpringRunnerTest() {
             )
         val periode =
             Kravgrunnlagsperiode432(
-                periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
+                periode = Datoperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 31)),
                 månedligSkattebeløp = BigDecimal.ZERO,
                 beløp = setOf(ytelBeløp, feilBeløp),
             )

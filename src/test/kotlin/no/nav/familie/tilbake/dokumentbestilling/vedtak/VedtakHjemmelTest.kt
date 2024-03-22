@@ -413,7 +413,7 @@ class VedtakHjemmelTest {
     ): VurdertForeldelse {
         val periodeBuilder =
             Foreldelsesperiode(
-                periode = periode,
+                periode = periode.toDatoperiode(),
                 foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_VURDERT,
                 begrunnelse = "bob",
             )
@@ -439,7 +439,7 @@ class VedtakHjemmelTest {
             oppsett(VilkårsvurderingAktsomhet(aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET, begrunnelse = "foo"))
         val vurderingPeriode =
             Vilkårsvurderingsperiode(
-                periode = periode,
+                periode = periode.toDatoperiode(),
                 vilkårsvurderingsresultat = resultat,
                 begrunnelse = "foo",
                 aktsomhet = aktsomhet,

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.PeriodeMedTekstDto
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -63,7 +64,7 @@ object VedtaksbrevFritekstValidator {
     ) {
         avsnittMedPerioder.forEach {
             if (!faktaFeilutbetaling.perioder.any { faktaPeriode ->
-                    faktaPeriode.periode.inneholder(it.periode.toMånedsperiode())
+                    faktaPeriode.periode.inneholder(it.periode)
                 }
             ) {
                 throw Feil(
@@ -146,7 +147,7 @@ object VedtaksbrevFritekstValidator {
                 // Hvis en av de periodene mangler fritekst
                 val omsluttetPerioder =
                     avsnittMedPerioder.filter {
-                        faktaFeilutbetalingsperiode.periode.inneholder(it.periode.toMånedsperiode())
+                        faktaFeilutbetalingsperiode.periode.inneholder(it.periode)
                     }
                 omsluttetPerioder.forEach {
                     if (it.faktaAvsnitt.isNullOrBlank() && validerPåkrevetFritekster) {
@@ -189,7 +190,7 @@ object VedtaksbrevFritekstValidator {
 
     private fun finnFritekstPerioder(
         vedtaksbrevFritekstPerioder: List<Vedtaksbrevsperiode>,
-        vurdertPeriode: Månedsperiode,
+        vurdertPeriode: Datoperiode,
         friteksttype: Friteksttype,
     ): List<Vedtaksbrevsperiode> {
         return vedtaksbrevFritekstPerioder.filter {

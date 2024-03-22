@@ -148,23 +148,23 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
         behandling = behandlingRepository.insert(Testdata.behandling)
-        val kravgrunnlagsperiode432 = Testdata.kravgrunnlag431.perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
+        val kravgrunnlagsperiode432 = Testdata.kravgrunnlag431.perioder.first().copy(periode = Datoperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
         kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
             Testdata.vilkårsvurdering
-                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null))),
+                .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Datoperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null))),
         )
         faktaRepository.insert(
             Testdata.faktaFeilutbetaling.copy(
                 perioder =
                     setOf(
                         FaktaFeilutbetalingsperiode(
-                            periode = Månedsperiode("2020-04" to "2022-08"),
+                            periode = Datoperiode("2020-04" to "2022-08"),
                             hendelsestype = Hendelsestype.ANNET,
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                         ),
                         FaktaFeilutbetalingsperiode(
-                            periode = Månedsperiode("2023-03" to "2023-04"),
+                            periode = Datoperiode("2023-03" to "2023-04"),
                             hendelsestype = Hendelsestype.ANNET,
                             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                         ),
@@ -629,7 +629,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val faktaFeilutbetaltePerioder =
             setOf(
                 FaktaFeilutbetalingsperiode(
-                    periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                    periode = Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                     hendelsestype = Hendelsestype.ANNET,
                     hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                 ),
@@ -661,7 +661,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
         val vilkårsvurderingPeriode =
             Vilkårsvurderingsperiode(
-                periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
+                periode = Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3)),
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER,
                 begrunnelse = "Vilkårsvurdering begrunnelse",
                 aktsomhet = aktsomhet,

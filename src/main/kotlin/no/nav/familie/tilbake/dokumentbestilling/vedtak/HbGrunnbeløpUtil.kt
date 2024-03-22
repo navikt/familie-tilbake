@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.DatoUtil
 import no.nav.familie.tilbake.common.Grunnbeløp
@@ -10,7 +11,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import java.math.BigDecimal
 
 object HbGrunnbeløpUtil {
-    fun lagHbGrunnbeløp(periode: Månedsperiode): HbGrunnbeløp {
+    fun lagHbGrunnbeløp(periode: Datoperiode): HbGrunnbeløp {
         val grunnbeløpsperioder = Grunnbeløpsperioder.finnGrunnbeløpsperioder(periode)
 
         val formattertPerioder =
@@ -31,13 +32,13 @@ object HbGrunnbeløpUtil {
 
     private fun formatterGrunnbeløp(
         grunnbeløp: Grunnbeløp,
-        periode: Månedsperiode,
+        periode: Datoperiode,
     ): String {
         val format = DatoUtil.DATO_FORMAT_DATO_MÅNEDSNAVN_ÅR
         val snitt = grunnbeløp.periode.snitt(periode) ?: error("Finner ikke snitt for ${grunnbeløp.periode} og $periode")
 
-        return "${formatterBeløpX6(grunnbeløp)} for perioden ${format.format(snitt.fomDato)} " +
-            "til ${format.format(snitt.tomDato)}"
+        return "${formatterBeløpX6(grunnbeløp)} for perioden ${format.format(snitt.fom)} " +
+            "til ${format.format(snitt.tom)}"
     }
 
     private fun formatterBeløpX6(grunnbeløp: Grunnbeløp): String {

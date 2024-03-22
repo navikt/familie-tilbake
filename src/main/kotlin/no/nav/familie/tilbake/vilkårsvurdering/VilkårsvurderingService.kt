@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
@@ -11,7 +12,9 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
@@ -30,39 +33,46 @@ class VilkårsvurderingService(
     val faktaFeilutbetalingService: FaktaFeilutbetalingService,
 ) {
     fun hentVilkårsvurdering(behandlingId: UUID): VurdertVilkårsvurderingDto {
-        val faktaOmFeilutbetaling =
-            faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
-                ?: throw Feil(
-                    message =
-                        "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
-                            "kan ikke hente vilkårsvurdering",
-                )
+        val faktaOmFeilutbetaling = hentAktivFaktaOmFeilutbetaling(behandlingId)
         val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val perioder = mutableListOf<Månedsperiode>()
-        val foreldetPerioderMedBegrunnelse = mutableMapOf<Månedsperiode, String>()
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
-        if (vurdertForeldelse == null) {
-            // fakta perioder
-            faktaOmFeilutbetaling.perioder
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
-        } else {
-            // Ikke foreldet perioder uten perioder som allerede vurdert i vilkårsvurdering
-            vurdertForeldelse.foreldelsesperioder.filter { !it.erForeldet() }
-                .filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it.periode) }
-                .forEach { perioder.add(it.periode) }
-            // foreldet perioder
-            vurdertForeldelse.foreldelsesperioder.filter { it.erForeldet() }
-                .forEach { foreldetPerioderMedBegrunnelse[it.periode] = it.begrunnelse }
-        }
+        val perioder = finnIkkeVurdertePerioder(vurdertForeldelse, faktaOmFeilutbetaling, vilkårsvurdering)
+        val foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse(vurdertForeldelse)
         return VilkårsvurderingMapper.tilRespons(
             vilkårsvurdering = vilkårsvurdering,
             perioder = perioder.toList(),
-            foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse.toMap(),
+            foreldetPerioderMedBegrunnelse = foreldetPerioderMedBegrunnelse,
             faktaFeilutbetaling = faktaOmFeilutbetaling,
             kravgrunnlag431 = kravgrunnlag431,
         )
+    }
+
+    private fun hentAktivFaktaOmFeilutbetaling(behandlingId: UUID) =
+        faktaFeilutbetalingService.hentAktivFaktaOmFeilutbetaling(behandlingId)
+            ?: throw Feil(
+                "Fakta om feilutbetaling finnes ikke for behandling=$behandlingId, " +
+                        "kan ikke hente vilkårsvurdering",
+            )
+
+    private fun foreldetPerioderMedBegrunnelse(vurdertForeldelse: VurdertForeldelse?): Map<Datoperiode, String> {
+        return if (vurdertForeldelse != null) {
+            vurdertForeldelse.foreldelsesperioder.filter { it.erForeldet() }
+                .map { it.periode to it.begrunnelse }
+                .toMap()
+        } else {
+            emptyMap()
+        }
+    }
+
+    private fun finnIkkeVurdertePerioder(
+        vurdertForeldelse: VurdertForeldelse?,
+        faktaOmFeilutbetaling: FaktaFeilutbetaling,
+        vilkårsvurdering: Vilkårsvurdering?
+    ): List<Datoperiode> {
+        val perioder = vurdertForeldelse?.foreldelsesperioder?.map { it.periode }
+            ?: faktaOmFeilutbetaling.perioder.map { it.periode }
+        return perioder.filter { !erPeriodeAlleredeVurdert(vilkårsvurdering, it) }
     }
 
     @Transactional
@@ -81,7 +91,7 @@ class VilkårsvurderingService(
         // filter bort perioder som er foreldet
         val ikkeForeldetPerioder =
             behandlingsstegVilkårsvurderingDto.vilkårsvurderingsperioder
-                .filter { !foreldelseService.erPeriodeForeldet(behandlingId, Månedsperiode(it.periode.fom, it.periode.tom)) }
+                .filter { !foreldelseService.erPeriodeForeldet(behandlingId, it.periode) }
         deaktiverEksisterendeVilkårsvurdering(behandlingId)
         vilkårsvurderingRepository.insert(
             VilkårsvurderingMapper.tilDomene(
@@ -105,11 +115,11 @@ class VilkårsvurderingService(
                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                     begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
                     aktsomhetDto =
-                        AktsomhetDto(
-                            aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
-                            tilbakekrevSmåbeløp = false,
-                            begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
-                        ),
+                    AktsomhetDto(
+                        aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
+                        tilbakekrevSmåbeløp = false,
+                        begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                    ),
                 )
             }
         vilkårsvurderingRepository.insert(
@@ -130,7 +140,7 @@ class VilkårsvurderingService(
 
     private fun erPeriodeAlleredeVurdert(
         vilkårsvurdering: Vilkårsvurdering?,
-        periode: Månedsperiode,
+        periode: Datoperiode,
     ): Boolean {
         return vilkårsvurdering?.perioder?.any { periode.inneholder(it.periode) } == true
     }

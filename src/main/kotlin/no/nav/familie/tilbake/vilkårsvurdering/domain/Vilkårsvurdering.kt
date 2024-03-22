@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering.domain
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
@@ -30,7 +31,7 @@ data class Vilkårsvurderingsperiode(
     @Id
     val id: UUID = UUID.randomUUID(),
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     @Column("vilkarsvurderingsresultat")
     val vilkårsvurderingsresultat: Vilkårsvurderingsresultat,
     val begrunnelse: String,

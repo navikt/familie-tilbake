@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.vilkårsvurdering
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
@@ -20,7 +21,7 @@ object VilkårsvurderingValidator {
         vilkårsvurderingDto.vilkårsvurderingsperioder.forEach {
             validerAndelTilbakekrevesBeløp(it.aktsomhetDto)
             validerAnnetBegrunnelse(it.aktsomhetDto)
-            validerBeløp(kravgrunnlag431, Månedsperiode(it.periode.fom, it.periode.tom), it)
+            validerBeløp(kravgrunnlag431, it.periode, it)
         }
     }
 
@@ -58,7 +59,7 @@ object VilkårsvurderingValidator {
 
     private fun validerBeløp(
         kravgrunnlag431: Kravgrunnlag431,
-        periode: Månedsperiode,
+        periode: Datoperiode,
         vilkårsvurderingsperiode: VilkårsvurderingsperiodeDto,
     ) {
         val feilMelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"

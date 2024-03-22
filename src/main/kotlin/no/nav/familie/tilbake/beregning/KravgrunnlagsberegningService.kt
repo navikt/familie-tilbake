@@ -38,8 +38,8 @@ object KravgrunnlagsberegningService {
 
     fun fordelKravgrunnlagBeløpPåPerioder(
         kravgrunnlag: Kravgrunnlag431,
-        vurderingsperioder: List<Månedsperiode>,
-    ): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
+        vurderingsperioder: List<Datoperiode>,
+    ): Map<Datoperiode, FordeltKravgrunnlagsbeløp> {
         return vurderingsperioder.associateWith {
             FordeltKravgrunnlagsbeløp(
                 beregnBeløp(kravgrunnlag, it, feilutbetaltYtelsesbeløputleder),
@@ -49,7 +49,7 @@ object KravgrunnlagsberegningService {
         }
     }
 
-    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Månedsperiode, FordeltKravgrunnlagsbeløp> {
+    fun summerKravgrunnlagBeløpForPerioder(kravgrunnlag: Kravgrunnlag431): Map<Datoperiode, FordeltKravgrunnlagsbeløp> {
         return kravgrunnlag.perioder.associate {
             it.periode to
                 FordeltKravgrunnlagsbeløp(
@@ -62,7 +62,7 @@ object KravgrunnlagsberegningService {
 
     fun beregnFeilutbetaltBeløp(
         kravgrunnlag: Kravgrunnlag431,
-        vurderingsperiode: Månedsperiode,
+        vurderingsperiode: Datoperiode,
     ): BigDecimal {
         return beregnBeløp(kravgrunnlag, vurderingsperiode, feilutbetaltYtelsesbeløputleder)
     }
@@ -85,7 +85,7 @@ object KravgrunnlagsberegningService {
 
     private fun beregnBeløp(
         kravgrunnlag: Kravgrunnlag431,
-        vurderingsperiode: Månedsperiode,
+        vurderingsperiode: Datoperiode,
         beløpsummerer: Function<Kravgrunnlagsperiode432, BigDecimal>,
     ): BigDecimal {
         val sum =

@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.foreldelse
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
@@ -39,7 +40,7 @@ class ForeldelseService(
 
     fun erPeriodeForeldet(
         behandlingId: UUID,
-        periode: Månedsperiode,
+        periode: Datoperiode,
     ): Boolean {
         return hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder
             ?.any { periode == it.periode && it.erForeldet() }

@@ -148,7 +148,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     private val periodeMedEnBeløpsperiode =
         lagPeriode(
             lagHbGrunnbeløp(
-                Månedsperiode(
+                Datoperiode(
                     LocalDate.of(2021, 1, 1),
                     LocalDate.of(2021, 3, 31),
                 ),
@@ -158,7 +158,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     private val periodeMedToBeløpsperioder =
         lagPeriode(
             lagHbGrunnbeløp(
-                Månedsperiode(
+                Datoperiode(
                     LocalDate.of(2020, 1, 1),
                     LocalDate.of(2021, 4, 30),
                 ),
@@ -168,7 +168,7 @@ class TekstformatererVedtaksbrevInntektOver6GTest {
     private val periodeMedTreBeløpsperioder =
         lagPeriode(
             lagHbGrunnbeløp(
-                Månedsperiode(
+                Datoperiode(
                     LocalDate.of(2020, 1, 1),
                     LocalDate.of(2021, 5, 31),
                 ),

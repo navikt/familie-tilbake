@@ -11,6 +11,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -98,8 +99,8 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val behandlingId = behandling.id
     private val perioder =
         listOf(
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
-            Månedsperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
+            Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
+            Datoperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 2)),
         )
     private lateinit var kravgrunnlag431: Kravgrunnlag431
 
@@ -267,7 +268,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         val vilkårsperioder =
             perioder.map {
                 VilkårsvurderingsperiodeDto(
-                    periode = it.toDatoperiode(),
+                    periode = it,
                     begrunnelse = "testverdi",
                     aktsomhetDto =
                         AktsomhetDto(

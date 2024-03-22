@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.data
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Fil
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -171,7 +171,7 @@ object Testdata {
 
     private val foreldelsesperiode =
         Foreldelsesperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
+            periode = Datoperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
             foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
             begrunnelse = "testverdi",
             foreldelsesfrist = LocalDate.now(),
@@ -215,7 +215,7 @@ object Testdata {
     val kravgrunnlagsperiode432 =
         Kravgrunnlagsperiode432(
             periode =
-                Månedsperiode(
+            Datoperiode(
                     YearMonth.now().minusMonths(1),
                     YearMonth.now(),
                 ),
@@ -281,7 +281,7 @@ object Testdata {
 
     val vilkårsperiode =
         Vilkårsvurderingsperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
+            periode = Datoperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
             begrunnelse = "testverdi",
             aktsomhet = vilkårsvurderingAktsomhet,
@@ -296,7 +296,7 @@ object Testdata {
 
     private val faktaFeilutbetalingsperiode =
         FaktaFeilutbetalingsperiode(
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
+            periode = Datoperiode(LocalDate.now(), LocalDate.now().plusDays(1)),
             hendelsestype = Hendelsestype.ANNET,
             hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
         )
@@ -309,7 +309,7 @@ object Testdata {
             perioder =
                 setOf(
                     FaktaFeilutbetalingsperiode(
-                        periode = Månedsperiode("2020-04" to "2022-08"),
+                        periode = Datoperiode("2020-04-01" to "2022-08-01"),
                         hendelsestype = Hendelsestype.ANNET,
                         hendelsesundertype = Hendelsesundertype.ANNET_FRITEKST,
                     ),
@@ -345,7 +345,7 @@ object Testdata {
     val vedtaksbrevsperiode =
         Vedtaksbrevsperiode(
             behandlingId = behandling.id,
-            periode = Månedsperiode(LocalDate.now(), LocalDate.now()),
+            periode = Datoperiode(LocalDate.now(), LocalDate.now()),
             fritekst = "testverdi",
             fritekststype = Friteksttype.FAKTA,
         )

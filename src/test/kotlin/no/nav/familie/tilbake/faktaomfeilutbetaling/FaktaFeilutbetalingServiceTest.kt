@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.faktaomfeilutbetaling
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
@@ -42,7 +43,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     private val behandling = Testdata.behandling
     private val periode =
-        Månedsperiode(
+        Datoperiode(
             fom = YearMonth.now().minusMonths(2),
             tom = YearMonth.now(),
         )
@@ -155,13 +156,13 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
         hendelsestype: Hendelsestype?,
         hendelsesundertype: Hendelsesundertype?,
     ) {
-        faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe periode.toDatoperiode()
+        faktaFeilutbetalingDto.totalFeilutbetaltPeriode shouldBe periode
         faktaFeilutbetalingDto.totaltFeilutbetaltBeløp shouldBe BigDecimal.valueOf(1000000, 2)
 
         faktaFeilutbetalingDto.feilutbetaltePerioder.size shouldBe 1
         val feilutbetaltePeriode = faktaFeilutbetalingDto.feilutbetaltePerioder.first()
         feilutbetaltePeriode.hendelsestype shouldBe hendelsestype
         feilutbetaltePeriode.hendelsesundertype shouldBe hendelsesundertype
-        feilutbetaltePeriode.periode shouldBe periode.toDatoperiode()
+        feilutbetaltePeriode.periode shouldBe periode
     }
 }

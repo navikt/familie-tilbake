@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import com.github.jknack.handlebars.internal.text.WordUtils
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -393,10 +394,9 @@ class VedtaksbrevgeneratorService(
         førstePeriode: Boolean,
     ): HbVedtaksbrevsperiode {
         val periode = resultatPeriode.periode
-        val fritekster: PeriodeMedTekstDto? =
-            perioderFritekst.firstOrNull { Månedsperiode(it.periode.fom, it.periode.tom) == periode }
+        val fritekster: PeriodeMedTekstDto? = perioderFritekst.firstOrNull { it.periode == periode }
         return HbVedtaksbrevsperiode(
-            periode = periode.toDatoperiode(),
+            periode = periode,
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
             fakta = utledFakta(periode, fakta, fritekster),
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
@@ -415,7 +415,7 @@ class VedtaksbrevgeneratorService(
     }
 
     private fun utledFakta(
-        periode: Månedsperiode,
+        periode: Datoperiode,
         fakta: FaktaFeilutbetaling,
         fritekst: PeriodeMedTekstDto?,
     ): HbFakta {
@@ -426,7 +426,7 @@ class VedtaksbrevgeneratorService(
     }
 
     private fun utledVurderinger(
-        periode: Månedsperiode,
+        periode: Datoperiode,
         vilkårPerioder: Set<Vilkårsvurderingsperiode>,
         foreldelse: VurdertForeldelse?,
         fritekst: PeriodeMedTekstDto?,
@@ -494,7 +494,7 @@ class VedtaksbrevgeneratorService(
 
     private fun finnForeldelsePeriode(
         foreldelse: VurdertForeldelse?,
-        periode: Månedsperiode,
+        periode: Datoperiode,
     ): Foreldelsesperiode? {
         return if (foreldelse == null) {
             null

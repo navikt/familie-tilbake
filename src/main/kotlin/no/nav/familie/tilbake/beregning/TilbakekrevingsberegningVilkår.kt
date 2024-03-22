@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.beregning
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.FordeltKravgrunnlagsbeløp
@@ -26,7 +27,7 @@ internal object TilbakekrevingsberegningVilkår {
         beregnRenter: Boolean,
         bruk6desimalerISkatteberegning: Boolean = false,
     ): Beregningsresultatsperiode {
-        val periode: Månedsperiode = vilkårVurdering.periode
+        val periode: Datoperiode = vilkårVurdering.periode
         val vurdering: Vurdering = finnVurdering(vilkårVurdering)
         val renter = beregnRenter && finnRenter(vilkårVurdering)
         val andel: BigDecimal? = finnAndelAvBeløp(vilkårVurdering)
@@ -77,7 +78,7 @@ internal object TilbakekrevingsberegningVilkår {
     }
 
     private fun beregnSkattBeløp(
-        periode: Månedsperiode,
+        periode: Datoperiode,
         bruttoTilbakekrevesBeløp: BigDecimal,
         perioderMedSkatteprosent: List<GrunnlagsperiodeMedSkatteprosent>,
         bruk6desimalerISkatteberegning: Boolean,

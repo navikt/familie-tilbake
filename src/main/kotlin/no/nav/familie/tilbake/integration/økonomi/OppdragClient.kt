@@ -375,8 +375,8 @@ class MockOppdragClient(
             DetaljertKravgrunnlagPeriodeDto().apply {
                 periode =
                     PeriodeDto().apply {
-                        fom = it.periode.fomDato
-                        tom = it.periode.tomDato
+                        fom = it.periode.fom
+                        tom = it.periode.tom
                     }
                 belopSkattMnd = it.månedligSkattebeløp
                 tilbakekrevingsBelop.addAll(mapBeløp(it.beløp))

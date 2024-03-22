@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak.domain
 
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.common.repository.Sporbar
 import org.springframework.data.annotation.Id
@@ -12,7 +13,7 @@ data class Vedtaksbrevsperiode(
     val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val periode: Månedsperiode,
+    val periode: Datoperiode,
     val fritekst: String,
     val fritekststype: Friteksttype,
     @Version

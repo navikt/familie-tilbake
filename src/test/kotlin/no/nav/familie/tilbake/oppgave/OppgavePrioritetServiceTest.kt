@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.oppgave
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -81,7 +82,7 @@ internal class OppgavePrioritetServiceTest {
         val periode =
             Testdata.kravgrunnlagsperiode432.copy(
                 id = UUID.randomUUID(),
-                periode = Månedsperiode(YearMonth.of(2020, 1), YearMonth.of(2023, 1)),
+                periode = Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2023, 1)),
                 beløp =
                     setOf(
                         lagFeilBeløp(BigDecimal(feilutbetaling)),

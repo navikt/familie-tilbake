@@ -106,7 +106,7 @@ class Foreldelsessteg(
 
     private fun harGrunnlagForeldetPeriode(behandlingId: UUID): Boolean {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        return kravgrunnlag.perioder.any { it.periode.fom.atDay(1) < LocalDate.now().minusMonths(foreldelseAntallMåned) }
+        return kravgrunnlag.perioder.any { it.periode.fom < LocalDate.now().minusMonths(foreldelseAntallMåned) }
     }
 
     private fun lagHistorikkinnslag(

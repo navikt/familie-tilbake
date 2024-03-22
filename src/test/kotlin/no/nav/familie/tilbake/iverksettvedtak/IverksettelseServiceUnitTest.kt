@@ -4,6 +4,7 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
@@ -104,7 +105,7 @@ class IverksettelseServiceUnitTest {
             beregningsresultatsperioder =
                 listOf(
                     Beregningsresultatsperiode(
-                        periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
+                        periode = Datoperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
                         vurdering = null,
                         feilutbetaltBeløp = BigDecimal(10000),
                         andelAvBeløp = BigDecimal(9983).divide(BigDecimal(10000), 2, RoundingMode.HALF_UP),
@@ -119,7 +120,7 @@ class IverksettelseServiceUnitTest {
                         riktigYtelsesbeløp = BigDecimal.ZERO,
                     ),
                     Beregningsresultatsperiode(
-                        periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
+                        periode = Datoperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
                         vurdering = null,
                         feilutbetaltBeløp = BigDecimal(47),
                         andelAvBeløp = BigDecimal.ONE,
@@ -140,7 +141,7 @@ class IverksettelseServiceUnitTest {
     private fun lagTilbakekrevingsperiode() =
         listOf(
             Tilbakekrevingsperiode(
-                periode = Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
+                periode = Datoperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)),
                 renter = BigDecimal.ZERO,
                 beløp =
                     listOf(
@@ -157,7 +158,7 @@ class IverksettelseServiceUnitTest {
                     ),
             ),
             Tilbakekrevingsperiode(
-                periode = Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
+                periode = Datoperiode(YearMonth.now().minusMonths(1), YearMonth.now()),
                 renter = BigDecimal.ZERO,
                 beløp =
                     listOf(
@@ -181,7 +182,7 @@ class IverksettelseServiceUnitTest {
                 setOf(
                     Kravgrunnlagsperiode432(
                         periode =
-                            Månedsperiode(
+                            Datoperiode(
                                 YearMonth.now().minusMonths(2),
                                 YearMonth.now().minusMonths(1),
                             ),
@@ -194,7 +195,7 @@ class IverksettelseServiceUnitTest {
                     ),
                     Kravgrunnlagsperiode432(
                         periode =
-                            Månedsperiode(
+                            Datoperiode(
                                 YearMonth.now().minusMonths(1),
                                 YearMonth.now(),
                             ),

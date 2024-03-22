@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBException
 import jakarta.xml.bind.Unmarshaller
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.UgyldigKravgrunnlagFeil
@@ -26,8 +27,8 @@ object KravgrunnlagUtil {
     private val jaxbContext: JAXBContext = JAXBContext.newInstance(DetaljertKravgrunnlagMelding::class.java)
     private val statusmeldingJaxbContext: JAXBContext = JAXBContext.newInstance(EndringKravOgVedtakstatus::class.java)
 
-    fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Månedsperiode, BigDecimal> {
-        val feilutbetalingPrPeriode = mutableMapOf<Månedsperiode, BigDecimal>()
+    fun finnFeilutbetalingPrPeriode(kravgrunnlag: Kravgrunnlag431): SortedMap<Datoperiode, BigDecimal> {
+        val feilutbetalingPrPeriode = mutableMapOf<Datoperiode, BigDecimal>()
         for (kravgrunnlagPeriode432 in kravgrunnlag.perioder) {
             val feilutbetaltBeløp =
                 kravgrunnlagPeriode432.beløp
@@ -37,7 +38,7 @@ object KravgrunnlagUtil {
                 feilutbetalingPrPeriode[kravgrunnlagPeriode432.periode] = feilutbetaltBeløp
             }
         }
-        return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Månedsperiode::fom).thenComparing(Månedsperiode::tom))
+        return feilutbetalingPrPeriode.toSortedMap(Comparator.comparing(Datoperiode::fom).thenComparing(Datoperiode::tom))
     }
 
     fun unmarshalKravgrunnlag(kravgrunnlagXML: String): DetaljertKravgrunnlagDto {
