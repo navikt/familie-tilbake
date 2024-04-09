@@ -12,6 +12,7 @@ import java.util.UUID
 data class ØkonomiXmlMottattArkiv(
     @Id
     val id: UUID = UUID.randomUUID(),
+    val gammel_okonomi_xml_mottatt_id: UUID?,
     val melding: String,
     val eksternFagsakId: String,
     val ytelsestype: Ytelsestype,
