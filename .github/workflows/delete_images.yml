@@ -2,7 +2,7 @@ name: 'Remove Old Images'
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 3-5 * * *'
+    - cron: '0 4 * * *'
 
 jobs:
   remove-images:
