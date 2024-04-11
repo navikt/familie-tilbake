@@ -26,7 +26,7 @@
         <kontrakter.version>3.0_20240228112956_0728048</kontrakter.version>
         <felles.version>2.20240123084817_35f03aa</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
-        <kotest.version>5.8.0</kotest.version>
+        <kotest.version>5.8.1</kotest.version>
         <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <okhttp3.version>4.9.1</okhttp3.version><!-- Inntil videre nødvendig for token-validation-spring-test-->
         <openhtmltopdf.version>1.1.4</openhtmltopdf.version>
