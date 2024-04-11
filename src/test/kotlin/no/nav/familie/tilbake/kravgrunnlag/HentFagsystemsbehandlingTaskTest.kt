@@ -46,6 +46,9 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var xmlMottattRepository: ØkonomiXmlMottattRepository
 
     @Autowired
+    private lateinit var kravgrunnlagService: KravgrunnlagService
+
+    @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
@@ -97,6 +100,7 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 økonomiXmlMottattService,
                 mockHentKravgrunnlagService,
+                kravgrunnlagService,
                 stegService,
                 historikkService,
             )

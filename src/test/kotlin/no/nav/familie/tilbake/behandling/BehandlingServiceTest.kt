@@ -373,10 +373,23 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock =
             BehandlingService(
-                behandlingRepository, fagsakService,
-                taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
-                behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
-                historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService,
+                behandlingRepository,
+                fagsakService,
+                taskService,
+                brevSporingService,
+                manuellBrevmottakerRepository,
+                kravgrunnlagRepository,
+                økonomiXmlMottattRepository,
+                behandlingskontrollService,
+                behandlingstilstandService,
+                tellerService,
+                stegService,
+                oppgaveTaskService,
+                historikkTaskService,
+                tilgangService,
+                6,
+                integrasjonerClient,
+                featureToggleService,
             )
         every { featureToggleService.isEnabled(any()) } returns true // default toggelen er av
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
@@ -417,10 +430,23 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         val behandlingServiceMock =
             BehandlingService(
-                behandlingRepository, fagsakService,
-                taskService, brevSporingService, manuellBrevmottakerRepository, kravgrunnlagRepository, økonomiXmlMottattRepository,
-                behandlingskontrollService, behandlingstilstandService, tellerService, stegService, oppgaveTaskService,
-                historikkTaskService, tilgangService, 6, integrasjonerClient, featureToggleService,
+                behandlingRepository,
+                fagsakService,
+                taskService,
+                brevSporingService,
+                manuellBrevmottakerRepository,
+                kravgrunnlagRepository,
+                økonomiXmlMottattRepository,
+                behandlingskontrollService,
+                behandlingstilstandService,
+                tellerService,
+                stegService,
+                oppgaveTaskService,
+                historikkTaskService,
+                tilgangService,
+                6,
+                integrasjonerClient,
+                featureToggleService,
             )
         every { featureToggleService.isEnabled(any()) } returns false // default toggelen er av
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null

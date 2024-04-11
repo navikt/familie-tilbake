@@ -1,0 +1,1 @@
+ALTER TABLE okonomi_xml_mottatt_arkiv ADD COLUMN gammel_okonomi_xml_mottatt_id UUID;

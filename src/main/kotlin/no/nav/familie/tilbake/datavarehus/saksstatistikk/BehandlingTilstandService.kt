@@ -57,6 +57,13 @@ class BehandlingTilstandService(
         opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
     }
 
+    fun opprettSendingAvBehandlingenManuellt(behandlingId: UUID) {
+        val hendelsesbeskrivelse = "Sender siste tilstand manuellt på behandling  $behandlingId"
+
+        val tilstand = hentBehandlingensTilstand(behandlingId)
+        opprettProsessTask(behandlingId, tilstand, hendelsesbeskrivelse)
+    }
+
     private fun opprettProsessTask(
         behandlingId: UUID,
         behandlingstilstand: Behandlingstilstand,
