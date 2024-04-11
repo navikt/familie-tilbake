@@ -113,6 +113,23 @@ class BehandlingService(
         return behandling
     }
 
+    fun opprettBehandlingUnder4xRettsgebyr(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
+        val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
+
+        val sendVarselbrev =
+            Task(
+                type = SendVarselbrevTask.TYPE,
+                payload = behandling.id.toString(),
+                properties =
+                Properties().apply {
+                    setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
+                },
+            )
+        taskService.save(sendVarselbrev)
+
+        return behandling
+    }
+
     @Transactional
     fun opprettBehandlingManuellTask(opprettManueltTilbakekrevingRequest: OpprettManueltTilbakekrevingRequest) {
         val kanBehandlingOpprettesManuelt =
@@ -470,11 +487,11 @@ class BehandlingService(
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
         logger.info(
-            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 "og eksternId=$eksternId",
         )
         secureLogger.info(
-            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
         )
 
