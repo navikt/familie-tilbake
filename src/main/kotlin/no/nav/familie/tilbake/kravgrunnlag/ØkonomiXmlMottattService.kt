@@ -23,8 +23,8 @@ class ØkonomiXmlMottattService(
         kravgrunnlagXml: String,
         kravgrunnlag: DetaljertKravgrunnlagDto,
         ytelsestype: Ytelsestype,
-    ) {
-        mottattXmlRepository.insert(
+    ): ØkonomiXmlMottatt {
+        return mottattXmlRepository.insert(
             ØkonomiXmlMottatt(
                 melding = kravgrunnlagXml,
                 kravstatuskode = Kravstatuskode.fraKode(kravgrunnlag.kodeStatusKrav),
@@ -53,6 +53,7 @@ class ØkonomiXmlMottattService(
             )
         eksisterendeKravgrunnlag.forEach {
             arkiverMottattXml(
+                mottattXmlId = it.id,
                 mottattXml = it.melding,
                 fagsystemId = it.eksternFagsakId,
                 ytelsestype = it.ytelsestype,
@@ -112,12 +113,14 @@ class ØkonomiXmlMottattService(
     }
 
     fun arkiverMottattXml(
+        mottattXmlId: UUID?,
         mottattXml: String,
         fagsystemId: String,
         ytelsestype: Ytelsestype,
     ) {
         mottattXmlArkivRepository.insert(
             ØkonomiXmlMottattArkiv(
+                gammel_okonomi_xml_mottatt_id = mottattXmlId,
                 melding = mottattXml,
                 eksternFagsakId = fagsystemId,
                 ytelsestype = ytelsestype,
