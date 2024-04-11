@@ -54,7 +54,7 @@ class BehandlingController(
 
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk som ikke skal kreve inn beløp under 4x rettsgebyr")
     @PostMapping(
-        path = ["/v1"],
+        path = ["/v1/automatisk"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )

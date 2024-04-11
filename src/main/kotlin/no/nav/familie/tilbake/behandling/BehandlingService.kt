@@ -121,9 +121,9 @@ class BehandlingService(
                 type = SendVarselbrevTask.TYPE,
                 payload = behandling.id.toString(),
                 properties =
-                Properties().apply {
-                    setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
-                },
+                    Properties().apply {
+                        setProperty(PropertyName.FAGSYSTEM, opprettTilbakekrevingRequest.fagsystem.name)
+                    },
             )
         taskService.save(sendVarselbrev)
 
