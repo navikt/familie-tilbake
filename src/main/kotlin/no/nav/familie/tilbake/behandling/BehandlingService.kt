@@ -487,6 +487,15 @@ class BehandlingService(
         val ansvarligsaksbehandler =
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
+        logger.info(
+            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
+                "og eksternId=${opprettTilbakekrevingRequest.eksternId}",
+        )
+        secureLogger.info(
+            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
+                " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
+        )
+
         val behandling =
             BehandlingMapper.tilDomeneBehandling(
                 opprettTilbakekrevingRequest,
@@ -512,11 +521,11 @@ class BehandlingService(
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
         logger.info(
-            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 "og eksternId=$eksternId",
         )
         secureLogger.info(
-            "Oppretter Tilbakekrevingsbehandling for feilutbetaling under 4x rettsgebyr for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
         )
 
