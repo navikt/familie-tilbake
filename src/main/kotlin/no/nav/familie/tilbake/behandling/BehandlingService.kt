@@ -89,14 +89,17 @@ class BehandlingService(
 
     @Transactional
     fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
-        val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
+        val behandling =
+            if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+                opprettBehandlingSomSkalBehandlesAutomatisk(opprettTilbakekrevingRequest)
+            } else {
+                opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
+            }
 
-        // Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
-
-        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg ===
-            Tilbakekrevingsvalg
-                .OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet
+        if ((
+                opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL ||
+                    opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
+            ) && !behandling.manueltOpprettet
         ) {
             val sendVarselbrev =
                 Task(
@@ -474,6 +477,28 @@ class BehandlingService(
         )
     }
 
+    private fun opprettBehandlingSomSkalBehandlesAutomatisk(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
+        val fagsystem = opprettTilbakekrevingRequest.fagsystem
+        val eksisterendeFagsak = fagsakService.finnFagsak(fagsystem, opprettTilbakekrevingRequest.eksternFagsakId)
+        val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
+        val fagsak =
+            eksisterendeFagsak
+                ?: fagsakService.opprettFagsak(opprettTilbakekrevingRequest, ytelsestype, fagsystem)
+        val ansvarligsaksbehandler =
+            integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
+
+        val behandling =
+            BehandlingMapper.tilDomeneBehandling(
+                opprettTilbakekrevingRequest,
+                fagsystem,
+                fagsak,
+                ansvarligsaksbehandler,
+            )
+        behandlingRepository.insert(behandling)
+
+        return behandling
+    }
+
     private fun opprettFørstegangsbehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val ytelsestype = opprettTilbakekrevingRequest.ytelsestype
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
@@ -552,6 +577,8 @@ class BehandlingService(
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             ),
         )
+
+        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
         return behandling
     }

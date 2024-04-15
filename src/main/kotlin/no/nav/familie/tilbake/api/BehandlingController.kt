@@ -52,21 +52,6 @@ class BehandlingController(
         return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
     }
 
-    @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk som ikke skal kreve inn beløp under 4x rettsgebyr")
-    @PostMapping(
-        path = ["/v1/automatisk"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Rolletilgangssjekk(Behandlerrolle.SAKSBEHANDLER, "Oppretter tilbakekreving som automatisk behandles", AuditLoggerEvent.CREATE)
-    fun oppretBehandlingForFeilutbetalingUnder4GangerRettsgebyr(
-        @Valid @RequestBody
-        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
-    ): Ressurs<String> {
-        val behandling = behandlingService.opprettBehandlingUnder4xRettsgebyr(opprettTilbakekrevingRequest)
-        return Ressurs.success(behandling.eksternBrukId.toString(), melding = "Behandling er opprettet.")
-    }
-
     @Operation(summary = "Opprett tilbakekrevingsbehandling manuelt")
     @PostMapping(
         path = ["/manuelt/task/v1"],
