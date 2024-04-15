@@ -96,8 +96,7 @@ class BehandlingService(
                 opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
             }
 
-        if ((opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) && !behandling.manueltOpprettet
-        ) {
+        if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg === Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL && !behandling.manueltOpprettet) {
             val sendVarselbrev =
                 Task(
                     type = SendVarselbrevTask.TYPE,
