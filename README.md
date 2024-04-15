@@ -37,7 +37,10 @@ Master-branchen blir automatisk bygget ved merge og deployet til prod.
 For NAV-interne kan henvendelser om applikasjonen rettes til #baks-dev på slack.
 Ellers kan man opprette et issue her på github.
 
-# Generering av dokumetnasjon
+# Generering av dokumentasjon
 https://confluence.adeo.no/display/TFA/Generert+dokumentasjon
 
 [Filer for generering av dokumentasjon](/src/test/kotlin/no/nav/familie/tilbake/dokumentasjonsgenerator)
+
+# Flyt ved mottatt kravgrunnlag
+![Screenshot 2024-04-15 at 15.57.24.png](..%2F..%2FDesktop%2FScreenshot%202024-04-15%20at%2015.57.24.png)
