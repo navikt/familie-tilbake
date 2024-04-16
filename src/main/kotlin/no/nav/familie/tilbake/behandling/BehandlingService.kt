@@ -487,16 +487,16 @@ class BehandlingService(
 
     private fun logOppretterBehandling(
         erAutomatisk: Boolean,
-        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest
+        opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ) {
         val erAutomatiskLogg = if (erAutomatisk) "som skal behandles automatisk" else ""
         logger.info(
             "Oppretter Tilbakekrevingsbehandling $erAutomatiskLogg for ytelsestype=${opprettTilbakekrevingRequest.ytelsestype},eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
-                    "og eksternId=${opprettTilbakekrevingRequest.eksternId}",
+                "og eksternId=${opprettTilbakekrevingRequest.eksternId}",
         )
         secureLogger.info(
             "Oppretter Tilbakekrevingsbehandling $erAutomatiskLogg for ytelsestype=${opprettTilbakekrevingRequest.ytelsestype},eksternFagsakId=${opprettTilbakekrevingRequest.eksternFagsakId} " +
-                    " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
+                " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
         )
     }
 
