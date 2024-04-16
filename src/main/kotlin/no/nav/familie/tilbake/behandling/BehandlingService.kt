@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.behandling
 
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør.VEDTAKSLØSNING
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
@@ -44,6 +45,7 @@ import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.Man
 import no.nav.familie.tilbake.dokumentbestilling.varsel.SendVarselbrevTask
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
+import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
@@ -90,9 +92,6 @@ class BehandlingService(
     @Transactional
     fun opprettBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Behandling {
         val behandling: Behandling = opprettFørstegangsbehandling(opprettTilbakekrevingRequest)
-
-        // Lag oppgave for behandling
-        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
         if (opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg ===
             Tilbakekrevingsvalg
@@ -163,7 +162,7 @@ class BehandlingService(
         val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(opprettRevurderingDto.ytelsestype)
         historikkTaskService.lagHistorikkTask(
             revurdering.id,
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
+            BEHANDLING_OPPRETTET,
             Aktør.SAKSBEHANDLER,
         )
 
@@ -340,7 +339,7 @@ class BehandlingService(
             when (behandlingsresultatstype) {
                 Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                -> Aktør.VEDTAKSLØSNING
+                -> VEDTAKSLØSNING
 
                 else -> Aktør.SAKSBEHANDLER
             }
@@ -465,16 +464,18 @@ class BehandlingService(
         val eksternId = opprettTilbakekrevingRequest.eksternId
         val erManueltOpprettet = opprettTilbakekrevingRequest.manueltOpprettet
         val brevmottakere = opprettTilbakekrevingRequest.manuelleBrevmottakere
+        val erAutomatisk = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
 
         val ansvarligsaksbehandler =
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
 
+        val erAutomatiskLogg = if (erAutomatisk) "som skal behandles automatisk" else ""
         logger.info(
-            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling $erAutomatiskLogg for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 "og eksternId=$eksternId",
         )
         secureLogger.info(
-            "Oppretter Tilbakekrevingsbehandling for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
+            "Oppretter Tilbakekrevingsbehandling $erAutomatiskLogg for ytelsestype=$ytelsestype,eksternFagsakId=$eksternFagsakId " +
                 " og personIdent=${opprettTilbakekrevingRequest.personIdent}",
         )
 
@@ -495,11 +496,7 @@ class BehandlingService(
             )
         behandlingRepository.insert(behandling)
 
-        historikkTaskService.lagHistorikkTask(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.BEHANDLING_OPPRETTET,
-            Aktør.VEDTAKSLØSNING,
-        )
+        historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, VEDTAKSLØSNING)
 
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
@@ -535,6 +532,11 @@ class BehandlingService(
                 properties = Properties().apply { setProperty(PropertyName.FAGSYSTEM, fagsystem.name) },
             ),
         )
+
+        // Lag oppgave for behandling
+        if (!erAutomatisk) {
+            oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+        }
 
         return behandling
     }
