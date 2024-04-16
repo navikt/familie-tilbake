@@ -16,6 +16,7 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
@@ -68,7 +69,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -369,7 +369,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
-        val featureToggleService = mockk<FeatureToggleService>()
+        val validerBehandlingService = mockk<ValiderBehandlingService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -379,7 +379,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 brevSporingService,
                 manuellBrevmottakerRepository,
                 kravgrunnlagRepository,
-                økonomiXmlMottattRepository,
                 behandlingskontrollService,
                 behandlingstilstandService,
                 tellerService,
@@ -389,9 +388,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilgangService,
                 6,
                 integrasjonerClient,
-                featureToggleService,
+                validerBehandlingService,
             )
-        every { featureToggleService.isEnabled(any()) } returns true // default toggelen er av
+        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling)
         every { behandlingRepository.insert(any()) } returns Testdata.behandling
@@ -426,7 +425,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
-        val featureToggleService = mockk<FeatureToggleService>()
+        val validerBehandlingService = mockk<ValiderBehandlingService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -436,7 +435,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 brevSporingService,
                 manuellBrevmottakerRepository,
                 kravgrunnlagRepository,
-                økonomiXmlMottattRepository,
                 behandlingskontrollService,
                 behandlingstilstandService,
                 tellerService,
@@ -446,9 +444,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilgangService,
                 6,
                 integrasjonerClient,
-                featureToggleService,
+                validerBehandlingService,
             )
-        every { featureToggleService.isEnabled(any()) } returns false // default toggelen er av
+        justRun { validerBehandlingService.validerOpprettBehandling(any()) } // default toggelen er av
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
