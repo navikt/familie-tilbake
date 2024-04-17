@@ -35,6 +35,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -82,6 +84,7 @@ class BehandlingService(
     private val opprettelseDagerBegrensning: Long,
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -457,9 +460,11 @@ class BehandlingService(
         validerBehandlingService.validerOpprettBehandling(opprettTilbakekrevingRequest)
 
         val fagsystem = opprettTilbakekrevingRequest.fagsystem
-        val erAutomatisk = opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
+        val erAutomatiskOgFeatureTogglePå =
+            opprettTilbakekrevingRequest.faktainfo.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK &&
+                featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR)
 
-        logOppretterBehandling(erAutomatisk, opprettTilbakekrevingRequest)
+        logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
         val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak)
@@ -478,7 +483,7 @@ class BehandlingService(
             ),
         )
 
-        if (!erAutomatisk) {
+        if (!erAutomatiskOgFeatureTogglePå) {
             oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
         }
 
