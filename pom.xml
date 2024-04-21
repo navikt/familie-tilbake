@@ -23,7 +23,7 @@
         <main-class>no.nav.familie.tilbake.LauncherKt</main-class>
         <kotlin.version>1.9.23</kotlin.version>
         <common-java-modules.version>2.2021.09.17_07.09-67428a6422cc</common-java-modules.version>
-        <kontrakter.version>3.0_20240411113533_8de49a4</kontrakter.version>
+        <kontrakter.version>3.0_20240417075019_5dc3ebf</kontrakter.version>
         <felles.version>2.20240123084817_35f03aa</felles.version>
         <!-- kotest.properties kan antakelig fjernes i versjon 6, for autoscan blir default false -->
         <kotest.version>5.8.1</kotest.version>
