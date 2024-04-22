@@ -69,6 +69,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -370,6 +371,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
+        val featureToggleService = mockk<FeatureToggleService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -389,8 +391,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 6,
                 integrasjonerClient,
                 validerBehandlingService,
+                featureToggleService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
+        every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling)
         every { behandlingRepository.insert(any()) } returns Testdata.behandling
@@ -426,6 +430,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
+        val featureToggleService = mockk<FeatureToggleService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -445,8 +450,10 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 6,
                 integrasjonerClient,
                 validerBehandlingService,
+                featureToggleService,
             )
-        justRun { validerBehandlingService.validerOpprettBehandling(any()) } // default toggelen er av
+        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
+        every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
