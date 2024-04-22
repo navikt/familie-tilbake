@@ -68,6 +68,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
+    private lateinit var kravgrunnlagService: KravgrunnlagService
+
+    @Autowired
     private lateinit var taskService: TaskService
 
     @Autowired
@@ -115,6 +118,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 behandlingskontrollService,
                 økonomiXmlMottattService,
                 mockHentKravgrunnlagService,
+                kravgrunnlagService,
                 stegService,
                 historikkService,
             )
@@ -175,6 +179,44 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandlingsstegstilstand = behandlingstilstandRepository.findByBehandlingId(behandling.id)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.GRUNNLAG, Behandlingsstegstatus.UTFØRT)
         assertSteg(behandlingsstegstilstand, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
+
+        xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
+        xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
+            xmlMottatt.eksternFagsakId,
+            xmlMottatt.ytelsestype,
+        ).shouldNotBeNull()
+    }
+
+    @Test
+    fun `doTask skal ikke feile hvis det finnes en åpen behandling`() {
+        requestSendtRepository
+            .insert(
+                HentFagsystemsbehandlingRequestSendt(
+                    eksternFagsakId = xmlMottatt.eksternFagsakId,
+                    ytelsestype = xmlMottatt.ytelsestype,
+                    eksternId = xmlMottatt.referanse,
+                    respons = lagHentFagsystemsbehandlingRespons(xmlMottatt),
+                ),
+            )
+
+        val hentetKravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(mottattXMl)
+
+        every { mockHentKravgrunnlagService.hentKravgrunnlagFraØkonomi(any(), any()) } returns hentetKravgrunnlag
+
+        fagsakRepository.insert(Testdata.fagsak.copy(eksternFagsakId = xmlMottatt.eksternFagsakId))
+        behandlingRepository.insert(Testdata.behandling)
+        behandlingskontrollService.fortsettBehandling(Testdata.behandling.id)
+        stegService.håndterSteg(Testdata.behandling.id)
+
+        håndterGammelKravgrunnlagTask.doTask(lagTask())
+
+        val behandling =
+            behandlingRepository.finnÅpenTilbakekrevingsbehandling(
+                xmlMottatt.ytelsestype,
+                hentetKravgrunnlag.fagsystemId,
+            )
+        behandling.shouldNotBeNull()
+        kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id).shouldBeTrue()
 
         xmlMottattRepository.findByIdOrNull(mottattXmlId).shouldBeNull()
         xmlMottattArkivRepository.findByEksternFagsakIdAndYtelsestype(
@@ -251,6 +293,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             )
 
         økonomiXmlMottattService.arkiverMottattXml(
+            mottattXmlId = null,
             mottattXml =
                 mottattXMl
                     .replace("<urn:vedtakId>", "<urn:vedtakId>2")
@@ -261,6 +304,7 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         )
 
         økonomiXmlMottattService.arkiverMottattXml(
+            mottattXmlId = null,
             mottattXml =
                 readXml("/kravvedtakstatusxml/statusmelding_AVSL_BA.xml")
                     .replace("<urn:vedtakId>", "<urn:vedtakId>2"),

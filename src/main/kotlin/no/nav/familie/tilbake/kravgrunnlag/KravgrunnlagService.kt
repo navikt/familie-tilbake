@@ -69,7 +69,7 @@ class KravgrunnlagService(
         val kravgrunnlag431: Kravgrunnlag431 = KravgrunnlagMapper.tilKravgrunnlag431(kravgrunnlag, behandling.id)
         sjekkIdentiskKravgrunnlag(kravgrunnlag431, behandling)
         lagreKravgrunnlag(kravgrunnlag431, ytelsestype)
-        mottattXmlService.arkiverMottattXml(kravgrunnlagXml, fagsystemId, ytelsestype)
+        mottattXmlService.arkiverMottattXml(mottattXmlId = null, mottattXml = kravgrunnlagXml, fagsystemId = fagsystemId, ytelsestype = ytelsestype)
 
         historikkTaskService.lagHistorikkTask(
             behandling.id,
@@ -122,7 +122,7 @@ class KravgrunnlagService(
         )
     }
 
-    private fun lagreKravgrunnlag(
+    fun lagreKravgrunnlag(
         kravgrunnlag431: Kravgrunnlag431,
         ytelsestype: Ytelsestype,
     ) {
@@ -207,7 +207,7 @@ class KravgrunnlagService(
         oppgaveTaskService.oppdaterOppgavePrioritetTask(behandlingId = behandling.id, fagsakId = behandling.aktivFagsystemsbehandling.eksternId)
     }
 
-    private fun sjekkIdentiskKravgrunnlag(
+    fun sjekkIdentiskKravgrunnlag(
         endretKravgrunnlag: Kravgrunnlag431,
         behandling: Behandling,
     ) {
