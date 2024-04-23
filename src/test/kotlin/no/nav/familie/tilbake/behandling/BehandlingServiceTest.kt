@@ -16,6 +16,7 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
@@ -369,6 +370,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
+        val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
 
         val behandlingServiceMock =
@@ -379,7 +381,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 brevSporingService,
                 manuellBrevmottakerRepository,
                 kravgrunnlagRepository,
-                økonomiXmlMottattRepository,
                 behandlingskontrollService,
                 behandlingstilstandService,
                 tellerService,
@@ -389,9 +390,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilgangService,
                 6,
                 integrasjonerClient,
+                validerBehandlingService,
                 featureToggleService,
             )
-        every { featureToggleService.isEnabled(any()) } returns true // default toggelen er av
+        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
+        every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling)
         every { behandlingRepository.insert(any()) } returns Testdata.behandling
@@ -426,6 +429,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val historikkTaskService = mockk<HistorikkTaskService>(relaxed = true)
         val tilgangService = mockk<TilgangService>(relaxed = true)
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
+        val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
 
         val behandlingServiceMock =
@@ -436,7 +440,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 brevSporingService,
                 manuellBrevmottakerRepository,
                 kravgrunnlagRepository,
-                økonomiXmlMottattRepository,
                 behandlingskontrollService,
                 behandlingstilstandService,
                 tellerService,
@@ -446,9 +449,11 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilgangService,
                 6,
                 integrasjonerClient,
+                validerBehandlingService,
                 featureToggleService,
             )
-        every { featureToggleService.isEnabled(any()) } returns false // default toggelen er av
+        justRun { validerBehandlingService.validerOpprettBehandling(any()) }
+        every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
         every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
         every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))

@@ -33,17 +33,19 @@ class PdfGenerator {
     fun genererPDFMedLogo(
         html: String,
         dokumentvariant: Dokumentvariant,
+        dokumenttittel: String,
     ): ByteArray {
         val logo = FileStructureUtil.readResourceAsString("formats/pdf/nav_logo_svg.html")
-        return genererPDF(logo + html, dokumentvariant)
+        return genererPDF(logo + html, dokumentvariant, dokumenttittel)
     }
 
-    fun genererPDF(
+    private fun genererPDF(
         html: String,
         dokumentvariant: Dokumentvariant,
+        dokumenttittel: String
     ): ByteArray {
         val baos = ByteArrayOutputStream()
-        genererPDF(html, baos, dokumentvariant)
+        genererPDF(html, baos, dokumentvariant, dokumenttittel)
         val bytes = baos.toByteArray()
         if (dokumentvariant == Dokumentvariant.ENDELIG) {
             // validering er for treig for å brukes for interaktiv bruk, tar typisk 1-2 sekunder pr dokument
@@ -57,8 +59,9 @@ class PdfGenerator {
         htmlContent: String,
         outputStream: ByteArrayOutputStream,
         dokumentvariant: Dokumentvariant,
+        dokumenttittel: String
     ) {
-        val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant)
+        val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant, dokumenttittel)
         val builder = PdfRendererBuilder()
         try {
             builder.useFont(
@@ -100,13 +103,16 @@ class PdfGenerator {
         html: String,
         format: DocFormat,
         dokumentvariant: Dokumentvariant,
+        dokumenttittel: String
     ): String {
         // nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
             " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
             "<html>" +
             "<head>" +
+            "<title>${dokumenttittel}</title>" +
             "<meta charset=\"UTF-8\" />" +
+            "<meta name=\"subject\" content=\"${dokumenttittel}\"/>" +
             "<style>" +
             hentCss(format) +
             "</style>" +
