@@ -27,6 +27,24 @@ object ManuellBrevmottakerMapper {
             vergetype = manuellBrevmottakerRequestDto.vergetype,
         )
 
+    fun tilDomene(
+        brevmottaker: Brevmottaker,
+        behandlingId: UUID,
+    ) =
+        ManuellBrevmottaker(
+            behandlingId = behandlingId,
+            type = brevmottaker.type,
+            ident = brevmottaker.personIdent,
+            orgNr = brevmottaker.organisasjonsnummer,
+            adresselinje1 = brevmottaker.manuellAdresseInfo?.adresselinje1,
+            adresselinje2 = brevmottaker.manuellAdresseInfo?.adresselinje2,
+            postnummer = brevmottaker.manuellAdresseInfo?.postnummer,
+            poststed = brevmottaker.manuellAdresseInfo?.poststed,
+            landkode = brevmottaker.manuellAdresseInfo?.landkode,
+            navn = brevmottaker.navn,
+            vergetype = brevmottaker.vergetype,
+        )
+
     fun tilRespons(manuellBrevmottaker: ManuellBrevmottaker) =
         ManuellBrevmottakerResponsDto(
             id = manuellBrevmottaker.id,
