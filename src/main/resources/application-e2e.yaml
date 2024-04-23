@@ -87,9 +87,8 @@ CREDENTIAL_PASSWORD:
 API_SCOPE: api://${TILBAKE_CLIENT_ID}/.default
 
 prosessering:
-  fixedDelayString:
-    in:
-      milliseconds: 2500
+  enabled: false
+
 
 unleash:
   enabled: true
