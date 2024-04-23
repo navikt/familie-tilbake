@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.time.LocalDate
 import java.util.UUID
+import org.springframework.data.repository.findByIdOrNull
 
 @Service
 class ØkonomiXmlMottattService(
@@ -102,6 +103,10 @@ class ØkonomiXmlMottattService(
 
     fun hentMottattKravgrunnlag(mottattXmlId: UUID): ØkonomiXmlMottatt {
         return mottattXmlRepository.findByIdOrThrow(mottattXmlId)
+    }
+
+    fun hentMottattKravgrunnlagNullable(mottattXmlId: UUID): ØkonomiXmlMottatt? {
+        return mottattXmlRepository.findByIdOrNull(mottattXmlId)
     }
 
     fun oppdaterMottattXml(mottattXml: ØkonomiXmlMottatt) {
