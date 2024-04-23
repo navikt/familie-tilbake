@@ -38,7 +38,7 @@ class PdfBrevService(
 
     fun genererForhåndsvisning(data: Brevdata): ByteArray {
         val html = lagHtml(data)
-        return pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.UTKAST)
+        return pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.UTKAST, data.tittel ?: data.metadata.tittel ?: data.overskrift)
     }
 
     fun sendBrev(
@@ -106,7 +106,7 @@ class PdfBrevService(
 
         val pdf =
             try {
-                pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG)
+                pdfGenerator.genererPDFMedLogo(html, Dokumentvariant.ENDELIG, data.tittel ?: data.metadata.tittel ?: data.overskrift)
             } catch (e: Exception) {
                 secureLogger.info("Feil ved generering av brev: brevData=$data, html=$html", e)
                 throw e
