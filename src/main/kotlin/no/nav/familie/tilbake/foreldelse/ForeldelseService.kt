@@ -66,7 +66,7 @@ class ForeldelseService(
             hentVurdertForeldelse(behandlingId).foreldetPerioder.map {
                 ForeldelsesperiodeDto(
                     periode = it.periode,
-                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
                     foreldelsesvurderingstype = Foreldelsesvurderingstype.IKKE_FORELDET,
                 )
             }

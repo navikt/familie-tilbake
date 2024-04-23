@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.config
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Period
@@ -28,6 +30,7 @@ object Constants {
     const val STATUSMELDING_XML_ROOT_ELEMENT: String = "urn:endringKravOgVedtakstatus"
 
     val rettsgebyr = rettsgebyrForDato.filter { it.gyldigFra <= LocalDate.now() }.maxByOrNull { it.gyldigFra }!!.beløp
+    val FIRE_X_RETTSGEBYR = rettsgebyr * 4
 
     private class Datobeløp(val gyldigFra: LocalDate, val beløp: Long)
 
@@ -48,7 +51,15 @@ object Constants {
                     .multiply(BigDecimal(0.5)),
         )
 
-    const val AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE = "Automatisk satt verdi"
+    const val AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE = "Automatisk satt verdi"
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR = "Automatisk behandling av tilbakekreving under 4 ganger rettsgebyr. Ingen tilbakekreving."
+
+    fun hentAutomatiskSaksbehandlingBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+        when (saksbehandlingstype) {
+            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk saksbehandlingsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
+        }
 }
 
 object PropertyName {
