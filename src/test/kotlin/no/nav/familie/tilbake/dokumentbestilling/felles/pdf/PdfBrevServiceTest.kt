@@ -132,7 +132,7 @@ internal class PdfBrevServiceTest {
                     behandlingstype = Behandlingstype.TILBAKEKREVING,
                     gjelderDødsfall = false,
                 ),
-            overskrift = "",
+            overskrift = "Overskrift",
             mottager = Brevmottager.BRUKER,
             brevtekst = "",
         )
