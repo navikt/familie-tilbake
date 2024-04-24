@@ -36,11 +36,13 @@ class AutomatiskSaksbehandlingTask(
     override fun doTask(task: Task) {
         logger.info("AutomatiskSaksbehandlingTask prosesserer med id=${task.id} og metadata ${task.metadata}")
         val behandlingId = UUID.fromString(task.payload)
-
-        if (kravgrunnlagService.sumFeilutbetalingsbeløpForBehandlingId(behandlingId) > Constants.FIRE_X_RETTSGEBYR) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (kravgrunnlagService.sumFeilutbetalingsbeløpForBehandlingId(behandlingId) > Constants.FIRE_X_RETTSGEBYR &&
+            behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
+        ) {
             throw Feil("Skal ikke behandle beløp over 4x rettsgebyr automatisk")
         }
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+
         if (!featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR) &&
             behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK
         ) {
