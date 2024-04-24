@@ -72,16 +72,16 @@ jobs:
           HISTORIKK_CLIENT_SECRET: ${{ secrets.HISTORIKK_CLIENT_SECRET }}
         run: cd tilbake-e2e/autotest; mvn -Dtest="**" test
       - name: Samle Docker-logs ved feil
-        if: failure()
+        if: success() || failure()
         uses: jwalton/gh-docker-logs@v2
         with:
           dest: './logs'
       - name: Tar logs
-        if: failure()
+        if: success() || failure()
         run: tar cvzf ./logs.tgz ./logs
       - name: Laste opp logs til GitHub
         uses: actions/upload-artifact@master
-        if: failure()
+        if: success() || failure()
         with:
           name: docker-logs-${{ github.run_number }}.tgz
           path: ./logs.tgz
