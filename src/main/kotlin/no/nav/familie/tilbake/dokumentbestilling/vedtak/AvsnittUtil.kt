@@ -176,7 +176,7 @@ internal object AvsnittUtil {
 
     private fun parseUnderavsnittstype(tekst: String): Underavsnittstype? {
         val rest = Vedtaksbrevsfritekst.fjernFritekstmarkering(tekst)
-        return Underavsnittstype.values().firstOrNull { it.name == rest }
+        return Underavsnittstype.entries.firstOrNull { it.name == rest }
     }
 
     private fun erOverskrift(tekst: String): Boolean {

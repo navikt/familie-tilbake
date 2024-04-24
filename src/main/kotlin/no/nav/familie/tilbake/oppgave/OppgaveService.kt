@@ -52,7 +52,7 @@ class OppgaveService(
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     private val antallOppgaveTyper =
-        Oppgavetype.values().associateWith {
+        Oppgavetype.entries.associateWith {
             Metrics.counter("oppgave.opprettet", "type", it.name)
         }
 
@@ -303,6 +303,5 @@ class OppgaveService(
 
     companion object {
         private const val NAY_ENSLIG_FORSØRGER = "4489"
-        private const val NAY_EGNE_ANSATTE = "4483"
     }
 }

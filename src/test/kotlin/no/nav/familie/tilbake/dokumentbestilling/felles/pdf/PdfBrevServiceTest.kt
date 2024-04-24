@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.felles.header.Institusjon
 import no.nav.familie.tilbake.micrometer.TellerService
-import no.nav.familie.tilbake.organisasjon.OrganisasjonService
 import org.junit.jupiter.api.Test
 import java.util.Base64
 
@@ -26,7 +25,6 @@ internal class PdfBrevServiceTest {
     private val journalføringService: JournalføringService = mockk(relaxed = true)
     private val tellerService: TellerService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
-    private val organisasjonService: OrganisasjonService = mockk(relaxed = true)
 
     private val pdfBrevService =
         PdfBrevService(

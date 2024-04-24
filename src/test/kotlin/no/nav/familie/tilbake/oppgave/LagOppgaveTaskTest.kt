@@ -18,7 +18,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,7 +38,6 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingskontrollService: BehandlingskontrollService
 
     private val mockOppgaveService: OppgaveService = mockk(relaxed = true)
-    private val mockIntegrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
     private val oppgavePrioritetService = mockk<OppgavePrioritetService>()
 
     private lateinit var lagOppgaveTask: LagOppgaveTask

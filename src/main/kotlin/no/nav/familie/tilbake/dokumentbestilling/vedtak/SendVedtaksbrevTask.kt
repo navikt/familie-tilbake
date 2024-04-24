@@ -10,7 +10,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendVedtaksoppsummeringTilDvhTask
 import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
@@ -31,7 +30,6 @@ class SendVedtaksbrevTask(
     private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevService: VedtaksbrevService,
     private val taskService: TaskService,
-    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 

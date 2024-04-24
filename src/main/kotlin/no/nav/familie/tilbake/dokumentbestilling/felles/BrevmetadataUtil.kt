@@ -8,14 +8,12 @@ import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuellAdresse
 import no.nav.familie.tilbake.dokumentbestilling.somBrevmottager
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.Vedtaksbrevgrunnlag
 import no.nav.familie.tilbake.organisasjon.OrganisasjonService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -26,10 +24,7 @@ class BrevmetadataUtil(
     private val manuelleBrevmottakerRepository: ManuellBrevmottakerRepository,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
     private val organisasjonService: OrganisasjonService,
-    private val featureToggleService: FeatureToggleService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun genererMetadataForBrev(
         behandlingId: UUID,
         vedtaksbrevgrunnlag: Vedtaksbrevgrunnlag? = null,

@@ -61,7 +61,6 @@ class DistribusjonshåndteringServiceTest {
             manuelleBrevmottakerRepository = manuelleBrevmottakerRepository,
             eksterneDataForBrevService = eksterneDataForBrevService,
             organisasjonService = mockk(),
-            featureToggleService = featureToggleService,
         )
     private val distribusjonshåndteringService =
         DistribusjonshåndteringService(
@@ -87,8 +86,6 @@ class DistribusjonshåndteringServiceTest {
         SendHenleggelsesbrevTask(
             henleggelsesbrevService = henleggelsesbrevService,
             behandlingRepository = behandlingRepository,
-            fagsakRepository = fagsakRepository,
-            featureToggleService = featureToggleService,
         )
 
     private val behandling = Testdata.behandling

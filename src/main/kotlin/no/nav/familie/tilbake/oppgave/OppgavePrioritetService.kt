@@ -2,7 +2,6 @@ package no.nav.familie.tilbake.oppgave
 
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -13,7 +12,6 @@ import java.util.UUID
 @Service
 class OppgavePrioritetService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun utledOppgaveprioritet(
         behandlingId: UUID,

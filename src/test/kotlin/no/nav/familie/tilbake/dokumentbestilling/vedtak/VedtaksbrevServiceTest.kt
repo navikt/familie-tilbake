@@ -138,7 +138,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 vedtaksbrevgrunnlagService,
                 faktaRepository,
                 vilkårsvurderingRepository,
-                fagsakRepository,
                 vedtaksbrevsoppsummeringRepository,
                 vedtaksbrevsperiodeRepository,
                 spyPdfBrevService,

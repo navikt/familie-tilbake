@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
@@ -35,7 +34,6 @@ class BehandlingskontrollService(
     private val behandlingTilstandService: BehandlingTilstandService,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val historikkTaskService: HistorikkTaskService,
-    private val featureToggleService: FeatureToggleService,
     private val brevmottakerRepository: ManuellBrevmottakerRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)

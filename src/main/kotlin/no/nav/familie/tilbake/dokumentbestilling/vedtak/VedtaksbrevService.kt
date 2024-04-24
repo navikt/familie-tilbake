@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.dokumentbestilling.vedtak
 import no.nav.familie.tilbake.api.dto.FritekstavsnittDto
 import no.nav.familie.tilbake.api.dto.HentForhåndvisningVedtaksbrevPdfDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
@@ -24,7 +23,6 @@ class VedtaksbrevService(
     private val vedtaksbrevgrunnlagService: VedtaksbrevgunnlagService,
     private val faktaRepository: FaktaFeilutbetalingRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val vedtaksbrevsoppsummeringRepository: VedtaksbrevsoppsummeringRepository,
     private val vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository,
     private val pdfBrevService: PdfBrevService,
