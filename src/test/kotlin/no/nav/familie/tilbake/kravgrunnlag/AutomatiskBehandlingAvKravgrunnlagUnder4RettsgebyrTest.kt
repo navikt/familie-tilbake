@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
@@ -22,10 +21,10 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.FeatureToggleConfig
-import no.nav.familie.tilbake.config.FeatureToggleMockConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import org.junit.jupiter.api.BeforeEach
@@ -34,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
 
-class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTest() {
+class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -60,7 +59,10 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTe
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
-    private lateinit var featureToggleService : FeatureToggleService
+    private lateinit var foreldelseService: ForeldelseService
+
+    @Autowired
+    private lateinit var featureToggleService: FeatureToggleService
 
     private lateinit var behandlingId: UUID
 
@@ -98,7 +100,8 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTe
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK } shouldBe true
         val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
-        fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR
+        fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
+        foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder shouldBe null
     }
 
     @Test
@@ -110,16 +113,25 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTe
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
 
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        kravgrunnlag.shouldNotBeNull()
-        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
-        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.OVERGANGSSTØNAD
-
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
-        automatiskSaksbehandlingTasks.size shouldBe 1
 
         val exception = shouldThrow<Feil> { automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first()) }
         exception.message shouldContain "Skal ikke behandle beløp over 4x rettsgebyr automatisk"
+    }
+
+    @Test
+    fun `Skal behandle automatisk selv om det finnes foreldet periode i kravgrunnlag`() {
+        lagGrunnlagssteg()
+
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr_foreldet.xml")
+        val task = opprettTask(kravgrunnlagXml)
+        behandleKravgrunnlagTask.doTask(task)
+        val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
+
+        automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first())
+        val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
+        vurdertForeldelse?.foreldelsesperioder?.size shouldBe 1
+        vurdertForeldelse?.foreldelsesperioder?.first()?.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE
     }
 
     private fun lagGrunnlagssteg() {
