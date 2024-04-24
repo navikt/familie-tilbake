@@ -75,21 +75,21 @@ class Foreldelsessteg(
     @Transactional
     override fun utførStegAutomatisk(behandlingId: UUID) {
         logger.info("Behandling $behandlingId er på ${Behandlingssteg.FORELDELSE} steg og behandler automatisk..")
-        if (!harGrunnlagForeldetPeriode(behandlingId)) {
-            utførSteg(behandlingId)
-            return
-        }
-        foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
-        lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
+        if (harGrunnlagForeldetPeriode(behandlingId)) {
+            foreldelseService.lagreFastForeldelseForAutomatiskSaksbehandling(behandlingId)
+            lagHistorikkinnslag(behandlingId, Aktør.VEDTAKSLØSNING)
 
-        behandlingskontrollService.oppdaterBehandlingsstegStatus(
-            behandlingId,
-            Behandlingsstegsinfo(
-                Behandlingssteg.FORELDELSE,
-                Behandlingsstegstatus.UTFØRT,
-            ),
-        )
-        behandlingskontrollService.fortsettBehandling(behandlingId)
+            behandlingskontrollService.oppdaterBehandlingsstegStatus(
+                behandlingId,
+                Behandlingsstegsinfo(
+                    Behandlingssteg.FORELDELSE,
+                    Behandlingsstegstatus.UTFØRT,
+                ),
+            )
+            behandlingskontrollService.fortsettBehandling(behandlingId)
+        } else {
+            utførSteg(behandlingId)
+        }
     }
 
     @Transactional
