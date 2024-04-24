@@ -22,6 +22,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.FeatureToggleConfig
+import no.nav.familie.tilbake.config.FeatureToggleMockConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
@@ -58,7 +59,8 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTe
     @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
-    val mockFeatureToggleService: FeatureToggleService = mockk()
+    @Autowired
+    private lateinit var featureToggleService : FeatureToggleService
 
     private lateinit var behandlingId: UUID
 
@@ -72,7 +74,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4Rettsgebyr : OppslagSpringRunnerTe
         fagsakRepository.insert(fagsakOvergangsstønad)
         behandlingId = behandlingRepository.insert(automatiskBehandling).id
 
-        every { mockFeatureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_BEHANDLE_TILBAKEKREVING_UNDER_4X_RETTSGEBYR) } returns true
     }
 
     @Test
