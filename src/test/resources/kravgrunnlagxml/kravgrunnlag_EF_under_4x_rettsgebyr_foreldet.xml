@@ -14,21 +14,21 @@
         <urn:enhetAnsvarlig>8020</urn:enhetAnsvarlig>
         <urn:enhetBosted>8020</urn:enhetBosted>
         <urn:enhetBehandl>8020</urn:enhetBehandl>
-        <urn:kontrollfelt>2024-11-01-18.40.23.787834</urn:kontrollfelt>
+        <urn:kontrollfelt>2017-11-01-18.40.23.787834</urn:kontrollfelt>
         <urn:saksbehId>K231B433</urn:saksbehId>
         <urn:referanse>1</urn:referanse>
         <urn:tilbakekrevingsPeriode>
             <urn:periode>
-                <mmel:fom>2024-03-01</mmel:fom>
-                <mmel:tom>2024-03-31</mmel:tom>
+                <mmel:fom>2017-03-01</mmel:fom>
+                <mmel:tom>2017-03-31</mmel:tom>
             </urn:periode>
-            <urn:belopSkattMnd>24300.00</urn:belopSkattMnd>
+            <urn:belopSkattMnd>243.00</urn:belopSkattMnd>
             <urn:tilbakekrevingsBelop>
                 <urn:kodeKlasse>EFOG</urn:kodeKlasse>
                 <urn:typeKlasse>YTEL</urn:typeKlasse>
-                <urn:belopOpprUtbet>203000.00</urn:belopOpprUtbet>
-                <urn:belopNy>154400.00</urn:belopNy>
-                <urn:belopTilbakekreves>48600.00</urn:belopTilbakekreves>
+                <urn:belopOpprUtbet>2030.00</urn:belopOpprUtbet>
+                <urn:belopNy>1544.00</urn:belopNy>
+                <urn:belopTilbakekreves>486.00</urn:belopTilbakekreves>
                 <urn:belopUinnkrevd>0.00</urn:belopUinnkrevd>
                 <urn:skattProsent>50.0000</urn:skattProsent>
             </urn:tilbakekrevingsBelop>
@@ -36,7 +36,7 @@
                 <urn:kodeKlasse>KL_KODE_FEIL_EFOG</urn:kodeKlasse>
                 <urn:typeKlasse>FEIL</urn:typeKlasse>
                 <urn:belopOpprUtbet>0.00</urn:belopOpprUtbet>
-                <urn:belopNy>48600.00</urn:belopNy>
+                <urn:belopNy>486.00</urn:belopNy>
                 <urn:belopTilbakekreves>0.00</urn:belopTilbakekreves>
                 <urn:belopUinnkrevd>0.00</urn:belopUinnkrevd>
                 <urn:skattProsent>50.0000</urn:skattProsent>
