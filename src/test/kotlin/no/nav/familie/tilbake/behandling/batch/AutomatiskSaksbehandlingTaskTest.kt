@@ -189,7 +189,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
 
         val faktaFeilutbetaling = faktaFeilutbetalingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         faktaFeilutbetaling.shouldNotBeNull()
-        faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE
+        faktaFeilutbetaling.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         faktaFeilutbetaling.perioder.shouldHaveSingleElement {
             Hendelsestype.ANNET == it.hendelsestype &&
                 Hendelsesundertype.ANNET_FRITEKST == it.hendelsesundertype
@@ -200,7 +200,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
         vilkårsvurdering.shouldNotBeNull()
         vilkårsvurdering.perioder.shouldHaveSingleElement {
-            Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE == it.begrunnelse &&
+            Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE == it.begrunnelse &&
                 Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT == it.vilkårsvurderingsresultat &&
                 it.aktsomhet != null && it.aktsomhet!!.aktsomhet == Aktsomhet.SIMPEL_UAKTSOMHET
             !it.aktsomhet!!.tilbakekrevSmåbeløp

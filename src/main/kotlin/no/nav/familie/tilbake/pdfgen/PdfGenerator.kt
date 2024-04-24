@@ -42,7 +42,7 @@ class PdfGenerator {
     private fun genererPDF(
         html: String,
         dokumentvariant: Dokumentvariant,
-        dokumenttittel: String
+        dokumenttittel: String,
     ): ByteArray {
         val baos = ByteArrayOutputStream()
         genererPDF(html, baos, dokumentvariant, dokumenttittel)
@@ -59,7 +59,7 @@ class PdfGenerator {
         htmlContent: String,
         outputStream: ByteArrayOutputStream,
         dokumentvariant: Dokumentvariant,
-        dokumenttittel: String
+        dokumenttittel: String,
     ) {
         val htmlDocument = appendHtmlMetadata(htmlContent, DocFormat.PDF, dokumentvariant, dokumenttittel)
         val builder = PdfRendererBuilder()
@@ -103,14 +103,14 @@ class PdfGenerator {
         html: String,
         format: DocFormat,
         dokumentvariant: Dokumentvariant,
-        dokumenttittel: String
+        dokumenttittel: String,
     ): String {
         // nødvendig doctype for å støtte non-breaking space i openhtmltopdf
         return "<!DOCTYPE html PUBLIC" +
             " \"-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN\" \"\">" +
             "<html>" +
             "<head>" +
-            "<title>${dokumenttittel}</title>" +
+            "<title>$dokumenttittel</title>" +
             "<meta charset=\"UTF-8\" />" +
             "<meta name=\"subject\" content=\"${dokumenttittel}\"/>" +
             "<style>" +
