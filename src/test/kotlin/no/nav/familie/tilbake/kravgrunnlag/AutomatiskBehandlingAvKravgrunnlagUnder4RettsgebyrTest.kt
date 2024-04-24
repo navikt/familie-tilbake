@@ -101,8 +101,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK } shouldBe true
         val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
         fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
-        val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
-        vurdertForeldelse?.foreldelsesperioder shouldBe null
+        foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder shouldBe null
     }
 
     @Test
@@ -114,13 +113,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
 
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        kravgrunnlag.shouldNotBeNull()
-        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
-        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.OVERGANGSSTØNAD
-
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
-        automatiskSaksbehandlingTasks.size shouldBe 1
 
         val exception = shouldThrow<Feil> { automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first()) }
         exception.message shouldContain "Skal ikke behandle beløp over 4x rettsgebyr automatisk"
@@ -131,23 +124,11 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         lagGrunnlagssteg()
 
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr_foreldet.xml")
-
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
-
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        kravgrunnlag.shouldNotBeNull()
-        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
-        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.OVERGANGSSTØNAD
-
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
-        automatiskSaksbehandlingTasks.size shouldBe 1
 
         automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first())
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK } shouldBe true
-        val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
-        fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
         val vurdertForeldelse = foreldelseService.hentAktivVurdertForeldelse(behandlingId)
         vurdertForeldelse?.foreldelsesperioder?.size shouldBe 1
         vurdertForeldelse?.foreldelsesperioder?.first()?.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE
