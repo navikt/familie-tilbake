@@ -99,10 +99,10 @@ class StegService(
         if (behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
             throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg")
         }
-        if (behandling.saksbehandlingstype != Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP) {
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
             throw Feil(
                 message =
-                    "Behandling med id=$behandlingId er sett til ordinær saksbehandling. " +
+                    "Behandling med id=$behandlingId er satt til ordinær saksbehandling. " +
                         "Kan ikke saksbehandle den automatisk",
             )
         }

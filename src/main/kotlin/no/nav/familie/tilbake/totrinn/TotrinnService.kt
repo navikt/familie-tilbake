@@ -65,7 +65,7 @@ class TotrinnService(
                     behandlingId = behandlingId,
                     behandlingssteg = it.behandlingssteg,
                     godkjent = true,
-                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
                 )
             }
         totrinnsvurderinger.forEach { totrinnsvurderingRepository.insert(it) }

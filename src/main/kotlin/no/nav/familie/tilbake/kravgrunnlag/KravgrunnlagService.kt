@@ -1,12 +1,14 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
@@ -14,6 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -29,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.Properties
+import java.util.UUID
 
 @Service
 class KravgrunnlagService(
@@ -108,7 +112,11 @@ class KravgrunnlagService(
                 }
             }
         }
-        stegService.håndterSteg(behandling.id)
+
+        stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
+        if (behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+            taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
+        }
         tellerService.tellKobletKravgrunnlag(fagsystem)
     }
 
@@ -136,6 +144,12 @@ class KravgrunnlagService(
             }
         }
         kravgrunnlagRepository.insert(kravgrunnlag431)
+    }
+
+    fun sumFeilutbetalingsbeløpForBehandlingId(behandlingId: UUID): Long {
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+        val beløpForPerioder = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
+        return beløpForPerioder.values.sumOf { it.feilutbetaltBeløp }.longValueExact()
     }
 
     private fun loggFeilHvisGammeltKravgrunnlag(
