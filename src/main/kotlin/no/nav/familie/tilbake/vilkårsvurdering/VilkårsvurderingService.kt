@@ -103,12 +103,12 @@ class VilkårsvurderingService(
                 VilkårsvurderingsperiodeDto(
                     periode = it.periode,
                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
                     aktsomhetDto =
                         AktsomhetDto(
                             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                             tilbakekrevSmåbeløp = false,
-                            begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGUNNLESE,
+                            begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
                         ),
                 )
             }
