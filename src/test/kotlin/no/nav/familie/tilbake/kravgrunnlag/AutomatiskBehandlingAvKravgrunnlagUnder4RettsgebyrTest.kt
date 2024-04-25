@@ -20,6 +20,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
+import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
@@ -27,6 +29,9 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepositor
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
+import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,6 +65,9 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
 
     @Autowired
     private lateinit var foreldelseService: ForeldelseService
+
+    @Autowired
+    private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
@@ -102,6 +110,15 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
         fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
         foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder shouldBe null
+
+        val vilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandlingId)
+        vilkårsvurdering.perioder.size shouldBe 1
+        vilkårsvurdering.perioder.first().foreldet shouldBe false // Vil alltid være satt til ikke foreldet ved automatisk behandling
+        vilkårsvurdering.perioder.first().begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.tilbakekrevSmåbeløp shouldBe false
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
     }
 
     @Test
