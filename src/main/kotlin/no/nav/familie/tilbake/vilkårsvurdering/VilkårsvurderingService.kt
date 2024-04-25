@@ -9,7 +9,8 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants
+import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse
+import no.nav.familie.tilbake.config.Constants.hentAutomatiskVilkårsvurderingBegrunnelse
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -103,12 +104,12 @@ class VilkårsvurderingService(
                 VilkårsvurderingsperiodeDto(
                     periode = it.periode,
                     vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
-                    begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
+                    begrunnelse = hentAutomatiskVilkårsvurderingBegrunnelse(behandling.saksbehandlingstype),
                     aktsomhetDto =
                         AktsomhetDto(
                             aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                             tilbakekrevSmåbeløp = false,
-                            begrunnelse = Constants.AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE,
+                            begrunnelse = hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(behandling.saksbehandlingstype),
                         ),
                 )
             }

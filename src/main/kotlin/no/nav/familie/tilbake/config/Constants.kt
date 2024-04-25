@@ -54,6 +54,8 @@ object Constants {
     const val AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE = "Automatisk satt verdi"
     const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE = "Automatisk behandling av tilbakekreving under 4 ganger rettsgebyr. Ingen tilbakekreving."
     const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE = "Automatisk behandlet under 4 ganger rettsgebyr på foreldet periode. Ikke relevant."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Beløpet skal ikke tilbakebetales."
+    const val AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE = "Automatisk behandlet. Feilutbetaling under 4 ganger rettsgebyr. Bruker har ikke handlet forsettlig eller grovt uaktsomt."
 
     fun hentAutomatiskSaksbehandlingBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
         when (saksbehandlingstype) {
@@ -64,8 +66,22 @@ object Constants {
 
     fun hentAutomatiskForeldelsesbegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
         when (saksbehandlingstype) {
-            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk saksbehandlingsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk foreldelsesbegrunnelse for ordinære saker")
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FORELDELSE_BEGRUNNELSE
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
+        }
+
+    fun hentAutomatiskVilkårsvurderingBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+        when (saksbehandlingstype) {
+            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk vilkårsvurderingsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
+        }
+
+    fun hentAutomatiskVilkårsvurderingAktsomhetBegrunnelse(saksbehandlingstype: Saksbehandlingstype): String =
+        when (saksbehandlingstype) {
+            Saksbehandlingstype.ORDINÆR -> throw Feil("Kan ikke utlede automatisk aktsomhetsbegrunnelse for ordinære saker")
+            Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR -> AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
             Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_LAVT_BELØP -> AUTOMATISK_SAKSBEHANDLING_BEGRUNNELSE
         }
 }
