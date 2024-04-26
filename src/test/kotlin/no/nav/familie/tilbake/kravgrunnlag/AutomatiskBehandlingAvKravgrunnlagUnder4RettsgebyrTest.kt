@@ -25,8 +25,10 @@ import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
+import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
@@ -59,6 +61,12 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
 
     @Autowired
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
+
+    @Autowired
+    private lateinit var sendØkonomiTilbakekrevingsvedtakTask: SendØkonomiTilbakekrevingsvedtakTask
+
+    @Autowired
+    private lateinit var sendVedtaksbrevTask: SendVedtaksbrevTask
 
     @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
@@ -119,6 +127,12 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.tilbakekrevSmåbeløp shouldBe false
         vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
         vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
+
+        val sendØkonomiTilbakekrevingsvedtak = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), SendØkonomiTilbakekrevingsvedtakTask.TYPE).first()
+        sendØkonomiTilbakekrevingsvedtakTask.doTask(sendØkonomiTilbakekrevingsvedtak)
+        sendØkonomiTilbakekrevingsvedtakTask.onCompletion(sendØkonomiTilbakekrevingsvedtak)
+        val sendBrevTask = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), SendVedtaksbrevTask.TYPE).first()
+        sendVedtaksbrevTask.doTask(sendBrevTask)
     }
 
     @Test
