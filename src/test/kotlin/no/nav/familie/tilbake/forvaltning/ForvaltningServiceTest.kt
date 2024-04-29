@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -85,10 +86,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var forvaltningService: ForvaltningService
 
-    private val behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         behandlingsstegstilstandRepository
