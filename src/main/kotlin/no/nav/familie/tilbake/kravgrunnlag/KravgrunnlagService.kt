@@ -150,10 +150,10 @@ class KravgrunnlagService(
     ) {
         val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(mottattKravgrunnlag.behandlingId)
 
-        val eksisterendeKravgrunnlagDato = eksisterendeKravgrunnlag.kontrollfelt.toLocalDateTime()
-        val mottattKravgrunnlagDato = mottattKravgrunnlag.kontrollfelt.toLocalDateTime()
+        val eksisterendeKravgrunnlagKontrollfeltTidspunkt = eksisterendeKravgrunnlag.kontrollfelt.toLocalDateTime()
+        val mottattKravgrunnlagKontrollfeltTidspunkt = mottattKravgrunnlag.kontrollfelt.toLocalDateTime()
 
-        val sistMottattKravgrunnlagSkalVæreAktivt = mottattKravgrunnlagDato.isAfter(eksisterendeKravgrunnlagDato)
+        val sistMottattKravgrunnlagSkalVæreAktivt = mottattKravgrunnlagKontrollfeltTidspunkt.isAfter(eksisterendeKravgrunnlagKontrollfeltTidspunkt)
 
         if (sistMottattKravgrunnlagSkalVæreAktivt && eksisterendeKravgrunnlag.referanse != mottattKravgrunnlag.referanse) {
             hentOgOppdaterFaktaInfo(mottattKravgrunnlag, ytelsestype)
