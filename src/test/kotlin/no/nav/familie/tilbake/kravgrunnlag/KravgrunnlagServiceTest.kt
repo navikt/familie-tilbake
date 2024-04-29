@@ -1,7 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import io.mockk.clearAllMocks
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -19,9 +17,6 @@ import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import io.mockk.runs
-import io.mockk.just
-import org.junit.jupiter.api.BeforeEach
 
 class KravgrunnlagServiceTest {
     private val kravgrunnlagRepository: KravgrunnlagRepository = mockk()
@@ -51,11 +46,6 @@ class KravgrunnlagServiceTest {
             endretKravgrunnlagEventPublisher = endretKravgrunnlagEventPublisher,
         )
 
-    @BeforeEach
-    fun beforeEach() {
-        clearAllMocks()
-    }
-
     @Test
     fun `Skal ikke oppdatere aktiv på nytt kravgrunnlag med eldre dato i kontrollfelt`() {
         val gammeltKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236317")
@@ -68,7 +58,7 @@ class KravgrunnlagServiceTest {
 
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(any()) } returns true
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns gammeltKravgrunnlag
-        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns nyttKravgrunnlag
+        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns mockk()
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
 
 
@@ -81,7 +71,7 @@ class KravgrunnlagServiceTest {
     @Test
     fun `Skal oppdatere aktiv på nytt kravgrunnlag med nyere dato i kontrollfelt`() {
         val gammeltKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236316")
-        val nyttKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2021-04-29-18.50.15.236317")
+        val nyttKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236317")
 
         val nyttKravgrunnlagSlot = slot<Kravgrunnlag431>()
         val gammeltKravgrunnlagSlot = slot<Kravgrunnlag431>()
@@ -91,7 +81,7 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(any()) } returns true
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns gammeltKravgrunnlag
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
-        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) }  returns nyttKravgrunnlag
+        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) }  returns mockk()
 
         kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD)
 
@@ -106,7 +96,7 @@ class KravgrunnlagServiceTest {
         val nyttKravgrunnlagSlot2 = slot<Kravgrunnlag431>()
 
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(any()) } returns false
-        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot2)) } returns nyttKravgrunnlag
+        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot2)) } returns mockk()
 
         kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD)
 
