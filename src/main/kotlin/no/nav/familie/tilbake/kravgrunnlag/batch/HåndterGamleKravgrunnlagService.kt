@@ -144,7 +144,7 @@ class HåndterGamleKravgrunnlagService(
                 eksternFagsakId = hentetKravgrunnlag.fagsystemId,
             )
 
-        val behandling = åpenBehandling ?: opprettBehandling(hentetKravgrunnlag, fagsystemsbehandlingData)
+        val behandling = åpenBehandling ?: opprettBehandlingFraKravgrunnlag(hentetKravgrunnlag, fagsystemsbehandlingData)
 
         val behandlingId = behandling.id
 
@@ -197,7 +197,7 @@ class HåndterGamleKravgrunnlagService(
         }
     }
 
-    fun opprettBehandling(
+    fun opprettBehandlingFraKravgrunnlag(
         hentetKravgrunnlag: DetaljertKravgrunnlagDto,
         fagsystemsbehandlingData: HentFagsystemsbehandling,
     ): Behandling {
@@ -235,6 +235,7 @@ class HåndterGamleKravgrunnlagService(
             faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
             verge = fagsystemsbehandlingData.verge,
             varsel = null,
+            begrunnelseForTilbakekreving = null
         )
     }
 

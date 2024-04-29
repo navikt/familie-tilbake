@@ -67,6 +67,7 @@ object BehandlingMapper {
             varsler = varsler,
             verger = verger,
             regelverk = opprettTilbakekrevingRequest.regelverk,
+            begrunnelseForTilbakekreving = opprettTilbakekrevingRequest.begrunnelseForTilbakekreving
         )
     }
 
@@ -115,6 +116,7 @@ object BehandlingMapper {
             harManuelleBrevmottakere = manuelleBrevmottakere.isNotEmpty(),
             støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
             manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
+            begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving
         )
     }
 
@@ -270,6 +272,7 @@ object BehandlingMapper {
             fagsystemsbehandling = setOf(kopiFagsystemsbehandling(originalBehandling)),
             verger = verger,
             regelverk = originalBehandling.regelverk,
+            begrunnelseForTilbakekreving = originalBehandling.begrunnelseForTilbakekreving,
         )
     }
 

@@ -123,7 +123,26 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
+
+    fun lagBehandling() = Behandling(
+        fagsakId = fagsak.id,
+        type = Behandlingstype.TILBAKEKREVING,
+        opprettetDato = LocalDate.now(),
+        avsluttetDato = null,
+        ansvarligSaksbehandler = "saksbehandler",
+        ansvarligBeslutter = "beslutter",
+        behandlendeEnhet = "testverdi",
+        behandlendeEnhetsNavn = "testverdi",
+        manueltOpprettet = false,
+        fagsystemsbehandling = setOf(fagsystemsbehandling),
+        resultater = setOf(behandlingsresultat),
+        varsler = setOf(varsel),
+        verger = setOf(verge),
+        eksternBrukId = UUID.randomUUID(),
+        begrunnelseForTilbakekreving = null,
+    )
 
     val revurdering =
         Behandling(
@@ -146,6 +165,7 @@ object Testdata {
             varsler = emptySet(),
             verger = setOf(verge.copy(id = UUID.randomUUID())),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
 
     val behandlingsårsak =
@@ -230,6 +250,33 @@ object Testdata {
     val kravgrunnlag431 =
         Kravgrunnlag431(
             behandlingId = behandling.id,
+            vedtakId = BigInteger.ZERO,
+            kravstatuskode = Kravstatuskode.NYTT,
+            fagområdekode = Fagområdekode.EFOG,
+            fagsystemId = "testverdi",
+            fagsystemVedtaksdato = LocalDate.now(),
+            omgjortVedtakId = BigInteger.ZERO,
+            gjelderVedtakId = "testverdi",
+            gjelderType = GjelderType.PERSON,
+            utbetalesTilId = "testverdi",
+            utbetIdType = GjelderType.PERSON,
+            hjemmelkode = "testverdi",
+            beregnesRenter = true,
+            ansvarligEnhet = "testverdi",
+            bostedsenhet = "testverdi",
+            behandlingsenhet = "testverdi",
+            kontrollfelt = "testverdi",
+            saksbehandlerId = "testverdi",
+            referanse = "testverdi",
+            eksternKravgrunnlagId = BigInteger.ZERO,
+            perioder = setOf(kravgrunnlagsperiode432),
+            aktiv = true,
+            sperret = false,
+        )
+
+    fun lagKravgrunnlag(behandlingId: UUID) =
+        Kravgrunnlag431(
+            behandlingId = behandlingId,
             vedtakId = BigInteger.ZERO,
             kravstatuskode = Kravstatuskode.NYTT,
             fagområdekode = Fagområdekode.EFOG,
