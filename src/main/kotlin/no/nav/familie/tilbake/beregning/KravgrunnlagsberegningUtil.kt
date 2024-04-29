@@ -10,14 +10,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.YearMonth
 import java.util.function.Function
 
-@Service
-object KravgrunnlagsberegningService {
+object KravgrunnlagsberegningUtil {
     private val feilutbetaltYtelsesbeløputleder: (Kravgrunnlagsperiode432) -> BigDecimal = { kgPeriode: Kravgrunnlagsperiode432 ->
         kgPeriode.beløp
             .filter { it.klassetype == Klassetype.FEIL }

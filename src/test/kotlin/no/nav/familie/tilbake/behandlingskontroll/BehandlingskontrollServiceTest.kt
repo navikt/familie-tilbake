@@ -29,6 +29,8 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstan
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.data.Testdata.lagBehandling
+import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
 import no.nav.familie.tilbake.integration.pdl.internal.logger
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
@@ -57,7 +59,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
@@ -161,7 +163,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal fortsette til grunnlagssteg når varselsrespons ble mottatt med sperret kravgrunnlag`() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
-        val kravgrunnlag = Testdata.kravgrunnlag431
+        val kravgrunnlag = lagKravgrunnlag(behandling.id)
         val oppdatertKravgrunnlag = kravgrunnlag.copy(sperret = true)
         kravgrunnlagRepository.insert(oppdatertKravgrunnlag)
 
@@ -184,7 +186,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(behandling.copy(verger = emptySet()))
 
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(VARSEL, UTFØRT)))
-        val kravgrunnlag = Testdata.kravgrunnlag431
+        val kravgrunnlag = lagKravgrunnlag(behandling.id)
         kravgrunnlagRepository.insert(kravgrunnlag)
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
@@ -210,7 +212,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                 varsler = emptySet(),
             ),
         )
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -227,7 +229,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `fortsettBehandling skal oppdatere til foreldelsessteg etter fakta steg er utført`() {
         lagBehandlingsstegstilstand(setOf(Behandlingsstegsinfo(FAKTA, UTFØRT)))
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -251,7 +253,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
@@ -301,7 +303,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
 
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
@@ -318,7 +320,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når manuelt varsel sendt og behandling er i vilkår steg `() {
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(
             setOf(
                 Behandlingsstegsinfo(VARSEL, UTFØRT),
@@ -354,7 +356,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tilbakehoppBehandlingssteg skal oppdatere til varselssteg når mottok sper melding og behandling er i vilkår steg `() {
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(
             setOf(
                 Behandlingsstegsinfo(VARSEL, UTFØRT),
