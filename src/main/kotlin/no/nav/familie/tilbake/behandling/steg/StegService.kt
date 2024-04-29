@@ -135,8 +135,12 @@ class StegService(
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
 
-        // TODO feil dersom...
+        if (behandlingsstegstilstand?.behandlingssteg != Behandlingssteg.FATTE_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}");
+        }
+
         if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
             throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
         }
