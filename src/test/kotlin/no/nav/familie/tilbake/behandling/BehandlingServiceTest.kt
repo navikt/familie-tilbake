@@ -1746,6 +1746,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             saksbehandlerIdent = "Z0000",
             institusjon = institusjon,
             manuelleBrevmottakere = manuelleBrevmottakere,
+            begrunnelseForTilbakekreving = null,
         )
     }
 

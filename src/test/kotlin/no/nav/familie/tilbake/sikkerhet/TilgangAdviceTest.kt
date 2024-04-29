@@ -129,6 +129,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                     Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
                 ),
             saksbehandlerIdent = "bob",
+            begrunnelseForTilbakekreving = null,
         )
 
     @BeforeEach
@@ -162,6 +163,7 @@ internal class TilgangAdviceTest : OppslagSpringRunnerTest() {
                     behandlendeEnhet = "8020",
                     behandlendeEnhetsNavn = "Oslo",
                     manueltOpprettet = false,
+                    begrunnelseForTilbakekreving = null,
                 ),
             )
     }
