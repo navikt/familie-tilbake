@@ -282,6 +282,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+
         behandlingsstegstilstand.size shouldBe 3
         val sisteStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         sisteStegstilstand.shouldNotBeNull()
