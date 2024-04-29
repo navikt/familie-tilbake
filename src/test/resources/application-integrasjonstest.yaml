@@ -5,6 +5,9 @@ server:
 prosessering:
   enabled: false
 
+unleash:
+  enabled: false
+
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
