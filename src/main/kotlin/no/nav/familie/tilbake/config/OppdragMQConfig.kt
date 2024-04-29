@@ -23,7 +23,7 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 private const val UTF_8_WITH_PUA = 1208
 
 @Configuration
-@Profile("!integrasjonstest")
+@Profile("!integrasjonstest & !e2e")
 class OppdragMQConfig(
     @Value("\${oppdrag.mq.hostname}") val hostname: String,
     @Value("\${oppdrag.mq.queuemanager}") val queuemanager: String,
