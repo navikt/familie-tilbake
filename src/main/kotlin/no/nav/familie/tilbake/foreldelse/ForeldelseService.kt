@@ -5,7 +5,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertForeldelseDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.LogiskPeriodeUtil
@@ -55,7 +55,7 @@ class ForeldelseService(
         behandlingsstegForeldelseDto: BehandlingsstegForeldelseDto,
     ) {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned
-        KravgrunnlagsberegningService.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
+        KravgrunnlagsberegningUtil.validatePerioder(behandlingsstegForeldelseDto.foreldetPerioder.map { it.periode })
         val vurdertForeldelse = ForeldelseMapper.tilDomene(behandlingId, behandlingsstegForeldelseDto.foreldetPerioder)
 
         nullstillVilkårsvurderingForEndringerIForeldelsesperiode(behandlingId, vurdertForeldelse)

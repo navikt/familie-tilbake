@@ -37,8 +37,10 @@ import no.nav.familie.tilbake.api.dto.VurdertTotrinnDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.VergeService
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
@@ -110,15 +112,18 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var stegService: StegService
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
 
     private val fom = YearMonth.now().minusMonths(1).atDay(1)
     private val tom = YearMonth.now().atEndOfMonth()
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
+        behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 

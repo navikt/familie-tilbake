@@ -26,7 +26,9 @@ import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
@@ -108,11 +110,13 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

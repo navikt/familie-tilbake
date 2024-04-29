@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -164,7 +164,7 @@ class KravgrunnlagService(
 
     fun sumFeilutbetalingsbeløpForBehandlingId(behandlingId: UUID): Long {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val beløpForPerioder = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
+        val beløpForPerioder = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
         return beløpForPerioder.values.sumOf { it.feilutbetaltBeløp }.longValueExact()
     }
 

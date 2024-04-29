@@ -15,7 +15,9 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FAKTA
@@ -72,11 +74,13 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
         fagsakRepository.insert(fagsak)
     }
 

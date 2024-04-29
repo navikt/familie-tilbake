@@ -19,6 +19,7 @@ import no.nav.familie.tilbake.api.dto.SærligGrunnDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -74,10 +75,11 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
-    private val behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val førstePeriode =

@@ -299,6 +299,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 behandlendeEnhet = "8020",
                 behandlendeEnhetsNavn = "Oslo",
                 manueltOpprettet = false,
+                begrunnelseForTilbakekreving = null,
             )
         behandlingRepository.insert(behandling)
         return behandling

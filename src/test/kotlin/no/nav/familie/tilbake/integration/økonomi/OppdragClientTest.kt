@@ -20,6 +20,8 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakMarshaller
@@ -57,8 +59,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
     private lateinit var tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest
     private lateinit var hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest
     private val kravgrunnlagId: BigInteger = BigInteger.ZERO
@@ -66,7 +68,8 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         wireMockServer.start()
-
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))

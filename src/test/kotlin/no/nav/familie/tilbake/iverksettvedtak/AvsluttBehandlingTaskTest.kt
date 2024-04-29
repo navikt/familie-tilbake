@@ -8,7 +8,9 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
@@ -21,6 +23,7 @@ import no.nav.familie.tilbake.iverksettvedtak.task.AvsluttBehandlingTask
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 
 internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -38,12 +41,15 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var avsluttBehandlingTask: AvsluttBehandlingTask
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
+        behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }

@@ -86,5 +86,6 @@ internal class BehandlingMapperTest {
         avsluttetDato = avsluttetDato,
         resultater = behandlingsresultatstype?.let { setOf(Behandlingsresultat(type = behandlingsresultatstype)) } ?: emptySet(),
         regelverk = Regelverk.NASJONAL,
+        begrunnelseForTilbakekreving = null,
     )
 }
