@@ -115,7 +115,7 @@ class GammelKravgrunnlagService(
         task: Task,
     ) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val hentetData: Pair<DetaljertKravgrunnlagDto, Boolean> =
+        val (hentetKravgrunnlag, erSperret) =
             try {
                 hentKravgrunnlagFraØkonomi(mottattXml)
             } catch (e: KravgrunnlagIkkeFunnetFeil) {
@@ -132,8 +132,6 @@ class GammelKravgrunnlagService(
                     throw e
                 }
             }
-        val hentetKravgrunnlag = hentetData.first
-        val erSperret = hentetData.second
 
         arkiverKravgrunnlag(mottattXml.id)
 
