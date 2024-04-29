@@ -1,10 +1,12 @@
 package no.nav.familie.tilbake.behandling.steg
 
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -81,6 +83,37 @@ class StegService(
             )
         ) {
             hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
+        }
+    }
+
+    @Deprecated("Skal bruke håndterStegAutomatisk. Kan fjernes når den er testet OK")
+    @Transactional
+    fun håndterStegAutomatiskGAMMEL(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.erSaksbehandlingAvsluttet) {
+            throw Feil("Behandling med id=$behandlingId er allerede ferdig behandlet")
+        }
+        if (behandling.regelverk == Regelverk.EØS) {
+            throw Feil("Behandling med id=$behandlingId behandles etter EØS-regelverket, og skal dermed ikke behandles automatisk.")
+        }
+        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        val behandledeSteg = aktivtBehandlingssteg.name
+        if (behandlingskontrollService.erBehandlingPåVent(behandlingId)) {
+            throw Feil(message = "Behandling med id=$behandlingId er på vent, kan ikke behandle steg $behandledeSteg")
+        }
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
+            throw Feil(
+                message =
+                    "Behandling med id=$behandlingId er satt til ordinær saksbehandling. " +
+                        "Kan ikke saksbehandle den automatisk",
+            )
+        }
+        while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
+            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
+            if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
+                break
+            }
+            aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         }
     }
 
