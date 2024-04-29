@@ -15,7 +15,7 @@ import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.api.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.familie.tilbake.beregning.BeløpsberegningUtil
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
@@ -207,7 +207,7 @@ object VilkårsvurderingMapper {
         kravgrunnlag431: Kravgrunnlag431,
         periode: Månedsperiode,
     ): BigDecimal =
-        KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+        KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             .setScale(0, RoundingMode.HALF_UP)
 
     private fun hentHendelsestype(

@@ -22,7 +22,9 @@ import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -93,9 +95,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     private val mockFeatureToggleService: FeatureToggleService = mockk()
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
     private val perioder =
         listOf(
             Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 1)),
@@ -105,6 +107,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
+        behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 

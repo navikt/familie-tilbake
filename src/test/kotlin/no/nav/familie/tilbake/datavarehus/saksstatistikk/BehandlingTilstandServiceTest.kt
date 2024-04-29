@@ -265,6 +265,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             revurderingsvedtaksdato = fom,
             faktainfo = faktainfo,
             saksbehandlerIdent = "Z0000",
+            begrunnelseForTilbakekreving = null,
         )
     }
 }
