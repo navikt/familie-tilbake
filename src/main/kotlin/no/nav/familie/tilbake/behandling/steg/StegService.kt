@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import no.nav.familie.tilbake.behandling.domain.Behandling
 
 @Service
 class StegService(
@@ -86,19 +87,25 @@ class StegService(
     @Transactional
     fun håndterStegAutomatisk(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        var aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
+        val aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
 
+        håndterStegAutomatisk(behandling, aktivtBehandlingssteg)
+    }
+
+    @Transactional
+    fun håndterStegAutomatisk(behandling: Behandling, aktivtBehandlingssteg: Behandlingssteg) {
         validerAtBehandlingIkkeErAvsluttet(behandling)
         validerAtUtomatiskBehandlingIkkeErEøs(behandling)
-        validerAtBehandlingIkkeErPåVent(behandlingId = behandlingId, erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandlingId), behandledeSteg = aktivtBehandlingssteg.name)
+        validerAtBehandlingIkkeErPåVent(behandlingId = behandling.id, erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandling.id), behandledeSteg = aktivtBehandlingssteg.name)
         validerAtBehandlingErAutomatisk(behandling)
 
-        while (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
-            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandlingId)
-            if (aktivtBehandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK) {
-                break
+        if (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET){
+            hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandling.id)
+
+            if (aktivtBehandlingssteg != Behandlingssteg.IVERKSETT_VEDTAK) {
+                val nesteSteg = hentAktivBehandlingssteg(behandling.id)
+                håndterStegAutomatisk(behandling, nesteSteg)
             }
-            aktivtBehandlingssteg = hentAktivBehandlingssteg(behandlingId)
         }
     }
 
