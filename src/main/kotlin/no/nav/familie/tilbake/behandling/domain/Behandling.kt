@@ -46,7 +46,7 @@ data class Behandling(
     val sporbar: Sporbar = Sporbar(),
     val regelverk: Regelverk? = null,
     @Column("begrunnelse_for_tilbakekreving")
-    val begrunnelseForTilbakekreving: String? = null,
+    val begrunnelseForTilbakekreving: String?,
 ) {
     val erAvsluttet get() = Behandlingsstatus.AVSLUTTET == status
 
