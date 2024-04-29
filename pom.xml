@@ -32,7 +32,7 @@
         <openhtmltopdf.version>pdfbox2-65c2c5010f84b2daa5821971c9c68cd330463830</openhtmltopdf.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
-        <verapdf.version>1.24.1</verapdf.version>
+        <verapdf.version>1.24.2</verapdf.version>
         <mockk.version>1.13.10</mockk.version>
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
