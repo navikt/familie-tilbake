@@ -203,4 +203,26 @@ class BehandlingController(
         behandlingService.byttBehandlendeEnhet(behandlingId, byttEnhetDto)
         return Ressurs.success("OK")
     }
+
+    @Operation(summary = "Angre send til beslutter")
+    @PutMapping(
+        path = ["{behandlingId}/angre-send-til-beslutter"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Rolletilgangssjekk(
+        Behandlerrolle.SAKSBEHANDLER,
+        "Saksbehandler angrer på send til beslutter og tar behandling tilbake til saksbehandler",
+        AuditLoggerEvent.UPDATE,
+        HenteParam.BEHANDLING_ID,
+    )
+    fun angreSendTilBeslutter(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<String> {
+
+        behandlingService.angreSendTilBeslutter(behandlingId)
+        return Ressurs.success("OK")
+    }
+
+
+
 }

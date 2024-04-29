@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -144,6 +145,11 @@ class OppgaveService(
         antallOppgaveTyper[oppgavetype]!!.increment()
 
         return opprettetOppgaveId
+    }
+
+    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): Oppgave? {
+        val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsakRepository.findByIdOrThrow(behandling.fagsakId))
+        return finnOppgaveResponse.oppgaver.singleOrNull{ it.status != StatusEnum.FERDIGSTILT }
     }
 
     private fun finnAktuellMappe(

@@ -52,6 +52,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.task.HentKravgrunnlagTask
 import no.nav.familie.tilbake.micrometer.TellerService
+import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
@@ -85,6 +86,7 @@ class BehandlingService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val oppgaveService: OppgaveService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -628,6 +630,40 @@ class BehandlingService(
         }
     }
 
+    @Transactional
+    fun angreSendTilBeslutter(behandlingId: UUID) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        validerKanAngreSendTilBeslutter(behandling)
+
+    }
+
+    private fun validerKanAngreSendTilBeslutter(behandling: Behandling) {
+        val innloggetSaksbehandler = ContextService.hentSaksbehandler()
+        val saksbehandlerSendtTilBeslutter = behandling.ansvarligSaksbehandler
+
+        if (saksbehandlerSendtTilBeslutter !== innloggetSaksbehandler) {
+            throw Feil(
+                "Prøver å angre på at behandling id=${behandling.id} er sendt til beslutter, men er ikke ansvarlig saksbehandler på behandlingen.",
+                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket",
+                httpStatus = HttpStatus.BAD_REQUEST,
+            )
+
+        }
+
+        val godkjenneVedtakOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+            oppgavetype = Oppgavetype.GodkjenneVedtak,
+            behandling = behandling,
+        ) ?: throw Feil("Systemet har ikke rukket å opprette godkjenne vedtak oppgaven ennå, kan ikke angre send til beslutter", frontendFeilmelding = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+
+
+        val tilordnetRessurs = godkjenneVedtakOppgave.tilordnetRessurs
+        val oppgaveErTilordnetEnAnnenSaksbehandler =
+            tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
+        if (oppgaveErTilordnetEnAnnenSaksbehandler) {
+            throw Feil("Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", frontendFeilmelding = "Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", httpStatus = HttpStatus.BAD_REQUEST)
+
+        }
+    }
     companion object {
         fun sjekkOmManuelleBrevmottakereErStøttet(
             behandling: Behandling,
