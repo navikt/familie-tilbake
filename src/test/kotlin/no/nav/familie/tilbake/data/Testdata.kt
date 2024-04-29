@@ -126,23 +126,24 @@ object Testdata {
             begrunnelseForTilbakekreving = null,
         )
 
-    fun lagBehandling() = Behandling(
-        fagsakId = fagsak.id,
-        type = Behandlingstype.TILBAKEKREVING,
-        opprettetDato = LocalDate.now(),
-        avsluttetDato = null,
-        ansvarligSaksbehandler = "saksbehandler",
-        ansvarligBeslutter = "beslutter",
-        behandlendeEnhet = "testverdi",
-        behandlendeEnhetsNavn = "testverdi",
-        manueltOpprettet = false,
-        fagsystemsbehandling = setOf(fagsystemsbehandling),
-        resultater = setOf(behandlingsresultat),
-        varsler = setOf(varsel),
-        verger = setOf(verge),
-        eksternBrukId = UUID.randomUUID(),
-        begrunnelseForTilbakekreving = null,
-    )
+    fun lagBehandling() =
+        Behandling(
+            fagsakId = fagsak.id,
+            type = Behandlingstype.TILBAKEKREVING,
+            opprettetDato = LocalDate.now(),
+            avsluttetDato = null,
+            ansvarligSaksbehandler = "saksbehandler",
+            ansvarligBeslutter = "beslutter",
+            behandlendeEnhet = "testverdi",
+            behandlendeEnhetsNavn = "testverdi",
+            manueltOpprettet = false,
+            fagsystemsbehandling = setOf(fagsystemsbehandling),
+            resultater = setOf(behandlingsresultat),
+            varsler = setOf(varsel),
+            verger = setOf(verge),
+            eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
+        )
 
     val revurdering =
         Behandling(
