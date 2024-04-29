@@ -14,9 +14,11 @@ import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslag
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsvedtak
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -57,9 +59,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
     private lateinit var spyKafkaProducer: KafkaProducer
     private lateinit var historikkService: HistorikkService
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
     private val opprettetTidspunkt = LocalDateTime.now()
 
     private val behandlingIdSlot = slot<UUID>()
@@ -68,6 +70,9 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.behandling
+        behandlingId = behandling.id
+        fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
 
