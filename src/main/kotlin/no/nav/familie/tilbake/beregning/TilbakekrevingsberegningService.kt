@@ -38,7 +38,6 @@ class TilbakekrevingsberegningService(
     private val vurdertForeldelseRepository: VurdertForeldelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
-    private val kravgrunnlagsberegningService: KravgrunnlagsberegningService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun hentBeregningsresultat(behandlingId: UUID): BeregningsresultatDto {
@@ -66,8 +65,7 @@ class TilbakekrevingsberegningService(
         val vurdertForeldelse = hentVurdertForeldelse(behandlingId)
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId)
         val vurderingsperioder: List<Månedsperiode> = finnPerioder(vurdertForeldelse, vilkårsvurdering)
-        val perioderMedBeløp: Map<Månedsperiode, FordeltKravgrunnlagsbeløp> =
-            kravgrunnlagsberegningService.fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag, vurderingsperioder)
+        val perioderMedBeløp: Map<Månedsperiode, FordeltKravgrunnlagsbeløp> = KravgrunnlagsberegningUtil.fordelKravgrunnlagBeløpPåPerioder(kravgrunnlag, vurderingsperioder)
         val beregningsresultatperioder =
             beregn(
                 kravgrunnlag,
@@ -94,14 +92,14 @@ class TilbakekrevingsberegningService(
         perioder: List<Datoperiode>,
     ): BeregnetPerioderDto {
         // Alle familieytelsene er månedsytelser. Så periode som skal lagres bør være innenfor en måned.
-        KravgrunnlagsberegningService.validatePerioder(perioder)
+        KravgrunnlagsberegningUtil.validatePerioder(perioder)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
         return BeregnetPerioderDto(
             beregnetPerioder =
                 perioder.map {
                     val feilutbetaltBeløp =
-                        KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
+                        KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag, it.toMånedsperiode())
                     BeregnetPeriodeDto(
                         periode = it,
                         feilutbetaltBeløp = feilutbetaltBeløp,
