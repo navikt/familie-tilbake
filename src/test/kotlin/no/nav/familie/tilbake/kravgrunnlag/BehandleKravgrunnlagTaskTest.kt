@@ -54,6 +54,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.lagDatoIkkeForeldet
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterPrioritetTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
@@ -357,8 +358,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 listOf(
                     FaktaFeilutbetalingsperiodeDto(
                         Datoperiode(
-                            YearMonth.of(2020, 8),
-                            YearMonth.of(2020, 8),
+                            YearMonth.from(LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()),
+                            YearMonth.from(LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()),
                         ),
                         Hendelsestype.ANNET,
                         Hendelsesundertype.ANNET_FRITEKST,
@@ -374,8 +375,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 listOf(
                     ForeldelsesperiodeDto(
                         Datoperiode(
-                            YearMonth.of(2020, 8),
-                            YearMonth.of(2020, 8),
+                            YearMonth.from(LocalDate.of(2020, 8, 1).lagDatoIkkeForeldet()),
+                            YearMonth.from(LocalDate.of(2020, 8, 1).lagDatoIkkeForeldet()),
                         ),
                         "Foreldelse begrunnelse",
                         Foreldelsesvurderingstype
@@ -451,7 +452,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
-        val periode = Datoperiode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
+        val periode = Datoperiode(YearMonth.from(LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()), YearMonth.from(LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()))
         // Håndter fakta steg
         stegService.håndterSteg(
             behandling.id,
@@ -571,7 +572,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml er ugyldig`() {
-        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_ugyldig_struktur.xml")
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_ugyldig_struktur.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Mottatt kravgrunnlagXML er ugyldig! Den feiler med jakarta.xml.bind.UnmarshalException\n" +
@@ -597,7 +598,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-01-2020-09-30 er ikke innenfor en kalendermåned."
+                "Perioden ${LocalDate.of(2023, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2023, 9,30).lagDatoIkkeForeldet()} er ikke innenfor en kalendermåned."
     }
 
     @Test
@@ -606,7 +607,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-15-2020-08-31 starter ikke første dag i måned."
+                "Perioden ${LocalDate.of(2020, 8,15).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} starter ikke første dag i måned."
     }
 
     @Test
@@ -615,7 +616,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-01-2020-08-28 slutter ikke siste dag i måned."
+                "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,28).lagDatoIkkeForeldet()} slutter ikke siste dag i måned."
     }
 
     @Test
@@ -624,7 +625,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=FEIL."
+                "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=FEIL."
     }
 
     @Test
@@ -633,7 +634,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=YTEL."
+                "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} mangler postering med klassetype=YTEL."
     }
 
     @Test
@@ -642,7 +643,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Overlappende perioder Månedsperiode(fom=2020-08, tom=2020-08) og Månedsperiode(fom=2020-08, tom=2020-08)."
+                "Overlappende perioder Månedsperiode(fom=${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08, tom=${LocalDate.now().lagDatoIkkeForeldet().year}-08) og Månedsperiode(fom=${LocalDate.now().lagDatoIkkeForeldet().year}-08, tom=${LocalDate.of(2020,8,31).lagDatoIkkeForeldet().year}-08)."
     }
 
     @Test
@@ -651,7 +652,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "For måned 2020-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210"
+                "For måned ${LocalDate.of(2020,8,1).lagDatoIkkeForeldet().year}-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210"
     }
 
     @Test
@@ -660,7 +661,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "Perioden 2020-08-01-2020-08-31 har FEIL postering med negativ beløp"
+                "Perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} har FEIL postering med negativ beløp"
     }
 
     @Test
@@ -669,7 +670,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-                "For perioden 2020-08-01-2020-08-31 " +
+                "For perioden ${LocalDate.of(2020, 8,1).lagDatoIkkeForeldet()}-${LocalDate.of(2020, 8,31).lagDatoIkkeForeldet()} " +
                 "total tilkakekrevesBeløp i YTEL posteringer er 1500.00, " +
                 "mens total nytt beløp i FEIL posteringer er 2108.00. " +
                 "Det er forventet at disse er like."

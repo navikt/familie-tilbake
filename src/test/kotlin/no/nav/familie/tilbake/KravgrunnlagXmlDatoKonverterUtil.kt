@@ -10,12 +10,12 @@ fun String.konverterDatoIXMLTilIkkeForeldet(): String {
     val perioder = detaljertKravgrunnlagDto.tilbakekrevingsPeriode.flatMap { listOf(it.periode.fom, it.periode.tom) }
 
     perioder.forEach { dato ->
-        muterbarXml = muterbarXml.replace(dato.toString(), dato.lagDatoIkkeForeldet())
+        muterbarXml = muterbarXml.replace(dato.toString(), dato.lagDatoIkkeForeldet().toString())
     }
 
     return muterbarXml
 }
 
-fun LocalDate.lagDatoIkkeForeldet(): String {
-    return withYear(LocalDate.now().year.minus(1)).toString()
+fun LocalDate.lagDatoIkkeForeldet(): LocalDate {
+    return withYear(LocalDate.now().year.minus(1))
 }
