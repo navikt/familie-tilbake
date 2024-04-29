@@ -30,6 +30,7 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
+import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
@@ -635,6 +636,16 @@ class BehandlingService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         validerKanAngreSendTilBeslutter(behandling)
 
+        historikkTaskService.lagHistorikkTask(
+            behandling.id,
+            TilbakekrevingHistorikkinnslagstype.ANGRE_SEND_TIL_BESLUTTER,
+            Aktør.SAKSBEHANDLER,
+        )
+
+        oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
+        oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+
+        stegService.angreSendTilBeslutter(behandlingId)
     }
 
     private fun validerKanAngreSendTilBeslutter(behandling: Behandling) {

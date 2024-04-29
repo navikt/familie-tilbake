@@ -4,7 +4,9 @@ import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -17,10 +19,11 @@ import java.util.UUID
 
 @Service
 class StegService(
-    val steg: List<IBehandlingssteg>,
+    val steg: MutableList<out IBehandlingssteg>,
     val behandlingRepository: BehandlingRepository,
     val behandlingskontrollService: BehandlingskontrollService,
     val validerBrevmottakerService: ValiderBrevmottakerService,
+    private val behandlingService: BehandlingService,
 ) {
     @Transactional
     fun håndterSteg(behandlingId: UUID) {
@@ -127,6 +130,18 @@ class StegService(
             Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
             else -> return
         }
+    }
+
+    @Transactional
+    fun angreSendTilBeslutter(behandlingId: UUID) {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+
+        // TODO feil dersom...
+        if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
+        }
+
+        behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
     }
 
     fun kanAnsvarligSaksbehandlerOppdateres(
