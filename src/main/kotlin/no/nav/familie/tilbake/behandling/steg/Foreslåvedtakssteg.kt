@@ -59,8 +59,8 @@ class Foreslåvedtakssteg(
 
         flyttBehandlingVidere(behandlingId)
 
-        // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
-        håndterOppgave(behandlingId)
+        ferdigstillOppgave(behandlingId)
+        opprettGodkjennevedtakOppgave(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
@@ -82,8 +82,8 @@ class Foreslåvedtakssteg(
         )
         flyttBehandlingVidere(behandlingId)
 
-        // lukker BehandleSak oppgave og oppretter GodkjenneVedtak oppgave
-        håndterOppgave(behandlingId)
+        ferdigstillOppgave(behandlingId)
+        opprettGodkjennevedtakOppgave(behandlingId)
 
         historikkTaskService.lagHistorikkTask(
             behandlingId = behandlingId,
@@ -123,13 +123,16 @@ class Foreslåvedtakssteg(
         behandlingskontrollService.fortsettBehandling(behandlingId)
     }
 
-    private fun håndterOppgave(behandlingId: UUID) {
+    private fun ferdigstillOppgave(behandlingId: UUID) {
         val finnesUnderkjenteSteg = totrinnService.finnesUnderkjenteStegITotrinnsvurdering(behandlingId)
         var oppgavetype = Oppgavetype.BehandleSak
         if (finnesUnderkjenteSteg) {
             oppgavetype = Oppgavetype.BehandleUnderkjentVedtak
         }
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId = behandlingId, oppgavetype = oppgavetype.name)
+    }
+
+    private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
 
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
