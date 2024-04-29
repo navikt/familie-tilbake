@@ -12,9 +12,9 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.avstemming.task.AvstemmingTask
 import no.nav.familie.tilbake.common.repository.Sporbar
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagBatch
-import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
@@ -41,7 +41,7 @@ internal class HåndterGamleKravgrunnlagBatchTest : OppslagSpringRunnerTest() {
     @Test
     fun `utfør skal ikke opprette tasker når det allerede finnes en feilet task på det samme kravgrunnlag`() {
         val mottattXml = mottattXmlRepository.insert(Testdata.økonomiXmlMottatt)
-        val task = taskService.save(Task(type = HåndterGammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
+        val task = taskService.save(Task(type = GammelKravgrunnlagTask.TYPE, payload = mottattXml.id.toString()))
         taskService.save(taskService.findById(task.id).copy(status = Status.FEILET))
 
         håndterGamleKravgrunnlagBatch.utfør()

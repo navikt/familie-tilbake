@@ -44,7 +44,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class HåndterGamleKravgrunnlagService(
+class GammelKravgrunnlagService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val behandlingService: BehandlingService,

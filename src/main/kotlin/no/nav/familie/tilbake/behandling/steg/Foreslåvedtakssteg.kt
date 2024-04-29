@@ -133,7 +133,6 @@ class Foreslåvedtakssteg(
     }
 
     private fun opprettGodkjennevedtakOppgave(behandlingId: UUID) {
-
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
             oppgaveTaskService.opprettOppgaveTask(
