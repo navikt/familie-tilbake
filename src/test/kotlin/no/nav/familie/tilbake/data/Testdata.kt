@@ -123,6 +123,7 @@ object Testdata {
             varsler = setOf(varsel),
             verger = setOf(verge),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
 
     val revurdering =
@@ -146,6 +147,7 @@ object Testdata {
             varsler = emptySet(),
             verger = setOf(verge.copy(id = UUID.randomUUID())),
             eksternBrukId = UUID.randomUUID(),
+            begrunnelseForTilbakekreving = null,
         )
 
     val behandlingsårsak =
