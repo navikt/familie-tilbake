@@ -2,8 +2,6 @@ CREATE TABLE historikkinnslag
 (
     id                UUID PRIMARY KEY,
     behandling_id     UUID                                NOT NULL references behandling,
-    ekstern_fagsak_id VARCHAR                             NOT NULL,
-    fagsystem         VARCHAR                             NOT NULL,
     type              VARCHAR                             NOT NULL,
     aktor             VARCHAR                             NOT NULL,
     tittel            VARCHAR                             NOT NULL,
@@ -23,12 +21,6 @@ COMMENT ON COLUMN historikkinnslag.id
 
 COMMENT ON COLUMN historikkinnslag.behandling_id
     IS 'Fagsystems/Tilbakekrevings behandling id som historikkinnslag er lagret for';
-
-COMMENT ON COLUMN historikkinnslag.ekstern_fagsak_id
-    IS 'Saksnummer (som gsak har mottatt)';
-
-COMMENT ON COLUMN historikkinnslag.fagsystem
-    IS 'Fagsystemet som historikkinnslag er lagret for';
 
 COMMENT ON COLUMN historikkinnslag.type
     IS 'Type av historikkinnslag';
