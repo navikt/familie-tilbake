@@ -124,7 +124,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal lagre mottatt kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
         lagGrunnlagssteg()
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)
@@ -151,9 +151,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
-                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
-                "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
-                "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
+                    "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                    "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
+                    "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10),
         )
         assertIkkeOpprettOppdaterPrioritetTask()
@@ -165,8 +165,8 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             Fagsystemsbehandling(
                 eksternId = UUID.randomUUID().toString(),
                 tilbakekrevingsvalg =
-                    Tilbakekrevingsvalg
-                        .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+                Tilbakekrevingsvalg
+                    .OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
                 revurderingsvedtaksdato = LocalDate.now().minusDays(10),
                 resultat = "OPPHØR",
                 årsak = "testverdi",
@@ -176,7 +176,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 .copy(fagsystemsbehandling = setOf(fagsystemsbehandling)),
         )
         lagGrunnlagssteg()
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)
@@ -220,7 +220,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)
@@ -262,7 +262,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_belop_storre_enn_diff.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_belop_storre_enn_diff.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)
@@ -293,21 +293,21 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag i Kravgrunnlag431 når behandling finnes`() {
         lagGrunnlagssteg()
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
         behandlingskontrollService
             .tilbakehoppBehandlingssteg(
                 behandlingId = behandling.id,
                 behandlingsstegsinfo =
-                    Behandlingsstegsinfo(
-                        Behandlingssteg.GRUNNLAG,
-                        Behandlingsstegstatus.VENTER,
-                        Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
-                        LocalDate.now().plusWeeks(4),
-                    ),
+                Behandlingsstegsinfo(
+                    Behandlingssteg.GRUNNLAG,
+                    Behandlingsstegstatus.VENTER,
+                    Venteårsak.VENT_PÅ_TILBAKEKREVINGSGRUNNLAG,
+                    LocalDate.now().plusWeeks(4),
+                ),
             )
-        val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
 
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
 
@@ -337,9 +337,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
-                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
-                "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
-                "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
+                    "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                    "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
+                    "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10),
         )
         assertIkkeOpprettOppdaterPrioritetTask()
@@ -348,7 +348,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag og slette behandlet data når behandling er på vilkårsvurdering steg`() {
         lagGrunnlagssteg()
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
         // Håndter fakta steg
         stegService.håndterSteg(
@@ -402,7 +402,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             Behandlingsstegstatus.KLAR,
         )
 
-        val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
 
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
@@ -448,7 +448,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Test
     fun `doTask skal lagre mottatt ENDR kravgrunnlag og slette behandlet data når behandling er på fatte vedtak steg`() {
         lagGrunnlagssteg()
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
 
         val periode = Datoperiode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
@@ -518,7 +518,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.UTFØRT)
         assertBehandlingsstegstilstand(behandlingsstegstilstand, Behandlingssteg.FATTE_VEDTAK, Behandlingsstegstatus.KLAR)
 
-        val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
 
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
@@ -571,21 +571,21 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml er ugyldig`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_ugyldig_struktur.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_ugyldig_struktur.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Mottatt kravgrunnlagXML er ugyldig! Den feiler med jakarta.xml.bind.UnmarshalException\n" +
-            " - with linked exception:\n" +
-            "[org.xml.sax.SAXParseException; lineNumber: 21; columnNumber: 33; " +
-            "cvc-complex-type.2.4.b: The content of element 'urn:detaljertKravgrunnlag' " +
-            "is not complete. One of " +
-            "'{\"urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1\":tilbakekrevingsPeriode}'" +
-            " is expected.]"
+                " - with linked exception:\n" +
+                "[org.xml.sax.SAXParseException; lineNumber: 21; columnNumber: 33; " +
+                "cvc-complex-type.2.4.b: The content of element 'urn:detaljertKravgrunnlag' " +
+                "is not complete. One of " +
+                "'{\"urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1\":tilbakekrevingsPeriode}'" +
+                " is expected.]"
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml ikke har referanse`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_tomt_referanse.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_tomt_referanse.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. Mangler referanse."
@@ -593,86 +593,86 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml periode ikke er innenfor måned`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_periode_utenfor_kalendermåned.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_periode_utenfor_kalendermåned.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-01-2020-09-30 er ikke innenfor en kalendermåned."
+                "Perioden 2020-08-01-2020-09-30 er ikke innenfor en kalendermåned."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml periode ikke starter første dag i måned`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_periode_starter_ikke_første_dag.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_periode_starter_ikke_første_dag.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-15-2020-08-31 starter ikke første dag i måned."
+                "Perioden 2020-08-15-2020-08-31 starter ikke første dag i måned."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml periode ikke slutter siste dag i måned`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_periode_slutter_ikke_siste_dag.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_periode_slutter_ikke_siste_dag.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-01-2020-08-28 slutter ikke siste dag i måned."
+                "Perioden 2020-08-01-2020-08-28 slutter ikke siste dag i måned."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml mangler FEIL postering`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_uten_FEIL_postering.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_uten_FEIL_postering.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=FEIL."
+                "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=FEIL."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml mangler YTEL postering`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_uten_YTEL_postering.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_uten_YTEL_postering.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=YTEL."
+                "Perioden 2020-08-01-2020-08-31 mangler postering med klassetype=YTEL."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har overlappende perioder`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_overlappende_perioder.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_overlappende_perioder.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Overlappende perioder Månedsperiode(fom=2020-08, tom=2020-08) og Månedsperiode(fom=2020-08, tom=2020-08)."
+                "Overlappende perioder Månedsperiode(fom=2020-08, tom=2020-08) og Månedsperiode(fom=2020-08, tom=2020-08)."
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når xml har posteringsskatt som ikke matcher månedlig skatt beløp`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_posteringsskatt_matcher_ikke_med_månedlig_skatt_beløp.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_posteringsskatt_matcher_ikke_med_månedlig_skatt_beløp.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "For måned 2020-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210"
+                "For måned 2020-08 er maks skatt 0.00, men maks tilbakekreving ganget med skattesats blir 210"
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har FEIL postering med negativt beløp`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_FEIL_postering_med_negativ_beløp.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_FEIL_postering_med_negativ_beløp.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Perioden 2020-08-01-2020-08-31 har FEIL postering med negativ beløp"
+                "Perioden 2020-08-01-2020-08-31 har FEIL postering med negativ beløp"
     }
 
     @Test
     fun `doTask skal ikke lagre mottatt kravgrunnlag når mottatt xml har ulike total tilbakekrevesbeløp og total nybeløp`() {
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_ulike_total_tilbakekrevesbeløp_total_nybeløp.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_ulike_total_tilbakekrevesbeløp_total_nybeløp.xml")
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "For perioden 2020-08-01-2020-08-31 " +
-            "total tilkakekrevesBeløp i YTEL posteringer er 1500.00, " +
-            "mens total nytt beløp i FEIL posteringer er 2108.00. " +
-            "Det er forventet at disse er like."
+                "For perioden 2020-08-01-2020-08-31 " +
+                "total tilkakekrevesBeløp i YTEL posteringer er 1500.00, " +
+                "mens total nytt beløp i FEIL posteringer er 2108.00. " +
+                "Det er forventet at disse er like."
     }
 
     @Test
@@ -680,13 +680,13 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val kravgrunnlagXml =
             readXml(
                 "/kravgrunnlagxml/" +
-                    "kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml",
+                        "kravgrunnlag_YTEL_postering_som_ikke_matcher_beregning.xml",
             )
 
         val exception = shouldThrow<RuntimeException> { behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml)) }
         exception.message shouldBe "Ugyldig kravgrunnlag for kravgrunnlagId 0. " +
-            "Har en eller flere perioder med YTEL-postering med tilbakekrevesBeløp " +
-            "som er større enn differanse mellom nyttBeløp og opprinneligBeløp"
+                "Har en eller flere perioder med YTEL-postering med tilbakekrevesBeløp " +
+                "som er større enn differanse mellom nyttBeløp og opprinneligBeløp"
     }
 
     @Test
@@ -694,7 +694,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         val task = opprettTask(kravgrunnlagXml)
 
         behandleKravgrunnlagTask.doTask(task)
@@ -715,9 +715,9 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         behandleKravgrunnlagTask.doTask(opprettTask(kravgrunnlagXml))
-        val endretKravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
+        val endretKravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_ENDR.xml")
 
         behandleKravgrunnlagTask.doTask(opprettTask(endretKravgrunnlagXml))
 
@@ -793,7 +793,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     ) {
         behandlingsstegstilstand.any {
             behandlingssteg == it.behandlingssteg &&
-                behandlingsstegstatus == it.behandlingsstegsstatus
+                    behandlingsstegstatus == it.behandlingsstegsstatus
         }.shouldBeTrue()
     }
 
@@ -803,18 +803,18 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     ) {
         taskService.findAll().any {
             LagHistorikkinnslagTask.TYPE == it.type &&
-                historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
-                aktør.name == it.metadata["aktør"] &&
-                behandling.id.toString() == it.payload
+                    historikkinnslagstype.name == it.metadata["historikkinnslagstype"] &&
+                    aktør.name == it.metadata["aktør"] &&
+                    behandling.id.toString() == it.payload
         }.shouldBeTrue()
     }
 
     private fun assertOppdaterFaktainfoTask(referanse: String) {
         taskService.findAll().any {
             OppdaterFaktainfoTask.TYPE == it.type &&
-                fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
-                fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
-                referanse == it.metadata["eksternId"]
+                    fagsak.eksternFagsakId == it.metadata["eksternFagsakId"] &&
+                    fagsak.ytelsestype.name == it.metadata["ytelsestype"] &&
+                    referanse == it.metadata["eksternId"]
         }.shouldBeTrue()
     }
 
@@ -824,23 +824,23 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     ) {
         taskService.findAll().any {
             OppdaterOppgaveTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
+                    behandling.id.toString() == it.payload
             beskrivelse == it.metadata["beskrivelse"] &&
-                fristDato.toString() == it.metadata["frist"]
+                    fristDato.toString() == it.metadata["frist"]
         }.shouldBeTrue()
     }
 
     private fun assertOpprettOppdaterPrioritetTask() {
         taskService.findAll().any {
             OppdaterPrioritetTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
+                    behandling.id.toString() == it.payload
         }.shouldBeTrue()
     }
 
     private fun assertIkkeOpprettOppdaterPrioritetTask() {
         taskService.findAll().any {
             OppdaterPrioritetTask.TYPE == it.type &&
-                behandling.id.toString() == it.payload
+                    behandling.id.toString() == it.payload
         }.shouldBeFalse()
     }
 }
