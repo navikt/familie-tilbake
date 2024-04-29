@@ -52,6 +52,7 @@ class BehandlingManuellOpprettelseService(private val behandlingService: Behandl
             verge = fagsystemsbehandlingData.verge,
             varsel = null,
             institusjon = fagsystemsbehandlingData.institusjon,
+            begrunnelseForTilbakekreving = null
         )
     }
 }

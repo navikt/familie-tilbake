@@ -39,6 +39,7 @@ data class BehandlingDto(
     val støtterManuelleBrevmottakere: Boolean,
     val harManuelleBrevmottakere: Boolean,
     val manuelleBrevmottakere: List<ManuellBrevmottakerResponsDto>,
+    val begrunnelseForTilbakekreving: String?,
 )
 
 data class BehandlingsstegsinfoDto(
