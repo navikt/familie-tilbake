@@ -116,6 +116,7 @@ object BehandlingMapper {
             harManuelleBrevmottakere = manuelleBrevmottakere.isNotEmpty(),
             støtterManuelleBrevmottakere = støtterManuelleBrevmottakere,
             manuelleBrevmottakere = manuelleBrevmottakere.map { ManuellBrevmottakerMapper.tilRespons(it) },
+            begrunnelseForTilbakekreving = behandling.begrunnelseForTilbakekreving
         )
     }
 
