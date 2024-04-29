@@ -5,9 +5,11 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,11 +27,13 @@ internal class VarselServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var varselService: VarselService
 
-    private val behandling = Testdata.behandling
-    private val kravgrunnlag = Testdata.kravgrunnlag431
+    private lateinit var behandling: Behandling
+    private lateinit var kravgrunnlag: Kravgrunnlag431
 
     @BeforeEach
     fun setup() {
+        behandling = Testdata.behandling
+        kravgrunnlag = Testdata.kravgrunnlag431
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
