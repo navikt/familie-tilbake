@@ -13,6 +13,8 @@ CREATE TABLE historikkinnslag
     opprettet_tid     TIMESTAMP(3) DEFAULT localtimestamp NOT NULL
 );
 
+CREATE INDEX ON historikkinnslag (behandling_id);
+
 COMMENT ON TABLE historikkinnslag
     IS 'historikkinnslag over hendelser i saken';
 
