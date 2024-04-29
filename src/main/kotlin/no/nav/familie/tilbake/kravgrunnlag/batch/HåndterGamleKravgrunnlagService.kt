@@ -235,7 +235,7 @@ class HåndterGamleKravgrunnlagService(
             faktainfo = setFaktainfo(fagsystemsbehandlingData.faktainfo),
             verge = fagsystemsbehandlingData.verge,
             varsel = null,
-            begrunnelseForTilbakekreving = null
+            begrunnelseForTilbakekreving = null,
         )
     }
 
