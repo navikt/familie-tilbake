@@ -40,7 +40,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
 
-    private val behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
     private val periode =
         Månedsperiode(
             fom = YearMonth.now().minusMonths(2),
@@ -49,6 +49,7 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val kravgrunnlag =
