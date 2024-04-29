@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -12,7 +13,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import no.nav.familie.tilbake.behandling.domain.Behandling
 
 @Service
 class StegService(
@@ -93,13 +93,16 @@ class StegService(
     }
 
     @Transactional
-    fun håndterStegAutomatisk(behandling: Behandling, aktivtBehandlingssteg: Behandlingssteg) {
+    fun håndterStegAutomatisk(
+        behandling: Behandling,
+        aktivtBehandlingssteg: Behandlingssteg,
+    ) {
         validerAtBehandlingIkkeErAvsluttet(behandling)
         validerAtUtomatiskBehandlingIkkeErEøs(behandling)
         validerAtBehandlingIkkeErPåVent(behandlingId = behandling.id, erBehandlingPåVent = behandlingskontrollService.erBehandlingPåVent(behandling.id), behandledeSteg = aktivtBehandlingssteg.name)
         validerAtBehandlingErAutomatisk(behandling)
 
-        if (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET){
+        if (aktivtBehandlingssteg != Behandlingssteg.AVSLUTTET) {
             hentStegInstans(aktivtBehandlingssteg).utførStegAutomatisk(behandling.id)
 
             if (aktivtBehandlingssteg != Behandlingssteg.IVERKSETT_VEDTAK) {

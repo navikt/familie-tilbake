@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.behandling.steg
 
-import java.util.*
 import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import java.util.UUID
 
 fun validerAtBehandlingIkkeErAvsluttet(behandling: Behandling) {
     if (behandling.erSaksbehandlingAvsluttet) {
@@ -30,10 +30,6 @@ fun validerAtBehandlingIkkeErPåVent(
 
 fun validerAtBehandlingErAutomatisk(behandling: Behandling) {
     if (behandling.saksbehandlingstype == Saksbehandlingstype.ORDINÆR) {
-        throw Feil(
-            message =
-            "Behandling med id=${behandling.id} er satt til ordinær saksbehandling. " +
-                    "Kan ikke saksbehandle den automatisk",
-        )
+        throw Feil("Behandling med id=${behandling.id} er satt til ordinær saksbehandling. Kan ikke saksbehandle den automatisk")
     }
 }
