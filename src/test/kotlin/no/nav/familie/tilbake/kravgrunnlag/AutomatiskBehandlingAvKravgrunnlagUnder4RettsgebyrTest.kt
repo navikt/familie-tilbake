@@ -75,12 +75,6 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     private lateinit var sendVedtaksbrevTask: SendVedtaksbrevTask
 
     @Autowired
-    private lateinit var publiserJournalpostTask: PubliserJournalpostTask
-
-    @Autowired
-    private lateinit var lagreBrevsporingTask: LagreBrevsporingTask
-
-    @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
@@ -91,9 +85,6 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
 
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
-
-    @Autowired
-    private lateinit var brevsporingRepository: BrevsporingRepository
 
     private lateinit var behandlingId: UUID
 
