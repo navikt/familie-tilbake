@@ -30,7 +30,6 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.Behandlingsstegsinfo
-import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.ContextService
@@ -87,7 +86,7 @@ class BehandlingService(
     private val integrasjonerClient: IntegrasjonerClient,
     private val validerBehandlingService: ValiderBehandlingService,
     private val featureToggleService: FeatureToggleService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -645,7 +644,7 @@ class BehandlingService(
         oppgaveTaskService.ferdigstilleOppgaveTask(behandlingId, Oppgavetype.GodkjenneVedtak.name)
         oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
 
-        stegService.angreSendTilBeslutter(behandlingId)
+        stegService.angreSendTilBeslutter(behandling)
     }
 
     private fun validerKanAngreSendTilBeslutter(behandling: Behandling) {
@@ -658,23 +657,22 @@ class BehandlingService(
                 frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
-
         }
 
-        val godkjenneVedtakOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-            oppgavetype = Oppgavetype.GodkjenneVedtak,
-            behandling = behandling,
-        ) ?: throw Feil("Systemet har ikke rukket å opprette godkjenne vedtak oppgaven ennå, kan ikke angre send til beslutter", frontendFeilmelding = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
-
+        val godkjenneVedtakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                behandling = behandling,
+            ) ?: throw Feil("Systemet har ikke rukket å opprette godkjenne vedtak oppgaven ennå, kan ikke angre send til beslutter", frontendFeilmelding = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
 
         val tilordnetRessurs = godkjenneVedtakOppgave.tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =
             tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
         if (oppgaveErTilordnetEnAnnenSaksbehandler) {
             throw Feil("Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", frontendFeilmelding = "Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", httpStatus = HttpStatus.BAD_REQUEST)
-
         }
     }
+
     companion object {
         fun sjekkOmManuelleBrevmottakereErStøttet(
             behandling: Behandling,

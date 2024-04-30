@@ -147,9 +147,12 @@ class OppgaveService(
         return opprettetOppgaveId
     }
 
-    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): Oppgave? {
+    fun hentOppgaveSomIkkeErFerdigstilt(
+        oppgavetype: Oppgavetype,
+        behandling: Behandling,
+    ): Oppgave? {
         val (_, finnOppgaveResponse) = finnOppgave(behandling, oppgavetype, fagsakRepository.findByIdOrThrow(behandling.fagsakId))
-        return finnOppgaveResponse.oppgaver.singleOrNull{ it.status != StatusEnum.FERDIGSTILT }
+        return finnOppgaveResponse.oppgaver.singleOrNull { it.status != StatusEnum.FERDIGSTILT }
     }
 
     private fun finnAktuellMappe(

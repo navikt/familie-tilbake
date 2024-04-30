@@ -372,6 +372,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
+        val oppgaveService = mockk<OppgaveService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -392,6 +393,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 validerBehandlingService,
                 featureToggleService,
+                oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
@@ -431,6 +433,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
+        val oppgaveService = mockk<OppgaveService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -451,6 +454,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 validerBehandlingService,
                 featureToggleService,
+                oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false

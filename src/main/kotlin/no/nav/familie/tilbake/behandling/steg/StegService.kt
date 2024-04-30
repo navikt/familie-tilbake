@@ -24,7 +24,6 @@ class StegService(
     val behandlingRepository: BehandlingRepository,
     val behandlingskontrollService: BehandlingskontrollService,
     val validerBrevmottakerService: ValiderBrevmottakerService,
-    private val behandlingService: BehandlingService,
 ) {
     @Transactional
     fun håndterSteg(behandlingId: UUID) {
@@ -163,19 +162,18 @@ class StegService(
     }
 
     @Transactional
-    fun angreSendTilBeslutter(behandlingId: UUID) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingId)
+    fun angreSendTilBeslutter(behandling: Behandling) {
+        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
 
         if (behandlingsstegstilstand?.behandlingssteg != Behandlingssteg.FATTE_VEDTAK) {
-            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}");
+            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}")
         }
 
         if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
             throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
         }
 
-        behandlingskontrollService.behandleStegPåNytt(behandlingId, Behandlingssteg.FORESLÅ_VEDTAK)
+        behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FORESLÅ_VEDTAK)
     }
 
     fun kanAnsvarligSaksbehandlerOppdateres(

@@ -61,7 +61,6 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns mockk()
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
 
-
         kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.BARNETRYGD)
 
         assertThat(gammeltKravgrunnlagSlot.captured.aktiv).isTrue
@@ -81,7 +80,7 @@ class KravgrunnlagServiceTest {
         every { kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(any()) } returns true
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns gammeltKravgrunnlag
         every { kravgrunnlagRepository.update(capture(gammeltKravgrunnlagSlot)) } returns mockk()
-        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) }  returns mockk()
+        every { kravgrunnlagRepository.insert(capture(nyttKravgrunnlagSlot)) } returns mockk()
 
         kravgrunnlagService.lagreKravgrunnlag(nyttKravgrunnlag, Ytelsestype.OVERGANGSSTØNAD)
 

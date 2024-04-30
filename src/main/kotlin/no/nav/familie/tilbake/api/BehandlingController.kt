@@ -218,11 +218,7 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-
         behandlingService.angreSendTilBeslutter(behandlingId)
         return Ressurs.success("OK")
     }
-
-
-
 }
