@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,8 +27,6 @@ class FinnGammelBehandlingUtenOppgaveTask(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
-    private val log = LoggerFactory.getLogger(this::class.java)
-
     override fun doTask(task: Task) {
         val dto =
             objectMapper.readValue(task.payload, FinnGammelBehandlingUtenOppgaveDto::class.java)

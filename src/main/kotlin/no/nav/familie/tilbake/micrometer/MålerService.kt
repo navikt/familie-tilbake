@@ -35,7 +35,7 @@ class MålerService(
     fun åpneBehandlinger() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = meldingstellingRepository.finnÅpneBehandlinger()
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -64,7 +64,7 @@ class MålerService(
     fun behandlingerKlarTilSaksbehandling() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = meldingstellingRepository.finnKlarTilBehandling()
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -93,7 +93,7 @@ class MålerService(
     fun behandlingerPåVent() {
         if (LeaderClient.isLeader() != true) return
         val behandlinger = meldingstellingRepository.finnVentendeBehandlinger()
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = behandlinger.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -123,7 +123,7 @@ class MålerService(
     fun sendteBrev() {
         if (LeaderClient.isLeader() != true) return
         val data = meldingstellingRepository.finnSendteBrev()
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info("Sendte brev for ${fagsystem.name} returnerte ${forekomster.sumOf { it.antall }} fordelt på ${forekomster.size} typer/uker.")
@@ -151,7 +151,7 @@ class MålerService(
     fun vedtak() {
         if (LeaderClient.isLeader() != true) return
         val data = meldingstellingRepository.finnVedtak()
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -188,7 +188,7 @@ class MålerService(
     @Scheduled(initialDelay = 210000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun mottatteKravgrunnlagKoblet() {
         val data = meldingstellingRepository.findByType(Meldingstype.KRAVGRUNNLAG)
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -220,7 +220,7 @@ class MålerService(
     @Scheduled(initialDelay = 240000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun mottatteStatusmeldinger() {
         val data = meldingstellingRepository.summerAntallForType(Meldingstype.STATUSMELDING)
-        Fagsystem.values().map { fagsystem ->
+        Fagsystem.entries.map { fagsystem ->
             val forekomster = data.filter { it.fagsystem == fagsystem }
             if (forekomster.isNotEmpty()) {
                 logger.info(
@@ -251,7 +251,7 @@ class MålerService(
         val fagsystemTilTasker = data.groupBy { it.fagsystem() }
 
         val rows =
-            Fagsystem.values().map {
+            Fagsystem.entries.map {
                 MultiGauge.Row.of(
                     Tags.of("fagsystem", it.name),
                     (fagsystemTilTasker[it.name]?.size ?: 0) + (fagsystemTilTasker["UKJENT"]?.size ?: 0),

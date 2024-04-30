@@ -13,7 +13,7 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
 
     companion object {
         fun fraKode(kode: String): Tilgangskontrollsfagsystem {
-            for (fagsystem in values()) {
+            for (fagsystem in entries) {
                 if (fagsystem.kode == kode) {
                     return fagsystem
                 }
@@ -22,7 +22,7 @@ enum class Tilgangskontrollsfagsystem(val kode: String) {
         }
 
         fun fraFagsystem(kontraktFagsystem: Fagsystem): Tilgangskontrollsfagsystem {
-            for (fagsystem in values()) {
+            for (fagsystem in entries) {
                 if (fagsystem.kode == kontraktFagsystem.name) {
                     return fagsystem
                 }

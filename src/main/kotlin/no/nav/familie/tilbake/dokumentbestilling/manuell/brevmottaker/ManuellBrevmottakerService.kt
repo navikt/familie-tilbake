@@ -1,11 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
-import no.nav.familie.kontrakter.felles.dokdist.AdresseType
-import no.nav.familie.kontrakter.felles.dokdist.AdresseType.norskPostadresse
-import no.nav.familie.kontrakter.felles.dokdist.AdresseType.utenlandskPostadresse
-import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE
 import no.nav.familie.tilbake.api.dto.ManuellBrevmottakerRequestDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakService
@@ -210,27 +205,3 @@ class ManuellBrevmottakerService(
         }
     }
 }
-
-private fun findAdresseType(brevmottaker: ManuellBrevmottaker): AdresseType {
-    return when {
-        brevmottaker.landkode == "NO" && brevmottaker.type != BRUKER_MED_UTENLANDSK_ADRESSE -> norskPostadresse
-        brevmottaker.landkode != "NO" && brevmottaker.type == BRUKER_MED_UTENLANDSK_ADRESSE -> utenlandskPostadresse
-        else -> throw Feil("landkode stemmer ikke overens med type for brevmottaker ${brevmottaker.id}")
-    }
-}
-
-fun List<ManuellBrevmottaker>.toManuelleAdresser(): List<ManuellAdresse> =
-    this.mapNotNull { manuellBrevmottaker ->
-        if (manuellBrevmottaker.hasManuellAdresse()) {
-            ManuellAdresse(
-                adresseType = findAdresseType(manuellBrevmottaker),
-                adresselinje1 = manuellBrevmottaker.adresselinje1,
-                adresselinje2 = manuellBrevmottaker.adresselinje2,
-                postnummer = manuellBrevmottaker.postnummer,
-                poststed = manuellBrevmottaker.poststed,
-                land = manuellBrevmottaker.landkode!!,
-            )
-        } else {
-            null
-        }
-    }

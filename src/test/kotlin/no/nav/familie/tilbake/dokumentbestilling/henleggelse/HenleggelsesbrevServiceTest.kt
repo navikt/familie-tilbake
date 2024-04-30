@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -45,7 +44,6 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val organisasjonService: OrganisasjonService = mockk()
     private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
 
     private val brevmetadataUtil =
         BrevmetadataUtil(
@@ -54,7 +52,6 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
             manuelleBrevmottakerRepository = mockk(relaxed = true),
             eksterneDataForBrevService = eksterneDataForBrevService,
             organisasjonService = organisasjonService,
-            featureToggleService = featureToggleService,
         )
 
     @BeforeEach

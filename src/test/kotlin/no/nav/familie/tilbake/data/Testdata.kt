@@ -169,12 +169,6 @@ object Testdata {
             begrunnelseForTilbakekreving = null,
         )
 
-    val behandlingsårsak =
-        Behandlingsårsak(
-            type = Behandlingsårsakstype.REVURDERING_KLAGE_KA,
-            originalBehandlingId = behandling.id,
-        )
-
     val behandlingsstegstilstand =
         Behandlingsstegstilstand(
             behandlingId = behandling.id,

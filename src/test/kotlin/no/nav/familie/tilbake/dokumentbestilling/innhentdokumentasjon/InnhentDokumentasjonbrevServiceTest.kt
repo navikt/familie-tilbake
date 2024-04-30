@@ -9,7 +9,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.felles.Adresseinfo
@@ -38,7 +37,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     private val behandlingRepository: BehandlingRepository = mockk()
     private lateinit var innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService
     private val organisasjonService: OrganisasjonService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val brevmetadataUtil =
         BrevmetadataUtil(
             behandlingRepository = behandlingRepository,
@@ -46,7 +44,6 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             manuelleBrevmottakerRepository = mockk(relaxed = true),
             eksterneDataForBrevService = mockEksterneDataForBrevService,
             organisasjonService = organisasjonService,
-            featureToggleService = featureToggleService,
         )
 
     @BeforeEach

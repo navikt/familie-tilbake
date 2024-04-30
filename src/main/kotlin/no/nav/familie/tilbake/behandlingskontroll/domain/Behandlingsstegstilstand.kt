@@ -70,7 +70,7 @@ enum class Behandlingssteg(
             sekvens: Int,
             brevmottakerErstatterVerge: Boolean = false,
         ): Behandlingssteg {
-            for (behandlingssteg in values()) {
+            for (behandlingssteg in entries) {
                 if (sekvens == behandlingssteg.sekvens) {
                     return when (behandlingssteg) {
                         BREVMOTTAKER, VERGE -> if (brevmottakerErstatterVerge) BREVMOTTAKER else VERGE
@@ -82,7 +82,7 @@ enum class Behandlingssteg(
         }
 
         fun fraNavn(navn: String): Behandlingssteg {
-            return values().firstOrNull { it.name == navn }
+            return entries.firstOrNull { it.name == navn }
                 ?: throw IllegalArgumentException("Ukjent Behandlingssteg $navn")
         }
     }

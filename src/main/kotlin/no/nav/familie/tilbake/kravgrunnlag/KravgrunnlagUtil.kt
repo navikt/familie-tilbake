@@ -73,7 +73,7 @@ object KravgrunnlagUtil {
     }
 
     fun tilYtelsestype(fagområdekode: String): Ytelsestype {
-        return Ytelsestype.values().firstOrNull { it.kode == fagområdekode }
+        return Ytelsestype.entries.firstOrNull { it.kode == fagområdekode }
             ?: throw IllegalArgumentException("Ukjent Ytelsestype for $fagområdekode")
     }
 

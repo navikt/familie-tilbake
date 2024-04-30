@@ -15,7 +15,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
 import no.nav.familie.tilbake.dokumentbestilling.brevmaler.Dokumentmalstype
@@ -62,7 +61,6 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private var behandling = Testdata.behandling
     private var fagsak = Testdata.fagsak
     private lateinit var brevmetadataUtil: BrevmetadataUtil
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     @BeforeEach
     fun setup() {
@@ -75,7 +73,6 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                 manuelleBrevmottakerRepository = mockk(relaxed = true),
                 eksterneDataForBrevService = mockEksterneDataForBrevService,
                 organisasjonService = mockk(),
-                featureToggleService = featureToggleService,
             )
         manueltVarselbrevService =
             ManueltVarselbrevService(
