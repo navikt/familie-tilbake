@@ -25,7 +25,7 @@ spec:
     enabled: true
     path: /internal/prometheus
   observability:
-    tracing:
+    autoInstrumentation:
       enabled: true
       runtime: java
   vault:
