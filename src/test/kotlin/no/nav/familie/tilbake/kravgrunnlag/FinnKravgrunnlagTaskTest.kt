@@ -261,6 +261,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 revurderingsvedtaksdato = LocalDate.now(),
                 faktainfo = faktainfo,
                 saksbehandlerIdent = "Z0000",
+                begrunnelseForTilbakekreving = null,
             )
         return behandlingService.opprettBehandling(request)
     }

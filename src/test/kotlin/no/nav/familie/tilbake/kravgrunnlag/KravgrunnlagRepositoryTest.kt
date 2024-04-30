@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -22,12 +24,15 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
-    private val fagsak = Testdata.fagsak
-    private val kravgrunnlag431 = Testdata.kravgrunnlag431
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var kravgrunnlag431: Kravgrunnlag431
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        kravgrunnlag431 = Testdata.kravgrunnlag431
+        behandling = Testdata.behandling
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }

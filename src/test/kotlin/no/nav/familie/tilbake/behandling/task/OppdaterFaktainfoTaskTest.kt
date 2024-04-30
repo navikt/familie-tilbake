@@ -16,6 +16,8 @@ import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
+import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.HentFagsystemsbehandlingRequestSendt
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
@@ -44,14 +46,15 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
     private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
     private lateinit var oppdaterFaktainfoTask: OppdaterFaktainfoTask
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, mockKafkaProducer)
         oppdaterFaktainfoTask = OppdaterFaktainfoTask(hentFagsystemsbehandlingService, behandlingService)
-
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

@@ -10,6 +10,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.Brevmottager
@@ -42,14 +43,16 @@ internal class LagreBrevsporingTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var lagreBrevsporingTask: LagreBrevsporingTask
 
-    private val behandling = Testdata.behandling
-    private val behandlingId = behandling.id
+    private lateinit var behandling: Behandling
+    private lateinit var behandlingId: UUID
 
     private val dokumentId: String = "testverdi"
     private val journalpostId: String = "testverdi"
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.behandling
+        behandlingId = behandling.id
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

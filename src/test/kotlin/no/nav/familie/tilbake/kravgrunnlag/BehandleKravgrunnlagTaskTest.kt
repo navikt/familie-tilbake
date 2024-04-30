@@ -26,7 +26,9 @@ import no.nav.familie.tilbake.api.dto.GodTroDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OppdaterFaktainfoTask
@@ -108,11 +110,13 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandleKravgrunnlagTask: BehandleKravgrunnlagTask
 
-    private val fagsak = Testdata.fagsak
-    private val behandling = Testdata.behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        fagsak = Testdata.fagsak
+        behandling = Testdata.behandling
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
@@ -701,7 +705,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 BigInteger.ZERO,
                 BigInteger.ZERO,
             )
-        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0")
+        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0", "2021-03-02-18.50.15.236315")
 
         mottattXmlArkivRepository.findAll().toList().shouldBeEmpty()
     }
@@ -741,6 +745,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagXml: String,
         kravstatuskode: Kravstatuskode,
         referanse: String,
+        forventetKontrollfelt: String = "2021-03-02-18.50.15.236316",
     ) {
         mottattKravgrunnlagListe.shouldNotBeEmpty()
         mottattKravgrunnlagListe.size shouldBe 1
@@ -748,7 +753,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         mottattKravgrunnlag.kravstatuskode shouldBe kravstatuskode
         mottattKravgrunnlag.eksternFagsakId shouldBe fagsak.eksternFagsakId
         mottattKravgrunnlag.referanse shouldBe referanse
-        mottattKravgrunnlag.kontrollfelt shouldBe "2021-03-02-18.50.15.236315"
+        mottattKravgrunnlag.kontrollfelt shouldBe forventetKontrollfelt
         mottattKravgrunnlag.melding shouldBe kravgrunnlagXml
         mottattKravgrunnlag.eksternKravgrunnlagId shouldBe BigInteger.ZERO
         mottattKravgrunnlag.vedtakId shouldBe BigInteger.ZERO
