@@ -16,7 +16,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Properties
 import java.util.UUID
@@ -136,36 +138,34 @@ class KravgrunnlagService(
     ) {
         val finnesKravgrunnlag = kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(kravgrunnlag431.behandlingId)
         if (finnesKravgrunnlag) {
-            val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(kravgrunnlag431.behandlingId)
-            loggFeilHvisGammeltKravgrunnlag(kravgrunnlag431, eksisterendeKravgrunnlag)
-            kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = false))
-            if (eksisterendeKravgrunnlag.referanse != kravgrunnlag431.referanse) {
-                hentOgOppdaterFaktaInfo(kravgrunnlag431, ytelsestype)
-            }
+            identifiserAktivtKravgrunnlagOgLagre(kravgrunnlag431, ytelsestype)
+        } else {
+            kravgrunnlagRepository.insert(kravgrunnlag431)
         }
-        kravgrunnlagRepository.insert(kravgrunnlag431)
+    }
+
+    private fun identifiserAktivtKravgrunnlagOgLagre(
+        mottattKravgrunnlag: Kravgrunnlag431,
+        ytelsestype: Ytelsestype
+    ) {
+        val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(mottattKravgrunnlag.behandlingId)
+
+        val eksisterendeKravgrunnlagKontrollfeltTidspunkt = eksisterendeKravgrunnlag.kontrollfelt.toLocalDateTime()
+        val mottattKravgrunnlagKontrollfeltTidspunkt = mottattKravgrunnlag.kontrollfelt.toLocalDateTime()
+
+        val sistMottattKravgrunnlagSkalVæreAktivt = mottattKravgrunnlagKontrollfeltTidspunkt.isAfter(eksisterendeKravgrunnlagKontrollfeltTidspunkt)
+
+        if (sistMottattKravgrunnlagSkalVæreAktivt && eksisterendeKravgrunnlag.referanse != mottattKravgrunnlag.referanse) {
+            hentOgOppdaterFaktaInfo(mottattKravgrunnlag, ytelsestype)
+        }
+        kravgrunnlagRepository.update(eksisterendeKravgrunnlag.copy(aktiv = !sistMottattKravgrunnlagSkalVæreAktivt))
+        kravgrunnlagRepository.insert(mottattKravgrunnlag.copy(aktiv = sistMottattKravgrunnlagSkalVæreAktivt))
     }
 
     fun sumFeilutbetalingsbeløpForBehandlingId(behandlingId: UUID): Long {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val beløpForPerioder = KravgrunnlagsberegningService.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
+        val beløpForPerioder = KravgrunnlagsberegningUtil.summerKravgrunnlagBeløpForPerioder(kravgrunnlag)
         return beløpForPerioder.values.sumOf { it.feilutbetaltBeløp }.longValueExact()
-    }
-
-    private fun loggFeilHvisGammeltKravgrunnlag(
-        kravgrunnlag431: Kravgrunnlag431,
-        eksisterendeKravgrunnlag: Kravgrunnlag431,
-    ) {
-        if (kravgrunnlag431.kontrollfelt < eksisterendeKravgrunnlag.kontrollfelt) {
-            log.error(
-                "Skitpomfrit! Det hentes inn et eldre kravgrunnlag enn det som allerede finnes på behandlingen. Dette må sjekkes nærmere! " +
-                    "Gjelder behandling=${kravgrunnlag431.behandlingId}, " +
-                    "eksisterendeKravgrunnlagId=${eksisterendeKravgrunnlag.id}, " +
-                    "eksisterendeEksternKravgrunnlagId=${eksisterendeKravgrunnlag.eksternKravgrunnlagId}, " +
-                    "nyKravgrunnlagId=${kravgrunnlag431.id}, " +
-                    "nyEksternKravgrunnlagId=${kravgrunnlag431.eksternKravgrunnlagId}",
-            )
-        }
     }
 
     private fun hentOgOppdaterFaktaInfo(
@@ -261,3 +261,6 @@ class KravgrunnlagService(
         const val FRIST_DATO_GRENSE = 10L
     }
 }
+
+private fun String.toLocalDateTime(): LocalDateTime =
+    LocalDateTime.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS"))
