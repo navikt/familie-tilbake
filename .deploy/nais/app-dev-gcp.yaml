@@ -30,6 +30,7 @@ spec:
   observability:
     tracing:
       enabled: true
+      runtime: java
   vault:
     enabled: false
   gcp: # Database
