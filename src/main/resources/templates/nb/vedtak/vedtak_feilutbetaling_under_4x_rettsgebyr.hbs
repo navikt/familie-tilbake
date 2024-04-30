@@ -1,6 +1,9 @@
 {{> nb/vedtak/vedtak_feilutbetaling_under_4x_start}}
+
+_Periode
 {{#each perioder }}
-{{> nb/vedtak/periode_overskrift}}
+Perioden fra og med {{{dato periode.fom}}} til og med {{{dato periode.tom}}}
 {{/each}}
+
 {{> nb/vedtak/vedtak_feilutbetaling_4x_rettsgebyr_begrunnelse}}
 {{> nb/vedtak/vedtak_slutt}}
