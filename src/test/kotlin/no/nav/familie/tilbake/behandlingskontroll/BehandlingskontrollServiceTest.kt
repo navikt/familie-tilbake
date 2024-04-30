@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
+import no.nav.familie.tilbake.integration.pdl.internal.logger
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -256,6 +257,8 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        logger.info("første behandlingsstegtilstand: " + behandlingsstegstilstand[0])
+        logger.info("andre behandlingsstegtilstand: " + behandlingsstegstilstand[1])
         behandlingsstegstilstand.size shouldBe 3
         val sisteStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         sisteStegstilstand.shouldNotBeNull()
@@ -279,6 +282,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+
         behandlingsstegstilstand.size shouldBe 3
         val sisteStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         sisteStegstilstand.shouldNotBeNull()

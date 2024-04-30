@@ -183,6 +183,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `håndterStegAutomatisk skal ikke utføre automatisk behandling når den følger EØS-regelverket`() {
+        lagBehandlingsstegstilstand(
+            behandlingssteg = Behandlingssteg.FAKTA,
+            behandlingsstegstatus = Behandlingsstegstatus.VENTER,
+        )
+
         behandlingRepository.findByIdOrThrow(behandlingId)
             .copy(regelverk = Regelverk.EØS)
             .also { behandlingRepository.update(it) }
