@@ -35,9 +35,9 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
     @Test
     fun `skal lage task på behandling som venter på varsel og tidsfristen har utgått`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         behandlingsstegstilstandRepository.insert(
-            Testdata.behandlingsstegstilstand.copy(
+            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VARSEL,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING,
@@ -55,10 +55,10 @@ internal class AutomatiskGjenopptaBehandlingBatchTest : OppslagSpringRunnerTest(
     @Test
     fun `skal lage task på behandling som venter på avvent dokumentasjon`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling.copy(status = Behandlingsstatus.UTREDES))
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(status = Behandlingsstatus.UTREDES))
         val tidsfrist = LocalDate.now().minusWeeks(1)
         behandlingsstegstilstandRepository.insert(
-            Testdata.behandlingsstegstilstand.copy(
+            Testdata.lagBehandlingsstegstilstand(behandling.id).copy(
                 behandlingssteg = Behandlingssteg.VILKÅRSVURDERING,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
                 venteårsak = Venteårsak.AVVENTER_DOKUMENTASJON,

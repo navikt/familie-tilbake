@@ -54,7 +54,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, mockKafkaProducer)
         oppdaterFaktainfoTask = OppdaterFaktainfoTask(hentFagsystemsbehandlingService, behandlingService)
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }

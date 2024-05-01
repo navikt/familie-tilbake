@@ -90,10 +90,11 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
 
     private val fagsak: Fagsak = Testdata.fagsak
-    private val behandling: Behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(fagsak)
         val fagsystemsbehandling =
             behandling.aktivFagsystemsbehandling.copy(
@@ -115,7 +116,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
             )
 
         val kravgrunnlag =
-            Testdata.kravgrunnlag431
+            Testdata.lagKravgrunnlag(behandling.id)
                 .copy(
                     kontrollfelt = "2019-11-22-19.09.31.458065",
                     perioder =

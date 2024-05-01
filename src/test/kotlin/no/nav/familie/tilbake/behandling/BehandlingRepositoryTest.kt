@@ -22,7 +22,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
     }
 

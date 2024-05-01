@@ -84,7 +84,7 @@ internal class TilbakekrevingsvedtakBeregningServiceTest : OppslagSpringRunnerTe
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)

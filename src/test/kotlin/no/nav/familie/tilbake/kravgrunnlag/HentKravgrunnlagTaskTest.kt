@@ -79,8 +79,9 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandling = Testdata.lagBehandling()
+        behandlingRepository.insert(behandling)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
@@ -97,7 +98,7 @@ internal class HentKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `doTask skal hente kravgrunnlag for revurderingstilbakekreving`() {
-        val revurdering = behandlingRepository.insert(Testdata.revurdering)
+        val revurdering = behandlingRepository.insert(Testdata.lagRevurdering(behandling.id))
         behandlingsstegstilstandRepository
             .insert(
                 Behandlingsstegstilstand(

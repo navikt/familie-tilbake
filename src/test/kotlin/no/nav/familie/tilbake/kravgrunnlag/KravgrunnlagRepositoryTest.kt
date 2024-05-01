@@ -31,8 +31,9 @@ internal class KravgrunnlagRepositoryTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        kravgrunnlag431 = Testdata.kravgrunnlag431
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
+        kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
+        behandling = behandling
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
     }

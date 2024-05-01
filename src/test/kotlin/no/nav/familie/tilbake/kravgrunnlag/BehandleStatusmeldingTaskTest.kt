@@ -80,7 +80,7 @@ internal class BehandleStatusmeldingTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(fagsak)
     }
 

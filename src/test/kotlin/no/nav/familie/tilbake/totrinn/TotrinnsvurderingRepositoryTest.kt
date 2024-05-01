@@ -22,12 +22,13 @@ internal class TotrinnsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val totrinnsvurdering = Testdata.totrinnsvurdering
+    private lateinit var totrinnsvurdering: Totrinnsvurdering
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        totrinnsvurdering = Testdata.lagTotrinnsvurdering(behandling.id)
     }
 
     @Test
