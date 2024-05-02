@@ -43,12 +43,12 @@ class VedtakHjemmelTest {
         vurderingPerioder: Set<Vilkårsvurderingsperiode>,
     ): Vedtaksbrevgrunnlag {
         val behandling =
-            Testdata.vedtaksbrevbehandling
+            Testdata.lagVedtaksbrevbehandling(Testdata.lagBehandling())
                 .copy(
                     vurderteForeldelser = vurdertForeldelse?.let { setOf(it) } ?: setOf(),
-                    vilkårsvurdering = setOf(Testdata.vilkårsvurdering.copy(perioder = vurderingPerioder)),
+                    vilkårsvurdering = setOf(Testdata.lagVilkårsvurdering(Testdata.lagBehandling().id).copy(perioder = vurderingPerioder)),
                 )
-        return Testdata.vedtaksbrevgrunnlag.copy(behandlinger = setOf(behandling), ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
+        return Testdata.lagVedtaksbrevgrunnlag(Testdata.lagBehandling()).copy(behandlinger = setOf(behandling), ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
     }
 
     @Test

@@ -99,7 +99,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
 
         manuellBrevmottakerService =
             ManuellBrevmottakerService(
@@ -260,7 +260,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `opprettBrevmottakerSteg skal ikke opprette steg når behandling er på vent`() {
-        val behandling = behandlingRepository.findByIdOrThrow(Testdata.behandling.id)
+        val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         behandlingskontrollService.settBehandlingPåVent(
@@ -275,7 +275,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fjernManuelleBrevmottakereOgTilbakeførSteg skal fjerne brevmottakere og tilbakeføre steget`() {
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
         manuellBrevmottakerService.opprettBrevmottakerSteg(behandling.id)

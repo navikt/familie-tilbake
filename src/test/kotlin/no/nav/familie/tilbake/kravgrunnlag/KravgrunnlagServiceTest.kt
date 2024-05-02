@@ -48,8 +48,9 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Skal ikke oppdatere aktiv på nytt kravgrunnlag med eldre dato i kontrollfelt`() {
-        val gammeltKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236317")
-        val nyttKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236316")
+        val behandling = Testdata.lagBehandling()
+        val gammeltKravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(kontrollfelt = "2024-04-29-18.50.15.236317")
+        val nyttKravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(kontrollfelt = "2024-04-29-18.50.15.236316")
 
         val nyttKravgrunnlagSlot = slot<Kravgrunnlag431>()
         val gammeltKravgrunnlagSlot = slot<Kravgrunnlag431>()
@@ -69,8 +70,9 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Skal oppdatere aktiv på nytt kravgrunnlag med nyere dato i kontrollfelt`() {
-        val gammeltKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236316")
-        val nyttKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236317")
+        val behandling = Testdata.lagBehandling()
+        val gammeltKravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(kontrollfelt = "2024-04-29-18.50.15.236316")
+        val nyttKravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(kontrollfelt = "2024-04-29-18.50.15.236317")
 
         val nyttKravgrunnlagSlot = slot<Kravgrunnlag431>()
         val gammeltKravgrunnlagSlot = slot<Kravgrunnlag431>()
@@ -90,7 +92,8 @@ class KravgrunnlagServiceTest {
 
     @Test
     fun `Skal lagre nytt kravgrunnlag dersom det ikke finnes et kravgrunnlag fra før`() {
-        val nyttKravgrunnlag = Testdata.kravgrunnlag431.copy(kontrollfelt = "2024-04-29-18.50.15.236317")
+        val behandling = Testdata.lagBehandling()
+        val nyttKravgrunnlag = Testdata.lagKravgrunnlag(behandling.id).copy(kontrollfelt = "2024-04-29-18.50.15.236317")
 
         val nyttKravgrunnlagSlot2 = slot<Kravgrunnlag431>()
 
