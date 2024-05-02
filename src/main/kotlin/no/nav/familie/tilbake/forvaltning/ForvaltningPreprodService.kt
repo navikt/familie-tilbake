@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Service
 @Profile("!prod")
@@ -17,9 +18,9 @@ class ForvaltningPreprodService(
 ) {
     @Transactional
     fun leggInnTestKravgrunnlag(kravgrunnlag: String) {
-        if (environment.activeProfiles.contains("prod")){
-                throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
-            }
+        if (environment.activeProfiles.contains("prod")) {
+            throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
+        }
         taskService.save(
             Task(
                 type = BehandleKravgrunnlagTask.TYPE,

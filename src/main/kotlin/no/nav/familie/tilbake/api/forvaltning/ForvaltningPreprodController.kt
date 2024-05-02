@@ -42,9 +42,9 @@ class ForvaltningPreprodController(
     fun simulerMottakAvKravgrunnlag(
         @RequestBody kravgrunnlag: String,
     ): Ressurs<String> {
-        if (environment.activeProfiles.contains("prod")){
-                throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
-            }
+        if (environment.activeProfiles.contains("prod")) {
+            throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
+        }
         forvaltningPreprodService.leggInnTestKravgrunnlag(kravgrunnlag)
         return Ressurs.success("OK")
     }
