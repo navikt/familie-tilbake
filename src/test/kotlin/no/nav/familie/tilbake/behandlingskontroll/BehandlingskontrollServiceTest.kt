@@ -252,11 +252,13 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                 Behandlingsstegsinfo(FORELDELSE, UTFØRT),
             ),
         )
-
+        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        logger.info("første behandlingsstegtilstand før fortsett behandling: " + behandlingsstegstilstand[0])
+        logger.info("andre behandlingsstegtilstand før fortsett behandling" + behandlingsstegstilstand[1])
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
+        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         logger.info("første behandlingsstegtilstand: " + behandlingsstegstilstand[0])
         logger.info("andre behandlingsstegtilstand: " + behandlingsstegstilstand[1])
         behandlingsstegstilstand.size shouldBe 3
