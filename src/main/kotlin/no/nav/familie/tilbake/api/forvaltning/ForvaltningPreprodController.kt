@@ -49,8 +49,6 @@ class ForvaltningPreprodController(
         if (environment.activeProfiles.contains("prod")) {
             throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
         }
-
-        forvaltningPreprodService.validerBehandlingOgKravgrunnlag(behandlingId, kravgrunnlag)
         forvaltningPreprodService.leggInnTestKravgrunnlag(kravgrunnlag)
         return Ressurs.success("OK")
     }
