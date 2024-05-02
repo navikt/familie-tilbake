@@ -34,6 +34,7 @@ class ForvaltningPreprodController(
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.TEXT_XML_VALUE]
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
@@ -48,6 +49,8 @@ class ForvaltningPreprodController(
         if (environment.activeProfiles.contains("prod")) {
             throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
         }
+
+        forvaltningPreprodService.validerBehandlingOgKravgrunnlag(behandlingId, kravgrunnlag)
         forvaltningPreprodService.leggInnTestKravgrunnlag(kravgrunnlag)
         return Ressurs.success("OK")
     }
