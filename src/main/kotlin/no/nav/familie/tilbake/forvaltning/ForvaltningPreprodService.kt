@@ -45,7 +45,7 @@ class ForvaltningPreprodService(
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         if (!kravgrunnlag.contains(behandling.aktivFagsystemsbehandling.eksternId)) {
-            throw Feil("Finner ikke ekstern behandlingId i kravgrunnlag")
+            throw Feil("Finner ikke ekstern behandlingId i kravgrunnlag (referanse)")
         }
 
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
