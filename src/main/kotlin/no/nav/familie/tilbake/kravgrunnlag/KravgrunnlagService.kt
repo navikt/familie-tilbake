@@ -146,7 +146,7 @@ class KravgrunnlagService(
 
     private fun identifiserAktivtKravgrunnlagOgLagre(
         mottattKravgrunnlag: Kravgrunnlag431,
-        ytelsestype: Ytelsestype
+        ytelsestype: Ytelsestype,
     ) {
         val eksisterendeKravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(mottattKravgrunnlag.behandlingId)
 

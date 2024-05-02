@@ -22,12 +22,15 @@ internal class VedtaksbrevsoppsummeringRepositoryTest : OppslagSpringRunnerTest(
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val vedtaksbrevsoppsummering = Testdata.vedtaksbrevsoppsummering
+    private lateinit var vedtaksbrevsoppsummering: Vedtaksbrevsoppsummering
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        Testdata.lagBehandling().apply {
+            behandlingRepository.insert(this)
+            vedtaksbrevsoppsummering = Testdata.lagVedtaksbrevsoppsummering(this.id)
+        }
     }
 
     @Test

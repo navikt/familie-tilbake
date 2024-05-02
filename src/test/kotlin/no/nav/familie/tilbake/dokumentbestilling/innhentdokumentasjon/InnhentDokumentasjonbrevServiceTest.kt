@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleService
@@ -49,6 +50,8 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
             featureToggleService = featureToggleService,
         )
 
+    lateinit var behandling: Behandling
+
     @BeforeEach
     fun setup() {
         spyPdfBrevService = spyk(pdfBrevService)
@@ -62,8 +65,9 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
                 distribusjonshåndteringService,
                 brevmetadataUtil,
             )
+        behandling = Testdata.lagBehandling()
         every { fagsakRepository.findByIdOrThrow(Testdata.fagsak.id) } returns Testdata.fagsak
-        every { behandlingRepository.findByIdOrThrow(Testdata.behandling.id) } returns Testdata.behandling
+        every { behandlingRepository.findByIdOrThrow(behandling.id) } returns behandling
         val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
         val ident = Testdata.fagsak.bruker.ident
         every { mockEksterneDataForBrevService.hentPerson(ident, Fagsystem.BA) } returns personinfo
@@ -76,7 +80,7 @@ class InnhentDokumentasjonbrevServiceTest : OppslagSpringRunnerTest() {
     fun `hentForhåndsvisningInnhentDokumentasjonBrev returnere pdf for innhent dokumentasjonbrev`() {
         val data =
             innhentDokumentasjonBrevService.hentForhåndsvisningInnhentDokumentasjonBrev(
-                Testdata.behandling.id,
+                behandling.id,
                 flereOpplysninger,
             )
 

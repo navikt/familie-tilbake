@@ -49,11 +49,11 @@ internal class FaktaFeilutbetalingServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val kravgrunnlag =
-            Testdata.kravgrunnlag431
+            Testdata.lagKravgrunnlag(behandling.id)
                 .copy(
                     perioder =
                         setOf(

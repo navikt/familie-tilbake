@@ -25,12 +25,13 @@ internal class ØkonomiXmlSendtRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val økonomiXmlSendt = Testdata.økonomiXmlSendt
+    private lateinit var økonomiXmlSendt: ØkonomiXmlSendt
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        økonomiXmlSendt = Testdata.lagØkonomiXmlSendt(behandling.id)
     }
 
     @Test
