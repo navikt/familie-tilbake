@@ -70,7 +70,7 @@ internal class HistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsak = Testdata.fagsak
         fagsakRepository.insert(fagsak)

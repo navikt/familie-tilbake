@@ -25,8 +25,9 @@ spec:
     enabled: true
     path: /internal/prometheus
   observability:
-    tracing:
+    autoInstrumentation:
       enabled: true
+      runtime: java
   vault:
     enabled: false
   gcp: # Database
@@ -113,16 +114,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: OTEL_METRICS_EXPORTER
-      value: prometheus
-    - name: OTEL_LOGS_EXPORTER
-      value: none
-    - name: OTEL_TRACES_EXPORTER
-      value: otlp
-    - name: OTEL_EXPORTER_METRICS_ENABLED
-      value: "false"
-    - name: OTEL_METRICS_EXEMPLAR_FILTER
-      value: ALWAYS_ON
   envFrom:
     - secret: familie-tilbake
     - secret: familie-tilbake-unleash-api-token
