@@ -95,7 +95,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
             )
 
         behandling =
-            Testdata.behandling.copy(
+            Testdata.lagBehandling().copy(
                 ansvarligSaksbehandler = ANSVARLIG_SAKSBEHANDLER,
                 ansvarligBeslutter = ANSVARLIG_BESLUTTER,
                 behandlendeEnhet = "8020",
@@ -245,7 +245,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 begrunnelse = "vilkår begrunnelse",
                 aktsomhet = vilkårVurderingAktsomhet,
             )
-        val vilkårVurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
+        val vilkårVurdering = Testdata.lagVilkårsvurdering(behandling.id).copy(perioder = setOf(vilkårVurderingPeriode))
 
         vilkårsvurderingRepository.insert(vilkårVurdering)
     }
@@ -264,7 +264,7 @@ class VedtaksoppsummeringServiceTest : OppslagSpringRunnerTest() {
                 begrunnelse = "vilkår begrunnelse",
                 godTro = vilkårVurderingGodTro,
             )
-        val vilkårsvurdering = Testdata.vilkårsvurdering.copy(perioder = setOf(vilkårVurderingPeriode))
+        val vilkårsvurdering = Testdata.lagVilkårsvurdering(behandling.id).copy(perioder = setOf(vilkårVurderingPeriode))
         vilkårsvurderingRepository.insert(vilkårsvurdering)
     }
 

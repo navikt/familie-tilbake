@@ -69,7 +69,7 @@ internal class OppdragClientTest : OppslagSpringRunnerTest() {
     fun init() {
         wireMockServer.start()
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)
         oppdragClient = DefaultOppdragClient(restOperations, URI.create(wireMockServer.baseUrl()))

@@ -7,6 +7,7 @@ import io.mockk.slot
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
@@ -26,6 +27,7 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -41,7 +43,7 @@ class IverksettelseServiceUnitTest {
     val oppdragClient = mockk<OppdragClient>()
     val featureToggleService = mockk<FeatureToggleService>()
 
-    val behandling = Testdata.behandling
+    lateinit var behandling: Behandling
 
     val iverksettelseService =
         IverksettelseService(
@@ -54,6 +56,11 @@ class IverksettelseServiceUnitTest {
             oppdragClient,
             featureToggleService,
         )
+
+    @BeforeEach
+    fun init() {
+        behandling = Testdata.lagBehandling()
+    }
 
     @Test
     fun `skal endre fra delvis til full tilbakekreving dersom utestående beløp er 0 og featuretoggle skrudd på`() {
@@ -90,10 +97,11 @@ class IverksettelseServiceUnitTest {
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
         every { kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(any()) } returns kravgrunnlag
         every { tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(any(), any()) } returns tilbakekrevingsperioder
-        every { økonomiXmlSendtRepository.insert(any()) } returns Testdata.økonomiXmlSendt
+        val økonomiXmlSendt = Testdata.lagØkonomiXmlSendt(behandling.id)
+        every { økonomiXmlSendtRepository.insert(any()) } returns økonomiXmlSendt
         every { oppdragClient.iverksettVedtak(any(), capture(requestSlot)) } returns TilbakekrevingsvedtakResponse()
-        every { økonomiXmlSendtRepository.findByIdOrThrow(any()) } returns Testdata.økonomiXmlSendt
-        every { økonomiXmlSendtRepository.update(any()) } returns Testdata.økonomiXmlSendt
+        every { økonomiXmlSendtRepository.findByIdOrThrow(any()) } returns økonomiXmlSendt
+        every { økonomiXmlSendtRepository.update(any()) } returns økonomiXmlSendt
         every { beregningService.beregn(any()) } returns lagBeregningsresultat()
         every { behandlingVedtakService.oppdaterBehandlingsvedtak(any(), any()) } returns behandling
         return requestSlot
@@ -176,7 +184,7 @@ class IverksettelseServiceUnitTest {
         )
 
     private fun lagKravgrunnlag() =
-        Testdata.kravgrunnlag431.copy(
+        Testdata.lagKravgrunnlag(behandling.id).copy(
             perioder =
                 setOf(
                     Kravgrunnlagsperiode432(

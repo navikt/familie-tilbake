@@ -77,7 +77,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @BeforeEach
     fun init() {
         val fagsak = Testdata.fagsak
-        val behandling = Testdata.behandling
+        val behandling = Testdata.lagBehandling()
         val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK)
         val automatiskBehandling = behandling.copy(fagsystemsbehandling = setOf(copyFagsystemsbehandling))
         val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)

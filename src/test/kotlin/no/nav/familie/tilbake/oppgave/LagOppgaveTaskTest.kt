@@ -44,14 +44,14 @@ internal class LagOppgaveTaskTest : OppslagSpringRunnerTest() {
 
     private lateinit var lagOppgaveTask: LagOppgaveTask
 
-    private val behandling: Behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     private val dagensDato = LocalDate.now()
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
 
         every { oppgavePrioritetService.utledOppgaveprioritet(any(), any()) } returns OppgavePrioritet.NORM
 
