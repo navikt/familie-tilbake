@@ -30,8 +30,11 @@ class ForvaltningPreprodController(
     private val environment: Environment,
     private val forvaltningPreprodService: ForvaltningPreprodService,
 ) {
-    @Operation(summary = "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! " +
-            "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile")
+    @Operation(
+        summary =
+            "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! " +
+                "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile",
+    )
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -50,6 +53,7 @@ class ForvaltningPreprodController(
         if (environment.activeProfiles.contains("prod")) {
             throw IllegalStateException("Kan ikke kjøre denne tjenesten i prod")
         }
+        forvaltningPreprodService.validerKravgrunnlagOgBehandling(behandlingId, kravgrunnlag)
         forvaltningPreprodService.leggInnTestKravgrunnlag(kravgrunnlag)
         return Ressurs.success("OK")
     }

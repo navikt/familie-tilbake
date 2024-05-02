@@ -1,11 +1,9 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.InternalPlatformDsl.toStr
 import io.mockk.every
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -27,15 +25,11 @@ import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.task.LagreBrevsporingTask
 import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
