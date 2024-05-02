@@ -30,7 +30,8 @@ class ForvaltningPreprodController(
     private val environment: Environment,
     private val forvaltningPreprodService: ForvaltningPreprodService,
 ) {
-    @Operation(summary = "Legg inn test-kravgrunnlag - KUN PREPROD/DEV!")
+    @Operation(summary = "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! " +
+            "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile")
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
