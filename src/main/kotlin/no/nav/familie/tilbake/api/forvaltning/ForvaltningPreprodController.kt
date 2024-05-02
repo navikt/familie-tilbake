@@ -33,7 +33,8 @@ class ForvaltningPreprodController(
     @Operation(
         summary =
             "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! " +
-                "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile",
+                "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile. " +
+                    "Tar i mot intern behandlingId i parameter. Kravgrunnlaget må matche med ekstern fagsak- og behandlingsid",
     )
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
