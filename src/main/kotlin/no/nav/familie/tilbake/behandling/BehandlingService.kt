@@ -649,15 +649,6 @@ class BehandlingService(
 
     private fun validerKanAngreSendTilBeslutter(behandling: Behandling) {
         val innloggetSaksbehandler = ContextService.hentSaksbehandler()
-        val saksbehandlerSendtTilBeslutter = behandling.ansvarligSaksbehandler
-
-        if (saksbehandlerSendtTilBeslutter !== innloggetSaksbehandler) {
-            throw Feil(
-                "Prøver å angre på at behandling id=${behandling.id} er sendt til beslutter, men er ikke ansvarlig saksbehandler på behandlingen.",
-                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket",
-                httpStatus = HttpStatus.BAD_REQUEST,
-            )
-        }
 
         val godkjenneVedtakOppgave =
             oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
@@ -668,7 +659,7 @@ class BehandlingService(
         val tilordnetRessurs = godkjenneVedtakOppgave.tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =
             tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
-        if (oppgaveErTilordnetEnAnnenSaksbehandler) {
+            if (oppgaveErTilordnetEnAnnenSaksbehandler) {
             throw Feil("Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", frontendFeilmelding = "Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
