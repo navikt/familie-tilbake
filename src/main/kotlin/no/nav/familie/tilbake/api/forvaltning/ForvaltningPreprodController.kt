@@ -34,7 +34,7 @@ class ForvaltningPreprodController(
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.TEXT_XML_VALUE]
+        consumes = [MediaType.TEXT_XML_VALUE],
     )
     @Rolletilgangssjekk(
         Behandlerrolle.FORVALTER,
