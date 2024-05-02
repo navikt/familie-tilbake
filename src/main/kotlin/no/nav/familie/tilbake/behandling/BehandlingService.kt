@@ -651,10 +651,10 @@ class BehandlingService(
         val innloggetSaksbehandler = ContextService.hentSaksbehandler()
         val saksbehandlerSendtTilBeslutter = behandling.ansvarligSaksbehandler
 
-        if (saksbehandlerSendtTilBeslutter !== innloggetSaksbehandler) {
+        if (saksbehandlerSendtTilBeslutter != innloggetSaksbehandler) {
             throw Feil(
                 "Prøver å angre på at behandling id=${behandling.id} er sendt til beslutter, men er ikke ansvarlig saksbehandler på behandlingen.",
-                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket. saksbehandlerSendtTilBeslutter: $saksbehandlerSendtTilBeslutter - innloggetSaksbehandler: $innloggetSaksbehandler",
+                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket.",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
