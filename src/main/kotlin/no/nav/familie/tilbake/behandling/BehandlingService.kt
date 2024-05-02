@@ -654,7 +654,7 @@ class BehandlingService(
         if (saksbehandlerSendtTilBeslutter !== innloggetSaksbehandler) {
             throw Feil(
                 "Prøver å angre på at behandling id=${behandling.id} er sendt til beslutter, men er ikke ansvarlig saksbehandler på behandlingen.",
-                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket",
+                frontendFeilmelding = "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket. saksbehandlerSendtTilBeslutter: $saksbehandlerSendtTilBeslutter - innloggetSaksbehandler: $innloggetSaksbehandler",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
