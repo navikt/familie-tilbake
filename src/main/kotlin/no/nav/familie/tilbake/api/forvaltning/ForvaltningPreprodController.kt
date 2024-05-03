@@ -40,9 +40,7 @@ class ForvaltningPreprodController(
                 "Endre personident i kravgrunnlag også\n\n" +
                 "Det vil ikke fungere å iverksette mot økonomi - men du kan bruke forvaltningsendepunkt: \"settIverksettingUtført()\" - da lages brev og behandlingen settes til AVSLUTTET. Data her kan finnes på task i prosessering (klar til plukk, eller feilet) . SendØkonomiVedtak",
         summary =
-            "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! " +
-                "Kjør settIverksettingTilUført-endepunktet for å hoppe over iverksettingssteget som vil feile. " +
-                    "Tar i mot intern behandlingId i parameter. Kravgrunnlaget må matche med ekstern fagsak- og behandlingsid",
+            "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! ",
     )
     @PostMapping(
         path = ["/behandling/{behandlingId}/kravgrunnlag/testkravgrunnlag"],
