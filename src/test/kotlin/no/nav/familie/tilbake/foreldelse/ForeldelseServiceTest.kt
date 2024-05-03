@@ -11,6 +11,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegForeldelseDto
 import no.nav.familie.tilbake.api.dto.ForeldelsesperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -42,14 +43,14 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var foreldelseService: ForeldelseService
 
-    private var behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
 
-        val kravgrunnlag431 = Testdata.kravgrunnlag431
+        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
         val førsteKravgrunnlagsperiode =
@@ -222,7 +223,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 Foreldelsesvurderingstype.IKKE_FORELDET,
             )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
-        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
+        vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
 
@@ -259,7 +260,7 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
                 Foreldelsesvurderingstype.IKKE_FORELDET,
             )
         foreldelseService.lagreVurdertForeldelse(behandling.id, BehandlingsstegForeldelseDto(listOf(forrigeForeldelsesperiode)))
-        vilkårsvurderingRepository.insert(Testdata.vilkårsvurdering)
+        vilkårsvurderingRepository.insert(Testdata.lagVilkårsvurdering(behandling.id))
 
         vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id).shouldNotBeNull()
 

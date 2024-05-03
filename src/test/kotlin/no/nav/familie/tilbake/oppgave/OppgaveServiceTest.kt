@@ -18,9 +18,10 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.data.Testdata.behandling
+import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.fagsak
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.person.PersonService
@@ -53,10 +54,12 @@ class OppgaveServiceTest {
         )
 
     private lateinit var oppgaveService: OppgaveService
+    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun setUp() {
         clearMocks(integrasjonerClient)
+        behandling = Testdata.lagBehandling()
         oppgaveService =
             OppgaveService(
                 behandlingRepository,

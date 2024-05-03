@@ -71,6 +71,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.data.Testdata.behandlingsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
@@ -398,12 +399,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
-        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling)
-        every { behandlingRepository.insert(any()) } returns Testdata.behandling
+        val behandling = Testdata.lagBehandling()
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(behandling)
+        every { behandlingRepository.insert(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
 
-        val behandling = shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }
+        shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }
         behandling.shouldNotBeNull()
     }
 
@@ -459,13 +461,15 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
         every { behandlingRepository.finnÅpenTilbakekrevingsbehandling(any(), any()) } returns null
-        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
-        every { behandlingRepository.insert(any()) } returns Testdata.behandling.copy(resultater = setOf(Testdata.behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
+        val behandling = Testdata.lagBehandling()
+        every { behandlingRepository.finnAvsluttetTilbakekrevingsbehandlinger(any()) } returns listOf(behandling.copy(resultater = setOf(behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT))))
+        every { behandlingRepository.insert(any()) } returns behandling.copy(resultater = setOf(behandlingsresultat.copy(type = Behandlingsresultatstype.HENLAGT_KRAVGRUNNLAG_NULLSTILT)))
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.opprettFagsak(any(), any(), any()) } returns Testdata.fagsak
 
-        val behandling = shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }
-        behandling.shouldNotBeNull()
+        shouldNotThrowAny { behandlingServiceMock.opprettBehandling(opprettTilbakekrevingRequest) }.apply {
+            this.shouldNotBeNull()
+        }
     }
 
     @Test
@@ -617,8 +621,8 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettRevurdering skal opprette revurdering for gitt avsluttet tilbakekrevingsbehandling`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -657,7 +661,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `opprettRevurdering skal ikke opprette revurdering for tilbakekreving som er avsluttet uten kravgrunnlag`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -913,7 +917,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling kan ikke opprette revurdering når tilbakekreving ikke har kravgrunnlag`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -924,9 +928,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling kan opprette revurdering når tilbakekreving er avsluttet med kravgrunnlag`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -937,13 +941,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling kan ikke opprette revurdering når tilbakekreving har en åpen revurdering`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        behandlingRepository.insert(Testdata.revurdering)
+        behandlingRepository.insert(Testdata.lagRevurdering(behandling.id))
 
         val behandlingDto = behandlingService.hentBehandling(behandling.id)
         behandlingDto.kanRevurderingOpprettes.shouldBeFalse()
@@ -952,13 +956,13 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentBehandling kan opprette revurdering når tilbakekreving har en avsluttet revurdering`() {
         fagsakRepository.insert(Testdata.fagsak)
-        var behandling = behandlingRepository.insert(Testdata.behandling)
+        var behandling = behandlingRepository.insert(Testdata.lagBehandling())
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        var revurdering = behandlingRepository.insert(Testdata.revurdering)
+        var revurdering = behandlingRepository.insert(Testdata.lagRevurdering(behandling.id))
         revurdering = behandlingRepository.findByIdOrThrow(revurdering.id)
         behandlingRepository.update(revurdering.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -1052,7 +1056,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `taBehandlingAvvent skal ikke gjenoppta når behandling er avsluttet`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
@@ -1063,7 +1067,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `taBehandlingAvvent skal ikke gjenoppta når behandling er ikke på vent`() {
         fagsakRepository.insert(Testdata.fagsak)
-        val behandling = behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
 
         val exception = shouldThrow<RuntimeException> { behandlingService.taBehandlingAvvent(behandling.id) }
         exception.message shouldBe "Behandling ${behandling.id} er ikke på vent, kan ike gjenoppta"
@@ -1079,7 +1083,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(behandlingId = behandling.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(behandlingId = behandling.id))
 
         behandlingService.settBehandlingPåVent(
             behandlingId = behandling.id,
@@ -1123,7 +1127,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 it.venteårsak == Venteårsak.VENT_PÅ_BRUKERTILBAKEMELDING
         }
 
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(behandlingId = behandling.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(behandlingId = behandling.id))
 
         behandlingService.taBehandlingAvvent(behandling.id)
 
@@ -1349,7 +1353,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
             )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        val kravgrunnlag = Testdata.kravgrunnlag431
+        val kravgrunnlag = Testdata.lagKravgrunnlag(behandling.id)
         kravgrunnlagRepository.insert(kravgrunnlag.copy(behandlingId = behandling.id))
 
         val exception =

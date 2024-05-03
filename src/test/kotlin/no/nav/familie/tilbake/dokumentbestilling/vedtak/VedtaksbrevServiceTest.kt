@@ -147,15 +147,15 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
             )
 
         fagsak = fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling.copy(avsluttetDato = LocalDate.now()))
-        val kravgrunnlagsperiode432 = Testdata.kravgrunnlag431.perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(perioder = setOf(kravgrunnlagsperiode432)))
+        behandling = behandlingRepository.insert(Testdata.lagBehandling().copy(avsluttetDato = LocalDate.now()))
+        val kravgrunnlagsperiode432 = Testdata.lagKravgrunnlag(behandling.id).perioder.first().copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(kravgrunnlagsperiode432)))
         vilkårsvurderingRepository.insert(
-            Testdata.vilkårsvurdering
+            Testdata.lagVilkårsvurdering(behandling.id)
                 .copy(perioder = setOf(Testdata.vilkårsperiode.copy(periode = Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), godTro = null))),
         )
         faktaRepository.insert(
-            Testdata.faktaFeilutbetaling.copy(
+            Testdata.lagFaktaFeilutbetaling(behandling.id).copy(
                 perioder =
                     setOf(
                         FaktaFeilutbetalingsperiode(
@@ -175,9 +175,9 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         val personinfo = Personinfo("28056325874", LocalDate.now(), "Fiona")
 
         every { eksterneDataForBrevService.hentPerson(Testdata.fagsak.bruker.ident, any()) }.returns(personinfo)
-        every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligSaksbehandler) }
+        every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler) }
             .returns("Ansvarlig O'Saksbehandler")
-        every { eksterneDataForBrevService.hentSaksbehandlernavn(Testdata.behandling.ansvarligBeslutter!!) }
+        every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligBeslutter!!) }
             .returns("Ansvarlig O'Beslutter")
         every {
             eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any())
@@ -240,7 +240,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf`() {
         val dto =
             HentForhåndvisningVedtaksbrevPdfDto(
-                Testdata.behandling.id,
+                behandling.id,
                 "Dette er en stor og gild oppsummeringstekst",
                 listOf(
                     PeriodeMedTekstDto(
@@ -265,7 +265,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevMedVedleggSomPdf skal generere en gyldig pdf med xml-spesialtegn`() {
-        val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto)
+        val bytes = vedtaksbrevService.hentForhåndsvisningVedtaksbrevMedVedleggSomPdf(forhåndvisningDto(behandling.id))
 
 //        File("test.pdf").writeBytes(bytes)
         PdfaValidator.validatePdf(bytes)
@@ -273,7 +273,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningVedtaksbrevSomTekst genererer avsnitt med tekst for forhåndsvisning av vedtaksbrev`() {
-        val avsnitt = vedtaksbrevService.hentVedtaksbrevSomTekst(Testdata.behandling.id)
+        val avsnitt = vedtaksbrevService.hentVedtaksbrevSomTekst(behandling.id)
 
         avsnitt.shouldHaveSize(3)
         avsnitt.first().overskrift shouldBe "Du må betale tilbake barnetrygden"
@@ -540,7 +540,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreUtkastAvFriteksterFraSaksbehandler skal lagre selv når påkrevet fritekst mangler for oppsummering`() {
         var lokalBehandling =
-            Testdata.revurdering.copy(
+            Testdata.lagRevurdering(behandling.id).copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
                 avsluttetDato = null,
@@ -555,7 +555,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         lokalBehandling = behandlingRepository.insert(lokalBehandling)
 
         // Er nødt til å opprette kravgrunnlag for revurderingen
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431.copy(id = UUID.randomUUID(), behandlingId = lokalBehandling.id, perioder = emptySet()))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(id = UUID.randomUUID(), behandlingId = lokalBehandling.id, perioder = emptySet()))
 
         lagFakta(lokalBehandling.id)
         lagVilkårsvurdering(lokalBehandling.id)
@@ -579,7 +579,7 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `lagreFriteksterFraSaksbehandler skal ikke lagre fritekster når påkrevet oppsummeringstekst mangler`() {
         var lokalBehandling =
-            Testdata.revurdering.copy(
+            Testdata.lagRevurdering(behandling.id).copy(
                 id = UUID.randomUUID(),
                 eksternBrukId = UUID.randomUUID(),
                 årsaker =
@@ -690,22 +690,20 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         underavsnitt.fritekstPåkrevet shouldBe fritekstPåkrevet
     }
 
-    companion object {
-        private val forhåndvisningDto =
-            HentForhåndvisningVedtaksbrevPdfDto(
-                Testdata.behandling.id,
-                "Dette er en stor og gild oppsummeringstekst",
-                listOf(
-                    PeriodeMedTekstDto(
-                        Datoperiode(
-                            LocalDate.now().minusDays(1),
-                            LocalDate.now(),
-                        ),
-                        faktaAvsnitt = "&bob",
-                        vilkårAvsnitt = "<bob>",
-                        særligeGrunnerAnnetAvsnitt = "'bob' \"bob\"",
+    fun forhåndvisningDto(behandlingId: UUID) =
+        HentForhåndvisningVedtaksbrevPdfDto(
+            behandlingId,
+            "Dette er en stor og gild oppsummeringstekst",
+            listOf(
+                PeriodeMedTekstDto(
+                    Datoperiode(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now(),
                     ),
+                    faktaAvsnitt = "&bob",
+                    vilkårAvsnitt = "<bob>",
+                    særligeGrunnerAnnetAvsnitt = "'bob' \"bob\"",
                 ),
-            )
-    }
+            ),
+        )
 }
