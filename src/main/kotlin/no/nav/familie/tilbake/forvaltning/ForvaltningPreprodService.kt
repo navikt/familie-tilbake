@@ -44,13 +44,14 @@ class ForvaltningPreprodService(
         kravgrunnlag: String,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        if (!kravgrunnlag.contains(behandling.aktivFagsystemsbehandling.eksternId)) {
-            throw Feil("Finner ikke ekstern behandlingId i kravgrunnlag (referanse)")
+        val eksternBehandlingIdNode = "<urn:referanse>${behandling.aktivFagsystemsbehandling.eksternId}</urn:referanse>"
+        if (!kravgrunnlag.contains(eksternBehandlingIdNode)) {
+            throw Feil("Finner ikke ekstern behandlingId fra vedtaksløsning i kravgrunnlag (referanse)")
         }
-
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
-        if (!kravgrunnlag.contains(fagsak.eksternFagsakId)) {
-            throw Feil("Finner ikke ekstern fagsakId i kravgrunnlag")
+        val eksternFagsakIdNode = "<urn:fagsystemId>${fagsak.eksternFagsakId}</urn:fagsystemId>"
+        if (!kravgrunnlag.contains(eksternFagsakIdNode)) {
+            throw Feil("Finner ikke ekstern fagsakId fra vedtaksløsning i kravgrunnlag (fagsystemId)")
         }
     }
 }
