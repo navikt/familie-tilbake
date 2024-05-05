@@ -60,6 +60,11 @@ class HistorikkService(
         return historikkinnslagRepository.insert(historikkinnslag)
     }
 
+    @Transactional(readOnly = true)
+    fun hentHistorikkinnslag(
+        behandlingId: UUID,
+    ): List<Historikkinnslag> = historikkinnslagRepository.findByBehandlingId(behandlingId)
+
     private fun lagTekst(
         behandling: Behandling,
         historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
