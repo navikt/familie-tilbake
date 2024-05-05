@@ -31,7 +31,8 @@ class ForvaltningPreprodController(
     private val forvaltningPreprodService: ForvaltningPreprodService,
 ) {
     @Operation(
-        description = "Legg inn behandlingId (intern id) fra tilbakekrevings-behandlingen (@id) (ikke eksternid fra url)\n" +
+        description =
+            "Legg inn behandlingId (intern id) fra tilbakekrevings-behandlingen (@id) (ikke eksternid fra url)\n" +
                 "lim inn et kravgrunnlag du vil bruke:\n\n" +
                 "Bytt ut MINIMUM:\n\n" +
                 "<urn:fagsystemId> testverdi</urn:fagsystemId> (ekstern fagsak id - long )\n\n" +

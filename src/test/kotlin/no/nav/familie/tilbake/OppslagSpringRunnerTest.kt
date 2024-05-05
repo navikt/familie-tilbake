@@ -27,6 +27,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
+import no.nav.familie.tilbake.historikkinnslag.Historikkinnslag
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
@@ -151,6 +152,7 @@ abstract class OppslagSpringRunnerTest {
             TaskLogg::class,
             Meldingstelling::class,
             ManuellBrevmottaker::class,
+            Historikkinnslag::class,
         )
             .reversed()
             .forEach {

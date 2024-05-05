@@ -1,10 +1,6 @@
 package no.nav.familie.tilbake.historikkinnslag
 
-import no.nav.familie.kontrakter.felles.Applikasjon
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
-import no.nav.familie.kontrakter.felles.historikkinnslag.OpprettHistorikkinnslagRequest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
@@ -23,7 +19,6 @@ import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagsty
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.DISTRIBUSJON_BREV_DØDSBO_SUKSESS
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype.VEDTAK_FATTET
-import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -32,9 +27,8 @@ import java.util.UUID
 @Service
 class HistorikkService(
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
     private val brevsporingRepository: BrevsporingRepository,
-    private val kafkaProducer: KafkaProducer,
+    private val historikkinnslagRepository: HistorikkinnslagRepository,
 ) {
     @Transactional
     fun lagHistorikkinnslag(
@@ -46,50 +40,24 @@ class HistorikkService(
         brevtype: String? = null,
         beslutter: String? = null,
         tittel: String? = null,
-    ) {
-        val request =
-            lagHistorikkinnslagRequest(
-                behandlingId,
-                aktør,
-                historikkinnslagstype,
-                opprettetTidspunkt,
-                beskrivelse,
-                brevtype,
-                beslutter,
-                tittel,
-            )
-        kafkaProducer.sendHistorikkinnslag(behandlingId, request.behandlingId, request)
-    }
-
-    private fun lagHistorikkinnslagRequest(
-        behandlingId: UUID,
-        aktør: Aktør,
-        historikkinnslagstype: TilbakekrevingHistorikkinnslagstype,
-        opprettetTidspunkt: LocalDateTime,
-        beskrivelse: String?,
-        brevtype: String?,
-        beslutter: String?,
-        tittel: String?,
-    ): OpprettHistorikkinnslagRequest {
+    ): Historikkinnslag {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val brevdata = hentBrevdata(behandling, brevtype)
 
-        return OpprettHistorikkinnslagRequest(
-            behandlingId = behandling.eksternBrukId.toString(),
-            eksternFagsakId = fagsak.eksternFagsakId,
-            fagsystem = fagsak.fagsystem,
-            applikasjon = Applikasjon.FAMILIE_TILBAKE,
-            type = historikkinnslagstype.type,
-            aktør = aktør,
-            aktørIdent = hentAktørIdent(behandling, aktør, beslutter),
-            opprettetTidspunkt = opprettetTidspunkt,
-            steg = historikkinnslagstype.steg?.name,
-            tittel = tittel ?: historikkinnslagstype.tittel,
-            tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
-            journalpostId = brevdata?.journalpostId,
-            dokumentId = brevdata?.dokumentId,
-        )
+        val historikkinnslag =
+            Historikkinnslag(
+                behandlingId = behandlingId,
+                aktør = aktør,
+                type = historikkinnslagstype.type,
+                tittel = tittel ?: historikkinnslagstype.tittel,
+                tekst = lagTekst(behandling, historikkinnslagstype, beskrivelse),
+                steg = historikkinnslagstype.steg?.name,
+                journalpostId = brevdata?.journalpostId,
+                dokumentId = brevdata?.dokumentId,
+                opprettetAv = hentAktørIdent(behandling, aktør, beslutter),
+                opprettetTid = opprettetTidspunkt,
+            )
+        return historikkinnslagRepository.insert(historikkinnslag)
     }
 
     private fun lagTekst(
