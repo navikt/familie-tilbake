@@ -38,6 +38,11 @@ class OppdaterOppgaveTask(
                 saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             }
         val behandlingId = UUID.fromString(task.payload)
+
+        if (!oppgaveService.skalLageOppgaveForBehandling(behandlingId)) {
+            return
+        }
+
         val enhet = task.metadata.getProperty("enhet")
 
         val oppgave =
