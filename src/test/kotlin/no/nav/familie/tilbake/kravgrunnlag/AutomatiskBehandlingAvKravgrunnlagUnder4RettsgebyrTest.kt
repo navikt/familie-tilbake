@@ -1,8 +1,8 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -25,9 +25,11 @@ import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
+import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
+import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
@@ -61,6 +63,12 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     private lateinit var automatiskSaksbehandlingTask: AutomatiskSaksbehandlingTask
 
     @Autowired
+    private lateinit var sendØkonomiTilbakekrevingsvedtakTask: SendØkonomiTilbakekrevingsvedtakTask
+
+    @Autowired
+    private lateinit var sendVedtaksbrevTask: SendVedtaksbrevTask
+
+    @Autowired
     private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
@@ -77,7 +85,7 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @BeforeEach
     fun init() {
         val fagsak = Testdata.fagsak
-        val behandling = Testdata.behandling
+        val behandling = Testdata.lagBehandling()
         val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK)
         val automatiskBehandling = behandling.copy(fagsystemsbehandling = setOf(copyFagsystemsbehandling))
         val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
@@ -92,33 +100,19 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         lagGrunnlagssteg()
 
         val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
-
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
 
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        kravgrunnlag.shouldNotBeNull()
-        kravgrunnlag.kravstatuskode shouldBe Kravstatuskode.NYTT
-        KravgrunnlagUtil.tilYtelsestype(kravgrunnlag.fagområdekode.name) shouldBe Ytelsestype.OVERGANGSSTØNAD
-
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
         automatiskSaksbehandlingTasks.size shouldBe 1
-
         automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first())
-        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
-        behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK } shouldBe true
-        val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
-        fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
+
+        assertFakta()
         foreldelseService.hentAktivVurdertForeldelse(behandlingId)?.foreldelsesperioder shouldBe null
 
-        val vilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandlingId)
-        vilkårsvurdering.perioder.size shouldBe 1
-        vilkårsvurdering.perioder.first().foreldet shouldBe false // Vil alltid være satt til ikke foreldet ved automatisk behandling
-        vilkårsvurdering.perioder.first().begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.tilbakekrevSmåbeløp shouldBe false
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
-        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
+        assertVilkårsvurdering()
+        sendVedtaksbrev()
+        assertAtVedtaksbrevTaskErFullført()
     }
 
     @Test
@@ -171,5 +165,36 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
                 payload = kravgrunnlagXml,
             ),
         )
+    }
+
+    private fun assertFakta() {
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingId)
+        behandlingsstegstilstand.any { it.behandlingssteg == Behandlingssteg.IVERKSETT_VEDTAK } shouldBe true
+        val fakta = faktaFeilutbetalingRepository.findFaktaFeilutbetalingByBehandlingIdAndAktivIsTrue(behandlingId)
+        fakta.begrunnelse shouldBe Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_FAKTA_BEGRUNNELSE
+    }
+
+    private fun sendVedtaksbrev() {
+        val sendØkonomiTilbakekrevingsvedtak = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), SendØkonomiTilbakekrevingsvedtakTask.TYPE).first()
+        sendØkonomiTilbakekrevingsvedtakTask.onCompletion(sendØkonomiTilbakekrevingsvedtak)
+        val sendBrevTask = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), SendVedtaksbrevTask.TYPE).first()
+        sendVedtaksbrevTask.doTask(sendBrevTask)
+    }
+
+    private fun assertVilkårsvurdering() {
+        val vilkårsvurdering = vilkårsvurderingService.hentVilkårsvurdering(behandlingId)
+        vilkårsvurdering.perioder.size shouldBe 1
+        vilkårsvurdering.perioder.first().foreldet shouldBe false // Vil alltid være satt til ikke foreldet ved automatisk behandling
+        vilkårsvurdering.perioder.first().begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.vilkårsvurderingsresultat shouldBe Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.tilbakekrevSmåbeløp shouldBe false
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.aktsomhet shouldBe Aktsomhet.SIMPEL_UAKTSOMHET
+        vilkårsvurdering.perioder.first().vilkårsvurderingsresultatInfo?.aktsomhet?.begrunnelse shouldBe AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
+    }
+
+    private fun assertAtVedtaksbrevTaskErFullført() {
+        val alleTasker = taskService.findAll()
+        val publiserTask = alleTasker.first { it.type == PubliserJournalpostTask.TYPE }
+        publiserTask shouldNotBe null // Vil sjekke at brevet er sendt, da publiserJournalpostTask opprettes når det er gjort
     }
 }

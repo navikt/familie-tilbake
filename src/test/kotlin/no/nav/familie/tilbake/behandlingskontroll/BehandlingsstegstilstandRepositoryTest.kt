@@ -23,12 +23,13 @@ internal class BehandlingsstegstilstandRepositoryTest : OppslagSpringRunnerTest(
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
-    private val behandlingsstegstilstand = Testdata.behandlingsstegstilstand
+    private lateinit var behandlingsstegstilstand: Behandlingsstegstilstand
 
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling())
+        behandlingsstegstilstand = Testdata.lagBehandlingsstegstilstand(behandling.id)
     }
 
     @Test

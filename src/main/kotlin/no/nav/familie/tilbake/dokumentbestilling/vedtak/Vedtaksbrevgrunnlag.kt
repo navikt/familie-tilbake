@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingstype
@@ -117,6 +118,8 @@ data class Vedtaksbrevgrunnlag(
     fun utledVedtaksbrevstype(): Vedtaksbrevstype {
         return if (erTilbakekrevingRevurderingHarÅrsakFeilutbetalingBortfalt()) {
             Vedtaksbrevstype.FRITEKST_FEILUTBETALING_BORTFALT
+        } else if (behandling.fagsystemsbehandling.first { it.aktiv }.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
+            Vedtaksbrevstype.AUTOMATISK_4X_RETTSGEBYR
         } else {
             Vedtaksbrevstype.ORDINÆR
         }
