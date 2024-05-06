@@ -81,7 +81,10 @@ object FaktaFeilutbetalingMapper {
         return Datoperiode(totalPeriodeFom!!, totalPeriodeTom!!)
     }
 
-    private fun utledBegrunnelse(tidligereBegrunnelse: String?, begrunnelseForTilbakekreving: String?): String {
+    private fun utledBegrunnelse(
+        tidligereBegrunnelse: String?,
+        begrunnelseForTilbakekreving: String?,
+    ): String {
         return tidligereBegrunnelse ?: begrunnelseForTilbakekreving ?: ""
     }
 }

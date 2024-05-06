@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepositor
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -125,9 +126,9 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
         behandleKravgrunnlagTask.doTask(task)
 
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
-
-        val exception = shouldThrow<Feil> { automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first()) }
-        exception.message shouldContain "Skal ikke behandle beløp over 4x rettsgebyr automatisk"
+        automatiskSaksbehandlingTasks.size shouldBe 0
+        val lagOppgaveTask = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), LagOppgaveTask.TYPE)
+        lagOppgaveTask.first().payload shouldBe behandlingId.toString()
     }
 
     @Test
