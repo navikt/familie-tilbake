@@ -270,19 +270,18 @@ class IntegrasjonerClientConfig {
 
         every { integrasjonerClient.finnOppgaver(any()) } answers
             {
-//                if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
+                if (Thread.currentThread().stackTrace.any { it.methodName == "opprettOppgave" }) {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 0,
-                        oppgaver = listOf(Oppgave(id = 1)),
-//                        oppgaver = emptyList(),
+                        oppgaver = emptyList(),
                     )
-//                }
-//                else {
-//                    FinnOppgaveResponseDto(
-//                        antallTreffTotalt = 1,
-//                        oppgaver = listOf(Oppgave(id = 1)),
-//                    )
-//                }
+                }
+                else {
+                    FinnOppgaveResponseDto(
+                        antallTreffTotalt = 1,
+                        oppgaver = listOf(Oppgave(id = 1)),
+                    )
+                }
             }
 
         every { integrasjonerClient.ferdigstillOppgave(any()) } just Runs
