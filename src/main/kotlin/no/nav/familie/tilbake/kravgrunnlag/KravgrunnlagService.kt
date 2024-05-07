@@ -1,6 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
 import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
@@ -17,6 +18,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
+import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -117,10 +119,16 @@ class KravgrunnlagService(
 
         stegService.håndterSteg(behandling.id) // Kjører automatisk frem til fakta-steg = KLAR
         if (behandling.aktivFagsystemsbehandling.tilbakekrevingsvalg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK) {
-            taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
+            if (erUnder4xRettsgebyr(kravgrunnlag431)) {
+                taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
+            } else {
+                oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
+            }
         }
         tellerService.tellKobletKravgrunnlag(fagsystem)
     }
+
+    private fun erUnder4xRettsgebyr(kravgrunnlag431: Kravgrunnlag431) = kravgrunnlag431.sumFeilutbetaling().longValueExact() <= Constants.FIRE_X_RETTSGEBYR
 
     private fun finnÅpenBehandling(
         ytelsestype: Ytelsestype,
