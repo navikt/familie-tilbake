@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsystemUtil
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
@@ -52,6 +53,7 @@ class KravgrunnlagService(
     private val historikkTaskService: HistorikkTaskService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
+    private val behandlingService: BehandlingService,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -124,8 +126,7 @@ class KravgrunnlagService(
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
             } else {
                 // endre behandling.saksnbehandlingstype til ORDINÆR?
-                val copy = behandling.copy(saksbehandlingstype = Saksbehandlingstype.ORDINÆR)
-                behandlingRepository.update(copy)
+                behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
                 oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
             }
         }
@@ -134,12 +135,12 @@ class KravgrunnlagService(
 
     private fun skalBehandlesAutomatisk(
         kravgrunnlag431: Kravgrunnlag431,
-        behandling: Behandling
+        behandling: Behandling,
     ) = erUnder4xRettsgebyr(kravgrunnlag431) && behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(behandling, kravgrunnlag431)
 
     private fun behandlingOgKravgrunnlagReferererTilSammeFagsystembehandling(
         behandling: Behandling,
-        kravgrunnlag431: Kravgrunnlag431
+        kravgrunnlag431: Kravgrunnlag431,
     ) = behandling.fagsystemsbehandling.first { it.aktiv }.eksternId == kravgrunnlag431.referanse
 
     private fun erUnder4xRettsgebyr(kravgrunnlag431: Kravgrunnlag431) = kravgrunnlag431.sumFeilutbetaling().longValueExact() <= Constants.FIRE_X_RETTSGEBYR
