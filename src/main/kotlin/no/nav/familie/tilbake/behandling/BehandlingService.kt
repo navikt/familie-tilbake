@@ -668,7 +668,7 @@ class BehandlingService(
         val tilordnetRessurs = godkjenneVedtakOppgave.tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =
             tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
-            if (oppgaveErTilordnetEnAnnenSaksbehandler) {
+        if (oppgaveErTilordnetEnAnnenSaksbehandler) {
             throw Feil("Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", frontendFeilmelding = "Kan ikke angre send til beslutter, oppgaven er plukket av $tilordnetRessurs", httpStatus = HttpStatus.BAD_REQUEST)
         }
     }

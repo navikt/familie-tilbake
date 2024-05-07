@@ -37,7 +37,7 @@ class Foreslåvedtakssteg(
     private val oppgaveTaskService: OppgaveTaskService,
     private val totrinnService: TotrinnService,
     private val historikkTaskService: HistorikkTaskService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) : IBehandlingssteg {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -156,9 +156,10 @@ class Foreslåvedtakssteg(
     ) {
         val oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
 
-        val oppgave = oppgavetyper.firstNotNullOfOrNull { oppgavetype ->
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)
-        }
+        val oppgave =
+            oppgavetyper.firstNotNullOfOrNull { oppgavetype ->
+                oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)
+            }
 
         if (oppgave == null) {
             throw Feil(
