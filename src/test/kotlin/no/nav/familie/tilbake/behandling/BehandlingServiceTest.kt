@@ -1529,6 +1529,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             oppgaveService = oppgaveServiceMock,
             environment = mockk(relaxed = true),
             oppgavePrioritetService = oppgavePrioritetServiceMock,
+            behandlingRepository = behandlingRepository,
         ).doTask(oppdaterOppgaveTask)
 
         verify(exactly = 0) {
