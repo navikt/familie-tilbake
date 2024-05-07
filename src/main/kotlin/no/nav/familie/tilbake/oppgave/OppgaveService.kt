@@ -17,7 +17,6 @@ import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FATTE_VEDTAK
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg.FORESLÅ_VEDTAK
@@ -300,11 +299,6 @@ class OppgaveService(
             it.payload == behandlingId.toString() &&
                 it.metadata.getProperty("oppgavetype") == oppgavetype.name
         }
-    }
-
-    fun skalLageOppgaveForBehandling(behandlingId: UUID): Boolean {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        return behandling.saksbehandlingstype!=Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
     }
 
     companion object {
