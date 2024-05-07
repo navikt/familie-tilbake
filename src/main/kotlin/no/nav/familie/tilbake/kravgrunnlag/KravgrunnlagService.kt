@@ -125,7 +125,6 @@ class KravgrunnlagService(
             if (skalBehandlesAutomatisk(kravgrunnlag431, behandling)) {
                 taskService.save(AutomatiskSaksbehandlingTask.opprettTask(behandling.id, fagsystem))
             } else {
-                // endre behandling.saksnbehandlingstype til ORDINÆR?
                 behandlingService.oppdaterSaksbehandlingtype(behandling.id, Saksbehandlingstype.ORDINÆR)
                 oppgaveTaskService.opprettOppgaveTask(behandling, Oppgavetype.BehandleSak)
             }
