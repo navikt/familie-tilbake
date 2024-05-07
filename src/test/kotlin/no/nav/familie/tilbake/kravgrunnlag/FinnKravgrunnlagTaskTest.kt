@@ -123,6 +123,7 @@ internal class FinnKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 historikkTaskService,
                 hentFagsystemsbehandlingService,
                 endretKravgrunnlagEventPublisher,
+                behandlingService,
             )
 
         finnKravgrunnlagTask =
