@@ -165,7 +165,7 @@ class Foreslåvedtakssteg(
             throw Feil(
                 message = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
                 frontendFeilmelding = "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.",
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
