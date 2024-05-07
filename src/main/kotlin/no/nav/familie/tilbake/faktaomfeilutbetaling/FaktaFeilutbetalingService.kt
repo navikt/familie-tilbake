@@ -74,7 +74,7 @@ class FaktaFeilutbetalingService(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = hentAutomatiskSaksbehandlingBegrunnelse(behandling.saksbehandlingstype),
+                begrunnelse = behandling.begrunnelseForTilbakekreving
             ),
         )
     }
