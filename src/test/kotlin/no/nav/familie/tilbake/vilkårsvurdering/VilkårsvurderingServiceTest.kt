@@ -79,7 +79,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
         val førstePeriode =
@@ -105,7 +105,7 @@ internal class VilkårsvurderingServiceTest : OppslagSpringRunnerTest() {
                         ),
                 )
 
-        val kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(førstePeriode, andrePeriode))
+        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(førstePeriode, andrePeriode))
         kravgrunnlagRepository.insert(kravgrunnlag431)
 
         val periode =

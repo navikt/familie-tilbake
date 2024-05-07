@@ -48,7 +48,7 @@ internal class AvsluttBehandlingTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         behandlingId = behandling.id
         fagsakRepository.insert(fagsak)
         behandlingRepository.insert(behandling)

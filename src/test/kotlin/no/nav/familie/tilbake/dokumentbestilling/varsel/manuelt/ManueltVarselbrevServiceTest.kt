@@ -13,6 +13,7 @@ import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.api.dto.FeilutbetalingsperiodeDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.config.FeatureToggleService
@@ -59,13 +60,14 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
     private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
-    private var behandling = Testdata.behandling
+    private lateinit var behandling: Behandling
     private var fagsak = Testdata.fagsak
     private lateinit var brevmetadataUtil: BrevmetadataUtil
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     @BeforeEach
     fun setup() {
+        behandling = Testdata.lagBehandling()
         spyPdfBrevService = spyk(pdfBrevService)
 
         brevmetadataUtil =

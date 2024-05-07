@@ -30,9 +30,7 @@ class FaktaFeilutbetalingService(
             .tilRespons(
                 faktaFeilutbetaling = faktaFeilutbetaling,
                 kravgrunnlag = kravgrunnlag,
-                revurderingsvedtaksdato = behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato,
-                varsletData = behandling.aktivtVarsel,
-                fagsystemsbehandling = behandling.aktivFagsystemsbehandling,
+                behandling = behandling,
             )
     }
 

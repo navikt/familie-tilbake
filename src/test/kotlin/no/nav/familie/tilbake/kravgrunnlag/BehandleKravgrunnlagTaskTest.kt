@@ -117,7 +117,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun init() {
         fagsak = Testdata.fagsak
-        behandling = Testdata.behandling
+        behandling = Testdata.lagBehandling()
         fagsakRepository.insert(Testdata.fagsak)
         behandlingRepository.insert(behandling)
     }
@@ -706,7 +706,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
                 BigInteger.ZERO,
                 BigInteger.ZERO,
             )
-        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0")
+        assertOkoXmlMottattData(mottattKravgrunnlagListe, kravgrunnlagXml, Kravstatuskode.NYTT, "0", "2021-03-02-18.50.15.236315")
 
         mottattXmlArkivRepository.findAll().toList().shouldBeEmpty()
     }
@@ -746,6 +746,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         kravgrunnlagXml: String,
         kravstatuskode: Kravstatuskode,
         referanse: String,
+        forventetKontrollfelt: String = "2021-03-02-18.50.15.236316",
     ) {
         mottattKravgrunnlagListe.shouldNotBeEmpty()
         mottattKravgrunnlagListe.size shouldBe 1
@@ -753,7 +754,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         mottattKravgrunnlag.kravstatuskode shouldBe kravstatuskode
         mottattKravgrunnlag.eksternFagsakId shouldBe fagsak.eksternFagsakId
         mottattKravgrunnlag.referanse shouldBe referanse
-        mottattKravgrunnlag.kontrollfelt shouldBe "2021-03-02-18.50.15.236315"
+        mottattKravgrunnlag.kontrollfelt shouldBe forventetKontrollfelt
         mottattKravgrunnlag.melding shouldBe kravgrunnlagXml
         mottattKravgrunnlag.eksternKravgrunnlagId shouldBe BigInteger.ZERO
         mottattKravgrunnlag.vedtakId shouldBe BigInteger.ZERO

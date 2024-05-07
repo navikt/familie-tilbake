@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultat
 import no.nav.familie.tilbake.beregning.modell.Beregningsresultatsperiode
 import no.nav.familie.tilbake.beregning.modell.Vedtaksresultat
@@ -58,19 +59,21 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
+    lateinit var behandling: Behandling
+
     @BeforeEach
     fun init() {
         fagsakRepository.insert(Testdata.fagsak)
-        behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
     }
 
     @Test
     fun `beregn skalberegne tilbakekrevingsbeløp for periode som ikke er foreldet`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.ZERO)
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, periode)
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -88,10 +91,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `hentBeregningsresultat skal hente beregningsresultat for periode som ikke er foreldet`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.ZERO)
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, periode)
 
-        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
+        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(behandling.id)
         beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
         beregningsresultatsperiode.periode shouldBe periode.toDatoperiode()
@@ -107,8 +110,8 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregn skalberegne tilbakekrevingsbeløp for periode som er foreldet`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.ZERO)
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -128,9 +131,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `hentBeregningsresultat skal hente beregningsresultat for periode som er foreldet`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.ZERO)
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.FORELDET, periode.fom.plusMonths(8).atDay(1))
 
-        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
+        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(behandling.id)
         beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
         beregningsresultatsperiode.periode shouldBe periode.toDatoperiode()
@@ -147,9 +150,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregn skalberegne tilbakekrevingsbeløp for periode som ikke er foreldet med skattProsent`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.valueOf(10))
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, periode)
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -169,10 +172,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `hentBeregningsresultat skal hente beregningsresultat for periode som ikke er foreldet med skattProsent`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.valueOf(10))
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, periode)
 
-        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(Testdata.behandling.id)
+        val beregningsresultat = tilbakekrevingsberegningService.hentBeregningsresultat(behandling.id)
         beregningsresultat.beregningsresultatsperioder.size shouldBe 1
         val beregningsresultatsperiode = beregningsresultat.beregningsresultatsperioder[0]
         beregningsresultatsperiode.periode shouldBe periode.toDatoperiode()
@@ -189,9 +192,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     fun `beregn skalberegne riktig beløp og utbetalt beløp for periode`() {
         val periode = Månedsperiode(LocalDate.of(2019, 5, 1), LocalDate.of(2019, 5, 3))
         lagKravgrunnlag(periode, BigDecimal.valueOf(10))
-        lagForeldelse(Testdata.behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, periode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        lagForeldelse(behandling.id, periode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, periode)
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -231,9 +234,9 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
             )
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode1, grunnlagPeriode2))
         kravgrunnlagRepository.insert(grunnlag)
-        lagForeldelse(Testdata.behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, logiskPeriode)
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        lagForeldelse(behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -274,10 +277,10 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
             )
         val grunnlag: Kravgrunnlag431 = lagGrunnlag(setOf(grunnlagPeriode, grunnlagPeriode1))
         kravgrunnlagRepository.insert(grunnlag)
-        lagForeldelse(Testdata.behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
-        lagVilkårsvurderingMedForsett(Testdata.behandling.id, logiskPeriode)
+        lagForeldelse(behandling.id, logiskPeriode, Foreldelsesvurderingstype.IKKE_FORELDET, null)
+        lagVilkårsvurderingMedForsett(behandling.id, logiskPeriode)
 
-        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(Testdata.behandling.id)
+        val beregningsresultat: Beregningsresultat = tilbakekrevingsberegningService.beregn(behandling.id)
         val resultat: List<Beregningsresultatsperiode> = beregningsresultat.beregningsresultatsperioder
         resultat.shouldHaveSize(1)
         val r: Beregningsresultatsperiode = resultat[0]
@@ -295,7 +298,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `beregnBeløp skal beregne feilutbetaltBeløp når saksbehandler deler opp periode`() {
-        val kravgrunnlag431 = Testdata.kravgrunnlag431
+        val kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
         val feilkravgrunnlagsbeløp = Testdata.feilKravgrunnlagsbeløp433
         val yteseskravgrunnlagsbeløp = Testdata.ytelKravgrunnlagsbeløp433
         val førsteKravgrunnlagsperiode =
@@ -331,7 +334,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
 
         val beregnetPerioderDto =
             tilbakekrevingsberegningService.beregnBeløp(
-                behandlingId = Testdata.behandling.id,
+                behandlingId = behandling.id,
                 perioder =
                     listOf(
                         Datoperiode(
@@ -372,7 +375,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 tilbakekrevingsberegningService.beregnBeløp(
-                    behandlingId = Testdata.behandling.id,
+                    behandlingId = behandling.id,
                     perioder =
                         listOf(
                             Datoperiode(
@@ -399,7 +402,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
         val exception =
             shouldThrow<RuntimeException> {
                 tilbakekrevingsberegningService.beregnBeløp(
-                    behandlingId = Testdata.behandling.id,
+                    behandlingId = behandling.id,
                     perioder =
                         listOf(
                             Datoperiode(
@@ -483,7 +486,7 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
                         lagYtelBeløp(BigDecimal.valueOf(10000), skattProsent),
                     ),
             )
-        val grunnlag: Kravgrunnlag431 = Testdata.kravgrunnlag431.copy(perioder = setOf(p))
+        val grunnlag: Kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id).copy(perioder = setOf(p))
         kravgrunnlagRepository.insert(grunnlag)
     }
 
@@ -500,6 +503,6 @@ class TilbakekrevingsberegningServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagGrunnlag(perioder: Set<Kravgrunnlagsperiode432>): Kravgrunnlag431 {
-        return Testdata.kravgrunnlag431.copy(perioder = perioder)
+        return Testdata.lagKravgrunnlag(behandling.id).copy(perioder = perioder)
     }
 }
