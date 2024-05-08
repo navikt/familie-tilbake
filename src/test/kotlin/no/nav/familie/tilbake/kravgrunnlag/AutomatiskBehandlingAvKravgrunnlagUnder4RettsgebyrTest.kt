@@ -51,9 +51,6 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     private lateinit var taskService: TaskService
 
     @Autowired
-    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
-
-    @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
