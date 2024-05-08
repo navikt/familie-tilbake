@@ -3,7 +3,10 @@ package no.nav.familie.tilbake.oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.common.exceptionhandler.ManglerOppgaveFeil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -24,6 +27,7 @@ class OppdaterOppgaveTask(
     private val oppgaveService: OppgaveService,
     val environment: Environment,
     private val oppgavePrioritetService: OppgavePrioritetService,
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -38,6 +42,12 @@ class OppdaterOppgaveTask(
                 saksbehandler.isNotBlank() && saksbehandler != Constants.BRUKER_ID_VEDTAKSLØSNINGEN
             }
         val behandlingId = UUID.fromString(task.payload)
+
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        if (behandling.saksbehandlingstype == Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR) {
+            return
+        }
+
         val enhet = task.metadata.getProperty("enhet")
 
         val oppgave =
