@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -30,6 +31,7 @@ class KravgrunnlagServiceTest {
     private val historikkTaskService: HistorikkTaskService = mockk()
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService = mockk()
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher = mockk()
+    private val behandlingService: BehandlingService = mockk()
 
     private val kravgrunnlagService =
         KravgrunnlagService(
@@ -44,6 +46,7 @@ class KravgrunnlagServiceTest {
             historikkTaskService = historikkTaskService,
             hentFagsystemsbehandlingService = hentFagsystemsbehandlingService,
             endretKravgrunnlagEventPublisher = endretKravgrunnlagEventPublisher,
+            behandlingService = behandlingService,
         )
 
     @Test

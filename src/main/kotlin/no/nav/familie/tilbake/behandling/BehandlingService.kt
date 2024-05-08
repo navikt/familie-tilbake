@@ -26,6 +26,7 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingstype.TILBAKEKREVING
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandling.task.OpprettBehandlingManueltTask
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -422,6 +423,15 @@ class BehandlingService(
                 regelverk = respons.regelverk,
             ),
         )
+    }
+
+    @Transactional
+    fun oppdaterSaksbehandlingtype(
+        behandlingId: UUID,
+        saksbehandlingstype: Saksbehandlingstype,
+    ) {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        behandlingRepository.update(behandling.copy(saksbehandlingstype = Saksbehandlingstype.ORDINÆR))
     }
 
     @Transactional
