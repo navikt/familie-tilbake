@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegFaktaDto
 import no.nav.familie.tilbake.api.dto.FaktaFeilutbetalingDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
-import no.nav.familie.tilbake.config.Constants.hentAutomatiskSaksbehandlingBegrunnelse
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsestype
@@ -74,7 +73,7 @@ class FaktaFeilutbetalingService(
             FaktaFeilutbetaling(
                 behandlingId = behandlingId,
                 perioder = feilutbetaltePerioder,
-                begrunnelse = behandling.begrunnelseForTilbakekreving
+                begrunnelse = behandling.begrunnelseForTilbakekreving,
             ),
         )
     }
