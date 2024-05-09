@@ -21,7 +21,6 @@ Appen tilgjengeliggjøres da på `localhost:8030`.
 ### Lokale avhengigheter
 For å teste tilbakekreving lokalt må du mest sannsynlig også sette opp disse repoene
 * [Familie-tilbake-frontend](https://github.com/navikt/familie-tilbake-frontend)
-* [Familie-historikk](https://github.com/navikt/familie-historikk) for å få historikk til frontenden
 * [Familie-tilbake-e2e](https://github.com/navikt/familie-tilbake-e2e) for å sette opp behandlinger
 
 ### Database

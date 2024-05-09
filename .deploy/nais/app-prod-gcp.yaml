@@ -89,8 +89,6 @@ spec:
           namespace: teamfamilie
           cluster: prod-gcp
     outbound:
-      rules:
-        - application: familie-historikk
       external:
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
