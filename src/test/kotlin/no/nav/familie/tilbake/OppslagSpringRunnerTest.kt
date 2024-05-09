@@ -105,6 +105,10 @@ abstract class OppslagSpringRunnerTest {
         return url.readText()
     }
 
+    fun readKravgrunnlagXmlMedIkkeForeldetDato(fileName: String): String {
+        return readXml(fileName).konverterDatoIXMLTilIkkeForeldet()
+    }
+
     private fun resetWiremockServers() {
         applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
     }

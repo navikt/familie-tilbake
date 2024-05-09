@@ -32,14 +32,15 @@ class ForvaltningPreprodController(
 ) {
     @Operation(
         description =
-            "Legg inn behandlingId (intern id) fra tilbakekrevings-behandlingen (@id) (ikke eksternid fra url)\n" +
-                "lim inn et kravgrunnlag du vil bruke:\n\n" +
-                "Bytt ut MINIMUM:\n\n" +
-                "<urn:fagsystemId> testverdi</urn:fagsystemId> (ekstern fagsak id - long )\n\n" +
-                "<urn:referanse>1</urn:referanse> (og ekstern behandlingsid long)\n\n" +
-                "Dette er eksternider fra vedtaksløsning!\n\n" +
-                "Endre personident i kravgrunnlag også\n\n" +
-                "Det vil ikke fungere å iverksette mot økonomi - men du kan bruke forvaltningsendepunkt: \"settIverksettingUtført()\" - da lages brev og behandlingen settes til AVSLUTTET. Data her kan finnes på task i prosessering (klar til plukk, eller feilet) . SendØkonomiVedtak",
+            "Legg inn behandlingId (intern id) fra tilbakekrevingsbehandlingen (ikke eksternid fra url).\n\n" +
+                "Legg inn et kravgrunnlag du vil bruke.\n\n" +
+                "Kopier et eksisterende kravgrunnlag og bytt ut MINIMUM:\n\n" +
+                " - fagsystemId (ekstern fagsakId - long)\n\n" +
+                " - referanse (ekstern behandlingId - long)\n\n" +
+                "Dette er eksternider fra vedtaksløsning som f.eks. ef-sak eller ba-sak.\n\n" +
+                "Endre personident i kravgrunnlag, med feltnavn: typeGjelderId og typeUtbetId\n\n" +
+                "Det vil ikke fungere å iverksette mot økonomi, men du kan bruke forvaltningsendepunkt: \"settIverksettingUtfort\" - da lages brev og behandlingen settes til AVSLUTTET. " +
+                "settIverksettingUtfort tar taskId og behandlingId (intern i familie-tilbake) som parameter. TaskId kan finnes på task i prosessering, tasken heter SendØkonomiVedtak og vil være ha status som klar til plukk eller feilet.",
         summary =
             "Legg inn test-kravgrunnlag - KUN PREPROD/DEV! ",
     )
