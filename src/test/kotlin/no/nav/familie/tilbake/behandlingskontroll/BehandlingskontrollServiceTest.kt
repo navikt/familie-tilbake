@@ -478,7 +478,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegstilstand(stegMetadata: Set<Behandlingsstegsinfo>) {
-        stegMetadata.map {
+        stegMetadata.forEach {
             behandlingsstegstilstandRepository.insert(
                 Behandlingsstegstilstand(
                     behandlingId = behandling.id,

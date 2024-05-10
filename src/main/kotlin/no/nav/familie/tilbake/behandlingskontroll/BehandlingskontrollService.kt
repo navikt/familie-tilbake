@@ -356,7 +356,7 @@ class BehandlingskontrollService(
 
         val sisteUtførteSteg =
             stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
-                .maxByOrNull { it.sporbar.endret.endretTid }!!.behandlingssteg
+                .maxByOrNull { it.behandlingssteg.sekvens }!!.behandlingssteg
 
         if (Behandlingssteg.VARSEL == sisteUtførteSteg) {
             return håndterOmSisteUtførteStegErVarsel(behandling)
