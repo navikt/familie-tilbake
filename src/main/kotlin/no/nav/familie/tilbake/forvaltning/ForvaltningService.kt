@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.forvaltning
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -8,7 +7,6 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
-import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultatstype
@@ -24,6 +22,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
@@ -60,7 +59,6 @@ class ForvaltningService(
     private val oppgaveTaskService: OppgaveTaskService,
     private val tellerService: TellerService,
     private val taskService: TaskService,
-    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)

@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.data.Testdata.behandlingsresultat
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
@@ -80,7 +81,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
             )
 
         fagsakRepository.insert(Testdata.fagsak)
-        behandling = behandlingRepository.insert(Testdata.behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling())
     }
 
     @Test
@@ -161,8 +162,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
                 resultater = setOf(behandlingsresultat),
             )
         behandlingRepository.update(fattetBehandling)
-        behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand.copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id).copy(behandlingssteg = Behandlingssteg.FATTE_VEDTAK))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
         val tilstand = service.hentBehandlingensTilstand(behandling.id)
 
@@ -191,8 +192,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingstilstand for behandling på vent`() {
-        behandlingsstegstilstandRepository.insert(Testdata.behandlingsstegstilstand)
-        kravgrunnlagRepository.insert(Testdata.kravgrunnlag431)
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
         behandlingService.settBehandlingPåVent(
             behandling.id,
             BehandlingPåVentDto(
@@ -210,7 +211,7 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
         tilstand.referertFagsaksbehandling shouldBe behandling.aktivFagsystemsbehandling.eksternId
         tilstand.behandlingstype shouldBe behandling.type
         tilstand.behandlingsstatus shouldBe behandling.status
-        tilstand.behandlingsresultat shouldBe Testdata.behandlingsresultat.type
+        tilstand.behandlingsresultat shouldBe behandlingsresultat.type
         tilstand.venterPåBruker shouldBe true
         tilstand.venterPåØkonomi shouldBe false
         tilstand.funksjoneltTidspunkt.shouldBeBetween(

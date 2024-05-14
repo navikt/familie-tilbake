@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
 import no.nav.familie.tilbake.api.dto.VilkårsvurderingsperiodeDto
-import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningService
+import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.vilkårsvurdering.domain.SærligGrunn
@@ -63,7 +63,7 @@ object VilkårsvurderingValidator {
     ) {
         val feilMelding = "Beløp som skal tilbakekreves kan ikke være mer enn feilutbetalt beløp"
         if (vilkårsvurderingsperiode.godTroDto?.beløpTilbakekreves != null) {
-            val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+            val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             if (vilkårsvurderingsperiode.godTroDto.beløpTilbakekreves > feilutbetalteBeløp) {
                 throw Feil(
                     message = feilMelding,
@@ -73,7 +73,7 @@ object VilkårsvurderingValidator {
             }
         }
         if (vilkårsvurderingsperiode.aktsomhetDto?.beløpTilbakekreves != null) {
-            val feilutbetalteBeløp = KravgrunnlagsberegningService.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
+            val feilutbetalteBeløp = KravgrunnlagsberegningUtil.beregnFeilutbetaltBeløp(kravgrunnlag431, periode)
             if (vilkårsvurderingsperiode.aktsomhetDto.beløpTilbakekreves > feilutbetalteBeløp) {
                 throw Feil(
                     message = feilMelding,
