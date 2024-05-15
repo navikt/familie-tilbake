@@ -276,8 +276,7 @@ class ForvaltningService(
 
         val oppdragId = OppdragId(fagsystem = fagområdekode.toString(), behandlingsId = eksternId, personIdent = ident)
         val (status, melding) = oppdragClient.hentStatus(oppdragId)
-        secureLogger.info("Status på behandling : $status. Melding fra oppdrag/økonomi: $melding ")
-        return "OK"
+        return "Status på behandling : $status. Melding fra oppdrag/økonomi: $melding "
     }
 }
 
