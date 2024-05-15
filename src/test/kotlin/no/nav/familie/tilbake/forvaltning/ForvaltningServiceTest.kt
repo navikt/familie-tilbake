@@ -335,12 +335,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val forvaltningsinfo =
             forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
-        forvaltningsinfo.mottattXmlId.shouldBeNull()
         forvaltningsinfo.eksternId shouldBe kravgrunnlag.referanse
     }
 
     @Test
-    fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
+    fun `hentIkkeArkiverteKravgrunnlag skal hente Kravgrunnlagsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val mottattXml = Testdata.økonomiXmlMottatt
         økonomiXmlMottattRepository.insert(
@@ -350,18 +349,17 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             ),
         )
         val forvaltningsinfo =
-            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
+            forvaltningService.hentIkkeArkiverteKravgrunnlag(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
-        forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
         forvaltningsinfo.eksternId shouldBe mottattXml.referanse
     }
 
     @Test
-    fun `hentForvaltningsinfo skal ikke hente forvaltningsinfo når behandling venter på kravgrunnlag`() {
+    fun `hentIkkeArkiverteKravgrunnlag skal ikke hente kravgrunnlagsinfo når behandling venter på kravgrunnlag`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val exception =
             shouldThrow<RuntimeException> {
-                forvaltningService.hentForvaltningsinfo(
+                forvaltningService.hentIkkeArkiverteKravgrunnlag(
                     fagsak.ytelsestype,
                     fagsak.eksternFagsakId,
                 )

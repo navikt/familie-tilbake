@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
+import no.nav.familie.tilbake.api.forvaltning.Kravgrunnlagsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -217,21 +218,28 @@ class ForvaltningService(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
     ): List<Forvaltningsinfo> {
-        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-        if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
+        val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(ytelsestype, eksternFagsakId)
+        if (behandling != null) {
             val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }
             return kravgrunnlag431.map { kravgrunnlag ->
                 Forvaltningsinfo(
                     eksternKravgrunnlagId = kravgrunnlag.eksternKravgrunnlagId,
                     kravgrunnlagId = kravgrunnlag.id,
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
-                    mottattXmlId = null,
                     eksternId = kravgrunnlag.referanse,
                     opprettetTid = kravgrunnlag.sporbar.opprettetTid,
                     behandlingId = behandling.id,
+                    behandlingstatus = behandling.status,
                 )
             }
         }
+        return listOf()
+    }
+
+    fun hentIkkeArkiverteKravgrunnlag(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+    ): List<Kravgrunnlagsinfo> {
         val økonomiXmlMottatt =
             økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
@@ -241,14 +249,12 @@ class ForvaltningService(
             )
         }
         return økonomiXmlMottatt.map { xml ->
-            Forvaltningsinfo(
+            Kravgrunnlagsinfo(
                 eksternKravgrunnlagId = xml.eksternKravgrunnlagId!!,
-                kravgrunnlagId = null,
-                kravgrunnlagKravstatuskode = null,
+                kravgrunnlagKravstatuskode = xml.kravstatuskode.navn,
                 mottattXmlId = xml.id,
                 eksternId = xml.referanse,
                 opprettetTid = xml.sporbar.opprettetTid,
-                behandlingId = null,
             )
         }
     }
