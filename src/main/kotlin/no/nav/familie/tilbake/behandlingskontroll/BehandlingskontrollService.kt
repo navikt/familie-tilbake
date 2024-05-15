@@ -354,7 +354,7 @@ class BehandlingskontrollService(
             return lagBehandlingsstegsinfo(avbruttSteg.behandlingssteg, KLAR)
         }
 
-        //Finn sisteUtførteSteg. Dersom tidspunkt for to steg er likt, bruk den med høyest sekvensnummer.
+        // Finn sisteUtførteSteg. Dersom tidspunkt for to steg er likt, bruk den med høyest sekvensnummer.
         val sisteUtførteSteg =
             stegstilstand.filter { Behandlingsstegstatus.erStegUtført(it.behandlingsstegsstatus) }
                 .maxWithOrNull(compareBy({ it.sporbar.endret.endretTid }, { it.behandlingssteg.sekvens }))!!.behandlingssteg
