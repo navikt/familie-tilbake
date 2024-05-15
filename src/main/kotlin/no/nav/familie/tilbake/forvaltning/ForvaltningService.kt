@@ -281,11 +281,11 @@ class ForvaltningService(
     }
 }
 
-private fun Ytelsestype.tilFagområdekode(): Fagområdekode = when (this) {
+private fun Ytelsestype.tilFagområdekode(): Fagområdekode =
+    when (this) {
         Ytelsestype.BARNETRYGD -> Fagområdekode.BA
         Ytelsestype.KONTANTSTØTTE -> Fagområdekode.KS
         Ytelsestype.OVERGANGSSTØNAD -> Fagområdekode.EFOG
         Ytelsestype.BARNETILSYN -> Fagområdekode.EFBT
         Ytelsestype.SKOLEPENGER -> Fagområdekode.EFSP
     }
-
