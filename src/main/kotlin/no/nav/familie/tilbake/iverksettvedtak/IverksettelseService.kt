@@ -1,20 +1,28 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.integration.økonomi.OppdragStatusMedMelding
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -26,7 +34,6 @@ import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,6 +48,7 @@ class IverksettelseService(
     private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
+    private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -50,27 +58,72 @@ class IverksettelseService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
+        if (behandling.status == Behandlingsstatus.AVSLUTTET)
+            {
+                val kvittering = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)?.kvittering
+                if (kvittering != null)
+                    {
+                        secureLogger.warn("Behandling=$behandlingId er allerede avsluttet og kvittert i økonomi")
+                        return
+                    }
+
+                // stop prosessering
+            }
+
         val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
         // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
         validerBeløp(behandlingId, beregnetPerioder)
 
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
         // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
+        // TODO Transaksjon opprettes i samme service - denne vil ikke fungere
+        // Hvis vi fikser denne bør vi kanskje også bytte til insert or update?
+        // foreslår å ikke endre denne, men rulle tilbake ved feil.
+        // select * from okonomi_xml_sendt where kvittering is null => ingen treff
         val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
         secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
         var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
-        val respons = oppdragClient.iverksettVedtak(behandlingId, request)
+        // TODO wrap denne i try catch -> bruk status fra oppdrag og oppdater økonomiXmlSendt med "enkel" status dersom den allerede er utført (KVITTERT_OK)"
+        val kvittering = sendRequestTilØkonomi(behandlingId, request)
 
         // oppdater respons
         økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = objectMapper.writeValueAsString(respons.mmel)))
+        økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = kvittering))
 
         behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private fun sendRequestTilØkonomi(
+        behandlingId: UUID,
+        request: TilbakekrevingsvedtakRequest,
+    ): String? {
+        try {
+            val respons = oppdragClient.iverksettVedtak(behandlingId, request)
+            return objectMapper.writeValueAsString(respons.mmel)
+        } catch (e: IntegrasjonException) {
+            if (hentOppdragStatus(behandlingId).status == OppdragStatus.KVITTERT_OK) {
+                secureLogger.warn("Kvittering for behandling=$behandlingId er KVITTERT_OK av økonomi")
+                return "Forenklet kvitteringsmelding: Oppdrag har allerede behandlet request og kvittert KVITTERT_OK"
+            } else {
+                throw e
+            }
+        }
+    }
+
+    fun hentOppdragStatus(
+        behandlingId: UUID,
+    ): OppdragStatusMedMelding {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+        val ident = fagsak.bruker.ident
+        val fagområdekode = fagsak.ytelsestype.tilFagområdekode()
+        val oppdragId = OppdragId(fagsystem = fagområdekode.toString(), behandlingsId = eksternId, personIdent = ident)
+        return oppdragClient.hentStatus(oppdragId)
+    }
+
     fun lagreIverksettelsesvedtakRequest(
         behandlingId: UUID,
         requestXml: String,
@@ -187,3 +240,12 @@ class IverksettelseService(
         }
     }
 }
+
+fun Ytelsestype.tilFagområdekode(): Fagområdekode =
+    when (this) {
+        Ytelsestype.BARNETRYGD -> Fagområdekode.BA
+        Ytelsestype.KONTANTSTØTTE -> Fagområdekode.KS
+        Ytelsestype.OVERGANGSSTØNAD -> Fagområdekode.EFOG
+        Ytelsestype.BARNETILSYN -> Fagområdekode.EFBT
+        Ytelsestype.SKOLEPENGER -> Fagområdekode.EFSP
+    }
