@@ -166,7 +166,7 @@ class ForvaltningController(
 
     @Operation(summary = "Hent status fra økonomi")
     @GetMapping(
-        path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/{eksternFagsystemBehandlingId}/oppdragstatus"],
+        path = ["/ytelsestype/{ytelsestype}/behandling/{behandlingId}/oppdragstatus"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Rolletilgangssjekk(
