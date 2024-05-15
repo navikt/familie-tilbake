@@ -27,7 +27,6 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.integration.pdl.internal.secureLogger
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
@@ -264,7 +263,7 @@ class ForvaltningService(
         }
     }
 
-    fun loggOppdragStatus(
+    fun hentOppdragStatus(
         ytelsestype: Ytelsestype,
         behandlingId: UUID,
     ): String {

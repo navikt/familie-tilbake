@@ -179,7 +179,7 @@ class ForvaltningController(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        return Ressurs.success(forvaltningService.loggOppdragStatus(ytelsestype, behandlingId = behandlingId))
+        return Ressurs.success(forvaltningService.hentOppdragStatus(ytelsestype, behandlingId = behandlingId))
     }
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
