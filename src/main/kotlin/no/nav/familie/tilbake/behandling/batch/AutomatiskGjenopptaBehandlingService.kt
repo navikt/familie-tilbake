@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling.batch
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -8,6 +7,7 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService

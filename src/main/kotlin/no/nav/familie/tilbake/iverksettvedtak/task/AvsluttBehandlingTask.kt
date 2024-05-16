@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.iverksettvedtak.task
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import org.slf4j.LoggerFactory

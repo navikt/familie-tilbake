@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -22,6 +21,7 @@ import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
 import no.nav.familie.tilbake.beregning.KravgrunnlagsberegningUtil
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431

@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.historikkinnslag
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
