@@ -236,7 +236,7 @@ class DefaultOppdragClient(
     }
 
     override fun hentStatus(oppdragId: OppdragId): OppdragStatusMedMelding {
-        val statusUri = UriComponentsBuilder.fromUri(familieOppdragUrl).pathSegment("api/status").build().toUri()
+        val statusUri = UriComponentsBuilder.fromUri(familieOppdragUrl).pathSegment(API_STATUS).build().toUri()
         val ressurs = postForEntity<Ressurs<OppdragStatus>>(statusUri, oppdragId)
         return OppdragStatusMedMelding(ressurs.getDataOrThrow(), ressurs.melding)
     }
@@ -285,6 +285,8 @@ class DefaultOppdragClient(
         const val HENT_KRAVGRUNNLAG_PATH = "api/tilbakekreving/kravgrunnlag"
         const val ANNULER_KRAVGRUNNLAG_PATH = "api/tilbakekreving/annuler/kravgrunnlag"
         const val HENT_FEILUTBETALINGER_PATH = "api/simulering/feilutbetalinger"
+        const val API_STATUS = "api/status"
+
         const val PING_PATH = "internal/status/alive"
     }
 }

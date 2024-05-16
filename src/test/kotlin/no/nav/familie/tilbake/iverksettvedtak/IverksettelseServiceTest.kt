@@ -14,6 +14,7 @@ import io.mockk.mockk
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.api.dto.AktsomhetDto
 import no.nav.familie.tilbake.api.dto.BehandlingsstegVilkårsvurderingDto
@@ -56,6 +57,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.test.context.transaction.TestTransaction
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestOperations
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -130,6 +133,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 beregningService,
                 behandlingVedtakService,
                 oppdragClient,
+                fagsakRepository,
                 mockFeatureToggleService,
             )
     }
@@ -170,6 +174,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    @Transactional
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
         wireMockServer.stubFor(
             WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
@@ -185,16 +190,30 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 ),
         )
 
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.API_STATUS}"))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            OppdragStatus.KVITTERT_TEKNISK_FEIL,
+                        ).toJson(),
+                    ),
+                ),
+        )
+
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
+        if(exception!=null) {
+            TestTransaction.flagForRollback()
+        }
+        TestTransaction.end()
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
             "Mottatt respons:${objectMapper.writeValueAsString(lagMmmelDto("10", "feil"))}"
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
-        økonomiXmlSendt.shouldNotBeNull()
-        assertRequestXml(økonomiXmlSendt.melding, behandlingId, økonomiXmlSendt.id)
-        økonomiXmlSendt.kvittering.shouldBeNull()
+        økonomiXmlSendt.shouldBeNull()
+
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {

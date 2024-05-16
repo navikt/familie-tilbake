@@ -56,42 +56,26 @@ class IverksettelseService(
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-        if (behandling.status == Behandlingsstatus.AVSLUTTET)
-            {
-                val kvittering = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)?.kvittering
-                if (kvittering != null)
-                    {
-                        secureLogger.warn("Behandling=$behandlingId er allerede avsluttet og kvittert i økonomi")
-                        return
-                    }
-
-                // stop prosessering
+        // vi lagrer bare kvittering dersom alt er ok alvorlighetsgrad= '00', eller '04'
+        if (behandling.status == Behandlingsstatus.AVSLUTTET) {
+            val kvittering = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)?.kvittering
+            if (kvittering != null) {
+                secureLogger.warn("Behandling=$behandlingId er allerede avsluttet og kvittert i økonomi")
+                return
             }
-
+        }
+        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
         val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
         // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
         validerBeløp(behandlingId, beregnetPerioder)
-
         val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
-        // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
-        // TODO Transaksjon opprettes i samme service - denne vil ikke fungere
-        // Hvis vi fikser denne bør vi kanskje også bytte til insert or update?
-        // foreslår å ikke endre denne, men rulle tilbake ved feil.
-        // select * from okonomi_xml_sendt where kvittering is null => ingen treff
         val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
         secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
-        var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
 
         // Send request til økonomi
-        // TODO wrap denne i try catch -> bruk status fra oppdrag og oppdater økonomiXmlSendt med "enkel" status dersom den allerede er utført (KVITTERT_OK)"
         val kvittering = sendRequestTilØkonomi(behandlingId, request)
-
-        // oppdater respons
-        økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = kvittering))
-
+        lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
         behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
     }
 
@@ -127,8 +111,9 @@ class IverksettelseService(
     fun lagreIverksettelsesvedtakRequest(
         behandlingId: UUID,
         requestXml: String,
+        kvittering: String?,
     ): ØkonomiXmlSendt {
-        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
+        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
     }
 
     private fun lagIveksettelseRequest(
