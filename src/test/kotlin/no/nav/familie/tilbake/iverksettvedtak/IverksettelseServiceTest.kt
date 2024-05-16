@@ -8,6 +8,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
@@ -146,19 +147,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for suksess respons`() {
-        wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
-                .willReturn(
-                    WireMock.okJson(
-                        Ressurs.success(
-                            lagRespons(
-                                "00",
-                                "OK",
-                            ),
-                        ).toJson(),
-                    ),
-                ),
-        )
+        mockIverksettelseResponse("00", "OK")
 
         iverksettelseService.sendIverksettVedtak(behandlingId)
 
@@ -176,36 +165,13 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @Test
     @Transactional
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
-        wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
-                .willReturn(
-                    WireMock.okJson(
-                        Ressurs.success(
-                            lagRespons(
-                                "10",
-                                "feil",
-                            ),
-                        ).toJson(),
-                    ),
-                ),
-        )
-
-        wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.API_STATUS}"))
-                .willReturn(
-                    WireMock.okJson(
-                        Ressurs.success(
-                            OppdragStatus.KVITTERT_TEKNISK_FEIL,
-                        ).toJson(),
-                    ),
-                ),
-        )
+        mockIverksettelseResponse("10", "feil")
+        mockHentOppdragStatus(OppdragStatus.KVITTERT_TEKNISK_FEIL)
 
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
-        if(exception!=null) {
-            TestTransaction.flagForRollback()
-        }
+        TestTransaction.flagForRollback() //ruller tilbake transaksjon i test for å simulere transaksjonshåndtering i prod
         TestTransaction.end()
+
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
         exception.cause!!.message shouldBe "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
@@ -213,7 +179,50 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
 
         val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
         økonomiXmlSendt.shouldBeNull()
+    }
 
+    @Test
+    @Transactional
+    fun `sendIverksettVedtak for allerede iverksatt behandling - skal returnere KVITTERING_OK og ikke iverksette`() {
+        mockIverksettelseResponse("08", "B441012F")
+        mockHentOppdragStatus(OppdragStatus.KVITTERT_OK)
+
+        iverksettelseService.sendIverksettVedtak(behandlingId)
+
+        val økonomiXmlSendt = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)
+        økonomiXmlSendt?.kvittering.shouldContain("Forenklet kvitteringsmelding: Oppdrag har allerede behandlet request og kvittert KVITTERT_OK")
+    }
+
+    private fun mockIverksettelseResponse(
+        alvorlighetsgrad: String,
+        kodeMelding: String,
+    ) {
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.IVERKSETTELSE_PATH}/$behandlingId"))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            lagRespons(
+                                alvorlighetsgrad,
+                                kodeMelding,
+                            ),
+                        ).toJson(),
+                    ),
+                ),
+        )
+    }
+
+    private fun mockHentOppdragStatus(oppdragStatus: OppdragStatus) {
+        wireMockServer.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/${DefaultOppdragClient.API_STATUS}"))
+                .willReturn(
+                    WireMock.okJson(
+                        Ressurs.success(
+                            oppdragStatus,
+                        ).toJson(),
+                    ),
+                ),
+        )
     }
 
     private fun lagKravgrunnlag(): Kravgrunnlag431 {

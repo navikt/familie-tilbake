@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -52,47 +52,43 @@ class IverksettelseService(
     private val featureToggleService: FeatureToggleService,
 ) {
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
-        // vi lagrer bare kvittering dersom alt er ok alvorlighetsgrad= '00', eller '04'
-        if (behandling.status == Behandlingsstatus.AVSLUTTET) {
-            val kvittering = økonomiXmlSendtRepository.findByBehandlingId(behandlingId)?.kvittering
-            if (kvittering != null) {
-                secureLogger.warn("Behandling=$behandlingId er allerede avsluttet og kvittert i økonomi")
-                return
-            }
-        }
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
-        val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
-        // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
-        validerBeløp(behandlingId, beregnetPerioder)
-        val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
-        val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
-        secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
+        if (behandlingErAlleredeIverksatt(behandling)) {
+            logger.info("Behandling med id ${behandling.id} er iverksatt mot økonomi - kan ikke iverksette flere ganger")
+        } else {
+            val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
+            // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
+            validerBeløp(behandlingId, beregnetPerioder)
+            val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
+            val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
+            secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
 
-        // Send request til økonomi
-        val kvittering = sendRequestTilØkonomi(behandlingId, request)
-        lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
-        behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
+            // Send request til økonomi
+            val kvittering = sendRequestTilØkonomi(behandlingId, request)
+            lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
+            behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
+        }
     }
+
+    private fun behandlingErAlleredeIverksatt(behandling: Behandling) = behandling.erAvsluttet && økonomiXmlSendtRepository.existsById(behandling.id)
 
     private fun sendRequestTilØkonomi(
         behandlingId: UUID,
         request: TilbakekrevingsvedtakRequest,
     ): String? {
         try {
-            val respons = oppdragClient.iverksettVedtak(behandlingId, request)
-            return objectMapper.writeValueAsString(respons.mmel)
+            return objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request).mmel)
         } catch (e: IntegrasjonException) {
             if (hentOppdragStatus(behandlingId).status == OppdragStatus.KVITTERT_OK) {
-                secureLogger.warn("Kvittering for behandling=$behandlingId er KVITTERT_OK av økonomi")
                 return "Forenklet kvitteringsmelding: Oppdrag har allerede behandlet request og kvittert KVITTERT_OK"
-            } else {
-                throw e
             }
+            throw e
         }
     }
 
