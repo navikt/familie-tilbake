@@ -161,7 +161,7 @@ class ForvaltningController(
     fun hentForvaltningsinfo(
         @PathVariable ytelsestype: Ytelsestype,
         @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<Forvaltningsinfo>> {
+    ): Ressurs<List<Behandlingsinfo>> {
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
 
@@ -237,8 +237,8 @@ class ForvaltningController(
     }
 }
 
-data class Forvaltningsinfo(
-    val eksternKravgrunnlagId: BigInteger,
+data class Behandlingsinfo(
+    val eksternKravgrunnlagId: BigInteger?,
     val kravgrunnlagId: UUID?,
     val kravgrunnlagKravstatuskode: String?,
     val eksternId: String,
@@ -249,7 +249,7 @@ data class Forvaltningsinfo(
 
 data class Kravgrunnlagsinfo(
     val eksternKravgrunnlagId: BigInteger,
-    val kravgrunnlagKravstatuskode: String?,
+    val kravgrunnlagKravstatuskode: String,
     val mottattXmlId: UUID?,
     val eksternId: String,
     val opprettetTid: LocalDateTime,

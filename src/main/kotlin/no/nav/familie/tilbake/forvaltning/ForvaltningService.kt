@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
+import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.api.forvaltning.Kravgrunnlagsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
@@ -215,12 +215,12 @@ class ForvaltningService(
     fun hentForvaltningsinfo(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
-    ): List<Forvaltningsinfo> {
+    ): List<Behandlingsinfo> {
         val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(ytelsestype, eksternFagsakId)
         if (behandling != null) {
             val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }
             return kravgrunnlag431.map { kravgrunnlag ->
-                Forvaltningsinfo(
+                Behandlingsinfo(
                     eksternKravgrunnlagId = kravgrunnlag.eksternKravgrunnlagId,
                     kravgrunnlagId = kravgrunnlag.id,
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
@@ -242,7 +242,7 @@ class ForvaltningService(
             økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil(
-                "Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
+                "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }

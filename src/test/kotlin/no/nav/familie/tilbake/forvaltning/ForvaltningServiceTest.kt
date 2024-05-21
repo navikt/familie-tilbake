@@ -364,7 +364,7 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
                     fagsak.eksternFagsakId,
                 )
             }
-        exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
+        exception.message shouldBe "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=${fagsak.ytelsestype} " +
             "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }
 
