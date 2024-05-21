@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.ValiderBrevmottakerService
 import no.nav.familie.tilbake.behandling.domain.Behandling
+import no.nav.familie.tilbake.behandling.domain.Behandlingsstatus
 import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
@@ -157,6 +158,21 @@ class StegService(
             Behandlingssteg.BREVMOTTAKER, Behandlingssteg.VERGE -> hentStegInstans(aktivtBehandlingssteg).utførSteg(behandlingId)
             else -> return
         }
+    }
+
+    @Transactional
+    fun angreSendTilBeslutter(behandling: Behandling) {
+        val behandlingsstegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandling.id)
+
+        if (behandlingsstegstilstand?.behandlingssteg != Behandlingssteg.FATTE_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen er i steg ${behandlingsstegstilstand?.behandlingssteg}")
+        }
+
+        if (behandling.status != Behandlingsstatus.FATTER_VEDTAK) {
+            throw Feil("Kan ikke angre send til beslutter når behandlingen har status ${behandling.status}")
+        }
+
+        behandlingskontrollService.behandleStegPåNytt(behandling.id, Behandlingssteg.FORESLÅ_VEDTAK)
     }
 
     fun kanAnsvarligSaksbehandlerOppdateres(

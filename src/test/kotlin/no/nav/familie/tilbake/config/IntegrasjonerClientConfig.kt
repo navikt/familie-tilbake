@@ -275,7 +275,8 @@ class IntegrasjonerClientConfig {
                         antallTreffTotalt = 0,
                         oppgaver = emptyList(),
                     )
-                } else {
+                }
+                else {
                     FinnOppgaveResponseDto(
                         antallTreffTotalt = 1,
                         oppgaver = listOf(Oppgave(id = 1)),
