@@ -25,7 +25,6 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -61,7 +60,6 @@ class ForvaltningService(
     private val tellerService: TellerService,
     private val taskService: TaskService,
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
-    private val iverksettelseService: IverksettelseService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -257,13 +255,5 @@ class ForvaltningService(
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
-    }
-
-    fun hentOppdragStatus(
-        ytelsestype: Ytelsestype,
-        behandlingId: UUID,
-    ): String {
-        val (status, melding) = iverksettelseService.hentOppdragStatus(behandlingId)
-        return "Status på behandling : $status. Melding fra oppdrag/økonomi: $melding "
     }
 }
