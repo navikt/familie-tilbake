@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.forvaltning
 
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -32,7 +31,6 @@ import no.nav.familie.tilbake.integration.økonomi.OppdragClient
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
@@ -268,28 +266,4 @@ class ForvaltningService(
             )
         }
     }
-
-    fun hentOppdragStatus(
-        ytelsestype: Ytelsestype,
-        behandlingId: UUID,
-    ): String {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
-        val ident = fagsakRepository.finnFagsakForBehandlingId(behandlingId).bruker.ident
-
-        val fagområdekode = ytelsestype.tilFagområdekode()
-
-        val oppdragId = OppdragId(fagsystem = fagområdekode.toString(), behandlingsId = eksternId, personIdent = ident)
-        val (status, melding) = oppdragClient.hentStatus(oppdragId)
-        return "Status på behandling : $status. Melding fra oppdrag/økonomi: $melding "
-    }
 }
-
-private fun Ytelsestype.tilFagområdekode(): Fagområdekode =
-    when (this) {
-        Ytelsestype.BARNETRYGD -> Fagområdekode.BA
-        Ytelsestype.KONTANTSTØTTE -> Fagområdekode.KS
-        Ytelsestype.OVERGANGSSTØNAD -> Fagområdekode.EFOG
-        Ytelsestype.BARNETILSYN -> Fagområdekode.EFBT
-        Ytelsestype.SKOLEPENGER -> Fagområdekode.EFSP
-    }

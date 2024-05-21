@@ -4,8 +4,6 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.kontrakter.felles.simulering.FeilutbetaltPeriode
 import no.nav.familie.kontrakter.felles.simulering.HentFeilutbetalingerFraSimuleringRequest
@@ -69,13 +67,8 @@ interface OppdragClient {
 
     fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering
 
-    fun hentStatus(oppdragId: OppdragId): OppdragStatusMedMelding
 }
 
-data class OppdragStatusMedMelding(
-    val status: OppdragStatus,
-    val melding: String,
-)
 
 @Service
 @Profile("!e2e & !mock-økonomi")
@@ -235,12 +228,6 @@ class DefaultOppdragClient(
         }
     }
 
-    override fun hentStatus(oppdragId: OppdragId): OppdragStatusMedMelding {
-        val statusUri = UriComponentsBuilder.fromUri(familieOppdragUrl).pathSegment("api/status").build().toUri()
-        val ressurs = postForEntity<Ressurs<OppdragStatus>>(statusUri, oppdragId)
-        return OppdragStatusMedMelding(ressurs.getDataOrThrow(), ressurs.melding)
-    }
-
     private fun validerHentKravgrunnlagRespons(
         mmelDto: MmelDto,
         kravgrunnlagId: BigInteger,
@@ -338,10 +325,6 @@ class MockOppdragClient(
                 nyttBeløp = BigDecimal("10000"),
             )
         return FeilutbetalingerFraSimulering(feilutbetaltePerioder = listOf(feilutbetaltPeriode))
-    }
-
-    override fun hentStatus(oppdragId: OppdragId): OppdragStatusMedMelding {
-        return OppdragStatusMedMelding(OppdragStatus.KVITTERT_OK, "Ingenting å se her")
     }
 
     fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {

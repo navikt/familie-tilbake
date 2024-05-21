@@ -165,24 +165,6 @@ class ForvaltningController(
         return Ressurs.success(forvaltningService.hentForvaltningsinfo(ytelsestype, eksternFagsakId))
     }
 
-    @Operation(summary = "Hent status fra økonomi")
-    @GetMapping(
-        path = ["/ytelsestype/{ytelsestype}/behandling/{behandlingId}/oppdragstatus"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Rolletilgangssjekk(
-        Behandlerrolle.FORVALTER,
-        "Henter forvaltningsinformasjon",
-        AuditLoggerEvent.NONE,
-        HenteParam.YTELSESTYPE_OG_EKSTERN_FAGSAK_ID,
-    )
-    fun hentOppdragStatus(
-        @PathVariable ytelsestype: Ytelsestype,
-        @PathVariable behandlingId: UUID,
-    ): Ressurs<String> {
-        return Ressurs.success(forvaltningService.hentOppdragStatus(ytelsestype, behandlingId = behandlingId))
-    }
-
     @Operation(summary = "Hent ikke arkiverte kravgrunnlag")
     @GetMapping(
         path = ["/ytelsestype/{ytelsestype}/fagsak/{eksternFagsakId}/ikke-arkivert-kravgrunnlag"],
