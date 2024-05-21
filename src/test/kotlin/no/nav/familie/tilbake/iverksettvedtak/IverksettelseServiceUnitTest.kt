@@ -54,7 +54,6 @@ class IverksettelseServiceUnitTest {
             beregningService,
             behandlingVedtakService,
             oppdragClient,
-            fagsakRepository = mockk(),
             featureToggleService,
         )
 

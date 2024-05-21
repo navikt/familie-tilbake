@@ -1,28 +1,21 @@
 package no.nav.familie.tilbake.iverksettvedtak
 
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.FeatureToggleConfig
 import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.integration.økonomi.OppdragClient
-import no.nav.familie.tilbake.integration.økonomi.OppdragStatusMedMelding
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
@@ -48,7 +41,6 @@ class IverksettelseService(
     private val beregningService: TilbakekrevingsberegningService,
     private val behandlingVedtakService: BehandlingsvedtakService,
     private val oppdragClient: OppdragClient,
-    private val fagsakRepository: FagsakRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -70,39 +62,13 @@ class IverksettelseService(
             secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
 
             // Send request til økonomi
-            val kvittering = sendRequestTilØkonomi(behandlingId, request)
+            val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request).mmel)
             lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
             behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
         }
     }
 
     private fun behandlingErAlleredeIverksatt(behandling: Behandling) = behandling.erAvsluttet && økonomiXmlSendtRepository.existsById(behandling.id)
-
-    private fun sendRequestTilØkonomi(
-        behandlingId: UUID,
-        request: TilbakekrevingsvedtakRequest,
-    ): String? {
-        try {
-            return objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request).mmel)
-        } catch (e: IntegrasjonException) {
-            if (hentOppdragStatus(behandlingId).status == OppdragStatus.KVITTERT_OK) {
-                return "Forenklet kvitteringsmelding: Oppdrag har allerede behandlet request og kvittert KVITTERT_OK"
-            }
-            throw e
-        }
-    }
-
-    fun hentOppdragStatus(
-        behandlingId: UUID,
-    ): OppdragStatusMedMelding {
-        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val eksternId = behandling.aktivFagsystemsbehandling.eksternId
-        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-        val ident = fagsak.bruker.ident
-        val fagområdekode = fagsak.ytelsestype.tilFagområdekode()
-        val oppdragId = OppdragId(fagsystem = fagområdekode.toString(), behandlingsId = eksternId, personIdent = ident)
-        return oppdragClient.hentStatus(oppdragId)
-    }
 
     fun lagreIverksettelsesvedtakRequest(
         behandlingId: UUID,
@@ -221,12 +187,3 @@ class IverksettelseService(
         }
     }
 }
-
-fun Ytelsestype.tilFagområdekode(): Fagområdekode =
-    when (this) {
-        Ytelsestype.BARNETRYGD -> Fagområdekode.BA
-        Ytelsestype.KONTANTSTØTTE -> Fagområdekode.KS
-        Ytelsestype.OVERGANGSSTØNAD -> Fagområdekode.EFOG
-        Ytelsestype.BARNETILSYN -> Fagområdekode.EFBT
-        Ytelsestype.SKOLEPENGER -> Fagområdekode.EFSP
-    }

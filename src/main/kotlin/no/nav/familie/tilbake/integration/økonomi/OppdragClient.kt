@@ -66,9 +66,7 @@ interface OppdragClient {
     )
 
     fun hentFeilutbetalingerFraSimulering(request: HentFeilutbetalingerFraSimuleringRequest): FeilutbetalingerFraSimulering
-
 }
-
 
 @Service
 @Profile("!e2e & !mock-økonomi")
