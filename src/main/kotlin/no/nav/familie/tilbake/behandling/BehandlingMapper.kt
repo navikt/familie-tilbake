@@ -27,6 +27,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype.*
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge
@@ -41,6 +43,7 @@ object BehandlingMapper {
         fagsystem: Fagsystem,
         fagsak: Fagsak,
         ansvarligSaksbehandler: Saksbehandler,
+        erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
         val faktainfo = opprettTilbakekrevingRequest.faktainfo
         val fagsystemskonsekvenser = faktainfo.konsekvensForYtelser.map { Fagsystemskonsekvens(konsekvens = it) }.toSet()
@@ -59,6 +62,7 @@ object BehandlingMapper {
         return Behandling(
             fagsakId = fagsak.id,
             type = Behandlingstype.TILBAKEKREVING,
+            saksbehandlingstype = if (erAutomatiskOgFeatureTogglePå) AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR else ORDINÆR,
             ansvarligSaksbehandler = ansvarligSaksbehandler.navIdent,
             behandlendeEnhet = opprettTilbakekrevingRequest.enhetId,
             behandlendeEnhetsNavn = opprettTilbakekrevingRequest.enhetsnavn,
