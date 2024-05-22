@@ -39,6 +39,7 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.H
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVedtaksbrevsperiode
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.handlebars.dto.periode.HbVurderinger
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
+import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.Hendelsesundertype
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesvurderingstype
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
@@ -395,14 +396,16 @@ class VedtaksbrevgeneratorService(
         val periode = resultatPeriode.periode
         val fritekster: PeriodeMedTekstDto? =
             perioderFritekst.firstOrNull { Månedsperiode(it.periode.fom, it.periode.tom) == periode }
+        val hbFakta = utledFakta(periode, fakta, fritekster)
+        val skalBrukeGrunnbeløpIVedtaksbrev = hbFakta.hendelsesundertype == Hendelsesundertype.INNTEKT_OVER_6G
         return HbVedtaksbrevsperiode(
             periode = periode.toDatoperiode(),
             kravgrunnlag = utledKravgrunnlag(resultatPeriode),
-            fakta = utledFakta(periode, fakta, fritekster),
+            fakta = hbFakta,
             vurderinger = utledVurderinger(periode, vilkårPerioder, foreldelse, fritekster),
             resultat = utledResultat(resultatPeriode, foreldelse),
             førstePeriode = førstePeriode,
-            grunnbeløp = lagHbGrunnbeløp(periode),
+            grunnbeløp = if (skalBrukeGrunnbeløpIVedtaksbrev) lagHbGrunnbeløp(periode) else null,
         )
     }
 
