@@ -160,13 +160,10 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    @Transactional
     fun `sendIverksettVedtak skal sende iverksettvedtak til økonomi for feil respons`() {
         mockIverksettelseResponse("10", "feil")
 
         val exception = shouldThrow<RuntimeException> { iverksettelseService.sendIverksettVedtak(behandlingId) }
-        TestTransaction.flagForRollback() // ruller tilbake transaksjon i test for å simulere transaksjonshåndtering i prod
-        TestTransaction.end()
 
         exception.shouldBeInstanceOf<IntegrasjonException>()
         exception.message shouldBe "Noe gikk galt ved iverksetting av behandling=$behandlingId"
@@ -178,7 +175,6 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    @Transactional
     fun `sendIverksettVedtak for allerede iverksatt behandling - skal returnere KVITTERING_OK og ikke iverksette`() {
         mockIverksettelseResponse("08", "B441012F") // Denne kan håndteres dersom oppdrag skiller på om vedtak finnes eller om det er feil status
 
