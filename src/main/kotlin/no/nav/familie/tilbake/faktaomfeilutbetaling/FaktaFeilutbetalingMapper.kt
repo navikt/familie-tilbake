@@ -42,6 +42,7 @@ object FaktaFeilutbetalingMapper {
             feilutbetaltePerioder = feilutbetaltePerioder,
             totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
             totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
+            kravgrunnlagReferanse = kravgrunnlag.referanse,
         )
     }
 
