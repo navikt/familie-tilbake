@@ -28,6 +28,18 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         eksternFagsakId: String,
     ): Behandling?
 
+    @Query(
+        """
+            SELECT beh.* FROM behandling beh JOIN fagsak f ON beh.fagsak_id = f.id 
+             WHERE f.ytelsestype=:ytelsestype AND f.ekstern_fagsak_id=:eksternFagsakId
+             ORDER BY beh.opprettet_tid DESC LIMIT 1
+        """,
+    )
+    fun finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+    ): Behandling?
+
     // language=PostgreSQL
     @Query(
         """
