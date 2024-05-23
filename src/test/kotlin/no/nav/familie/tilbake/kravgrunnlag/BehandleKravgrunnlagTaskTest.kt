@@ -152,7 +152,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertHistorikkTask(TilbakekrevingHistorikkinnslagstype.KRAVGRUNNLAG_MOTTATT, Aktør.VEDTAKSLØSNING)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
-                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato. " +
                 "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
                 "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10),
@@ -338,7 +338,7 @@ internal class BehandleKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
         assertOppdaterFaktainfoTask(kravgrunnlag.referanse)
         assertOppgaveTask(
             "Behandling er tatt av vent, " +
-                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato." +
+                "men revurderingsvedtaksdato er mindre enn 10 dager fra dagens dato. " +
                 "Fristen settes derfor 10 dager fra revurderingsvedtaksdato " +
                 "for å sikre at behandlingen har mottatt oppdatert kravgrunnlag",
             behandling.aktivFagsystemsbehandling.revurderingsvedtaksdato.plusDays(10),

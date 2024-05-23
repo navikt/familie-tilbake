@@ -481,7 +481,7 @@ class BehandlingService(
         logOppretterBehandling(erAutomatiskOgFeatureTogglePå, opprettTilbakekrevingRequest)
 
         val fagsak = finnEllerOpprettFagsak(opprettTilbakekrevingRequest)
-        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak)
+        val behandling = lagreBehandling(opprettTilbakekrevingRequest, fagsak, erAutomatiskOgFeatureTogglePå)
         historikkTaskService.lagHistorikkTask(behandling.id, BEHANDLING_OPPRETTET, Aktør.VEDTAKSLØSNING)
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
@@ -532,6 +532,7 @@ class BehandlingService(
     private fun lagreBehandling(
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
         fagsak: Fagsak,
+        erAutomatiskOgFeatureTogglePå: Boolean,
     ): Behandling {
         val ansvarligsaksbehandler =
             integrasjonerClient.hentSaksbehandler(opprettTilbakekrevingRequest.saksbehandlerIdent)
@@ -541,6 +542,7 @@ class BehandlingService(
                 opprettTilbakekrevingRequest.fagsystem,
                 fagsak,
                 ansvarligsaksbehandler,
+                erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
         return behandling

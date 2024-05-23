@@ -31,6 +31,7 @@ import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -76,6 +77,9 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
 
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
+
+    @Autowired
+    private lateinit var oppdaterOppgaveTask: OppdaterOppgaveTask
 
     private lateinit var behandlingId: UUID
 
