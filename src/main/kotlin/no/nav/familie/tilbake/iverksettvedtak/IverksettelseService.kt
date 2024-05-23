@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.iverksettvedtak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
@@ -26,7 +27,6 @@ import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -44,38 +44,36 @@ class IverksettelseService(
     private val featureToggleService: FeatureToggleService,
 ) {
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
-        val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
-        val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
-        // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
-        validerBeløp(behandlingId, beregnetPerioder)
+        if (behandling.erAvsluttet) {
+            logger.info("Behandling med id ${behandling.id} er iverksatt mot økonomi - kan ikke iverksette flere ganger")
+        } else {
+            val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
+            val beregnetPerioder = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandlingId, kravgrunnlag)
+            // Validerer beregning slik at rapporterte beløp må være samme i vedtaksbrev og iverksettelse
+            validerBeløp(behandlingId, beregnetPerioder)
+            val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
+            val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
+            secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
 
-        val request = lagIveksettelseRequest(behandling.ansvarligSaksbehandler, kravgrunnlag, beregnetPerioder)
-        // lagre request i en separat transaksjon slik at det lagrer selv om tasken feiler
-        val requestXml = TilbakekrevingsvedtakMarshaller.marshall(behandlingId, request)
-        secureLogger.info("Sender tilbakekrevingsvedtak til økonomi for behandling=$behandlingId request=$requestXml")
-        var økonomiXmlSendt = lagreIverksettelsesvedtakRequest(behandlingId, requestXml)
-
-        // Send request til økonomi
-        val respons = oppdragClient.iverksettVedtak(behandlingId, request)
-
-        // oppdater respons
-        økonomiXmlSendt = økonomiXmlSendtRepository.findByIdOrThrow(økonomiXmlSendt.id)
-        økonomiXmlSendtRepository.update(økonomiXmlSendt.copy(kvittering = objectMapper.writeValueAsString(respons.mmel)))
-
-        behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
+            // Send request til økonomi
+            val kvittering = objectMapper.writeValueAsString(oppdragClient.iverksettVedtak(behandlingId, request).mmel)
+            lagreIverksettelsesvedtakRequest(behandlingId, requestXml, kvittering)
+            behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
+        }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagreIverksettelsesvedtakRequest(
         behandlingId: UUID,
         requestXml: String,
+        kvittering: String?,
     ): ØkonomiXmlSendt {
-        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml))
+        return økonomiXmlSendtRepository.insert(ØkonomiXmlSendt(behandlingId = behandlingId, melding = requestXml, kvittering = kvittering))
     }
 
     private fun lagIveksettelseRequest(
