@@ -50,7 +50,7 @@ class IverksettelseService(
     fun sendIverksettVedtak(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
-        if (behandlingErAlleredeIverksatt(behandling)) {
+        if (behandling.erAvsluttet) {
             logger.info("Behandling med id ${behandling.id} er iverksatt mot økonomi - kan ikke iverksette flere ganger")
         } else {
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
@@ -67,8 +67,6 @@ class IverksettelseService(
             behandlingVedtakService.oppdaterBehandlingsvedtak(behandlingId, Iverksettingsstatus.IVERKSATT)
         }
     }
-
-    private fun behandlingErAlleredeIverksatt(behandling: Behandling) = behandling.erAvsluttet && økonomiXmlSendtRepository.existsById(behandling.id)
 
     fun lagreIverksettelsesvedtakRequest(
         behandlingId: UUID,
