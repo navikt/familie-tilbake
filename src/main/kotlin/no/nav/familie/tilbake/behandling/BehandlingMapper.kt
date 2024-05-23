@@ -27,8 +27,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandlingsårsakstype
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandling.domain.Fagsystemsbehandling
 import no.nav.familie.tilbake.behandling.domain.Fagsystemskonsekvens
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
-import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype.*
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype.AUTOMATISK_IKKE_INNKREVING_UNDER_4X_RETTSGEBYR
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype.ORDINÆR
 import no.nav.familie.tilbake.behandling.domain.Varsel
 import no.nav.familie.tilbake.behandling.domain.Varselsperiode
 import no.nav.familie.tilbake.behandling.domain.Verge

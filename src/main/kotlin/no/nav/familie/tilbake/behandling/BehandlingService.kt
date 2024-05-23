@@ -542,7 +542,7 @@ class BehandlingService(
                 opprettTilbakekrevingRequest.fagsystem,
                 fagsak,
                 ansvarligsaksbehandler,
-                erAutomatiskOgFeatureTogglePå
+                erAutomatiskOgFeatureTogglePå,
             )
         behandlingRepository.insert(behandling)
         return behandling
