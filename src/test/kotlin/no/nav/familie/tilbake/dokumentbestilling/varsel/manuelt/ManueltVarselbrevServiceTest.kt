@@ -244,6 +244,7 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
                     tilbakekrevingsvalg =
                         Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
                 ),
+            kravgrunnlagReferanse = "123456",
         )
     }
 }
