@@ -22,7 +22,6 @@ import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
@@ -79,6 +78,7 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevsporing
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.dokumentbestilling.henleggelse.SendHenleggelsesbrevTask
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
@@ -373,6 +373,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
+        val oppgaveService = mockk<OppgaveService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -393,6 +394,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 validerBehandlingService,
                 featureToggleService,
+                oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
@@ -433,6 +435,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val integrasjonerClient = mockk<IntegrasjonerClient>(relaxed = true)
         val validerBehandlingService = mockk<ValiderBehandlingService>()
         val featureToggleService = mockk<FeatureToggleService>()
+        val oppgaveService = mockk<OppgaveService>()
 
         val behandlingServiceMock =
             BehandlingService(
@@ -453,6 +456,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 validerBehandlingService,
                 featureToggleService,
+                oppgaveService,
             )
         justRun { validerBehandlingService.validerOpprettBehandling(any()) }
         every { featureToggleService.isEnabled(any()) } returns false
@@ -1529,6 +1533,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             oppgaveService = oppgaveServiceMock,
             environment = mockk(relaxed = true),
             oppgavePrioritetService = oppgavePrioritetServiceMock,
+            behandlingRepository = behandlingRepository,
         ).doTask(oppdaterOppgaveTask)
 
         verify(exactly = 0) {

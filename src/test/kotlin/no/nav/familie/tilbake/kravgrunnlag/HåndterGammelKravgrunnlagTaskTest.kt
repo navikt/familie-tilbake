@@ -36,6 +36,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
+import no.nav.familie.tilbake.historikkinnslag.HistorikkinnslagRepository
 import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGamleKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.batch.HåndterGammelKravgrunnlagTask
@@ -91,6 +92,9 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var stegService: StegService
 
+    @Autowired
+    private lateinit var historikkinnslagRepository: HistorikkinnslagRepository
+
     private val mockHentKravgrunnlagService: HentKravgrunnlagService = mockk()
 
     private lateinit var historikkService: HistorikkService
@@ -104,12 +108,12 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        mottattXMl = readXml("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
+        mottattXMl = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_BA_riktig_eksternfagsakId_ytelsestype.xml")
         xmlMottatt = xmlMottattRepository.insert(Testdata.økonomiXmlMottatt.copy(melding = mottattXMl))
         mottattXmlId = xmlMottatt.id
 
         val kafkaProducer: KafkaProducer = mockk()
-        historikkService = HistorikkService(behandlingRepository, fagsakRepository, brevSporingRepository, kafkaProducer)
+        historikkService = HistorikkService(behandlingRepository, brevSporingRepository, historikkinnslagRepository)
         håndterGamleKravgrunnlagService =
             HåndterGamleKravgrunnlagService(
                 behandlingRepository,
@@ -127,7 +131,6 @@ internal class HåndterGammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             HåndterGammelKravgrunnlagTask(håndterGamleKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any()) } returns Unit
-        every { kafkaProducer.sendHistorikkinnslag(any(), any(), any()) } returns Unit
     }
 
     @AfterEach

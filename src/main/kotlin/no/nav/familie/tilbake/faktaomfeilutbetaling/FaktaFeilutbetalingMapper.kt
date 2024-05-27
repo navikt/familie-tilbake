@@ -42,6 +42,7 @@ object FaktaFeilutbetalingMapper {
             feilutbetaltePerioder = feilutbetaltePerioder,
             totaltFeilutbetaltBeløp = logiskePerioder.sumOf(LogiskPeriode::feilutbetaltBeløp),
             totalFeilutbetaltPeriode = utledTotalFeilutbetaltPeriode(logiskePerioder),
+            kravgrunnlagReferanse = kravgrunnlag.referanse,
         )
     }
 
@@ -81,7 +82,10 @@ object FaktaFeilutbetalingMapper {
         return Datoperiode(totalPeriodeFom!!, totalPeriodeTom!!)
     }
 
-    private fun utledBegrunnelse(tidligereBegrunnelse: String?, begrunnelseForTilbakekreving: String?): String {
+    private fun utledBegrunnelse(
+        tidligereBegrunnelse: String?,
+        begrunnelseForTilbakekreving: String?,
+    ): String {
         return tidligereBegrunnelse ?: begrunnelseForTilbakekreving ?: ""
     }
 }

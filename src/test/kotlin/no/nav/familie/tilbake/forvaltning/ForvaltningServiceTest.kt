@@ -8,7 +8,6 @@ import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -29,6 +28,7 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.SendSakshendelseTilDvhTask
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.VedtaksbrevsoppsummeringRepository
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.LagHistorikkinnslagTask
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
@@ -335,12 +335,11 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
         val forvaltningsinfo =
             forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe kravgrunnlag.eksternKravgrunnlagId
-        forvaltningsinfo.mottattXmlId.shouldBeNull()
         forvaltningsinfo.eksternId shouldBe kravgrunnlag.referanse
     }
 
     @Test
-    fun `hentForvaltningsinfo skal hente forvaltningsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
+    fun `hentIkkeArkiverteKravgrunnlag skal hente Kravgrunnlagsinfo basert på eksternFagsakId og ytelsestype fra mottattXml`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val mottattXml = Testdata.økonomiXmlMottatt
         økonomiXmlMottattRepository.insert(
@@ -350,23 +349,22 @@ internal class ForvaltningServiceTest : OppslagSpringRunnerTest() {
             ),
         )
         val forvaltningsinfo =
-            forvaltningService.hentForvaltningsinfo(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
+            forvaltningService.hentIkkeArkiverteKravgrunnlag(fagsak.ytelsestype, fagsak.eksternFagsakId).first()
         forvaltningsinfo.eksternKravgrunnlagId shouldBe mottattXml.eksternKravgrunnlagId
-        forvaltningsinfo.mottattXmlId shouldBe mottattXml.id
         forvaltningsinfo.eksternId shouldBe mottattXml.referanse
     }
 
     @Test
-    fun `hentForvaltningsinfo skal ikke hente forvaltningsinfo når behandling venter på kravgrunnlag`() {
+    fun `hentIkkeArkiverteKravgrunnlag skal ikke hente kravgrunnlagsinfo når behandling venter på kravgrunnlag`() {
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
         val exception =
             shouldThrow<RuntimeException> {
-                forvaltningService.hentForvaltningsinfo(
+                forvaltningService.hentIkkeArkiverteKravgrunnlag(
                     fagsak.ytelsestype,
                     fagsak.eksternFagsakId,
                 )
             }
-        exception.message shouldBe "Finnes ikke data i systemet for ytelsestype=${fagsak.ytelsestype} " +
+        exception.message shouldBe "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=${fagsak.ytelsestype} " +
             "og eksternFagsakId=${fagsak.eksternFagsakId}"
     }
 

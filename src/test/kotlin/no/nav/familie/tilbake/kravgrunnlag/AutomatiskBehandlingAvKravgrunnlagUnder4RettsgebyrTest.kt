@@ -1,9 +1,7 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -13,12 +11,13 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.batch.AutomatiskSaksbehandlingTask
+import no.nav.familie.tilbake.behandling.domain.Saksbehandlingstype
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingssteg
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstatus
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.behandlingskontroll.domain.Venteårsak
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_AKTSOMHET_BEGRUNNELSE
 import no.nav.familie.tilbake.config.Constants.AUTOMATISK_SAKSBEHANDLING_UNDER_4X_RETTSGEBYR_VILKÅRSVURDERING_BEGRUNNELSE
@@ -31,6 +30,8 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepositor
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.task.SendØkonomiTilbakekrevingsvedtakTask
 import no.nav.familie.tilbake.kravgrunnlag.task.BehandleKravgrunnlagTask
+import no.nav.familie.tilbake.oppgave.LagOppgaveTask
+import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Aktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurderingsresultat
@@ -49,9 +50,6 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
 
     @Autowired
     private lateinit var taskService: TaskService
-
-    @Autowired
-    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -80,13 +78,16 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     @Autowired
     private lateinit var featureToggleService: FeatureToggleService
 
+    @Autowired
+    private lateinit var oppdaterOppgaveTask: OppdaterOppgaveTask
+
     private lateinit var behandlingId: UUID
 
     @BeforeEach
     fun init() {
         val fagsak = Testdata.fagsak
         val behandling = Testdata.lagBehandling()
-        val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK)
+        val copyFagsystemsbehandling = behandling.fagsystemsbehandling.first().copy(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, eksternId = "1")
         val automatiskBehandling = behandling.copy(fagsystemsbehandling = setOf(copyFagsystemsbehandling))
         val fagsakOvergangsstønad = fagsak.copy(ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
         fagsakRepository.insert(fagsakOvergangsstønad)
@@ -99,7 +100,8 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     fun `Skal knytte kravgrunnlag til åpen behandling under 4x rettsgebyr og behandles automatisk`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_under_4x_rettsgebyr.xml")
+
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
 
@@ -119,15 +121,32 @@ class AutomatiskBehandlingAvKravgrunnlagUnder4RettsgebyrTest : OppslagSpringRunn
     fun `Skal ikke behandle feilutbetalinger over 4x rettsgebyr automatisk`() {
         lagGrunnlagssteg()
 
-        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_over_4x_rettsgebyr.xml")
+        val kravgrunnlagXml = readKravgrunnlagXmlMedIkkeForeldetDato("/kravgrunnlagxml/kravgrunnlag_EF_over_4x_rettsgebyr.xml")
 
         val task = opprettTask(kravgrunnlagXml)
         behandleKravgrunnlagTask.doTask(task)
 
         val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
+        automatiskSaksbehandlingTasks.size shouldBe 0
+        val lagOppgaveTask = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), LagOppgaveTask.TYPE)
+        lagOppgaveTask.first().payload shouldBe behandlingId.toString()
+    }
 
-        val exception = shouldThrow<Feil> { automatiskSaksbehandlingTask.doTask(automatiskSaksbehandlingTasks.first()) }
-        exception.message shouldContain "Skal ikke behandle beløp over 4x rettsgebyr automatisk"
+    @Test
+    fun `Skal ikke behandle feilutbetalinger hvis kravgrunnlag refererer til annen fagsystembehandling`() {
+        lagGrunnlagssteg()
+
+        val kravgrunnlagXml = readXml("/kravgrunnlagxml/kravgrunnlag_EF_feil_referanse.xml")
+
+        val task = opprettTask(kravgrunnlagXml)
+        behandleKravgrunnlagTask.doTask(task)
+
+        val automatiskSaksbehandlingTasks = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), AutomatiskSaksbehandlingTask.TYPE)
+        automatiskSaksbehandlingTasks.size shouldBe 0
+        val lagOppgaveTask = taskService.finnAlleTaskerMedPayloadOgType(behandlingId.toString(), LagOppgaveTask.TYPE)
+        lagOppgaveTask.first().payload shouldBe behandlingId.toString()
+        val oppdatertBehandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        oppdatertBehandling.saksbehandlingstype shouldBe Saksbehandlingstype.ORDINÆR
     }
 
     @Test

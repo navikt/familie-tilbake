@@ -31,7 +31,6 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.data.Testdata.lagBehandling
 import no.nav.familie.tilbake.data.Testdata.lagKravgrunnlag
-import no.nav.familie.tilbake.integration.pdl.internal.logger
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -252,15 +251,11 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
                 Behandlingsstegsinfo(FORELDELSE, UTFØRT),
             ),
         )
-        var behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        logger.info("første behandlingsstegtilstand før fortsett behandling: " + behandlingsstegstilstand[0])
-        logger.info("andre behandlingsstegtilstand før fortsett behandling" + behandlingsstegstilstand[1])
         kravgrunnlagRepository.insert(lagKravgrunnlag(behandling.id))
+
         behandlingskontrollService.fortsettBehandling(behandlingId = behandling.id)
 
-        behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
-        logger.info("første behandlingsstegtilstand: " + behandlingsstegstilstand[0])
-        logger.info("andre behandlingsstegtilstand: " + behandlingsstegstilstand[1])
+        val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandling.id)
         behandlingsstegstilstand.size shouldBe 3
         val sisteStegstilstand = behandlingskontrollService.finnAktivStegstilstand(behandlingsstegstilstand)
         sisteStegstilstand.shouldNotBeNull()
@@ -478,7 +473,7 @@ internal class BehandlingskontrollServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagBehandlingsstegstilstand(stegMetadata: Set<Behandlingsstegsinfo>) {
-        stegMetadata.map {
+        stegMetadata.forEach {
             behandlingsstegstilstandRepository.insert(
                 Behandlingsstegstilstand(
                     behandlingId = behandling.id,

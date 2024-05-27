@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.forvaltning
 
-import no.nav.familie.kontrakter.felles.historikkinnslag.Aktør
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tilbake.api.forvaltning.Forvaltningsinfo
+import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
+import no.nav.familie.tilbake.api.forvaltning.Kravgrunnlagsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
+import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkTaskService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
@@ -210,39 +211,44 @@ class ForvaltningService(
     fun hentForvaltningsinfo(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
-    ): List<Forvaltningsinfo> {
-        val behandling = behandlingRepository.finnÅpenTilbakekrevingsbehandling(ytelsestype, eksternFagsakId)
-        if (behandling != null && kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id)) {
+    ): List<Behandlingsinfo> {
+        val behandling = behandlingRepository.finnNyesteTilbakekrevingsbehandlingForYtelsestypeAndEksternFagsakId(ytelsestype, eksternFagsakId)
+        if (behandling != null) {
             val kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingId(behandling.id).filter { it.aktiv }
             return kravgrunnlag431.map { kravgrunnlag ->
-                Forvaltningsinfo(
+                Behandlingsinfo(
                     eksternKravgrunnlagId = kravgrunnlag.eksternKravgrunnlagId,
                     kravgrunnlagId = kravgrunnlag.id,
                     kravgrunnlagKravstatuskode = kravgrunnlag.kravstatuskode.kode,
-                    mottattXmlId = null,
                     eksternId = kravgrunnlag.referanse,
                     opprettetTid = kravgrunnlag.sporbar.opprettetTid,
                     behandlingId = behandling.id,
+                    behandlingstatus = behandling.status,
                 )
             }
         }
+        return listOf()
+    }
+
+    fun hentIkkeArkiverteKravgrunnlag(
+        ytelsestype: Ytelsestype,
+        eksternFagsakId: String,
+    ): List<Kravgrunnlagsinfo> {
         val økonomiXmlMottatt =
             økonomiXmlMottattRepository.findByEksternFagsakIdAndYtelsestype(eksternFagsakId, ytelsestype)
         if (økonomiXmlMottatt.isEmpty()) {
             throw Feil(
-                "Finnes ikke data i systemet for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
+                "Finnes ikke kravgrunnlag som ikke er arkivert for ytelsestype=$ytelsestype og eksternFagsakId=$eksternFagsakId",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         return økonomiXmlMottatt.map { xml ->
-            Forvaltningsinfo(
+            Kravgrunnlagsinfo(
                 eksternKravgrunnlagId = xml.eksternKravgrunnlagId!!,
-                kravgrunnlagId = null,
-                kravgrunnlagKravstatuskode = null,
+                kravgrunnlagKravstatuskode = xml.kravstatuskode.navn,
                 mottattXmlId = xml.id,
                 eksternId = xml.referanse,
                 opprettetTid = xml.sporbar.opprettetTid,
-                behandlingId = null,
             )
         }
     }
