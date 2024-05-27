@@ -98,7 +98,7 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         saksbehandler: String?,
         prioritet: OppgavePrioritet,
-    ): OppgaveResponse {
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsakId = behandling.fagsakId
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
@@ -107,10 +107,11 @@ class OppgaveService(
         // Sjekk om oppgave allerede finnes for behandling
         val (_, finnOppgaveRespons) = finnOppgave(behandling, oppgavetype, fagsak)
         if (finnOppgaveRespons.oppgaver.isNotEmpty() && !finnesFerdigstillOppgaveForBehandling(behandlingId, oppgavetype)) {
-            throw Feil(
+            logger.info(
                 "Det finnes allerede en oppgave $oppgavetype for behandling $behandlingId og " +
                     "finnes ikke noen ferdigstilleoppgaver. Eksisterende oppgaven $oppgavetype må lukke først.",
             )
+            return
         }
 
         val opprettOppgave =
@@ -140,11 +141,9 @@ class OppgaveService(
                 prioritet = prioritet,
             )
 
-        val opprettetOppgaveId = integrasjonerClient.opprettOppgave(opprettOppgave)
-
+        val oppgaveResponse = integrasjonerClient.opprettOppgave(opprettOppgave)
         antallOppgaveTyper[oppgavetype]!!.increment()
-
-        return opprettetOppgaveId
+        logger.info("Ny oppgave (id=${oppgaveResponse.oppgaveId}, type=$oppgavetype, frist=$fristForFerdigstillelse) opprettet for behandling $behandlingId")
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(

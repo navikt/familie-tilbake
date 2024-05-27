@@ -74,9 +74,7 @@ class OppdaterOppgaveTask(
                 oppgavetype = oppgavetype,
                 saksbehandler = saksbehandler,
                 prioritet = prioritet,
-            ).also {
-                log.info("Ny oppgave (id=${it.oppgaveId}, type=$oppgavetype, frist=$frist) opprettet for behandling $behandlingId")
-            }
+            )
             return
         }
 
