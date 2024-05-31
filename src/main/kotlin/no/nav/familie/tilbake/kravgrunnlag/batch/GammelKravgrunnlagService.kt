@@ -115,7 +115,7 @@ class GammelKravgrunnlagService(
         task: Task,
     ) {
         logger.info("Håndterer kravgrunnlag med kravgrunnlagId=${mottattXml.eksternKravgrunnlagId}")
-        val (hentetKravgrunnlag, erSperret) =
+        val (hentetKravgrunnlag, kravgrunnlagErSperret) =
             try {
                 hentKravgrunnlagFraØkonomi(mottattXml)
             } catch (e: KravgrunnlagIkkeFunnetFeil) {
@@ -167,7 +167,7 @@ class GammelKravgrunnlagService(
         )
 
         stegService.håndterSteg(behandlingId)
-        if (erSperret) {
+        if (kravgrunnlagErSperret) {
             logger.info(
                 "Hentet kravgrunnlag med kravgrunnlagId=${hentetKravgrunnlag.kravgrunnlagId} " +
                     "til behandling=$behandlingId er sperret. Venter behandlingen på ny kravgrunnlag fra økonomi",
