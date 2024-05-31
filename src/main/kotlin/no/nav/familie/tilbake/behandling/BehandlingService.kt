@@ -486,7 +486,7 @@ class BehandlingService(
         behandlingskontrollService.fortsettBehandling(behandling.id)
         stegService.håndterSteg(behandling.id)
 
-        håndterBrevmottakere(opprettTilbakekrevingRequest.manuelleBrevmottakere, behandling, fagsystem, fagsak)
+        opprettBehandleBrevmottakerSteg(opprettTilbakekrevingRequest.manuelleBrevmottakere, behandling, fagsystem, fagsak)
 
         // kjør FinnGrunnlagTask for å finne og koble grunnlag med behandling
         taskService.save(
@@ -548,7 +548,7 @@ class BehandlingService(
         return behandling
     }
 
-    private fun håndterBrevmottakere(
+    private fun opprettBehandleBrevmottakerSteg(
         brevmottakere: Set<Brevmottaker>,
         behandling: Behandling,
         fagsystem: Fagsystem,
@@ -558,7 +558,9 @@ class BehandlingService(
         if (manuelleBrevmottakere.isNotEmpty()) {
             logger.info("Lagrer ${manuelleBrevmottakere.size} manuell(e) brevmottaker(e) oversendt fra $fagsystem-sak")
             manuellBrevmottakerRepository.insertAll(manuelleBrevmottakere)
-            håndterBrevmottakerSteg(behandling, fagsak)
+            if (sjekkOmManuelleBrevmottakereErStøttet(behandling, fagsak)) {
+                behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
+            }
         }
     }
 
@@ -626,19 +628,6 @@ class BehandlingService(
             !Behandlingsresultat.ALLE_HENLEGGELSESKODER.contains(behandling.sisteResultat?.type) &&
             kravgrunnlagRepository.existsByBehandlingIdAndAktivTrue(behandling.id) &&
             behandlingRepository.finnÅpenTilbakekrevingsrevurdering(behandling.id) == null
-    }
-
-    private fun håndterBrevmottakerSteg(
-        behandling: Behandling,
-        fagsak: Fagsak,
-    ) {
-        if (sjekkOmManuelleBrevmottakereErStøttet(
-                behandling = behandling,
-                fagsak = fagsak,
-            )
-        ) {
-            behandlingskontrollService.behandleBrevmottakerSteg(behandling.id)
-        }
     }
 
     @Transactional

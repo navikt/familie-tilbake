@@ -72,7 +72,7 @@ class HåndterGamleKravgrunnlagBatch(
                 val finnesTask =
                     alleFeiledeTasker.any {
                         it.payload == mottattXmlIdOgYtelse.id.toString() &&
-                            (it.type == HåndterGammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
+                            (it.type == GammelKravgrunnlagTask.TYPE || it.type == HentFagsystemsbehandlingTask.TYPE)
                     }
                 if (!finnesTask) {
                     val fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(mottattXmlIdOgYtelse.ytelsestype)
